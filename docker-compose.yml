@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: sigre_postgres
+    environment:
+      POSTGRES_DB: sigre_main
+      POSTGRES_USER: sigre_user
+      POSTGRES_PASSWORD: sigre_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - sigre_network
+
+  # Base de datos para autenticación
+  postgres_auth:
+    image: postgres:15-alpine
+    container_name: sigre_postgres_auth
+    environment:
+      POSTGRES_DB: sigre_auth
+      POSTGRES_USER: sigre_user
+      POSTGRES_PASSWORD: sigre_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    networks:
+      - sigre_network
+
+  # Base de datos para usuarios
+  postgres_users:
+    image: postgres:15-alpine
+    container_name: sigre_postgres_users
+    environment:
+      POSTGRES_DB: sigre_users
+      POSTGRES_USER: sigre_user
+      POSTGRES_PASSWORD: sigre_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_users_data:/var/lib/postgresql/data
+    networks:
+      - sigre_network
+
+  # API Gateway
+  gateway:
+    build:
+      context: ./03. backend/sigre-gateway
+      dockerfile: Dockerfile
+    container_name: sigre_gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - user-service
+    networks:
+      - sigre_network
+
+  # Servicio de Autenticación
+  auth-service:
+    build:
+      context: ./03. backend/sigre-auth-service
+      dockerfile: Dockerfile
+    container_name: sigre_auth_service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres_auth
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_auth:5432/sigre_auth
+      SPRING_DATASOURCE_USERNAME: sigre_user
+      SPRING_DATASOURCE_PASSWORD: sigre_password
+    networks:
+      - sigre_network
+
+  # Servicio de Usuarios
+  user-service:
+    build:
+      context: ./03. backend/sigre-user-service
+      dockerfile: Dockerfile
+    container_name: sigre_user_service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres_users
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_users:5432/sigre_users
+      SPRING_DATASOURCE_USERNAME: sigre_user
+      SPRING_DATASOURCE_PASSWORD: sigre_password
+    networks:
+      - sigre_network
+
+volumes:
+  postgres_data:
+  postgres_auth_data:
+  postgres_users_data:
+
+networks:
+  sigre_network:
+    driver: bridge 
