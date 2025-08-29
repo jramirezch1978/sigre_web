@@ -1,105 +1,227 @@
 version: '3.8'
 
 services:
-  # Base de datos PostgreSQL
-  postgres:
-    image: postgres:15-alpine
-    container_name: sigre_postgres
+  # Base de datos PostgreSQL principal para SIGRE
+  db-sigre-web:
+    container_name: db-sigre-web
+    image: postgres:15.2
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: sigre_main
-      POSTGRES_USER: sigre_user
-      POSTGRES_PASSWORD: sigre_password
+      POSTGRES_DB: db-sigre-web
+      POSTGRES_USER: sigre-web
+      POSTGRES_PASSWORD: S1greW3b@2025!
+      TZ: America/Lima
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - sigre_db_data:/var/lib/postgresql/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     networks:
-      - sigre_network
+      - sigre-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sigre-web -d db-sigre-web"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    command: ["postgres", "-c", "timezone=America/Lima"]
 
-  # Base de datos para autenticación
-  postgres_auth:
-    image: postgres:15-alpine
-    container_name: sigre_postgres_auth
-    environment:
-      POSTGRES_DB: sigre_auth
-      POSTGRES_USER: sigre_user
-      POSTGRES_PASSWORD: sigre_password
+  # Discovery Server (Eureka)
+  discovery-server:
+    build:
+      context: ./03. backend/discovery-server
+      dockerfile: Dockerfile
+    container_name: discovery-server
+    restart: unless-stopped
     ports:
-      - "5433:5432"
-    volumes:
-      - postgres_auth_data:/var/lib/postgresql/data
-    networks:
-      - sigre_network
-
-  # Base de datos para usuarios
-  postgres_users:
-    image: postgres:15-alpine
-    container_name: sigre_postgres_users
+      - "8761:8761"
     environment:
-      POSTGRES_DB: sigre_users
-      POSTGRES_USER: sigre_user
-      POSTGRES_PASSWORD: sigre_password
-    ports:
-      - "5434:5432"
+      - TZ=America/Lima
     volumes:
-      - postgres_users_data:/var/lib/postgresql/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     networks:
-      - sigre_network
+      - sigre-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # API Gateway
-  gateway:
+  api-gateway:
     build:
-      context: ./03. backend/sigre-gateway
+      context: ./03. backend/api-gateway
       dockerfile: Dockerfile
-    container_name: sigre_gateway
+    container_name: api-gateway
+    restart: unless-stopped
     ports:
-      - "8080:8080"
-    depends_on:
-      - auth-service
-      - user-service
-    networks:
-      - sigre_network
-
-  # Servicio de Autenticación
-  auth-service:
-    build:
-      context: ./03. backend/sigre-auth-service
-      dockerfile: Dockerfile
-    container_name: sigre_auth_service
-    ports:
-      - "8081:8081"
-    depends_on:
-      - postgres_auth
+      - "9080:9080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_auth:5432/sigre_auth
-      SPRING_DATASOURCE_USERNAME: sigre_user
-      SPRING_DATASOURCE_PASSWORD: sigre_password
-    networks:
-      - sigre_network
-
-  # Servicio de Usuarios
-  user-service:
-    build:
-      context: ./03. backend/sigre-user-service
-      dockerfile: Dockerfile
-    container_name: sigre_user_service
-    ports:
-      - "8082:8082"
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - TZ=America/Lima
+      - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
-      - postgres_users
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_users:5432/sigre_users
-      SPRING_DATASOURCE_USERNAME: sigre_user
-      SPRING_DATASOURCE_PASSWORD: sigre_password
+      discovery-server:
+        condition: service_healthy
     networks:
-      - sigre_network
+      - sigre-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Microservicio de Asistencia
+  asistencia-service:
+    build:
+      context: ./03. backend/asistencia-service
+      dockerfile: Dockerfile
+    container_name: asistencia-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-sigre-web:5432/db-sigre-web
+      - SPRING_DATASOURCE_USERNAME=sigre-web
+      - SPRING_DATASOURCE_PASSWORD=S1greW3b@2025!
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - TZ=America/Lima
+      - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      db-sigre-web:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - sigre-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/api/time/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Inventory Service
+  inventory-service:
+    build:
+      context: ./03. backend/inventory-service
+      dockerfile: Dockerfile
+    container_name: inventory-service
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-sigre-web:5432/db-sigre-web
+      - SPRING_DATASOURCE_USERNAME=sigre-web
+      - SPRING_DATASOURCE_PASSWORD=S1greW3b@2025!
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - TZ=America/Lima
+      - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      db-sigre-web:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - sigre-network
+
+  # Orders Service
+  orders-service:
+    build:
+      context: ./03. backend/orders-service
+      dockerfile: Dockerfile
+    container_name: orders-service
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-sigre-web:5432/db-sigre-web
+      - SPRING_DATASOURCE_USERNAME=sigre-web
+      - SPRING_DATASOURCE_PASSWORD=S1greW3b@2025!
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - TZ=America/Lima
+      - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      db-sigre-web:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - sigre-network
+
+  # Products Service
+  products-service:
+    build:
+      context: ./03. backend/products-service
+      dockerfile: Dockerfile
+    container_name: products-service
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-sigre-web:5432/db-sigre-web
+      - SPRING_DATASOURCE_USERNAME=sigre-web
+      - SPRING_DATASOURCE_PASSWORD=S1greW3b@2025!
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - TZ=America/Lima
+      - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      db-sigre-web:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - sigre-network
+
+  # Frontend Angular - Módulo de Asistencia
+  sigre-frontend:
+    build:
+      context: ./02. frontend
+      dockerfile: Dockerfile
+    container_name: sigre-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - NODE_ENV=production
+      - TZ=America/Lima
+      - API_URL=http://10.100.14.102:8084
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - asistencia-service
+      - api-gateway
+    networks:
+      - sigre-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
-  postgres_data:
-  postgres_auth_data:
-  postgres_users_data:
+  sigre_db_data:
+    driver: local
 
 networks:
-  sigre_network:
-    driver: bridge 
+  sigre-network:
+    driver: bridge

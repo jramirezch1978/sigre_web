@@ -21,8 +21,11 @@ import { ClockComponent } from './components/clock/clock.component';
     <mat-toolbar color="primary" class="toolbar">
       <div class="toolbar-content">
         <div class="logo-section">
-          <mat-icon class="logo-icon">water</mat-icon>
-          <span class="logo-text">SIGRE</span>
+          <img src="assets/logo-transmarina.png" alt="Transmarina Logo" class="company-logo">
+          <div class="company-info">
+            <span class="company-name">Transmarina</span>
+            <span class="company-sector">Empresa Hidrobiológica</span>
+          </div>
         </div>
         <div class="clock-section">
           <app-clock></app-clock>
@@ -55,21 +58,33 @@ import { ClockComponent } from './components/clock/clock.component';
     .logo-section {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
     }
     
-    .logo-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-      color: white;
+    .company-logo {
+      height: 50px;
+      width: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
     
-    .logo-text {
-      font-size: 24px;
+    .company-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .company-name {
+      font-size: 20px;
       font-weight: 700;
       color: white;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
+    }
+    
+    .company-sector {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 300;
     }
     
     .clock-section {
