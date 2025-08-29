@@ -84,22 +84,20 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class ClockComponent implements OnInit, OnDestroy {
   currentTime: Date = new Date();
-  private timeSubscription: Subscription = new Subscription();
+  private timer: any;
 
-  constructor(private timeService: TimeService) {}
+  constructor() {}
 
   ngOnInit() {
-    // Suscribirse al servicio de tiempo que sincroniza con el servidor
-    this.timeSubscription = this.timeService.getCurrentTime().subscribe(
-      serverTime => {
-        this.currentTime = serverTime;
-      }
-    );
+    // Actualizar el reloj cada segundo con hora local por ahora
+    this.timer = setInterval(() => {
+      this.currentTime = new Date();
+    }, 1000);
   }
 
   ngOnDestroy() {
-    if (this.timeSubscription) {
-      this.timeSubscription.unsubscribe();
+    if (this.timer) {
+      clearInterval(this.timer);
     }
   }
 }

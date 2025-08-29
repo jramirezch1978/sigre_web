@@ -6,10 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
-import { TimeService } from '../../services/time.service';
-import { RacionService, RacionResponse as ApiRacionResponse, RacionSelectionRequest } from '../../services/racion.service';
-import { Subscription } from 'rxjs';
-import { staggerAnimation, racionCardAnimation, cardHover, buttonPress } from '../../animations/animations';
 
 export interface Racion {
   id: string;
@@ -32,7 +28,6 @@ export interface Racion {
     MatSnackBarModule,
     MatDividerModule
   ],
-  animations: [staggerAnimation, racionCardAnimation, cardHover, buttonPress],
   template: `
     <div class="container">
       <div class="header-section">
@@ -63,18 +58,13 @@ export interface Racion {
           </mat-card-header>
           
           <mat-card-content class="racion-content">
-            <div class="racion-grid" [@staggerAnimation]="racionesDisponibles.length">
+            <div class="racion-grid">
               <div 
-                *ngFor="let racion of racionesDisponibles; let i = index" 
+                *ngFor="let racion of racionesDisponibles" 
                 class="racion-item"
                 [class.disabled]="!racion.disponible"
-                [@racionCardAnimation]
-                (mouseenter)="onCardHover(i, true)"
-                (mouseleave)="onCardHover(i, false)"
               >
-                <mat-card class="racion-item-card" 
-                         [style.border-color]="racion.color"
-                         [@cardHover]="hoveredCard === i ? 'hovered' : 'default'">
+                <mat-card class="racion-item-card" [style.border-color]="racion.color">
                   <mat-card-content class="racion-item-content">
                     <div class="racion-icon">
                       <mat-icon [style.color]="racion.color">{{ racion.icono }}</mat-icon>
@@ -87,12 +77,8 @@ export interface Racion {
                       mat-raised-button 
                       [color]="racion.disponible ? 'primary' : 'warn'"
                       (click)="seleccionarRacion(racion)"
-                      (mousedown)="onButtonPress(i, true)"
-                      (mouseup)="onButtonPress(i, false)"
-                      (mouseleave)="onButtonPress(i, false)"
                       [disabled]="!racion.disponible"
                       class="racion-button"
-                      [@buttonPress]="pressedButton === i ? 'pressed' : 'released'"
                     >
                       <mat-icon>{{ racion.disponible ? 'check_circle' : 'block' }}</mat-icon>
                       {{ racion.disponible ? 'Seleccionar' : 'No Disponible' }}
@@ -310,9 +296,8 @@ export interface Racion {
 export class RacionSelectionComponent implements OnInit, OnDestroy {
   codigoTarjeta: string = '';
   currentTime: Date = new Date();
-  private timeSubscription: Subscription = new Subscription();
-  hoveredCard: number = -1;
-  pressedButton: number = -1;
+  private timer: any;
+  
   raciones: Racion[] = [
     {
       id: 'desayuno',
@@ -346,28 +331,24 @@ export class RacionSelectionComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private snackBar: MatSnackBar,
-    private timeService: TimeService,
-    private racionService: RacionService
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
     this.codigoTarjeta = this.route.snapshot.queryParams['tarjeta'] || 'N/A';
     
-    // Suscribirse al servicio de tiempo del servidor
-    this.timeSubscription = this.timeService.getCurrentTime().subscribe(
-      serverTime => {
-        this.currentTime = serverTime;
-        this.cargarRacionesDesdeServicio();
-      }
-    );
+    // Actualizar tiempo cada segundo
+    this.timer = setInterval(() => {
+      this.currentTime = new Date();
+      this.actualizarDisponibilidadRaciones();
+    }, 1000);
     
-    this.cargarRacionesDesdeServicio();
+    this.actualizarDisponibilidadRaciones();
   }
 
   ngOnDestroy() {
-    if (this.timeSubscription) {
-      this.timeSubscription.unsubscribe();
+    if (this.timer) {
+      clearInterval(this.timer);
     }
   }
 
@@ -398,68 +379,21 @@ export class RacionSelectionComponent implements OnInit, OnDestroy {
     }
   }
 
-  cargarRacionesDesdeServicio() {
-    this.racionService.getRacionesDisponibles().subscribe(
-      (racionesApi: ApiRacionResponse[]) => {
-        // Convertir las raciones de la API al formato local
-        this.raciones = racionesApi.map(r => ({
-          id: r.id,
-          nombre: r.nombre,
-          descripcion: r.descripcion,
-          icono: r.icono,
-          disponible: r.disponible,
-          color: r.color,
-          horario: r.horario
-        }));
-      },
-      error => {
-        console.error('Error al cargar raciones, usando datos locales', error);
-        this.actualizarDisponibilidadRaciones();
-      }
-    );
-  }
-
   seleccionarRacion(racion: Racion) {
     if (!racion.disponible) {
       this.mostrarMensaje('Esta ración no está disponible en este horario', 'warning');
       return;
     }
 
-    const request: RacionSelectionRequest = {
-      codigoTarjeta: this.codigoTarjeta,
-      racionId: racion.id
-    };
-
-    this.racionService.seleccionarRacion(request).subscribe(
-      response => {
-        this.mostrarMensaje(`Ración ${racion.nombre} seleccionada exitosamente`, 'success');
-        
-        setTimeout(() => {
-          this.mostrarMensaje('Su solicitud ha sido registrada. ¡Buen provecho!', 'success');
-          
-          // Volver al inicio después de 3 segundos
-          setTimeout(() => {
-            this.volverInicio();
-          }, 3000);
-        }, 1500);
-      },
-      error => {
-        console.error('Error al seleccionar ración:', error);
-        this.mostrarMensaje(`Ración ${racion.nombre} seleccionada (modo offline)`, 'success');
-        
-        setTimeout(() => {
-          this.volverInicio();
-        }, 2000);
-      }
-    );
-  }
-
-  onCardHover(index: number, isHovered: boolean) {
-    this.hoveredCard = isHovered ? index : -1;
-  }
-
-  onButtonPress(index: number, isPressed: boolean) {
-    this.pressedButton = isPressed ? index : -1;
+    this.mostrarMensaje(`Ración ${racion.nombre} seleccionada exitosamente`, 'success');
+    
+    setTimeout(() => {
+      this.mostrarMensaje('Su solicitud ha sido registrada. ¡Buen provecho!', 'success');
+      
+      setTimeout(() => {
+        this.volverInicio();
+      }, 3000);
+    }, 1500);
   }
 
   volverInicio() {

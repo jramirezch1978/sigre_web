@@ -94,9 +94,9 @@ docker-compose exec sigre-frontend date
 docker-compose exec db-sigre-web date
 
 # Probar endpoints a través del API Gateway
-curl http://10.100.14.102:8080/api/asistencia/api/time/current
-curl http://10.100.14.102:8080/api/asistencia/api/raciones/disponibles
-curl http://10.100.14.102:8080/api/asistencia/api/time/health
+curl http://10.100.14.102:9080/api/asistencia/api/time/current
+curl http://10.100.14.102:9080/api/asistencia/api/raciones/disponibles
+curl http://10.100.14.102:9080/api/asistencia/api/time/health
 
 # Probar endpoints directos (para debugging)
 curl http://10.100.14.102:8084/api/time/current
@@ -161,8 +161,8 @@ docker-compose exec -T db-sigre-web psql -U sigre-web -d db-sigre-web < backup.s
 ## ⚙️ Configuración
 
 ### Puertos Utilizados
-- **9080**: Frontend Angular (HTTP)
-- **8080**: API Gateway (HTTP) - Punto de entrada principal
+- **8080**: Frontend Angular (HTTP) - Interfaz principal
+- **9080**: API Gateway (HTTP) - Punto de entrada API
 - **8084**: Microservicio Asistencia (API REST)
 - **8761**: Discovery Server (Eureka)
 - **5432**: Base de datos PostgreSQL

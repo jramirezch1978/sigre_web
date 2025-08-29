@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, interval, switchMap, startWith, BehaviorSubject, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { ConfigService } from './config.service';
 
 export interface ServerTimeResponse {
   timestamp: string;
@@ -18,19 +17,16 @@ export interface ServerTimeResponse {
   providedIn: 'root'
 })
 export class TimeService {
+  private readonly API_URL = 'http://10.100.14.102:9080/api/asistencia/api/time';
   private currentTimeSubject = new BehaviorSubject<Date>(new Date());
   
-  constructor(
-    private http: HttpClient,
-    private configService: ConfigService
-  ) {
+  constructor(private http: HttpClient) {
     this.startTimeSync();
   }
 
   private startTimeSync() {
-    // Usar tiempo de configuración para sincronización
-    const refreshTime = this.configService.getAutoRefreshTime();
-    interval(refreshTime)
+    // Sincronizar con el servidor cada 30 segundos
+    interval(30000)
       .pipe(
         startWith(0),
         switchMap(() => this.getServerTime()),
@@ -53,8 +49,7 @@ export class TimeService {
   }
 
   private getServerTime(): Observable<Date> {
-    const apiUrl = this.configService.getApiUrl('time');
-    return this.http.get<ServerTimeResponse>(`${apiUrl}/current`)
+    return this.http.get<ServerTimeResponse>(`${this.API_URL}/current`)
       .pipe(
         map(response => new Date(response.timestamp)),
         catchError(() => {
