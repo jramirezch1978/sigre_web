@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { ConfigService } from './config.service';
 
 export interface RacionResponse {
   id: string;
@@ -23,14 +22,12 @@ export interface RacionSelectionRequest {
   providedIn: 'root'
 })
 export class RacionService {
-  constructor(
-    private http: HttpClient,
-    private configService: ConfigService
-  ) {}
+  private readonly API_URL = 'http://10.100.14.102:9080/api/asistencia/api/raciones';
+
+  constructor(private http: HttpClient) {}
 
   getRacionesDisponibles(): Observable<RacionResponse[]> {
-    const apiUrl = this.configService.getApiUrl('raciones');
-    return this.http.get<RacionResponse[]>(`${apiUrl}/disponibles`)
+    return this.http.get<RacionResponse[]>(`${this.API_URL}/disponibles`)
       .pipe(
         catchError(error => {
           console.error('Error al obtener raciones:', error);
@@ -41,8 +38,7 @@ export class RacionService {
   }
 
   seleccionarRacion(request: RacionSelectionRequest): Observable<string> {
-    const apiUrl = this.configService.getApiUrl('raciones');
-    return this.http.post<string>(`${apiUrl}/seleccionar`, request)
+    return this.http.post<string>(`${this.API_URL}/seleccionar`, request)
       .pipe(
         catchError(error => {
           console.error('Error al seleccionar ración:', error);
@@ -52,8 +48,7 @@ export class RacionService {
   }
 
   getHorarioInfo(): Observable<string> {
-    const apiUrl = this.configService.getApiUrl('raciones');
-    return this.http.get<string>(`${apiUrl}/horario-info`)
+    return this.http.get<string>(`${this.API_URL}/horario-info`)
       .pipe(
         catchError(error => {
           console.error('Error al obtener info de horario:', error);
