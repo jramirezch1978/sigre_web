@@ -14,23 +14,24 @@ import { MatIconModule } from '@angular/material/icon';
           <mat-icon>schedule</mat-icon>
         </div>
         <div class="clock-time digital-clock">
-          {{ currentTime | date:'hh:mm:ss a' }}
+          {{ formatTime(currentTime) }}
         </div>
         <div class="clock-date">
-          {{ currentTime | date:'EEEE, d MMMM yyyy' }}
+          {{ formatDate(currentTime) }}
         </div>
       </mat-card-content>
     </mat-card>
   `,
   styles: [`
     .clock-card {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: #1e293b;
       text-align: center;
       padding: 16px;
       min-width: 200px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     
     .clock-content {
@@ -48,21 +49,22 @@ import { MatIconModule } from '@angular/material/icon';
       font-size: 24px;
       width: 24px;
       height: 24px;
-      color: rgba(255, 255, 255, 0.8);
+      color: #64748b;
     }
     
     .clock-time {
       font-size: 2.5rem;
       font-weight: bold;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      color: #1e293b;
+      text-shadow: none;
       margin: 8px 0;
+      font-family: 'Courier New', monospace;
     }
     
     .clock-date {
       font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.8);
-      font-weight: 300;
+      color: #64748b;
+      font-weight: 400;
       text-transform: capitalize;
     }
     
@@ -99,5 +101,30 @@ export class ClockComponent implements OnInit, OnDestroy {
     if (this.timer) {
       clearInterval(this.timer);
     }
+  }
+
+  formatTime(date: Date): string {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    const displayHours = hours % 12 || 12;
+    const formattedHours = displayHours.toString().padStart(2, '0');
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = seconds.toString().padStart(2, '0');
+    
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
+  }
+
+  formatDate(date: Date): string {
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    
+    return date.toLocaleDateString('es-PE', options);
   }
 }
