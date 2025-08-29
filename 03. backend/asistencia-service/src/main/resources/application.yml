@@ -5,7 +5,7 @@ spring:
   application:
     name: asistencia-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/db-sigre-web
+    url: jdbc:postgresql://10.100.14.102:5432/db-sigre-web
     username: sigre-web
     password: S1greW3b@2025!
     driver-class-name: org.postgresql.Driver
@@ -26,12 +26,13 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://10.100.14.102:8761/eureka/
     fetch-registry: true
     register-with-eureka: true
   instance:
     hostname: localhost
     prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
 # Management endpoints
 management:
@@ -50,3 +51,19 @@ logging:
     org.springframework.web: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+# Perfil para Docker
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:postgresql://db-sigre-web:5432/db-sigre-web
+    username: sigre-web
+    password: S1greW3b@2025!
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka/

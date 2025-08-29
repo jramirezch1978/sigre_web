@@ -29,8 +29,8 @@ services:
   # Discovery Server (Eureka)
   discovery-server:
     build:
-      context: ./03. backend/discovery-server
-      dockerfile: Dockerfile
+      context: ./03. backend
+      dockerfile: discovery-server/Dockerfile
     container_name: discovery-server
     restart: unless-stopped
     ports:
@@ -52,15 +52,15 @@ services:
   # API Gateway
   api-gateway:
     build:
-      context: ./03. backend/api-gateway
-      dockerfile: Dockerfile
+      context: ./03. backend
+      dockerfile: api-gateway/Dockerfile
     container_name: api-gateway
     restart: unless-stopped
     ports:
       - "9080:9080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka
       - TZ=America/Lima
       - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
     volumes:
@@ -81,8 +81,8 @@ services:
   # Microservicio de Asistencia
   asistencia-service:
     build:
-      context: ./03. backend/asistencia-service
-      dockerfile: Dockerfile
+      context: ./03. backend
+      dockerfile: asistencia-service/Dockerfile
     container_name: asistencia-service
     restart: unless-stopped
     ports:
@@ -92,7 +92,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db-sigre-web:5432/db-sigre-web
       - SPRING_DATASOURCE_USERNAME=sigre-web
       - SPRING_DATASOURCE_PASSWORD=S1greW3b@2025!
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka
       - TZ=America/Lima
       - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
     volumes:
@@ -115,8 +115,8 @@ services:
   # Inventory Service
   inventory-service:
     build:
-      context: ./03. backend/inventory-service
-      dockerfile: Dockerfile
+      context: ./03. backend
+      dockerfile: inventory-service/Dockerfile
     container_name: inventory-service
     restart: unless-stopped
     environment:
@@ -124,7 +124,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db-sigre-web:5432/db-sigre-web
       - SPRING_DATASOURCE_USERNAME=sigre-web
       - SPRING_DATASOURCE_PASSWORD=S1greW3b@2025!
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka
       - TZ=America/Lima
       - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
     volumes:
@@ -141,8 +141,8 @@ services:
   # Orders Service
   orders-service:
     build:
-      context: ./03. backend/orders-service
-      dockerfile: Dockerfile
+      context: ./03. backend
+      dockerfile: orders-service/Dockerfile
     container_name: orders-service
     restart: unless-stopped
     environment:
@@ -150,7 +150,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db-sigre-web:5432/db-sigre-web
       - SPRING_DATASOURCE_USERNAME=sigre-web
       - SPRING_DATASOURCE_PASSWORD=S1greW3b@2025!
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka
       - TZ=America/Lima
       - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
     volumes:
@@ -167,8 +167,8 @@ services:
   # Products Service
   products-service:
     build:
-      context: ./03. backend/products-service
-      dockerfile: Dockerfile
+      context: ./03. backend
+      dockerfile: products-service/Dockerfile
     container_name: products-service
     restart: unless-stopped
     environment:
@@ -176,7 +176,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db-sigre-web:5432/db-sigre-web
       - SPRING_DATASOURCE_USERNAME=sigre-web
       - SPRING_DATASOURCE_PASSWORD=S1greW3b@2025!
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka
       - TZ=America/Lima
       - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
     volumes:

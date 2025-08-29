@@ -28,9 +28,7 @@ import { ConfigService } from './services/config.service';
             <span class="company-sucursal">{{ companySucursal }}</span>
           </div>
         </div>
-        <div class="clock-section">
-          <app-clock></app-clock>
-        </div>
+
         <div class="title-section">
           <h1>Módulo de Asistencia</h1>
         </div>
@@ -96,11 +94,7 @@ import { ConfigService } from './services/config.service';
       letter-spacing: 0.5px;
     }
     
-    .clock-section {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-    }
+
     
     .title-section h1 {
       color: #1e293b;

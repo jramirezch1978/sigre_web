@@ -3,20 +3,25 @@ FROM maven:3.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-# Copiar el pom.xml del proyecto padre
-COPY ../pom.xml ./pom.xml
+# Copiar el pom.xml padre primero
+COPY pom.xml ./pom.xml
 
-# Copiar el pom.xml del microservicio
-COPY pom.xml ./api-gateway/pom.xml
+# Copiar todos los pom.xml de los módulos para resolver dependencias
+COPY discovery-server/pom.xml ./discovery-server/pom.xml
+COPY api-gateway/pom.xml ./api-gateway/pom.xml
+COPY asistencia-service/pom.xml ./asistencia-service/pom.xml
+COPY inventory-service/pom.xml ./inventory-service/pom.xml
+COPY orders-service/pom.xml ./orders-service/pom.xml
+COPY products-service/pom.xml ./products-service/pom.xml
 
-# Copiar el código fuente
-COPY src ./api-gateway/src
+# Descargar dependencias
+RUN mvn dependency:go-offline -B
 
-# Cambiar al directorio del microservicio
-WORKDIR /app/api-gateway
+# Copiar el código fuente del api-gateway
+COPY api-gateway/src ./api-gateway/src
 
-# Construir la aplicación
-RUN mvn clean package -DskipTests
+# Construir solo el api-gateway
+RUN mvn clean package -DskipTests -pl api-gateway -am
 
 # Etapa de producción
 FROM openjdk:17-jdk-slim

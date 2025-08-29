@@ -1,0 +1,39 @@
+# Eliminar solo el contenedor del frontend
+docker compose rm -f sigre-frontend
+
+# Reconstruir y levantar solo frontend
+docker compose up sigre-frontend --build -d
+
+#Compilar todo
+docker compose up --build -d
+
+docker compose restart sigre-frontend
+docker compose restart asistencia-service
+
+docker compose down              # Detiene contenedores, MANTIENE volúmenes
+docker compose up --build -d    # Reconstruye y levanta todo
+
+#compila solo el frontend
+docker compose up sigre-frontend --build -d
+
+
+# Reiniciar servicios para aplicar configuración
+docker compose restart asistencia-service
+docker compose restart api-gateway
+
+
+mvn clean package -DskipTests
+
+
+# 1. Verificar que Eureka esté funcionando y qué servicios están registrados
+Invoke-WebRequest -Uri "http://10.100.14.102:8761" -UseBasicParsing
+
+# 2. Verificar que asistencia-service funcione directamente (sin API Gateway)
+Invoke-WebRequest -Uri "http://10.100.14.102:8084/api/time/current" -UseBasicParsing
+
+# 3. Ver logs del API Gateway para entender por qué no encuentra el servicio
+docker logs api-gateway
+
+# 4. Ver logs del asistencia-service para ver si se registró en Eureka
+docker logs asistencia-service
+

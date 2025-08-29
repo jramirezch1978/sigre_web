@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { TimeService } from '../../services/time.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-clock',
@@ -12,6 +14,10 @@ import { MatIconModule } from '@angular/material/icon';
       <mat-card-content class="clock-content">
         <div class="clock-icon">
           <mat-icon>schedule</mat-icon>
+          <div class="connection-status" [class.connected]="isServerConnected" [class.disconnected]="!isServerConnected">
+            <mat-icon class="status-icon">{{ isServerConnected ? 'wifi' : 'wifi_off' }}</mat-icon>
+            <span class="status-text">{{ isServerConnected ? 'Servidor' : 'Local' }}</span>
+          </div>
         </div>
         <div class="clock-time digital-clock">
           {{ formatTime(currentTime) }}
@@ -68,6 +74,38 @@ import { MatIconModule } from '@angular/material/icon';
       text-transform: capitalize;
     }
     
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    .connection-status.connected {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+    
+    .connection-status.disconnected {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+    
+    .status-icon {
+      font-size: 12px;
+      width: 12px;
+      height: 12px;
+    }
+    
+    .status-text {
+      font-weight: 500;
+      font-size: 9px;
+    }
+    
     @media (max-width: 768px) {
       .clock-card {
         min-width: 160px;
@@ -86,20 +124,32 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class ClockComponent implements OnInit, OnDestroy {
   currentTime: Date = new Date();
-  private timer: any;
+  private timeSubscription: Subscription = new Subscription();
+  isServerConnected = false;
 
-  constructor() {}
+  constructor(private timeService: TimeService) {}
 
   ngOnInit() {
-    // Actualizar el reloj cada segundo con hora local por ahora
-    this.timer = setInterval(() => {
-      this.currentTime = new Date();
-    }, 1000);
+    // Suscribirse al servicio de tiempo del servidor
+    this.timeSubscription = this.timeService.getCurrentTime().subscribe({
+      next: (serverTime) => {
+        this.currentTime = serverTime;
+        this.isServerConnected = true;
+      },
+      error: (error) => {
+        console.warn('Error conectando al servidor, usando hora local:', error);
+        this.isServerConnected = false;
+        // Fallback a hora local
+        setInterval(() => {
+          this.currentTime = new Date();
+        }, 1000);
+      }
+    });
   }
 
   ngOnDestroy() {
-    if (this.timer) {
-      clearInterval(this.timer);
+    if (this.timeSubscription) {
+      this.timeSubscription.unsubscribe();
     }
   }
 

@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { FormsModule } from '@angular/forms';
 import { RacionSelectionComponent } from '../racion-selection/racion-selection.component';
+import { ClockComponent } from '../clock/clock.component';
 
 export interface Racion {
   id: string;
@@ -30,7 +31,8 @@ export interface Racion {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    ClockComponent
   ],
   template: `
     <div class="container">
@@ -74,13 +76,20 @@ export interface Racion {
             </div>
             
             <div class="info-section">
-              <div class="info-item">
-                <mat-icon class="info-icon">info</mat-icon>
-                <span>El sistema detectará automáticamente su tarjeta</span>
-              </div>
-              <div class="info-item">
-                <mat-icon class="info-icon">schedule</mat-icon>
-                <span>Horario disponible según la hora actual</span>
+              <div class="info-grid">
+                <div class="info-items">
+                  <div class="info-item">
+                    <mat-icon class="info-icon">info</mat-icon>
+                    <span>El sistema detectará automáticamente su tarjeta</span>
+                  </div>
+                  <div class="info-item">
+                    <mat-icon class="info-icon">schedule</mat-icon>
+                    <span>Horario disponible según la hora actual</span>
+                  </div>
+                </div>
+                <div class="clock-container">
+                  <app-clock></app-clock>
+                </div>
               </div>
             </div>
           </mat-card-content>
@@ -174,13 +183,29 @@ export interface Racion {
     }
     
     .info-section {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
       padding: 20px;
       background: rgba(14, 165, 233, 0.05);
       border-radius: 12px;
       border: 1px solid rgba(14, 165, 233, 0.1);
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: start;
+    }
+    
+    .info-items {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .clock-container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
     }
     
     .info-item {
@@ -216,6 +241,15 @@ export interface Racion {
       .submit-button {
         height: 48px;
         font-size: 16px;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      
+      .clock-container {
+        justify-content: center;
       }
     }
   `]

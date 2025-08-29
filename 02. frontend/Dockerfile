@@ -1,13 +1,16 @@
 # Etapa de construcción
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
 # Copiar archivos de dependencias
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm ci --only=production
+# Instalar TODAS las dependencias (incluyendo devDependencies para el build)
+RUN npm ci
+
+# Verificar que Angular CLI esté instalado
+RUN npx ng version
 
 # Copiar código fuente
 COPY . .

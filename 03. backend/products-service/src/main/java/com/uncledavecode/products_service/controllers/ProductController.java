@@ -5,7 +5,7 @@ import com.uncledavecode.products_service.model.dtos.ProductResponse;
 import com.uncledavecode.products_service.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
+// import org.springframework.security.access.prepost.PreAuthorize; // Seguridad deshabilitada
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // @PreAuthorize("hasRole('ROLE_ADMIN')") // Seguridad deshabilitada
     public void addProduct(@RequestBody ProductRequest productRequest) {
         this.productService.addProduct(productRequest);
     }
@@ -27,14 +27,14 @@ public class ProductController {
     // AGREGAR ESTOS ENDPOINTS PARA MANEJAR AMBAS RUTAS
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_USER')")
+    // @PreAuthorize("hasRole('ROLE_USER')") // Seguridad deshabilitada
     public List<ProductResponse> getAllProducts() {
         return this.productService.getAllProducts();
     }
 
     @GetMapping("/")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_USER')")
+    // @PreAuthorize("hasRole('ROLE_USER')") // Seguridad deshabilitada
     public List<ProductResponse> getAllProductsWithSlash() {
         return this.productService.getAllProducts();
     }
