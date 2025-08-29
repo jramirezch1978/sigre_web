@@ -1,5 +1,9 @@
 package com.uncledavecode.api_gateway.config;
 
+// Configuración de seguridad deshabilitada para desarrollo
+// Sin autenticación requerida para el módulo de asistencia
+
+/*
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -19,3 +23,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+*/
