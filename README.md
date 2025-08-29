@@ -73,11 +73,11 @@ sigre_web/
    ```
 
 5. **Acceder a la aplicación**
-   - **Frontend**: http://10.100.14.102:8080
-   - **API Gateway**: http://10.100.14.102:9080
-   - **API Backend**: http://10.100.14.102:8084
-   - **Eureka Server**: http://10.100.14.102:8761
-   - **Portainer**: http://10.100.14.102:9000
+   - **Frontend**: http://10.100.14.102:8080 ⭐ (Interfaz principal)
+   - **API Gateway**: http://10.100.14.102:9080 (APIs)
+   - **API Backend**: http://10.100.14.102:8084 (Microservicio directo)
+   - **Eureka Server**: http://10.100.14.102:8761 (Service Discovery)
+   - **Portainer**: http://10.100.14.102:9000 (Gestión Docker)
 
 ### 🔍 Verificación de Servicios
 

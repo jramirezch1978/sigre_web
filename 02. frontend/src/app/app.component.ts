@@ -42,9 +42,10 @@ import { ClockComponent } from './components/clock/clock.component';
   `,
   styles: [`
     .toolbar {
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 50%, #fef2f2 100%);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
       height: 80px;
+      border-bottom: 3px solid #e11d48;
     }
     
     .toolbar-content {
@@ -77,14 +78,14 @@ import { ClockComponent } from './components/clock/clock.component';
     .company-name {
       font-size: 20px;
       font-weight: 700;
-      color: white;
+      color: #1e293b;
       letter-spacing: 1px;
     }
     
     .company-sector {
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.8);
-      font-weight: 300;
+      color: #64748b;
+      font-weight: 400;
     }
     
     .clock-section {
@@ -94,10 +95,11 @@ import { ClockComponent } from './components/clock/clock.component';
     }
     
     .title-section h1 {
-      color: white;
+      color: #1e293b;
       font-size: 20px;
-      font-weight: 500;
+      font-weight: 600;
       margin: 0;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
     
     .main-content {
