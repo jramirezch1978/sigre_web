@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ClockComponent } from './components/clock/clock.component';
+import { ConfigService } from './services/config.service';
 
 @Component({
   selector: 'app-root',
@@ -21,10 +22,10 @@ import { ClockComponent } from './components/clock/clock.component';
     <mat-toolbar color="primary" class="toolbar">
       <div class="toolbar-content">
         <div class="logo-section">
-          <img src="assets/logo-transmarina.png" alt="Transmarina Logo" class="company-logo">
+          <img [src]="companyLogo" [alt]="companyName + ' Logo'" class="company-logo">
           <div class="company-info">
-            <span class="company-name">Transmarina</span>
-            <span class="company-sector">Empresa Hidrobiológica</span>
+            <span class="company-name">{{ companyName }}</span>
+            <span class="company-sucursal">{{ companySucursal }}</span>
           </div>
         </div>
         <div class="clock-section">
@@ -76,16 +77,23 @@ import { ClockComponent } from './components/clock/clock.component';
     }
     
     .company-name {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: #1e293b;
       letter-spacing: 1px;
     }
     
     .company-sector {
-      font-size: 12px;
+      font-size: 11px;
       color: #64748b;
       font-weight: 400;
+    }
+    
+    .company-sucursal {
+      font-size: 12px;
+      color: #e11d48;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
     
     .clock-section {
@@ -96,10 +104,14 @@ import { ClockComponent } from './components/clock/clock.component';
     
     .title-section h1 {
       color: #1e293b;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 600;
       margin: 0;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(135deg, #1e293b 0%, #e11d48 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     .main-content {
@@ -129,6 +141,20 @@ import { ClockComponent } from './components/clock/clock.component';
     }
   `]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'SIGRE - Módulo de Asistencia';
+  companyName = 'Transmarina del PERU SAC';
+  companyLogo = 'assets/logo-transmarina.png';
+  companySucursal = 'PIURA - SECHURA';
+
+  constructor(private configService: ConfigService) {}
+
+  ngOnInit() {
+    // Cargar configuración desde appsettings.json
+    setTimeout(() => {
+      this.companyName = this.configService.getCompanyName();
+      this.companyLogo = this.configService.getCompanyLogo();
+      this.companySucursal = this.configService.getCompanySucursal();
+    }, 100);
+  }
 }
