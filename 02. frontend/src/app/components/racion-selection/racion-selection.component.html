@@ -1,0 +1,74 @@
+<div class="container">
+  <div class="header-section">
+    <mat-card class="header-card">
+      <mat-card-content class="header-content">
+        <div class="user-info">
+          <mat-icon class="user-icon">person</mat-icon>
+          <div class="user-details">
+            <h2>Selección de Ración</h2>
+            <p>Tarjeta: {{ codigoTarjeta }}</p>
+            <p class="current-time">{{ currentTime | date:'EEEE, d MMMM yyyy - hh:mm:ss a' }}</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="racion-section">
+    <mat-card class="racion-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="racion-title-icon">restaurant</mat-icon>
+          Elija su Ración
+        </mat-card-title>
+        <mat-card-subtitle>
+          {{ getHorarioDisponible() }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content class="racion-content">
+        <div class="racion-grid">
+          <div 
+            *ngFor="let racion of racionesDisponibles" 
+            class="racion-item"
+            [class.disabled]="!racion.disponible"
+          >
+            <mat-card class="racion-item-card" [style.border-color]="racion.color">
+              <mat-card-content class="racion-item-content">
+                <div class="racion-icon">
+                  <mat-icon [style.color]="racion.color">{{ racion.icono }}</mat-icon>
+                </div>
+                <h3 class="racion-nombre">{{ racion.nombre }}</h3>
+                <p class="racion-descripcion">{{ racion.descripcion }}</p>
+                <p class="racion-horario">{{ racion.horario }}</p>
+                
+                <button 
+                  mat-raised-button 
+                  [color]="racion.disponible ? 'primary' : 'warn'"
+                  (click)="seleccionarRacion(racion)"
+                  [disabled]="!racion.disponible"
+                  class="racion-button"
+                >
+                  <mat-icon>{{ racion.disponible ? 'check_circle' : 'block' }}</mat-icon>
+                  {{ racion.disponible ? 'Seleccionar' : 'No Disponible' }}
+                </button>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="action-section">
+    <button 
+      mat-stroked-button 
+      color="secondary" 
+      (click)="volverMenuPrincipal()"
+      class="back-button"
+    >
+      <mat-icon>home</mat-icon>
+      Volver al Menú Principal
+    </button>
+  </div>
+</div>

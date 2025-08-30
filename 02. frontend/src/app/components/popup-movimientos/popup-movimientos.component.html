@@ -1,0 +1,42 @@
+<div class="popup-overlay" (click)="cerrarPopup()">
+  <div class="popup-content" (click)="$event.stopPropagation()">
+    <mat-card class="movement-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="movement-icon">access_time</mat-icon>
+          Tipo de Movimiento
+        </mat-card-title>
+        <mat-card-subtitle>
+          Trabajador: {{ nombreTrabajador }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content class="movement-content">
+        <div class="movements-grid">
+          <div 
+            *ngFor="let movimiento of movimientosDisponibles" 
+            class="movement-item"
+            (click)="seleccionarMovimiento(movimiento)"
+          >
+            <mat-card class="movement-item-card" [style.background]="movimiento.color">
+              <mat-card-content class="movement-item-content">
+                <div class="movement-item-icon">
+                  <mat-icon>{{ movimiento.icono }}</mat-icon>
+                </div>
+                <h4 class="movement-item-title">{{ movimiento.nombre }}</h4>
+                <div class="movement-number">{{ movimiento.numero }}</div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </mat-card-content>
+      
+      <mat-card-actions class="popup-actions">
+        <button mat-stroked-button (click)="cerrarPopup()" class="cancel-button">
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

@@ -1,0 +1,60 @@
+<div class="popup-overlay" (click)="cerrarPopup()">
+  <div class="popup-content" (click)="$event.stopPropagation()">
+    <mat-card class="racion-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="racion-icon">restaurant</mat-icon>
+          Selección de Ración
+        </mat-card-title>
+        <mat-card-subtitle>
+          {{ nombreTrabajador }} - {{ fechaActual | date:'EEEE, d MMMM yyyy' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content class="racion-content">
+        <div class="info-message" *ngIf="mensajeAsistencia">
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          <span>{{ mensajeAsistencia }}</span>
+        </div>
+        
+        <div class="raciones-grid">
+          <div 
+            *ngFor="let racion of racionesDisponibles" 
+            class="racion-item"
+            [class.disabled]="!racion.disponible || racion.yaSeleccionada"
+            (click)="seleccionarRacion(racion)"
+          >
+            <mat-card class="racion-item-card" [style.border-color]="racion.color">
+              <mat-card-content class="racion-item-content">
+                <div class="racion-item-icon">
+                  <mat-icon [style.color]="racion.color">{{ racion.icono }}</mat-icon>
+                </div>
+                <h4 class="racion-item-title">{{ racion.nombre }}</h4>
+                <p class="racion-item-horario">{{ racion.horario }}</p>
+                <div class="racion-status">
+                  <mat-icon class="status-icon" *ngIf="racion.yaSeleccionada">done</mat-icon>
+                  <mat-icon class="status-icon" *ngIf="!racion.disponible && !racion.yaSeleccionada">block</mat-icon>
+                  <span class="status-text">
+                    {{ racion.yaSeleccionada ? 'Ya seleccionada' : 
+                       (racion.disponible ? 'Disponible' : 'No disponible') }}
+                  </span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </mat-card-content>
+      
+      <mat-card-actions class="popup-actions">
+        <button mat-button (click)="omitirRacion()" class="skip-button">
+          <mat-icon>skip_next</mat-icon>
+          Omitir Ración
+        </button>
+        <button mat-stroked-button (click)="cerrarPopup()" class="cancel-button">
+          <mat-icon>close</mat-icon>
+          Cerrar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

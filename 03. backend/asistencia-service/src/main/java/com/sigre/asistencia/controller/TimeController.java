@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/time")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class TimeController {
 
     private final TimeService timeService;

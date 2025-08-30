@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 export interface CompanyConfig {
   name: string;
@@ -27,23 +28,53 @@ export interface AppSettings {
 })
 export class ConfigService {
   private configSubject = new BehaviorSubject<AppSettings | null>(null);
+  private isLoading = false;
+  private loadPromise: Promise<AppSettings> | null = null;
 
   constructor(private http: HttpClient) {
     this.loadConfig();
   }
 
   private loadConfig(): void {
-    this.http.get<{appSettings: AppSettings}>('assets/appsettings.json').subscribe({
-      next: (response) => {
-        console.log('Configuración cargada:', response.appSettings);
-        this.configSubject.next(response.appSettings);
-      },
-      error: (error) => {
-        console.error('ERROR CRÍTICO: No se pudo cargar el archivo appsettings.json', error);
-        alert('ERROR: No se pudo cargar la configuración de la aplicación. Verifique que el archivo appsettings.json exista.');
-        throw new Error('Configuración requerida no encontrada: appsettings.json');
-      }
+    if (this.isLoading || this.loadPromise) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.loadPromise = firstValueFrom(
+      this.http.get<{appSettings: AppSettings}>('assets/appsettings.json')
+    ).then(response => {
+      console.log('Configuración cargada:', response.appSettings);
+      this.configSubject.next(response.appSettings);
+      this.isLoading = false;
+      return response.appSettings;
+    }).catch(error => {
+      console.error('ERROR CRÍTICO: No se pudo cargar el archivo appsettings.json', error);
+      this.isLoading = false;
+      this.loadPromise = null;
+      throw new Error('Configuración requerida no encontrada: appsettings.json');
     });
+  }
+
+  async waitForConfig(): Promise<AppSettings> {
+    if (this.configSubject.value) {
+      return this.configSubject.value;
+    }
+    
+    if (this.loadPromise) {
+      return this.loadPromise;
+    }
+    
+    // Si no hay promesa de carga, intentar cargar de nuevo
+    this.loadConfig();
+    return this.loadPromise!;
+  }
+
+  getConfig$(): Observable<AppSettings> {
+    return this.configSubject.pipe(
+      filter(config => config !== null),
+      map(config => config!)
+    );
   }
 
   getCurrentConfig(): AppSettings {
@@ -55,23 +86,39 @@ export class ConfigService {
   }
 
   getCompanyName(): string {
-    return this.getCurrentConfig().company.name;
+    const config = this.configSubject.value;
+    return config?.company?.name || 'Transmarina del PERU SAC';
   }
 
   getCompanyLogo(): string {
-    return this.getCurrentConfig().company.logoPath;
+    const config = this.configSubject.value;
+    return config?.company?.logoPath || 'assets/logo-transmarina.png';
   }
 
   getCompanySector(): string {
-    return this.getCurrentConfig().company.sector;
+    const config = this.configSubject.value;
+    return config?.company?.sector || 'Empresa Hidrobiológica';
   }
 
   getCompanySucursal(): string {
-    return this.getCurrentConfig().company.sucursal;
+    const config = this.configSubject.value;
+    return config?.company?.sucursal || 'PIURA - SECHURA';
   }
 
   getApiUrl(endpoint: 'time' | 'raciones'): string {
-    const config = this.getCurrentConfig();
+    const config = this.configSubject.value;
+    if (!config) {
+      // Valores por defecto si no hay configuración
+      const defaultUrls = {
+        time: 'http://10.100.14.102:9080/api/asistencia/api/time',
+        raciones: 'http://10.100.14.102:9080/api/asistencia/api/raciones'
+      };
+      return defaultUrls[endpoint];
+    }
     return `${config.api.baseUrl}${config.api.endpoints[endpoint]}`;
+  }
+
+  isConfigLoaded(): boolean {
+    return this.configSubject.value !== null;
   }
 }

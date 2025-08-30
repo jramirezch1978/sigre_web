@@ -1,4 +1,4 @@
-package com.uncledavecode.products_service;
+package com.sigre.products_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

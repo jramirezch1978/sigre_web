@@ -9,148 +9,60 @@ import { Subscription } from 'rxjs';
   selector: 'app-clock',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatIconModule],
-  template: `
-    <mat-card class="clock-card">
-      <mat-card-content class="clock-content">
-        <div class="clock-icon">
-          <mat-icon>schedule</mat-icon>
-          <div class="connection-status" [class.connected]="isServerConnected" [class.disconnected]="!isServerConnected">
-            <mat-icon class="status-icon">{{ isServerConnected ? 'wifi' : 'wifi_off' }}</mat-icon>
-            <span class="status-text">{{ isServerConnected ? 'Servidor' : 'Local' }}</span>
-          </div>
-        </div>
-        <div class="clock-time digital-clock">
-          {{ formatTime(currentTime) }}
-        </div>
-        <div class="clock-date">
-          {{ formatDate(currentTime) }}
-        </div>
-      </mat-card-content>
-    </mat-card>
-  `,
-  styles: [`
-    .clock-card {
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      color: #1e293b;
-      text-align: center;
-      padding: 16px;
-      min-width: 200px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    .clock-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .clock-icon {
-      margin-bottom: 8px;
-    }
-    
-    .clock-icon mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-      color: #64748b;
-    }
-    
-    .clock-time {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #1e293b;
-      text-shadow: none;
-      margin: 8px 0;
-      font-family: 'Courier New', monospace;
-    }
-    
-    .clock-date {
-      font-size: 0.9rem;
-      color: #64748b;
-      font-weight: 400;
-      text-transform: capitalize;
-    }
-    
-    .connection-status {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 4px;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 12px;
-      transition: all 0.3s ease;
-    }
-    
-    .connection-status.connected {
-      background: rgba(16, 185, 129, 0.1);
-      color: #10b981;
-    }
-    
-    .connection-status.disconnected {
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
-    }
-    
-    .status-icon {
-      font-size: 12px;
-      width: 12px;
-      height: 12px;
-    }
-    
-    .status-text {
-      font-weight: 500;
-      font-size: 9px;
-    }
-    
-    @media (max-width: 768px) {
-      .clock-card {
-        min-width: 160px;
-        padding: 12px;
-      }
-      
-      .clock-time {
-        font-size: 2rem;
-      }
-      
-      .clock-date {
-        font-size: 0.8rem;
-      }
-    }
-  `]
+  templateUrl: './clock.component.html',
+  styleUrls: ['./clock.component.scss']
 })
 export class ClockComponent implements OnInit, OnDestroy {
   currentTime: Date = new Date();
   private timeSubscription: Subscription = new Subscription();
+  private localTimer: any;
   isServerConnected = false;
 
   constructor(private timeService: TimeService) {}
 
   ngOnInit() {
-    // Suscribirse al servicio de tiempo del servidor
+    // Iniciar con hora local como fallback
+    this.startLocalClock();
+    
+    // Intentar conectar al servidor
     this.timeSubscription = this.timeService.getCurrentTime().subscribe({
       next: (serverTime) => {
+        // Conexión exitosa al servidor
         this.currentTime = serverTime;
         this.isServerConnected = true;
+        this.stopLocalClock(); // Detener reloj local
+        console.log('✅ Conectado al servidor - Hora sincronizada');
       },
       error: (error) => {
-        console.warn('Error conectando al servidor, usando hora local:', error);
+        // Error de conexión - usar hora local
+        console.warn('❌ Error conectando al servidor, usando hora local:', error);
         this.isServerConnected = false;
-        // Fallback a hora local
-        setInterval(() => {
-          this.currentTime = new Date();
-        }, 1000);
+        this.startLocalClock(); // Asegurar que el reloj local esté funcionando
       }
     });
+  }
+
+  private startLocalClock() {
+    if (this.localTimer) {
+      clearInterval(this.localTimer);
+    }
+    this.localTimer = setInterval(() => {
+      this.currentTime = new Date();
+    }, 1000);
+  }
+
+  private stopLocalClock() {
+    if (this.localTimer) {
+      clearInterval(this.localTimer);
+      this.localTimer = null;
+    }
   }
 
   ngOnDestroy() {
     if (this.timeSubscription) {
       this.timeSubscription.unsubscribe();
     }
+    this.stopLocalClock();
   }
 
   formatTime(date: Date): string {

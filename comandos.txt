@@ -23,6 +23,7 @@ docker compose restart api-gateway
 
 
 mvn clean package -DskipTests
+mvn clean install -DskipTests
 
 
 # 1. Verificar que Eureka esté funcionando y qué servicios están registrados
@@ -31,9 +32,24 @@ Invoke-WebRequest -Uri "http://10.100.14.102:8761" -UseBasicParsing
 # 2. Verificar que asistencia-service funcione directamente (sin API Gateway)
 Invoke-WebRequest -Uri "http://10.100.14.102:8084/api/time/current" -UseBasicParsing
 
-# 3. Ver logs del API Gateway para entender por qué no encuentra el servicio
-docker logs api-gateway
 
-# 4. Ver logs del asistencia-service para ver si se registró en Eureka
-docker logs asistencia-service
+docker compose build
+docker compose restart products-service inventory-service orders-service
 
+Remove-Item '..\01. documentacion\logs\log*.txt' -Force -ErrorAction SilentlyContinue;
+docker logs discovery-server > '..\01. documentacion\logs\log-discovery-server.txt';
+docker logs api-gateway > '..\01. documentacion\logs\log-api-gateway.txt';
+docker logs inventory-service > '..\01. documentacion\logs\log-inventory-service.txt';
+docker logs orders-service > '..\01. documentacion\logs\log-orders-service.txt';
+docker logs products-service > '..\01. documentacion\logs\log-products-service.txt';
+docker logs asistencia-service > '..\01. documentacion\logs\log-asistencia-service.txt';
+
+
+# 1. Verificar que el frontend esté funcionando
+Invoke-WebRequest -Uri "http://10.100.14.102:8080" -UseBasicParsing
+
+# 2. Ver logs del frontend para errores
+docker logs sigre-frontend
+
+# 3. Ver logs del API Gateway para ver si llegan peticiones del frontend
+docker logs api-gateway | Select-String "api/asistencia"

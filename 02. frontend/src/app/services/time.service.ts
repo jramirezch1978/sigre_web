@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, interval, switchMap, startWith, BehaviorSubject, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { ConfigService } from './config.service';
 
 export interface ServerTimeResponse {
   timestamp: string;
@@ -17,10 +18,12 @@ export interface ServerTimeResponse {
   providedIn: 'root'
 })
 export class TimeService {
-  private readonly API_URL = 'http://10.100.14.102:9080/api/asistencia/api/time';
   private currentTimeSubject = new BehaviorSubject<Date>(new Date());
   
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private configService: ConfigService
+  ) {
     this.startTimeSync();
   }
 
@@ -49,7 +52,8 @@ export class TimeService {
   }
 
   private getServerTime(): Observable<Date> {
-    return this.http.get<ServerTimeResponse>(`${this.API_URL}/current`)
+    const apiUrl = this.configService.getApiUrl('time');
+    return this.http.get<ServerTimeResponse>(`${apiUrl}/current`)
       .pipe(
         map(response => new Date(response.timestamp)),
         catchError(() => {

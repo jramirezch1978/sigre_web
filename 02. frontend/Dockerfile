@@ -21,6 +21,9 @@ RUN npm run build:prod
 # Etapa de producción
 FROM nginx:alpine
 
+# Instalar curl para health checks
+RUN apk add --no-cache curl
+
 # Copiar la aplicación construida
 COPY --from=builder /app/dist/sigre-asistencia /usr/share/nginx/html
 

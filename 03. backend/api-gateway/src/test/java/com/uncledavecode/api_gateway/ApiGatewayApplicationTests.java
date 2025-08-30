@@ -1,4 +1,4 @@
-package com.uncledavecode.api_gateway;
+package com.sigre.api_gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

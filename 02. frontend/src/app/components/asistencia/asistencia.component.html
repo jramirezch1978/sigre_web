@@ -1,0 +1,101 @@
+<div class="container">
+  <div class="welcome-section">
+    <mat-card class="welcome-card">
+      <mat-card-header>
+        <div class="header-content">
+          <div class="company-section">
+            <img src="assets/logo-transmarina.png" alt="Transmarina Logo" class="company-logo">
+            <div class="company-info">
+              <span class="company-name">Transmarina del PERU SAC</span>
+              <span class="company-sucursal">PIURA - SECHURA</span>
+            </div>
+          </div>
+          <div class="title-section">
+            <mat-card-title>
+              <mat-icon class="welcome-icon">person_add</mat-icon>
+              Bienvenido al Sistema de Asistencia
+            </mat-card-title>
+            <mat-card-subtitle>
+              Por favor, ingrese su código de tarjeta de proximidad
+            </mat-card-subtitle>
+          </div>
+        </div>
+      </mat-card-header>
+      
+      <mat-card-content class="card-content">
+        <div class="input-section">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Código de Tarjeta</mat-label>
+            <input 
+              matInput 
+              [(ngModel)]="codigoTarjeta" 
+              placeholder="Ej: 123456789"
+              (keyup.enter)="validarTarjeta()"
+              maxlength="20"
+              class="tarjeta-input"
+            >
+            <mat-icon matSuffix>credit_card</mat-icon>
+          </mat-form-field>
+          
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="validarTarjeta()"
+            [disabled]="!codigoTarjeta || codigoTarjeta.length < 3"
+            class="submit-button"
+          >
+            <mat-icon>login</mat-icon>
+            Validar Tarjeta
+          </button>
+        </div>
+        
+        <div class="info-section">
+          <div class="info-grid">
+            <div class="info-items">
+              <div class="info-item">
+                <mat-icon class="info-icon">info</mat-icon>
+                <span>El sistema detectará automáticamente su tarjeta</span>
+              </div>
+              <div class="info-item">
+                <mat-icon class="info-icon">schedule</mat-icon>
+                <span>Horario disponible según la hora actual</span>
+              </div>
+            </div>
+            <div class="clock-container">
+              <app-clock></app-clock>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+      
+      <mat-card-actions class="card-actions">
+        <button 
+          mat-stroked-button 
+          color="secondary" 
+          (click)="volverMenuPrincipal()"
+          class="back-menu-button"
+        >
+          <mat-icon>home</mat-icon>
+          Volver al Menú Principal
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Popup de Movimientos -->
+  <app-popup-movimientos
+    *ngIf="mostrarPopupMovimientos"
+    [tipoMarcaje]="tipoMarcaje"
+    [nombreTrabajador]="nombreTrabajador"
+    (movimientoSeleccionado)="onMovimientoSeleccionado($event)"
+    (cerrar)="onPopupCerrado('movimientos')"
+  ></app-popup-movimientos>
+
+  <!-- Popup de Raciones -->
+  <app-popup-raciones
+    *ngIf="mostrarPopupRaciones"
+    [nombreTrabajador]="nombreTrabajador"
+    (racionSeleccionada)="onRacionSeleccionada($event)"
+    (cerrar)="onPopupCerrado('raciones')"
+  ></app-popup-raciones>
+</div>
