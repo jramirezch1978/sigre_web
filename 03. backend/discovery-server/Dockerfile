@@ -17,7 +17,7 @@ COPY products-service/pom.xml ./products-service/pom.xml
 COPY sync-service/pom.xml ./sync-service/pom.xml
 
 # Descargar dependencias
-RUN mvn dependency:go-offline -B
+
 
 # Copiar el código fuente del discovery-server
 COPY discovery-server/src ./discovery-server/src

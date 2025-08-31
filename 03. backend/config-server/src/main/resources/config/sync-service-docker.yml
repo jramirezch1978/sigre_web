@@ -1,0 +1,70 @@
+spring:
+  datasource:
+    # Datasource principal para Spring Actuator y health checks
+    url: jdbc:postgresql://db-sigre-web:5432/db-sigre-web
+    username: sigre-web
+    password: S1greW3b@2025!
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+    
+    # Bases de datos para la aplicación
+    local:
+      url: jdbc:postgresql://db-sigre-web:5432/db-sigre-web
+      username: sigre-web
+      password: S1greW3b@2025!
+      driver-class-name: org.postgresql.Driver
+    
+    remote:
+      host: facturaciontdp.pe
+      port: 1521
+      database: heimdall
+      service-name: heimdall
+      username: transmarina
+      password: transmarina
+      driver-class-name: oracle.jdbc.OracleDriver
+      url: jdbc:oracle:thin:@//facturaciontdp.pe:1521/heimdall
+
+  jpa:
+    show-sql: false
+    hibernate:
+      # Para PostgreSQL local usamos update para sincronizar columnas de control
+      # NOTA: En producción considerar cambiar a 'validate'
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
+        enable_lazy_load_no_trans: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    generate-ddl: false
+
+  # Configuración de email (Servidor SMTP Franevi)
+  mail:
+    host: mail.franevi.com
+    port: 26
+    username: facturacion.electronica@franevi.com
+    password: S1gr3@2025
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            enable: true
+    notifications:
+      enabled: true  # Habilitado con credenciales reales
+      recipients: 
+        - jramirez@npssac.com.pe
+      subject: "[SIGRE] Reporte de Sincronización - Módulo de Asistencia"
+    smtp:
+      from: facturacion.electronica@franevi.com
+
+logging:
+  level:
+    com.sigre.sync: DEBUG

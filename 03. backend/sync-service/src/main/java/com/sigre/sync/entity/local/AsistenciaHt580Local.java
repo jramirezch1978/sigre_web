@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "asistencia_ht580")
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 public class AsistenciaHt580Local {
     
     @Id
-    @Column(name = "RECKEY", length = 12)
+    @Column(name = "RECKEY", length = 36)
     private String reckey;
     
     @Column(name = "COD_ORIGEN", length = 2)
@@ -62,4 +63,18 @@ public class AsistenciaHt580Local {
     @Column(name = "INTENTOS_SYNC")
     @Builder.Default
     private Integer intentosSync = 0;
+    
+    @PrePersist
+    public void prePersist() {
+        if (reckey == null || reckey.isEmpty()) {
+            // Generar UUID único que no colisione con Oracle
+            reckey = "LOCAL-" + UUID.randomUUID().toString().substring(0, 29);
+        }
+        if (estadoSync == null) {
+            estadoSync = "P";
+        }
+        if (intentosSync == null) {
+            intentosSync = 0;
+        }
+    }
 }

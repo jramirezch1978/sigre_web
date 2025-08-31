@@ -17,7 +17,7 @@ COPY sync-service/pom.xml ./sync-service/
 # Copiar código fuente del sync-service
 COPY sync-service/src ./sync-service/src
 
-# Compilar directamente sin dependency:go-offline (MÁS RÁPIDO)
+# Construir solo el sync-service
 RUN mvn clean package -DskipTests -pl sync-service -am
 
 # Etapa de ejecución
@@ -40,6 +40,11 @@ EXPOSE 8088
 
 # Variables de entorno
 ENV JAVA_OPTS="-Xmx512m -Xms256m -Duser.timezone=America/Lima"
+ENV SPRING_PROFILES_ACTIVE=docker
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8088/actuator/health || exit 1
 
 # Comando de ejecución
-CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

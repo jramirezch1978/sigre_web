@@ -10,8 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import java.time.LocalDateTime;
 import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -42,188 +41,239 @@ public class SyncSchedulerService {
     private LocalDateTime lastSyncTime;
     private boolean initialSyncCompleted = false;
     
-    /**
-     * Ejecutar sincronización inicial al arrancar el microservicio
-     */
+    // Executor service para manejar los hilos
+    private final ExecutorService executorService = Executors.newFixedThreadPool(2, r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
+    
     @EventListener(ApplicationReadyEvent.class)
     public void ejecutarSincronizacionInicial() {
         try {
-            // Log de parámetros obtenidos del config-server
-            log.info("📋 Parámetros de sincronización obtenidos del config-server:");
-            log.info("  - Intervalo: {} minutos", intervalMinutes);
-            log.info("  - Delay de reintento: {} segundos", retryDelaySeconds);
-            log.info("  - Máximo reintentos: {}", maxRetries);
-            log.info("  - Sync inicial habilitado: {}", initialSyncOnStartup);
+            log.info("================================================================");
+            log.info("📋 CONFIGURACIÓN DE SINCRONIZACIÓN OBTENIDA DEL CONFIG-SERVER");
+            log.info("================================================================");
+            log.info("  ⏱️  Intervalo entre sincronizaciones: {} minutos", intervalMinutes);
+            log.info("  🔄 Delay de reintento en caso de error: {} segundos", retryDelaySeconds);
+            log.info("  🔢 Máximo número de reintentos: {}", maxRetries);
+            log.info("  🚀 Sincronización inicial al arranque: {}", initialSyncOnStartup);
+            log.info("================================================================");
             
             if (!initialSyncOnStartup) {
-                log.info("⏭️ Sincronización inicial deshabilitada por configuración");
+                log.info("⭕ Sincronización inicial deshabilitada por configuración");
                 return;
             }
             
-            log.info("🚀 Ejecutando sincronización inicial al startup del microservicio");
+            log.info("🚀 INICIANDO SINCRONIZACIÓN INICIAL AL STARTUP DEL MICROSERVICIO");
             
             // Esperar 10 segundos para que todos los servicios estén listos
+            log.info("⏳ Esperando 10 segundos para que todos los servicios estén listos...");
             Thread.sleep(10000);
+            
             ejecutarSincronizacionCompleta();
             initialSyncCompleted = true;
             
         } catch (Exception e) {
-            log.error("❌ ERROR en sincronización inicial", e);
-            log.error("❌ Parámetros de config - Intervalo: {} | Delay: {} | Reintentos: {}", 
-                     intervalMinutes, retryDelaySeconds, maxRetries);
+            log.error("❌ ERROR CRÍTICO en sincronización inicial", e);
         }
     }
     
-    /**
-     * Sincronización programada cada 5 minutos después de completar la anterior
-     */
-    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES, initialDelay = 60) // 1 min delay inicial
-    public void ejecutarSincronizacion() {
+    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES, initialDelay = 60)
+    public void ejecutarSincronizacionProgramada() {
         if (syncInProgress) {
-            log.warn("Sincronización anterior aún en progreso, saltando esta ejecución");
+            log.warn("⚠️ Sincronización anterior aún en progreso, saltando esta ejecución");
             return;
         }
         
+        log.info("⏰ Ejecutando sincronización programada");
         ejecutarSincronizacionCompleta();
     }
     
-    /**
-     * Método principal de sincronización completa
-     */
     private void ejecutarSincronizacionCompleta() {
-        log.info("🔄 Iniciando proceso de sincronización bidireccional");
+        log.info("╔════════════════════════════════════════════════════════════╗");
+        log.info("║     INICIANDO PROCESO DE SINCRONIZACIÓN BIDIRECCIONAL     ║");
+        log.info("╠════════════════════════════════════════════════════════════╣");
+        log.info("║ HILO 1: Remote → Local (centros, maestro, tarjetas)       ║");
+        log.info("║ HILO 2: Local → Remote (asistencia_ht580)                 ║");
+        log.info("╚════════════════════════════════════════════════════════════╝");
+        
         syncInProgress = true;
         LocalDateTime inicioSync = LocalDateTime.now();
         lastSyncTime = inicioSync;
         
+        CountDownLatch latch = new CountDownLatch(2);
+        Map<String, Boolean> resultadosHilos = new ConcurrentHashMap<>();
+        Map<String, Exception> erroresHilos = new ConcurrentHashMap<>();
+        
         try {
-            // Ejecutar ambas sincronizaciones en paralelo usando CompletableFuture
-            CompletableFuture<Boolean> syncRemoteToLocal = CompletableFuture.supplyAsync(() -> {
+            // HILO 1: Sincronización Remote → Local (CON ORDEN CORRECTO)
+            Future<Boolean> futureRemoteToLocal = executorService.submit(() -> {
+                String threadName = "HILO-1-Remote-To-Local";
+                Thread.currentThread().setName(threadName);
+                
                 try {
-                    return ejecutarSyncRemoteToLocal();
+                    log.info("🧵 [{}] INICIADO - Orden: 1°centros_costo, 2°maestro, 3°tarjetas", threadName);
+                    boolean resultado = ejecutarSyncRemoteToLocalConOrden();
+                    resultadosHilos.put("remoteToLocal", resultado);
+                    log.info("🧵 [{}] COMPLETADO - Resultado: {}", threadName, resultado ? "ÉXITO" : "ERROR");
+                    return resultado;
+                    
                 } catch (Exception e) {
-                    log.error("Error en sincronización Remote → Local", e);
+                    log.error("🧵 [{}] FALLÓ con excepción", threadName, e);
+                    erroresHilos.put("remoteToLocal", e);
+                    resultadosHilos.put("remoteToLocal", false);
                     return false;
+                    
+                } finally {
+                    latch.countDown();
                 }
             });
             
-            CompletableFuture<Boolean> syncLocalToRemote = CompletableFuture.supplyAsync(() -> {
+            // HILO 2: Sincronización Local → Remote
+            Future<Boolean> futureLocalToRemote = executorService.submit(() -> {
+                String threadName = "HILO-2-Local-To-Remote";
+                Thread.currentThread().setName(threadName);
+                
                 try {
-                    return ejecutarSyncLocalToRemote();
+                    log.info("🧵 [{}] INICIADO - Sincronizando: asistencia_ht580", threadName);
+                    boolean resultado = ejecutarSyncLocalToRemote();
+                    resultadosHilos.put("localToRemote", resultado);
+                    log.info("🧵 [{}] COMPLETADO - Resultado: {}", threadName, resultado ? "ÉXITO" : "ERROR");
+                    return resultado;
+                    
                 } catch (Exception e) {
-                    log.error("Error en sincronización Local → Remote", e);
+                    log.error("🧵 [{}] FALLÓ con excepción", threadName, e);
+                    erroresHilos.put("localToRemote", e);
+                    resultadosHilos.put("localToRemote", false);
                     return false;
+                    
+                } finally {
+                    latch.countDown();
                 }
             });
             
-            // Esperar a que ambas tareas terminen
-            CompletableFuture<Void> allTasks = CompletableFuture.allOf(syncRemoteToLocal, syncLocalToRemote);
+            // SINCRONIZADOR: Esperar a que AMBOS hilos terminen
+            log.info("⏳ SINCRONIZADOR: Esperando que AMBOS HILOS terminen su ejecución...");
+            boolean terminoEnTiempo = latch.await(4, TimeUnit.MINUTES);
             
-            // Timeout de 4 minutos para evitar bloqueos
-            allTasks.get(4, TimeUnit.MINUTES);
+            if (!terminoEnTiempo) {
+                log.error("❌ TIMEOUT: Los hilos no terminaron en el tiempo esperado (4 minutos)");
+                futureRemoteToLocal.cancel(true);
+                futureLocalToRemote.cancel(true);
+            }
             
-            boolean resultadoRemoteToLocal = syncRemoteToLocal.get();
-            boolean resultadoLocalToRemote = syncLocalToRemote.get();
+            // AMBOS HILOS HAN TERMINADO
+            log.info("═══════════════════════════════════════════════════════════");
+            log.info("✅ AMBOS HILOS HAN TERMINADO - Recopilando resultados finales");
+            log.info("═══════════════════════════════════════════════════════════");
             
-            // Generar reporte de sincronización
+            boolean resultadoRemoteToLocal = resultadosHilos.getOrDefault("remoteToLocal", false);
+            boolean resultadoLocalToRemote = resultadosHilos.getOrDefault("localToRemote", false);
+            
+            log.info("📊 Resultado HILO 1 (Remote → Local): {}", resultadoRemoteToLocal ? "ÉXITO" : "ERROR");
+            log.info("📊 Resultado HILO 2 (Local → Remote): {}", resultadoLocalToRemote ? "ÉXITO" : "ERROR");
+            
             LocalDateTime finSync = LocalDateTime.now();
             long duracionMinutos = Duration.between(inicioSync, finSync).toMinutes();
+            long duracionSegundos = Duration.between(inicioSync, finSync).toSeconds();
             
-            EmailNotificationService.SyncReport report = EmailNotificationService.SyncReport.builder()
-                    .fechaHora(inicioSync)
-                    .duracionMinutos(duracionMinutos)
-                    .exitoso(resultadoRemoteToLocal && resultadoLocalToRemote)
-                    .remoteToLocalExitoso(resultadoRemoteToLocal)
-                    .localToRemoteExitoso(resultadoLocalToRemote)
-                    .tablasSincronizadasRemoteToLocal(obtenerEstadisticasRemoteToLocal())
-                    .tablasSincronizadasLocalToRemote(obtenerEstadisticasLocalToRemote())
-                    .estadisticasDetalladas(obtenerEstadisticasDetalladas(resultadoRemoteToLocal, resultadoLocalToRemote))
-                    .errores(obtenerErroresSincronizacion())
-                    .proximaSincronizacion(finSync.plusMinutes(5))
-                    .build();
+            log.info("⏱️ Duración total de sincronización: {} minutos ({} segundos)", duracionMinutos, duracionSegundos);
             
-            // Enviar reporte por email
-            emailService.enviarReporteSincronizacion(report);
+            // Generar y enviar reporte SOLO DESPUÉS DE QUE AMBOS HILOS TERMINEN
+            generarYEnviarReporte(inicioSync, finSync, resultadoRemoteToLocal, resultadoLocalToRemote);
             
             if (resultadoRemoteToLocal && resultadoLocalToRemote) {
-                log.info("✅ Sincronización bidireccional completada exitosamente");
+                log.info("✅ SINCRONIZACIÓN BIDIRECCIONAL COMPLETADA EXITOSAMENTE");
             } else {
-                log.warn("⚠️ Sincronización completada con errores - Remote→Local: {} | Local→Remote: {}", 
-                        resultadoRemoteToLocal, resultadoLocalToRemote);
+                log.warn("⚠️ SINCRONIZACIÓN COMPLETADA CON ERRORES");
+                log.warn("   - Remote → Local: {}", resultadoRemoteToLocal ? "OK" : "ERROR");
+                log.warn("   - Local → Remote: {}", resultadoLocalToRemote ? "OK" : "ERROR");
             }
             
         } catch (Exception e) {
-            log.error("❌ Error crítico en proceso de sincronización", e);
+            log.error("❌ ERROR CRÍTICO en el proceso de sincronización", e);
+            
         } finally {
             syncInProgress = false;
-            log.info("🏁 Proceso de sincronización finalizado. Próxima ejecución en 5 minutos.");
+            log.info("╔════════════════════════════════════════════════════════════╗");
+            log.info("║   PROCESO DE SINCRONIZACIÓN FINALIZADO                    ║");
+            log.info("║   Próxima ejecución en: {} minutos                        ║", intervalMinutes);
+            log.info("╚════════════════════════════════════════════════════════════╝");
         }
     }
     
     /**
-     * Ejecutar sincronización de Remote (Oracle) → Local (PostgreSQL)
+     * Ejecutar sincronización de Remote → Local CON ORDEN CORRECTO
+     * IMPORTANTE: Primero centros_costo, luego maestro, finalmente tarjetas
      */
-    private boolean ejecutarSyncRemoteToLocal() {
-        log.info("📥 Iniciando sincronización Remote → Local");
+    private boolean ejecutarSyncRemoteToLocalConOrden() {
+        log.info("🔥 [HILO 1] Iniciando sincronización Remote → Local con ORDEN CORRECTO");
         
         try {
-            // Sincronizar maestro
-            boolean maestroOk = remoteToLocalSync.sincronizarMaestro();
-            if (!maestroOk) {
-                return manejarErrorConReintento("maestro", () -> remoteToLocalSync.sincronizarMaestro());
-            }
-            
-            // Sincronizar centros de costo
+            // PASO 1: Sincronizar CENTROS DE COSTO primero (no tiene dependencias)
+            log.info("📍 [HILO 1] PASO 1/3: Sincronizando CENTROS_COSTO...");
             boolean centrosOk = remoteToLocalSync.sincronizarCentrosCosto();
+            if (!centrosOk && maxRetries > 0) {
+                centrosOk = manejarErrorConReintento("centros_costo", () -> remoteToLocalSync.sincronizarCentrosCosto());
+            }
+            
             if (!centrosOk) {
-                return manejarErrorConReintento("centros_costo", () -> remoteToLocalSync.sincronizarCentrosCosto());
+                log.error("❌ [HILO 1] Fallo crítico en CENTROS_COSTO - Abortando sincronización");
+                return false;
             }
             
-            // Sincronizar tarjetas de reloj
+            // PASO 2: Sincronizar MAESTRO (depende de centros_costo)
+            log.info("📍 [HILO 1] PASO 2/3: Sincronizando MAESTRO...");
+            boolean maestroOk = remoteToLocalSync.sincronizarMaestro();
+            if (!maestroOk && maxRetries > 0) {
+                maestroOk = manejarErrorConReintento("maestro", () -> remoteToLocalSync.sincronizarMaestro());
+            }
+            
+            if (!maestroOk) {
+                log.error("❌ [HILO 1] Fallo en MAESTRO - Continuando con tarjetas");
+            }
+            
+            // PASO 3: Sincronizar TARJETAS DE RELOJ (depende de maestro)
+            log.info("📍 [HILO 1] PASO 3/3: Sincronizando RRHH_ASIGNA_TRJT_RELOJ...");
             boolean tarjetasOk = remoteToLocalSync.sincronizarTarjetasReloj();
-            if (!tarjetasOk) {
-                return manejarErrorConReintento("rrhh_asigna_trjt_reloj", () -> remoteToLocalSync.sincronizarTarjetasReloj());
+            if (!tarjetasOk && maxRetries > 0) {
+                tarjetasOk = manejarErrorConReintento("rrhh_asigna_trjt_reloj", () -> remoteToLocalSync.sincronizarTarjetasReloj());
             }
             
-            log.info("✅ Sincronización Remote → Local completada");
-            return true;
+            boolean todoOk = centrosOk && maestroOk && tarjetasOk;
+            log.info("✅ [HILO 1] Sincronización Remote → Local completada - Resultado: {}", todoOk ? "ÉXITO TOTAL" : "CON ERRORES");
+            return todoOk;
             
         } catch (Exception e) {
-            log.error("❌ Error en sincronización Remote → Local", e);
+            log.error("❌ [HILO 1] Error crítico en sincronización Remote → Local", e);
             return false;
         }
     }
     
-    /**
-     * Ejecutar sincronización de Local (PostgreSQL) → Remote (Oracle)
-     */
     private boolean ejecutarSyncLocalToRemote() {
-        log.info("📤 Iniciando sincronización Local → Remote");
+        log.info("📤 [HILO 2] Iniciando sincronización Local → Remote");
         
         try {
-            // Sincronizar asistencia
             boolean asistenciaOk = localToRemoteSync.sincronizarAsistencia();
-            if (!asistenciaOk) {
-                return manejarErrorConReintento("asistencia_ht580", () -> localToRemoteSync.sincronizarAsistencia());
+            if (!asistenciaOk && maxRetries > 0) {
+                asistenciaOk = manejarErrorConReintento("asistencia_ht580", () -> localToRemoteSync.sincronizarAsistencia());
             }
             
-            log.info("✅ Sincronización Local → Remote completada");
-            return true;
+            log.info("✅ [HILO 2] Sincronización Local → Remote completada - Resultado: {}", asistenciaOk ? "ÉXITO" : "CON ERRORES");
+            return asistenciaOk;
             
         } catch (Exception e) {
-            log.error("❌ Error en sincronización Local → Remote", e);
+            log.error("❌ [HILO 2] Error en sincronización Local → Remote", e);
             return false;
         }
     }
     
-    /**
-     * Manejar errores con reintento después de 30 segundos
-     */
     private boolean manejarErrorConReintento(String tabla, SyncOperation operation) {
-        log.warn("⚠️ Error en sincronización de tabla: {}. Reintentando en 30 segundos...", tabla);
+        log.warn("⚠️ Error en sincronización de tabla: {}. Reintentando en {} segundos...", tabla, retryDelaySeconds);
         
         try {
-            Thread.sleep(30000); // Esperar 30 segundos
+            Thread.sleep(retryDelaySeconds * 1000L);
             boolean resultado = operation.execute();
             
             if (resultado) {
@@ -240,115 +290,114 @@ public class SyncSchedulerService {
         }
     }
     
-    /**
-     * Obtener estado de la sincronización
-     */
+    private void generarYEnviarReporte(LocalDateTime inicioSync, LocalDateTime finSync, 
+                                       boolean resultadoRemoteToLocal, boolean resultadoLocalToRemote) {
+        try {
+            log.info("📧 Generando reporte de sincronización para envío por email...");
+            
+            long duracionMinutos = Duration.between(inicioSync, finSync).toMinutes();
+            
+            Map<String, EmailNotificationService.SyncTableStats> estadisticasDetalladas = new HashMap<>();
+            
+            // Estadísticas de Remote → Local
+            estadisticasDetalladas.put("centros_costo", EmailNotificationService.SyncTableStats.builder()
+                    .nombreTabla("centros_costo")
+                    .registrosInsertados(remoteToLocalSync.getInsertados("centros_costo"))
+                    .registrosActualizados(remoteToLocalSync.getActualizados("centros_costo"))
+                    .registrosEliminados(remoteToLocalSync.getEliminados("centros_costo"))
+                    .registrosErrores(remoteToLocalSync.getErrores("centros_costo"))
+                    .direccion("REMOTE_TO_LOCAL")
+                    .baseOrigen("bd_remota")
+                    .baseDestino("bd_local")
+                    .exitoso(remoteToLocalSync.getErrores("centros_costo") == 0)
+                    .build());
+                    
+            estadisticasDetalladas.put("maestro", EmailNotificationService.SyncTableStats.builder()
+                    .nombreTabla("maestro")
+                    .registrosInsertados(remoteToLocalSync.getInsertados("maestro"))
+                    .registrosActualizados(remoteToLocalSync.getActualizados("maestro"))
+                    .registrosEliminados(remoteToLocalSync.getEliminados("maestro"))
+                    .registrosErrores(remoteToLocalSync.getErrores("maestro"))
+                    .direccion("REMOTE_TO_LOCAL")
+                    .baseOrigen("bd_remota")
+                    .baseDestino("bd_local")
+                    .exitoso(remoteToLocalSync.getErrores("maestro") == 0)
+                    .build());
+                    
+            estadisticasDetalladas.put("rrhh_asigna_trjt_reloj", EmailNotificationService.SyncTableStats.builder()
+                    .nombreTabla("rrhh_asigna_trjt_reloj")
+                    .registrosInsertados(remoteToLocalSync.getInsertados("rrhh_asigna_trjt_reloj"))
+                    .registrosActualizados(remoteToLocalSync.getActualizados("rrhh_asigna_trjt_reloj"))
+                    .registrosEliminados(remoteToLocalSync.getEliminados("rrhh_asigna_trjt_reloj"))
+                    .registrosErrores(remoteToLocalSync.getErrores("rrhh_asigna_trjt_reloj"))
+                    .direccion("REMOTE_TO_LOCAL")
+                    .baseOrigen("bd_remota")
+                    .baseDestino("bd_local")
+                    .exitoso(remoteToLocalSync.getErrores("rrhh_asigna_trjt_reloj") == 0)
+                    .build());
+            
+            // Estadísticas de Local → Remote
+            estadisticasDetalladas.put("asistencia_ht580", EmailNotificationService.SyncTableStats.builder()
+                    .nombreTabla("asistencia_ht580")
+                    .registrosInsertados(localToRemoteSync.getRegistrosInsertados())
+                    .registrosActualizados(0)
+                    .registrosEliminados(0)
+                    .registrosErrores(localToRemoteSync.getRegistrosErrores())
+                    .direccion("LOCAL_TO_REMOTE")
+                    .baseOrigen("bd_local")
+                    .baseDestino("bd_remota")
+                    .exitoso(localToRemoteSync.getRegistrosErrores() == 0)
+                    .build());
+            
+            List<String> todosLosErrores = new ArrayList<>();
+            todosLosErrores.addAll(remoteToLocalSync.getErroresSincronizacion());
+            todosLosErrores.addAll(localToRemoteSync.getErrores());
+            
+            EmailNotificationService.SyncReport report = EmailNotificationService.SyncReport.builder()
+                    .fechaHora(inicioSync)
+                    .duracionMinutos(duracionMinutos)
+                    .exitoso(resultadoRemoteToLocal && resultadoLocalToRemote)
+                    .remoteToLocalExitoso(resultadoRemoteToLocal)
+                    .localToRemoteExitoso(resultadoLocalToRemote)
+                    .estadisticasDetalladas(estadisticasDetalladas)
+                    .errores(todosLosErrores)
+                    .proximaSincronizacion(finSync.plusMinutes(intervalMinutes))
+                    .build();
+            
+            emailService.enviarReporteSincronizacion(report);
+            log.info("📧 Reporte de sincronización enviado por email");
+            
+        } catch (Exception e) {
+            log.error("❌ Error al generar/enviar reporte de sincronización", e);
+        }
+    }
+    
     public SyncStatus getSyncStatus() {
         return SyncStatus.builder()
                 .syncInProgress(syncInProgress)
                 .lastSyncTime(lastSyncTime)
+                .nextSyncIn(calcularProximaSincronizacion())
+                .initialSyncCompleted(initialSyncCompleted)
                 .build();
     }
     
-    // Interfaz funcional para operaciones de sincronización
+    private String calcularProximaSincronizacion() {
+        if (lastSyncTime == null) return "No ejecutado";
+        LocalDateTime proximaSync = lastSyncTime.plusMinutes(intervalMinutes);
+        Duration duracion = Duration.between(LocalDateTime.now(), proximaSync);
+        long minutos = duracion.toMinutes();
+        if (minutos > 0) {
+            return minutos + " minutos";
+        } else {
+            return "En proceso o próximamente";
+        }
+    }
+    
     @FunctionalInterface
     private interface SyncOperation {
         boolean execute() throws Exception;
     }
     
-    /**
-     * Obtener estadísticas de sincronización Remote → Local
-     */
-    private Map<String, Integer> obtenerEstadisticasRemoteToLocal() {
-        Map<String, Integer> stats = new HashMap<>();
-        // TODO: Implementar conteo real desde los servicios de sincronización
-        stats.put("maestro", 0);
-        stats.put("centros_costo", 0);
-        stats.put("rrhh_asigna_trjt_reloj", 0);
-        return stats;
-    }
-    
-    /**
-     * Obtener estadísticas de sincronización Local → Remote
-     */
-    private Map<String, Integer> obtenerEstadisticasLocalToRemote() {
-        Map<String, Integer> stats = new HashMap<>();
-        // TODO: Implementar conteo real desde los servicios de sincronización
-        stats.put("asistencia_ht580", 0);
-        return stats;
-    }
-    
-    /**
-     * Obtener estadísticas detalladas por tabla
-     */
-    private Map<String, EmailNotificationService.SyncTableStats> obtenerEstadisticasDetalladas(boolean remoteToLocalOk, boolean localToRemoteOk) {
-        Map<String, EmailNotificationService.SyncTableStats> stats = new HashMap<>();
-        
-        // Remote → Local
-        stats.put("maestro", EmailNotificationService.SyncTableStats.builder()
-                .nombreTabla("maestro")
-                .registrosInsertados(remoteToLocalSync.getRegistrosInsertados())
-                .registrosActualizados(remoteToLocalSync.getRegistrosActualizados())
-                .registrosErrores(remoteToLocalSync.getRegistrosErrores())
-                .direccion("REMOTE_TO_LOCAL")
-                .baseOrigen("bd_remota")
-                .baseDestino("bd_local")
-                .exitoso(remoteToLocalSync.getRegistrosErrores() == 0)
-                .erroresDetallados(remoteToLocalSync.getErrores())
-                .build());
-                
-        stats.put("centros_costo", EmailNotificationService.SyncTableStats.builder()
-                .nombreTabla("centros_costo")
-                .registrosInsertados(0)
-                .registrosActualizados(0)
-                .direccion("REMOTE_TO_LOCAL")
-                .baseOrigen("bd_remota")
-                .baseDestino("bd_local")
-                .exitoso(true)
-                .build());
-                
-        stats.put("rrhh_asigna_trjt_reloj", EmailNotificationService.SyncTableStats.builder()
-                .nombreTabla("rrhh_asigna_trjt_reloj")
-                .registrosInsertados(0)
-                .registrosActualizados(0)
-                .direccion("REMOTE_TO_LOCAL")
-                .baseOrigen("bd_remota")
-                .baseDestino("bd_local")
-                .exitoso(true)
-                .build());
-        
-        // Local → Remote
-        stats.put("asistencia_ht580", EmailNotificationService.SyncTableStats.builder()
-                .nombreTabla("asistencia_ht580")
-                .registrosInsertados(localToRemoteSync.getRegistrosInsertados())
-                .registrosActualizados(localToRemoteSync.getRegistrosActualizados())
-                .registrosErrores(localToRemoteSync.getRegistrosErrores())
-                .direccion("LOCAL_TO_REMOTE")
-                .baseOrigen("bd_local")
-                .baseDestino("bd_remota")
-                .exitoso(localToRemoteSync.getRegistrosErrores() == 0)
-                .erroresDetallados(localToRemoteSync.getErrores())
-                .build());
-        
-        return stats;
-    }
-    
-    /**
-     * Obtener lista de errores de sincronización
-     */
-    private List<String> obtenerErroresSincronizacion() {
-        List<String> errores = new ArrayList<>();
-        
-        // Agregar errores de Remote → Local
-        errores.addAll(remoteToLocalSync.getErrores());
-        
-        // Agregar errores de Local → Remote
-        errores.addAll(localToRemoteSync.getErrores());
-        
-        return errores;
-    }
-    
-    // DTO para estado de sincronización
     @lombok.Data
     @lombok.Builder
     public static class SyncStatus {

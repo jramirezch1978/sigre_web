@@ -1,7 +1,7 @@
 package com.sigre.sync.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -13,30 +13,30 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class EmailNotificationService {
     
-    private final JavaMailSender mailSender;
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
     
-    @Value("${mail.notifications.recipients}")
+    @Value("${spring.mail.notifications.recipients:jramirez@npssac.com.pe}")
     private List<String> recipients;
     
-    @Value("${mail.notifications.subject}")
+    @Value("${spring.mail.notifications.subject:[SIGRE] Reporte de Sincronización}")
     private String subject;
     
-    @Value("${mail.notifications.enabled:true}")
+    @Value("${spring.mail.notifications.enabled:true}")
     private boolean emailEnabled;
     
-    @Value("${mail.smtp.from}")
+    @Value("${spring.mail.smtp.from:facturacion.electronica@franevi.com}")
     private String fromEmail;
     
     /**
      * Enviar reporte de sincronización por email
      */
     public void enviarReporteSincronizacion(SyncReport report) {
-        if (!emailEnabled) {
-            log.info("📧 Notificaciones por email deshabilitadas");
+        if (!emailEnabled || mailSender == null) {
+            log.info("📧 Notificaciones por email deshabilitadas o no configuradas");
             return;
         }
         
@@ -86,18 +86,19 @@ public class EmailNotificationService {
         
         // Tabla de resumen detallado con errores
         content.append("📊 RESUMEN DETALLADO DE SINCRONIZACIÓN:\n\n");
-        content.append(String.format("%-25s | %-12s | %-12s | %-10s | %-12s | %-12s | %-10s\n", 
-                "NOMBRE DE TABLA", "INSERTADOS", "ACTUALIZADOS", "ERRORES", "BASE ORIGEN", "BASE DESTINO", "ESTADO"));
-        content.append("-".repeat(105)).append("\n");
+        content.append(String.format("%-25s | %-11s | %-12s | %-11s | %-8s | %-12s | %-12s | %-10s\n", 
+                "NOMBRE DE TABLA", "INSERTADOS", "ACTUALIZADOS", "ELIMINADOS", "ERRORES", "BASE ORIGEN", "BASE DESTINO", "ESTADO"));
+        content.append("-".repeat(120)).append("\n");
         
         // Remote → Local
         for (Map.Entry<String, SyncTableStats> entry : report.getEstadisticasDetalladas().entrySet()) {
             SyncTableStats stats = entry.getValue();
             if (stats.getDireccion().equals("REMOTE_TO_LOCAL")) {
-                content.append(String.format("%-25s | %-12d | %-12d | %-10d | %-12s | %-12s | %-10s\n",
+                content.append(String.format("%-25s | %-11d | %-12d | %-11d | %-8d | %-12s | %-12s | %-10s\n",
                         entry.getKey(),
                         stats.getRegistrosInsertados(),
                         stats.getRegistrosActualizados(),
+                        stats.getRegistrosEliminados(),
                         stats.getRegistrosErrores(),
                         "bd_remota",
                         "bd_local",
@@ -109,10 +110,11 @@ public class EmailNotificationService {
         for (Map.Entry<String, SyncTableStats> entry : report.getEstadisticasDetalladas().entrySet()) {
             SyncTableStats stats = entry.getValue();
             if (stats.getDireccion().equals("LOCAL_TO_REMOTE")) {
-                content.append(String.format("%-25s | %-12d | %-12d | %-10d | %-12s | %-12s | %-10s\n",
+                content.append(String.format("%-25s | %-11d | %-12d | %-11d | %-8d | %-12s | %-12s | %-10s\n",
                         entry.getKey(),
                         stats.getRegistrosInsertados(),
                         stats.getRegistrosActualizados(),
+                        stats.getRegistrosEliminados(),
                         stats.getRegistrosErrores(),
                         "bd_local",
                         "bd_remota",
@@ -161,6 +163,7 @@ public class EmailNotificationService {
         private String nombreTabla;
         private int registrosInsertados;
         private int registrosActualizados;
+        private int registrosEliminados;
         private int registrosErrores;
         private String direccion; // REMOTE_TO_LOCAL o LOCAL_TO_REMOTE
         private String baseOrigen;

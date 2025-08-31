@@ -11,21 +11,17 @@ spring:
       server:
         native:
           search-locations: classpath:/config
+        health:
+          enabled: false  # Desactiva el health check de Git
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://10.100.14.102:8761/eureka
-  instance:
-    prefer-ip-address: true
-
----
-spring:
-  config:
-    activate:
-      on-profile: docker
+management:
+  health:
+    config:
+      enabled: false  # Desactiva el health indicator del config server
 
 eureka:
   client:
     service-url:
       defaultZone: http://discovery-server:8761/eureka
+  instance:
+    prefer-ip-address: true

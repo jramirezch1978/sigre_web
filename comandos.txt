@@ -16,6 +16,8 @@ docker compose up --build -d    # Reconstruye y levanta todo
 #compila solo el frontend
 docker compose up sigre-frontend --build -d
 
+# Reconstruir y reiniciar el sync-service
+docker compose up sync-service --build -d
 
 # Reiniciar servicios para aplicar configuración
 docker compose restart asistencia-service
@@ -59,4 +61,21 @@ docker logs api-gateway | Select-String "api/asistencia"
 
 
 Remove-Item '..\01. documentacion\logs\log*.txt' -Force -ErrorAction SilentlyContinue;
-docker logs config-server > '..\01. documentacion\logs\log-config-server.txt';
+docker logs sync-service > '..\01. documentacion\logs\log-sync-service.txt';
+
+
+docker compose down sync-service
+docker rmi sigre_web-sync-service
+docker compose up sync-service --build -d
+
+docker compose build config-server
+docker compose restart config-server
+
+docker compose restart sync-service
+docker compose logs -f sync-service
+
+docker compose down sync-service
+docker compose up --build -d sync-service
+
+docker compose down sync-service config-server
+docker compose up --build -d sync-service config-server

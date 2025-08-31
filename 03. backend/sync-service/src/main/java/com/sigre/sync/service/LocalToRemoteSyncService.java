@@ -24,6 +24,7 @@ public class LocalToRemoteSyncService {
     private final List<String> erroresSincronizacion = new ArrayList<>();
     private int registrosInsertados = 0;
     private int registrosActualizados = 0;
+    private int registrosEliminados = 0;
     private int registrosErrores = 0;
     
     /**
@@ -127,6 +128,7 @@ public class LocalToRemoteSyncService {
     private void resetearContadores() {
         registrosInsertados = 0;
         registrosActualizados = 0;
+        registrosEliminados = 0;
         registrosErrores = 0;
         erroresSincronizacion.clear();
     }
@@ -134,6 +136,7 @@ public class LocalToRemoteSyncService {
     // Getters para estadísticas
     public int getRegistrosInsertados() { return registrosInsertados; }
     public int getRegistrosActualizados() { return registrosActualizados; }
+    public int getRegistrosEliminados() { return registrosEliminados; }
     public int getRegistrosErrores() { return registrosErrores; }
     public List<String> getErrores() { return new ArrayList<>(erroresSincronizacion); }
 }
