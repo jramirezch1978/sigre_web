@@ -59,10 +59,13 @@ export class AsistenciaComponent implements OnInit {
     // Obtener el tipo de marcaje de los query params
     this.tipoMarcaje = this.route.snapshot.queryParams['tipoMarcaje'] || '';
     
-    // Simular lectura automática de tarjeta (para demo) - OPTIMIZADO PARA VELOCIDAD
-    setTimeout(() => {
-      this.codigoTarjeta = '123456789';
-    }, 500); // Reducido de 2000ms a 500ms para mayor velocidad
+    // Solo simular tarjeta si no hay código (primera vez)
+    if (!this.codigoTarjeta) {
+      // Simular lectura automática de tarjeta (para demo) - OPTIMIZADO PARA VELOCIDAD
+      setTimeout(() => {
+        this.codigoTarjeta = '123456789';
+      }, 500); // Reducido para mayor velocidad
+    }
   }
 
   validarTarjeta() {
@@ -95,9 +98,9 @@ export class AsistenciaComponent implements OnInit {
       // Mostrar popup inmediatamente para máxima velocidad
       this.mostrarPopupRaciones = true;
     } else {
-      // Para otros tipos de marcaje, volver inmediatamente al menú
+      // Para otros tipos de marcaje, limpiar campos para siguiente trabajador
       this.mostrarMensaje(this.mensajeAsistencia, 'success');
-      this.volverMenuPrincipal(); // INMEDIATO - Sin delay para alta concurrencia
+      this.limpiarCamposParaSiguienteTrabajador();
     }
   }
 
@@ -106,8 +109,8 @@ export class AsistenciaComponent implements OnInit {
     this.mostrarPopupRaciones = false;
     this.mostrarMensaje(`Ración ${racion.nombre} registrada exitosamente`, 'success');
     
-    // Volver inmediatamente al menú principal
-    this.volverMenuPrincipal();
+    // Limpiar campos para el siguiente trabajador
+    this.limpiarCamposParaSiguienteTrabajador();
   }
 
   onRacionOmitida() {
@@ -115,8 +118,8 @@ export class AsistenciaComponent implements OnInit {
     this.mostrarPopupRaciones = false;
     this.mostrarMensaje('Los datos han sido enviados satisfactoriamente', 'success');
     
-    // Volver inmediatamente al menú principal
-    this.volverMenuPrincipal();
+    // Limpiar campos para el siguiente trabajador
+    this.limpiarCamposParaSiguienteTrabajador();
   }
 
   onPopupCerrado(tipo: 'movimientos' | 'raciones') {
@@ -125,6 +128,32 @@ export class AsistenciaComponent implements OnInit {
     } else {
       this.mostrarPopupRaciones = false;
     }
+  }
+
+  getTituloSegunTipo(): string {
+    switch (this.tipoMarcaje) {
+      case 'puerta-principal':
+        return 'Marcaje Puerta Principal';
+      case 'area-produccion':
+        return 'Marcaje Área de Producción';
+      case 'comedor':
+        return 'Control de Comedor';
+      default:
+        return 'Sistema de Asistencia';
+    }
+  }
+
+  limpiarCamposParaSiguienteTrabajador() {
+    // Limpiar campos pero MANTENER el tipo de marcaje
+    this.codigoTarjeta = '';
+    this.nombreTrabajador = '';
+    this.codigoTrabajador = '';
+    this.mensajeAsistencia = '';
+    this.mostrarPopupMovimientos = false;
+    this.mostrarPopupRaciones = false;
+    
+    // NO limpiar this.tipoMarcaje - se mantiene para el siguiente trabajador
+    console.log('🔄 Campos limpiados para siguiente trabajador. Tipo de marcaje mantenido:', this.tipoMarcaje);
   }
 
   volverMenuPrincipal() {
