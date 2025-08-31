@@ -23,7 +23,7 @@ public class SyncSchedulerService {
     
     private final RemoteToLocalSyncService remoteToLocalSync;
     private final LocalToRemoteSyncService localToRemoteSync;
-    private final EmailNotificationService emailService;
+    private final EmailNotificationServiceHTML emailService;
     
     @Value("${sync.config.interval-minutes:5}")
     private int intervalMinutes;
@@ -297,10 +297,10 @@ public class SyncSchedulerService {
             
             long duracionMinutos = Duration.between(inicioSync, finSync).toMinutes();
             
-            Map<String, EmailNotificationService.SyncTableStats> estadisticasDetalladas = new HashMap<>();
+            Map<String, EmailNotificationServiceHTML.SyncTableStats> estadisticasDetalladas = new HashMap<>();
             
             // Estadísticas de Remote → Local
-            estadisticasDetalladas.put("centros_costo", EmailNotificationService.SyncTableStats.builder()
+            estadisticasDetalladas.put("centros_costo", EmailNotificationServiceHTML.SyncTableStats.builder()
                     .nombreTabla("centros_costo")
                     .registrosInsertados(remoteToLocalSync.getInsertados("centros_costo"))
                     .registrosActualizados(remoteToLocalSync.getActualizados("centros_costo"))
@@ -312,7 +312,7 @@ public class SyncSchedulerService {
                     .exitoso(remoteToLocalSync.getErrores("centros_costo") == 0)
                     .build());
                     
-            estadisticasDetalladas.put("maestro", EmailNotificationService.SyncTableStats.builder()
+            estadisticasDetalladas.put("maestro", EmailNotificationServiceHTML.SyncTableStats.builder()
                     .nombreTabla("maestro")
                     .registrosInsertados(remoteToLocalSync.getInsertados("maestro"))
                     .registrosActualizados(remoteToLocalSync.getActualizados("maestro"))
@@ -324,7 +324,7 @@ public class SyncSchedulerService {
                     .exitoso(remoteToLocalSync.getErrores("maestro") == 0)
                     .build());
                     
-            estadisticasDetalladas.put("rrhh_asigna_trjt_reloj", EmailNotificationService.SyncTableStats.builder()
+            estadisticasDetalladas.put("rrhh_asigna_trjt_reloj", EmailNotificationServiceHTML.SyncTableStats.builder()
                     .nombreTabla("rrhh_asigna_trjt_reloj")
                     .registrosInsertados(remoteToLocalSync.getInsertados("rrhh_asigna_trjt_reloj"))
                     .registrosActualizados(remoteToLocalSync.getActualizados("rrhh_asigna_trjt_reloj"))
@@ -337,7 +337,7 @@ public class SyncSchedulerService {
                     .build());
             
             // Estadísticas de Local → Remote
-            estadisticasDetalladas.put("asistencia_ht580", EmailNotificationService.SyncTableStats.builder()
+            estadisticasDetalladas.put("asistencia_ht580", EmailNotificationServiceHTML.SyncTableStats.builder()
                     .nombreTabla("asistencia_ht580")
                     .registrosInsertados(localToRemoteSync.getRegistrosInsertados())
                     .registrosActualizados(0)
@@ -353,7 +353,7 @@ public class SyncSchedulerService {
             todosLosErrores.addAll(remoteToLocalSync.getErroresSincronizacion());
             todosLosErrores.addAll(localToRemoteSync.getErrores());
             
-            EmailNotificationService.SyncReport report = EmailNotificationService.SyncReport.builder()
+            EmailNotificationServiceHTML.SyncReport report = EmailNotificationServiceHTML.SyncReport.builder()
                     .fechaHora(inicioSync)
                     .duracionMinutos(duracionMinutos)
                     .exitoso(resultadoRemoteToLocal && resultadoLocalToRemote)
