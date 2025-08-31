@@ -21,24 +21,15 @@
           <div 
             *ngFor="let racion of racionesDisponibles" 
             class="racion-item"
-            [class.disabled]="!racion.disponible || racion.yaSeleccionada"
             (click)="seleccionarRacion(racion)"
           >
-            <mat-card class="racion-item-card" [style.border-color]="racion.color">
+            <mat-card class="racion-item-card" [style.background]="'linear-gradient(135deg, ' + racion.color + ' 0%, ' + racion.color + 'dd 100%)'">
               <mat-card-content class="racion-item-content">
                 <div class="racion-item-icon">
-                  <mat-icon [style.color]="racion.color">{{ racion.icono }}</mat-icon>
+                  <mat-icon>{{ racion.icono }}</mat-icon>
                 </div>
                 <h4 class="racion-item-title">{{ racion.nombre }}</h4>
                 <p class="racion-item-horario">{{ racion.horario }}</p>
-                <div class="racion-status">
-                  <mat-icon class="status-icon" *ngIf="racion.yaSeleccionada">done</mat-icon>
-                  <mat-icon class="status-icon" *ngIf="!racion.disponible && !racion.yaSeleccionada">block</mat-icon>
-                  <span class="status-text">
-                    {{ racion.yaSeleccionada ? 'Ya seleccionada' : 
-                       (racion.disponible ? 'Disponible' : 'No disponible') }}
-                  </span>
-                </div>
               </mat-card-content>
             </mat-card>
           </div>

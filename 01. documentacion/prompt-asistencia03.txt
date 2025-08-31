@@ -1,0 +1,90 @@
+Perfecto ya todo esta esta ok, continuamos con el desarrollo, ahora hay que crear un microservicio 
+que permite sincronizar datos entre base de datos postgresql y oracle 11gr2, las cuales llamaremos de la 
+siguiente manera
+
+oracle 11gr2 => bd_remota
+postgresql => bd_local
+
+la sincronización se realizara bajo la siguiente estructura
+
+las siguiantes tablas:
+maestro
+centros_costo
+rrhh_asigna_trjt_reloj
+
+solo se sicnronizaran en una sola direcion, de bd_remota a bd_local, 
+
+mientras que la siguiente tabla
+asistencia_ht580
+
+solo se sincronizara tambien en una sola dirección, de bd_local a bd_remota
+
+de esa manera en la bd_local se traeran los datos remotos, teniendo como una copia del mismo, y es el registro
+de asistencia que es la que se sube a la bd_remota.
+
+la sincronizacion se realizara cada 5 min, disparando dos hilos una para sincronizacion de bd_remota a bd_local, 
+y la otra de bd_local a bd_remota.
+
+una vez que ambos hilos terminen (debe haber algun tipo de sincronizador de tareas) se lanza nuevamente 
+el proceso de sincronía despues de 5 min, osea que el proceso no es que cora cada 5 min, sino que se dispara
+cada 5 min una vez que termine de sincronizar, asi se evitan que hayan tareas que se junten por demora en la
+sincronización o saturación por lo mismo por fallas en la comunicación
+
+si por algun motivo hay una falla en l comunidación se terminan las tareas, se esperan 30 seg se reintenta una vez mas
+y si continua el error, se termina el proceso, y luego es lanza nuevamente el proceso apasados los 5 min.
+
+Datos de conexion para ORacle 11gR2
+HEIMDALL =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = facturaciontdp.pe)(PORT = 1521))
+    )
+    (CONNECT_DATA =
+      (SERVICE_NAME = heimdall)
+    )
+  )
+usuario : transmarina
+clave : transmarina  
+
+el proceso de sincronia debe ejecutarse la primera vez o cuando la data de las tablas esten vacias para que se llenen, y luego ya cada
+5 min.
+
+la sincronia completa, ya sea de bajada o de subida se ejecute en sus propias transacciones
+
+los parametros de conexion a la base de datos Oracle11gr2, debe estar en appsetting.json, al igual que la configuracion
+a la bd_local, que es la misma que usan el resto de microservicios
+
+
+confirmame que cuando arranque el miscroservicio, empiece con la sincronización de los datos, 
+al finalizar la sicnronizacion de los datos (de los dos hilos, tanto de subida como de bajada)
+se envie un correo con los datos finales de sincronizacion, el email destinatario debe estar en 
+parametros de config server, que sea un arreglo de correos, que tenga el valor por defecto de
+jramirez@npssac.com.pe, con un resumen de los datos sincronizados por tabla, tienes tener cuidado
+que los datos no se dupliquen, por ejemplo el maestro tiene cod_tra como PK, centros de costo tiene 
+a cencos como PK, y asi cada uno, revisa que las entitades tengas ese PK correspondiente.
+
+entonces por cada tabla debe ser algo asi
+
+nombre de tabla     |     registros insertados    |   registros actualizados   |  BASE ORIGEN    |  Base Destinos     |
+maestro                         30                          40
+tabla 2
+tabla 3
+
+ten cuidado que cuando sean registros actualizados, realmente hayan cambiado, porque si no hay data cambiada
+entonces no debes contabilizarlo ni hacer el proceso de actualización, ten cuidado, los que si contabilizas
+si o si son los insertados
+
+
+
+la conifguración para la cuenta que va a enviar los correos es esta 
+    <add key="SmtpServer" value="mail.franevi.com" />
+    <add key="SmtpPort" value="26" />
+    <add key="SmtpUser" value="facturacion.electronica@franevi.com" />
+    <add key="SmtpPassword" value="S1gr3@2025" />
+    <add key="SmtpEnableSSL" value="true" />
+    <add key="ClientSettingsProvider.ServiceUri" value="" />
+    <add key="LaunchTimerOnOpen" value="1" />
+
+procede.
+
+

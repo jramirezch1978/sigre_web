@@ -1,0 +1,80 @@
+# Configuración para sync-service
+spring:
+  datasource:
+    local:
+      url: jdbc:postgresql://10.100.14.102:5432/db-sigre-web
+      username: sigre-web
+      password: S1greW3b@2025!
+      driver-class-name: org.postgresql.Driver
+    remote:
+      host: facturaciontdp.pe
+      port: 1521
+      service-name: heimdall
+      username: transmarina
+      password: transmarina
+      driver-class-name: oracle.jdbc.OracleDriver
+
+# Configuración de sincronización
+sync:
+  config:
+    interval-minutes: 5
+    retry-delay-seconds: 30
+    max-retries: 1
+    batch-size: 100
+    initial-sync-on-startup: true
+  tables:
+    remote-to-local: 
+      - maestro
+      - centros_costo
+      - rrhh_asigna_trjt_reloj
+    local-to-remote:
+      - asistencia_ht580
+
+# Configuración de email y notificaciones
+spring:
+  mail:
+    host: mail.franevi.com
+    port: 26
+    username: facturacion.electronica@franevi.com
+    password: S1gr3@2025
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          auth: true
+          starttls:
+            enable: true
+
+# Configuración de notificaciones por email
+mail:
+  notifications:
+    recipients:
+      - jramirez@npssac.com.pe
+    subject: "SIGRE - Reporte de Sincronización"
+    enabled: true
+  smtp:
+    from: facturacion.electronica@franevi.com
+
+# Configuración específica para Oracle 11gR2
+oracle:
+  connection:
+    description: |
+      (DESCRIPTION =
+        (ADDRESS_LIST =
+          (ADDRESS = (PROTOCOL = TCP)(HOST = facturaciontdp.pe)(PORT = 1521))
+        )
+        (CONNECT_DATA =
+          (SERVICE_NAME = heimdall)
+        )
+      )
+
+---
+# Perfil para Docker
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    local:
+      url: jdbc:postgresql://db-sigre-web:5432/db-sigre-web

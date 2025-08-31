@@ -26,6 +26,31 @@ services:
       retries: 5
     command: ["postgres", "-c", "timezone=America/Lima"]
 
+  # Config Server (Configuración Centralizada)
+  config-server:
+    build:
+      context: ./03. backend
+      dockerfile: config-server/Dockerfile
+    container_name: config-server
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - TZ=America/Lima
+      - JAVA_OPTS=-Xmx256m -Xms128m -Duser.timezone=America/Lima
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - sigre-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   # Discovery Server (Eureka)
   discovery-server:
     build:
@@ -216,6 +241,39 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  # Sync Service (Sincronización PostgreSQL ↔ Oracle)
+  sync-service:
+    build:
+      context: ./03. backend
+      dockerfile: sync-service/Dockerfile
+    container_name: sync-service
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - TZ=America/Lima
+      - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      config-server:
+        condition: service_healthy
+      db-sigre-web:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - sigre-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
 
   # Frontend Angular - Módulo de Asistencia
   sigre-frontend:

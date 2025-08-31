@@ -44,7 +44,7 @@ export class PopupRacionesComponent implements OnInit {
   private cargarRacionesDisponibles() {
     const hora = new Date().getHours();
     
-    this.racionesDisponibles = [
+    const todasLasRaciones = [
       {
         id: 'desayuno',
         nombre: 'Desayuno',
@@ -52,7 +52,7 @@ export class PopupRacionesComponent implements OnInit {
         color: '#f59e0b',
         horario: '06:00 - 09:00',
         disponible: hora >= 6 && hora < 9,
-        yaSeleccionada: false // TODO: Consultar API si ya fue seleccionada hoy
+        yaSeleccionada: false
       },
       {
         id: 'almuerzo',
@@ -61,7 +61,7 @@ export class PopupRacionesComponent implements OnInit {
         color: '#10b981',
         horario: '12:00 - 15:00',
         disponible: hora < 12,
-        yaSeleccionada: false // TODO: Consultar API si ya fue seleccionada hoy
+        yaSeleccionada: false
       },
       {
         id: 'cena',
@@ -70,9 +70,12 @@ export class PopupRacionesComponent implements OnInit {
         color: '#1e3a8a',
         horario: '18:00 - 21:00',
         disponible: hora >= 12,
-        yaSeleccionada: false // TODO: Consultar API si ya fue seleccionada hoy
+        yaSeleccionada: false
       }
     ];
+    
+    // Solo mostrar raciones disponibles
+    this.racionesDisponibles = todasLasRaciones.filter(racion => racion.disponible);
   }
 
   seleccionarRacion(racion: RacionDisponible) {

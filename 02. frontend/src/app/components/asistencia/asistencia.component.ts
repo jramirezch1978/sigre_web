@@ -77,10 +77,8 @@ export class AsistenciaComponent implements OnInit {
       this.codigoTrabajador = 'EMP001';
       this.mostrarMensaje('Trabajador encontrado: ' + this.nombreTrabajador, 'success');
       
-      // Mostrar popup de movimientos después de un breve delay
-      setTimeout(() => {
-        this.mostrarPopupMovimientos = true;
-      }, 1000);
+      // Mostrar popup de movimientos inmediatamente
+      this.mostrarPopupMovimientos = true;
     } else {
       this.mostrarMensaje('Tarjeta no válida, intente nuevamente', 'error');
     }
@@ -111,9 +109,17 @@ export class AsistenciaComponent implements OnInit {
     this.mostrarPopupRaciones = false;
     this.mostrarMensaje(`Ración ${racion.nombre} registrada exitosamente`, 'success');
     
-    setTimeout(() => {
-      this.volverMenuPrincipal();
-    }, 2000);
+    // Volver inmediatamente al menú principal
+    this.volverMenuPrincipal();
+  }
+
+  onRacionOmitida() {
+    console.log('Ración omitida por el usuario');
+    this.mostrarPopupRaciones = false;
+    this.mostrarMensaje('Los datos han sido enviados satisfactoriamente', 'success');
+    
+    // Volver inmediatamente al menú principal
+    this.volverMenuPrincipal();
   }
 
   onPopupCerrado(tipo: 'movimientos' | 'raciones') {
@@ -129,8 +135,8 @@ export class AsistenciaComponent implements OnInit {
   }
 
   private mostrarMensaje(mensaje: string, tipo: 'success' | 'error') {
-    this.snackBar.open(mensaje, 'Cerrar', {
-      duration: 3000,
+    this.snackBar.open(mensaje, '', {
+      duration: tipo === 'success' ? 1000 : 3000, // 1 seg para éxito, 3 seg para errores
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
       panelClass: tipo === 'success' ? 'success-snackbar' : 'error-snackbar'
