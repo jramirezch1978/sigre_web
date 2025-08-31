@@ -3,11 +3,18 @@ spring:
     name: sync-service
   cloud:
     config:
-      uri: http://10.100.14.102:8888
+      discovery:
+        enabled: true
+        service-id: config-server
       fail-fast: true
       retry:
         initial-interval: 3000
         max-attempts: 5
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://10.100.14.102:8761/eureka
 
 ---
 # Perfil para Docker
@@ -15,6 +22,8 @@ spring:
   config:
     activate:
       on-profile: docker
-  cloud:
-    config:
-      uri: http://config-server:8888
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka

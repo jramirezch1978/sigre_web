@@ -7,6 +7,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import org.springframework.beans.factory.annotation.Value;
 import java.time.LocalDateTime;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +26,18 @@ public class SyncSchedulerService {
     private final LocalToRemoteSyncService localToRemoteSync;
     private final EmailNotificationService emailService;
     
+    @Value("${sync.config.interval-minutes:5}")
+    private int intervalMinutes;
+    
+    @Value("${sync.config.retry-delay-seconds:30}")
+    private int retryDelaySeconds;
+    
+    @Value("${sync.config.max-retries:1}")
+    private int maxRetries;
+    
+    @Value("${sync.config.initial-sync-on-startup:true}")
+    private boolean initialSyncOnStartup;
+    
     private boolean syncInProgress = false;
     private LocalDateTime lastSyncTime;
     private boolean initialSyncCompleted = false;
@@ -34,15 +47,30 @@ public class SyncSchedulerService {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void ejecutarSincronizacionInicial() {
-        log.info("🚀 Ejecutando sincronización inicial al startup del microservicio");
-        
-        // Esperar 10 segundos para que todos los servicios estén listos
         try {
+            // Log de parámetros obtenidos del config-server
+            log.info("📋 Parámetros de sincronización obtenidos del config-server:");
+            log.info("  - Intervalo: {} minutos", intervalMinutes);
+            log.info("  - Delay de reintento: {} segundos", retryDelaySeconds);
+            log.info("  - Máximo reintentos: {}", maxRetries);
+            log.info("  - Sync inicial habilitado: {}", initialSyncOnStartup);
+            
+            if (!initialSyncOnStartup) {
+                log.info("⏭️ Sincronización inicial deshabilitada por configuración");
+                return;
+            }
+            
+            log.info("🚀 Ejecutando sincronización inicial al startup del microservicio");
+            
+            // Esperar 10 segundos para que todos los servicios estén listos
             Thread.sleep(10000);
             ejecutarSincronizacionCompleta();
             initialSyncCompleted = true;
+            
         } catch (Exception e) {
-            log.error("❌ Error en sincronización inicial", e);
+            log.error("❌ ERROR en sincronización inicial", e);
+            log.error("❌ Parámetros de config - Intervalo: {} | Delay: {} | Reintentos: {}", 
+                     intervalMinutes, retryDelaySeconds, maxRetries);
         }
     }
     

@@ -8,11 +8,13 @@ COPY pom.xml ./pom.xml
 
 # Copiar todos los pom.xml de los módulos para resolver dependencias
 COPY discovery-server/pom.xml ./discovery-server/pom.xml
+COPY config-server/pom.xml ./config-server/pom.xml
 COPY api-gateway/pom.xml ./api-gateway/pom.xml
 COPY asistencia-service/pom.xml ./asistencia-service/pom.xml
 COPY inventory-service/pom.xml ./inventory-service/pom.xml
 COPY orders-service/pom.xml ./orders-service/pom.xml
 COPY products-service/pom.xml ./products-service/pom.xml
+COPY sync-service/pom.xml ./sync-service/pom.xml
 
 # Descargar dependencias
 RUN mvn dependency:go-offline -B

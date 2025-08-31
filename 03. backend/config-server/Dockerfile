@@ -3,14 +3,21 @@ FROM maven:3.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-# Copiar POM padre
+# Copiar POM padre y todos los POMs de módulos
 COPY pom.xml ./
+COPY discovery-server/pom.xml ./discovery-server/
 COPY config-server/pom.xml ./config-server/
+COPY api-gateway/pom.xml ./api-gateway/
+COPY inventory-service/pom.xml ./inventory-service/
+COPY orders-service/pom.xml ./orders-service/
+COPY products-service/pom.xml ./products-service/
+COPY asistencia-service/pom.xml ./asistencia-service/
+COPY sync-service/pom.xml ./sync-service/
 
 # Copiar código fuente del config-server
 COPY config-server/src ./config-server/src
 
-# Compilar solo el config-server
+# Compilar directamente sin dependency:go-offline (MÁS RÁPIDO)
 RUN mvn clean package -DskipTests -pl config-server -am
 
 # Etapa de ejecución

@@ -82,25 +82,55 @@ public class DatabaseConfig {
     
     @Bean(name = "remoteDataSource")
     public DataSource remoteDataSource() {
-        String oracleUrl = buildOracleUrl();
-        
-        return DataSourceBuilder.create()
-                .driverClassName("oracle.jdbc.OracleDriver")
-                .url(oracleUrl)
-                .username(oracleUsername)
-                .password(oraclePassword)
-                .build();
+        try {
+            // Log de parámetros obtenidos del config-server
+            log.info("📋 Parámetros Oracle obtenidos del config-server:");
+            log.info("  - Host: {}", oracleHost);
+            log.info("  - Port: {}", oraclePort);
+            log.info("  - Service Name: {}", oracleServiceName);
+            log.info("  - Username: {}", oracleUsername);
+            log.info("  - Password: [{}]", oraclePassword != null ? "***CONFIGURADO***" : "NO CONFIGURADO");
+            
+            String oracleUrl = buildOracleUrl();
+            
+            DataSource dataSource = DataSourceBuilder.create()
+                    .driverClassName("oracle.jdbc.OracleDriver")
+                    .url(oracleUrl)
+                    .username(oracleUsername)
+                    .password(oraclePassword)
+                    .build();
+            
+            log.info("✅ DataSource Oracle configurado exitosamente");
+            return dataSource;
+            
+        } catch (Exception e) {
+            log.error("❌ ERROR al configurar DataSource Oracle desde config-server", e);
+            log.error("❌ Parámetros recibidos - Host: {} | Port: {} | Service: {} | User: {}", 
+                     oracleHost, oraclePort, oracleServiceName, oracleUsername);
+            throw new RuntimeException("Error crítico en configuración de Oracle", e);
+        }
     }
     
     /**
      * Construir URL de Oracle dinámicamente desde configuración del config-server
      */
     private String buildOracleUrl() {
-        // Construir URL completa de Oracle usando los valores del config-server
-        String url = String.format("jdbc:oracle:thin:@%s:%s:%s", oracleHost, oraclePort, oracleServiceName);
-        
-        log.info("URL de Oracle construida: {}", url.replaceAll(oraclePassword, "***"));
-        return url;
+        try {
+            // Construir URL completa de Oracle usando los valores del config-server
+            String url = String.format("jdbc:oracle:thin:@%s:%s:%s", oracleHost, oraclePort, oracleServiceName);
+            
+            log.info("🔗 URL de Oracle construida exitosamente: {}", url);
+            log.debug("🔍 Detalles de conexión Oracle - Host: {} | Port: {} | Service: {}", 
+                     oracleHost, oraclePort, oracleServiceName);
+            
+            return url;
+            
+        } catch (Exception e) {
+            log.error("❌ ERROR al construir URL de Oracle", e);
+            log.error("❌ Valores recibidos del config-server - Host: {} | Port: {} | Service: {}", 
+                     oracleHost, oraclePort, oracleServiceName);
+            throw new RuntimeException("Error al construir URL de Oracle", e);
+        }
     }
 
     @Bean(name = "remoteEntityManagerFactory")

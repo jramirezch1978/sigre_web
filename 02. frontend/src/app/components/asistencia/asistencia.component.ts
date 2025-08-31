@@ -59,10 +59,10 @@ export class AsistenciaComponent implements OnInit {
     // Obtener el tipo de marcaje de los query params
     this.tipoMarcaje = this.route.snapshot.queryParams['tipoMarcaje'] || '';
     
-    // Simular lectura automática de tarjeta (para demo)
+    // Simular lectura automática de tarjeta (para demo) - OPTIMIZADO PARA VELOCIDAD
     setTimeout(() => {
       this.codigoTarjeta = '123456789';
-    }, 2000);
+    }, 500); // Reducido de 2000ms a 500ms para mayor velocidad
   }
 
   validarTarjeta() {
@@ -89,18 +89,15 @@ export class AsistenciaComponent implements OnInit {
     this.mostrarPopupMovimientos = false;
     this.mensajeAsistencia = `Marcaje registrado: ${movimiento.nombre}`;
     
-    // Solo mostrar popup de raciones si es "Ingreso a Planta"
+    // Solo mostrar popup de raciones si es "Ingreso a Planta" - OPTIMIZADO PARA VELOCIDAD
     if (movimiento.codigo === 'INGRESO_PLANTA') {
       this.mostrarMensaje('Marcaje registrado exitosamente', 'success');
-      setTimeout(() => {
-        this.mostrarPopupRaciones = true;
-      }, 1000);
+      // Mostrar popup inmediatamente para máxima velocidad
+      this.mostrarPopupRaciones = true;
     } else {
-      // Para otros tipos de marcaje, mostrar mensaje y volver al menú
+      // Para otros tipos de marcaje, volver inmediatamente al menú
       this.mostrarMensaje(this.mensajeAsistencia, 'success');
-      setTimeout(() => {
-        this.volverMenuPrincipal();
-      }, 2000);
+      this.volverMenuPrincipal(); // INMEDIATO - Sin delay para alta concurrencia
     }
   }
 
