@@ -47,6 +47,9 @@ public class RacionesSeleccionadas {
     @Column(name = "observaciones", length = 500)
     private String observaciones;
     
+    @Column(name = "id_asistencia_referencia", length = 12)
+    private String idAsistenciaReferencia; // RECKEY de asistencia_ht580 relacionada
+    
     @Column(name = "flag_estado", length = 1, nullable = false)
     @Builder.Default
     private String flagEstado = "1"; // 1=Activo, 0=Inactivo

@@ -7,10 +7,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { ClockComponent } from '../clock/clock.component';
 import { PopupMovimientosComponent, TipoMovimiento } from '../popup-movimientos/popup-movimientos.component';
 import { PopupRacionesComponent, RacionDisponible } from '../popup-raciones/popup-raciones.component';
+import { ErrorPopupComponent, ErrorData } from '../error-popup/error-popup.component';
+import { ConfigService } from '../../services/config.service';
 
 export interface Racion {
   id: string;
@@ -27,12 +32,15 @@ export interface Racion {
   imports: [
     CommonModule,
     FormsModule,
+    HttpClientModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
     MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatDialogModule,
     ClockComponent,
     PopupMovimientosComponent,
     PopupRacionesComponent
@@ -41,85 +49,187 @@ export interface Racion {
   styleUrls: ['./asistencia.component.scss']
 })
 export class AsistenciaComponent implements OnInit {
-  codigoTarjeta: string = '';
+  // Propiedades principales
+  codigoInput: string = '';  // Cambié codigoTarjeta por codigoInput más general
   tipoMarcaje: string = '';
-  mostrarPopupMovimientos = false;
-  mostrarPopupRaciones = false;
   nombreTrabajador = '';
   codigoTrabajador = '';
+  
+  // Estados de UI
+  mostrarPopupMovimientos = false;
+  mostrarPopupRaciones = false;
+  procesandoValidacion = false;
+  procesandoMarcacion = false;
+  
+  // Información temporal
   mensajeAsistencia = '';
+  tipoMovimientoSeleccionado: string = '';
+  racionesSeleccionadas: RacionDisponible[] = [];
+  
+  // IP del dispositivo
+  private deviceIP: string = '';
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private http: HttpClient,
+    private configService: ConfigService,
+    private dialog: MatDialog
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     // Obtener el tipo de marcaje de los query params
     this.tipoMarcaje = this.route.snapshot.queryParams['tipoMarcaje'] || '';
     
-    // Solo simular tarjeta si no hay código (primera vez)
-    if (!this.codigoTarjeta) {
-      // Simular lectura automática de tarjeta (para demo) - OPTIMIZADO PARA VELOCIDAD
-      setTimeout(() => {
-        this.codigoTarjeta = '123456789';
-      }, 500); // Reducido para mayor velocidad
-    }
+    // Inicializar configuración
+    await this.configService.waitForConfig();
+    
+    // Capturar IP del dispositivo
+    await this.capturarIPDispositivo();
+    
+    console.log('🔧 Componente inicializado - Tipo marcaje:', this.tipoMarcaje, 'IP:', this.deviceIP);
   }
 
-  validarTarjeta() {
-    if (!this.codigoTarjeta || this.codigoTarjeta.length < 3) {
-      this.mostrarMensaje('Por favor, ingrese un código válido', 'error');
+  /**
+   * PASO 1: Validar código de entrada (DNI, código trabajador o código tarjeta)
+   */
+  async validarCodigo() {
+    if (!this.codigoInput || this.codigoInput.length < 3) {
+      this.mostrarMensaje('Por favor, ingrese un código válido (mínimo 3 caracteres)', 'error');
       return;
     }
 
-    // Simular validación de tarjeta
-    if (this.codigoTarjeta === '123456789') {
-      this.nombreTrabajador = 'Juan Pérez Rodríguez';
-      this.codigoTrabajador = 'EMP001';
-      this.mostrarMensaje('Trabajador encontrado: ' + this.nombreTrabajador, 'success');
+    this.procesandoValidacion = true;
+    
+    try {
+      const apiUrl = this.configService.getApiUrl() + '/api/marcaciones/validar-codigo';
       
-      // Mostrar popup de movimientos inmediatamente
-      this.mostrarPopupMovimientos = true;
-    } else {
-      this.mostrarMensaje('Tarjeta no válida, intente nuevamente', 'error');
+      const response = await this.http.post<any>(apiUrl, {
+        codigo: this.codigoInput.trim()
+      }).toPromise();
+      
+      if (response.valido) {
+        this.nombreTrabajador = response.nombreTrabajador;
+        this.codigoTrabajador = response.codigoTrabajador;
+        
+        this.mostrarMensaje(`Trabajador encontrado: ${this.nombreTrabajador}`, 'success');
+        console.log('✅ Trabajador validado:', response);
+        
+        // PASO 2: Mostrar popup de tipo de asistencia inmediatamente
+        setTimeout(() => this.mostrarPopupMovimientos = true, 500);
+        
+      } else {
+        // Error de validación - mostrar popup con mensaje específico
+        this.mostrarErrorValidacion(response.mensajeError || 'Código no encontrado');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error validando código:', error);
+      this.mostrarErrorValidacion('Error de conexión. Intente nuevamente.');
+    } finally {
+      this.procesandoValidacion = false;
     }
   }
-
-  onMovimientoSeleccionado(movimiento: TipoMovimiento) {
-    console.log('Movimiento seleccionado:', movimiento);
-    this.mostrarPopupMovimientos = false;
-    this.mensajeAsistencia = `Marcaje registrado: ${movimiento.nombre}`;
+  
+  /**
+   * Mostrar popup de error de validación según especificación del prompt-final
+   */
+  private mostrarErrorValidacion(mensaje: string) {
+    const errorData: ErrorData = {
+      titulo: 'Código No Válido',
+      mensaje: mensaje,
+      codigoIngresado: this.codigoInput,
+      tipoError: 'validacion'
+    };
     
-    // Solo mostrar popup de raciones si es "Ingreso a Planta" - OPTIMIZADO PARA VELOCIDAD
+    // Abrir popup modal de error
+    const dialogRef = this.dialog.open(ErrorPopupComponent, {
+      width: '400px',
+      disableClose: true, // No permitir cerrar con ESC o click fuera
+      data: errorData
+    });
+    
+    // Al cerrar el popup, regresar a ventana original (limpiar campos)
+    dialogRef.afterClosed().subscribe((regresarAOriginal: boolean) => {
+      if (regresarAOriginal) {
+        console.log('🔄 Regresando a ventana original de marcación');
+        this.codigoInput = '';
+        this.nombreTrabajador = '';
+        this.codigoTrabajador = '';
+      }
+    });
+  }
+  
+  /**
+   * Mostrar popup de error crítico que detiene el proceso (solo para errores de grabación de ticket)
+   */
+  private mostrarErrorCritico(mensaje: string) {
+    const errorData: ErrorData = {
+      titulo: 'Error Crítico del Sistema',
+      mensaje: mensaje,
+      codigoIngresado: this.codigoInput,
+      tipoError: 'procesamiento'
+    };
+    
+    // Abrir popup modal de error crítico
+    const dialogRef = this.dialog.open(ErrorPopupComponent, {
+      width: '450px',
+      disableClose: true,
+      data: errorData
+    });
+    
+    // Al cerrar, regresar a ventana original para permitir reintento
+    dialogRef.afterClosed().subscribe((regresarAOriginal: boolean) => {
+      if (regresarAOriginal) {
+        console.log('🔄 Error crítico - Regresando a ventana original para reintento');
+        // NO limpiar codigoInput ni trabajador - permitir reintento inmediato
+        this.mostrarPopupMovimientos = false;
+        this.mostrarPopupRaciones = false;
+        this.procesandoMarcacion = false;
+        this.procesandoValidacion = false;
+      }
+    });
+  }
+
+  /**
+   * PASO 2: Manejar selección de tipo de movimiento/asistencia
+   */
+  onMovimientoSeleccionado(movimiento: TipoMovimiento) {
+    console.log('✅ Movimiento seleccionado:', movimiento);
+    this.mostrarPopupMovimientos = false;
+    this.tipoMovimientoSeleccionado = movimiento.codigo;
+    
+    // Según el prompt-final: Si selecciona "Ingreso a Planta" → ir al Paso 3, sino al Paso 4
     if (movimiento.codigo === 'INGRESO_PLANTA') {
-      this.mostrarMensaje('Marcaje registrado exitosamente', 'success');
-      // Mostrar popup inmediatamente para máxima velocidad
+      // PASO 3: Mostrar popup de selección de raciones
+      console.log('📍 Ingreso a Planta detectado - Mostrando popup de raciones');
       this.mostrarPopupRaciones = true;
     } else {
-      // Para otros tipos de marcaje, limpiar campos para siguiente trabajador
-      this.mostrarMensaje(this.mensajeAsistencia, 'success');
-      this.limpiarCamposParaSiguienteTrabajador();
+      // PASO 4: Ir directamente a procesar marcación (sin raciones)
+      console.log('📍 Otro tipo de movimiento - Procesando marcación directamente');
+      this.procesarMarcacionFinal([]);
     }
   }
 
-  onRacionSeleccionada(racion: RacionDisponible) {
-    console.log('Ración seleccionada:', racion);
-    this.mostrarPopupRaciones = false;
-    this.mostrarMensaje(`Ración ${racion.nombre} registrada exitosamente`, 'success');
+  /**
+   * PASO 3: Manejar selección de raciones (múltiples o simple según horario)
+   */
+  onRacionesSeleccionadas(raciones: RacionDisponible[]) {
+    console.log('✅ Raciones confirmadas desde popup:', raciones.map(r => r.nombre));
+    this.racionesSeleccionadas = [...raciones];
     
-    // Limpiar campos para el siguiente trabajador
-    this.limpiarCamposParaSiguienteTrabajador();
+    // Cerrar popup y procesar marcación
+    this.mostrarPopupRaciones = false;
+    this.procesarMarcacionFinal(this.racionesSeleccionadas);
   }
 
   onRacionOmitida() {
-    console.log('Ración omitida por el usuario');
+    console.log('❌ Ración omitida por el usuario');
     this.mostrarPopupRaciones = false;
-    this.mostrarMensaje('Los datos han sido enviados satisfactoriamente', 'success');
     
-    // Limpiar campos para el siguiente trabajador
-    this.limpiarCamposParaSiguienteTrabajador();
+    // PASO 4: Procesar marcación sin raciones
+    this.procesarMarcacionFinal([]);
   }
 
   onPopupCerrado(tipo: 'movimientos' | 'raciones') {
@@ -143,14 +253,144 @@ export class AsistenciaComponent implements OnInit {
     }
   }
 
+  /**
+   * PASO 4: Procesar marcación final con API asíncrona
+   */
+  async procesarMarcacionFinal(raciones: RacionDisponible[]) {
+    this.procesandoMarcacion = true;
+    
+    try {
+      console.log('🔄 Procesando marcación final - Raciones:', raciones);
+      
+      // Preparar raciones para la API
+      const racionesParaApi = raciones.map(racion => ({
+        tipoRacion: racion.codigo,
+        codigoRacion: racion.id,
+        nombreRacion: racion.nombre,
+        fechaServicio: this.obtenerFechaServicioRacion()
+      }));
+      
+      const request = {
+        codigoInput: this.codigoInput.trim(),
+        tipoMarcaje: this.tipoMarcaje,
+        tipoMovimiento: this.tipoMovimientoSeleccionado,
+        direccionIp: this.deviceIP,
+        fechaMarcacion: new Date().toISOString(),
+        racionesSeleccionadas: racionesParaApi
+      };
+      
+      console.log('📤 Enviando request a API:', request);
+      
+      const apiUrl = this.configService.getApiUrl() + '/api/marcaciones/procesar';
+      const response = await this.http.post<any>(apiUrl, request).toPromise();
+      
+      if (!response.error) {
+        this.mostrarMensaje(`✅ Marcación procesada exitosamente. Ticket: ${response.ticketId}`, 'success');
+        console.log('✅ Ticket creado:', response);
+      } else {
+        // Error al grabar ticket - según prompt-final, este es el ÚNICO caso donde se detiene el proceso
+        this.mostrarErrorCritico(response.mensajeError);
+        console.error('❌ Error crítico en API:', response);
+        return; // No limpiar campos - permitir reintento
+      }
+      
+    } catch (error) {
+      console.error('❌ Error llamando API de marcación:', error);
+      // Error crítico de conexión - también detiene el proceso
+      this.mostrarErrorCritico('Error de conexión con el servidor. Los datos no se pudieron procesar.');
+      this.procesandoMarcacion = false;
+      return; // No ejecutar finally para no limpiar campos
+    } finally {
+      this.procesandoMarcacion = false;
+      
+      // Solo limpiar campos si llegamos aquí (sin errores críticos)
+      setTimeout(() => this.limpiarCamposParaSiguienteTrabajador(), 2000);
+    }
+  }
+  
+  /**
+   * Capturar IP del dispositivo marcador (tablet, celular, etc.)
+   * IMPORTANTE: IP del equipo marcador, NO del servidor frontend
+   */
+  async capturarIPDispositivo(): Promise<void> {
+    try {
+      // Método 1: Intentar WebRTC para obtener IP local real
+      const localIP = await this.obtenerIPViaWebRTC();
+      if (localIP && localIP !== '127.0.0.1') {
+        this.deviceIP = localIP;
+        console.log('🌐 IP local del dispositivo via WebRTC:', this.deviceIP);
+        return;
+      }
+    } catch (error) {
+      console.warn('⚠️ WebRTC no disponible:', error);
+    }
+    
+    try {
+      // Método 2: API externa para IP pública 
+      const response = await this.http.get<any>('https://api.ipify.org?format=json').toPromise();
+      this.deviceIP = response.ip;
+      console.log('🌐 IP pública del dispositivo:', this.deviceIP);
+    } catch (error) {
+      // Método 3: Fallback - usar timestamp único como identificador
+      this.deviceIP = `DEVICE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      console.warn('⚠️ No se pudo obtener IP, usando ID único del dispositivo:', this.deviceIP);
+    }
+  }
+  
+  /**
+   * Obtener IP local usando WebRTC
+   */
+  private obtenerIPViaWebRTC(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      try {
+        const rtc = new RTCPeerConnection({ iceServers: [] });
+        rtc.createDataChannel('');
+        
+        rtc.createOffer().then(offer => rtc.setLocalDescription(offer));
+        
+        rtc.onicecandidate = (ice) => {
+          if (ice && ice.candidate && ice.candidate.candidate) {
+            const candidate = ice.candidate.candidate;
+            const ipMatch = candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+            if (ipMatch) {
+              rtc.close();
+              resolve(ipMatch[1]);
+            }
+          }
+        };
+        
+        setTimeout(() => {
+          rtc.close();
+          reject('WebRTC timeout');
+        }, 2000);
+        
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  
+  /**
+   * Obtener fecha de servicio para las raciones (fecha truncada)
+   */
+  private obtenerFechaServicioRacion(): string {
+    const fechaServicio = new Date();
+    fechaServicio.setHours(0, 0, 0, 0); // Truncar a fecha sin hora
+    return fechaServicio.toISOString();
+  }
+
   limpiarCamposParaSiguienteTrabajador() {
     // Limpiar campos pero MANTENER el tipo de marcaje
-    this.codigoTarjeta = '';
+    this.codigoInput = '';
     this.nombreTrabajador = '';
     this.codigoTrabajador = '';
     this.mensajeAsistencia = '';
+    this.tipoMovimientoSeleccionado = '';
+    this.racionesSeleccionadas = [];
     this.mostrarPopupMovimientos = false;
     this.mostrarPopupRaciones = false;
+    this.procesandoValidacion = false;
+    this.procesandoMarcacion = false;
     
     // NO limpiar this.tipoMarcaje - se mantiene para el siguiente trabajador
     console.log('🔄 Campos limpiados para siguiente trabajador. Tipo de marcaje mantenido:', this.tipoMarcaje);

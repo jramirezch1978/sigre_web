@@ -16,7 +16,7 @@
               {{ getTituloSegunTipo() }}
             </mat-card-title>
             <mat-card-subtitle>
-              Por favor, ingrese su código de tarjeta de proximidad
+              Por favor, ingrese su DNI, código de trabajador o código de tarjeta
             </mat-card-subtitle>
           </div>
         </div>
@@ -25,27 +25,29 @@
       <mat-card-content class="card-content">
         <div class="input-section">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Código de Tarjeta</mat-label>
+            <mat-label>DNI, Código de Trabajador o Código de Tarjeta</mat-label>
             <input 
               matInput 
-              [(ngModel)]="codigoTarjeta" 
-              placeholder="Ej: 123456789"
-              (keyup.enter)="validarTarjeta()"
+              [(ngModel)]="codigoInput" 
+              placeholder="Ej: 12345678, EMP001, o 123456789"
+              (keyup.enter)="validarCodigo()"
               maxlength="20"
-              class="tarjeta-input"
+              class="codigo-input"
+              [disabled]="procesandoValidacion"
             >
-            <mat-icon matSuffix>credit_card</mat-icon>
+            <mat-icon matSuffix>badge</mat-icon>
           </mat-form-field>
           
           <button 
             mat-raised-button 
             color="primary" 
-            (click)="validarTarjeta()"
-            [disabled]="!codigoTarjeta || codigoTarjeta.length < 3"
+            (click)="validarCodigo()"
+            [disabled]="!codigoInput || codigoInput.length < 3 || procesandoValidacion"
             class="submit-button"
           >
-            <mat-icon>login</mat-icon>
-            Validar Tarjeta
+            <mat-icon *ngIf="!procesandoValidacion">login</mat-icon>
+            <mat-icon *ngIf="procesandoValidacion" class="spinning">sync</mat-icon>
+            {{ procesandoValidacion ? 'Validando...' : 'Validar Código' }}
           </button>
         </div>
         
@@ -53,12 +55,16 @@
           <div class="info-grid">
             <div class="info-items">
               <div class="info-item">
-                <mat-icon class="info-icon">info</mat-icon>
-                <span>El sistema detectará automáticamente su tarjeta</span>
+                <mat-icon class="info-icon">badge</mat-icon>
+                <span>Acepta DNI, código de trabajador o código de tarjeta</span>
+              </div>
+              <div class="info-item">
+                <mat-icon class="info-icon">security</mat-icon>
+                <span>Validación automática en tiempo real</span>
               </div>
               <div class="info-item">
                 <mat-icon class="info-icon">schedule</mat-icon>
-                <span>Horario disponible según la hora actual</span>
+                <span>Raciones disponibles según la hora actual</span>
               </div>
             </div>
             <div class="clock-container">
@@ -95,7 +101,7 @@
   <app-popup-raciones
     *ngIf="mostrarPopupRaciones"
     [nombreTrabajador]="nombreTrabajador"
-    (racionSeleccionada)="onRacionSeleccionada($event)"
+    (racionesSeleccionadas)="onRacionesSeleccionadas($event)"
     (racionOmitida)="onRacionOmitida()"
     (cerrar)="onPopupCerrado('raciones')"
   ></app-popup-raciones>

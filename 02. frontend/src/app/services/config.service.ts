@@ -105,16 +105,29 @@ export class ConfigService {
     return config?.company?.sucursal || 'PIURA - SECHURA';
   }
 
-  getApiUrl(endpoint: 'time' | 'raciones'): string {
+  getApiUrl(endpoint?: 'time' | 'raciones'): string {
     const config = this.configSubject.value;
+    
     if (!config) {
-      // Valores por defecto si no hay configuración
+      // URL base por defecto si no hay configuración
+      const defaultBaseUrl = 'http://10.100.14.102:9080/api/asistencia';
+      
+      if (!endpoint) {
+        return defaultBaseUrl;
+      }
+      
       const defaultUrls = {
-        time: 'http://10.100.14.102:9080/api/asistencia/api/time',
-        raciones: 'http://10.100.14.102:9080/api/asistencia/api/raciones'
+        time: defaultBaseUrl + '/api/time',
+        raciones: defaultBaseUrl + '/api/raciones'
       };
       return defaultUrls[endpoint];
     }
+    
+    // Si no se especifica endpoint, retornar URL base
+    if (!endpoint) {
+      return config.api.baseUrl;
+    }
+    
     return `${config.api.baseUrl}${config.api.endpoints[endpoint]}`;
   }
 

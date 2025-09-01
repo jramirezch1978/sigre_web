@@ -17,10 +17,16 @@
           <span>{{ mensajeAsistencia }}</span>
         </div>
         
+        <div class="horario-info" *ngIf="puedeSeleccionarMultiples">
+          <mat-icon class="info-icon">info</mat-icon>
+          <span>Puede seleccionar almuerzo, cena o ambos</span>
+        </div>
+        
         <div class="raciones-grid">
           <div 
             *ngFor="let racion of racionesDisponibles" 
             class="racion-item"
+            [class.seleccionada]="racion.yaSeleccionada"
             (click)="seleccionarRacion(racion)"
           >
             <mat-card class="racion-item-card" [style.background]="'linear-gradient(135deg, ' + racion.color + ' 0%, ' + racion.color + 'dd 100%)'">
@@ -30,6 +36,12 @@
                 </div>
                 <h4 class="racion-item-title">{{ racion.nombre }}</h4>
                 <p class="racion-item-horario">{{ racion.horario }}</p>
+                
+                <!-- Indicador de selección para modo múltiple -->
+                <div *ngIf="puedeSeleccionarMultiples" class="selection-indicator">
+                  <mat-icon *ngIf="racion.yaSeleccionada" class="selected-icon">check_circle</mat-icon>
+                  <mat-icon *ngIf="!racion.yaSeleccionada" class="unselected-icon">radio_button_unchecked</mat-icon>
+                </div>
               </mat-card-content>
             </mat-card>
           </div>
@@ -37,14 +49,47 @@
       </mat-card-content>
       
       <mat-card-actions class="popup-actions">
-        <button mat-button (click)="omitirRacion()" class="skip-button">
-          <mat-icon>skip_next</mat-icon>
-          Omitir Ración
-        </button>
-        <button mat-stroked-button (click)="cerrarPopup()" class="cancel-button">
-          <mat-icon>close</mat-icon>
-          Cerrar
-        </button>
+        <!-- ANTES DEL MEDIODÍA: Botón Aceptar + Omitir + Cancelar -->
+        <div *ngIf="esAntesMediodia" class="actions-antes-mediodia">
+          <button 
+            *ngIf="racionesElegidas.length > 0"
+            mat-raised-button 
+            color="primary"
+            (click)="confirmarSeleccion()" 
+            class="accept-button"
+          >
+            <mat-icon>check</mat-icon>
+            Aceptar ({{ racionesElegidas.length }} ración{{ racionesElegidas.length > 1 ? 'es' : '' }})
+          </button>
+          
+          <button mat-button (click)="omitirRacion()" class="skip-button">
+            <mat-icon>skip_next</mat-icon>
+            Omitir Ración
+          </button>
+          
+          <button mat-stroked-button (click)="cerrarPopup()" class="cancel-button">
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+        </div>
+        
+        <!-- DESPUÉS DEL MEDIODÍA: Solo Omitir + Cancelar (Cena se selecciona directo) -->
+        <div *ngIf="!esAntesMediodia" class="actions-despues-mediodia">
+          <p class="horario-mensaje">
+            <mat-icon>info</mat-icon>
+            Después del mediodía: Seleccione cena o omítala
+          </p>
+          
+          <button mat-button (click)="omitirRacion()" class="skip-button">
+            <mat-icon>skip_next</mat-icon>
+            Omitir Ración
+          </button>
+          
+          <button mat-stroked-button (click)="cerrarPopup()" class="cancel-button">
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+        </div>
       </mat-card-actions>
     </mat-card>
   </div>

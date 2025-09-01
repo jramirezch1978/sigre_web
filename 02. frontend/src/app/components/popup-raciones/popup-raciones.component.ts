@@ -30,12 +30,15 @@ export class PopupRacionesComponent implements OnInit {
   @Input() nombreTrabajador: string = '';
   @Input() codigoTrabajador: string = '';
   @Input() mensajeAsistencia: string = '';
-  @Output() racionSeleccionada = new EventEmitter<RacionDisponible>();
+  @Output() racionesSeleccionadas = new EventEmitter<RacionDisponible[]>();
   @Output() racionOmitida = new EventEmitter<void>();
   @Output() cerrar = new EventEmitter<void>();
 
   fechaActual = new Date();
   racionesDisponibles: RacionDisponible[] = [];
+  racionesElegidas: RacionDisponible[] = [];
+  esAntesMediodia: boolean = false;
+  puedeSeleccionarMultiples: boolean = false;
 
   ngOnInit() {
     this.cargarRacionesDisponibles();
@@ -43,47 +46,81 @@ export class PopupRacionesComponent implements OnInit {
 
   private cargarRacionesDisponibles() {
     const hora = new Date().getHours();
+    this.esAntesMediodia = hora < 12;
+    this.puedeSeleccionarMultiples = this.esAntesMediodia;
+    
+    console.log(`🕐 Hora actual: ${hora}:xx - ${this.esAntesMediodia ? 'ANTES' : 'DESPUÉS'} del mediodía`);
     
     const todasLasRaciones = [
       {
-        id: 'desayuno',
-        nombre: 'Desayuno',
-        icono: 'free_breakfast',
-        color: '#f59e0b',
-        horario: '06:00 - 09:00',
-        disponible: hora >= 6 && hora < 9,
-        yaSeleccionada: false
-      },
-      {
-        id: 'almuerzo',
+        id: 'ALMUERZO',
         nombre: 'Almuerzo',
         icono: 'lunch_dining',
         color: '#10b981',
         horario: '12:00 - 15:00',
-        disponible: hora < 12,
+        disponible: this.esAntesMediodia, // Solo antes del mediodía
         yaSeleccionada: false
       },
       {
-        id: 'cena',
+        id: 'CENA',
         nombre: 'Cena',
         icono: 'dinner_dining',
         color: '#1e3a8a',
         horario: '18:00 - 21:00',
-        disponible: hora >= 12,
+        disponible: true, // Siempre disponible
         yaSeleccionada: false
       }
     ];
     
-    // Solo mostrar raciones disponibles
+    // Filtrar raciones disponibles según horario
     this.racionesDisponibles = todasLasRaciones.filter(racion => racion.disponible);
+    
+    console.log('📋 Raciones disponibles:', this.racionesDisponibles.map(r => r.nombre));
+    console.log('💡 Modo selección:', this.puedeSeleccionarMultiples ? 
+      'MÚLTIPLE (antes mediodía): puede elegir almuerzo, cena o ambos' : 
+      'SIMPLE (después mediodía): solo cena');
   }
 
   seleccionarRacion(racion: RacionDisponible) {
-    if (!racion.disponible || racion.yaSeleccionada) {
+    if (!racion.disponible) {
       return;
     }
     
-    this.racionSeleccionada.emit(racion);
+    if (this.esAntesMediodia) {
+      // ANTES DEL MEDIODÍA: Selección múltiple con toggle
+      if (racion.yaSeleccionada) {
+        // Deseleccionar ración
+        racion.yaSeleccionada = false;
+        this.racionesElegidas = this.racionesElegidas.filter(r => r.id !== racion.id);
+        console.log('❌ Ración deseleccionada:', racion.nombre);
+      } else {
+        // Seleccionar ración
+        racion.yaSeleccionada = true;
+        this.racionesElegidas.push(racion);
+        console.log('✅ Ración seleccionada:', racion.nombre);
+      }
+      
+      console.log('📋 Raciones elegidas:', this.racionesElegidas.map(r => r.nombre));
+      // NO emitir aún - esperar a que presione "Aceptar"
+      
+    } else {
+      // DESPUÉS DEL MEDIODÍA: Solo cena disponible, cierre inmediato
+      console.log('✅ Ración seleccionada (después mediodía - cierre inmediato):', racion.nombre);
+      this.racionesSeleccionadas.emit([racion]);
+    }
+  }
+  
+  /**
+   * Confirmar selección de raciones (solo antes del mediodía)
+   */
+  confirmarSeleccion() {
+    if (this.racionesElegidas.length === 0) {
+      console.log('⚠️ No hay raciones seleccionadas');
+      return;
+    }
+    
+    console.log('✅ Confirmando selección de raciones:', this.racionesElegidas.map(r => r.nombre));
+    this.racionesSeleccionadas.emit([...this.racionesElegidas]);
   }
 
   omitirRacion() {

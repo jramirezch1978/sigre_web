@@ -1,0 +1,55 @@
+todo ha quedado muy bien, excelente, ahora regresemos al frontend, te voy a explicar lo ultimo que queda, 
+el funcionamiento final del frontend, ok, comenzamos eligiendo el tipo de marcacion, que puede ser 
+marcacion entrada o marcacion zona de producción, cualquiera que sea debe capturar la ip del dispotivico 
+y guardarlo en asistencia_ht580, pero continuo explicandote, se realizaran el preoceso siguiendo estos pasos:
+
+Paso 1. el trabajador debe ingresar un input que puede ser alfanumerico, este input puede corresponder
+a tres cosas diferentes, puede ser que ingrese su dni o su codigo de trabajador o su codigo de tarjeta 
+de proximidad asignada, si es dni o codigo de trabajador lo puedes validar con la tabla maestro, 
+pero si es el codigo de tarjeta, debe buscarlo de rrhh_asigna_trjt_reloj y validar la fecha de inicio y 
+fin de la tarjeta (ya que las tarjetas tienen un tiempo limitado de vigencia), si no encuentra en 
+ninguno de los tres opciones,entonces debes mostrar entonces un error, y lo muestras en una ventana popup, 
+indicando que el codigo ingresado no existe, por favor validar con Recursos Humanos, y muestras el codigo
+que ingreso.
+
+Paso2. Si el codigo existe, inmediatamente sale el popup del tipo de assitencia, y si selecciona como tipo
+de asistencia, ingreso a Planta, debe ir al paso 3, sino al paso 4.
+
+Paso3. si es que seleccion ingreso a planta, debe aparecer el popup donde elige su racion o la opcion de 
+omitir racion, ojo que si es antes del medio día el trabajador puede elegir tanto el almuerzo
+como la cena o ambos, tener cuidado con el popup que este preparado para ese tipo de elección, si es 
+despues de mediodía, solo puede puede eligir la cena y nada mas, tener cuidado con eso, ya que en esta 
+situacion, como va a aparecer unicamente el boton de cena u omitir racion, al presionarlo cualquiera de los 
+dos botones se cerrara el popup de elección de tipo de racion guardando la opcion seelccionada, 
+pero antes del mediodía el trabajador puede seleccionar tanto el almuerzo como la cena o ambos, y 
+luego dar aceptar, de esta forma se elegiría dos raciones, o en tal caso puede presionar el boton de 
+omitir raciones, se cierra el popup y no hay racion seleccionada
+
+Paso 4. debe guardar el registro de asistencia en la tabla asistencia_ht580, con el usuario "work" que ese
+el usuario asignado para integraciones externas, guardando la ip del equipo donde se ha abierto la aplicacion
+osea del equipo marcador, tablet o celular posiblemente, no la del servidor frontend, ten cuidado. en
+caso haya seleccionado uno o varios tipos de racion, se debe almacenar en la tabla raciones_seleccionadas
+poniendo un registro por cada tipo de racion, tambien guardando la direccion ip, ten cuidado con la fecha,
+ya que es el truncamiento de la fecha y hora de la marcación, ya que indica, el día que se va a servir la 
+racion, por otro lado tambien el usuario sería work, y debe guardarse la fecha y registro de registro.
+
+
+teniendo todos estos pasos, esta claro lo que se piensa hacer, yo pienso que para el paso 4, debe ser un solo 
+API llamado a asistencia_service, enviando toda la información necesaria, esta api, debe ser asincrona, devolver
+el control rapidamente al frontend, porque este modulo de alta concurrencia, no puede haber tiempo de espera,
+lo que puede devolver es un ticket de registro de que los datos han sido grabados en una tabla que serviria
+como cola de atención, asi el frontend queda listo para atender al sieuiente, y el backend debe lanzar indmedaitamente
+un metodo asyncrono para atender ese registro de la cola de atencion (que tiene que ser una tabla) y guardar 
+todos los datos en las tablas correspondientes, la grabación a estas tablas finales (asistencia_ht580 y raciones_seleccionadas)
+deben ser tratadas como una transacción por cada ticket, una vez terminada debes de colocar en el registro del ticket la referencia
+del id de asistencia y el id de raciones_seleccionadas (esto en caso de que existiera)
+
+la tabla qe funcionaría como cola la debes de crear a partir de la model / entity que debes de crear, eso te lo dejo a tu conviencia
+si hubiera un error al momento de guardar en el registro en la tabla de tickets, lo envias por correo electronico a jramirez@npssac.com.pe
+usando la misma configuración de email que ya tie el miscrosercvicio sync-service (y creo que esta en config-server)
+igual si apareciera un error al grabar en asistencia_ht580 o raciones_seleccionadas, debes de enviar el mensaje de email (en formato HTML)
+si hubiera un error al grabar el ticket, debes de mandarle al frontend un error para que lo muestre en pantalla, es la unica
+parte de todo de proceso de asistencia, que generarías un stop al mostra el mensaje, al hacer click en el mensaje de error, se regresaría
+a la ventana original de la marcación seleccionada
+
+ok procede

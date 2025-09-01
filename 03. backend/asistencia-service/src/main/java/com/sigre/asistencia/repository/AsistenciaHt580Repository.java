@@ -60,4 +60,15 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     List<AsistenciaHt580> findAsistenciasByCodigoAndTipoMovimiento(@Param("codigo") String codigo,
                                                                   @Param("tipoMovimiento") String tipoMovimiento,
                                                                   @Param("fecha") LocalDate fecha);
+    
+    /**
+     * Verificar si existe un RECKEY (para generar únicos)
+     */
+    boolean existsByReckey(String reckey);
+    
+    /**
+     * Buscar asistencias pendientes de sincronización
+     */
+    @Query("SELECT a FROM AsistenciaHt580 a WHERE a.estadoSync = 'P' OR a.estadoSync IS NULL")
+    List<AsistenciaHt580> findAsistenciasPendientesSync();
 }
