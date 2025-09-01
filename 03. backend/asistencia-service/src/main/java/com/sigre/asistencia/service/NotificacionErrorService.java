@@ -26,8 +26,8 @@ public class NotificacionErrorService {
     @Value("${spring.mail.smtp.from:facturacion.electronica@franevi.com}")
     private String fromEmail;
     
-    @Value("${spring.mail.notifications.recipients:jramirez@npssac.com.pe}")
-    private String destinatarioEmail;
+    @Value("${spring.mail.notifications.recipients:jramirez@npssac.com.pe,esilva@transmarina.com}")
+    private String destinatarioEmails;
     
     /**
      * Enviar notificación de error al crear ticket
@@ -37,8 +37,8 @@ public class NotificacionErrorService {
             String asunto = "[SIGRE-ASISTENCIA] ERROR CRÍTICO - Creación de Ticket";
             String contenido = construirEmailErrorTicket(codigoInput, mensajeError);
             
-            enviarEmailHtml(destinatarioEmail, asunto, contenido);
-            log.info("📧 Email de error de ticket enviado a: {}", destinatarioEmail);
+            enviarEmailAMultiplesDestinatarios(asunto, contenido);
+            log.info("📧 Email de error de ticket enviado a destinatarios configurados");
             
         } catch (Exception e) {
             log.error("❌ Error enviando notificación de error de ticket", e);
@@ -53,7 +53,7 @@ public class NotificacionErrorService {
             String asunto = "[SIGRE-ASISTENCIA] ERROR - Procesamiento de Ticket";
             String contenido = construirEmailErrorProcesamiento(ticket, mensajeError);
             
-            enviarEmailHtml(destinatarioEmail, asunto, contenido);
+            enviarEmailAMultiplesDestinatarios(asunto, contenido);
             log.info("📧 Email de error de procesamiento enviado para ticket: {}", ticket.getTicketId());
             
         } catch (Exception e) {
@@ -186,7 +186,32 @@ public class NotificacionErrorService {
     }
     
     /**
-     * Enviar email HTML
+     * Enviar email a múltiples destinatarios
+     */
+    private void enviarEmailAMultiplesDestinatarios(String subject, String htmlContent) {
+        try {
+            // Obtener lista de destinatarios desde configuración
+            String[] destinatarios = destinatarioEmails.split(",");
+            
+            for (String destinatario : destinatarios) {
+                String email = destinatario.trim();
+                if (!email.isEmpty()) {
+                    try {
+                        enviarEmailHtml(email, subject, htmlContent);
+                        log.info("📧 Email enviado exitosamente a: {}", email);
+                    } catch (Exception e) {
+                        log.error("❌ Error enviando email a: {}", email, e);
+                    }
+                }
+            }
+            
+        } catch (Exception e) {
+            log.error("❌ Error procesando lista de destinatarios: {}", destinatarioEmails, e);
+        }
+    }
+    
+    /**
+     * Enviar email HTML individual
      */
     private void enviarEmailHtml(String to, String subject, String htmlContent) throws Exception {
         MimeMessage message = mailSender.createMimeMessage();

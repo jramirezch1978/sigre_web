@@ -77,5 +77,16 @@ docker compose logs -f sync-service
 docker compose down sync-service
 docker compose up --build -d sync-service
 
+docker compose down asistencia-service sigre-frontend api-gateway
+docker compose up --build -d asistencia-service sigre-frontend  api-gateway
+
 docker compose down sync-service config-server sigre-frontend asistencia-service
 docker compose up --build -d sync-service config-server sigre-frontend asistencia-service
+
+# Reconstruir frontend FORZANDO limpieza de cache
+docker compose down sigre-frontend
+docker compose build --no-cache sigre-frontend
+docker compose up -d sigre-frontend
+
+docker compose down asistencia-service sigre-frontend api-gateway
+docker compose up --build -d asistencia-service sigre-frontend  api-gateway

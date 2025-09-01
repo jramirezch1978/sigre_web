@@ -7,8 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/time")
+@RequestMapping("/api/time") // Mantenemos /api/time para que coincida con el frontend
 @RequiredArgsConstructor
+// CORS manejado por API Gateway - no duplicar headers
 public class TimeController {
 
     private final TimeService timeService;

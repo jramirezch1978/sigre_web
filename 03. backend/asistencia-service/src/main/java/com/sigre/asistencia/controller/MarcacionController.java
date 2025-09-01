@@ -11,16 +11,17 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * Controlador REST para marcaciones de asistencia
  * API asíncrona de alta concurrencia
  */
 @RestController
-@RequestMapping("/api/marcaciones")
+@RequestMapping("/") // Ruta raíz - el API Gateway ya maneja /api/asistencia
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*") // Permitir CORS para el frontend
+// CORS manejado por API Gateway - no duplicar headers
 public class MarcacionController {
     
     private final TicketAsistenciaService ticketService;
@@ -89,9 +90,9 @@ public class MarcacionController {
      * API para validar código antes de mostrar popups (opcional - para UX mejorada)
      */
     @PostMapping("/validar-codigo")
-    public ResponseEntity<?> validarCodigo(@RequestBody ValidarCodigoRequest request) {
+    public ResponseEntity<?> validarCodigoPost(@RequestBody ValidarCodigoRequest request) {
         try {
-            log.info("🔍 Validando código: {}", request.getCodigo());
+            log.info("🔍 [POST] Validando código: {}", request.getCodigo());
             
             var resultado = validacionService.validarCodigo(request.getCodigo());
             
@@ -103,11 +104,11 @@ public class MarcacionController {
                         .tipoInput(resultado.getTipoInput())
                         .build());
             } else {
-                return ResponseEntity.badRequest()
-                        .body(ValidarCodigoResponse.builder()
-                                .valido(false)
-                                .mensajeError(resultado.getMensajeError())
-                                .build());
+                // ✅ CORREGIDO: Devolver 200 OK con valido=false, no 400 Bad Request
+                return ResponseEntity.ok(ValidarCodigoResponse.builder()
+                        .valido(false)
+                        .mensajeError(resultado.getMensajeError())
+                        .build());
             }
             
         } catch (Exception e) {
@@ -118,6 +119,21 @@ public class MarcacionController {
                             .mensajeError("Error interno del servidor")
                             .build());
         }
+    }
+    
+    /**
+     * Endpoint GET para testing y diagnóstico
+     */
+    @GetMapping("/validar-codigo")
+    public ResponseEntity<?> validarCodigoGet() {
+        log.info("📋 [GET] Endpoint de validación disponible - Use POST con JSON payload");
+        
+        return ResponseEntity.ok().body(Map.of(
+            "mensaje", "Endpoint de validación disponible",
+            "metodo", "POST",
+            "payload", "{ \"codigo\": \"codigo-a-validar\" }",
+            "ejemplo", "curl -X POST -H 'Content-Type: application/json' -d '{\"codigo\":\"12345678\"}' http://localhost:8084/validar-codigo"
+        ));
     }
     
     /**

@@ -103,7 +103,7 @@ export class AsistenciaComponent implements OnInit {
     this.procesandoValidacion = true;
     
     try {
-      const apiUrl = this.configService.getApiUrl() + '/api/marcaciones/validar-codigo';
+      const apiUrl = this.configService.getApiUrl() + '/api/asistencia/validar-codigo';
       
       const response = await this.http.post<any>(apiUrl, {
         codigo: this.codigoInput.trim()
@@ -284,7 +284,7 @@ export class AsistenciaComponent implements OnInit {
       
       console.log('📤 Enviando request a API:', request);
       
-      const apiUrl = this.configService.getApiUrl() + '/api/marcaciones/procesar';
+      const apiUrl = this.configService.getApiUrl() + '/api/asistencia/procesar';
       const response = await this.http.post<any>(apiUrl, request).toPromise();
       
       if (!response.error) {
