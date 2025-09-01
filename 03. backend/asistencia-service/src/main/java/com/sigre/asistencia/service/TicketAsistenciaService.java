@@ -218,7 +218,8 @@ public class TicketAsistenciaService {
                 idsGenerados.add(racion.getIdRacionComedor().toString());
                 
                 log.info("✅ Ración {} creada para trabajador: {} | Fecha servicio: {}", 
-                        racionDto.getTipoRacion(), ticket.getCodTrabajador(), racionDto.getFechaServicio().toLocalDate());
+                        racionDto.getTipoRacion(), ticket.getCodTrabajador(), 
+                        LocalDateTime.parse(racionDto.getFechaServicio()).toLocalDate());
             }
             
             String resultado = String.join(",", idsGenerados);

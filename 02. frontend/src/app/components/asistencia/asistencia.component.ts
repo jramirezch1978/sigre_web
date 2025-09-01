@@ -373,14 +373,7 @@ export class AsistenciaComponent implements OnInit {
     });
   }
   
-  /**
-   * Obtener fecha de servicio para las raciones (fecha truncada)
-   */
-  private obtenerFechaServicioRacion(): string {
-    const fechaServicio = new Date();
-    fechaServicio.setHours(0, 0, 0, 0); // Truncar a fecha sin hora
-    return fechaServicio.toISOString();
-  }
+
 
   limpiarCamposParaSiguienteTrabajador() {
     // Limpiar campos pero MANTENER el tipo de marcaje
