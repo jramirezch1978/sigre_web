@@ -263,11 +263,14 @@ export class AsistenciaComponent implements OnInit {
       console.log('🔄 Procesando marcación final - Raciones:', raciones);
       
       // Preparar raciones para la API
+      const fechaServicio = new Date();
+      fechaServicio.setHours(0, 0, 0, 0); // Truncar a fecha sin hora
+      
       const racionesParaApi = raciones.map(racion => ({
-        tipoRacion: racion.codigo,
-        codigoRacion: racion.id,
+        tipoRacion: racion.id,        // ✅ Usar racion.id (no racion.codigo)
+        codigoRacion: racion.id,      // ✅ Código de ración
         nombreRacion: racion.nombre,
-        fechaServicio: this.obtenerFechaServicioRacion()
+        fechaServicio: fechaServicio.toISOString() // String ISO para el DTO
       }));
       
       const request = {

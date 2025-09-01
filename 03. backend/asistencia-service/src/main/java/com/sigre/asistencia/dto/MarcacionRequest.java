@@ -58,6 +58,6 @@ public class MarcacionRequest {
         private String tipoRacion; // "ALMUERZO", "CENA"
         private String codigoRacion;
         private String nombreRacion;
-        private LocalDateTime fechaServicio; // Fecha truncada para el día que se va a servir
+        private String fechaServicio; // Fecha en formato ISO String desde frontend
     }
 }

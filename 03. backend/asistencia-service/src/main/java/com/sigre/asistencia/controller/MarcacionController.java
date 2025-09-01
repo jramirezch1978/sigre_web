@@ -99,7 +99,7 @@ public class MarcacionController {
                 return ResponseEntity.ok(ValidarCodigoResponse.builder()
                         .valido(true)
                         .nombreTrabajador(resultado.getTrabajador().getNombreCompleto())
-                        .codigoTrabajador(resultado.getTrabajador().getCodTra())
+                        .codigoTrabajador(resultado.getTrabajador().getCodTrabajador())
                         .tipoInput(resultado.getTipoInput())
                         .build());
             } else {

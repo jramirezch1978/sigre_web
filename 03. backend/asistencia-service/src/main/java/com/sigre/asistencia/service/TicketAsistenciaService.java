@@ -59,7 +59,7 @@ public class TicketAsistenciaService {
             TicketAsistencia ticket = TicketAsistencia.builder()
                     .codigoInput(request.getCodigoInput())
                     .tipoInput(validacion.getTipoInput())
-                    .codTrabajador(validacion.getTrabajador().getCodTra())
+                    .codTrabajador(validacion.getTrabajador().getCodTrabajador())
                     .nombreTrabajador(validacion.getTrabajador().getNombreCompleto())
                     .tipoMarcaje(request.getTipoMarcaje())
                     .tipoMovimiento(request.getTipoMovimiento())
@@ -173,9 +173,7 @@ public class TicketAsistenciaService {
                     .flagVerifyType("1") // Web validation
                     .turno(determinarTurno(ticket.getFechaMarcacion()))
                     .lecturaPda(null) // No aplica para web
-                    .estadoSync("P") // Pendiente para sincronización
-                    .intentosSync(0)
-                    .build();
+                    .build(); // Campos de sync solo están en sync-service, no en asistencia-service
             
             asistencia = asistenciaRepository.save(asistencia);
             log.info("✅ Asistencia creada: {} para trabajador: {}", reckey, ticket.getCodTrabajador());
@@ -208,7 +206,7 @@ public class TicketAsistenciaService {
                 RacionesSeleccionadas racion = RacionesSeleccionadas.builder()
                         .codTrabajador(ticket.getCodTrabajador())
                         .tipoRacion(racionDto.getTipoRacion())
-                        .fecha(LocalDateTime.parse(racionDto.getFechaServicio()).toLocalDate()) // Truncar a fecha
+                        .fecha(LocalDateTime.parse(racionDto.getFechaServicio()).toLocalDate()) // Parse String ISO y truncar a fecha
                         .direccionIp(ticket.getDireccionIp())
                         .codUsuario(ticket.getUsuarioSistema())
                         .fechaRegistro(LocalDateTime.now())
