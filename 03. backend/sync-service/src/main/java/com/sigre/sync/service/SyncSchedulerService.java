@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Scheduled;
+
 import org.springframework.stereotype.Service;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -37,14 +37,14 @@ public class SyncSchedulerService {
     @Value("${sync.config.initial-sync-on-startup:true}")
     private boolean initialSyncOnStartup;
     
-    private boolean syncInProgress = false;
+    // Variable eliminada: Ya no necesitamos syncInProgress porque ejecutamos secuencialmente
     private LocalDateTime lastSyncTime;
     private boolean initialSyncCompleted = false;
     
     // Executor service para manejar los hilos
     private final ExecutorService executorService = Executors.newFixedThreadPool(2, r -> {
         Thread t = new Thread(r);
-        t.setDaemon(true);
+        t.setDaemon(false);  // ✅ CORREGIDO: No daemon para mantener viva la JVM
         return t;
     });
     
@@ -71,23 +71,95 @@ public class SyncSchedulerService {
             log.info("⏳ Esperando 10 segundos para que todos los servicios estén listos...");
             Thread.sleep(10000);
             
-            ejecutarSincronizacionCompleta();
+            log.info("🔄 Ejecutando sincronización inicial...");
+            try {
+                ejecutarSincronizacionCompleta();
+                log.info("🔄 Sincronización inicial terminada exitosamente");
+            } catch (Exception syncException) {
+                log.error("❌ Error durante sincronización inicial", syncException);
+            }
+            
+            log.info("🔄 Marcando sincronización inicial como completada...");
             initialSyncCompleted = true;
+            log.info("✅ Sincronización inicial completada");
+            log.info("🔄 Iniciando ciclo de sincronización recurrente cada {} minutos", intervalMinutes);
+            
+            // Iniciar el ciclo recurrente SIEMPRE, incluso si hubo errores en la sincronización inicial
+            log.info("🔄 Llamando a iniciarCicloSincronizacionRecurrente()...");
+            try {
+                iniciarCicloSincronizacionRecurrente();
+                log.info("🔄 iniciarCicloSincronizacionRecurrente() ejecutado exitosamente");
+            } catch (Exception cycleException) {
+                log.error("❌ Error al iniciar ciclo recurrente", cycleException);
+            }
+            
+            // MECANISMO DE RESPALDO: Verificar después de 30 segundos si el ciclo se inició
+            CompletableFuture.delayedExecutor(30, TimeUnit.SECONDS).execute(() -> {
+                log.info("🔍 VERIFICACIÓN DE RESPALDO: Comprobando si el ciclo recurrente está activo...");
+                if (!Thread.getAllStackTraces().keySet().stream()
+                        .anyMatch(t -> "SyncCycle-Thread".equals(t.getName()))) {
+                    log.warn("⚠️ RESPALDO ACTIVADO: El ciclo recurrente no está activo. Reintentando...");
+                    iniciarCicloSincronizacionRecurrente();
+                } else {
+                    log.info("✅ VERIFICACIÓN OK: El ciclo recurrente está activo");
+                }
+            });
             
         } catch (Exception e) {
             log.error("❌ ERROR CRÍTICO en sincronización inicial", e);
-        }
-    }
-    
-    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES, initialDelay = 60)
-    public void ejecutarSincronizacionProgramada() {
-        if (syncInProgress) {
-            log.warn("⚠️ Sincronización anterior aún en progreso, saltando esta ejecución");
-            return;
+            // Aún así marcar como completado e iniciar el ciclo recurrente
+            initialSyncCompleted = true;
+            log.info("🔄 Iniciando ciclo de sincronización recurrente a pesar del error inicial");
+            try {
+                iniciarCicloSincronizacionRecurrente();
+            } catch (Exception fallbackException) {
+                log.error("❌ Error incluso en el respaldo del ciclo recurrente", fallbackException);
+            }
         }
         
-        log.info("⏰ Ejecutando sincronización programada");
-        ejecutarSincronizacionCompleta();
+        log.info("🏁 Método ejecutarSincronizacionInicial() terminado completamente");
+    }
+    
+    /**
+     * Iniciar el ciclo de sincronización recurrente después de la sincronización inicial
+     */
+    private void iniciarCicloSincronizacionRecurrente() {
+        log.info("🚀 INICIANDO MÉTODO iniciarCicloSincronizacionRecurrente()");
+        
+        // Crear un hilo dedicado para el ciclo recurrente
+        Thread ciclicThread = new Thread(() -> {
+            log.info("🧵 HILO DEL CICLO RECURRENTE INICIADO");
+            try {
+                int ciclo = 1;
+                while (true) {
+                    // Esperar el intervalo configurado
+                    log.info("⏰ [CICLO {}] Esperando {} minutos antes de la próxima sincronización...", ciclo, intervalMinutes);
+                    long sleepMs = intervalMinutes * 60 * 1000L;
+                    log.info("⏰ [CICLO {}] Durmiendo por {} milisegundos...", ciclo, sleepMs);
+                    Thread.sleep(sleepMs);
+                    
+                    // Ejecutar sincronización
+                    log.info("🔔 [CICLO {}] INICIANDO CICLO DE SINCRONIZACIÓN PROGRAMADA", ciclo);
+                    ejecutarSincronizacionCompleta();
+                    log.info("✅ [CICLO {}] Ciclo de sincronización completado", ciclo);
+                    ciclo++;
+                }
+            } catch (InterruptedException e) {
+                log.warn("⚠️ Ciclo de sincronización interrumpido", e);
+                Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                log.error("❌ Error crítico en ciclo de sincronización", e);
+                // Reiniciar el ciclo después de un error
+                log.info("🔄 Reiniciando ciclo de sincronización...");
+                iniciarCicloSincronizacionRecurrente();
+            }
+        }, "SyncCycle-Thread");
+        
+        ciclicThread.setDaemon(false); // No es daemon para que mantenga viva la JVM
+        ciclicThread.start();
+        log.info("🧵 Thread SyncCycle-Thread iniciado: {}", ciclicThread.getName());
+        
+        log.info("🚀 Método iniciarCicloSincronizacionRecurrente() completado");
     }
     
     private void ejecutarSincronizacionCompleta() {
@@ -98,7 +170,6 @@ public class SyncSchedulerService {
         log.info("║ HILO 2: Local → Remote (asistencia_ht580)                 ║");
         log.info("╚════════════════════════════════════════════════════════════╝");
         
-        syncInProgress = true;
         LocalDateTime inicioSync = LocalDateTime.now();
         lastSyncTime = inicioSync;
         
@@ -153,15 +224,10 @@ public class SyncSchedulerService {
                 }
             });
             
-            // SINCRONIZADOR: Esperar a que AMBOS hilos terminen
+            // SINCRONIZADOR: Esperar a que AMBOS hilos terminen (SIN TIMEOUT)
             log.info("⏳ SINCRONIZADOR: Esperando que AMBOS HILOS terminen su ejecución...");
-            boolean terminoEnTiempo = latch.await(4, TimeUnit.MINUTES);
-            
-            if (!terminoEnTiempo) {
-                log.error("❌ TIMEOUT: Los hilos no terminaron en el tiempo esperado (4 minutos)");
-                futureRemoteToLocal.cancel(true);
-                futureLocalToRemote.cancel(true);
-            }
+            log.info("⏳ (Sin timeout - los hilos pueden tomar el tiempo que necesiten)");
+            latch.await(); // Espera indefinidamente hasta que ambos hilos terminen
             
             // AMBOS HILOS HAN TERMINADO
             log.info("═══════════════════════════════════════════════════════════");
@@ -195,7 +261,6 @@ public class SyncSchedulerService {
             log.error("❌ ERROR CRÍTICO en el proceso de sincronización", e);
             
         } finally {
-            syncInProgress = false;
             log.info("╔════════════════════════════════════════════════════════════╗");
             log.info("║   PROCESO DE SINCRONIZACIÓN FINALIZADO                    ║");
             log.info("║   Próxima ejecución en: {} minutos                        ║", intervalMinutes);
@@ -374,7 +439,7 @@ public class SyncSchedulerService {
     
     public SyncStatus getSyncStatus() {
         return SyncStatus.builder()
-                .syncInProgress(syncInProgress)
+                .syncInProgress(false) // Con el nuevo diseño secuencial, no rastreamos este estado
                 .lastSyncTime(lastSyncTime)
                 .nextSyncIn(calcularProximaSincronizacion())
                 .initialSyncCompleted(initialSyncCompleted)
