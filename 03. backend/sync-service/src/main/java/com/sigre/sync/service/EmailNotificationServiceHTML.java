@@ -422,10 +422,7 @@ public class EmailNotificationServiceHTML {
                 
                 log.info("📊 Conteo asistencia con filtro por origen {}: Local={}, Remoto={}", 
                         codigosOrigen, countAsistenciaLocal, countAsistenciaRemote);
-            } else {
-                // Si no hay códigos de origen, contar todo
-                countAsistenciaRemote = asistenciaRemoteRepo.count();
-            }
+            } 
             
             conteos.put("asistencia_ht580", new Long[]{countAsistenciaLocal, countAsistenciaRemote});
             
