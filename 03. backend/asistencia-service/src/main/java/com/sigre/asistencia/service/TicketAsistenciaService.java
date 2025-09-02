@@ -6,16 +6,19 @@ import com.sigre.asistencia.dto.MarcacionResponse;
 import com.sigre.asistencia.entity.AsistenciaHt580;
 import com.sigre.asistencia.entity.RacionesSeleccionadas;
 import com.sigre.asistencia.entity.TicketAsistencia;
+import com.sigre.asistencia.entity.TicketRacionGenerada;
 import com.sigre.asistencia.repository.AsistenciaHt580Repository;
 import com.sigre.asistencia.repository.RacionesSeleccionadasRepository;
 import com.sigre.asistencia.repository.TicketAsistenciaRepository;
+import com.sigre.asistencia.repository.TicketRacionGeneradaRepository;
 import com.sigre.asistencia.service.ValidacionTrabajadorService.ResultadoValidacion;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,16 +30,35 @@ import java.util.concurrent.CompletableFuture;
  * Implementa cola de alta concurrencia con procesamiento asíncrono
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class TicketAsistenciaService {
     
-    private final TicketAsistenciaRepository ticketRepository;
-    private final ValidacionTrabajadorService validacionService;
-    private final AsistenciaHt580Repository asistenciaRepository;
-    private final RacionesSeleccionadasRepository racionesRepository;
-    private final NotificacionErrorService notificacionService; // Para envío de emails de error
-    private final ObjectMapper objectMapper;
+    @Autowired
+    private TicketAsistenciaRepository ticketRepository;
+    
+    @Autowired
+    private ValidacionTrabajadorService validacionService;
+    
+    @Autowired
+    private AsistenciaHt580Repository asistenciaRepository;
+    
+    @Autowired
+    private RacionesSeleccionadasRepository racionesRepository;
+    
+    @Autowired
+    private TicketRacionGeneradaRepository ticketRacionRepository;
+    
+    @Autowired
+    private GeneradorNumeroTicketService generadorNumeroService;
+    
+    @Autowired
+    private TurnoService turnoService;
+    
+    @Autowired(required = false) // Opcional - no bloquear si no está configurado
+    private NotificacionErrorService notificacionService;
+    
+    @Autowired
+    private ObjectMapper objectMapper;
     
     /**
      * Método principal: Crear ticket de forma INMEDIATA (alta concurrencia)
@@ -44,44 +66,65 @@ public class TicketAsistenciaService {
      */
     @Transactional
     public MarcacionResponse crearTicketMarcacion(MarcacionRequest request) {
+        long inicioTiempo = System.currentTimeMillis();
         try {
             log.info("🎫 Creando ticket para código: {} | IP: {}", request.getCodigoInput(), request.getDireccionIp());
             
             // PASO 1: Validación inmediata del trabajador
+            long inicioValidacion = System.currentTimeMillis();
             ResultadoValidacion validacion = validacionService.validarCodigo(request.getCodigoInput());
+            long tiempoValidacion = System.currentTimeMillis() - inicioValidacion;
+            log.info("⏱️ Validación completada en: {} ms", tiempoValidacion);
             
             if (!validacion.isValido()) {
                 log.warn("❌ Validación fallida para código: {} | Error: {}", request.getCodigoInput(), validacion.getMensajeError());
                 return MarcacionResponse.error(validacion.getMensajeError(), request.getCodigoInput());
             }
             
-            // PASO 2: Crear ticket en la cola
+            // PASO 2: Generar número de ticket único
+            long inicioGeneracion = System.currentTimeMillis();
+            String numeroTicket = generadorNumeroService.generarNumeroTicket(request.getCodOrigen());
+            long tiempoGeneracion = System.currentTimeMillis() - inicioGeneracion;
+            log.info("⏱️ Número de ticket generado en: {} ms | Ticket: {}", tiempoGeneracion, numeroTicket);
+            
+            // PASO 3: Crear ticket en la cola
+            LocalDateTime ahora = LocalDateTime.now();
             TicketAsistencia ticket = TicketAsistencia.builder()
+                    .numeroTicket(numeroTicket) // PK generada
                     .codigoInput(request.getCodigoInput())
                     .tipoInput(validacion.getTipoInput())
+                    .codOrigen(request.getCodOrigen())
                     .codTrabajador(validacion.getTrabajador().getCodTrabajador())
                     .nombreTrabajador(validacion.getTrabajador().getNombreCompleto())
                     .tipoMarcaje(request.getTipoMarcaje())
                     .tipoMovimiento(request.getTipoMovimiento())
                     .direccionIp(request.getDireccionIp())
                     .racionesSeleccionadas(convertirRacionesAJson(request.getRacionesSeleccionadas()))
-                    .fechaMarcacion(request.getFechaMarcacion() != null ? request.getFechaMarcacion() : LocalDateTime.now())
-                    .estadoProcesamiento("PENDIENTE")
+                    .fechaMarcacion(request.getFechaMarcacion() != null ? request.getFechaMarcacion() : ahora)
+                    .estadoProcesamiento("P") // P = Pendiente
                     .usuarioSistema("work")
                     .intentosProcesamiento(0)
+                    .fechaCreacion(ahora) // Setear explícitamente para evitar null
                     .build();
             
             // GUARDAR TICKET INMEDIATAMENTE
+            long inicioGuardado = System.currentTimeMillis();
             ticket = ticketRepository.save(ticket);
-            log.info("✅ Ticket {} creado exitosamente para trabajador: {} - {}", 
-                    ticket.getTicketId(), ticket.getCodTrabajador(), ticket.getNombreTrabajador());
+            long tiempoGuardado = System.currentTimeMillis() - inicioGuardado;
+            log.info("⏱️ Ticket guardado en BD en: {} ms | Ticket: {}", tiempoGuardado, ticket.getNumeroTicket());
             
-            // PASO 3: Lanzar procesamiento asíncrono (no esperar)
-            procesarTicketAsync(ticket.getTicketId());
+            // PASO 4: Lanzar procesamiento asíncrono (NO ESPERAR)
+            long inicioAsync = System.currentTimeMillis();
+            procesarTicketAsync(ticket.getNumeroTicket());
+            long tiempoAsync = System.currentTimeMillis() - inicioAsync;
+            log.info("⏱️ Procesamiento asíncrono lanzado en: {} ms", tiempoAsync);
             
-            // PASO 4: Retornar respuesta INMEDIATA al frontend
+            // PASO 5: Retornar respuesta INMEDIATA al frontend
+            long tiempoTotal = System.currentTimeMillis() - inicioTiempo;
+            log.info("⚡ TICKET {} CREADO COMPLETAMENTE EN: {} ms", ticket.getNumeroTicket(), tiempoTotal);
+            
             return MarcacionResponse.exitoso(
-                    ticket.getTicketId(),
+                    ticket.getNumeroTicket(),
                     ticket.getNombreTrabajador(),
                     ticket.getCodTrabajador()
             );
@@ -89,9 +132,13 @@ public class TicketAsistenciaService {
         } catch (Exception e) {
             log.error("❌ Error crítico al crear ticket para código: {}", request.getCodigoInput(), e);
             
-            // Enviar notificación por email del error crítico
+            // Enviar notificación por email del error crítico (si está configurado)
             try {
-                notificacionService.enviarErrorTicket(request.getCodigoInput(), e.getMessage());
+                if (notificacionService != null) {
+                    notificacionService.enviarErrorTicket(request.getCodigoInput(), e.getMessage());
+                } else {
+                    log.info("📧 NotificacionErrorService no configurado - error registrado en logs");
+                }
             } catch (Exception emailError) {
                 log.error("❌ Error adicional al enviar notificación de email", emailError);
             }
@@ -108,12 +155,12 @@ public class TicketAsistenciaService {
      */
     @Async
     @Transactional
-    public CompletableFuture<Void> procesarTicketAsync(Long ticketId) {
+    public CompletableFuture<Void> procesarTicketAsync(String numeroTicket) {
         try {
-            log.info("🔄 Iniciando procesamiento asíncrono del ticket: {}", ticketId);
+            log.info("🔄 Iniciando procesamiento asíncrono del ticket: {}", numeroTicket);
             
-            TicketAsistencia ticket = ticketRepository.findById(ticketId)
-                    .orElseThrow(() -> new RuntimeException("Ticket no encontrado: " + ticketId));
+            TicketAsistencia ticket = ticketRepository.findById(numeroTicket)
+                    .orElseThrow(() -> new RuntimeException("Ticket no encontrado: " + numeroTicket));
             
             // Marcar como procesando
             ticket.marcarComoProcesando();
@@ -122,28 +169,34 @@ public class TicketAsistenciaService {
             // PASO 1: Crear registro de asistencia
             String idAsistencia = crearRegistroAsistencia(ticket);
             
-            // PASO 2: Crear registros de raciones (si aplica)
-            String idsRaciones = crearRegistrosRaciones(ticket, idAsistencia);
+            // PASO 2: Crear registros de raciones y asociaciones (si aplica)
+            crearRegistrosRaciones(ticket, idAsistencia);
             
             // PASO 3: Marcar ticket como completado
-            ticket.marcarComoCompletado(idAsistencia, idsRaciones);
+            ticket.marcarComoCompletado(idAsistencia);
             ticketRepository.save(ticket);
             
+            // PASO 4: Obtener información de raciones para logging
+            List<Long> racionIds = ticketRacionRepository.findRacionIdsByNumeroTicket(numeroTicket);
             log.info("✅ Ticket {} procesado exitosamente | Asistencia: {} | Raciones: {}", 
-                    ticketId, idAsistencia, idsRaciones != null ? idsRaciones : "ninguna");
+                    numeroTicket, idAsistencia, racionIds.size() > 0 ? racionIds.toString() : "ninguna");
             
         } catch (Exception e) {
-            log.error("❌ Error procesando ticket {}", ticketId, e);
+            log.error("❌ Error procesando ticket {}", numeroTicket, e);
             
             // Marcar ticket como error
             try {
-                TicketAsistencia ticket = ticketRepository.findById(ticketId).orElse(null);
+                TicketAsistencia ticket = ticketRepository.findById(numeroTicket).orElse(null);
                 if (ticket != null) {
                     ticket.marcarComoError(e.getMessage());
                     ticketRepository.save(ticket);
                     
-                    // Enviar notificación por email del error
-                    notificacionService.enviarErrorProcesamiento(ticket, e.getMessage());
+                    // Enviar notificación por email del error (si está configurado)
+                    if (notificacionService != null) {
+                        notificacionService.enviarErrorProcesamiento(ticket, e.getMessage());
+                    } else {
+                        log.info("📧 NotificacionErrorService no configurado - error registrado en logs");
+                    }
                 }
             } catch (Exception updateError) {
                 log.error("❌ Error adicional actualizando estado del ticket", updateError);
@@ -171,7 +224,7 @@ public class TicketAsistenciaService {
                     .codUsuario(ticket.getUsuarioSistema())
                     .direccionIp(ticket.getDireccionIp())
                     .flagVerifyType("1") // Web validation
-                    .turno(determinarTurno(ticket.getFechaMarcacion()))
+                    .turno(turnoService.determinarTurnoActual(ticket.getFechaMarcacion()))
                     .lecturaPda(null) // No aplica para web
                     .build(); // Campos de sync solo están en sync-service, no en asistencia-service
             
@@ -181,32 +234,33 @@ public class TicketAsistenciaService {
             return reckey;
             
         } catch (Exception e) {
-            log.error("❌ Error creando registro de asistencia para ticket: {}", ticket.getTicketId(), e);
+            log.error("❌ Error creando registro de asistencia para ticket: {}", ticket.getNumeroTicket(), e);
             throw new RuntimeException("Error creando registro de asistencia", e);
         }
     }
     
     /**
-     * Crear registros en raciones_seleccionadas (si aplica)
+     * Crear registros en raciones_seleccionadas y asociarlos al ticket via tabla intermedia
      */
-    private String crearRegistrosRaciones(TicketAsistencia ticket, String idAsistencia) {
+    private void crearRegistrosRaciones(TicketAsistencia ticket, String idAsistencia) {
         try {
             if (ticket.getRacionesSeleccionadas() == null || ticket.getRacionesSeleccionadas().trim().isEmpty()) {
-                log.info("ℹ️ No hay raciones para procesar en ticket: {}", ticket.getTicketId());
-                return null;
+                log.info("ℹ️ No hay raciones para procesar en ticket: {}", ticket.getNumeroTicket());
+                return;
             }
             
             List<MarcacionRequest.RacionSeleccionada> raciones = 
                     objectMapper.readValue(ticket.getRacionesSeleccionadas(), 
                             objectMapper.getTypeFactory().constructCollectionType(List.class, MarcacionRequest.RacionSeleccionada.class));
             
-            List<String> idsGenerados = new ArrayList<>();
+            int racionesCreadas = 0;
             
             for (MarcacionRequest.RacionSeleccionada racionDto : raciones) {
+                // PASO 1: Crear registro de ración
                 RacionesSeleccionadas racion = RacionesSeleccionadas.builder()
                         .codTrabajador(ticket.getCodTrabajador())
                         .tipoRacion(racionDto.getTipoRacion())
-                        .fecha(LocalDateTime.parse(racionDto.getFechaServicio()).toLocalDate()) // Parse String ISO y truncar a fecha
+                        .fecha(parsearFechaISO(racionDto.getFechaServicio()))
                         .direccionIp(ticket.getDireccionIp())
                         .codUsuario(ticket.getUsuarioSistema())
                         .fechaRegistro(LocalDateTime.now())
@@ -215,20 +269,27 @@ public class TicketAsistenciaService {
                         .build();
                 
                 racion = racionesRepository.save(racion);
-                idsGenerados.add(racion.getIdRacionComedor().toString());
                 
-                log.info("✅ Ración {} creada para trabajador: {} | Fecha servicio: {}", 
+                // PASO 2: Crear asociación en tabla intermedia
+                TicketRacionGenerada asociacion = TicketRacionGenerada.builder()
+                        .numeroTicket(ticket.getNumeroTicket())
+                        .racionComedorId(racion.getIdRacionComedor())
+                        .build();
+                
+                ticketRacionRepository.save(asociacion);
+                racionesCreadas++;
+                
+                log.info("✅ Ración {} creada y asociada | Trabajador: {} | Fecha: {} | ID: {}", 
                         racionDto.getTipoRacion(), ticket.getCodTrabajador(), 
-                        LocalDateTime.parse(racionDto.getFechaServicio()).toLocalDate());
+                        parsearFechaISO(racionDto.getFechaServicio()),
+                        racion.getIdRacionComedor());
             }
             
-            String resultado = String.join(",", idsGenerados);
-            log.info("✅ {} raciones creadas exitosamente para ticket: {}", idsGenerados.size(), ticket.getTicketId());
-            
-            return resultado;
+            log.info("✅ {} raciones creadas y asociadas exitosamente para ticket: {}", 
+                    racionesCreadas, ticket.getNumeroTicket());
             
         } catch (Exception e) {
-            log.error("❌ Error creando registros de raciones para ticket: {}", ticket.getTicketId(), e);
+            log.error("❌ Error creando registros de raciones para ticket: {}", ticket.getNumeroTicket(), e);
             throw new RuntimeException("Error creando registros de raciones", e);
         }
     }
@@ -264,16 +325,27 @@ public class TicketAsistenciaService {
     }
     
     /**
-     * Determinar turno según hora
+     * Parsear fecha ISO desde frontend (maneja formato con 'Z')
+     * Ejemplo: '2025-09-01T05:00:00.000Z' → LocalDate
      */
-    private String determinarTurno(LocalDateTime fecha) {
-        int hora = fecha.getHour();
-        if (hora >= 6 && hora < 14) {
-            return "MAÑANA";
-        } else if (hora >= 14 && hora < 22) {
-            return "TARDE";
-        } else {
-            return "NOCHE";
+    private LocalDate parsearFechaISO(String fechaISO) {
+        try {
+            if (fechaISO == null || fechaISO.trim().isEmpty()) {
+                return LocalDate.now();
+            }
+            
+            // Manejar formato ISO con 'Z' (UTC)
+            if (fechaISO.endsWith("Z")) {
+                java.time.Instant instant = java.time.Instant.parse(fechaISO);
+                return instant.atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            }
+            
+            // Fallback: intentar parse directo
+            return LocalDateTime.parse(fechaISO).toLocalDate();
+            
+        } catch (Exception e) {
+            log.warn("⚠️ Error parseando fecha ISO '{}', usando fecha actual: {}", fechaISO, e.getMessage());
+            return LocalDate.now();
         }
     }
     

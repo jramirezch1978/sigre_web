@@ -220,8 +220,20 @@ public class EmailNotificationServiceHTML {
         for (Map.Entry<String, SyncTableStats> entry : report.getEstadisticasDetalladas().entrySet()) {
             SyncTableStats stats = entry.getValue();
             Long[] conteo = conteos.get(entry.getKey());
-            long countLocal = conteo[0];
-            long countRemote = conteo[1];
+            
+            // Manejo seguro para tablas sin conteo definido (como turno)
+            long countLocal = 0;
+            long countRemote = 0;
+            
+            if (conteo != null) {
+                countLocal = conteo[0];
+                countRemote = conteo[1];
+            } else {
+                log.debug("⚠️ No hay conteo definido para tabla: {} - usando valores por defecto", entry.getKey());
+                // Para tablas de referencia como turno, usar conteo básico
+                countLocal = stats.getRegistrosInsertados() + stats.getRegistrosActualizados();
+                countRemote = countLocal; // Estimación
+            }
             
             // Para asistencia_ht580, mostrar detalle por origen
             if (entry.getKey().equals("asistencia_ht580")) {

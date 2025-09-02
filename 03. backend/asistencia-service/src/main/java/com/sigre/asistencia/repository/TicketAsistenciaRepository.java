@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface TicketAsistenciaRepository extends JpaRepository<TicketAsistencia, Long> {
+public interface TicketAsistenciaRepository extends JpaRepository<TicketAsistencia, String> {
     
     /**
      * Buscar tickets pendientes de procesamiento
@@ -19,13 +19,13 @@ public interface TicketAsistenciaRepository extends JpaRepository<TicketAsistenc
     /**
      * Buscar tickets pendientes (para el procesador asíncrono)
      */
-    @Query("SELECT t FROM TicketAsistencia t WHERE t.estadoProcesamiento = 'PENDIENTE' ORDER BY t.fechaCreacion ASC")
+    @Query("SELECT t FROM TicketAsistencia t WHERE t.estadoProcesamiento = 'P' ORDER BY t.fechaCreacion ASC")
     List<TicketAsistencia> findTicketsPendientes();
     
     /**
      * Buscar tickets con error que necesitan reintento
      */
-    @Query("SELECT t FROM TicketAsistencia t WHERE t.estadoProcesamiento = 'ERROR' AND t.intentosProcesamiento < 3 ORDER BY t.fechaCreacion ASC")
+    @Query("SELECT t FROM TicketAsistencia t WHERE t.estadoProcesamiento = 'E' AND t.intentosProcesamiento < 3 ORDER BY t.fechaCreacion ASC")
     List<TicketAsistencia> findTicketsParaReintento();
     
     /**

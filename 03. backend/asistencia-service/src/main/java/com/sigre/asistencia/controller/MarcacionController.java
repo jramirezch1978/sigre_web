@@ -70,7 +70,7 @@ public class MarcacionController {
             }
             
             log.info("✅ Ticket {} creado exitosamente para trabajador: {}", 
-                    response.getTicketId(), response.getNombreTrabajador());
+                    response.getNumeroTicket(), response.getNombreTrabajador());
             
             return ResponseEntity.ok(response);
             

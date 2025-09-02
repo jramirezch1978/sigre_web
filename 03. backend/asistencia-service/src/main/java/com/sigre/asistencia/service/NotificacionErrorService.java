@@ -1,8 +1,8 @@
 package com.sigre.asistencia.service;
 
 import com.sigre.asistencia.entity.TicketAsistencia;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,14 +14,14 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Servicio para envío de notificaciones de error por email
- * Usa la misma configuración SMTP que sync-service
+ * Usa la misma configuración y estructura que sync-service
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class NotificacionErrorService {
     
-    private final JavaMailSender mailSender;
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
     
     @Value("${spring.mail.smtp.from:facturacion.electronica@franevi.com}")
     private String fromEmail;
@@ -29,10 +29,18 @@ public class NotificacionErrorService {
     @Value("${spring.mail.notifications.recipients:jramirez@npssac.com.pe,esilva@transmarina.com}")
     private String destinatarioEmails;
     
+    @Value("${spring.mail.notifications.enabled:false}")
+    private boolean emailEnabled;
+    
     /**
      * Enviar notificación de error al crear ticket
      */
     public void enviarErrorTicket(String codigoInput, String mensajeError) {
+        if (!emailEnabled || mailSender == null) {
+            log.info("📧 Notificaciones por email deshabilitadas o no configuradas");
+            return;
+        }
+        
         try {
             String asunto = "[SIGRE-ASISTENCIA] ERROR CRÍTICO - Creación de Ticket";
             String contenido = construirEmailErrorTicket(codigoInput, mensajeError);
@@ -49,12 +57,17 @@ public class NotificacionErrorService {
      * Enviar notificación de error en procesamiento
      */
     public void enviarErrorProcesamiento(TicketAsistencia ticket, String mensajeError) {
+        if (!emailEnabled || mailSender == null) {
+            log.info("📧 Notificaciones por email deshabilitadas o no configuradas");
+            return;
+        }
+        
         try {
             String asunto = "[SIGRE-ASISTENCIA] ERROR - Procesamiento de Ticket";
             String contenido = construirEmailErrorProcesamiento(ticket, mensajeError);
             
             enviarEmailAMultiplesDestinatarios(asunto, contenido);
-            log.info("📧 Email de error de procesamiento enviado para ticket: {}", ticket.getTicketId());
+            log.info("📧 Email de error de procesamiento enviado para ticket: {}", ticket.getNumeroTicket());
             
         } catch (Exception e) {
             log.error("❌ Error enviando notificación de error de procesamiento", e);
@@ -172,7 +185,7 @@ public class NotificacionErrorService {
                 </body>
                 </html>
                 """,
-                ticket.getTicketId(),
+                ticket.getNumeroTicket(),
                 ticket.getNombreTrabajador(),
                 ticket.getCodTrabajador(),
                 ticket.getCodigoInput(),
@@ -189,6 +202,12 @@ public class NotificacionErrorService {
      * Enviar email a múltiples destinatarios
      */
     private void enviarEmailAMultiplesDestinatarios(String subject, String htmlContent) {
+        // Validación adicional de seguridad
+        if (mailSender == null) {
+            log.warn("⚠️ JavaMailSender no configurado, no se puede enviar email");
+            return;
+        }
+        
         try {
             // Obtener lista de destinatarios desde configuración
             String[] destinatarios = destinatarioEmails.split(",");

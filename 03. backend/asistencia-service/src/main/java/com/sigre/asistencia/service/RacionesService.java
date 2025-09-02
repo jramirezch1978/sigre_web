@@ -93,13 +93,13 @@ public class RacionesService {
         int horaActual = LocalDateTime.now().getHour();
         
         switch (tipoRacion.toUpperCase()) {
-            case "DESAYUNO":
+            case "D":
                 // Desayuno disponible de 6:00 a 9:00
                 return horaActual >= 6 && horaActual < 9;
-            case "ALMUERZO":
+            case "A":
                 // Almuerzo disponible hasta mediodía
                 return horaActual < 12;
-            case "CENA":
+            case "C":
                 // Cena disponible después de mediodía
                 return horaActual >= 12;
             default:

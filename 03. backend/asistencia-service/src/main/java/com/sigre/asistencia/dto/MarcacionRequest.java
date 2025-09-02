@@ -23,6 +23,11 @@ public class MarcacionRequest {
     private String codigoInput;
     
     /**
+     * Código de origen del dispositivo/ubicación (WE, MO, KI, etc.)
+     */
+    private String codOrigen;
+    
+    /**
      * Tipo de marcaje seleccionado
      */
     private String tipoMarcaje; // "puerta-principal", "area-produccion", "comedor"
@@ -55,7 +60,7 @@ public class MarcacionRequest {
     @AllArgsConstructor
     @Builder
     public static class RacionSeleccionada {
-        private String tipoRacion; // "ALMUERZO", "CENA"
+        private String tipoRacion; // "A" = Almuerzo, "C" = Cena, "D" = Desayuno
         private String codigoRacion;
         private String nombreRacion;
         private String fechaServicio; // Fecha en formato ISO String desde frontend

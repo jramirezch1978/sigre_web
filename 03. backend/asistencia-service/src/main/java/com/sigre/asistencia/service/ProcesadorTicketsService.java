@@ -123,11 +123,11 @@ public class ProcesadorTicketsService {
             for (TicketAsistencia ticket : ticketsPendientes) {
                 try {
                     // Procesar cada ticket de forma asíncrona
-                    ticketService.procesarTicketAsync(ticket.getTicketId());
+                    ticketService.procesarTicketAsync(ticket.getNumeroTicket());
                     procesados++;
                     
                 } catch (Exception e) {
-                    log.error("❌ Error procesando ticket: {}", ticket.getTicketId(), e);
+                    log.error("❌ Error procesando ticket: {}", ticket.getNumeroTicket(), e);
                 }
             }
             
@@ -156,19 +156,19 @@ public class ProcesadorTicketsService {
             for (TicketAsistencia ticket : ticketsError) {
                 try {
                     log.info("🔄 Reintentando ticket: {} (Intento: {}/{})", 
-                            ticket.getTicketId(), ticket.getIntentosProcesamiento() + 1, maxReintentos);
+                            ticket.getNumeroTicket(), ticket.getIntentosProcesamiento() + 1, maxReintentos);
                     
                     // Reiniciar estado para reintento
-                    ticket.setEstadoProcesamiento("PENDIENTE");
+                    ticket.setEstadoProcesamiento("P"); // P = Pendiente
                     ticket.setMensajeError(null);
                     ticketRepository.save(ticket);
                     
                     // Procesar de forma asíncrona
-                    ticketService.procesarTicketAsync(ticket.getTicketId());
+                    ticketService.procesarTicketAsync(ticket.getNumeroTicket());
                     reintentados++;
                     
                 } catch (Exception e) {
-                    log.error("❌ Error reintentando ticket: {}", ticket.getTicketId(), e);
+                    log.error("❌ Error reintentando ticket: {}", ticket.getNumeroTicket(), e);
                 }
             }
             
@@ -200,10 +200,10 @@ public class ProcesadorTicketsService {
      */
     public EstadisticasCola obtenerEstadisticas() {
         try {
-            long pendientes = ticketRepository.countByEstadoProcesamiento("PENDIENTE");
-            long procesando = ticketRepository.countByEstadoProcesamiento("PROCESANDO");
-            long completados = ticketRepository.countByEstadoProcesamiento("COMPLETADO");
-            long errores = ticketRepository.countByEstadoProcesamiento("ERROR");
+            long pendientes = ticketRepository.countByEstadoProcesamiento("P"); // P = Pendiente
+            long procesando = ticketRepository.countByEstadoProcesamiento("R"); // R = Procesando
+            long completados = ticketRepository.countByEstadoProcesamiento("C"); // C = Completado
+            long errores = ticketRepository.countByEstadoProcesamiento("E"); // E = Error
             
             return EstadisticasCola.builder()
                     .ticketsPendientes(pendientes)

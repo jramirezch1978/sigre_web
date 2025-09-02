@@ -53,7 +53,7 @@ export class PopupRacionesComponent implements OnInit {
     
     const todasLasRaciones = [
       {
-        id: 'ALMUERZO',
+        id: 'A', // Código de Almuerzo
         nombre: 'Almuerzo',
         icono: 'lunch_dining',
         color: '#10b981',
@@ -62,7 +62,7 @@ export class PopupRacionesComponent implements OnInit {
         yaSeleccionada: false
       },
       {
-        id: 'CENA',
+        id: 'C', // Código de Cena
         nombre: 'Cena',
         icono: 'dinner_dining',
         color: '#1e3a8a',

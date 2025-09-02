@@ -300,13 +300,28 @@ public class SyncSchedulerService {
             }
             
             // PASO 3: Sincronizar TARJETAS DE RELOJ (depende de maestro)
-            log.info("📍 [HILO 1] PASO 3/3: Sincronizando RRHH_ASIGNA_TRJT_RELOJ...");
+            log.info("📍 [HILO 1] PASO 3/4: Sincronizando RRHH_ASIGNA_TRJT_RELOJ...");
             boolean tarjetasOk = remoteToLocalSync.sincronizarTarjetasReloj();
             if (!tarjetasOk && maxRetries > 0) {
-                tarjetasOk = manejarErrorConReintento("rrhh_asigna_trjt_reloj", () -> remoteToLocalSync.sincronizarTarjetasReloj());
+                tarjetasOk = manejarErrorConReintento("tarjetas", () -> remoteToLocalSync.sincronizarTarjetasReloj());
             }
             
-            boolean todoOk = centrosOk && maestroOk && tarjetasOk;
+            if (!tarjetasOk) {
+                log.error("❌ [HILO 1] Fallo en TARJETAS - Continuando con turno");
+            }
+            
+            // PASO 4: Sincronizar TURNO (independiente - para consultas rápidas de asistencia)
+            log.info("📍 [HILO 1] PASO 4/4: Sincronizando TURNO...");
+            boolean turnoOk = remoteToLocalSync.sincronizarTurno();
+            if (!turnoOk && maxRetries > 0) {
+                turnoOk = manejarErrorConReintento("turno", () -> remoteToLocalSync.sincronizarTurno());
+            }
+            
+            if (!turnoOk) {
+                log.error("❌ [HILO 1] Fallo en TURNO - No crítico para asistencia");
+            }
+            
+            boolean todoOk = centrosOk && maestroOk && tarjetasOk && turnoOk;
             log.info("✅ [HILO 1] Sincronización Remote → Local completada - Resultado: {}", todoOk ? "ÉXITO TOTAL" : "CON ERRORES");
             return todoOk;
             
@@ -399,6 +414,18 @@ public class SyncSchedulerService {
                     .baseOrigen("bd_remota")
                     .baseDestino("bd_local")
                     .exitoso(remoteToLocalSync.getErrores("rrhh_asigna_trjt_reloj") == 0)
+                    .build());
+                    
+            estadisticasDetalladas.put("turno", EmailNotificationServiceHTML.SyncTableStats.builder()
+                    .nombreTabla("turno")
+                    .registrosInsertados(remoteToLocalSync.getInsertados("turno"))
+                    .registrosActualizados(remoteToLocalSync.getActualizados("turno"))
+                    .registrosEliminados(remoteToLocalSync.getEliminados("turno"))
+                    .registrosErrores(remoteToLocalSync.getErrores("turno"))
+                    .direccion("REMOTE_TO_LOCAL")
+                    .baseOrigen("bd_remota")
+                    .baseDestino("bd_local")
+                    .exitoso(remoteToLocalSync.getErrores("turno") == 0)
                     .build());
             
             // Estadísticas de Local → Remote

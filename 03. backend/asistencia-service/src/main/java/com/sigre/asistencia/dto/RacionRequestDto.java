@@ -17,8 +17,8 @@ public class RacionRequestDto {
     private String codTrabajador;
     
     @NotBlank(message = "El tipo de ración es obligatorio")
-    @Pattern(regexp = "^(DESAYUNO|ALMUERZO|CENA)$", 
-             message = "Tipo de ración no válido. Debe ser: DESAYUNO, ALMUERZO o CENA")
+    @Pattern(regexp = "^(D|A|C)$", 
+             message = "Tipo de ración no válido. Debe ser: D (Desayuno), A (Almuerzo) o C (Cena)")
     private String tipoRacion;
     
     @NotBlank(message = "El usuario es obligatorio")

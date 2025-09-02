@@ -32,8 +32,8 @@ public class RacionesSeleccionadas {
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
     
-    @Column(name = "tipo_racion", length = 20, nullable = false)
-    private String tipoRacion; // DESAYUNO, ALMUERZO, CENA
+    @Column(name = "tipo_racion", length = 1, nullable = false)
+    private String tipoRacion; // D = Desayuno, A = Almuerzo, C = Cena
     
     @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;
@@ -54,39 +54,50 @@ public class RacionesSeleccionadas {
     @Builder.Default
     private String flagEstado = "1"; // 1=Activo, 0=Inactivo
     
-    // Relación con Maestro
+    // ===== RELACIONES JPA =====
+    
+    /**
+     * Relación con el trabajador (FK hacia Maestro)
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cod_trabajador", referencedColumnName = "COD_TRABAJADOR", insertable = false, updatable = false)
     private Maestro trabajador;
+    
+    /**
+     * Relación con el registro de asistencia que generó esta ración (FK hacia AsistenciaHt580)
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_asistencia_referencia", referencedColumnName = "RECKEY", insertable = false, updatable = false)
+    private AsistenciaHt580 asistenciaReferencia;
     
     // Método helper para verificar si está activa
     public boolean isActiva() {
         return "1".equals(flagEstado);
     }
     
-    // Enums para tipos de ración
+    // Enums para tipos de ración (códigos de 1 carácter)
     public enum TipoRacion {
-        DESAYUNO("DESAYUNO"),
-        ALMUERZO("ALMUERZO"),
-        CENA("CENA");
+        DESAYUNO("D"),
+        ALMUERZO("A"),
+        CENA("C");
         
-        private final String valor;
+        private final String codigo;
         
-        TipoRacion(String valor) {
-            this.valor = valor;
+        TipoRacion(String codigo) {
+            this.codigo = codigo;
         }
         
-        public String getValor() {
-            return valor;
+        public String getCodigo() {
+            return codigo;
         }
         
-        public static TipoRacion fromString(String valor) {
+        public static TipoRacion fromCodigo(String codigo) {
             for (TipoRacion tipo : TipoRacion.values()) {
-                if (tipo.valor.equalsIgnoreCase(valor)) {
+                if (tipo.codigo.equalsIgnoreCase(codigo)) {
                     return tipo;
                 }
             }
-            throw new IllegalArgumentException("Tipo de ración no válido: " + valor);
+            throw new IllegalArgumentException("Código de ración no válido: " + codigo);
         }
     }
 }

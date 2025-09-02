@@ -31,7 +31,7 @@ export class ClockComponent implements OnInit, OnDestroy {
         this.currentTime = serverTime;
         this.isServerConnected = true;
         this.stopLocalClock(); // Detener reloj local
-        console.log('✅ Conectado al servidor - Hora sincronizada');
+        
       },
       error: (error) => {
         // Error de conexión - usar hora local

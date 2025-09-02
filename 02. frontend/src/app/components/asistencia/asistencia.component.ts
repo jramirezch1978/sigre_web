@@ -259,6 +259,9 @@ export class AsistenciaComponent implements OnInit {
   async procesarMarcacionFinal(raciones: RacionDisponible[]) {
     this.procesandoMarcacion = true;
     
+    // ⏱️ INICIAR MEDICIÓN DE TIEMPO DE API
+    const tiempoInicio = performance.now();
+    
     try {
       console.log('🔄 Procesando marcación final - Raciones:', raciones);
       
@@ -275,6 +278,7 @@ export class AsistenciaComponent implements OnInit {
       
       const request = {
         codigoInput: this.codigoInput.trim(),
+        codOrigen: 'WE', // Código de origen para aplicación WEB (2 caracteres)
         tipoMarcaje: this.tipoMarcaje,
         tipoMovimiento: this.tipoMovimientoSeleccionado,
         direccionIp: this.deviceIP,
@@ -283,12 +287,24 @@ export class AsistenciaComponent implements OnInit {
       };
       
       console.log('📤 Enviando request a API:', request);
+      console.log('⏱️ Iniciando llamada API a las:', new Date().toLocaleTimeString());
       
       const apiUrl = this.configService.getApiUrl() + '/api/asistencia/procesar';
       const response = await this.http.post<any>(apiUrl, request).toPromise();
       
+      // ⏱️ MEDIR TIEMPO DE RESPUESTA
+      const tiempoTranscurrido = performance.now() - tiempoInicio;
+      console.log(`⚡ API RESPONDIÓ EN: ${tiempoTranscurrido.toFixed(0)} ms (${(tiempoTranscurrido/1000).toFixed(2)} segundos)`);
+      
+      if (tiempoTranscurrido > 500) {
+        console.warn(`⚠️ API MUY LENTA: ${tiempoTranscurrido.toFixed(0)} ms - OBJETIVO: <500ms`);
+      } else {
+        console.log(`✅ API RÁPIDA: ${tiempoTranscurrido.toFixed(0)} ms - DENTRO DEL OBJETIVO`);
+      }
+      
       if (!response.error) {
-        this.mostrarMensaje(`✅ Marcación procesada exitosamente. Ticket: ${response.ticketId}`, 'success');
+        // Mostrar mensaje destacado con el número de ticket hexadecimal
+        this.mostrarMensajeTicket(response.numeroTicket, response.nombreTrabajador);
         console.log('✅ Ticket creado:', response);
       } else {
         // Error al grabar ticket - según prompt-final, este es el ÚNICO caso donde se detiene el proceso
@@ -304,6 +320,14 @@ export class AsistenciaComponent implements OnInit {
       this.procesandoMarcacion = false;
       return; // No ejecutar finally para no limpiar campos
     } finally {
+      // ⏱️ MEDIR TIEMPO TOTAL (incluso con errores)
+      const tiempoTotal = performance.now() - tiempoInicio;
+      console.log(`⏱️ TIEMPO TOTAL DE PROCESAMIENTO: ${tiempoTotal.toFixed(0)} ms (${(tiempoTotal/1000).toFixed(2)} segundos)`);
+      
+      if (tiempoTotal > 1000) {
+        console.error(`🚨 PROCESAMIENTO MUY LENTO: ${tiempoTotal.toFixed(0)} ms - REVISAR URGENTE`);
+      }
+      
       this.procesandoMarcacion = false;
       
       // Solo limpiar campos si llegamos aquí (sin errores críticos)
@@ -399,9 +423,26 @@ export class AsistenciaComponent implements OnInit {
   private mostrarMensaje(mensaje: string, tipo: 'success' | 'error') {
     this.snackBar.open(mensaje, '', {
       duration: tipo === 'success' ? 1000 : 3000, // 1 seg para éxito, 3 seg para errores
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
+      horizontalPosition: 'end', // Parte derecha de la pantalla
+      verticalPosition: 'top',   // Parte superior de la pantalla
       panelClass: tipo === 'success' ? 'success-snackbar' : 'error-snackbar'
     });
+  }
+
+  /**
+   * Mostrar mensaje destacado con el número de ticket generado
+   */
+  private mostrarMensajeTicket(numeroTicket: string, nombreTrabajador: string) {
+    const mensaje = `🎫 TICKET GENERADO: ${numeroTicket}\n✅ ${nombreTrabajador}\n📋 Procesando en segundo plano...`;
+    
+    this.snackBar.open(mensaje, '✅ ACEPTAR', {
+      duration: 8000, // 8 segundos para que lean el número de ticket
+      horizontalPosition: 'end', // Parte derecha de la pantalla  
+      verticalPosition: 'top',   // Parte superior de la pantalla
+      panelClass: 'ticket-success-snackbar'
+    });
+
+    // También mostrar en consola para debugging
+    console.log(`🎫 TICKET GENERADO: ${numeroTicket} para ${nombreTrabajador}`);
   }
 }

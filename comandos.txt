@@ -10,8 +10,12 @@ docker compose up --build -d
 docker compose restart sigre-frontend
 docker compose restart asistencia-service
 
+
+Este comando es resetear todos los microservicios
+========================================================================================
 docker compose down              # Detiene contenedores, MANTIENE volúmenes
 docker compose up --build -d    # Reconstruye y levanta todo
+========================================================================================
 
 #compila solo el frontend
 docker compose up sigre-frontend --build -d
@@ -47,6 +51,7 @@ docker logs products-service > '..\01. documentacion\logs\log-products-service.t
 docker logs asistencia-service > '..\01. documentacion\logs\log-asistencia-service.txt';
 docker logs config-server > '..\01. documentacion\logs\log-config-server.txt';
 docker logs sync-service > '..\01. documentacion\logs\log-sync-service.txt';
+docker logs sigre-frontend > '..\01. documentacion\logs\log-sigre-frontend.txt';
 
 
 # 1. Verificar que el frontend esté funcionando
@@ -90,3 +95,13 @@ docker compose up -d sigre-frontend
 
 docker compose down asistencia-service sigre-frontend api-gateway
 docker compose up --build -d asistencia-service sigre-frontend  api-gateway
+
+docker compose down asistencia-service sigre-frontend
+docker compose up --build -d asistencia-service sigre-frontend
+docker compose restart discovery-server
+
+docker compose down asistencia-service
+docker compose up --build -d asistencia-service
+
+docker compose down asistencia-service sigre-frontend sync-service
+docker compose up --build -d asistencia-service sigre-frontend sync-service

@@ -18,9 +18,9 @@ import java.time.LocalDateTime;
 public class MarcacionResponse {
     
     /**
-     * ID del ticket generado
+     * Número de ticket generado (PK hexadecimal)
      */
-    private Long ticketId;
+    private String numeroTicket;
     
     /**
      * Código de seguimiento para el ticket
@@ -30,7 +30,7 @@ public class MarcacionResponse {
     /**
      * Estado del ticket
      */
-    private String estado; // "PENDIENTE", "PROCESANDO", "COMPLETADO", "ERROR"
+    private String estado; // "P"=Pendiente, "R"=Procesando, "C"=Completado, "E"=Error
     
     /**
      * Mensaje para mostrar al usuario
@@ -71,11 +71,11 @@ public class MarcacionResponse {
     /**
      * Factory method para respuesta exitosa
      */
-    public static MarcacionResponse exitoso(Long ticketId, String nombreTrabajador, String codigoTrabajador) {
+    public static MarcacionResponse exitoso(String numeroTicket, String nombreTrabajador, String codigoTrabajador) {
         return MarcacionResponse.builder()
-                .ticketId(ticketId)
-                .codigoSeguimiento(generarCodigoSeguimiento(ticketId))
-                .estado("PENDIENTE")
+                .numeroTicket(numeroTicket)
+                .codigoSeguimiento(numeroTicket) // El número de ticket hexadecimal ES el código de seguimiento
+                .estado("P") // P = Pendiente
                 .mensaje("Datos recibidos correctamente. Ticket generado.")
                 .nombreTrabajador(nombreTrabajador)
                 .codigoTrabajador(codigoTrabajador)
@@ -90,9 +90,9 @@ public class MarcacionResponse {
      */
     public static MarcacionResponse error(String mensajeError, String codigoInput) {
         return MarcacionResponse.builder()
-                .ticketId(null)
+                .numeroTicket(null)
                 .codigoSeguimiento(null)
-                .estado("ERROR")
+                .estado("E") // E = Error
                 .mensaje("Error en validación inicial")
                 .nombreTrabajador(null)
                 .codigoTrabajador(null)
@@ -101,12 +101,5 @@ public class MarcacionResponse {
                 .mensajeError(mensajeError)
                 .tiempoEstimadoSegundos(0)
                 .build();
-    }
-    
-    /**
-     * Generar código de seguimiento único
-     */
-    private static String generarCodigoSeguimiento(Long ticketId) {
-        return String.format("TKT-%06d-%d", ticketId, System.currentTimeMillis() % 10000);
     }
 }
