@@ -6,6 +6,7 @@ import com.sigre.sync.repository.local.AsistenciaHt580LocalRepository;
 import com.sigre.sync.repository.remote.AsistenciaHt580RemoteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,9 @@ public class LocalToRemoteSyncService {
     
     private final AsistenciaHt580LocalRepository asistenciaLocalRepository;
     private final AsistenciaHt580RemoteRepository asistenciaRemoteRepository;
+    
+    @Value("${sync.config.max-retries:1}")
+    private int maxRetries;
     
     private final List<String> erroresSincronizacion = new ArrayList<>();
     private int registrosInsertados = 0;
@@ -38,9 +42,11 @@ public class LocalToRemoteSyncService {
             // Resetear contadores
             resetearContadores();
             
-            // Obtener registros pendientes de sincronización
-            List<AsistenciaHt580Local> asistenciasPendientes = asistenciaLocalRepository.findByEstadoSyncOrEstadoSyncIsNull("P");
-            log.info("📊 Encontrados {} registros de asistencia pendientes", asistenciasPendientes.size());
+            // Obtener registros pendientes + errores con reintentos disponibles
+            List<AsistenciaHt580Local> asistenciasPendientes = asistenciaLocalRepository.findPendientesParaSincronizacion(maxRetries);
+            log.info("📊 Encontrados {} registros de asistencia pendientes (incluyendo {} reintentos)", 
+                    asistenciasPendientes.size(), 
+                    asistenciasPendientes.stream().mapToInt(a -> "E".equals(a.getEstadoSync()) ? 1 : 0).sum());
             
             // Procesar cada registro de asistencia
             for (AsistenciaHt580Local asistenciaLocal : asistenciasPendientes) {

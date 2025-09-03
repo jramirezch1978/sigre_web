@@ -57,10 +57,6 @@ public class AsistenciaHt580 {
     @Column(name = "OBSERVACIONES", length = 200)
     private String observaciones;
     
-    @Column(name = "ESTADO_PROCESAMIENTO", length = 1, nullable = false)
-    @Builder.Default
-    private String estadoProcesamiento = "P"; // P=Pendiente, R=Procesado, E=Error
-    
     @Column(name = "FLAG_ESTADO", length = 1, nullable = false)
     @Builder.Default
     private String flagEstado = "1";
@@ -102,11 +98,6 @@ public class AsistenciaHt580 {
         if (intentosSync == null) {
             intentosSync = 0;
             System.out.println("🔍 DEBUG intentosSync seteado a 0");
-        }
-        // Marcar como pendiente de procesamiento para tickets de asistencia
-        if (estadoProcesamiento == null) {
-            estadoProcesamiento = "P"; // P = Pendiente
-            System.out.println("🔍 DEBUG estadoProcesamiento seteado a 'P'");
         }
         
         System.out.println("🔍 DEBUG @PrePersist FINAL - estadoSync: '" + estadoSync + "', intentosSync: " + intentosSync);

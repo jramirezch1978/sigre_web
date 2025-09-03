@@ -119,8 +119,8 @@ public class TicketAsistenciaService {
                     .codOrigen(request.getCodOrigen())
                     .codTrabajador(validacion.getTrabajador().getCodTrabajador())
                     .nombreTrabajador(validacion.getTrabajador().getNombreCompleto())
-                    .tipoMarcaje(determinarTipoMarcacion(request.getTipoMarcaje())) // ✅ CORREGIDO - Guardar número 1-2
-                    .tipoMovimiento(mapearTipoMovimientoANumero(request.getTipoMovimiento())) // ✅ CORREGIDO - Guardar número 1-8
+                    .tipoMarcaje(request.getTipoMarcaje()) // ✅ Controller ya envía número 1-2
+                    .tipoMovimiento(request.getTipoMovimiento()) // ✅ Controller ya envía número 1-8
                     .direccionIp(request.getDireccionIp())
                     .racionesSeleccionadas(convertirRacionesAJson(request.getRacionesSeleccionadas()))
                     .fechaMarcacion(request.getFechaMarcacion() != null ? request.getFechaMarcacion() : ahora)
@@ -131,6 +131,7 @@ public class TicketAsistenciaService {
                     .build();
             
             // Debug logging eliminado - problema de tipoMovimiento resuelto
+            
             
             // GUARDAR TICKET INMEDIATAMENTE
             long inicioGuardado = System.currentTimeMillis();
@@ -252,7 +253,6 @@ public class TicketAsistenciaService {
                     .tipoMarcacion(ticket.getTipoMarcaje()) // ✅ ticket ya tiene número 1-2 mapeado
                     .turno(turnoService.determinarTurnoActual(ticket.getFechaMarcacion()))
                     .lecturaPda(null) // No aplica para web
-                    .estadoProcesamiento("P") // P = Pendiente (para tickets de asistencia)
                     .build();
             
             asistencia = asistenciaRepository.save(asistencia);
@@ -460,7 +460,6 @@ public class TicketAsistenciaService {
                     .direccionIp("AUTO-CLOSE")
                     .flagVerifyType("1")
                     .turno(ultimaAsistencia.getTurno())
-                    .estadoProcesamiento("P") // P = Pendiente (para procesamiento posterior)
                     .flagEstado("1")
                     .observaciones(String.format("Auto-cierre - %d horas transcurridas", horasTranscurridas))
                     .build();

@@ -19,10 +19,21 @@ public interface AsistenciaHt580LocalRepository extends JpaRepository<Asistencia
     List<AsistenciaHt580Local> findByEstadoSyncOrEstadoSyncIsNull(String estadoSync);
     
     /**
-     * Contar registros pendientes
+     * Buscar registros pendientes + errores que aún pueden reintentarse
+     * Incluye: estado_sync='P', NULL, y 'E' con intentos <= maxRetries
      */
-    @Query("SELECT COUNT(a) FROM AsistenciaHt580Local a WHERE a.estadoSync = 'P' OR a.estadoSync IS NULL")
-    long countPendientes();
+    @Query("SELECT a FROM AsistenciaHt580Local a WHERE " +
+           "(a.estadoSync = 'P' OR a.estadoSync IS NULL) OR " +
+           "(a.estadoSync = 'E' AND a.intentosSync <= :maxRetries)")
+    List<AsistenciaHt580Local> findPendientesParaSincronizacion(@Param("maxRetries") int maxRetries);
+    
+    /**
+     * Contar registros pendientes (incluyendo errores con reintentos disponibles)
+     */
+    @Query("SELECT COUNT(a) FROM AsistenciaHt580Local a WHERE " +
+           "(a.estadoSync = 'P' OR a.estadoSync IS NULL) OR " +
+           "(a.estadoSync = 'E' AND a.intentosSync <= :maxRetries)")
+    long countPendientesParaSincronizacion(@Param("maxRetries") int maxRetries);
     
     /**
      * Marcar como sincronizado

@@ -50,9 +50,32 @@ public class MarcacionController {
             log.info("📥 Nueva solicitud de marcación - Código: {} | Tipo: {} | IP: {}", 
                     request.getCodigoInput(), request.getTipoMarcaje(), request.getDireccionIp());
             
-            // Debug logging removido - problema diagnosticado
+            // 🔍 DEBUG FRONTEND - Ver todos los valores que llegan del frontend
+            log.info("🔍 DEBUG Frontend - codigoInput: '{}' (len={})", request.getCodigoInput(), request.getCodigoInput() != null ? request.getCodigoInput().length() : "null");
+            log.info("🔍 DEBUG Frontend - codOrigen: '{}' (len={})", request.getCodOrigen(), request.getCodOrigen() != null ? request.getCodOrigen().length() : "null");
+            log.info("🔍 DEBUG Frontend - tipoMarcaje: '{}' (len={})", request.getTipoMarcaje(), request.getTipoMarcaje() != null ? request.getTipoMarcaje().length() : "null");
+            log.info("🔍 DEBUG Frontend - tipoMovimiento: '{}' (len={})", request.getTipoMovimiento(), request.getTipoMovimiento() != null ? request.getTipoMovimiento().length() : "null");
+            log.info("🔍 DEBUG Frontend - direccionIp: '{}' (len={})", request.getDireccionIp(), request.getDireccionIp() != null ? request.getDireccionIp().length() : "null");
             
-            // Validar request básico
+            // ✅ MAPEAR a números ANTES de enviar al service
+            String tipoMarcajeNumerico = mapearTipoMarcajeANumero(request.getTipoMarcaje());
+            String tipoMovimientoNumerico = mapearTipoMovimientoANumero(request.getTipoMovimiento());
+            
+            log.info("🔍 DEBUG Mapeo - tipoMarcaje: '{}' → '{}' (len={})", request.getTipoMarcaje(), tipoMarcajeNumerico, tipoMarcajeNumerico.length());
+            log.info("🔍 DEBUG Mapeo - tipoMovimiento: '{}' → '{}' (len={})", request.getTipoMovimiento(), tipoMovimientoNumerico, tipoMovimientoNumerico.length());
+            
+            // Crear request con valores numéricos
+            MarcacionRequest requestNumerico = MarcacionRequest.builder()
+                    .codigoInput(request.getCodigoInput())
+                    .codOrigen(request.getCodOrigen())
+                    .tipoMarcaje(tipoMarcajeNumerico)  // ✅ NÚMERO 1-2
+                    .tipoMovimiento(tipoMovimientoNumerico)  // ✅ NÚMERO 1-8
+                    .direccionIp(request.getDireccionIp())
+                    .fechaMarcacion(request.getFechaMarcacion())
+                    .racionesSeleccionadas(request.getRacionesSeleccionadas())
+                    .build();
+            
+            // Validar request básico (con request original)
             if (request.getCodigoInput() == null || request.getCodigoInput().trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(MarcacionResponse.error("Código de entrada requerido", ""));
@@ -73,8 +96,8 @@ public class MarcacionController {
                 request.setDireccionIp(obtenerIpReal(httpRequest));
             }
             
-            // Crear ticket (INMEDIATO - No bloquea)
-            MarcacionResponse response = ticketService.crearTicketMarcacion(request);
+            // Crear ticket (INMEDIATO - No bloquea) con valores ya mapeados a números
+            MarcacionResponse response = ticketService.crearTicketMarcacion(requestNumerico);
             
             if (response.isError()) {
                 log.warn("⚠️ Error en validación: {}", response.getMensajeError());
@@ -300,5 +323,43 @@ public class MarcacionController {
         private String tipoInput;
         private String mensajeError;
         private int ultimoMovimiento; // ✅ AGREGADO - Para filtrar movimientos sin llamada adicional
+    }
+    
+    /**
+     * Mapear tipo de marcaje del frontend (string) a número (1-2) 
+     */
+    private String mapearTipoMarcajeANumero(String tipoMarcaje) {
+        if (tipoMarcaje == null) return "1";
+        
+        return switch (tipoMarcaje.trim()) {
+            case "puerta-principal" -> "1";
+            case "area-produccion" -> "2";
+            default -> {
+                log.warn("⚠️ Tipo marcaje no reconocido: '{}', usando 1 por defecto", tipoMarcaje);
+                yield "1";
+            }
+        };
+    }
+    
+    /**
+     * Mapear tipo de movimiento del frontend (string) a número (1-8)
+     */
+    private String mapearTipoMovimientoANumero(String tipoMovimiento) {
+        if (tipoMovimiento == null) return "1";
+        
+        return switch (tipoMovimiento.trim()) {
+            case "INGRESO_PLANTA" -> "1";
+            case "SALIDA_PLANTA" -> "2";
+            case "SALIDA_ALMORZAR" -> "3";
+            case "REGRESO_ALMORZAR" -> "4";
+            case "SALIDA_COMISION" -> "5";
+            case "RETORNO_COMISION" -> "6";
+            case "INGRESO_PRODUCCION" -> "7";
+            case "SALIDA_PRODUCCION" -> "8";
+            default -> {
+                log.warn("⚠️ Tipo movimiento no reconocido: '{}', usando 1 por defecto", tipoMovimiento);
+                yield "1";
+            }
+        };
     }
 }
