@@ -82,31 +82,40 @@ public class LocalToRemoteSyncService {
      * Procesar un registro de asistencia individual
      */
     private void procesarAsistencia(AsistenciaHt580Local asistenciaLocal) {
-        String reckey = asistenciaLocal.getReckey();
-        
+        String externalId = asistenciaLocal.getExternalId();
+        boolean existeEnRemote = false;
         try {
             // Verificar si ya existe en Oracle
-            boolean existeEnRemote = asistenciaRemoteRepository.existsById(reckey);
+            if (externalId != null) {
+                existeEnRemote = asistenciaRemoteRepository.existsById(externalId);
+            } else {
+                existeEnRemote = false;
+            }
             
             if (!existeEnRemote) {
                 // INSERTAR en Oracle
                 AsistenciaHt580Remote asistenciaRemote = convertirLocalToRemote(asistenciaLocal);
-                asistenciaRemoteRepository.save(asistenciaRemote);
+                AsistenciaHt580Remote asistenciaSaved = asistenciaRemoteRepository.save(asistenciaRemote);
                 
-                // Marcar como sincronizado en local
+                // ✅ CAPTURAR el reckey generado por Oracle y guardar en external_id
+                String oracleReckey = asistenciaSaved.getReckey();
+                log.info("🔄 Oracle generó ID: {} para registro local: {}", oracleReckey, asistenciaLocal.getReckey());
+                
+                // ✅ ACTUALIZAR registro con external_id de Oracle (NO eliminar)
+                asistenciaLocal.setExternalId(oracleReckey); // ✅ ID de Oracle en external_id
                 asistenciaLocal.setEstadoSync("S");
                 asistenciaLocal.setFechaSync(LocalDateTime.now());
                 asistenciaLocalRepository.save(asistenciaLocal);
                 
                 registrosInsertados++;
-                log.debug("➕ Insertada asistencia en Oracle: {}", reckey);
+                log.debug("➕ Insertada asistencia en Oracle: {} con external_id: {}", asistenciaLocal.getReckey(), oracleReckey);
                 
             } else {
                 // Ya existe, marcar como sincronizado
                 asistenciaLocal.setEstadoSync("S");
                 asistenciaLocal.setFechaSync(LocalDateTime.now());
                 asistenciaLocalRepository.save(asistenciaLocal);
-                log.debug("⏭️ Asistencia ya existe en Oracle: {}", reckey);
+                log.debug("⏭️ Asistencia ya existe en Oracle: {}", asistenciaLocal.getReckey());
             }
             
         } catch (Exception e) {
@@ -115,13 +124,13 @@ public class LocalToRemoteSyncService {
             
             String errorDetallado = String.format(
                 "Error sincronizando asistencia RECKEY=%s, COD_ORIGEN=%s, CODIGO=%s: %s", 
-                reckey, asistenciaLocal.getCodOrigen(), asistenciaLocal.getCodigo(), e.getMessage()
+                asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(), asistenciaLocal.getCodigo(), e.getMessage()
             );
             
             erroresSincronizacion.add(errorDetallado);
             
             log.error("❌ Error procesando asistencia {} (COD_ORIGEN={}): {}", 
-                     reckey, asistenciaLocal.getCodOrigen(), e.getMessage());
+                     asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(), e.getMessage());
             
             // Marcar registro como error en local para reintento
             asistenciaLocal.setEstadoSync("E"); // E = Error
@@ -129,7 +138,7 @@ public class LocalToRemoteSyncService {
             asistenciaLocalRepository.save(asistenciaLocal);
             
             log.info("🔄 Registro marcado como ERROR para reintento | RECKEY: {} | Intento: {}", 
-                    reckey, asistenciaLocal.getIntentosSync());
+                    asistenciaLocal.getReckey(), asistenciaLocal.getIntentosSync());
         }
     }
     

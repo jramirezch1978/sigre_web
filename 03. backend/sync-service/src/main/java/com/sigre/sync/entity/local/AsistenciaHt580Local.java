@@ -19,8 +19,11 @@ import java.util.UUID;
 public class AsistenciaHt580Local {
     
     @Id
-    @Column(name = "RECKEY", length = 36)
+    @Column(name = "RECKEY", length = 12) // ID PostgreSQL
     private String reckey;
+    
+    @Column(name = "EXTERNAL_ID", length = 12, unique = true)
+    private String externalId; // ID único de Oracle (único)
     
     @Column(name = "COD_ORIGEN", length = 2)
     private String codOrigen;
