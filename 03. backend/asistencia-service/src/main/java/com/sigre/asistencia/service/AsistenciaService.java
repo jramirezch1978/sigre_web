@@ -53,7 +53,7 @@ public class AsistenciaService {
             LocalDateTime ahora = LocalDateTime.now();
             AsistenciaHt580 asistencia = AsistenciaHt580.builder()
                     .reckey(reckey)
-                    .codOrigen("01") // Código origen por defecto
+                    .codOrigen(request.getCodOrigen() != null ? request.getCodOrigen() : "SE") // ✅ Usar codOrigen del request, fallback a SE
                     .codigo(request.getCodTrabajador())
                     .flagInOut(flagInOut)
                     .fechaRegistro(ahora)
@@ -144,7 +144,6 @@ public class AsistenciaService {
         return switch (tipoMarcaje.trim()) {
             case "puerta-principal" -> "1";
             case "area-produccion" -> "2";
-            case "comedor" -> "3"; // Si existe
             default -> {
                 log.warn("⚠️ Tipo marcaje no reconocido: '{}', usando 1 por defecto", tipoMarcaje);
                 yield "1";

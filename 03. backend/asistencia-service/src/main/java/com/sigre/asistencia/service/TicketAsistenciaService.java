@@ -119,13 +119,13 @@ public class TicketAsistenciaService {
                     .codOrigen(request.getCodOrigen())
                     .codTrabajador(validacion.getTrabajador().getCodTrabajador())
                     .nombreTrabajador(validacion.getTrabajador().getNombreCompleto())
-                    .tipoMarcaje(request.getTipoMarcaje())
-                    .tipoMovimiento(request.getTipoMovimiento()) // ✅ CORREGIDO - SÍ existe en TicketAsistencia
+                    .tipoMarcaje(determinarTipoMarcacion(request.getTipoMarcaje())) // ✅ CORREGIDO - Guardar número 1-2
+                    .tipoMovimiento(mapearTipoMovimientoANumero(request.getTipoMovimiento())) // ✅ CORREGIDO - Guardar número 1-8
                     .direccionIp(request.getDireccionIp())
                     .racionesSeleccionadas(convertirRacionesAJson(request.getRacionesSeleccionadas()))
                     .fechaMarcacion(request.getFechaMarcacion() != null ? request.getFechaMarcacion() : ahora)
                     .estadoProcesamiento("P") // P = Pendiente
-                    .usuarioSistema(codUsuarioSistema) // ✅ PARÁMETRO configurable
+                    .usuarioSistema(codUsuarioSistema.length() > 6 ? codUsuarioSistema.substring(0, 6) : codUsuarioSistema) // ✅ CHAR(6) límite
                     .intentosProcesamiento(0)
                     .fechaCreacion(ahora) // Setear explícitamente para evitar null
                     .build();
@@ -241,15 +241,15 @@ public class TicketAsistenciaService {
             
             AsistenciaHt580 asistencia = AsistenciaHt580.builder()
                     .reckey(reckey)
-                    .codOrigen("01") // Código origen para marcaciones web
+                    .codOrigen(ticket.getCodOrigen()) // ✅ CORREGIDO - usar cod_origen del frontend
                     .codigo(ticket.getCodTrabajador())
-                    .flagInOut(mapearTipoMovimientoANumero(ticket.getTipoMovimiento()))
+                    .flagInOut(ticket.getTipoMovimiento()) // ✅ CORREGIDO - ticket ya tiene número 1-8
                     .fechaRegistro(LocalDateTime.now())
                     .fechaMovimiento(ticket.getFechaMarcacion())
                     .codUsuario(codUsuarioSistema) // ✅ PARÁMETRO configurable (no usar ticket.getUsuarioSistema())
                     .direccionIp(ticket.getDireccionIp())
                     .flagVerifyType("1") // Web validation
-                    .tipoMarcacion(determinarTipoMarcacion(ticket.getTipoMarcaje()))
+                    .tipoMarcacion(ticket.getTipoMarcaje()) // ✅ ticket ya tiene número 1-2 mapeado
                     .turno(turnoService.determinarTurnoActual(ticket.getFechaMarcacion()))
                     .lecturaPda(null) // No aplica para web
                     .estadoProcesamiento("P") // P = Pendiente (para tickets de asistencia)
@@ -649,7 +649,6 @@ public class TicketAsistenciaService {
         return switch (tipoMarcaje.trim()) {
             case "puerta-principal" -> "1";
             case "area-produccion" -> "2";
-            case "comedor" -> "3"; // Si existe
             default -> {
                 log.warn("⚠️ Tipo marcaje no reconocido: '{}', usando 1 por defecto", tipoMarcaje);
                 yield "1";

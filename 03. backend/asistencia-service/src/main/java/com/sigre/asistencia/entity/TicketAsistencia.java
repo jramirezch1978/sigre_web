@@ -33,20 +33,20 @@ public class TicketAsistencia {
     @Column(name = "tipo_input", nullable = false, length = 20)
     private String tipoInput; // "DNI", "CODIGO_TRABAJADOR", "CODIGO_TARJETA"
     
-    @Column(name = "cod_origen", nullable = false, length = 2)
-    private String codOrigen; // Código de origen del dispositivo/ubicación (del frontend)
+    @Column(name = "cod_origen", columnDefinition = "CHAR(2)", nullable = false)
+    private String codOrigen; // Código de origen del dispositivo/ubicación (SE, WE, etc.)
     
-    @Column(name = "cod_trabajador", nullable = false, length = 8)
+    @Column(name = "cod_trabajador", columnDefinition = "CHAR(8)", nullable = false)
     private String codTrabajador; // Código del trabajador encontrado - FK hacia Maestro
     
     @Column(name = "nombre_trabajador", nullable = false, length = 200)
     private String nombreTrabajador;
     
-    @Column(name = "tipo_marcaje", nullable = false, length = 50)
-    private String tipoMarcaje; // "puerta-principal", "area-produccion", "comedor"
+    @Column(name = "tipo_marcaje", columnDefinition = "CHAR(1)", nullable = false)
+    private String tipoMarcaje; // Números: 1=puerta-principal, 2=area-produccion, 3=comedor
     
-    @Column(name = "tipo_movimiento", nullable = false, length = 50)
-    private String tipoMovimiento; // "INGRESO_PLANTA", "SALIDA_PLANTA", etc.
+    @Column(name = "tipo_movimiento", columnDefinition = "CHAR(1)", nullable = false)
+    private String tipoMovimiento; // Números del 1-8 según tipo: 1=INGRESO_PLANTA, 2=SALIDA_PLANTA, etc.
     
     @Column(name = "direccion_ip", nullable = false, length = 20)
     private String direccionIp; // IP del dispositivo marcador
@@ -57,7 +57,7 @@ public class TicketAsistencia {
     @Column(name = "fecha_marcacion", nullable = false)
     private LocalDateTime fechaMarcacion;
     
-    @Column(name = "estado_procesamiento", nullable = false, length = 1)
+    @Column(name = "estado_procesamiento", columnDefinition = "CHAR(1)", nullable = false)
     @Builder.Default
     private String estadoProcesamiento = "P"; // P=Pendiente, R=Procesando, C=Completado, E=Error
     
@@ -73,7 +73,7 @@ public class TicketAsistencia {
     @Builder.Default
     private Integer intentosProcesamiento = 0;
     
-    @Column(name = "usuario_sistema", nullable = false, length = 20)
+    @Column(name = "usuario_sistema", columnDefinition = "CHAR(6)", nullable = false)
     @Builder.Default
     private String usuarioSistema = "work"; // Usuario para integraciones externas
     
