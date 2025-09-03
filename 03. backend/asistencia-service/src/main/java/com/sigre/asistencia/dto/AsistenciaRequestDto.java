@@ -17,7 +17,7 @@ public class AsistenciaRequestDto {
     private String codTrabajador;
     
     @NotBlank(message = "El tipo de movimiento es obligatorio")
-    @Pattern(regexp = "^(INGRESO_PLANTA|SALIDA_PLANTA|INGRESO_ALMORZAR|SALIDA_ALMORZAR|INGRESO_PRODUCCION|SALIDA_PRODUCCION)$", 
+    @Pattern(regexp = "^(INGRESO_PLANTA|SALIDA_PLANTA|SALIDA_ALMORZAR|REGRESO_ALMORZAR|SALIDA_COMISION|RETORNO_COMISION|INGRESO_PRODUCCION|SALIDA_PRODUCCION)$", 
              message = "Tipo de movimiento no válido")
     private String tipoMovimiento;
     

@@ -8,6 +8,7 @@ export interface CompanyConfig {
   logoPath: string;
   sector: string;
   sucursal: string;
+  codOrigen: string;
 }
 
 export interface ApiConfig {
@@ -103,6 +104,11 @@ export class ConfigService {
   getCompanySucursal(): string {
     const config = this.configSubject.value;
     return config?.company?.sucursal || 'PIURA - SECHURA';
+  }
+
+  getCodOrigen(): string {
+    const config = this.configSubject.value;
+    return config?.company?.codOrigen || 'SE';
   }
 
   getApiUrl(endpoint?: 'time' | 'raciones'): string {

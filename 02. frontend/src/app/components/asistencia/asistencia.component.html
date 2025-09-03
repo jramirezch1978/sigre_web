@@ -27,11 +27,13 @@
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>DNI, Código de Trabajador o Código de Tarjeta</mat-label>
             <input 
+              #codigoInputRef
               matInput 
               [(ngModel)]="codigoInput" 
               placeholder="Ej: 12345678, EMP001, o 123456789"
               (keyup.enter)="validarCodigo()"
               maxlength="20"
+              autofocus
               class="codigo-input"
               [disabled]="procesandoValidacion"
             >
@@ -93,6 +95,7 @@
     *ngIf="mostrarPopupMovimientos"
     [tipoMarcaje]="tipoMarcaje"
     [nombreTrabajador]="nombreTrabajador"
+    [ultimoMovimiento]="ultimoMovimiento"
     (movimientoSeleccionado)="onMovimientoSeleccionado($event)"
     (cerrar)="onPopupCerrado('movimientos')"
   ></app-popup-movimientos>
@@ -105,4 +108,17 @@
     (racionOmitida)="onRacionOmitida()"
     (cerrar)="onPopupCerrado('raciones')"
   ></app-popup-raciones>
+
+  <!-- Loader de Procesamiento API -->
+  <div class="api-loader-overlay" *ngIf="procesandoMarcacion">
+    <div class="api-loader-content">
+      <mat-spinner diameter="60" color="primary"></mat-spinner>
+      <div class="loader-text">
+        <h3>🎫 Generando Ticket</h3>
+        <p>Procesando marcación para:</p>
+        <p class="worker-name">{{ nombreTrabajador }}</p>
+        <p class="processing-info">Por favor, espere un momento...</p>
+      </div>
+    </div>
+  </div>
 </div>

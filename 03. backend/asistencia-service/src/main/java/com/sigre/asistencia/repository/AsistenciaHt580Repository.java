@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580, String> {
@@ -31,6 +32,12 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
            "ORDER BY a.fechaMovimiento DESC " +
            "LIMIT 1")
     AsistenciaHt580 findUltimaAsistenciaByTrabajador(@Param("codigo") String codigo);
+    
+    /**
+     * Buscar última asistencia de un trabajador por código (con Optional)
+     * ORDENADO POR FECHA DE REGISTRO (no fecha de movimiento)
+     */
+    Optional<AsistenciaHt580> findTopByCodigoOrderByFechaRegistroDesc(String codigo);
     
     /**
      * Buscar asistencias en un rango de fechas
@@ -65,4 +72,17 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
      * Verificar si existe un RECKEY (para generar únicos)
      */
     boolean existsByReckey(String reckey);
+    
+    /**
+     * Obtener ÚLTIMOS movimientos de TODOS los trabajadores
+     * Para proceso de auto-cierre masivo cada 30 minutos
+     * ORDENADO POR FECHA DE REGISTRO (no fecha de movimiento)
+     */
+    @Query("SELECT a FROM AsistenciaHt580 a " +
+           "WHERE a.fechaRegistro = (" +
+           "    SELECT MAX(a2.fechaRegistro) FROM AsistenciaHt580 a2 " +
+           "    WHERE a2.codigo = a.codigo" +
+           ") " +
+           "ORDER BY a.codigo ASC")
+    List<AsistenciaHt580> findUltimosMovimientosPorTrabajador();
 }

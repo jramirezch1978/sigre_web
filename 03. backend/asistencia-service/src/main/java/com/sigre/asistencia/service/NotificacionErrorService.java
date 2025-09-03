@@ -190,7 +190,7 @@ public class NotificacionErrorService {
                 ticket.getCodTrabajador(),
                 ticket.getCodigoInput(),
                 ticket.getTipoMarcaje(),
-                ticket.getTipoMovimiento(),
+                "Error en procesamiento", // No usar getTipoMovimiento(), campo eliminado
                 ticket.getDireccionIp(),
                 ticket.getFechaMarcacion().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
                 ticket.getIntentosProcesamiento(),

@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class TurnoLocal {
     
     @Id
-    @Column(name = "TURNO", length = 4)
+    @Column(name = "TURNO", columnDefinition = "CHAR(4)")
     private String turno;
     
     @Column(name = "HORA_INICIO_NORM")
@@ -84,10 +84,10 @@ public class TurnoLocal {
     @Column(name = "TOLERANCIA", precision = 2)
     private Integer tolerancia;
     
-    @Column(name = "TIPO_TURNO", length = 1)
+    @Column(name = "TIPO_TURNO", columnDefinition = "CHAR(1)")
     private String tipoTurno;
     
-    @Column(name = "FLAG_ESTADO", length = 1)
+    @Column(name = "FLAG_ESTADO", columnDefinition = "CHAR(1)")
     private String flagEstado;
     
     @Column(name = "DESCRIPCION", length = 40)
@@ -96,14 +96,14 @@ public class TurnoLocal {
     @Column(name = "COD_USR", length = 6)
     private String codUsuario;
     
-    @Column(name = "FLAG_REPLICACION", length = 1)
+    @Column(name = "FLAG_REPLICACION", columnDefinition = "CHAR(1)")
     private String flagReplicacion;
     
     // Columnas de control de sincronización
     @Column(name = "fecha_sync")
     private LocalDateTime fechaSync;
     
-    @Column(name = "estado_sync", length = 1)
+    @Column(name = "estado_sync", columnDefinition = "CHAR(1)")
     @Builder.Default
     private String estadoSync = "S"; // S=Sincronizado, P=Pendiente, E=Error
     

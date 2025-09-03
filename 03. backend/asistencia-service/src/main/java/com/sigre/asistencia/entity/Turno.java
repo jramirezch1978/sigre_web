@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class Turno {
     
     @Id
-    @Column(name = "TURNO", length = 4)
+    @Column(name = "TURNO", columnDefinition = "CHAR(4)")
     private String turno; // PK - Código de turno (ej: "001", "002", "NOC")
     
     @Column(name = "HORA_INICIO_NORM")
@@ -85,10 +85,10 @@ public class Turno {
     @Builder.Default
     private Integer tolerancia = 0;
     
-    @Column(name = "TIPO_TURNO", length = 1)
+    @Column(name = "TIPO_TURNO", columnDefinition = "CHAR(1)")
     private String tipoTurno;
     
-    @Column(name = "FLAG_ESTADO", length = 1)
+    @Column(name = "FLAG_ESTADO", columnDefinition = "CHAR(1)")
     @Builder.Default
     private String flagEstado = "1";
     

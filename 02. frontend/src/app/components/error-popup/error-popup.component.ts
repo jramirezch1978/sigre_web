@@ -9,7 +9,8 @@ export interface ErrorData {
   titulo: string;
   mensaje: string;
   codigoIngresado: string;
-  tipoError: 'validacion' | 'procesamiento';
+  tipoError: 'validacion' | 'procesamiento' | 'tiempo-minimo';
+  trabajadorInfo?: string; // Opcional - para errores de tiempo mínimo
 }
 
 @Component({
@@ -40,9 +41,21 @@ export interface ErrorData {
             <strong>Código ingresado:</strong> {{ data.codigoIngresado }}
           </div>
           
-          <div class="help-message">
+          <!-- Información específica para error de tiempo mínimo -->
+          <div class="trabajador-info" *ngIf="data.tipoError === 'tiempo-minimo' && data.trabajadorInfo">
+            <mat-icon class="trabajador-icon">person</mat-icon>
+            <strong>Trabajador:</strong> {{ data.trabajadorInfo }}
+          </div>
+          
+          <div class="help-message" *ngIf="data.tipoError !== 'tiempo-minimo'">
             <mat-icon class="help-icon">help_outline</mat-icon>
             <span>Por favor validar con Recursos Humanos</span>
+          </div>
+          
+          <!-- Mensaje específico para tiempo mínimo -->
+          <div class="tiempo-info" *ngIf="data.tipoError === 'tiempo-minimo'">
+            <mat-icon class="tiempo-icon">schedule</mat-icon>
+            <span>Espere el tiempo indicado antes de intentar nuevamente</span>
           </div>
         </mat-card-content>
         
@@ -117,6 +130,40 @@ export interface ErrorData {
     .help-icon {
       margin-right: 8px;
       color: #ff9800;
+    }
+    
+    .trabajador-info {
+      background: #fff3e0;
+      border: 1px solid #ff9800;
+      padding: 12px;
+      border-radius: 6px;
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+    }
+    
+    .trabajador-icon {
+      margin-right: 10px;
+      color: #ff9800;
+      font-size: 20px;
+    }
+    
+    .tiempo-info {
+      background: #f3e5f5;
+      border: 1px solid #9c27b0;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      color: #6a1b9a;
+      font-style: italic;
+    }
+    
+    .tiempo-icon {
+      margin-right: 8px;
+      color: #9c27b0;
     }
     
     .error-actions {

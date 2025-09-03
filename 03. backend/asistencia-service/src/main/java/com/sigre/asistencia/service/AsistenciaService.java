@@ -46,8 +46,8 @@ public class AsistenciaService {
             // Generar RECKEY único
             String reckey = generarReckey();
             
-            // Determinar flag IN/OUT basado en el tipo de movimiento
-            String flagInOut = determinarFlagInOut(request.getTipoMovimiento());
+            // Determinar flag IN/OUT basado en el tipo de movimiento (ahora usa números 1-8)
+            String flagInOut = mapearTipoMovimientoANumero(request.getTipoMovimiento());
             
             // Crear registro de asistencia
             LocalDateTime ahora = LocalDateTime.now();
@@ -63,6 +63,7 @@ public class AsistenciaService {
                     .flagVerifyType("1") // Tipo verificación por defecto
                     .turno(request.getTurno() != null ? request.getTurno() : "0001")
                     .lecturaPda(String.format("Marcaje %s - %s", request.getTipoMarcaje(), request.getTipoMovimiento()))
+                    .tipoMarcacion(determinarTipoMarcacion(request.getTipoMarcaje()))
                     .build();
             
             // Guardar en base de datos
@@ -113,21 +114,41 @@ public class AsistenciaService {
     }
     
     /**
-     * Determinar flag IN/OUT basado en el tipo de movimiento
+     * Mapear tipo de movimiento del frontend (string) a número (1-8) para FLAG_IN_OUT
      */
-    private String determinarFlagInOut(String tipoMovimiento) {
-        switch (tipoMovimiento) {
-            case "INGRESO_PLANTA":
-            case "INGRESO_ALMORZAR":
-            case "INGRESO_PRODUCCION":
-                return "I"; // Ingreso
-            case "SALIDA_PLANTA":
-            case "SALIDA_ALMORZAR":
-            case "SALIDA_PRODUCCION":
-                return "O"; // Salida (Out)
-            default:
-                log.warn("Tipo de movimiento no reconocido: {}, usando 'I' por defecto", tipoMovimiento);
-                return "I";
-        }
+    private String mapearTipoMovimientoANumero(String tipoMovimiento) {
+        if (tipoMovimiento == null) return "1"; // Por defecto ingreso
+        
+        return switch (tipoMovimiento.trim()) {
+            case "INGRESO_PLANTA" -> "1";
+            case "SALIDA_PLANTA" -> "2";
+            case "SALIDA_ALMORZAR" -> "3";
+            case "REGRESO_ALMORZAR" -> "4";
+            case "SALIDA_COMISION" -> "5";
+            case "RETORNO_COMISION" -> "6";
+            case "INGRESO_PRODUCCION" -> "7";
+            case "SALIDA_PRODUCCION" -> "8";
+            default -> {
+                log.warn("⚠️ Tipo movimiento no reconocido: '{}', usando 1 por defecto", tipoMovimiento);
+                yield "1";
+            }
+        };
+    }
+    
+    /**
+     * Determinar tipo de marcación numérico para campo obligatorio
+     */
+    private String determinarTipoMarcacion(String tipoMarcaje) {
+        if (tipoMarcaje == null) return "1"; // Por defecto puerta principal
+        
+        return switch (tipoMarcaje.trim()) {
+            case "puerta-principal" -> "1";
+            case "area-produccion" -> "2";
+            case "comedor" -> "3"; // Si existe
+            default -> {
+                log.warn("⚠️ Tipo marcaje no reconocido: '{}', usando 1 por defecto", tipoMarcaje);
+                yield "1";
+            }
+        };
     }
 }

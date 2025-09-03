@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -49,6 +49,9 @@ export interface Racion {
   styleUrls: ['./asistencia.component.scss']
 })
 export class AsistenciaComponent implements OnInit {
+  
+  @ViewChild('codigoInputRef') codigoInputRef!: ElementRef;
+  
   // Propiedades principales
   codigoInput: string = '';  // Cambié codigoTarjeta por codigoInput más general
   tipoMarcaje: string = '';
@@ -65,6 +68,8 @@ export class AsistenciaComponent implements OnInit {
   mensajeAsistencia = '';
   tipoMovimientoSeleccionado: string = '';
   racionesSeleccionadas: RacionDisponible[] = [];
+  ultimoMovimiento: number = 0;
+  requiereAutoCierre: boolean = false;
   
   // IP del dispositivo
   private deviceIP: string = '';
@@ -89,12 +94,17 @@ export class AsistenciaComponent implements OnInit {
     await this.capturarIPDispositivo();
     
     console.log('🔧 Componente inicializado - Tipo marcaje:', this.tipoMarcaje, 'IP:', this.deviceIP);
+    
+    // ENFOCAR input automáticamente para lector de tarjetas de proximidad
+    setTimeout(() => {
+      this.enfocarInput();
+    }, 500); // Delay para que el DOM esté completamente cargado
   }
 
   /**
    * PASO 1: Validar código de entrada (DNI, código trabajador o código tarjeta)
    */
-  async validarCodigo() {
+  validarCodigo() {
     if (!this.codigoInput || this.codigoInput.length < 3) {
       this.mostrarMensaje('Por favor, ingrese un código válido (mínimo 3 caracteres)', 'error');
       return;
@@ -104,25 +114,41 @@ export class AsistenciaComponent implements OnInit {
     
     try {
       const apiUrl = this.configService.getApiUrl() + '/api/asistencia/validar-codigo';
-      
-      const response = await this.http.post<any>(apiUrl, {
-        codigo: this.codigoInput.trim()
-      }).toPromise();
-      
-      if (response.valido) {
-        this.nombreTrabajador = response.nombreTrabajador;
-        this.codigoTrabajador = response.codigoTrabajador;
-        
-        this.mostrarMensaje(`Trabajador encontrado: ${this.nombreTrabajador}`, 'success');
-        console.log('✅ Trabajador validado:', response);
-        
-        // PASO 2: Mostrar popup de tipo de asistencia inmediatamente
-        setTimeout(() => this.mostrarPopupMovimientos = true, 500);
-        
-      } else {
-        // Error de validación - mostrar popup con mensaje específico
-        this.mostrarErrorValidacion(response.mensajeError || 'Código no encontrado');
-      }
+  
+      this.http.post<any>(apiUrl, { codigo: this.codigoInput.trim() }).subscribe(
+        {
+          next: (response) => {
+            if (response.valido) {
+              this.nombreTrabajador = response.nombreTrabajador;
+              this.codigoTrabajador = response.codigoTrabajador;
+              this.ultimoMovimiento = response.ultimoMovimiento; // ✅ DIRECTO desde validación
+              this.mostrarMensaje(`Trabajador encontrado: ${this.nombreTrabajador}`, 'success');
+              
+              // 🔍 LOGGING DETALLADO para verificar recepción
+              console.log('✅ Trabajador validado:', response);
+              console.log('🔍 DEBUG Frontend - response.ultimoMovimiento:', response.ultimoMovimiento);
+              console.log('🔍 DEBUG Frontend - this.ultimoMovimiento:', this.ultimoMovimiento);
+              console.log('📋 Último movimiento desde validación - Trabajador:', this.codigoTrabajador, 'Último:', this.ultimoMovimiento);
+              
+              // ✅ MOSTRAR MOVIMIENTOS DIRECTAMENTE (sin llamada adicional)
+              this.mostrarPopupMovimientos = true;
+              
+            } else {
+              // Verificar si es error de tiempo mínimo
+              if (response.mensajeError && response.mensajeError.startsWith('TIEMPO_MINIMO_ERROR|')) {
+                console.log('⏰ Tiempo insuficiente detectado en validación de código');
+                this.mostrarErrorTiempoMinimo(response.mensajeError);
+              } else {
+                this.mostrarErrorValidacion(response.mensajeError || 'Código no encontrado');
+              }
+            }
+          },
+          error: (error) => {
+            console.error('❌ Error validando código:', error);
+            this.mostrarErrorValidacion('Error de conexión');
+          }
+        }
+      );
       
     } catch (error) {
       console.error('❌ Error validando código:', error);
@@ -131,6 +157,8 @@ export class AsistenciaComponent implements OnInit {
       this.procesandoValidacion = false;
     }
   }
+  
+  // Método eliminado: obtenerUltimoMovimiento() ya no se usa - toda la lógica está en validarCodigo()
   
   /**
    * Mostrar popup de error de validación según especificación del prompt-final
@@ -159,6 +187,69 @@ export class AsistenciaComponent implements OnInit {
         this.codigoTrabajador = '';
       }
     });
+  }
+  
+  /**
+   * Mostrar popup específico para error de tiempo mínimo entre marcaciones
+   */
+  private mostrarErrorTiempoMinimo(mensajeCompleto: string) {
+    try {
+      // Parsear mensaje: "TIEMPO_MINIMO_ERROR|codigo|nombre|minutosMinimos|fechaUltimo|minutosRestantes"
+      const partes = mensajeCompleto.split('|');
+      
+      if (partes.length >= 6) {
+        const codigo = partes[1];
+        const nombre = partes[2];
+        const minutosMinimos = partes[3];
+        const fechaUltimo = partes[4];
+        const minutosRestantes = partes[5];
+        
+        // Formatear fecha para mostrar de manera amigable
+        const fechaFormateada = new Date(fechaUltimo).toLocaleString('es-PE', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        
+        const mensajeTiempo = `No se puede realizar otra marcación hasta que hayan pasado ${minutosMinimos} minutos.\n\n` +
+                             `⏰ Faltan ${minutosRestantes} minutos para poder marcar nuevamente.\n\n` +
+                             `📅 Último marcado: ${fechaFormateada}`;
+        
+        const errorData: ErrorData = {
+          titulo: '⏰ Tiempo Mínimo Entre Marcaciones',
+          mensaje: mensajeTiempo,
+          codigoIngresado: codigo,
+          tipoError: 'tiempo-minimo',
+          trabajadorInfo: `${codigo} - ${nombre}`
+        };
+        
+        console.log('⏰ Mostrando error de tiempo mínimo:', errorData);
+        
+        // Abrir popup modal específico para tiempo mínimo
+        const dialogRef = this.dialog.open(ErrorPopupComponent, {
+          width: '500px',
+          disableClose: true,
+          data: errorData
+        });
+        
+        dialogRef.afterClosed().subscribe(() => {
+          // Limpiar campos después de cerrar popup de tiempo mínimo
+          this.limpiarCamposParaSiguienteTrabajador();
+        });
+        
+      } else {
+        // Si no se puede parsear, mostrar error genérico
+        console.error('❌ Error parseando mensaje de tiempo mínimo:', mensajeCompleto);
+        this.mostrarErrorCritico('Error de tiempo entre marcaciones');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error procesando mensaje de tiempo mínimo:', error);
+      this.mostrarErrorCritico('Error de tiempo entre marcaciones');
+    }
   }
   
   /**
@@ -256,83 +347,112 @@ export class AsistenciaComponent implements OnInit {
   /**
    * PASO 4: Procesar marcación final con API asíncrona
    */
-  async procesarMarcacionFinal(raciones: RacionDisponible[]) {
+  procesarMarcacionFinal(raciones: RacionDisponible[]) 
+  {
     this.procesandoMarcacion = true;
     
     // ⏱️ INICIAR MEDICIÓN DE TIEMPO DE API
     const tiempoInicio = performance.now();
     
-    try {
-      console.log('🔄 Procesando marcación final - Raciones:', raciones);
-      
-      // Preparar raciones para la API
-      const fechaServicio = new Date();
-      fechaServicio.setHours(0, 0, 0, 0); // Truncar a fecha sin hora
-      
-      const racionesParaApi = raciones.map(racion => ({
-        tipoRacion: racion.id,        // ✅ Usar racion.id (no racion.codigo)
-        codigoRacion: racion.id,      // ✅ Código de ración
-        nombreRacion: racion.nombre,
-        fechaServicio: fechaServicio.toISOString() // String ISO para el DTO
-      }));
-      
-      const request = {
-        codigoInput: this.codigoInput.trim(),
-        codOrigen: 'WE', // Código de origen para aplicación WEB (2 caracteres)
-        tipoMarcaje: this.tipoMarcaje,
-        tipoMovimiento: this.tipoMovimientoSeleccionado,
-        direccionIp: this.deviceIP,
-        fechaMarcacion: new Date().toISOString(),
-        racionesSeleccionadas: racionesParaApi
-      };
-      
-      console.log('📤 Enviando request a API:', request);
-      console.log('⏱️ Iniciando llamada API a las:', new Date().toLocaleTimeString());
-      
-      const apiUrl = this.configService.getApiUrl() + '/api/asistencia/procesar';
-      const response = await this.http.post<any>(apiUrl, request).toPromise();
-      
-      // ⏱️ MEDIR TIEMPO DE RESPUESTA
-      const tiempoTranscurrido = performance.now() - tiempoInicio;
-      console.log(`⚡ API RESPONDIÓ EN: ${tiempoTranscurrido.toFixed(0)} ms (${(tiempoTranscurrido/1000).toFixed(2)} segundos)`);
-      
-      if (tiempoTranscurrido > 500) {
-        console.warn(`⚠️ API MUY LENTA: ${tiempoTranscurrido.toFixed(0)} ms - OBJETIVO: <500ms`);
-      } else {
-        console.log(`✅ API RÁPIDA: ${tiempoTranscurrido.toFixed(0)} ms - DENTRO DEL OBJETIVO`);
+    console.log('🔄 Procesando marcación final - Raciones:', raciones);
+    
+    // Preparar raciones para la API
+    const fechaServicio = new Date();
+    fechaServicio.setHours(0, 0, 0, 0); // Truncar a fecha sin hora
+    
+    const racionesParaApi = raciones.map(racion => ({
+      tipoRacion: racion.id,        // ✅ Usar racion.id (no racion.codigo)
+      codigoRacion: racion.id,      // ✅ Código de ración
+      nombreRacion: racion.nombre,
+      fechaServicio: fechaServicio.toISOString() // String ISO para el DTO
+    }));
+    
+    const request = {
+      codigoInput: this.codigoInput.trim(),
+      codOrigen: this.configService.getCodOrigen(), // Código de origen desde configuración
+      tipoMarcaje: this.tipoMarcaje,
+      tipoMovimiento: this.tipoMovimientoSeleccionado,
+      direccionIp: this.deviceIP,
+      fechaMarcacion: new Date().toISOString(),
+      racionesSeleccionadas: racionesParaApi
+    };
+    
+    console.log('📤 Enviando request a API:', request);
+    console.log('⏱️ Iniciando llamada API a las:', new Date().toLocaleTimeString());
+    
+    const apiUrl = this.configService.getApiUrl() + '/api/asistencia/procesar';
+    
+    this.http.post<any>(apiUrl, request).subscribe(
+    {
+      next: (response) => {
+        // ⏱️ MEDIR TIEMPO DE RESPUESTA
+        const tiempoTranscurrido = performance.now() - tiempoInicio;
+        console.log(`⚡ API RESPONDIÓ EN: ${tiempoTranscurrido.toFixed(0)} ms (${(tiempoTranscurrido/1000).toFixed(2)} segundos)`);
+        
+        if (tiempoTranscurrido > 500) {
+          console.warn(`⚠️ API MUY LENTA: ${tiempoTranscurrido.toFixed(0)} ms - OBJETIVO: <500ms`);
+        } else {
+          console.log(`✅ API RÁPIDA: ${tiempoTranscurrido.toFixed(0)} ms - DENTRO DEL OBJETIVO`);
+        }
+        
+        if (!response.error) {
+          // Mostrar mensaje destacado con el número de ticket hexadecimal
+          this.mostrarMensajeTicket(response.numeroTicket, response.nombreTrabajador);
+          console.log('✅ Ticket creado:', response);
+          
+          // Procesar success - continuar con limpieza
+          this.finalizarProcesamiento(tiempoInicio);
+          
+        } else {
+          // Verificar si es error de tiempo mínimo
+          if (response.mensajeError && response.mensajeError.startsWith('TIEMPO_MINIMO_ERROR|')) {
+            this.mostrarErrorTiempoMinimo(response.mensajeError);
+          } else {
+            // Error al grabar ticket - según prompt-final, este es el ÚNICO caso donde se detiene el proceso
+            this.mostrarErrorCritico(response.mensajeError);
+          }
+
+          console.error('❌ Error crítico en API:', response);
+
+          this.limpiarCamposParaSiguienteTrabajador();
+
+          this.procesandoMarcacion = false;
+          // No limpiar campos - permitir reintento
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error llamando API de marcación:', error);
+
+        // Error crítico de conexión - también detiene el proceso
+        this.mostrarErrorCritico('Error de conexión con el servidor. Los datos no se pudieron procesar.');
+
+        this.limpiarCamposParaSiguienteTrabajador();
+        
+        this.procesandoMarcacion = false;
+        // No limpiar campos - permitir reintento
       }
-      
-      if (!response.error) {
-        // Mostrar mensaje destacado con el número de ticket hexadecimal
-        this.mostrarMensajeTicket(response.numeroTicket, response.nombreTrabajador);
-        console.log('✅ Ticket creado:', response);
-      } else {
-        // Error al grabar ticket - según prompt-final, este es el ÚNICO caso donde se detiene el proceso
-        this.mostrarErrorCritico(response.mensajeError);
-        console.error('❌ Error crítico en API:', response);
-        return; // No limpiar campos - permitir reintento
-      }
-      
-    } catch (error) {
-      console.error('❌ Error llamando API de marcación:', error);
-      // Error crítico de conexión - también detiene el proceso
-      this.mostrarErrorCritico('Error de conexión con el servidor. Los datos no se pudieron procesar.');
-      this.procesandoMarcacion = false;
-      return; // No ejecutar finally para no limpiar campos
-    } finally {
-      // ⏱️ MEDIR TIEMPO TOTAL (incluso con errores)
-      const tiempoTotal = performance.now() - tiempoInicio;
-      console.log(`⏱️ TIEMPO TOTAL DE PROCESAMIENTO: ${tiempoTotal.toFixed(0)} ms (${(tiempoTotal/1000).toFixed(2)} segundos)`);
-      
-      if (tiempoTotal > 1000) {
-        console.error(`🚨 PROCESAMIENTO MUY LENTO: ${tiempoTotal.toFixed(0)} ms - REVISAR URGENTE`);
-      }
-      
-      this.procesandoMarcacion = false;
-      
-      // Solo limpiar campos si llegamos aquí (sin errores críticos)
-      setTimeout(() => this.limpiarCamposParaSiguienteTrabajador(), 2000);
+    });
+  }
+  
+  private finalizarProcesamiento(tiempoInicio: number) {
+    // ⏱️ MEDIR TIEMPO TOTAL (incluso con errores)
+    const tiempoTotal = performance.now() - tiempoInicio;
+    console.log(`⏱️ TIEMPO TOTAL DE PROCESAMIENTO: ${tiempoTotal.toFixed(0)} ms (${(tiempoTotal/1000).toFixed(2)} segundos)`);
+    
+    if (tiempoTotal > 1000) {
+      console.error(`🚨 PROCESAMIENTO MUY LENTO: ${tiempoTotal.toFixed(0)} ms - REVISAR URGENTE`);
     }
+    
+    console.log('📍 PUNTO 1: API procesada - Loader sigue visible');
+    
+    // Limpiar campos Y ocultar loader al final
+    console.log('📍 PUNTO 2: Iniciando limpieza de campos...');
+    this.limpiarCamposParaSiguienteTrabajador();
+    
+    console.log('📍 PUNTO 3: Campos limpiados - Ocultando loader');
+    this.procesandoMarcacion = false; // ← OCULTAR LOADER AL FINAL
+
+    console.log('✅ SECUENCIA CORRECTA: API → Limpieza → Ocultar Loader');
   }
   
   /**
@@ -414,6 +534,23 @@ export class AsistenciaComponent implements OnInit {
     
     // NO limpiar this.tipoMarcaje - se mantiene para el siguiente trabajador
     console.log('🔄 Campos limpiados para siguiente trabajador. Tipo de marcaje mantenido:', this.tipoMarcaje);
+    
+    // ENFOCAR automáticamente el input para lector de tarjetas de proximidad
+    setTimeout(() => {
+      this.enfocarInput();
+    }, 100); // Pequeño delay para asegurar que el DOM esté actualizado
+  }
+
+  /**
+   * Enfocar el input para lector de tarjetas de proximidad
+   */
+  private enfocarInput() {
+    if (this.codigoInputRef && this.codigoInputRef.nativeElement) {
+      this.codigoInputRef.nativeElement.focus();
+      console.log('🎯 Input enfocado automáticamente para lector de tarjetas');
+    } else {
+      console.warn('⚠️ Referencia al input no disponible');
+    }
   }
 
   volverMenuPrincipal() {
@@ -436,7 +573,7 @@ export class AsistenciaComponent implements OnInit {
     const mensaje = `🎫 TICKET GENERADO: ${numeroTicket}\n✅ ${nombreTrabajador}\n📋 Procesando en segundo plano...`;
     
     this.snackBar.open(mensaje, '✅ ACEPTAR', {
-      duration: 8000, // 8 segundos para que lean el número de ticket
+      duration: 3000, // 3 segundos para que lean el número de ticket
       horizontalPosition: 'end', // Parte derecha de la pantalla  
       verticalPosition: 'top',   // Parte superior de la pantalla
       panelClass: 'ticket-success-snackbar'

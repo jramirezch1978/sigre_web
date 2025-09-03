@@ -28,7 +28,7 @@ public class AsistenciaHt580 {
     private String codigo;
     
     @Column(name = "FLAG_IN_OUT", length = 1, nullable = false)
-    private String flagInOut;
+    private String flagInOut;  // 1=Ingreso, 2=Salida, etc.
     
     @Column(name = "FEC_REGISTRO", nullable = false)
     private LocalDateTime fechaRegistro;
@@ -51,6 +51,33 @@ public class AsistenciaHt580 {
     @Column(name = "LECTURA_PDA", length = 3000)
     private String lecturaPda;
     
+    @Column(name = "TIPO_MARCACION", length = 10, nullable=false)
+    private String tipoMarcacion; // Tipo de marcación
+    
+    @Column(name = "OBSERVACIONES", length = 200)
+    private String observaciones;
+    
+    @Column(name = "ESTADO_PROCESAMIENTO", length = 1, nullable = false)
+    @Builder.Default
+    private String estadoProcesamiento = "P"; // P=Pendiente, R=Procesado, E=Error
+    
+    @Column(name = "FLAG_ESTADO", length = 1, nullable = false)
+    @Builder.Default
+    private String flagEstado = "1";
+    
+    // ===== CAMPOS DE SINCRONIZACIÓN =====
+    
+    @Column(name = "FECHA_SYNC")
+    private LocalDateTime fechaSync;
+    
+    @Column(name = "ESTADO_SYNC", length = 1)
+    @Builder.Default
+    private String estadoSync = "P"; // P=Pendiente, S=Sincronizado, E=Error
+    
+    @Column(name = "INTENTOS_SYNC")
+    @Builder.Default
+    private Integer intentosSync = 0;
+    
     // ===== RELACIONES JPA =====
     
     /**
@@ -59,4 +86,29 @@ public class AsistenciaHt580 {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TURNO", referencedColumnName = "TURNO", insertable = false, updatable = false)
     private Turno turnoEntity;
+    
+    /**
+     * Configurar campos de sincronización antes de guardar
+     */
+    @PrePersist
+    public void prePersist() {
+        System.out.println("🔍 DEBUG @PrePersist ejecutado para RECKEY: " + reckey);
+        
+        // Marcar como pendiente de sincronización para que sync-service lo procese
+        if (estadoSync == null) {
+            estadoSync = "P"; // P = Pendiente
+            System.out.println("🔍 DEBUG estadoSync seteado a 'P'");
+        }
+        if (intentosSync == null) {
+            intentosSync = 0;
+            System.out.println("🔍 DEBUG intentosSync seteado a 0");
+        }
+        // Marcar como pendiente de procesamiento para tickets de asistencia
+        if (estadoProcesamiento == null) {
+            estadoProcesamiento = "P"; // P = Pendiente
+            System.out.println("🔍 DEBUG estadoProcesamiento seteado a 'P'");
+        }
+        
+        System.out.println("🔍 DEBUG @PrePersist FINAL - estadoSync: '" + estadoSync + "', intentosSync: " + intentosSync);
+    }
 }

@@ -35,7 +35,7 @@ public class AsistenciaController {
         request.setDireccionIp(clientIp);
         
         log.info("Registrando marcaje - Trabajador: {} - Movimiento: {} - IP: {}", 
-                request.getCodTrabajador(), request.getTipoMovimiento(), clientIp);
+                request.getCodTrabajador(), "Marcación de asistencia", clientIp);
         
         try {
             AsistenciaResponseDto response = asistenciaService.registrarAsistencia(request);

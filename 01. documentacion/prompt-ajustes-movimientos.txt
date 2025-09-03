@@ -1,0 +1,44 @@
+hay un ultimo ajutes con los tipos de movimientos de asistencia, los movimientos de asstencia son los siguientes
+
+1 = ingreso a planta
+2 = salida de planta
+3 = Salida a almorzar
+4 = Regreso de almorzar
+5 = Salida de comisión
+6 = Retorno de comisión
+7 = Ingreso a producción
+8 = Salida de producción
+
+ahora debe haber una mejor logica para estos movimientos los cuales ería los siguientes
+
+1. si el trabajador tiene como ultimo movimiento el 2 (en asistencia_ht580) o no tiene movimientos de asistencia, 
+entonces debería ser visible solo el movimiento 1
+
+2.- Si el trabajador tiene como ultimo movimiento el 1, entonces solo debería poder mostrarse los 
+movimientos 2, 3, 5 y en caso del tipo de marcaje 2 (control de planta) = el movimiento 7
+
+3. Si estamos en tipo de marcaje = 2, y el ultimo movimiento es el 7 entonces debería solo mostrar el 8
+
+4.- Si el trabajador tiene como ultimo movimiento el 3 entonces solo debe mostrarle el 4 nada mas
+
+5.- Si el trabajador tiene como ultimo movimiento el 5 entonces solo debe mostrarle el 6 nada mas
+
+6.- Este proceso debería ejecutarse cada 30 min, y deberí hacer lo siguiente, se buscarían las utlimas marcaciones
+realizadas por todos los trabajadores, y si son de tipo 1 y tienen 13 horas o mas de antiguedad, 
+entonces debe hacer un registro de tipo 2 con la hora final del turno del día que sería la fecha trunca
+(sin la hora) del registro de tipo 1 encontrado, para ello primero debe consultar en la tabla turno 
+cual sería la hora final correspondiente a esa hora de ingreso, para ello debes de valerte de los intervalos 
+de la hora, y teniendo en cuenta que los turnos nocturnos terminan en la hora de fin pero del día siguiente, y recien
+ahi tomaría como fecha el día sieguiente al del registro de tipo 1, este proceso tambien debería realizarse o validarse
+al momento de la marcación de trabajador, osea digamos que la validación de ultimo registro marcado por codigo de trabajador
+sea una funcion que se pueda llamar tanto en el proceso que se ejecuta cada 30 min, como en la marcacion
+
+7.- En la marcación todo el proceso (incluyendo la validacion planteada anteriormente) no debe demorar mas de 0.5 segundos (500 milisegundos) a lo mucho, se puede hacer? => 
+este punto pienso que debería hacerlo el backend especificamente, que opinas?
+
+
+
+
+por otro lado ya no quier que los servicios destruyan las tablas, solo ddl-auto debe ser update, para todos los casos
+
+procede
