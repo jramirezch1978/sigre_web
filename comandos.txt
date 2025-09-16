@@ -88,32 +88,55 @@ docker compose up --build -d asistencia-service sigre-frontend  api-gateway
 docker compose down sync-service config-server sigre-frontend asistencia-service
 docker compose up --build -d sync-service config-server sigre-frontend asistencia-service
 
+=========================================================
 # Reconstruir frontend FORZANDO limpieza de cache
 docker compose down sigre-frontend
 docker compose build --no-cache sigre-frontend
 docker compose up -d sigre-frontend
+docker compose restart discovery-server
+=========================================================
+
 
 docker compose down asistencia-service sigre-frontend config-server sync-service
 docker compose up --build -d config-server asistencia-service sigre-frontend sync-service
 docker compose restart discovery-server
 
+=========================================================
+ASISTENCIA Y SIGRE_WEB
+=========================================================
 docker compose down asistencia-service sigre-frontend
 docker compose up --build -d asistencia-service sigre-frontend
 docker compose restart discovery-server
+=========================================================
+
+
+=========================================================
+SIGRE_WEB
+=========================================================
+docker compose down sigre-frontend
+docker compose up --build -d sigre-frontend
+docker compose restart discovery-server
+=========================================================
 
 docker compose down asistencia-service
 docker compose up --build -d asistencia-service
 docker compose restart discovery-server
 
+=========================================================
+ASISTENCIA, SYNC-SERVICES Y SIGRE_WEB
+=========================================================
 docker compose down asistencia-service sigre-frontend sync-service
 docker compose up --build -d asistencia-service sigre-frontend sync-service
+docker compose restart discovery-server
+=========================================================
 
 docker compose down asistencia-service sync-service
 docker compose up --build -d asistencia-service sync-service
-docker compose restart sync-service
+docker compose restart discovery-server
 
 docker compose restart asistencia-service
 docker compose restart sync-service
+
 
 
 Dni de prueba

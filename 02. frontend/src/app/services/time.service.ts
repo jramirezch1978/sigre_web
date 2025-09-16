@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, interval, switchMap, startWith, BehaviorSubject, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { ConfigService } from './config.service';
 
 export interface ServerTimeResponse {
   timestamp: string;
-  formattedTime: string;
-  formattedDate: string;
-  fullDateTime: string;
+  formattedTime: string;    // hh:mm:ss a
+  formattedDate: string;    // EEEE, d MMMM yyyy
+  fullDateTime: string;     // yyyy-MM-dd HH:mm:ss
   hour: number;
   minute: number;
   second: number;
@@ -18,64 +17,104 @@ export interface ServerTimeResponse {
   providedIn: 'root'
 })
 export class TimeService {
-  private currentTimeSubject = new BehaviorSubject<Date>(new Date());
   
+  private currentServerTime = new BehaviorSubject<ServerTimeResponse | null>(null);
+  public serverTime$ = this.currentServerTime.asObservable();
+  private syncInterval: any;
+
   constructor(
     private http: HttpClient,
     private configService: ConfigService
   ) {
-    this.startTimeSync();
+    this.initTimeSync();
   }
 
-  private startTimeSync() {
-    // Sincronizar con el servidor cada 30 segundos
-    interval(30000)
-      .pipe(
-        startWith(0),
-        switchMap(() => this.getServerTime()),
-        catchError(() => {
-          // Si falla, usar hora local como fallback
-          console.warn('No se pudo obtener la hora del servidor, usando hora local');
-          return of(new Date());
-        })
-      )
-      .subscribe(serverTime => {
-        this.currentTimeSubject.next(serverTime);
-      });
+  /**
+   * Inicializar sincronización de tiempo con el servidor
+   */
+  private initTimeSync() {
+    // Sincronizar inmediatamente
+    this.syncWithServer();
+    
+    // Sincronizar cada 10 segundos para mantener conexión actualizada
+    this.syncInterval = setInterval(() => {
+      this.syncWithServer();
+    }, 1000);
+  }
 
-    // Actualizar cada segundo basado en la última sincronización
-    interval(1000).subscribe(() => {
-      const currentTime = this.currentTimeSubject.value;
-      const newTime = new Date(currentTime.getTime() + 1000);
-      this.currentTimeSubject.next(newTime);
+  /**
+   * Sincronizar con el servidor para obtener la hora exacta
+   */
+  private syncWithServer() {
+    const timeEndpoint = this.configService.getApiUrl() + '/api/asistencia/api/time/current';
+    
+    this.http.get<ServerTimeResponse>(timeEndpoint).subscribe({
+      next: (serverTime) => {
+        this.currentServerTime.next(serverTime);
+      },
+      error: (error) => {
+        console.error('❌ Error sincronizando tiempo con servidor:', error);
+        // En caso de error, mantener el último tiempo conocido
+      }
     });
   }
 
-  private getServerTime(): Observable<Date> {
-    const apiUrl = this.configService.getApiUrl('time');
-    return this.http.get<ServerTimeResponse>(`${apiUrl}/current`)
-      .pipe(
-        map(response => new Date(response.timestamp)),
-        catchError(() => {
-          // Fallback a hora local si falla la petición
-          return of(new Date());
-        })
-      );
+  /**
+   * Obtener la fecha/hora actual del servidor (sincrónicamente)
+   */
+  getCurrentServerTime(): ServerTimeResponse | null {
+    return this.currentServerTime.value;
   }
 
-  getCurrentTime(): Observable<Date> {
-    return this.currentTimeSubject.asObservable();
+  /**
+   * Obtener la fecha/hora actual del servidor como Observable
+   */
+  getCurrentServerTimeObservable(): Observable<ServerTimeResponse | null> {
+    return this.serverTime$;
   }
 
-  getCurrentTimeSnapshot(): Date {
-    return this.currentTimeSubject.value;
+  /**
+   * Obtener la fecha/hora actual del servidor para marcación
+   * Devuelve el formato exacto que espera el backend
+   */
+  getMarcacionDateTime(): string {
+    const serverTime = this.getCurrentServerTime();
+    if (serverTime) {
+      return serverTime.fullDateTime; // Formato: yyyy-MM-dd HH:mm:ss
+    } else {
+      // Fallback: usar hora local del dispositivo (NO recomendado)
+      console.warn('⚠️ No se pudo obtener hora del servidor, usando hora local');
+      return new Date().toISOString().slice(0, 19).replace('T', ' ');
+    }
   }
 
-  isBeforeNoon(): boolean {
-    return this.getCurrentTimeSnapshot().getHours() < 12;
+  /**
+   * Forzar una nueva sincronización con el servidor
+   */
+  forceSyncWithServer(): Observable<ServerTimeResponse> {
+    const timeEndpoint = this.configService.getApiUrl() + '/api/asistencia/api/time/current';
+    
+    return new Observable(observer => {
+      this.http.get<ServerTimeResponse>(timeEndpoint).subscribe({
+        next: (serverTime) => {
+          this.currentServerTime.next(serverTime);
+          observer.next(serverTime);
+          observer.complete();
+        },
+        error: (error) => {
+          console.error('❌ Error en sincronización forzada:', error);
+          observer.error(error);
+        }
+      });
+    });
   }
 
-  isAfterNoon(): boolean {
-    return this.getCurrentTimeSnapshot().getHours() >= 12;
+  /**
+   * Limpiar intervalo de sincronización
+   */
+  ngOnDestroy() {
+    if (this.syncInterval) {
+      clearInterval(this.syncInterval);
+    }
   }
 }

@@ -123,7 +123,7 @@ public class TicketAsistenciaService {
                     .tipoMovimiento(request.getTipoMovimiento()) // ✅ Controller ya envía número 1-8
                     .direccionIp(request.getDireccionIp())
                     .racionesSeleccionadas(convertirRacionesAJson(request.getRacionesSeleccionadas()))
-                    .fechaMarcacion(request.getFechaMarcacion() != null ? request.getFechaMarcacion() : ahora)
+                    .fechaMarcacion(convertirFechaMarcacion(request.getFechaMarcacion(), ahora))
                     .estadoProcesamiento("P") // P = Pendiente
                     .usuarioSistema(codUsuarioSistema.length() > 6 ? codUsuarioSistema.substring(0, 6) : codUsuarioSistema) // ✅ CHAR(6) límite
                     .intentosProcesamiento(0)
@@ -653,5 +653,31 @@ public class TicketAsistenciaService {
                 yield "1";
             }
         };
+    }
+    
+    /**
+     * Convertir fecha de marcación de String a LocalDateTime
+     * Solución para problemas de zona horaria: el frontend envía la fecha como string
+     * en formato "yyyy-MM-dd HH:mm:ss" obtenida del servidor
+     */
+    private LocalDateTime convertirFechaMarcacion(String fechaMarcacionString, LocalDateTime fechaPorDefecto) {
+        if (fechaMarcacionString == null || fechaMarcacionString.trim().isEmpty()) {
+            log.warn("⚠️ Fecha de marcación nula o vacía, usando fecha actual del servidor");
+            return fechaPorDefecto;
+        }
+        
+        try {
+            // Parsear formato: yyyy-MM-dd HH:mm:ss
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime fechaParseada = LocalDateTime.parse(fechaMarcacionString.trim(), formatter);
+            
+            log.debug("🕐 Fecha de marcación convertida: '{}' -> {}", fechaMarcacionString, fechaParseada);
+            return fechaParseada;
+            
+        } catch (Exception e) {
+            log.error("❌ Error parseando fecha de marcación: '{}', usando fecha del servidor. Error: {}", 
+                     fechaMarcacionString, e.getMessage());
+            return fechaPorDefecto;
+        }
     }
 }

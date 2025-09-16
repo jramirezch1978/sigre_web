@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -43,9 +42,10 @@ public class MarcacionRequest {
     private String direccionIp;
     
     /**
-     * Fecha y hora de la marcación
+     * Fecha y hora de la marcación (formato: yyyy-MM-dd HH:mm:ss)
+     * Se recibe como String para evitar problemas de zona horaria
      */
-    private LocalDateTime fechaMarcacion;
+    private String fechaMarcacion;
     
     /**
      * Raciones seleccionadas (si aplica)

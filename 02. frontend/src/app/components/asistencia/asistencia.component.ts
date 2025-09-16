@@ -16,6 +16,7 @@ import { PopupMovimientosComponent, TipoMovimiento } from '../popup-movimientos/
 import { PopupRacionesComponent, RacionDisponible } from '../popup-raciones/popup-raciones.component';
 import { ErrorPopupComponent, ErrorData } from '../error-popup/error-popup.component';
 import { ConfigService } from '../../services/config.service';
+import { ClockService } from '../../services/clock.service';
 
 export interface Racion {
   id: string;
@@ -80,7 +81,8 @@ export class AsistenciaComponent implements OnInit {
     private snackBar: MatSnackBar,
     private http: HttpClient,
     private configService: ConfigService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private clockService: ClockService  // ← Usar servicio centralizado en lugar de TimeService
   ) {}
 
   async ngOnInit() {
@@ -181,7 +183,6 @@ export class AsistenciaComponent implements OnInit {
     // Al cerrar el popup, regresar a ventana original (limpiar campos)
     dialogRef.afterClosed().subscribe((regresarAOriginal: boolean) => {
       if (regresarAOriginal) {
-        console.log('🔄 Regresando a ventana original de marcación');
         this.codigoInput = '';
         this.nombreTrabajador = '';
         this.codigoTrabajador = '';
@@ -367,13 +368,21 @@ export class AsistenciaComponent implements OnInit {
       fechaServicio: fechaServicio.toISOString() // String ISO para el DTO
     }));
     
+    // ✅ SOLUCIÓN MEJORADA: Usar tiempo del reloj centralizado (única fuente de verdad)
+    const fechaMarcacionCentralizada = this.clockService.getDateTimeForMarcacion();
+    const infoTiempo = this.clockService.getCurrentTimeInfo();
+    
+    console.log('🕐 Fecha de marcación centralizada:', fechaMarcacionCentralizada);
+    console.log('🕐 Fuente de tiempo:', infoTiempo.sourceInfo);
+    console.log('🟢/🔴 Servidor conectado:', infoTiempo.isServerConnected);
+
     const request = {
       codigoInput: this.codigoInput.trim(),
       codOrigen: this.configService.getCodOrigen(), // Código de origen desde configuración
       tipoMarcaje: this.tipoMarcaje,
       tipoMovimiento: this.tipoMovimientoSeleccionado,
       direccionIp: this.deviceIP,
-      fechaMarcacion: new Date().toISOString(),
+      fechaMarcacion: fechaMarcacionCentralizada, // ✅ Hora del reloj centralizado (servidor o dispositivo)
       racionesSeleccionadas: racionesParaApi
     };
     

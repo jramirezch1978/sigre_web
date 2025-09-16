@@ -16,6 +16,7 @@ export interface ApiConfig {
   endpoints: {
     time: string;
     raciones: string;
+    dashboard: string;
   };
 }
 
@@ -111,7 +112,7 @@ export class ConfigService {
     return config?.company?.codOrigen || 'SE';
   }
 
-  getApiUrl(endpoint?: 'time' | 'raciones'): string {
+  getApiUrl(endpoint?: 'time' | 'raciones' | 'dashboard'): string {
     const config = this.configSubject.value;
     
     if (!config) {
@@ -124,7 +125,8 @@ export class ConfigService {
       
       const defaultUrls = {
         time: defaultBaseUrl + '/api/time',
-        raciones: defaultBaseUrl + '/api/raciones'
+        raciones: defaultBaseUrl + '/api/raciones',
+        dashboard: defaultBaseUrl + '/api/dashboard'
       };
       return defaultUrls[endpoint];
     }

@@ -48,4 +48,25 @@ public interface AsistenciaHt580LocalRepository extends JpaRepository<Asistencia
     @Modifying
     @Query("UPDATE AsistenciaHt580Local a SET a.estadoSync = 'E', a.intentosSync = a.intentosSync + 1 WHERE a.reckey = :reckey")
     void marcarComoError(@Param("reckey") String reckey);
+    
+    // ===== MÉTODOS PARA DETECTAR ACTIVIDAD =====
+    
+    /**
+     * Verificar si han habido nuevos registros en los últimos X minutos
+     */
+    @Query("SELECT COUNT(a) FROM AsistenciaHt580Local a WHERE a.fechaRegistro >= :fechaDesde")
+    long countNuevosRegistrosDesde(@Param("fechaDesde") LocalDateTime fechaDesde);
+    
+    /**
+     * Verificar si ha habido sincronización en los últimos X minutos
+     */
+    @Query("SELECT COUNT(a) FROM AsistenciaHt580Local a WHERE a.fechaSync >= :fechaDesde")
+    long countSincronizacionesDesde(@Param("fechaDesde") LocalDateTime fechaDesde);
+    
+    /**
+     * Verificar si han habido errores en los últimos X minutos
+     */
+    @Query("SELECT COUNT(a) FROM AsistenciaHt580Local a WHERE a.estadoSync = 'E' " +
+           "AND (a.fechaRegistro >= :fechaDesde OR a.fechaSync >= :fechaDesde)")
+    long countErroresDesde(@Param("fechaDesde") LocalDateTime fechaDesde);
 }

@@ -51,4 +51,9 @@ export class MenuInicialComponent implements OnInit {
       queryParams: { tipoMarcaje: tipo } 
     });
   }
+
+  irADashboard() {
+    // Navegar al dashboard de asistencia
+    this.router.navigate(['/dashboard']);
+  }
 }

@@ -1,0 +1,501 @@
+<!-- Gentelella Style Dashboard Layout -->
+<div class="container body">
+  <div class="main_container">
+    
+    <!-- Left Sidebar -->
+    <div class="col-md-3 left_col">
+      <div class="left_col scroll-view">
+        
+        <!-- Logo/Title -->
+        <div class="navbar nav_title">
+          <a href="#" class="site_title">
+            <mat-icon class="logo-icon">business</mat-icon>
+            <span class="logo-text">SIGRE Admin</span>
+          </a>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <!-- Profile Section -->
+        <div class="profile clearfix">
+          <div class="profile_pic">
+            <mat-icon class="profile-avatar">account_circle</mat-icon>
+          </div>
+          <div class="profile_info">
+            <span>Bienvenido,</span>
+            <h4>Administrador</h4>
+          </div>
+        </div>
+
+        <br />
+
+        <!-- Sidebar Menu -->
+        <div id="sidebar-menu" class="main_menu_side main_menu">
+          <div class="menu_section">
+            <h3>Panel Principal</h3>
+            <ul class="nav side-menu">
+              <li class="active">
+                <a><mat-icon>dashboard</mat-icon> Dashboard <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu" style="display: block;">
+                  <li class="current-page"><a href="#">Resumen General</a></li>
+                  <li><a href="#">Métricas Tiempo Real</a></li>
+                </ul>
+              </li>
+              
+              <li>
+                <a><mat-icon>people</mat-icon> Asistencia <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a href="#">Registros Diarios</a></li>
+                  <li><a href="#">Reportes por Empleado</a></li>
+                  <li><a href="#">Horarios y Turnos</a></li>
+                  <li><a href="#">Ausencias y Permisos</a></li>
+                </ul>
+              </li>
+
+              <li>
+                <a><mat-icon>restaurant</mat-icon> Comedores <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a href="#">Control de Raciones</a></li>
+                  <li><a href="#">Menús Diarios</a></li>
+                  <li><a href="#">Reportes Alimentarios</a></li>
+                </ul>
+              </li>
+
+              <li>
+                <a><mat-icon>assessment</mat-icon> Reportes <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a href="#">Reportes Semanales</a></li>
+                  <li><a href="#">Reportes Mensuales</a></li>
+                  <li><a href="#">Análisis de Tendencias</a></li>
+                  <li><a href="#">Exportar Datos</a></li>
+                </ul>
+              </li>
+
+              <li>
+                <a><mat-icon>business</mat-icon> Centros de Costo <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a href="#">Resumen por Área</a></li>
+                  <li><a href="#">Productividad</a></li>
+                  <li><a href="#">Costos Operativos</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
+          <div class="menu_section">
+            <h3>Sistema</h3>
+            <ul class="nav side-menu">
+              <li>
+                <a><mat-icon>settings</mat-icon> Configuración <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a href="#">Parámetros Generales</a></li>
+                  <li><a href="#">Dispositivos</a></li>
+                  <li><a href="#">Sincronización</a></li>
+                </ul>
+              </li>
+              
+              <li>
+                <a><mat-icon>security</mat-icon> Administración <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a href="#">Usuarios del Sistema</a></li>
+                  <li><a href="#">Permisos y Roles</a></li>
+                  <li><a href="#">Logs del Sistema</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="sidebar-footer">
+          <button mat-icon-button class="footer-btn" title="Configuración">
+            <mat-icon>settings</mat-icon>
+          </button>
+          <button mat-icon-button class="footer-btn" title="Pantalla Completa">
+            <mat-icon>fullscreen</mat-icon>
+          </button>
+          <button mat-icon-button class="footer-btn" title="Ayuda">
+            <mat-icon>help</mat-icon>
+          </button>
+          <button mat-icon-button class="footer-btn" title="Cerrar Sesión" (click)="volverMenuPrincipal()">
+            <mat-icon>power_settings_new</mat-icon>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Top Navigation -->
+    <div class="top_nav">
+      <div class="nav_menu">
+        <div class="nav toggle">
+          <button mat-icon-button id="menu_toggle" class="menu-toggle-btn">
+            <mat-icon>menu</mat-icon>
+          </button>
+        </div>
+
+        <nav class="nav navbar-nav">
+          <ul class="navbar-right">
+            <!-- Refresh Button -->
+            <li class="nav-item">
+              <button mat-icon-button (click)="cargarDashboard()" [disabled]="cargandoDatos" 
+                      class="nav-action-btn" title="Actualizar Datos">
+                <mat-icon [class.spinning]="cargandoDatos">refresh</mat-icon>
+              </button>
+            </li>
+
+            <!-- Notifications -->
+            <li class="nav-item dropdown">
+              <button mat-icon-button [matMenuTriggerFor]="notificationsMenu" class="nav-action-btn">
+                <mat-icon>notifications</mat-icon>
+                <span class="badge bg-green">3</span>
+              </button>
+              <mat-menu #notificationsMenu="matMenu" class="notifications-menu">
+                <div class="menu-header">Notificaciones</div>
+                <button mat-menu-item class="notification-item">
+                  <mat-icon>warning</mat-icon>
+                  <div class="notification-content">
+                    <span class="notification-title">5 tickets pendientes</span>
+                    <span class="notification-time">hace 2 min</span>
+                  </div>
+                </button>
+                <button mat-menu-item class="notification-item">
+                  <mat-icon>info</mat-icon>
+                  <div class="notification-content">
+                    <span class="notification-title">Sincronización completada</span>
+                    <span class="notification-time">hace 10 min</span>
+                  </div>
+                </button>
+              </mat-menu>
+            </li>
+
+            <!-- User Profile -->
+            <li class="nav-item dropdown">
+              <button mat-button [matMenuTriggerFor]="userMenu" class="user-profile-btn">
+                <mat-icon class="profile-icon">account_circle</mat-icon>
+                <span class="profile-name">Administrador</span>
+                <mat-icon class="dropdown-arrow">keyboard_arrow_down</mat-icon>
+              </button>
+              <mat-menu #userMenu="matMenu" class="user-menu">
+                <button mat-menu-item>
+                  <mat-icon>person</mat-icon>
+                  <span>Mi Perfil</span>
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>settings</mat-icon>
+                  <span>Configuración</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="volverMenuPrincipal()">
+                  <mat-icon>exit_to_app</mat-icon>
+                  <span>Cerrar Sesión</span>
+                </button>
+              </mat-menu>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="right_col" role="main">
+      
+      <!-- Loading State -->
+      <div *ngIf="cargandoDatos" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando datos del dashboard...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !cargandoDatos" class="error-container">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error }}</p>
+        <button mat-raised-button color="primary" (click)="cargarDashboard()">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div *ngIf="!cargandoDatos && !error" class="dashboard-content">
+        
+        <!-- Top Tiles (Gentelella Style Exact) -->
+        <div class="row" *ngIf="estadisticasGenerales">
+          <div class="tile_count" style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; width: 100%;">
+            
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count" style="flex: 1; min-width: 180px; height: 120px; display: flex; flex-direction: column; justify-content: center; background: #fff; border: 1px solid #e6e9ed; border-radius: 5px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+              <span class="count_top" style="display: flex; align-items: center; margin-bottom: 8px;">
+                <mat-icon style="color: #3498db; font-size: 32px; margin-right: 12px; width: 32px; height: 32px;">people</mat-icon>
+                <div>
+                  <div class="count" style="font-size: 24px; font-weight: bold; color: #34495e; line-height: 1;">{{ trabajadoresUnicosHoy || 'N/A' }}</div>
+                  <span class="count_bottom" style="font-size: 12px; color: #7f8c8d; text-transform: uppercase;">Trabajadores Hoy</span>
+                </div>
+              </span>
+            </div>
+
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count" style="flex: 1; min-width: 180px; height: 120px; display: flex; flex-direction: column; justify-content: center; background: #fff; border: 1px solid #e6e9ed; border-radius: 5px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+              <span class="count_top" style="display: flex; align-items: center; margin-bottom: 8px;">
+                <mat-icon style="color: #e74c3c; font-size: 32px; margin-right: 12px; width: 32px; height: 32px;">access_time</mat-icon>
+                <div>
+                  <div class="count" style="font-size: 24px; font-weight: bold; color: #34495e; line-height: 1;">{{ formatNumber(estadisticasGenerales.totalRegistrosHoy) }}<small>reg</small></div>
+                  <span class="count_bottom" style="font-size: 12px; color: #7f8c8d; text-transform: uppercase;">Registros Hoy</span>
+                </div>
+              </span>
+            </div>
+
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count" style="flex: 1; min-width: 180px; height: 120px; display: flex; flex-direction: column; justify-content: center; background: #fff; border: 1px solid #e6e9ed; border-radius: 5px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+              <span class="count_top" style="display: flex; align-items: center; margin-bottom: 8px;">
+                <mat-icon style="color: #f39c12; font-size: 32px; margin-right: 12px; width: 32px; height: 32px;">pending_actions</mat-icon>
+                <div>
+                  <div class="count" style="font-size: 24px; font-weight: bold; color: #34495e; line-height: 1;">{{ formatNumber(estadisticasGenerales.ticketsPendientes) }}</div>
+                  <span class="count_bottom" style="font-size: 12px; color: #7f8c8d; text-transform: uppercase;">Tickets Pendientes</span>
+                </div>
+              </span>
+            </div>
+
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count" style="flex: 1; min-width: 180px; height: 120px; display: flex; flex-direction: column; justify-content: center; background: #fff; border: 1px solid #e6e9ed; border-radius: 5px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+              <span class="count_top" style="display: flex; align-items: center; margin-bottom: 8px;">
+                <mat-icon style="color: #2ecc71; font-size: 32px; margin-right: 12px; width: 32px; height: 32px;">cloud_done</mat-icon>
+                <div>
+                  <div class="count" style="font-size: 24px; font-weight: bold; color: #34495e; line-height: 1;">{{ formatNumber(estadisticasGenerales.totalRegistrosDbRemoto) }}</div>
+                  <span class="count_bottom" style="font-size: 12px; color: #7f8c8d; text-transform: uppercase;">Sincronizados</span>
+                </div>
+              </span>
+            </div>
+
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count" style="flex: 1; min-width: 180px; height: 120px; display: flex; flex-direction: column; justify-content: center; background: #fff; border: 1px solid #e6e9ed; border-radius: 5px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+              <span class="count_top" style="display: flex; align-items: center; margin-bottom: 8px;">
+                <mat-icon style="color: #9b59b6; font-size: 32px; margin-right: 12px; width: 32px; height: 32px;">storage</mat-icon>
+                <div>
+                  <div class="count" style="font-size: 24px; font-weight: bold; color: #34495e; line-height: 1;">{{ formatNumber(estadisticasGenerales.totalRegistrosDbLocal) }}</div>
+                  <span class="count_bottom" style="font-size: 12px; color: #7f8c8d; text-transform: uppercase;">Base Local</span>
+                </div>
+              </span>
+            </div>
+
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count" style="flex: 1; min-width: 180px; height: 120px; display: flex; flex-direction: column; justify-content: center; background: #fff; border: 1px solid #e6e9ed; border-radius: 5px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+              <span class="count_top" style="display: flex; align-items: center; margin-bottom: 8px;">
+                <mat-icon style="color: #1abc9c; font-size: 32px; margin-right: 12px; width: 32px; height: 32px;">restaurant</mat-icon>
+                <div>
+                  <div class="count" style="font-size: 24px; font-weight: bold; color: #34495e; line-height: 1;">{{ racionesPorTipo?.totalRaciones || 'N/A' }}</div>
+                  <span class="count_bottom" style="font-size: 12px; color: #7f8c8d; text-transform: uppercase;">
+                    Raciones Hoy
+                    <span *ngIf="racionesPorTipo" style="display: block; font-size: 10px; color: #bbb; margin-top: 2px;">
+                      D:{{ racionesPorTipo.desayunos }} | A:{{ racionesPorTipo.almuerzos }} | C:{{ racionesPorTipo.cenas }}
+                    </span>
+                  </span>
+                </div>
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="row">
+          <div class="col-md-12 col-sm-12">
+            <div class="dashboard_graph">
+
+              <!-- Chart Section Header -->
+              <div class="row x_title">
+                <div class="col-md-6">
+                  <h3>Actividad de Marcajes <small>Análisis en tiempo real</small></h3>
+                </div>
+                <div class="col-md-6">
+                  <div class="filter-actions">
+                    <button mat-stroked-button class="btn-filter" (click)="generarDatosPrueba()">
+                      <mat-icon>science</mat-icon>
+                      Datos Prueba
+                    </button>
+                    <button mat-stroked-button class="btn-filter" (click)="probarConectividad()">
+                      <mat-icon>wifi</mat-icon>
+                      Probar API
+                    </button>
+                    <button mat-stroked-button class="btn-filter">
+                      <mat-icon>date_range</mat-icon>
+                      Filtrar Fechas
+                    </button>
+                    <button mat-stroked-button class="btn-filter">
+                      <mat-icon>file_download</mat-icon>
+                      Exportar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Charts Grid -->
+              <div class="row charts-row">
+                <div class="col-md-6 col-sm-6">
+                  <div class="chart-container">
+                    <div class="chart-title">
+                      <h4>Tráfico por Hora</h4>
+                      <span class="chart-subtitle">Marcajes por hora - Últimas 24 horas</span>
+                    </div>
+                    <div class="chart-wrapper">
+                      <canvas #chartMarcajesHora></canvas>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6 col-sm-6">
+                  <div class="chart-container">
+                    <div class="chart-title">
+                      <h4>Tendencia Acumulada</h4>
+                      <span class="chart-subtitle">Marcajes acumulados - Últimas 24 horas</span>
+                    </div>
+                    <div class="chart-wrapper">
+                      <canvas #chartMarcajes24h></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Tables Row -->
+        <div class="row">
+          
+          <!-- Recent Activity Table -->
+          <div class="col-md-6 col-sm-6">
+            <div class="x_panel">
+              <div class="x_title">
+                <h2>
+                  <mat-icon class="panel-icon">list_alt</mat-icon>
+                  Actividad Reciente
+                  <small>Últimos marcajes registrados</small>
+                </h2>
+                <div class="panel-actions">
+                  <button mat-icon-button class="panel-action">
+                    <mat-icon>refresh</mat-icon>
+                  </button>
+                  <button mat-icon-button class="panel-action">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                </div>
+                <div class="clearfix"></div>
+              </div>
+              <div class="x_content">
+                
+                <div class="recent-activity-list">
+                  <div class="activity-item" *ngFor="let marcaje of listadoMarcajes.slice(0, 8)">
+                    <div class="activity-avatar">
+                      <mat-icon class="activity-icon" [ngClass]="'icon-' + marcaje.tipoMovimiento">
+                        {{ marcaje.tipoMovimiento === '1' ? 'login' : 'logout' }}
+                      </mat-icon>
+                    </div>
+                    <div class="activity-content">
+                      <div class="activity-main">
+                        <strong>{{ marcaje.nombreTrabajador }}</strong>
+                        <span class="activity-action">{{ marcaje.descripcionMovimiento }}</span>
+                      </div>
+                      <div class="activity-meta">
+                        <span class="activity-time">{{ formatearHora(marcaje.fechaMovimiento) }}</span>
+                        <span class="activity-center">{{ marcaje.centroCosto }}</span>
+                      </div>
+                    </div>
+                    <div class="activity-status">
+                      <span class="status-dot" [ngClass]="'status-' + marcaje.tipoMovimiento"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel-footer">
+                  <button mat-stroked-button class="view-all-btn">
+                    Ver todos los registros
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Cost Centers Summary -->
+          <div class="col-md-6 col-sm-6">
+            <div class="x_panel">
+              <div class="x_title">
+                <h2>
+                  <mat-icon class="panel-icon">business</mat-icon>
+                  Centros de Costo
+                  <small>Resumen por área de trabajo</small>
+                </h2>
+                <div class="panel-actions">
+                  <button mat-icon-button class="panel-action">
+                    <mat-icon>bar_chart</mat-icon>
+                  </button>
+                  <button mat-icon-button class="panel-action">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                </div>
+                <div class="clearfix"></div>
+              </div>
+              <div class="x_content">
+
+                <div class="cost-centers-grid">
+                  <div class="cost-center-item" *ngFor="let centro of resumenCentrosCosto">
+                    <div class="center-info">
+                      <div class="center-badge">{{ centro.centroCosto }}</div>
+                      <div class="center-details">
+                        <div class="center-name">{{ centro.descripcionCentroCosto }}</div>
+                        <div class="center-stats">
+                          <span class="stat-item">
+                            <mat-icon class="stat-icon">people</mat-icon>
+                            {{ centro.cantidadTrabajadores }} personas
+                          </span>
+                          <span class="stat-item">
+                            <mat-icon class="stat-icon">access_time</mat-icon>
+                            {{ centro.cantidadMarcajes }} marcajes
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="center-progress">
+                      <div class="progress-bar">
+                        <div class="progress-fill" [style.width]="(centro.cantidadMarcajes / getTotalMarcajes() * 100) + '%'"></div>
+                      </div>
+                      <span class="progress-text">{{ ((centro.cantidadMarcajes / getTotalMarcajes()) * 100).toFixed(1) }}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel-footer">
+                  <button mat-stroked-button class="view-all-btn">
+                    Ver análisis detallado
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer Info -->
+        <div class="footer-info-bar">
+          <div class="info-item">
+            <mat-icon>schedule</mat-icon>
+            <span>Última actualización: {{ formatearFecha(ultimaActualizacion.toISOString()) }}</span>
+          </div>
+          <div class="info-item">
+            <mat-icon>sync</mat-icon>
+            <span>Sistema: {{ estadisticasGenerales?.estadoSincronizacion || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <mat-icon>info</mat-icon>
+            <span>SIGRE Admin Dashboard v2.1.0</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Reloj Flotante Estilo Windows -->
+<div class="floating-clock">
+  <app-floating-clock></app-floating-clock>
+</div>

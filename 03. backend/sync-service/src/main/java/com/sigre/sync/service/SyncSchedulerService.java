@@ -24,6 +24,7 @@ public class SyncSchedulerService {
     private final RemoteToLocalSyncService remoteToLocalSync;
     private final LocalToRemoteSyncService localToRemoteSync;
     private final EmailNotificationServiceHTML emailService;
+    private final ActivityDetectionService activityDetectionService;
     
     @Value("${sync.config.interval-minutes:5}")
     private int intervalMinutes;
@@ -246,8 +247,8 @@ public class SyncSchedulerService {
             
             log.info("⏱️ Duración total de sincronización: {} minutos ({} segundos)", duracionMinutos, duracionSegundos);
             
-            // Generar y enviar reporte SOLO DESPUÉS DE QUE AMBOS HILOS TERMINEN
-            generarYEnviarReporte(inicioSync, finSync, resultadoRemoteToLocal, resultadoLocalToRemote);
+            // Generar y enviar reporte SOLO SI HA HABIDO ACTIVIDAD
+            generarYEnviarReporteCondicional(inicioSync, finSync, resultadoRemoteToLocal, resultadoLocalToRemote);
             
             if (resultadoRemoteToLocal && resultadoLocalToRemote) {
                 log.info("✅ SINCRONIZACIÓN BIDIRECCIONAL COMPLETADA EXITOSAMENTE");
@@ -367,6 +368,50 @@ public class SyncSchedulerService {
         } catch (Exception e) {
             log.error("❌ Error en reintento para tabla: {}", tabla, e);
             return false;
+        }
+    }
+    
+    /**
+     * Generar y enviar reporte SOLO SI ha habido actividad en el sistema
+     */
+    private void generarYEnviarReporteCondicional(LocalDateTime inicioSync, LocalDateTime finSync, 
+                                                 boolean resultadoRemoteToLocal, boolean resultadoLocalToRemote) {
+        try {
+            log.info("🔍 Verificando si se debe enviar reporte de sincronización...");
+            
+            // Verificar si ha habido actividad en los últimos intervalMinutes
+            boolean hayActividad = activityDetectionService.hayActividadReciente(intervalMinutes);
+            String resumenActividad = activityDetectionService.getResumenActividad(intervalMinutes);
+            
+            // CONDICIONES PARA ENVIAR REPORTE:
+            // 1. Ha habido nuevas marcas de asistencia
+            // 2. Ha ocurrido sincronización de alguna tabla
+            // 3. Ha habido errores
+            // 4. La sincronización falló (para reportar el problema)
+            boolean debeEnviarReporte = hayActividad || !resultadoRemoteToLocal || !resultadoLocalToRemote;
+            
+            if (!debeEnviarReporte) {
+                log.info("😴 SIN ACTIVIDAD Y SIN ERRORES - Omitiendo envío de reporte");
+                log.info("📊 {}", resumenActividad);
+                log.info("🔔 Próximo reporte programado para: {}", finSync.plusMinutes(intervalMinutes));
+                return; // ⚡ SALIR SIN ENVIAR REPORTE
+            }
+            
+            if (hayActividad) {
+                log.info("✅ ACTIVIDAD DETECTADA - Procediendo con envío de reporte");
+                log.info("📊 {}", resumenActividad);
+            } else {
+                log.warn("⚠️ SIN ACTIVIDAD PERO CON ERRORES - Enviando reporte de errores");
+            }
+            
+            // Continuar con generación de reporte normal (mismo contenido)
+            generarYEnviarReporte(inicioSync, finSync, resultadoRemoteToLocal, resultadoLocalToRemote);
+            
+        } catch (Exception e) {
+            log.error("❌ Error al verificar actividad para reporte", e);
+            // En caso de error, enviar reporte de todas formas para no perder información crítica
+            log.info("🚨 Por error en detección, enviando reporte como medida de seguridad");
+            generarYEnviarReporte(inicioSync, finSync, resultadoRemoteToLocal, resultadoLocalToRemote);
         }
     }
     

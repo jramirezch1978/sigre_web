@@ -87,8 +87,11 @@ public class MarcacionController {
             }
             
             // Complementar información faltante
-            if (request.getFechaMarcacion() == null) {
-                request.setFechaMarcacion(LocalDateTime.now());
+            if (request.getFechaMarcacion() == null || request.getFechaMarcacion().trim().isEmpty()) {
+                // Si no viene fecha del frontend, usar la hora actual del servidor en formato String
+                LocalDateTime ahora = LocalDateTime.now();
+                String fechaFormateada = ahora.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                request.setFechaMarcacion(fechaFormateada);
             }
             
             // Si no viene IP, intentar obtenerla del request
