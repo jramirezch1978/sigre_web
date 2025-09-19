@@ -15,10 +15,10 @@ import java.util.Optional;
 public interface RrhhAsignaTrjtRelojRepository extends JpaRepository<RrhhAsignaTrjtReloj, RrhhAsignaTrjtRelojId> {
     
     /**
-     * Buscar asignación de tarjeta vigente por código de tarjeta
+     * Buscar asignación de tarjeta vigente por código de tarjeta (usando LIKE con TRIM)
      */
     @Query("SELECT r FROM RrhhAsignaTrjtReloj r " +
-           "WHERE r.codTarjeta = :codTarjeta " +
+           "WHERE TRIM(r.codTarjeta) LIKE CONCAT('%', TRIM(:codTarjeta), '%') " +
            "AND r.flagEstado = '1' " +
            "AND (r.fechaInicio IS NULL OR r.fechaInicio <= :fecha) " +
            "AND (r.fechaFin IS NULL OR r.fechaFin >= :fecha)")
@@ -42,10 +42,10 @@ public interface RrhhAsignaTrjtRelojRepository extends JpaRepository<RrhhAsignaT
                                                               @Param("fecha") LocalDate fecha);
     
     /**
-     * Verificar si un código de tarjeta existe y está vigente
+     * Verificar si un código de tarjeta existe y está vigente (usando LIKE con TRIM)
      */
     @Query("SELECT COUNT(r) > 0 FROM RrhhAsignaTrjtReloj r " +
-           "WHERE r.codTarjeta = :codTarjeta " +
+           "WHERE TRIM(r.codTarjeta) LIKE CONCAT('%', TRIM(:codTarjeta), '%') " +
            "AND r.flagEstado = '1' " +
            "AND (r.fechaInicio IS NULL OR r.fechaInicio <= :fecha) " +
            "AND (r.fechaFin IS NULL OR r.fechaFin >= :fecha)")
