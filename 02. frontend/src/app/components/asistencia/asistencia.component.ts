@@ -294,9 +294,18 @@ export class AsistenciaComponent implements OnInit {
     
     // Según el prompt-final: Si selecciona "Ingreso a Planta" → ir al Paso 3, sino al Paso 4
     if (movimiento.codigo === 'INGRESO_PLANTA') {
-      // PASO 3: Mostrar popup de selección de raciones
-      console.log('📍 Ingreso a Planta detectado - Mostrando popup de raciones');
-      this.mostrarPopupRaciones = true;
+      // PASO 3: Validar si debe mostrar popup de selección de raciones según configuración
+      // Capturar momento exacto de evaluación para consistencia temporal (hora del servidor)
+      const horaEvaluacion = this.clockService.getCurrentTimeSync();
+      const hayRacionesDisponibles = this.configService.deberMostrarVentanaRaciones(horaEvaluacion);
+      
+      if (hayRacionesDisponibles) {
+        console.log('📍 Ingreso a Planta detectado - Mostrando popup de raciones');
+        this.mostrarPopupRaciones = true;
+      } else {
+        console.log('📍 Ingreso a Planta detectado - NO hay raciones disponibles, procesando marcación directamente');
+        this.procesarMarcacionFinal([]);
+      }
     } else {
       // PASO 4: Ir directamente a procesar marcación (sin raciones)
       console.log('📍 Otro tipo de movimiento - Procesando marcación directamente');
@@ -357,9 +366,9 @@ export class AsistenciaComponent implements OnInit {
     
     console.log('🔄 Procesando marcación final - Raciones:', raciones);
     
-    // Preparar raciones para la API
-    const fechaServicio = new Date();
-    fechaServicio.setHours(0, 0, 0, 0); // Truncar a fecha sin hora
+    // Preparar raciones para la API (usar hora del servidor)
+    const fechaServicio = new Date(this.clockService.getCurrentTimeSync()); // ✅ CREAR COPIA
+    fechaServicio.setHours(0, 0, 0, 0); // Truncar a fecha sin hora SIN afectar original
     
     const racionesParaApi = raciones.map(racion => ({
       tipoRacion: racion.id,        // ✅ Usar racion.id (no racion.codigo)

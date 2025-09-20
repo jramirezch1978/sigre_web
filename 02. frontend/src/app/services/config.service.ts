@@ -20,9 +20,30 @@ export interface ApiConfig {
   };
 }
 
+export interface RacionConfig {
+  inicio: string;
+  fin: string;
+  estado: string;
+  hora_inicio_marcacion: string;
+  hora_fin_marcacion: string;
+}
+
+export interface RacionesConfig {
+  horarios: {
+    desayuno: RacionConfig;
+    almuerzo: RacionConfig;
+    cena: RacionConfig;
+  };
+  reglas: {
+    almuerzoCenaHastaMediodia: boolean;
+    soloDesayunoEnHorario: boolean;
+  };
+}
+
 export interface AppSettings {
   company: CompanyConfig;
   api: ApiConfig;
+  raciones: RacionesConfig;
 }
 
 @Injectable({
@@ -116,19 +137,20 @@ export class ConfigService {
     const config = this.configSubject.value;
     
     if (!config) {
-      // URL base por defecto si no hay configuración
-      const defaultBaseUrl = 'http://10.100.14.102:9080/api/asistencia';
+      // Fallback: estructura consistente con appsettings.json
+      const defaultBaseUrl = 'http://10.100.14.102:9080';
       
       if (!endpoint) {
         return defaultBaseUrl;
       }
       
-      const defaultUrls = {
-        time: defaultBaseUrl + '/api/time',
-        raciones: defaultBaseUrl + '/api/raciones',
-        dashboard: defaultBaseUrl + '/api/dashboard'
+      // Endpoints completos (igual que en appsettings.json)
+      const defaultEndpoints = {
+        time: '/api/asistencia/api/time',
+        raciones: '/api/asistencia/api/raciones', 
+        dashboard: '/api/asistencia/api/dashboard'
       };
-      return defaultUrls[endpoint];
+      return `${defaultBaseUrl}${defaultEndpoints[endpoint]}`;
     }
     
     // Si no se especifica endpoint, retornar URL base
@@ -141,5 +163,79 @@ export class ConfigService {
 
   isConfigLoaded(): boolean {
     return this.configSubject.value !== null;
+  }
+
+  // ===== MÉTODOS PARA RACIONES DINÁMICAS =====
+  
+  getRacionesConfig(): RacionesConfig {
+    const config = this.configSubject.value;
+    if (!config || !config.raciones) {
+      throw new Error('Configuración de raciones no disponible');
+    }
+    return config.raciones;
+  }
+
+  getRacionConfig(tipoRacion: 'desayuno' | 'almuerzo' | 'cena'): RacionConfig {
+    const racionesConfig = this.getRacionesConfig();
+    return racionesConfig.horarios[tipoRacion];
+  }
+
+  /**
+   * Verificar si una ración está disponible según estado y horario de marcación
+   */
+  isRacionDisponible(tipoRacion: 'desayuno' | 'almuerzo' | 'cena', horaActual?: Date): boolean {
+    try {
+      const racionConfig = this.getRacionConfig(tipoRacion);
+      
+      // Si estado es false, NO está disponible
+      if (racionConfig.estado === 'false') {
+        return false;
+      }
+      
+      // Si estado es true, verificar horario de marcación
+      const hora = horaActual || new Date();
+      return this.isHoraEnRangoMarcacion(racionConfig, hora);
+      
+    } catch (error) {
+      console.error(`Error verificando disponibilidad de ${tipoRacion}:`, error);
+      return false; // Si hay error, no mostrar la ración
+    }
+  }
+
+  /**
+   * Verificar si la hora actual está en el rango de marcación de una ración
+   */
+  private isHoraEnRangoMarcacion(racionConfig: RacionConfig, horaActual: Date): boolean {
+    const horaMinutos = horaActual.getHours() * 60 + horaActual.getMinutes();
+    
+    const [horaInicioH, horaInicioM] = racionConfig.hora_inicio_marcacion.split(':').map(n => parseInt(n));
+    const [horaFinH, horaFinM] = racionConfig.hora_fin_marcacion.split(':').map(n => parseInt(n));
+    
+    const inicioMinutos = horaInicioH * 60 + horaInicioM;
+    const finMinutos = horaFinH * 60 + horaFinM;
+    
+    return horaMinutos >= inicioMinutos && horaMinutos <= finMinutos;
+  }
+
+  /**
+   * Obtener todas las raciones disponibles según configuración actual
+   */
+  getRacionesDisponibles(horaActual?: Date): Array<{tipo: string, config: RacionConfig, disponible: boolean}> {
+    const tipos: Array<'desayuno' | 'almuerzo' | 'cena'> = ['desayuno', 'almuerzo', 'cena'];
+    
+    return tipos.map(tipo => ({
+      tipo,
+      config: this.getRacionConfig(tipo),
+      disponible: this.isRacionDisponible(tipo, horaActual)
+    }));
+  }
+
+  /**
+   * Verificar si se debe mostrar la ventana de raciones
+   * (si hay al menos una ración disponible)
+   */
+  deberMostrarVentanaRaciones(horaActual?: Date): boolean {
+    const racionesDisponibles = this.getRacionesDisponibles(horaActual);
+    return racionesDisponibles.some(r => r.disponible);
   }
 }

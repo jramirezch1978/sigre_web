@@ -42,8 +42,8 @@ public class MarcacionRequest {
     private String direccionIp;
     
     /**
-     * Fecha y hora de la marcación (formato: yyyy-MM-dd HH:mm:ss)
-     * Se recibe como String para evitar problemas de zona horaria
+     * Fecha y hora de la marcación (formato: dd/MM/yyyy HH:mm:ss)
+     * Se recibe como String para evitar problemas de zona horaria y conversión UTC
      */
     private String fechaMarcacion;
     

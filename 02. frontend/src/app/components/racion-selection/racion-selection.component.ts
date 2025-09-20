@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { ClockService } from '../../services/clock.service';
 
 export interface Racion {
   id: string;
@@ -33,7 +34,7 @@ export interface Racion {
 })
 export class RacionSelectionComponent implements OnInit, OnDestroy {
   codigoTarjeta: string = '';
-  currentTime: Date = new Date();
+  currentTime: Date = new Date(); // Se actualiza con hora del servidor en ngOnInit
   private timer: any;
   
   raciones: Racion[] = [
@@ -69,15 +70,19 @@ export class RacionSelectionComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private clockService: ClockService
   ) {}
 
   ngOnInit() {
     this.codigoTarjeta = this.route.snapshot.queryParams['tarjeta'] || 'N/A';
     
-    // Actualizar tiempo cada segundo
+    // Inicializar con hora del servidor
+    this.currentTime = this.clockService.getCurrentTimeSync();
+    
+    // Actualizar tiempo cada segundo usando hora del servidor
     this.timer = setInterval(() => {
-      this.currentTime = new Date();
+      this.currentTime = this.clockService.getCurrentTimeSync();
       this.actualizarDisponibilidadRaciones();
     }, 1000);
     

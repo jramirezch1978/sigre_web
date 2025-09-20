@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { ClockService } from './clock.service';
+import { ConfigService } from './config.service';
 
 export interface RacionResponse {
   id: string;
@@ -22,12 +24,19 @@ export interface RacionSelectionRequest {
   providedIn: 'root'
 })
 export class RacionService {
-  private readonly API_URL = 'http://10.100.14.102:9080/api/asistencia/api/raciones';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private clockService: ClockService,
+    private configService: ConfigService
+  ) {}
+
+  private getApiUrl(): string {
+    return this.configService.getApiUrl('raciones');
+  }
 
   getRacionesDisponibles(): Observable<RacionResponse[]> {
-    return this.http.get<RacionResponse[]>(`${this.API_URL}/disponibles`)
+    return this.http.get<RacionResponse[]>(`${this.getApiUrl()}/disponibles`)
       .pipe(
         catchError(error => {
           console.error('Error al obtener raciones:', error);
@@ -38,7 +47,7 @@ export class RacionService {
   }
 
   seleccionarRacion(request: RacionSelectionRequest): Observable<string> {
-    return this.http.post<string>(`${this.API_URL}/seleccionar`, request)
+    return this.http.post<string>(`${this.getApiUrl()}/seleccionar`, request)
       .pipe(
         catchError(error => {
           console.error('Error al seleccionar ración:', error);
@@ -48,7 +57,7 @@ export class RacionService {
   }
 
   getHorarioInfo(): Observable<string> {
-    return this.http.get<string>(`${this.API_URL}/horario-info`)
+    return this.http.get<string>(`${this.getApiUrl()}/horario-info`)
       .pipe(
         catchError(error => {
           console.error('Error al obtener info de horario:', error);
@@ -58,7 +67,7 @@ export class RacionService {
   }
 
   private getMockRaciones(): Observable<RacionResponse[]> {
-    const currentHour = new Date().getHours();
+    const currentHour = this.clockService.getCurrentTimeSync().getHours();
     
     const mockRaciones: RacionResponse[] = [
       {

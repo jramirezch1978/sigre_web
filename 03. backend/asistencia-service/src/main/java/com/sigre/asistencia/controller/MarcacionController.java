@@ -56,6 +56,8 @@ public class MarcacionController {
             log.info("🔍 DEBUG Frontend - tipoMarcaje: '{}' (len={})", request.getTipoMarcaje(), request.getTipoMarcaje() != null ? request.getTipoMarcaje().length() : "null");
             log.info("🔍 DEBUG Frontend - tipoMovimiento: '{}' (len={})", request.getTipoMovimiento(), request.getTipoMovimiento() != null ? request.getTipoMovimiento().length() : "null");
             log.info("🔍 DEBUG Frontend - direccionIp: '{}' (len={})", request.getDireccionIp(), request.getDireccionIp() != null ? request.getDireccionIp().length() : "null");
+            log.info("🔍 DEBUG Frontend - fechaMarcacion RAW: '{}'", request.getFechaMarcacion());
+            log.info("🔍 DEBUG Frontend - Hora actual backend: {}", LocalDateTime.now());
             
             // ✅ MAPEAR a números ANTES de enviar al service
             String tipoMarcajeNumerico = mapearTipoMarcajeANumero(request.getTipoMarcaje());
@@ -88,10 +90,10 @@ public class MarcacionController {
             
             // Complementar información faltante
             if (request.getFechaMarcacion() == null || request.getFechaMarcacion().trim().isEmpty()) {
-                // Si no viene fecha del frontend, usar la hora actual del servidor en formato String
-                LocalDateTime ahora = LocalDateTime.now();
-                String fechaFormateada = ahora.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                request.setFechaMarcacion(fechaFormateada);
+            // Si no viene fecha del frontend, usar la hora actual del servidor en formato String
+            LocalDateTime ahora = LocalDateTime.now();
+            String fechaFormateada = ahora.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+            request.setFechaMarcacion(fechaFormateada);
             }
             
             // Si no viene IP, intentar obtenerla del request

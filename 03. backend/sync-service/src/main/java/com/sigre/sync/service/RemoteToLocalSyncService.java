@@ -620,21 +620,6 @@ public class RemoteToLocalSyncService {
             return obj.toString();
         };
         
-        // LOG de datos RAW COMPLETOS para diagnóstico (TODOS los 26 campos)
-        try {
-            StringBuilder jsonCompleto = new StringBuilder("{\n");
-            for (int i = 0; i < row.length; i++) {
-                String nombreCampo = obtenerNombreCampo(i);
-                jsonCompleto.append("  \"").append(nombreCampo).append("\": \"").append(row[i]).append("\"");
-                if (i < row.length - 1) jsonCompleto.append(",");
-                jsonCompleto.append("\n");
-            }
-            jsonCompleto.append("}");
-            log.info("📋 JSON RAW ORACLE COMPLETO [{}]: {}", row[0], jsonCompleto.toString());
-        } catch (Exception e) {
-            log.warn("⚠️ Error generando JSON completo: {}", e.getMessage());
-        }
-        
         return TurnoLocal.builder()
                 .turno(convertirTexto.apply(row[0]))                       // TURNO
                 .horaInicioNorm(convertirFecha.apply(row[1]))              // HORA_INICIO_NORM

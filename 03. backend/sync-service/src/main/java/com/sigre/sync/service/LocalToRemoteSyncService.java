@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class LocalToRemoteSyncService {
     
     private final AsistenciaHt580LocalRepository asistenciaLocalRepository;
     private final AsistenciaHt580RemoteRepository asistenciaRemoteRepository;
+    private final ObjectMapper objectMapper;
     
     @Value("${sync.config.max-retries:1}")
     private int maxRetries;
@@ -84,6 +88,7 @@ public class LocalToRemoteSyncService {
     private void procesarAsistencia(AsistenciaHt580Local asistenciaLocal) {
         String externalId = asistenciaLocal.getExternalId();
         boolean existeEnRemote = false;
+
         try {
             // Verificar si ya existe en Oracle
             if (externalId != null) {
@@ -94,15 +99,61 @@ public class LocalToRemoteSyncService {
             
             if (!existeEnRemote) {
                 // INSERTAR en Oracle
+                
+                // ✅ LOGGING JSON - Objeto local (PostgreSQL)
+                try {
+                    log.info("🔄 Asistencia Local (PostgreSQL): {}", objectMapper.writeValueAsString(asistenciaLocal));
+                } catch (Exception e) {
+                    log.info("🔄 Asistencia Local (PostgreSQL): {}", asistenciaLocal.toString());
+                }
+                
                 AsistenciaHt580Remote asistenciaRemote = convertirLocalToRemote(asistenciaLocal);
-                AsistenciaHt580Remote asistenciaSaved = asistenciaRemoteRepository.save(asistenciaRemote);
                 
-                // ✅ CAPTURAR el reckey generado por Oracle y guardar en external_id
-                String oracleReckey = asistenciaSaved.getReckey();
-                log.info("🔄 Oracle generó ID: {} para registro local: {}", oracleReckey, asistenciaLocal.getReckey());
+                // ✅ LOGGING JSON - Objeto remoto ANTES del save
+                try {
+                    log.info("🔄 Asistencia Remota ANTES de Oracle: {}", objectMapper.writeValueAsString(asistenciaRemote));
+                } catch (Exception e) {
+                    log.info("🔄 Asistencia Remota ANTES de Oracle: {}", asistenciaRemote.toString());
+                }
+
+                asistenciaRemoteRepository.save(asistenciaRemote);
                 
-                // ✅ ACTUALIZAR registro con external_id de Oracle (NO eliminar)
-                asistenciaLocal.setExternalId(oracleReckey); // ✅ ID de Oracle en external_id
+                // ✅ CONSULTAR Oracle para obtener el reckey REAL generado por trigger  
+                // Con formato de fecha y TRIM para evitar problemas de precisión/padding
+                AsistenciaHt580Remote asistenciaSaved = asistenciaRemoteRepository
+                        .findRegistroRecienInsertado(
+                                asistenciaRemote.getCodOrigen(),
+                                asistenciaRemote.getCodigo(), 
+                                asistenciaRemote.getFlagInOut(),
+                                asistenciaRemote.getFechaMovimiento(),
+                                asistenciaRemote.getCodUsuario(),
+                                asistenciaRemote.getDireccionIp(),
+                                asistenciaRemote.getTurno(),
+                                asistenciaRemote.getLecturaPda()
+                        );
+                
+                String oracleReckey = "";
+                if (asistenciaSaved != null) {
+                    oracleReckey = asistenciaSaved.getReckey();
+                    log.info("🔍 CONSULTA Oracle exitosa - ID real: {} (vs save: {})", oracleReckey, asistenciaSaved.getReckey());
+                    
+                    // ✅ LOGGING JSON - Objeto real de Oracle
+                    try {
+                        log.info("🔄 Asistencia Oracle REAL (consultada): {}", objectMapper.writeValueAsString(asistenciaSaved));
+                    } catch (Exception e) {
+                        log.info("🔄 Asistencia Oracle REAL (consultada): {}", asistenciaSaved.toString());
+                    }
+
+                    // ✅ ACTUALIZAR registro con external_id de Oracle (NO eliminar)
+                    asistenciaLocal.setExternalId(oracleReckey); // ✅ ID de Oracle en external_id
+                    
+                
+                } else {
+                    // Fallback al save response
+                    //oracleReckey = asistenciaSaved.getReckey();
+                    //log.warn("⚠️ No se encontró registro en Oracle por consulta, usando save response: {}", oracleReckey);
+                }
+                
                 asistenciaLocal.setEstadoSync("S");
                 asistenciaLocal.setFechaSync(LocalDateTime.now());
                 asistenciaLocalRepository.save(asistenciaLocal);
@@ -111,11 +162,33 @@ public class LocalToRemoteSyncService {
                 log.debug("➕ Insertada asistencia en Oracle: {} con external_id: {}", asistenciaLocal.getReckey(), oracleReckey);
                 
             } else {
-                // Ya existe, marcar como sincronizado
+                // Ya existe, pero tiene la fecha de update entonces lo actualizo
+                if (asistenciaLocal.getFechaUpdate() != null && asistenciaLocal.getEstadoSync().equals("N")) {
+                    Optional<AsistenciaHt580Remote> asistenciaRemoteOptional = asistenciaRemoteRepository.findById(externalId);
+
+                    if (asistenciaRemoteOptional.isPresent()) {
+                        AsistenciaHt580Remote asistenciaRemote = asistenciaRemoteOptional.get();
+                        
+                        //Actualizo los campos de la asistencia remota
+                        asistenciaRemote.setFlagInOut(asistenciaLocal.getFlagInOut());
+                        asistenciaRemote.setFechaMovimiento(asistenciaLocal.getFechaMovimiento());
+                        asistenciaRemote.setCodUsuario(asistenciaLocal.getCodUsuario());
+                        asistenciaRemote.setDireccionIp(asistenciaLocal.getDireccionIp());
+                        asistenciaRemote.setFlagVerifyType(asistenciaLocal.getFlagVerifyType());
+                        asistenciaRemote.setTurno(asistenciaLocal.getTurno());
+                        asistenciaRemote.setLecturaPda(asistenciaLocal.getLecturaPda());
+
+                        asistenciaRemoteRepository.save(asistenciaRemote);
+                    }
+                    
+                }
+
+                //Actualizo la sincronizacion en la base de dato slocal
                 asistenciaLocal.setEstadoSync("S");
                 asistenciaLocal.setFechaSync(LocalDateTime.now());
                 asistenciaLocalRepository.save(asistenciaLocal);
-                log.debug("⏭️ Asistencia ya existe en Oracle: {}", asistenciaLocal.getReckey());
+                
+                log.debug("⏭️ Asistencia ya existe en Oracle: {}", asistenciaLocal.getExternalId());
             }
             
         } catch (Exception e) {

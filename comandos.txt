@@ -75,6 +75,7 @@ docker compose up sync-service --build -d
 
 docker compose build config-server
 docker compose restart config-server
+docker compose restart discovery-server
 
 docker compose restart sync-service
 docker compose logs -f sync-service
@@ -109,6 +110,13 @@ docker compose up --build -d asistencia-service sigre-frontend
 docker compose restart discovery-server
 =========================================================
 
+=========================================================
+COFIG-SERVER
+=========================================================
+docker compose down config-server
+docker compose up --build -d config-server
+docker compose restart discovery-server
+=========================================================
 
 =========================================================
 SIGRE_WEB
@@ -130,9 +138,21 @@ docker compose up --build -d asistencia-service sigre-frontend sync-service
 docker compose restart discovery-server
 =========================================================
 
+=========================================================
+ASISTENCIA Y SYNC_SERVICE
+=========================================================
 docker compose down asistencia-service sync-service
 docker compose up --build -d asistencia-service sync-service
 docker compose restart discovery-server
+=========================================================
+
+=========================================================
+SYNC_SERVICE
+=========================================================
+docker compose down sync-service
+docker compose up --build -d sync-service
+docker compose restart discovery-server
+=========================================================
 
 docker compose restart asistencia-service
 docker compose restart sync-service

@@ -228,8 +228,16 @@ export class ClockService {
    */
   getDateTimeForMarcacion(): string {
     const currentTime = this.getCurrentTimeSync();
-    // Formato: "2025-09-15 18:30:45"
-    return currentTime.toISOString().slice(0, 19).replace('T', ' ');
+    
+    // ✅ FORMATO dd/mm/yyyy hh:mi:ss (estándar para backend)
+    const year = currentTime.getFullYear();
+    const month = String(currentTime.getMonth() + 1).padStart(2, '0');
+    const day = String(currentTime.getDate()).padStart(2, '0');
+    const hours = String(currentTime.getHours()).padStart(2, '0');
+    const minutes = String(currentTime.getMinutes()).padStart(2, '0');
+    const seconds = String(currentTime.getSeconds()).padStart(2, '0');
+    
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
 
   /**

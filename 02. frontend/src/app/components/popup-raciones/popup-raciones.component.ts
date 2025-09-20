@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { ConfigService } from '../../services/config.service';
+import { ClockService } from '../../services/clock.service';
 
 export interface RacionDisponible {
   id: string;
@@ -34,51 +36,106 @@ export class PopupRacionesComponent implements OnInit {
   @Output() racionOmitida = new EventEmitter<void>();
   @Output() cerrar = new EventEmitter<void>();
 
-  fechaActual = new Date();
+  fechaActual = new Date(); // Se actualiza en ngOnInit con hora del servidor
   racionesDisponibles: RacionDisponible[] = [];
   racionesElegidas: RacionDisponible[] = [];
   esAntesMediodia: boolean = false;
   puedeSeleccionarMultiples: boolean = false;
 
+  constructor(
+    private configService: ConfigService,
+    private clockService: ClockService
+  ) {}
+
   ngOnInit() {
+    // Actualizar fecha con hora del servidor
+    this.fechaActual = this.clockService.getCurrentTimeSync();
     this.cargarRacionesDisponibles();
   }
 
   private cargarRacionesDisponibles() {
-    const hora = new Date().getHours();
-    this.esAntesMediodia = hora < 12;
-    this.puedeSeleccionarMultiples = this.esAntesMediodia;
+    const horaActual = this.clockService.getCurrentTimeSync();
+    const hora = horaActual.getHours();
     
-    console.log(`🕐 Hora actual: ${hora}:xx - ${this.esAntesMediodia ? 'ANTES' : 'DESPUÉS'} del mediodía`);
+    console.log(`🕐 Hora actual del servidor: ${hora}:${horaActual.getMinutes().toString().padStart(2, '0')}`);
     
-    const todasLasRaciones = [
-      {
-        id: 'A', // Código de Almuerzo
+    try {
+      // Obtener configuración dinámica de raciones
+      const racionesConfig = this.configService.getRacionesDisponibles(horaActual);
+      
+      // Mapear solo las raciones que están disponibles según configuración
+      this.racionesDisponibles = racionesConfig
+        .filter(config => config.disponible) // Solo raciones disponibles
+        .map(config => {
+          // Mapear tipo de ración a código y configuración visual
+          const racionInfo = this.mapearTipoRacion(config.tipo);
+          
+          return {
+            id: racionInfo.codigo,
+            nombre: racionInfo.nombre,
+            icono: racionInfo.icono,
+            color: racionInfo.color,
+            horario: `${config.config.inicio} - ${config.config.fin}`,
+            disponible: true, // Ya filtrado arriba
+            yaSeleccionada: false
+          };
+        });
+      
+      // Determinar lógica de selección múltiple
+      // Si hay más de una ración disponible, permitir selección múltiple
+      this.puedeSeleccionarMultiples = this.racionesDisponibles.length > 1;
+      
+      // Para compatibilidad, mantener esAntesMediodia
+      this.esAntesMediodia = this.puedeSeleccionarMultiples;
+      
+      console.log('📋 Raciones disponibles:', this.racionesDisponibles.map(r => `${r.nombre} (${r.horario})`));
+      console.log('💡 Modo selección:', this.puedeSeleccionarMultiples ? 
+        'MÚLTIPLE: puede elegir varias raciones' : 
+        'SIMPLE: solo una ración disponible');
+        
+    } catch (error) {
+      console.error('❌ Error cargando configuración de raciones:', error);
+      
+      // Fallback: no mostrar raciones si hay error de configuración
+      this.racionesDisponibles = [];
+      this.puedeSeleccionarMultiples = false;
+      this.esAntesMediodia = false;
+      
+      console.warn('⚠️ Sin configuración de raciones disponible - modo fallback');
+    }
+  }
+
+  /**
+   * Mapear tipo de ración a configuración visual
+   */
+  private mapearTipoRacion(tipo: string) {
+    const mapeo = {
+      'desayuno': {
+        codigo: 'D',
+        nombre: 'Desayuno',
+        icono: 'free_breakfast',
+        color: '#f59e0b'
+      },
+      'almuerzo': {
+        codigo: 'A', 
         nombre: 'Almuerzo',
         icono: 'lunch_dining',
-        color: '#10b981',
-        horario: '12:00 - 15:00',
-        disponible: this.esAntesMediodia, // Solo antes del mediodía
-        yaSeleccionada: false
+        color: '#10b981'
       },
-      {
-        id: 'C', // Código de Cena
-        nombre: 'Cena',
+      'cena': {
+        codigo: 'C',
+        nombre: 'Cena', 
         icono: 'dinner_dining',
-        color: '#1e3a8a',
-        horario: '18:00 - 21:00',
-        disponible: true, // Siempre disponible
-        yaSeleccionada: false
+        color: '#1e3a8a'
       }
-    ];
+    };
     
-    // Filtrar raciones disponibles según horario
-    this.racionesDisponibles = todasLasRaciones.filter(racion => racion.disponible);
-    
-    console.log('📋 Raciones disponibles:', this.racionesDisponibles.map(r => r.nombre));
-    console.log('💡 Modo selección:', this.puedeSeleccionarMultiples ? 
-      'MÚLTIPLE (antes mediodía): puede elegir almuerzo, cena o ambos' : 
-      'SIMPLE (después mediodía): solo cena');
+    return mapeo[tipo] || {
+      codigo: tipo.charAt(0).toUpperCase(),
+      nombre: tipo.charAt(0).toUpperCase() + tipo.slice(1),
+      icono: 'restaurant',
+      color: '#6b7280'
+    };
   }
 
   seleccionarRacion(racion: RacionDisponible) {

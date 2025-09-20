@@ -82,9 +82,22 @@ public class TicketAsistenciaService {
     @Transactional
     public MarcacionResponse crearTicketMarcacion(MarcacionRequest request) {
         long inicioTiempo = System.currentTimeMillis();
+        LocalDateTime ahora = LocalDateTime.now(); // ✅ MOVER DECLARACIÓN AL INICIO
+        
         try {
             log.info("🎫 Creando ticket para código: {} | Movimiento: {} | IP: {}", 
                     request.getCodigoInput(), request.getTipoMovimiento(), request.getDireccionIp());
+            
+            // 🔍 DEBUG FECHA - Mostrar fecha recibida del frontend
+            log.info("🔍 DEBUG FECHA - getFechaMarcacion() del request: '{}'", request.getFechaMarcacion());
+            log.info("🔍 DEBUG FECHA - Hora actual backend: {}", ahora);
+            
+            // 🔍 DEBUG FECHA - Mostrar conversión de fecha
+            LocalDateTime fechaConvertida = convertirFechaMarcacion(request.getFechaMarcacion(), ahora);
+            log.info("🔍 DEBUG FECHA - Fecha después de conversión: {}", fechaConvertida);
+            log.info("🔍 DEBUG FECHA - ¿Son iguales? Frontend vs Backend: {} vs {} = {}", 
+                    request.getFechaMarcacion(), ahora, 
+                    fechaConvertida.equals(ahora) ? "IGUALES" : "DIFERENTES");
             
             // PASO 1: Validación inmediata del trabajador
             long inicioValidacion = System.currentTimeMillis();
@@ -111,7 +124,6 @@ public class TicketAsistenciaService {
             log.info("⏱️ Número de ticket generado en: {} ms | Ticket: {}", tiempoGeneracion, numeroTicket);
             
             // PASO 3: Crear ticket en la cola
-            LocalDateTime ahora = LocalDateTime.now();
             TicketAsistencia ticket = TicketAsistencia.builder()
                     .numeroTicket(numeroTicket) // PK generada
                     .codigoInput(request.getCodigoInput())
@@ -123,7 +135,7 @@ public class TicketAsistenciaService {
                     .tipoMovimiento(request.getTipoMovimiento()) // ✅ Controller ya envía número 1-8
                     .direccionIp(request.getDireccionIp())
                     .racionesSeleccionadas(convertirRacionesAJson(request.getRacionesSeleccionadas()))
-                    .fechaMarcacion(convertirFechaMarcacion(request.getFechaMarcacion(), ahora))
+                    .fechaMarcacion(fechaConvertida) // ✅ Usar fecha ya convertida y loggeada
                     .estadoProcesamiento("P") // P = Pendiente
                     .usuarioSistema(codUsuarioSistema.length() > 6 ? codUsuarioSistema.substring(0, 6) : codUsuarioSistema) // ✅ CHAR(6) límite
                     .intentosProcesamiento(0)
@@ -252,8 +264,14 @@ public class TicketAsistenciaService {
                     .flagVerifyType("1") // Web validation
                     .tipoMarcacion(ticket.getTipoMarcaje()) // ✅ ticket ya tiene número 1-2 mapeado
                     .turno(turnoService.determinarTurnoActual(ticket.getFechaMarcacion()))
-                    .lecturaPda(null) // No aplica para web
+                    .lecturaPda(ticket.getCodigoInput()) // ✅ Guardar código ingresado original en LECTURA_PDA
                     .build();
+            
+            // 🔍 DEBUG ASISTENCIA - Mostrar fechas que se van a guardar  
+            log.info("🔍 DEBUG ASISTENCIA - fechaMovimiento que se guardará: {}", asistencia.getFechaMovimiento());
+            log.info("🔍 DEBUG ASISTENCIA - fechaRegistro que se guardará: {}", asistencia.getFechaRegistro());
+            log.info("🔍 DEBUG ASISTENCIA - Diferencia en minutos: {}", 
+                    java.time.Duration.between(asistencia.getFechaMovimiento(), asistencia.getFechaRegistro()).toMinutes());
             
             asistencia = asistenciaRepository.save(asistencia);
             log.info("✅ Asistencia creada: {} para trabajador: {}", reckey, ticket.getCodTrabajador());
@@ -658,7 +676,7 @@ public class TicketAsistenciaService {
     /**
      * Convertir fecha de marcación de String a LocalDateTime
      * Solución para problemas de zona horaria: el frontend envía la fecha como string
-     * en formato "yyyy-MM-dd HH:mm:ss" obtenida del servidor
+     * en formato "dd/MM/yyyy HH:mm:ss" (formato local, sin conversión UTC)
      */
     private LocalDateTime convertirFechaMarcacion(String fechaMarcacionString, LocalDateTime fechaPorDefecto) {
         if (fechaMarcacionString == null || fechaMarcacionString.trim().isEmpty()) {
@@ -666,12 +684,23 @@ public class TicketAsistenciaService {
             return fechaPorDefecto;
         }
         
+        log.info("🔍 DEBUG Fecha - String recibido: '{}'", fechaMarcacionString);
+        log.info("🔍 DEBUG Fecha - Fecha por defecto: {}", fechaPorDefecto);
+        
         try {
-            // Parsear formato: yyyy-MM-dd HH:mm:ss
-            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            // Parsear formato: dd/MM/yyyy HH:mm:ss (formato estándar del frontend)
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
             LocalDateTime fechaParseada = LocalDateTime.parse(fechaMarcacionString.trim(), formatter);
             
-            log.debug("🕐 Fecha de marcación convertida: '{}' -> {}", fechaMarcacionString, fechaParseada);
+            log.info("🕐 Fecha de marcación convertida: '{}' -> {}", fechaMarcacionString, fechaParseada);
+            
+            // Verificar si la fecha parseada es lógica (no en el pasado lejano ni futuro lejano)
+            if (fechaParseada.isBefore(LocalDateTime.now().minusDays(1)) || 
+                fechaParseada.isAfter(LocalDateTime.now().plusDays(1))) {
+                log.warn("⚠️ Fecha parseada fuera de rango lógico: {}, usando fecha del servidor", fechaParseada);
+                return fechaPorDefecto;
+            }
+            
             return fechaParseada;
             
         } catch (Exception e) {

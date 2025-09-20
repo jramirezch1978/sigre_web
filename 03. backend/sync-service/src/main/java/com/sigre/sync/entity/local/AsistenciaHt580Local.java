@@ -39,6 +39,9 @@ public class AsistenciaHt580Local {
     
     @Column(name = "FEC_MOVIMIENTO", nullable = false)
     private LocalDateTime fechaMovimiento;
+
+    @Column(name = "FEC_UPDATE", nullable = true)
+    private LocalDateTime fechaUpdate;
     
     @Column(name = "COD_USR", length = 6, nullable = false)
     private String codUsuario;

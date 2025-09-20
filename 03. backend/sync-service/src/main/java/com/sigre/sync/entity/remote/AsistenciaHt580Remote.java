@@ -19,7 +19,7 @@ public class AsistenciaHt580Remote {
     
     @Id
     @Column(name = "RECKEY", length = 12)
-    private String reckey;
+    private String reckey; // ✅ Generado por Oracle trigger (no usar @GeneratedValue)
     
     @Column(name = "COD_ORIGEN", length = 2)
     private String codOrigen;
