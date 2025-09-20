@@ -29,11 +29,19 @@ public class LocalToRemoteSyncService {
     @Value("${sync.config.max-retries:1}")
     private int maxRetries;
     
+    @Value("${sync.config.cod-origen:SE}")
+    private String codOrigenConfiguracion;
+    
     private final List<String> erroresSincronizacion = new ArrayList<>();
     private int registrosInsertados = 0;
     private int registrosActualizados = 0;
     private int registrosEliminados = 0;
     private int registrosErrores = 0;
+    
+    // 📊 Contadores específicos para operaciones en Oracle
+    private int oracleInsertados = 0;
+    private int oracleActualizados = 0;
+    private int oracleEliminados = 0;
     
     /**
      * Sincronizar tabla asistencia_ht580 de PostgreSQL → Oracle
@@ -70,8 +78,21 @@ public class LocalToRemoteSyncService {
                 }
             }
             
+            log.info("✅ FASE 1 completada - Insertados: {} | Errores: {}", 
+                    registrosInsertados, registrosErrores);
+            
+            // ✅ FASE 2: Sincronizar cambios de registros ya sincronizados
+            sincronizarCambiosRegistrosSincronizados();
+            
+            // ✅ FASE 3: Eliminar registros huérfanos de Oracle
+            eliminarRegistrosHuerfanosOracle();
+            
             log.info("✅ Sincronización ASISTENCIA_HT580 completada - Insertados: {} | Errores: {}", 
                     registrosInsertados, registrosErrores);
+            
+            // 📊 Log específico de operaciones en Oracle
+            log.info("📊 OPERACIONES EN ORACLE - Insertados: {} | Actualizados: {} | Eliminados: {}", 
+                    oracleInsertados, oracleActualizados, oracleEliminados);
             
             return registrosErrores == 0;
             
@@ -117,6 +138,7 @@ public class LocalToRemoteSyncService {
                 }
 
                 asistenciaRemoteRepository.save(asistenciaRemote);
+                oracleInsertados++; // 📊 Contador Oracle
                 
                 // ✅ CONSULTAR Oracle para obtener el reckey REAL generado por trigger  
                 // Con formato de fecha y TRIM para evitar problemas de precisión/padding
@@ -179,6 +201,7 @@ public class LocalToRemoteSyncService {
                         asistenciaRemote.setLecturaPda(asistenciaLocal.getLecturaPda());
 
                         asistenciaRemoteRepository.save(asistenciaRemote);
+                        oracleActualizados++; // 📊 Contador Oracle
                     }
                     
                 }
@@ -235,6 +258,145 @@ public class LocalToRemoteSyncService {
     }
     
     /**
+     * FASE 2: Sincronizar cambios de registros ya sincronizados
+     * PostgreSQL (con external_id) → Comparar Oracle → Actualizar si diferente
+     */
+    private void sincronizarCambiosRegistrosSincronizados() {
+        log.info("🔄 FASE 2: Sincronizando cambios de registros ya sincronizados");
+        
+        try {
+            // ✅ Usar codOrigen de configuración
+            String codOrigen = codOrigenConfiguracion;
+            
+            // Buscar registros PostgreSQL ya sincronizados (con external_id)
+            List<AsistenciaHt580Local> registrosSincronizados = asistenciaLocalRepository
+                    .findByEstadoSyncAndExternalIdIsNotNullAndCodOrigen("S", codOrigen);
+            
+            log.info("📊 FASE 2: Encontrados {} registros sincronizados para verificar", registrosSincronizados.size());
+            
+            for (AsistenciaHt580Local localRecord : registrosSincronizados) {
+                // Buscar en Oracle por external_id
+                AsistenciaHt580Remote oracleRecord = asistenciaRemoteRepository
+                        .findById(localRecord.getExternalId())
+                        .orElse(null);
+                
+                if (oracleRecord == null) {
+                    // No existe en Oracle - re-insertar
+                    log.warn("🔄 FASE 2: Registro {} no existe en Oracle, re-insertando", localRecord.getExternalId());
+                    AsistenciaHt580Remote nuevoRegistro = convertirLocalToRemote(localRecord);
+                    asistenciaRemoteRepository.save(nuevoRegistro);
+                    
+                    // ✅ OBTENER EL NUEVO RECKEY GENERADO POR ORACLE
+                    AsistenciaHt580Remote registroConNuevoReckey = asistenciaRemoteRepository
+                            .findRegistroRecienInsertado(
+                                    nuevoRegistro.getCodOrigen(),
+                                    nuevoRegistro.getCodigo(), 
+                                    nuevoRegistro.getFlagInOut(),
+                                    nuevoRegistro.getFechaMovimiento(),
+                                    nuevoRegistro.getCodUsuario(),
+                                    nuevoRegistro.getDireccionIp(),
+                                    nuevoRegistro.getTurno(),
+                                    nuevoRegistro.getLecturaPda()
+                            );
+                    
+                    if (registroConNuevoReckey != null) {
+                        // ✅ ACTUALIZAR EXTERNAL_ID CON EL NUEVO RECKEY DE ORACLE
+                        localRecord.setExternalId(registroConNuevoReckey.getReckey());
+                        asistenciaLocalRepository.save(localRecord);
+                        log.info("✅ FASE 2: External_id actualizado de {} a {}", 
+                                localRecord.getExternalId(), registroConNuevoReckey.getReckey());
+                    }
+                    
+                    registrosActualizados++;
+                    oracleInsertados++; // 📊 Contador Oracle (re-insert)
+                    
+                } else {
+                    // Comparar datos y actualizar si es diferente
+                    if (sonDiferentes(localRecord, oracleRecord)) {
+                        log.info("🔄 FASE 2: Actualizando registro {} en Oracle", localRecord.getExternalId());
+                        actualizarRegistroOracle(localRecord, oracleRecord);
+                        registrosActualizados++;
+                        oracleActualizados++; // 📊 Contador Oracle
+                    }
+                }
+            }
+            
+            log.info("✅ FASE 2 completada - Actualizados: {}", registrosActualizados);
+            
+        } catch (Exception e) {
+            log.error("❌ Error en FASE 2: {}", e.getMessage(), e);
+            erroresSincronizacion.add("Error en FASE 2: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * FASE 3: Eliminar registros huérfanos de Oracle
+     * Oracle (filtro cod_origen) → Buscar PostgreSQL → Eliminar Oracle si no existe
+     */
+    private void eliminarRegistrosHuerfanosOracle() {
+        log.info("🔄 FASE 3: Eliminando registros huérfanos de Oracle");
+        
+        try {
+            // ✅ Usar codOrigen de configuración
+            String codOrigen = codOrigenConfiguracion;
+            
+            // Obtener TODOS los registros de Oracle para este origen (sin filtro de fecha)
+            List<AsistenciaHt580Remote> registrosOracle = asistenciaRemoteRepository
+                    .findByCodOrigenOrderByFechaRegistroDesc(codOrigen);
+            
+            log.info("📊 FASE 3: Verificando {} registros Oracle para origen {}", registrosOracle.size(), codOrigen);
+            
+            for (AsistenciaHt580Remote oracleRecord : registrosOracle) {
+                // Buscar en PostgreSQL por external_id
+                AsistenciaHt580Local localRecord = asistenciaLocalRepository
+                        .findByExternalId(oracleRecord.getReckey())
+                        .orElse(null);
+                
+                if (localRecord == null) {
+                    // No existe en PostgreSQL - eliminar de Oracle
+                    log.warn("🗑️ FASE 3: Eliminando registro huérfano {} de Oracle", oracleRecord.getReckey());
+                    asistenciaRemoteRepository.delete(oracleRecord);
+                    registrosEliminados++;
+                    oracleEliminados++; // 📊 Contador Oracle
+                }
+            }
+            
+            log.info("✅ FASE 3 completada - Eliminados: {}", registrosEliminados);
+            
+        } catch (Exception e) {
+            log.error("❌ Error en FASE 3: {}", e.getMessage(), e);
+            erroresSincronizacion.add("Error en FASE 3: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Comparar si dos registros tienen datos diferentes
+     */
+    private boolean sonDiferentes(AsistenciaHt580Local local, AsistenciaHt580Remote oracle) {
+        return !local.getCodigo().equals(oracle.getCodigo()) ||
+               !local.getFlagInOut().equals(oracle.getFlagInOut()) ||
+               !local.getFechaMovimiento().equals(oracle.getFechaMovimiento()) ||
+               !local.getCodUsuario().trim().equals(oracle.getCodUsuario().trim()) ||
+               !local.getDireccionIp().equals(oracle.getDireccionIp());
+    }
+    
+    /**
+     * Actualizar registro de Oracle con datos de PostgreSQL
+     */
+    private void actualizarRegistroOracle(AsistenciaHt580Local local, AsistenciaHt580Remote oracle) {
+        oracle.setCodigo(local.getCodigo());
+        oracle.setFlagInOut(local.getFlagInOut());
+        oracle.setFechaMovimiento(local.getFechaMovimiento());
+        oracle.setCodUsuario(local.getCodUsuario());
+        oracle.setDireccionIp(local.getDireccionIp());
+        oracle.setFlagVerifyType(local.getFlagVerifyType());
+        oracle.setTurno(local.getTurno());
+        oracle.setLecturaPda(local.getLecturaPda());
+        
+        asistenciaRemoteRepository.save(oracle);
+    }
+    
+    /**
      * Resetear contadores para nueva sincronización
      */
     private void resetearContadores() {
@@ -243,6 +405,11 @@ public class LocalToRemoteSyncService {
         registrosEliminados = 0;
         registrosErrores = 0;
         erroresSincronizacion.clear();
+        
+        // 📊 Resetear contadores Oracle
+        oracleInsertados = 0;
+        oracleActualizados = 0;
+        oracleEliminados = 0;
     }
     
     // Getters para estadísticas
@@ -251,4 +418,9 @@ public class LocalToRemoteSyncService {
     public int getRegistrosEliminados() { return registrosEliminados; }
     public int getRegistrosErrores() { return registrosErrores; }
     public List<String> getErrores() { return new ArrayList<>(erroresSincronizacion); }
+    
+    // 📊 Getters para contadores específicos de Oracle
+    public int getOracleInsertados() { return oracleInsertados; }
+    public int getOracleActualizados() { return oracleActualizados; }
+    public int getOracleEliminados() { return oracleEliminados; }
 }

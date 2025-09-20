@@ -473,12 +473,12 @@ public class SyncSchedulerService {
                     .exitoso(remoteToLocalSync.getErrores("turno") == 0)
                     .build());
             
-            // Estadísticas de Local → Remote
+            // Estadísticas de Local → Remote (mostrando operaciones específicas en Oracle)
             estadisticasDetalladas.put("asistencia_ht580", EmailNotificationServiceHTML.SyncTableStats.builder()
                     .nombreTabla("asistencia_ht580")
-                    .registrosInsertados(localToRemoteSync.getRegistrosInsertados())
-                    .registrosActualizados(0)
-                    .registrosEliminados(0)
+                    .registrosInsertados(localToRemoteSync.getOracleInsertados()) // 📊 Oracle específico
+                    .registrosActualizados(localToRemoteSync.getOracleActualizados()) // 📊 Oracle específico
+                    .registrosEliminados(localToRemoteSync.getOracleEliminados()) // 📊 Oracle específico
                     .registrosErrores(localToRemoteSync.getRegistrosErrores())
                     .direccion("LOCAL_TO_REMOTE")
                     .baseOrigen("bd_local")

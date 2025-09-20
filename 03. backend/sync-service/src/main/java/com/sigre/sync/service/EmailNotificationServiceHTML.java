@@ -698,6 +698,5 @@ public class EmailNotificationServiceHTML {
         private String baseDestino;
         private long duracionMs;
         private boolean exitoso;
-        private List<String> erroresDetallados;
     }
 }

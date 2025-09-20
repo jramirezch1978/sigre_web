@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AsistenciaHt580LocalRepository extends JpaRepository<AsistenciaHt580Local, String> {
@@ -69,4 +70,23 @@ public interface AsistenciaHt580LocalRepository extends JpaRepository<Asistencia
     @Query("SELECT COUNT(a) FROM AsistenciaHt580Local a WHERE a.estadoSync = 'E' " +
            "AND (a.fechaRegistro >= :fechaDesde OR a.fechaSync >= :fechaDesde)")
     long countErroresDesde(@Param("fechaDesde") LocalDateTime fechaDesde);
+    
+    // ===== MÉTODOS PARA SINCRONIZACIÓN BIDIRECCIONAL =====
+    
+    /**
+     * FASE 2: Buscar registros sincronizados con external_id para verificar cambios
+     */
+    @Query("SELECT a FROM AsistenciaHt580Local a WHERE " +
+           "a.estadoSync = :estadoSync AND " +
+           "a.externalId IS NOT NULL AND " +
+           "a.codOrigen = :codOrigen")
+    List<AsistenciaHt580Local> findByEstadoSyncAndExternalIdIsNotNullAndCodOrigen(
+            @Param("estadoSync") String estadoSync,
+            @Param("codOrigen") String codOrigen
+    );
+    
+    /**
+     * FASE 3: Buscar registro por external_id (ID de Oracle)
+     */
+    Optional<AsistenciaHt580Local> findByExternalId(String externalId);
 }

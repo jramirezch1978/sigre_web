@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface AsistenciaHt580RemoteRepository extends JpaRepository<AsistenciaHt580Remote, String> {
@@ -41,4 +42,9 @@ public interface AsistenciaHt580RemoteRepository extends JpaRepository<Asistenci
             @Param("turno") String turno,
             @Param("lecturaPda") String lecturaPda
     );
+    
+    /**
+     * FASE 3: Buscar todos los registros de Oracle por cod_origen (sin filtro fecha)
+     */
+    List<AsistenciaHt580Remote> findByCodOrigenOrderByFechaRegistroDesc(String codOrigen);
 }
