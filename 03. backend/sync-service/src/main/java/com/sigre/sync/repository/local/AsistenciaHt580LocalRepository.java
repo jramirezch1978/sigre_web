@@ -89,4 +89,16 @@ public interface AsistenciaHt580LocalRepository extends JpaRepository<Asistencia
      * FASE 3: Buscar registro por external_id (ID de Oracle)
      */
     Optional<AsistenciaHt580Local> findByExternalId(String externalId);
+    
+    /**
+     * FASE 2: Buscar registros sincronizados SIN external_id (para re-insertar en Oracle)
+     */
+    @Query("SELECT a FROM AsistenciaHt580Local a WHERE " +
+           "a.estadoSync = :estadoSync AND " +
+           "a.externalId IS NULL AND " +
+           "a.codOrigen = :codOrigen")
+    List<AsistenciaHt580Local> findByEstadoSyncAndExternalIdIsNullAndCodOrigen(
+            @Param("estadoSync") String estadoSync,
+            @Param("codOrigen") String codOrigen
+    );
 }

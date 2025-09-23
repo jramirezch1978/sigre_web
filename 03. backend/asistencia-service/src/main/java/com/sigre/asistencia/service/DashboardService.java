@@ -372,12 +372,16 @@ public class DashboardService {
     
     private String obtenerDescripcionMovimiento(String flagInOut) {
         Map<String, String> descripciones = Map.of(
-                "1", "INGRESO",
-                "2", "SALIDA", 
-                "3", "INGRESO ALMUERZO",
-                "4", "SALIDA ALMUERZO",
-                "5", "INGRESO ESPECIAL",
-                "6", "SALIDA ESPECIAL"
+                "1", "INGRESO A PLANTA",
+                "2", "SALIDA DE PLANTA", 
+                "3", "SALIDA A ALMORZAR",
+                "4", "REGRESO DE ALMORZAR",
+                "5", "SALIDA DE COMISIÓN",
+                "6", "RETORNO DE COMISIÓN",
+                "7", "INGRESO A PRODUCCIÓN",
+                "8", "SALIDA DE PRODUCCIÓN",
+                "9", "SALIDA A CENAR",
+                "10", "REGRESO DE CENAR"
         );
         return descripciones.getOrDefault(flagInOut, "MOVIMIENTO DESCONOCIDO");
     }

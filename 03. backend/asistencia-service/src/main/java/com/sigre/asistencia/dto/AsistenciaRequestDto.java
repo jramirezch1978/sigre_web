@@ -19,7 +19,7 @@ public class AsistenciaRequestDto {
     private String codOrigen; // Código de origen del dispositivo/ubicación (SE, WE, etc.)
     
     @NotBlank(message = "El tipo de movimiento es obligatorio")
-    @Pattern(regexp = "^(INGRESO_PLANTA|SALIDA_PLANTA|SALIDA_ALMORZAR|REGRESO_ALMORZAR|SALIDA_COMISION|RETORNO_COMISION|INGRESO_PRODUCCION|SALIDA_PRODUCCION)$", 
+    @Pattern(regexp = "^(INGRESO_PLANTA|SALIDA_PLANTA|SALIDA_ALMORZAR|REGRESO_ALMORZAR|SALIDA_COMISION|RETORNO_COMISION|INGRESO_PRODUCCION|SALIDA_PRODUCCION|SALIDA_CENAR|REGRESO_CENAR)$", 
              message = "Tipo de movimiento no válido")
     private String tipoMovimiento;
     

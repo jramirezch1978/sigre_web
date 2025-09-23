@@ -30,7 +30,7 @@ public interface AsistenciaHt580RemoteRepository extends JpaRepository<Asistenci
            "  AND TRIM(a.codUsuario) = TRIM(:codUsuario) " +
            "  AND a.direccionIp     = :direccionIp " +
            "  AND TRIM(a.turno)     = TRIM(:turno) " +
-           "  AND a.lecturaPda      = :lecturaPda " +
+           "  AND ((:lecturaPda IS NULL AND a.lecturaPda IS NULL) OR a.lecturaPda = :lecturaPda) " +
            "ORDER BY a.fechaRegistro DESC")
     AsistenciaHt580Remote findRegistroRecienInsertado(
             @Param("codOrigen") String codOrigen,

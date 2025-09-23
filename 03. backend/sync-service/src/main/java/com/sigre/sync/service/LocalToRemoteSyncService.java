@@ -94,6 +94,10 @@ public class LocalToRemoteSyncService {
             log.info("📊 OPERACIONES EN ORACLE - Insertados: {} | Actualizados: {} | Eliminados: {}", 
                     oracleInsertados, oracleActualizados, oracleEliminados);
             
+            if (oracleInsertados > 0) {
+                log.info("🆕 Registros RE-INSERTADOS incluyen AUTO_CLOSE y registros sin external_id");
+            }
+            
             return registrosErrores == 0;
             
         } catch (Exception e) {
@@ -157,7 +161,7 @@ public class LocalToRemoteSyncService {
                 String oracleReckey = "";
                 if (asistenciaSaved != null) {
                     oracleReckey = asistenciaSaved.getReckey();
-                    log.info("🔍 CONSULTA Oracle exitosa - ID real: {} (vs save: {})", oracleReckey, asistenciaSaved.getReckey());
+                    log.info("🔍 CONSULTA Oracle exitosa - ID real: {} (original local: {})", oracleReckey, asistenciaLocal.getReckey());
                     
                     // ✅ LOGGING JSON - Objeto real de Oracle
                     try {
@@ -168,17 +172,21 @@ public class LocalToRemoteSyncService {
 
                     // ✅ ACTUALIZAR registro con external_id de Oracle (NO eliminar)
                     asistenciaLocal.setExternalId(oracleReckey); // ✅ ID de Oracle en external_id
+                    asistenciaLocal.setFechaUpdate(LocalDateTime.now()); // ✅ Marcar como actualizado
+                    asistenciaLocal.setEstadoSync("S");
+                    asistenciaLocal.setFechaSync(LocalDateTime.now());
+                    asistenciaLocalRepository.save(asistenciaLocal);
                     
+                    log.info("✅ External_id actualizado: {} → {}", asistenciaLocal.getReckey(), oracleReckey);
                 
                 } else {
-                    // Fallback al save response
-                    //oracleReckey = asistenciaSaved.getReckey();
-                    //log.warn("⚠️ No se encontró registro en Oracle por consulta, usando save response: {}", oracleReckey);
+                    // ❌ NO se encontró registro en Oracle - ERROR crítico
+                    log.error("❌ CRÍTICO: No se encontró registro en Oracle después del save - posible fallo en trigger");
+                    asistenciaLocal.setEstadoSync("E"); // ✅ Marcar como ERROR (no como sincronizado)
+                    asistenciaLocal.setIntentosSync(asistenciaLocal.getIntentosSync() + 1);
+                    asistenciaLocalRepository.save(asistenciaLocal);
+                    registrosErrores++;
                 }
-                
-                asistenciaLocal.setEstadoSync("S");
-                asistenciaLocal.setFechaSync(LocalDateTime.now());
-                asistenciaLocalRepository.save(asistenciaLocal);
                 
                 registrosInsertados++;
                 log.debug("➕ Insertada asistencia en Oracle: {} con external_id: {}", asistenciaLocal.getReckey(), oracleReckey);
@@ -272,7 +280,12 @@ public class LocalToRemoteSyncService {
             List<AsistenciaHt580Local> registrosSincronizados = asistenciaLocalRepository
                     .findByEstadoSyncAndExternalIdIsNotNullAndCodOrigen("S", codOrigen);
             
-            log.info("📊 FASE 2: Encontrados {} registros sincronizados para verificar", registrosSincronizados.size());
+            // 🆕 BUSCAR registros sincronizados SIN external_id (AUTO_CLOSE y otros)
+            List<AsistenciaHt580Local> registrosSinExternalId = asistenciaLocalRepository
+                    .findByEstadoSyncAndExternalIdIsNullAndCodOrigen("S", codOrigen);
+            
+            log.info("📊 FASE 2: Encontrados {} registros sincronizados CON external_id para verificar", registrosSincronizados.size());
+            log.info("📊 FASE 2: Encontrados {} registros sincronizados SIN external_id para re-insertar", registrosSinExternalId.size());
             
             for (AsistenciaHt580Local localRecord : registrosSincronizados) {
                 // Buscar en Oracle por external_id
@@ -321,7 +334,78 @@ public class LocalToRemoteSyncService {
                 }
             }
             
-            log.info("✅ FASE 2 completada - Actualizados: {}", registrosActualizados);
+            // 🆕 PROCESAR registros sincronizados SIN external_id (AUTO_CLOSE y otros)
+            log.info("🔄 FASE 2B: Procesando registros sincronizados SIN external_id");
+            for (AsistenciaHt580Local recordSinExternalId : registrosSinExternalId) {
+                try {
+                    log.info("🔄 FASE 2B: Re-insertando registro {} en Oracle (AUTO_CLOSE o similar)", recordSinExternalId.getReckey());
+                    
+                    // Convertir y re-insertar en Oracle
+                    AsistenciaHt580Remote nuevoRegistroOracle = convertirLocalToRemote(recordSinExternalId);
+                    
+                    // 🔍 LOGGING DETALLADO - Datos que se envían a Oracle
+                    log.info("🔍 FASE 2B: Datos enviados a Oracle para {}: COD_ORIGEN={}, CODIGO={}, FLAG_IN_OUT={}, DIRECCION_IP={}, LECTURA_PDA={}", 
+                            recordSinExternalId.getReckey(), 
+                            nuevoRegistroOracle.getCodOrigen(),
+                            nuevoRegistroOracle.getCodigo(),
+                            nuevoRegistroOracle.getFlagInOut(),
+                            nuevoRegistroOracle.getDireccionIp(),
+                            nuevoRegistroOracle.getLecturaPda());
+                    
+                    asistenciaRemoteRepository.save(nuevoRegistroOracle);
+                    oracleInsertados++; // 📊 Contador Oracle
+                    
+                    // ✅ CONSULTAR Oracle para obtener el reckey REAL generado
+                    AsistenciaHt580Remote registroConReckey = asistenciaRemoteRepository
+                            .findRegistroRecienInsertado(
+                                    nuevoRegistroOracle.getCodOrigen(),
+                                    nuevoRegistroOracle.getCodigo(), 
+                                    nuevoRegistroOracle.getFlagInOut(),
+                                    nuevoRegistroOracle.getFechaMovimiento(),
+                                    nuevoRegistroOracle.getCodUsuario(),
+                                    nuevoRegistroOracle.getDireccionIp(),
+                                    nuevoRegistroOracle.getTurno(),
+                                    nuevoRegistroOracle.getLecturaPda()
+                            );
+                    
+                    // 🔍 LOGGING DETALLADO - Resultado de la consulta
+                    if (registroConReckey == null) {
+                        log.error("🔍 FASE 2B: CONSULTA ORACLE FALLÓ - Parámetros de búsqueda:");
+                        log.error("    COD_ORIGEN: '{}'", nuevoRegistroOracle.getCodOrigen());
+                        log.error("    CODIGO: '{}'", nuevoRegistroOracle.getCodigo());
+                        log.error("    FLAG_IN_OUT: '{}'", nuevoRegistroOracle.getFlagInOut());
+                        log.error("    FECHA_MOVIMIENTO: '{}'", nuevoRegistroOracle.getFechaMovimiento());
+                        log.error("    COD_USUARIO: '{}'", nuevoRegistroOracle.getCodUsuario());
+                        log.error("    DIRECCION_IP: '{}'", nuevoRegistroOracle.getDireccionIp());
+                        log.error("    TURNO: '{}'", nuevoRegistroOracle.getTurno());
+                        log.error("    LECTURA_PDA: '{}'", nuevoRegistroOracle.getLecturaPda());
+                    }
+                    
+                    if (registroConReckey != null) {
+                        // ✅ ACTUALIZAR con el external_id de Oracle
+                        recordSinExternalId.setExternalId(registroConReckey.getReckey());
+                        recordSinExternalId.setFechaUpdate(LocalDateTime.now());
+                        asistenciaLocalRepository.save(recordSinExternalId);
+                        
+                        log.info("✅ FASE 2B: External_id poblado: {} → {} ({})", 
+                                recordSinExternalId.getReckey(), 
+                                registroConReckey.getReckey(),
+                                recordSinExternalId.getDireccionIp().contains("AUTO-CLOSE") ? "AUTO-CLOSE" : "NORMAL");
+                        
+                        registrosActualizados++;
+                    } else {
+                        log.error("❌ FASE 2B: No se pudo obtener reckey de Oracle para {}", recordSinExternalId.getReckey());
+                    }
+                    
+                } catch (Exception e) {
+                    log.error("❌ FASE 2B: Error re-insertando registro {}: {}", 
+                            recordSinExternalId.getReckey(), e.getMessage());
+                    erroresSincronizacion.add("Error FASE 2B re-insert: " + recordSinExternalId.getReckey() + " - " + e.getMessage());
+                    registrosErrores++;
+                }
+            }
+            
+            log.info("✅ FASE 2 completada - Actualizados: {} (incluye {} re-inserts)", registrosActualizados, registrosSinExternalId.size());
             
         } catch (Exception e) {
             log.error("❌ Error en FASE 2: {}", e.getMessage(), e);

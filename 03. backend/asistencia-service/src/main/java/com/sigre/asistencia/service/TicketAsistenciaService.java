@@ -256,7 +256,7 @@ public class TicketAsistenciaService {
                     .reckey(reckey)
                     .codOrigen(ticket.getCodOrigen()) // ✅ CORREGIDO - usar cod_origen del frontend
                     .codigo(ticket.getCodTrabajador())
-                    .flagInOut(ticket.getTipoMovimiento()) // ✅ CORREGIDO - ticket ya tiene número 1-8
+                    .flagInOut(ticket.getTipoMovimiento()) // ✅ CORREGIDO - ticket ya tiene número 1-10
                     .fechaRegistro(LocalDateTime.now())
                     .fechaMovimiento(ticket.getFechaMarcacion())
                     .codUsuario(codUsuarioSistema) // ✅ PARÁMETRO configurable (no usar ticket.getUsuarioSistema())
@@ -636,7 +636,7 @@ public class TicketAsistenciaService {
     // Método eliminado: validarTiempoMinimoEntreMarcaciones() - ahora se hace en /validar-codigo
     
     /**
-     * Mapear tipo de movimiento del frontend (string) a número (1-8) para FLAG_IN_OUT
+     * Mapear tipo de movimiento del frontend (string) a número (1-10) para FLAG_IN_OUT
      */
     private String mapearTipoMovimientoANumero(String tipoMovimiento) {
         if (tipoMovimiento == null) return "1"; // Por defecto ingreso
@@ -650,6 +650,8 @@ public class TicketAsistenciaService {
             case "RETORNO_COMISION" -> "6";
             case "INGRESO_PRODUCCION" -> "7";
             case "SALIDA_PRODUCCION" -> "8";
+            case "SALIDA_CENAR" -> "9";
+            case "REGRESO_CENAR" -> "10";
             default -> {
                 log.warn("⚠️ Tipo movimiento no reconocido: '{}', usando 1 por defecto", tipoMovimiento);
                 yield "1";

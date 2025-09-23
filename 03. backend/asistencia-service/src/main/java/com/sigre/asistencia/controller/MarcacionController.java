@@ -71,7 +71,7 @@ public class MarcacionController {
                     .codigoInput(request.getCodigoInput())
                     .codOrigen(request.getCodOrigen())
                     .tipoMarcaje(tipoMarcajeNumerico)  // ✅ NÚMERO 1-2
-                    .tipoMovimiento(tipoMovimientoNumerico)  // ✅ NÚMERO 1-8
+                    .tipoMovimiento(tipoMovimientoNumerico)  // ✅ NÚMERO 1-10
                     .direccionIp(request.getDireccionIp())
                     .fechaMarcacion(request.getFechaMarcacion())
                     .racionesSeleccionadas(request.getRacionesSeleccionadas())
@@ -347,7 +347,7 @@ public class MarcacionController {
     }
     
     /**
-     * Mapear tipo de movimiento del frontend (string) a número (1-8)
+     * Mapear tipo de movimiento del frontend (string) a número (1-10)
      */
     private String mapearTipoMovimientoANumero(String tipoMovimiento) {
         if (tipoMovimiento == null) return "1";
@@ -361,6 +361,8 @@ public class MarcacionController {
             case "RETORNO_COMISION" -> "6";
             case "INGRESO_PRODUCCION" -> "7";
             case "SALIDA_PRODUCCION" -> "8";
+            case "SALIDA_CENAR" -> "9";
+            case "REGRESO_CENAR" -> "10";
             default -> {
                 log.warn("⚠️ Tipo movimiento no reconocido: '{}', usando 1 por defecto", tipoMovimiento);
                 yield "1";
