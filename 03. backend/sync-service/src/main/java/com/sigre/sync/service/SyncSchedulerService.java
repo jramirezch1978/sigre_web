@@ -383,16 +383,26 @@ public class SyncSchedulerService {
             boolean hayActividad = activityDetectionService.hayActividadReciente(intervalMinutes);
             String resumenActividad = activityDetectionService.getResumenActividad(intervalMinutes);
             
+            // ✅ VERIFICAR si hubo operaciones específicas en Oracle (FASE 2A/2B/3)
+            boolean huboCambiosOracle = (localToRemoteSync.getOracleInsertados() > 0 || 
+                                       localToRemoteSync.getOracleActualizados() > 0 || 
+                                       localToRemoteSync.getOracleEliminados() > 0);
+            
             // CONDICIONES PARA ENVIAR REPORTE:
             // 1. Ha habido nuevas marcas de asistencia
             // 2. Ha ocurrido sincronización de alguna tabla
             // 3. Ha habido errores
             // 4. La sincronización falló (para reportar el problema)
-            boolean debeEnviarReporte = hayActividad || !resultadoRemoteToLocal || !resultadoLocalToRemote;
+            // 5. 🆕 Hubo operaciones en Oracle (INSERT/UPDATE/DELETE en FASE 2A/2B/3)
+            boolean debeEnviarReporte = hayActividad || !resultadoRemoteToLocal || !resultadoLocalToRemote || huboCambiosOracle;
             
             if (!debeEnviarReporte) {
                 log.info("😴 SIN ACTIVIDAD Y SIN ERRORES - Omitiendo envío de reporte");
                 log.info("📊 {}", resumenActividad);
+                log.info("📊 Oracle: {} insertados, {} actualizados, {} eliminados", 
+                        localToRemoteSync.getOracleInsertados(),
+                        localToRemoteSync.getOracleActualizados(), 
+                        localToRemoteSync.getOracleEliminados());
                 log.info("🔔 Próximo reporte programado para: {}", finSync.plusMinutes(intervalMinutes));
                 return; // ⚡ SALIR SIN ENVIAR REPORTE
             }
@@ -400,6 +410,12 @@ public class SyncSchedulerService {
             if (hayActividad) {
                 log.info("✅ ACTIVIDAD DETECTADA - Procediendo con envío de reporte");
                 log.info("📊 {}", resumenActividad);
+            } else if (huboCambiosOracle) {
+                log.info("🔄 CAMBIOS EN ORACLE DETECTADOS - Procediendo con envío de reporte");
+                log.info("📊 Oracle: {} insertados, {} actualizados, {} eliminados", 
+                        localToRemoteSync.getOracleInsertados(),
+                        localToRemoteSync.getOracleActualizados(), 
+                        localToRemoteSync.getOracleEliminados());
             } else {
                 log.warn("⚠️ SIN ACTIVIDAD PERO CON ERRORES - Enviando reporte de errores");
             }
