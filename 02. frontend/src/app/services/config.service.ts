@@ -37,6 +37,14 @@ export interface RacionesConfig {
   reglas: {
     almuerzoCenaHastaMediodia: boolean;
     soloDesayunoEnHorario: boolean;
+    botonMarcacionSalidaAlmorzar: {
+      inicio: string;
+      fin: string;
+    };
+    botonMarcacionSalidaCenar: {
+      inicio: string;
+      fin: string;
+    };
   };
 }
 

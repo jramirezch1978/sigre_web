@@ -136,7 +136,7 @@ export class PopupMovimientosComponent implements OnInit {
   private estaEnHorarioPermitido(horaActual: Date, configKey: string): boolean {
     try {
       const config = this.configService.getCurrentConfig();
-      const horarioConfig = (config as any)?.marcacion?.[configKey];
+      const horarioConfig = (config as any)?.raciones?.reglas?.[configKey];
       
       if (!horarioConfig?.inicio || !horarioConfig?.fin) {
         console.warn(`⚠️ No se encontró configuración de horario para ${configKey}`);

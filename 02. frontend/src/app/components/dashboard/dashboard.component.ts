@@ -23,6 +23,7 @@ import {
   ResumenCentroCosto 
 } from '../../services/dashboard.service';
 import { FloatingClockComponent } from '../floating-clock/floating-clock.component';
+import { NotImplementedService } from '../../services/not-implemented.service';
 
 declare var Chart: any; // Para Chart.js
 
@@ -75,7 +76,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private dashboardService: DashboardService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private notImplementedService: NotImplementedService
   ) {}
 
   async ngOnInit() {
@@ -576,4 +578,56 @@ export class DashboardComponent implements OnInit, OnDestroy {
       panelClass: ['success-snackbar']
     });
   }
+
+  // =====================================================================================
+  // 🚧 MÉTODOS PARA OPCIONES NO IMPLEMENTADAS - POPUP PROFESIONAL
+  // =====================================================================================
+
+  // 📋 MENU LATERAL - Títulos principales
+  onAsistenciaMenu() { this.notImplementedService.menuNotImplemented('Módulo de Asistencia'); }
+  onComedoresMenu() { this.notImplementedService.menuNotImplemented('Módulo de Comedores'); }
+  onReportesMenu() { this.notImplementedService.menuNotImplemented('Módulo de Reportes'); }
+  onCentrosCostoMenu() { this.notImplementedService.menuNotImplemented('Módulo de Centros de Costo'); }
+  onConfiguracionMenu() { this.notImplementedService.menuNotImplemented('Módulo de Configuración'); }
+  onAdministracionMenu() { this.notImplementedService.menuNotImplemented('Módulo de Administración'); }
+
+  // 📋 MENU LATERAL - Opciones no implementadas
+  onMetricasTiempoReal() { this.notImplementedService.menuNotImplemented('Métricas Tiempo Real'); }
+  onRegistrosDiarios() { this.notImplementedService.menuNotImplemented('Registros Diarios'); }
+  onReportesPorEmpleado() { this.notImplementedService.menuNotImplemented('Reportes por Empleado'); }
+  onHorariosYTurnos() { this.notImplementedService.menuNotImplemented('Horarios y Turnos'); }
+  onAusenciasPermisos() { this.notImplementedService.menuNotImplemented('Ausencias y Permisos'); }
+  onControlRaciones() { this.notImplementedService.menuNotImplemented('Control de Raciones'); }
+  onMenusDiarios() { this.notImplementedService.menuNotImplemented('Menús Diarios'); }
+  onReportesAlimentarios() { this.notImplementedService.menuNotImplemented('Reportes Alimentarios'); }
+  onReportesSemanales() { this.notImplementedService.reportNotImplemented('Reportes Semanales'); }
+  onReportesMensuales() { this.notImplementedService.reportNotImplemented('Reportes Mensuales'); }
+  onAnalisisTendencias() { this.notImplementedService.reportNotImplemented('Análisis de Tendencias'); }
+  onExportarDatos() { this.notImplementedService.reportNotImplemented('Exportar Datos'); }
+  onResumenPorArea() { this.notImplementedService.menuNotImplemented('Resumen por Área'); }
+  onProductividad() { this.notImplementedService.menuNotImplemented('Productividad'); }
+  onCostosOperativos() { this.notImplementedService.menuNotImplemented('Costos Operativos'); }
+  onParametrosGenerales() { this.notImplementedService.menuNotImplemented('Parámetros Generales'); }
+  onDispositivos() { this.notImplementedService.menuNotImplemented('Dispositivos'); }
+  onSincronizacion() { this.notImplementedService.menuNotImplemented('Sincronización'); }
+  onUsuariosSistema() { this.notImplementedService.menuNotImplemented('Usuarios del Sistema'); }
+  onPermisosRoles() { this.notImplementedService.menuNotImplemented('Permisos y Roles'); }
+  onLogsSistema() { this.notImplementedService.menuNotImplemented('Logs del Sistema'); }
+
+  // 🔘 BOTONES FOOTER SIDEBAR - Opciones no implementadas
+  onConfiguracion() { this.notImplementedService.actionNotImplemented('Configuración del Sistema'); }
+  onPantallaCompleta() { this.notImplementedService.actionNotImplemented('Modo Pantalla Completa'); }
+  onAyuda() { this.notImplementedService.actionNotImplemented('Centro de Ayuda'); }
+
+  // 👤 MENU USUARIO - Opciones no implementadas
+  onMiPerfil() { this.notImplementedService.actionNotImplemented('Mi Perfil'); }
+  onConfiguracionUsuario() { this.notImplementedService.actionNotImplemented('Configuración de Usuario'); }
+
+  // 📊 BOTONES MAIN CONTENT - Opciones no implementadas
+  onFiltrarFechas() { this.notImplementedService.actionNotImplemented('Filtrar por Fechas'); }
+  onExportar() { this.notImplementedService.actionNotImplemented('Exportar Datos'); }
+  onVerTodosRegistros() { this.notImplementedService.actionNotImplemented('Ver Todos los Registros'); }
+  onVerAnalisisDetallado() { this.notImplementedService.actionNotImplemented('Análisis Detallado'); }
+  onPanelActions() { this.notImplementedService.actionNotImplemented('Opciones del Panel'); }
+
 }
