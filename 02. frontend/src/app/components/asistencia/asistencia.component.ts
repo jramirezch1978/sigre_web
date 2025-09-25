@@ -17,6 +17,8 @@ import { PopupRacionesComponent, RacionDisponible } from '../popup-raciones/popu
 import { ErrorPopupComponent, ErrorData } from '../error-popup/error-popup.component';
 import { ConfigService } from '../../services/config.service';
 import { ClockService } from '../../services/clock.service';
+import { VersionService } from '../../services/version.service';
+import { Observable } from 'rxjs';
 
 export interface Racion {
   id: string;
@@ -75,6 +77,10 @@ export class AsistenciaComponent implements OnInit {
   // IP del dispositivo
   private deviceIP: string = '';
 
+  // Propiedades observables para versión
+  appVersion$!: Observable<string>;
+  buildTimestamp$!: Observable<string>;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -82,7 +88,8 @@ export class AsistenciaComponent implements OnInit {
     private http: HttpClient,
     private configService: ConfigService,
     private dialog: MatDialog,
-    private clockService: ClockService  // ← Usar servicio centralizado en lugar de TimeService
+    private clockService: ClockService,  // ← Usar servicio centralizado en lugar de TimeService
+    private versionService: VersionService
   ) {}
 
   async ngOnInit() {
@@ -101,6 +108,10 @@ export class AsistenciaComponent implements OnInit {
     setTimeout(() => {
       this.enfocarInput();
     }, 500); // Delay para que el DOM esté completamente cargado
+
+    // Inicializar observables de versión
+    this.appVersion$ = this.versionService.getAppVersion();
+    this.buildTimestamp$ = this.versionService.getBuildTimestamp();
   }
 
   /**
@@ -600,4 +611,5 @@ export class AsistenciaComponent implements OnInit {
     // También mostrar en consola para debugging
     console.log(`🎫 TICKET GENERADO: ${numeroTicket} para ${nombreTrabajador}`);
   }
+
 }

@@ -25,6 +25,15 @@ spring:
       password: transmarina
       driver-class-name: oracle.jdbc.OracleDriver
       url: jdbc:oracle:thin:@//facturaciontdp.pe:1521/heimdall
+      hikari:
+        maximum-pool-size: 3          # Reducido para conexiones remotas
+        minimum-idle: 1               # Mantener al menos 1 conexión
+        connection-timeout: 60000     # 60 segundos timeout de conexión
+        idle-timeout: 300000          # 5 minutos timeout inactivo
+        max-lifetime: 1800000         # 30 minutos máximo lifetime
+        keepalive-time: 60000         # 1 minuto keep-alive
+        validation-timeout: 5000      # 5 segundos timeout de validación
+        leak-detection-threshold: 60000 # Detectar leaks después de 1 minuto
 
   jpa:
     show-sql: false

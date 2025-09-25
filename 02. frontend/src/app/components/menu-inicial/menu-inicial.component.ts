@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ClockComponent } from '../clock/clock.component';
 import { ConfigService } from '../../services/config.service';
+import { VersionService } from '../../services/version.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-menu-inicial',
@@ -25,16 +27,21 @@ export class MenuInicialComponent implements OnInit {
   companyLogo = 'assets/logo-transmarina.png';
   companySucursal = 'PIURA - SECHURA';
 
+  // Propiedades observables para versión
+  appVersion$!: Observable<string>;
+  buildTimestamp$!: Observable<string>;
+
   constructor(
     private router: Router,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private versionService: VersionService
   ) {}
 
   async ngOnInit() {
     try {
       // Esperar a que se cargue la configuración
       await this.configService.waitForConfig();
-      
+
       // Cargar configuración desde appsettings.json
       this.companyName = this.configService.getCompanyName();
       this.companyLogo = this.configService.getCompanyLogo();
@@ -43,6 +50,10 @@ export class MenuInicialComponent implements OnInit {
       console.warn('No se pudo cargar la configuración, usando valores por defecto:', error);
       // Los valores por defecto ya están establecidos en las propiedades
     }
+
+    // Inicializar observables de versión
+    this.appVersion$ = this.versionService.getAppVersion();
+    this.buildTimestamp$ = this.versionService.getBuildTimestamp();
   }
 
   seleccionarTipoMarcaje(tipo: string) {
@@ -56,4 +67,5 @@ export class MenuInicialComponent implements OnInit {
     // Navegar al dashboard de asistencia
     this.router.navigate(['/dashboard']);
   }
+
 }

@@ -1,7 +1,7 @@
 .container {
   margin: 15px;
   padding: 0px;
-  min-height: calc(100vh - 35px);
+  min-height: calc(100vh - 45px); // 10px menos de alto para margen inferior
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -19,6 +19,7 @@
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  position: relative; // Para posicionar el indicador flotante
 }
 
 .menu-card mat-card-header {
@@ -218,7 +219,7 @@
   .container {
     margin: 10px;
     width: calc(100vw - 20px);
-    min-height: calc(100vh - 25px);
+    min-height: calc(100vh - 35px); // 10px menos de alto para margen inferior
   }
   
   .menu-content {
@@ -227,6 +228,13 @@
   
   .clock-section {
     margin-bottom: 20px;
+  }
+
+  .version-indicator-floating {
+    top: 100px; // Ajustar posición para tablets
+    right: 15px;
+    font-size: 9px;
+    padding: 3px 8px;
   }
   
   .options-grid {
@@ -300,6 +308,13 @@
 }
 
 @media (max-width: 480px) {
+  .version-indicator-floating {
+    top: 90px; // Ajustar posición para móviles
+    right: 10px;
+    font-size: 8px;
+    padding: 2px 6px;
+  }
+
   .options-grid {
     grid-template-columns: 1fr;
     gap: 10px;
@@ -330,5 +345,33 @@
   
   .option-description {
     font-size: 9px;
+  }
+}
+
+// =====================================================================================
+// 🔍 ESTILOS PARA INDICADOR DE VERSIÓN FLOTANTE
+// =====================================================================================
+
+.version-indicator-floating {
+  position: absolute;
+  top: 120px; // Debajo del header, a la altura del reloj
+  right: 20px; // Margen desde el borde derecho
+  background: rgba(52, 73, 94, 0.9);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 10px;
+  font-family: 'Courier New', monospace;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  z-index: 1000;
+
+  // Animación sutil para que sea visible pero no moleste
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    opacity: 1;
   }
 }
