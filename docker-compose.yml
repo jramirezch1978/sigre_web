@@ -273,6 +273,22 @@ services:
       - TZ=America/Lima
       - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      # CONFIGURACIÓN ORACLE A TRAVÉS DEL PROXY DE WINDOWS
+      - SPRING_DATASOURCE_REMOTE_HOST=10.100.14.10
+      - SPRING_DATASOURCE_REMOTE_PORT=1522
+      - SPRING_DATASOURCE_REMOTE_SERVICE_NAME=heimdall
+      - SPRING_DATASOURCE_REMOTE_USERNAME=transmarina
+      - SPRING_DATASOURCE_REMOTE_PASSWORD=transmarina
+      # Configuración local PostgreSQL
+      - SPRING_DATASOURCE_LOCAL_URL=jdbc:postgresql://db-sigre-web:5432/db-sigre-web
+      - SPRING_DATASOURCE_LOCAL_USERNAME=sigre-web
+      - SPRING_DATASOURCE_LOCAL_PASSWORD=S1greW3b@2025!
+      # Timeouts para Oracle
+      - ORACLE_NET_CONNECT_TIMEOUT=120000
+      - ORACLE_NET_READ_TIMEOUT=120000
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4      
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
@@ -291,14 +307,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 90s
-    # 📝 CONFIGURACIÓN DE LOGS - Limitar tamaño y rotación
     logging:
       driver: "json-file"
       options:
-        max-size: "50m"      # Máximo 50MB por archivo de log
-        max-file: "3"        # Mantener máximo 3 archivos rotados
-        compress: "true"     # Comprimir archivos rotados
-
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+  
   # Frontend Angular - Módulo de Asistencia
   sigre-frontend:
     build:

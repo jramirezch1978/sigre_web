@@ -26,7 +26,7 @@ public class LocalToRemoteSyncService {
     private final AsistenciaHt580RemoteRepository asistenciaRemoteRepository;
     private final ObjectMapper objectMapper;
     
-    @Value("${sync.config.max-retries:1}")
+    @Value("${sync.config.max-retries:5}")
     private int maxRetries;
     
     @Value("${sync.config.cod-origen:SE}")
@@ -46,7 +46,6 @@ public class LocalToRemoteSyncService {
     /**
      * Sincronizar tabla asistencia_ht580 de PostgreSQL → Oracle
      */
-    @Transactional("remoteTransactionManager")
     public boolean sincronizarAsistencia() {
         log.info("📤 Iniciando sincronización de tabla ASISTENCIA_HT580 (Local → Remote)");
         
@@ -110,6 +109,7 @@ public class LocalToRemoteSyncService {
     /**
      * Procesar un registro de asistencia individual
      */
+    @Transactional("remoteTransactionManager")
     private void procesarAsistencia(AsistenciaHt580Local asistenciaLocal) {
         String externalId = asistenciaLocal.getExternalId();
         boolean existeEnRemote = false;
@@ -269,6 +269,7 @@ public class LocalToRemoteSyncService {
      * FASE 2: Sincronizar cambios de registros ya sincronizados
      * PostgreSQL (con external_id) → Comparar Oracle → Actualizar si diferente
      */
+    @Transactional("remoteTransactionManager")
     private void sincronizarCambiosRegistrosSincronizados() {
         log.info("🔄 FASE 2: Sincronizando cambios de registros ya sincronizados");
         
@@ -419,37 +420,49 @@ public class LocalToRemoteSyncService {
      */
     private void eliminarRegistrosHuerfanosOracle() {
         log.info("🔄 FASE 3: Eliminando registros huérfanos de Oracle");
-        
+
         try {
             // ✅ Usar codOrigen de configuración
             String codOrigen = codOrigenConfiguracion;
-            
-            // Obtener TODOS los registros de Oracle para este origen (sin filtro de fecha)
+
+            // Obtener TODOS los registros de Oracle para este origen
             List<AsistenciaHt580Remote> registrosOracle = asistenciaRemoteRepository
                     .findByCodOrigenOrderByFechaRegistroDesc(codOrigen);
-            
-            log.info("📊 FASE 3: Verificando {} registros Oracle para origen {}", registrosOracle.size(), codOrigen);
-            
+
+            log.info("📊 FASE 3: Verificando {} registros Oracle para origen {}",
+                    registrosOracle.size(), codOrigen);
+
+            // Procesar cada registro individualmente con transacción separada
             for (AsistenciaHt580Remote oracleRecord : registrosOracle) {
-                // Buscar en PostgreSQL por external_id
-                AsistenciaHt580Local localRecord = asistenciaLocalRepository
-                        .findByExternalId(oracleRecord.getReckey())
-                        .orElse(null);
-                
-                if (localRecord == null) {
-                    // No existe en PostgreSQL - eliminar de Oracle
-                    log.warn("🗑️ FASE 3: Eliminando registro huérfano {} de Oracle", oracleRecord.getReckey());
-                    asistenciaRemoteRepository.delete(oracleRecord);
-                    registrosEliminados++;
-                    oracleEliminados++; // 📊 Contador Oracle
+                try {
+                    procesarRegistroHuerfano(oracleRecord);
+                } catch (Exception e) {
+                    log.warn("⚠️ Error procesando registro {} en FASE 3: {}", oracleRecord.getReckey(), e.getMessage());
+                    // Continuar con el siguiente registro en lugar de fallar completamente
                 }
             }
-            
+
             log.info("✅ FASE 3 completada - Eliminados: {}", registrosEliminados);
-            
+
         } catch (Exception e) {
-            log.error("❌ Error en FASE 3: {}", e.getMessage(), e);
-            erroresSincronizacion.add("Error en FASE 3: " + e.getMessage());
+            log.error("❌ Error crítico en FASE 3: {}", e.getMessage(), e);
+            erroresSincronizacion.add("Error crítico en FASE 3: " + e.getMessage());
+        }
+    }
+
+    @Transactional("remoteTransactionManager")
+    private void procesarRegistroHuerfano(AsistenciaHt580Remote oracleRecord) {
+        // Buscar en PostgreSQL por external_id
+        AsistenciaHt580Local localRecord = asistenciaLocalRepository
+                .findByExternalId(oracleRecord.getReckey())
+                .orElse(null);
+
+        if (localRecord == null) {
+            // No existe en PostgreSQL - eliminar de Oracle
+            log.warn("🗑️ FASE 3: Eliminando registro huérfano {} de Oracle", oracleRecord.getReckey());
+            asistenciaRemoteRepository.delete(oracleRecord);
+            registrosEliminados++;
+            oracleEliminados++; // 📊 Contador Oracle
         }
     }
     

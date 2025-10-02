@@ -17,23 +17,21 @@ spring:
       driver-class-name: org.postgresql.Driver
     
     remote:
-      host: facturaciontdp.pe
-      port: 1521
-      database: heimdall
-      service-name: heimdall
+      host: 10.100.14.10  # Agregar esta línea
+      port: 1522           # Agregar esta línea
+      service-name: heimdall  # Agregar esta línea
       username: transmarina
       password: transmarina
+      jdbc-url: jdbc:oracle:thin:@//10.100.14.10:1522/heimdall
       driver-class-name: oracle.jdbc.OracleDriver
-      url: jdbc:oracle:thin:@//facturaciontdp.pe:1521/heimdall
-      hikari:
-        maximum-pool-size: 3          # Reducido para conexiones remotas
-        minimum-idle: 1               # Mantener al menos 1 conexión
-        connection-timeout: 60000     # 60 segundos timeout de conexión
-        idle-timeout: 300000          # 5 minutos timeout inactivo
-        max-lifetime: 1800000         # 30 minutos máximo lifetime
-        keepalive-time: 60000         # 1 minuto keep-alive
-        validation-timeout: 5000      # 5 segundos timeout de validación
-        leak-detection-threshold: 60000 # Detectar leaks después de 1 minuto
+      hikari:  # Debe estar anidado bajo 'remote'
+        maximum-pool-size: 2
+        minimum-idle: 0
+        connection-timeout: 30000  # 30 segundos es suficiente
+        validation-timeout: 5000
+        initialization-fail-timeout: -1
+        connection-test-query: SELECT 1 FROM DUAL
+        auto-commit: false  # <-- CRÍTICO: Agregar esta línea
 
   jpa:
     show-sql: false
@@ -81,7 +79,7 @@ sync:
   config:
     interval-minutes: 5              # Intervalo entre sincronizaciones (configurado a 5 minutos)
     retry-delay-seconds: 30          # Delay antes de reintentar en caso de error
-    max-retries: 1                   # Número máximo de reintentos por tabla
+    max-retries: 5                   # Número máximo de reintentos por tabla
     initial-sync-on-startup: true    # Ejecutar sincronización inicial al arranque
     cod-origen: SE                   # Código de origen para filtrar registros de asistencia (debe coincidir con frontend)
 

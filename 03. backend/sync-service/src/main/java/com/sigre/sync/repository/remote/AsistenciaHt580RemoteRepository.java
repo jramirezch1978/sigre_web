@@ -44,7 +44,7 @@ public interface AsistenciaHt580RemoteRepository extends JpaRepository<Asistenci
     );
     
     /**
-     * FASE 3: Buscar todos los registros de Oracle por cod_origen (sin filtro fecha)
+     * FASE 3: Buscar TODOS los registros de Oracle por cod_origen (sin filtro fecha)
      */
     List<AsistenciaHt580Remote> findByCodOrigenOrderByFechaRegistroDesc(String codOrigen);
 }
