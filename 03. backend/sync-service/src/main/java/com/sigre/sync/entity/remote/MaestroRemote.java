@@ -78,7 +78,16 @@ public class MaestroRemote {
     
     @Column(name = "FLAG_SEXO", length = 1)
     private String flagSexo;
-    
+
+    @Column(name = "TIPO_TRABAJADOR", length = 3)
+    private String tipoTrabajador;
+
+    @Column(name = "COD_SECCION", length = 3)
+    private String codSeccion;
+
+    @Column(name = "COD_AREA", length = 1)
+    private String codArea;
+
     // Método helper para obtener nombre completo
     public String getNombreCompleto() {
         StringBuilder nombre = new StringBuilder();

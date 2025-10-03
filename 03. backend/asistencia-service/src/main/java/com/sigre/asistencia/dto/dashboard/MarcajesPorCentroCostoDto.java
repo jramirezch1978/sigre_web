@@ -34,4 +34,32 @@ public class MarcajesPorCentroCostoDto {
         private Long cantidadMarcajes;
         private Long cantidadTrabajadores;
     }
+
+    /**
+     * DTO para indicadores de centros de costo con movimientos pivoteados
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class IndicadorCentroCosto {
+        private String tipoTrabajador;
+        private String descTipoTrabajador;
+        private String codArea;
+        private String descArea;
+        private String codSeccion;
+        private String descSeccion;
+        private String descCentroCosto;
+        private Long ingresoPlanta;
+        private Long salidaPlanta;
+        private Long salidaAlmorzar;
+        private Long regresoAlmorzar;
+        private Long salidaComision;
+        private Long retornoComision;
+        private Long ingresoProduccion;
+        private Long salidaProduccion;
+        private Long salidaCenar;
+        private Long regresoCenar;
+        private Long total;
+    }
 }

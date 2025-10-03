@@ -185,4 +185,92 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
      */
     @Query("SELECT COUNT(DISTINCT a.codigo) FROM AsistenciaHt580 a WHERE DATE(a.fechaMovimiento) = CURRENT_DATE")
     Long countTrabajadoresUnicosHoy();
+
+    /**
+     * Obtener indicadores de centros de costo con movimientos pivoteados por fecha
+     * SELECT m.tipo_trabajador, tt.desc_tipo_tra, m.cod_area, a.desc_area,
+     *        m.cod_seccion, s.desc_seccion, cc.desc_cencos, ah.flag_in_out, count(*)
+     * FROM ASISTENCIA_HT580 ah, MAESTRO m, centros_costo cc, tipo_trabajador tt, area a, seccion s
+     * WHERE ah.codigo = m.cod_trabajador
+     *   AND m.cencos = cc.cencos
+     *   AND m.cod_area = a.cod_area
+     *   AND s.codarea = m.cod_area
+     *   AND s.codseccion = m.cod_seccion
+     *   AND m.tipo_trabajador = tt.tipo_trabajador
+     *   AND to_char(ah.fec_movimiento, 'dd/mm/yyyy') = '02/10/2025'
+     *   AND ah.cod_origen = 'SE'
+     * GROUP BY m.tipo_trabajador, tt.desc_tipo_tra, m.cod_area, a.desc_area,
+     *          m.cod_seccion, s.desc_seccion, cc.desc_cencos, ah.flag_in_out
+     */
+    @Query("SELECT " +
+           "m.tipoTrabajador, " +
+           "tt.descripcionTipoTrabajador, " +
+           "m.codArea, " +
+           "ar.descripcionArea, " +
+           "m.codSeccion, " +
+           "s.descripcionSeccion, " +
+           "cc.descripcionCencos, " +
+           "a.flagInOut, " +
+           "COUNT(a) " +
+           "FROM AsistenciaHt580 a " +
+           "JOIN Maestro m ON a.codigo = m.codTrabajador " +
+           "LEFT JOIN TipoTrabajador tt ON m.tipoTrabajador = tt.tipoTrabajador " +
+           "LEFT JOIN Area ar ON m.codArea = ar.codArea " +
+           "LEFT JOIN Seccion s ON m.codArea = s.id.codArea AND m.codSeccion = s.id.codSeccion " +
+           "LEFT JOIN CentrosCosto cc ON m.centroCosto = cc.cencos " +
+           "WHERE DATE(a.fechaMovimiento) = :fecha " +
+           "AND a.codOrigen = 'SE' " +
+           "GROUP BY m.tipoTrabajador, tt.descripcionTipoTrabajador, m.codArea, ar.descripcionArea, " +
+           "         m.codSeccion, s.descripcionSeccion, cc.descripcionCencos, a.flagInOut " +
+           "ORDER BY m.tipoTrabajador, m.codArea, m.codSeccion")
+    List<Object[]> findIndicadoresCentrosCostoPorFecha(@Param("fecha") LocalDate fecha);
+
+    /**
+     * Obtener indicadores de áreas con movimientos pivoteados por fecha
+     */
+    @Query("SELECT " +
+           "m.tipoTrabajador, " +
+           "tt.descripcionTipoTrabajador, " +
+           "m.codArea, " +
+           "ar.descripcionArea, " +
+           "cc.descripcionCencos, " +
+           "a.flagInOut, " +
+           "COUNT(a) " +
+           "FROM AsistenciaHt580 a " +
+           "JOIN Maestro m ON a.codigo = m.codTrabajador " +
+           "LEFT JOIN TipoTrabajador tt ON m.tipoTrabajador = tt.tipoTrabajador " +
+           "LEFT JOIN Area ar ON m.codArea = ar.codArea " +
+           "LEFT JOIN CentrosCosto cc ON m.centroCosto = cc.cencos " +
+           "WHERE DATE(a.fechaMovimiento) = :fecha " +
+           "AND a.codOrigen = 'SE' " +
+           "GROUP BY m.tipoTrabajador, tt.descripcionTipoTrabajador, m.codArea, ar.descripcionArea, " +
+           "         cc.descripcionCencos, a.flagInOut " +
+           "ORDER BY m.tipoTrabajador, m.codArea")
+    List<Object[]> findIndicadoresAreasPorFecha(@Param("fecha") LocalDate fecha);
+
+    /**
+     * Obtener indicadores de secciones con movimientos pivoteados por fecha
+     */
+    @Query("SELECT " +
+           "m.tipoTrabajador, " +
+           "tt.descripcionTipoTrabajador, " +
+           "m.codArea, " +
+           "ar.descripcionArea, " +
+           "m.codSeccion, " +
+           "s.descripcionSeccion, " +
+           "cc.descripcionCencos, " +
+           "a.flagInOut, " +
+           "COUNT(a) " +
+           "FROM AsistenciaHt580 a " +
+           "JOIN Maestro m ON a.codigo = m.codTrabajador " +
+           "LEFT JOIN TipoTrabajador tt ON m.tipoTrabajador = tt.tipoTrabajador " +
+           "LEFT JOIN Area ar ON m.codArea = ar.codArea " +
+           "LEFT JOIN Seccion s ON m.codArea = s.id.codArea AND m.codSeccion = s.id.codSeccion " +
+           "LEFT JOIN CentrosCosto cc ON m.centroCosto = cc.cencos " +
+           "WHERE DATE(a.fechaMovimiento) = :fecha " +
+           "AND a.codOrigen = 'SE' " +
+           "GROUP BY m.tipoTrabajador, tt.descripcionTipoTrabajador, m.codArea, ar.descripcionArea, " +
+           "         m.codSeccion, s.descripcionSeccion, cc.descripcionCencos, a.flagInOut " +
+           "ORDER BY m.tipoTrabajador, m.codArea, m.codSeccion")
+    List<Object[]> findIndicadoresSeccionesPorFecha(@Param("fecha") LocalDate fecha);
 }

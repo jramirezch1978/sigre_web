@@ -1,0 +1,440 @@
+<!-- Dashboard de Centros de Costo -->
+<div class="centros-costo-container">
+
+  <!-- Header con filtros -->
+  <div class="dashboard-header">
+    <div class="header-title">
+      <mat-icon class="header-icon">business</mat-icon>
+      <h1>Dashboard de Centros de Costo</h1>
+    </div>
+
+    <div class="header-actions">
+      <!-- Selector de fecha -->
+      <mat-form-field appearance="outline" class="fecha-selector">
+        <mat-label>Seleccionar Fecha</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="fechaSeleccionada" (dateChange)="onFechaChange()">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Botón de actualizar -->
+      <button mat-raised-button color="primary" (click)="onRefresh()" [disabled]="cargandoCentrosCosto || cargandoAreas || cargandoSecciones">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="cargandoCentrosCosto || cargandoAreas || cargandoSecciones" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando indicadores...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !(cargandoCentrosCosto || cargandoAreas || cargandoSecciones)" class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="onRefresh()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!(cargandoCentrosCosto || cargandoAreas || cargandoSecciones) && !error">
+
+    <!-- Tabs para diferentes vistas -->
+    <mat-tab-group class="dashboard-tabs">
+
+      <!-- Tab Centros de Costo -->
+      <mat-tab label="Centros de Costo">
+        <div class="tab-content">
+          <mat-card class="data-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>business</mat-icon>
+                Indicadores por Centro de Costo
+              </mat-card-title>
+              <mat-card-subtitle>
+                Movimientos pivoteados por tipo de trabajador, área y sección
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="table-container" *ngIf="indicadoresCentrosCosto.length > 0; else noDataCentrosCosto">
+                <table mat-table [dataSource]="indicadoresCentrosCosto" class="movements-table">
+
+                  <!-- Tipo Trabajador -->
+                  <ng-container matColumnDef="tipoTrabajador">
+                    <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                    <td mat-cell *matCellDef="let element">{{ element.tipoTrabajador }}</td>
+                  </ng-container>
+
+                  <!-- Descripción Tipo Trabajador -->
+                  <ng-container matColumnDef="descTipoTrabajador">
+                    <th mat-header-cell *matHeaderCellDef>Descripción Tipo</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descTipoTrabajador }}</td>
+                  </ng-container>
+
+                  <!-- Código Área -->
+                  <ng-container matColumnDef="codArea">
+                    <th mat-header-cell *matHeaderCellDef>Área</th>
+                    <td mat-cell *matCellDef="let element">{{ element.codArea }}</td>
+                  </ng-container>
+
+                  <!-- Descripción Área -->
+                  <ng-container matColumnDef="descArea">
+                    <th mat-header-cell *matHeaderCellDef>Descripción Área</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descArea }}</td>
+                  </ng-container>
+
+                  <!-- Código Sección -->
+                  <ng-container matColumnDef="codSeccion">
+                    <th mat-header-cell *matHeaderCellDef>Sección</th>
+                    <td mat-cell *matCellDef="let element">{{ element.codSeccion }}</td>
+                  </ng-container>
+
+                  <!-- Descripción Sección -->
+                  <ng-container matColumnDef="descSeccion">
+                    <th mat-header-cell *matHeaderCellDef>Descripción Sección</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descSeccion }}</td>
+                  </ng-container>
+
+                  <!-- Centro de Costo -->
+                  <ng-container matColumnDef="descCentroCosto">
+                    <th mat-header-cell *matHeaderCellDef>Centro de Costo</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descCentroCosto }}</td>
+                  </ng-container>
+
+                  <!-- Movimientos (columnas pivoteadas) -->
+                  <ng-container matColumnDef="ingresoPlanta">
+                    <th mat-header-cell *matHeaderCellDef>Ingreso Planta</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.ingresoPlanta > 0 ? 'highlight-cell' : ''">{{ element.ingresoPlanta }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaPlanta">
+                    <th mat-header-cell *matHeaderCellDef>Salida Planta</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaPlanta > 0 ? 'highlight-cell' : ''">{{ element.salidaPlanta }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaAlmorzar">
+                    <th mat-header-cell *matHeaderCellDef>Salida Almorzar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaAlmorzar > 0 ? 'highlight-cell' : ''">{{ element.salidaAlmorzar }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="regresoAlmorzar">
+                    <th mat-header-cell *matHeaderCellDef>Regreso Almorzar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.regresoAlmorzar > 0 ? 'highlight-cell' : ''">{{ element.regresoAlmorzar }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaComision">
+                    <th mat-header-cell *matHeaderCellDef>Salida Comisión</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaComision > 0 ? 'highlight-cell' : ''">{{ element.salidaComision }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="retornoComision">
+                    <th mat-header-cell *matHeaderCellDef>Retorno Comisión</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.retornoComision > 0 ? 'highlight-cell' : ''">{{ element.retornoComision }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="ingresoProduccion">
+                    <th mat-header-cell *matHeaderCellDef>Ingreso Producción</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.ingresoProduccion > 0 ? 'highlight-cell' : ''">{{ element.ingresoProduccion }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaProduccion">
+                    <th mat-header-cell *matHeaderCellDef>Salida Producción</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaProduccion > 0 ? 'highlight-cell' : ''">{{ element.salidaProduccion }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaCenar">
+                    <th mat-header-cell *matHeaderCellDef>Salida Cenar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaCenar > 0 ? 'highlight-cell' : ''">{{ element.salidaCenar }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="regresoCenar">
+                    <th mat-header-cell *matHeaderCellDef>Regreso Cenar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.regresoCenar > 0 ? 'highlight-cell' : ''">{{ element.regresoCenar }}</td>
+                  </ng-container>
+
+                  <!-- Total -->
+                  <ng-container matColumnDef="total">
+                    <th mat-header-cell *matHeaderCellDef class="total-header">TOTAL</th>
+                    <td mat-cell *matCellDef="let element" class="total-cell">{{ element.total }}</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="columnasCentrosCosto"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columnasCentrosCosto;"></tr>
+                </table>
+              </div>
+
+              <ng-template #noDataCentrosCosto>
+                <div class="no-data-container">
+                  <mat-icon>info</mat-icon>
+                  <p>No hay datos de centros de costo para la fecha seleccionada.</p>
+                </div>
+              </ng-template>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Tab Áreas -->
+      <mat-tab label="Áreas">
+        <div class="tab-content">
+          <mat-card class="data-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>location_city</mat-icon>
+                Indicadores por Área
+              </mat-card-title>
+              <mat-card-subtitle>
+                Movimientos pivoteados por tipo de trabajador y área
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="table-container" *ngIf="indicadoresAreas.length > 0; else noDataAreas">
+                <table mat-table [dataSource]="indicadoresAreas" class="movements-table">
+
+                  <!-- Tipo Trabajador -->
+                  <ng-container matColumnDef="tipoTrabajador">
+                    <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                    <td mat-cell *matCellDef="let element">{{ element.tipoTrabajador }}</td>
+                  </ng-container>
+
+                  <!-- Descripción Tipo Trabajador -->
+                  <ng-container matColumnDef="descTipoTrabajador">
+                    <th mat-header-cell *matHeaderCellDef>Descripción Tipo</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descTipoTrabajador }}</td>
+                  </ng-container>
+
+                  <!-- Código Área -->
+                  <ng-container matColumnDef="codArea">
+                    <th mat-header-cell *matHeaderCellDef>Área</th>
+                    <td mat-cell *matCellDef="let element">{{ element.codArea }}</td>
+                  </ng-container>
+
+                  <!-- Descripción Área -->
+                  <ng-container matColumnDef="descArea">
+                    <th mat-header-cell *matHeaderCellDef>Descripción Área</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descArea }}</td>
+                  </ng-container>
+
+                  <!-- Centro de Costo -->
+                  <ng-container matColumnDef="descCentroCosto">
+                    <th mat-header-cell *matHeaderCellDef>Centro de Costo</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descCentroCosto }}</td>
+                  </ng-container>
+
+                  <!-- Movimientos -->
+                  <ng-container matColumnDef="ingresoPlanta">
+                    <th mat-header-cell *matHeaderCellDef>Ingreso Planta</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.ingresoPlanta > 0 ? 'highlight-cell' : ''">{{ element.ingresoPlanta }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaPlanta">
+                    <th mat-header-cell *matHeaderCellDef>Salida Planta</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaPlanta > 0 ? 'highlight-cell' : ''">{{ element.salidaPlanta }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaAlmorzar">
+                    <th mat-header-cell *matHeaderCellDef>Salida Almorzar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaAlmorzar > 0 ? 'highlight-cell' : ''">{{ element.salidaAlmorzar }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="regresoAlmorzar">
+                    <th mat-header-cell *matHeaderCellDef>Regreso Almorzar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.regresoAlmorzar > 0 ? 'highlight-cell' : ''">{{ element.regresoAlmorzar }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaComision">
+                    <th mat-header-cell *matHeaderCellDef>Salida Comisión</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaComision > 0 ? 'highlight-cell' : ''">{{ element.salidaComision }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="retornoComision">
+                    <th mat-header-cell *matHeaderCellDef>Retorno Comisión</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.retornoComision > 0 ? 'highlight-cell' : ''">{{ element.retornoComision }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="ingresoProduccion">
+                    <th mat-header-cell *matHeaderCellDef>Ingreso Producción</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.ingresoProduccion > 0 ? 'highlight-cell' : ''">{{ element.ingresoProduccion }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaProduccion">
+                    <th mat-header-cell *matHeaderCellDef>Salida Producción</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaProduccion > 0 ? 'highlight-cell' : ''">{{ element.salidaProduccion }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaCenar">
+                    <th mat-header-cell *matHeaderCellDef>Salida Cenar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaCenar > 0 ? 'highlight-cell' : ''">{{ element.salidaCenar }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="regresoCenar">
+                    <th mat-header-cell *matHeaderCellDef>Regreso Cenar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.regresoCenar > 0 ? 'highlight-cell' : ''">{{ element.regresoCenar }}</td>
+                  </ng-container>
+
+                  <!-- Total -->
+                  <ng-container matColumnDef="total">
+                    <th mat-header-cell *matHeaderCellDef class="total-header">TOTAL</th>
+                    <td mat-cell *matCellDef="let element" class="total-cell">{{ element.total }}</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="columnasAreas"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columnasAreas;"></tr>
+                </table>
+              </div>
+
+              <ng-template #noDataAreas>
+                <div class="no-data-container">
+                  <mat-icon>info</mat-icon>
+                  <p>No hay datos de áreas para la fecha seleccionada.</p>
+                </div>
+              </ng-template>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Tab Secciones -->
+      <mat-tab label="Secciones">
+        <div class="tab-content">
+          <mat-card class="data-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>location_on</mat-icon>
+                Indicadores por Sección
+              </mat-card-title>
+              <mat-card-subtitle>
+                Movimientos pivoteados por tipo de trabajador, área y sección
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="table-container" *ngIf="indicadoresSecciones.length > 0; else noDataSecciones">
+                <table mat-table [dataSource]="indicadoresSecciones" class="movements-table">
+
+                  <!-- Tipo Trabajador -->
+                  <ng-container matColumnDef="tipoTrabajador">
+                    <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                    <td mat-cell *matCellDef="let element">{{ element.tipoTrabajador }}</td>
+                  </ng-container>
+
+                  <!-- Descripción Tipo Trabajador -->
+                  <ng-container matColumnDef="descTipoTrabajador">
+                    <th mat-header-cell *matHeaderCellDef>Descripción Tipo</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descTipoTrabajador }}</td>
+                  </ng-container>
+
+                  <!-- Código Área -->
+                  <ng-container matColumnDef="codArea">
+                    <th mat-header-cell *matHeaderCellDef>Área</th>
+                    <td mat-cell *matCellDef="let element">{{ element.codArea }}</td>
+                  </ng-container>
+
+                  <!-- Descripción Área -->
+                  <ng-container matColumnDef="descArea">
+                    <th mat-header-cell *matHeaderCellDef>Descripción Área</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descArea }}</td>
+                  </ng-container>
+
+                  <!-- Código Sección -->
+                  <ng-container matColumnDef="codSeccion">
+                    <th mat-header-cell *matHeaderCellDef>Sección</th>
+                    <td mat-cell *matCellDef="let element">{{ element.codSeccion }}</td>
+                  </ng-container>
+
+                  <!-- Descripción Sección -->
+                  <ng-container matColumnDef="descSeccion">
+                    <th mat-header-cell *matHeaderCellDef>Descripción Sección</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descSeccion }}</td>
+                  </ng-container>
+
+                  <!-- Centro de Costo -->
+                  <ng-container matColumnDef="descCentroCosto">
+                    <th mat-header-cell *matHeaderCellDef>Centro de Costo</th>
+                    <td mat-cell *matCellDef="let element">{{ element.descCentroCosto }}</td>
+                  </ng-container>
+
+                  <!-- Movimientos -->
+                  <ng-container matColumnDef="ingresoPlanta">
+                    <th mat-header-cell *matHeaderCellDef>Ingreso Planta</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.ingresoPlanta > 0 ? 'highlight-cell' : ''">{{ element.ingresoPlanta }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaPlanta">
+                    <th mat-header-cell *matHeaderCellDef>Salida Planta</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaPlanta > 0 ? 'highlight-cell' : ''">{{ element.salidaPlanta }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaAlmorzar">
+                    <th mat-header-cell *matHeaderCellDef>Salida Almorzar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaAlmorzar > 0 ? 'highlight-cell' : ''">{{ element.salidaAlmorzar }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="regresoAlmorzar">
+                    <th mat-header-cell *matHeaderCellDef>Regreso Almorzar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.regresoAlmorzar > 0 ? 'highlight-cell' : ''">{{ element.regresoAlmorzar }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaComision">
+                    <th mat-header-cell *matHeaderCellDef>Salida Comisión</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaComision > 0 ? 'highlight-cell' : ''">{{ element.salidaComision }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="retornoComision">
+                    <th mat-header-cell *matHeaderCellDef>Retorno Comisión</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.retornoComision > 0 ? 'highlight-cell' : ''">{{ element.retornoComision }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="ingresoProduccion">
+                    <th mat-header-cell *matHeaderCellDef>Ingreso Producción</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.ingresoProduccion > 0 ? 'highlight-cell' : ''">{{ element.ingresoProduccion }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaProduccion">
+                    <th mat-header-cell *matHeaderCellDef>Salida Producción</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaProduccion > 0 ? 'highlight-cell' : ''">{{ element.salidaProduccion }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="salidaCenar">
+                    <th mat-header-cell *matHeaderCellDef>Salida Cenar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.salidaCenar > 0 ? 'highlight-cell' : ''">{{ element.salidaCenar }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="regresoCenar">
+                    <th mat-header-cell *matHeaderCellDef>Regreso Cenar</th>
+                    <td mat-cell *matCellDef="let element" [class]="element.regresoCenar > 0 ? 'highlight-cell' : ''">{{ element.regresoCenar }}</td>
+                  </ng-container>
+
+                  <!-- Total -->
+                  <ng-container matColumnDef="total">
+                    <th mat-header-cell *matHeaderCellDef class="total-header">TOTAL</th>
+                    <td mat-cell *matCellDef="let element" class="total-cell">{{ element.total }}</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="columnasSecciones"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columnasSecciones;"></tr>
+                </table>
+              </div>
+
+              <ng-template #noDataSecciones>
+                <div class="no-data-container">
+                  <mat-icon>info</mat-icon>
+                  <p>No hay datos de secciones para la fecha seleccionada.</p>
+                </div>
+              </ng-template>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+
+  </div>
+</div>

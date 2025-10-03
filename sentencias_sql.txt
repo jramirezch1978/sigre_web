@@ -1,0 +1,50 @@
+SELECT 
+    REPLACE(
+        REPLACE(
+            '[' ||
+            RTRIM(
+                XMLAGG(
+                    XMLELEMENT("x",
+                        '{' ||
+                        '"column_name":"' || LOWER(COLUMN_NAME) || '",' ||
+                        '"data_type":"' || DATA_TYPE || '",' ||
+                        '"character_maximum_length":' || NVL(TO_CHAR(DATA_LENGTH), 'null') || ',' ||
+                        '"numeric_precision":' || NVL(TO_CHAR(DATA_PRECISION), 'null') || ',' ||
+                        '"numeric_scale":' || NVL(TO_CHAR(DATA_SCALE), 'null') || ',' ||
+                        '"is_nullable":"' || NULLABLE || '",' ||
+                        '"column_default":null,' ||
+                        '"ordinal_position":' || COLUMN_ID ||
+                        '},'
+                    ) ORDER BY COLUMN_ID
+                ).EXTRACT('//text()').GETCLOBVAL(),
+                ','
+            ) || 
+            ']',
+            '&quot;', '"'
+        ),
+        '&amp;', '&'
+    ) AS json_result
+FROM ALL_TAB_COLUMNS
+WHERE TABLE_NAME = 'TIPO_TRABAJADOR'
+  AND OWNER = 'TRANSMARINA';
+
+
+SELECT 
+    COLUMN_ID AS "Posición",
+    LOWER(COLUMN_NAME) AS "Nombre Columna",
+    DATA_TYPE AS "Tipo",
+    CASE 
+        WHEN DATA_TYPE LIKE '%CHAR%' THEN DATA_LENGTH || ' chars'
+        WHEN DATA_TYPE = 'NUMBER' AND DATA_PRECISION IS NOT NULL 
+            THEN DATA_PRECISION || ',' || NVL(DATA_SCALE, 0)
+        ELSE NULL
+    END AS "Tamaño",
+    CASE NULLABLE 
+        WHEN 'N' THEN 'NO' 
+        ELSE 'SÍ' 
+    END AS "Permite NULL",
+    DATA_DEFAULT AS "Valor por Defecto"
+FROM ALL_TAB_COLUMNS
+WHERE TABLE_NAME = 'MAESTRO'
+  AND OWNER = 'TRANSMARINA'
+ORDER BY COLUMN_ID;  

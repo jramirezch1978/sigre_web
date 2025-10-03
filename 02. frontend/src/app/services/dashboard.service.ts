@@ -52,6 +52,67 @@ export interface RacionesPorTipo {
   fecha: string;
 }
 
+export interface IndicadorCentroCosto {
+  tipoTrabajador: string;
+  descTipoTrabajador: string;
+  codArea: string;
+  descArea: string;
+  codSeccion: string;
+  descSeccion: string;
+  descCentroCosto: string;
+  ingresoPlanta: number;
+  salidaPlanta: number;
+  salidaAlmorzar: number;
+  regresoAlmorzar: number;
+  salidaComision: number;
+  retornoComision: number;
+  ingresoProduccion: number;
+  salidaProduccion: number;
+  salidaCenar: number;
+  regresoCenar: number;
+  total: number;
+}
+
+export interface IndicadorArea {
+  tipoTrabajador: string;
+  descTipoTrabajador: string;
+  codArea: string;
+  descArea: string;
+  descCentroCosto: string;
+  ingresoPlanta: number;
+  salidaPlanta: number;
+  salidaAlmorzar: number;
+  regresoAlmorzar: number;
+  salidaComision: number;
+  retornoComision: number;
+  ingresoProduccion: number;
+  salidaProduccion: number;
+  salidaCenar: number;
+  regresoCenar: number;
+  total: number;
+}
+
+export interface IndicadorSeccion {
+  tipoTrabajador: string;
+  descTipoTrabajador: string;
+  codArea: string;
+  descArea: string;
+  codSeccion: string;
+  descSeccion: string;
+  descCentroCosto: string;
+  ingresoPlanta: number;
+  salidaPlanta: number;
+  salidaAlmorzar: number;
+  regresoAlmorzar: number;
+  salidaComision: number;
+  retornoComision: number;
+  ingresoProduccion: number;
+  salidaProduccion: number;
+  salidaCenar: number;
+  regresoCenar: number;
+  total: number;
+}
+
 export interface DashboardResponse {
   estadisticasGenerales: EstadisticasGenerales;
   marcajesDelDia: MarcajesPorHora;
@@ -182,5 +243,41 @@ export class DashboardService {
    */
   healthCheck(): Observable<string> {
     return this.http.get(`${this.baseUrl}/health`, { responseType: 'text' });
+  }
+
+  /**
+   * Obtener indicadores de centros de costo con movimientos pivoteados
+   */
+  obtenerIndicadoresCentrosCosto(fecha?: string): Observable<IndicadorCentroCosto[]> {
+    let url = `${this.baseUrl}/indicadores-centros-costo`;
+    if (fecha) {
+      url += `?fecha=${fecha}`;
+    }
+    console.log('🏢 Llamando indicadores centros de costo:', url);
+    return this.http.get<IndicadorCentroCosto[]>(url);
+  }
+
+  /**
+   * Obtener indicadores de áreas con movimientos pivoteados
+   */
+  obtenerIndicadoresAreas(fecha?: string): Observable<IndicadorArea[]> {
+    let url = `${this.baseUrl}/indicadores-areas`;
+    if (fecha) {
+      url += `?fecha=${fecha}`;
+    }
+    console.log('🏭 Llamando indicadores áreas:', url);
+    return this.http.get<IndicadorArea[]>(url);
+  }
+
+  /**
+   * Obtener indicadores de secciones con movimientos pivoteados
+   */
+  obtenerIndicadoresSecciones(fecha?: string): Observable<IndicadorSeccion[]> {
+    let url = `${this.baseUrl}/indicadores-secciones`;
+    if (fecha) {
+      url += `?fecha=${fecha}`;
+    }
+    console.log('📍 Llamando indicadores secciones:', url);
+    return this.http.get<IndicadorSeccion[]>(url);
   }
 }

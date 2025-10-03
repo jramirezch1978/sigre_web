@@ -4,9 +4,11 @@ import com.sigre.asistencia.dto.dashboard.*;
 import com.sigre.asistencia.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -167,12 +169,66 @@ public class DashboardController {
     public ResponseEntity<String> health() {
         try {
             EstadisticasGeneralesDto stats = dashboardService.obtenerEstadisticasGenerales();
-            return ResponseEntity.ok("Dashboard Service OK - Última actualización: " + 
+            return ResponseEntity.ok("Dashboard Service OK - Última actualización: " +
                 stats.getUltimaActualizacion());
         } catch (Exception e) {
             log.error("❌ Health check falló: {}", e.getMessage());
             return ResponseEntity.internalServerError()
                 .body("Dashboard Service ERROR: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtener indicadores de centros de costo con movimientos pivoteados
+     */
+    @GetMapping("/indicadores-centros-costo")
+    public ResponseEntity<List<MarcajesPorCentroCostoDto.IndicadorCentroCosto>> obtenerIndicadoresCentrosCosto(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        log.info("📊 Solicitando indicadores de centros de costo para fecha: {}", fecha);
+        try {
+            List<MarcajesPorCentroCostoDto.IndicadorCentroCosto> indicadores =
+                fecha != null ? dashboardService.obtenerIndicadoresCentrosCosto(fecha) :
+                               dashboardService.obtenerIndicadoresCentrosCosto();
+            return ResponseEntity.ok(indicadores);
+        } catch (Exception e) {
+            log.error("❌ Error obteniendo indicadores de centros de costo: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Obtener indicadores de áreas con movimientos pivoteados
+     */
+    @GetMapping("/indicadores-areas")
+    public ResponseEntity<List<IndicadoresAreaDto>> obtenerIndicadoresAreas(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        log.info("📊 Solicitando indicadores de áreas para fecha: {}", fecha);
+        try {
+            List<IndicadoresAreaDto> indicadores =
+                fecha != null ? dashboardService.obtenerIndicadoresAreas(fecha) :
+                               dashboardService.obtenerIndicadoresAreas();
+            return ResponseEntity.ok(indicadores);
+        } catch (Exception e) {
+            log.error("❌ Error obteniendo indicadores de áreas: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Obtener indicadores de secciones con movimientos pivoteados
+     */
+    @GetMapping("/indicadores-secciones")
+    public ResponseEntity<List<IndicadoresSeccionDto>> obtenerIndicadoresSecciones(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        log.info("📊 Solicitando indicadores de secciones para fecha: {}", fecha);
+        try {
+            List<IndicadoresSeccionDto> indicadores =
+                fecha != null ? dashboardService.obtenerIndicadoresSecciones(fecha) :
+                               dashboardService.obtenerIndicadoresSecciones();
+            return ResponseEntity.ok(indicadores);
+        } catch (Exception e) {
+            log.error("❌ Error obteniendo indicadores de secciones: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

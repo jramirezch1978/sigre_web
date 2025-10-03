@@ -2,11 +2,17 @@ package com.sigre.asistencia.service;
 
 import com.sigre.asistencia.dto.dashboard.*;
 import com.sigre.asistencia.entity.AsistenciaHt580;
+import com.sigre.asistencia.entity.Area;
 import com.sigre.asistencia.entity.Maestro;
+import com.sigre.asistencia.entity.Seccion;
+import com.sigre.asistencia.entity.SeccionId;
 import com.sigre.asistencia.repository.AsistenciaHt580Repository;
+import com.sigre.asistencia.repository.AreaRepository;
 import com.sigre.asistencia.repository.MaestroRepository;
+import com.sigre.asistencia.repository.SeccionRepository;
 import com.sigre.asistencia.repository.TicketAsistenciaRepository;
 import com.sigre.asistencia.repository.RacionesSeleccionadasRepository;
+import org.springframework.data.repository.query.Param;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +20,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,6 +37,8 @@ public class DashboardService {
     private final AsistenciaHt580Repository asistenciaRepository;
     private final TicketAsistenciaRepository ticketRepository;
     private final MaestroRepository maestroRepository;
+    private final AreaRepository areaRepository;
+    private final SeccionRepository seccionRepository;
     private final RacionesSeleccionadasRepository racionesRepository;
     
     /**
@@ -143,26 +154,50 @@ public class DashboardService {
      * Obtener resumen de marcajes por centro de costo
      */
     public List<MarcajesPorCentroCostoDto.ResumenCentroCosto> obtenerResumenPorCentroCosto() {
-        log.info("Obteniendo resumen por centro de costo");
+        log.info("Obteniendo resumen por centro de costo con tipo de trabajador");
         
-        List<Object[]> resultados = asistenciaRepository.countMarcajesPorCentroCostoHoy();
+        // Usar la consulta que trae tipo_trabajador, desc_tipo_tra y desc_cencos
+        List<Object[]> resultados = asistenciaRepository.findIndicadoresCentrosCostoPorFecha(LocalDate.now());
         
-        return resultados.stream()
-                .map(resultado -> {
-                    String centroCosto = (String) resultado[0];
-                    Long cantidad = ((Number) resultado[1]).longValue();
-                    
-                    // Contar trabajadores únicos por centro de costo
-                    Long cantidadTrabajadores = contarTrabajadoresPorCentroCosto(centroCosto);
-                    
-                    return MarcajesPorCentroCostoDto.ResumenCentroCosto.builder()
-                            .centroCosto(centroCosto)
-                            .descripcionCentroCosto(obtenerDescripcionCentroCosto(centroCosto))
-                            .cantidadMarcajes(cantidad)
-                            .cantidadTrabajadores(cantidadTrabajadores)
-                            .build();
-                })
+        // Agrupar por tipo_trabajador + desc_cencos
+        Map<String, ResumenData> resumenMap = new HashMap<>();
+        
+        for (Object[] resultado : resultados) {
+            String tipoTrabajador = (String) resultado[0];
+            String descTipoTrabajador = (String) resultado[1];
+            String descCencos = (String) resultado[6]; // desc_cencos está en posición 6
+            Long cantidad = ((Number) resultado[8]).longValue();
+            
+            String clave = tipoTrabajador + "|" + (descCencos != null ? descCencos : "SIN CENTRO COSTO");
+            
+            if (!resumenMap.containsKey(clave)) {
+                ResumenData data = new ResumenData();
+                data.tipoTrabajador = tipoTrabajador;
+                data.descTipoTrabajador = descTipoTrabajador != null ? descTipoTrabajador : tipoTrabajador;
+                data.descCencos = descCencos != null ? descCencos : "SIN CENTRO COSTO";
+                data.cantidadMarcajes = 0L;
+                resumenMap.put(clave, data);
+            }
+            
+            resumenMap.get(clave).cantidadMarcajes += cantidad;
+        }
+        
+        return resumenMap.values().stream()
+                .map(data -> MarcajesPorCentroCostoDto.ResumenCentroCosto.builder()
+                        .centroCosto(data.tipoTrabajador)
+                        .descripcionCentroCosto(data.descTipoTrabajador + " - " + data.descCencos)
+                        .cantidadMarcajes(data.cantidadMarcajes)
+                        .cantidadTrabajadores(0L) // TODO: calcular si es necesario
+                        .build())
                 .collect(Collectors.toList());
+    }
+    
+    // Clase auxiliar para agrupar datos
+    private static class ResumenData {
+        String tipoTrabajador;
+        String descTipoTrabajador;
+        String descCencos;
+        Long cantidadMarcajes;
     }
     
     /**
@@ -187,7 +222,246 @@ public class DashboardService {
                 .marcajes(marcajesDto)
                 .build();
     }
-    
+
+    /**
+     * Obtener indicadores de centros de costo con movimientos pivoteados
+     */
+    public List<MarcajesPorCentroCostoDto.IndicadorCentroCosto> obtenerIndicadoresCentrosCosto() {
+        return obtenerIndicadoresCentrosCosto(LocalDate.now());
+    }
+
+    /**
+     * Obtener indicadores de centros de costo con movimientos pivoteados por fecha
+     */
+    public List<MarcajesPorCentroCostoDto.IndicadorCentroCosto> obtenerIndicadoresCentrosCosto(LocalDate fecha) {
+        log.info("Obteniendo indicadores de centros de costo para fecha: {}", fecha);
+
+        List<Object[]> resultados = asistenciaRepository.findIndicadoresCentrosCostoPorFecha(fecha);
+
+        // Procesar resultados y pivotear por tipo de movimiento
+        Map<String, Map<String, Long>> pivoteoMap = new HashMap<>();
+
+        // Mapa para almacenar descripciones
+        Map<String, String[]> descripcionesMap = new HashMap<>();
+
+        for (Object[] resultado : resultados) {
+            String tipoTrabajador = (String) resultado[0];
+            String descTipoTrabajador = (String) resultado[1];
+            String codArea = (String) resultado[2];
+            String descArea = (String) resultado[3];
+            String codSeccion = (String) resultado[4];
+            String descSeccion = (String) resultado[5];
+            String descCentroCosto = (String) resultado[6];
+            String flagInOut = (String) resultado[7];
+            Long cantidad = ((Number) resultado[8]).longValue();
+
+            String clave = tipoTrabajador + "|" + codArea + "|" + codSeccion;
+
+            // Guardar descripciones
+            descripcionesMap.putIfAbsent(clave, new String[]{
+                    descTipoTrabajador != null ? descTipoTrabajador : "SIN TIPO",
+                    descArea != null ? descArea : "ÁREA DESCONOCIDA",
+                    descSeccion != null ? descSeccion : "SECCIÓN DESCONOCIDA",
+                    descCentroCosto != null ? descCentroCosto : "CENTRO COSTO DESCONOCIDO"
+            });
+
+            pivoteoMap.computeIfAbsent(clave, k -> new HashMap<>()).put(flagInOut, cantidad);
+        }
+
+        return pivoteoMap.entrySet().stream()
+                .map(entry -> {
+                    String[] partes = entry.getKey().split("\\|");
+                    String tipoTrabajador = partes[0];
+                    String codArea = partes[1];
+                    String codSeccion = partes[2];
+                    String clave = entry.getKey();
+
+                    String[] descripciones = descripcionesMap.get(clave);
+                    Map<String, Long> movimientos = entry.getValue();
+
+                    // Calcular total
+                    Long total = movimientos.values().stream().mapToLong(Long::longValue).sum();
+
+                    return MarcajesPorCentroCostoDto.IndicadorCentroCosto.builder()
+                            .tipoTrabajador(tipoTrabajador)
+                            .descTipoTrabajador(descripciones[0])
+                            .codArea(codArea)
+                            .descArea(descripciones[1])
+                            .codSeccion(codSeccion)
+                            .descSeccion(descripciones[2])
+                            .descCentroCosto(descripciones[3])
+                            .ingresoPlanta(movimientos.getOrDefault("1", 0L))
+                            .salidaPlanta(movimientos.getOrDefault("2", 0L))
+                            .salidaAlmorzar(movimientos.getOrDefault("3", 0L))
+                            .regresoAlmorzar(movimientos.getOrDefault("4", 0L))
+                            .salidaComision(movimientos.getOrDefault("5", 0L))
+                            .retornoComision(movimientos.getOrDefault("6", 0L))
+                            .ingresoProduccion(movimientos.getOrDefault("7", 0L))
+                            .salidaProduccion(movimientos.getOrDefault("8", 0L))
+                            .salidaCenar(movimientos.getOrDefault("9", 0L))
+                            .regresoCenar(movimientos.getOrDefault("10", 0L))
+                            .total(total)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Obtener indicadores de áreas con movimientos pivoteados
+     */
+    public List<IndicadoresAreaDto> obtenerIndicadoresAreas() {
+        return obtenerIndicadoresAreas(LocalDate.now());
+    }
+
+    /**
+     * Obtener indicadores de áreas con movimientos pivoteados por fecha
+     */
+    public List<IndicadoresAreaDto> obtenerIndicadoresAreas(LocalDate fecha) {
+        log.info("Obteniendo indicadores de áreas para fecha: {}", fecha);
+
+        List<Object[]> resultados = asistenciaRepository.findIndicadoresAreasPorFecha(fecha);
+
+        // Procesar resultados y pivotear por tipo de movimiento
+        Map<String, Map<String, Long>> pivoteoMap = new HashMap<>();
+        Map<String, String[]> descripcionesMap = new HashMap<>();
+
+        for (Object[] resultado : resultados) {
+            String tipoTrabajador = (String) resultado[0];
+            String descTipoTrabajador = (String) resultado[1];
+            String codArea = (String) resultado[2];
+            String descArea = (String) resultado[3];
+            String descCentroCosto = (String) resultado[4];
+            String flagInOut = (String) resultado[5];
+            Long cantidad = ((Number) resultado[6]).longValue();
+
+            String clave = tipoTrabajador + "|" + codArea;
+
+            // Guardar descripciones
+            descripcionesMap.putIfAbsent(clave, new String[]{
+                    descTipoTrabajador != null ? descTipoTrabajador : "SIN TIPO",
+                    descArea != null ? descArea : "ÁREA DESCONOCIDA",
+                    descCentroCosto != null ? descCentroCosto : "CENTRO COSTO DESCONOCIDO"
+            });
+
+            pivoteoMap.computeIfAbsent(clave, k -> new HashMap<>()).put(flagInOut, cantidad);
+        }
+
+        return pivoteoMap.entrySet().stream()
+                .map(entry -> {
+                    String[] partes = entry.getKey().split("\\|");
+                    String tipoTrabajador = partes[0];
+                    String codArea = partes[1];
+                    String clave = entry.getKey();
+
+                    String[] descripciones = descripcionesMap.get(clave);
+                    Map<String, Long> movimientos = entry.getValue();
+
+                    // Calcular total
+                    Long total = movimientos.values().stream().mapToLong(Long::longValue).sum();
+
+                    return IndicadoresAreaDto.builder()
+                            .tipoTrabajador(tipoTrabajador)
+                            .descTipoTrabajador(descripciones[0])
+                            .codArea(codArea)
+                            .descArea(descripciones[1])
+                            .descCentroCosto(descripciones[2])
+                            .ingresoPlanta(movimientos.getOrDefault("1", 0L))
+                            .salidaPlanta(movimientos.getOrDefault("2", 0L))
+                            .salidaAlmorzar(movimientos.getOrDefault("3", 0L))
+                            .regresoAlmorzar(movimientos.getOrDefault("4", 0L))
+                            .salidaComision(movimientos.getOrDefault("5", 0L))
+                            .retornoComision(movimientos.getOrDefault("6", 0L))
+                            .ingresoProduccion(movimientos.getOrDefault("7", 0L))
+                            .salidaProduccion(movimientos.getOrDefault("8", 0L))
+                            .salidaCenar(movimientos.getOrDefault("9", 0L))
+                            .regresoCenar(movimientos.getOrDefault("10", 0L))
+                            .total(total)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Obtener indicadores de secciones con movimientos pivoteados
+     */
+    public List<IndicadoresSeccionDto> obtenerIndicadoresSecciones() {
+        return obtenerIndicadoresSecciones(LocalDate.now());
+    }
+
+    /**
+     * Obtener indicadores de secciones con movimientos pivoteados por fecha
+     */
+    public List<IndicadoresSeccionDto> obtenerIndicadoresSecciones(LocalDate fecha) {
+        log.info("Obteniendo indicadores de secciones para fecha: {}", fecha);
+
+        List<Object[]> resultados = asistenciaRepository.findIndicadoresSeccionesPorFecha(fecha);
+
+        // Procesar resultados y pivotear por tipo de movimiento
+        Map<String, Map<String, Long>> pivoteoMap = new HashMap<>();
+        Map<String, String[]> descripcionesMap = new HashMap<>();
+
+        for (Object[] resultado : resultados) {
+            String tipoTrabajador = (String) resultado[0];
+            String descTipoTrabajador = (String) resultado[1];
+            String codArea = (String) resultado[2];
+            String descArea = (String) resultado[3];
+            String codSeccion = (String) resultado[4];
+            String descSeccion = (String) resultado[5];
+            String descCentroCosto = (String) resultado[6];
+            String flagInOut = (String) resultado[7];
+            Long cantidad = ((Number) resultado[8]).longValue();
+
+            String clave = tipoTrabajador + "|" + codArea + "|" + codSeccion;
+
+            // Guardar descripciones
+            descripcionesMap.putIfAbsent(clave, new String[]{
+                    descTipoTrabajador != null ? descTipoTrabajador : "SIN TIPO",
+                    descArea != null ? descArea : "ÁREA DESCONOCIDA",
+                    descSeccion != null ? descSeccion : "SECCIÓN DESCONOCIDA",
+                    descCentroCosto != null ? descCentroCosto : "CENTRO COSTO DESCONOCIDO"
+            });
+
+            pivoteoMap.computeIfAbsent(clave, k -> new HashMap<>()).put(flagInOut, cantidad);
+        }
+
+        return pivoteoMap.entrySet().stream()
+                .map(entry -> {
+                    String[] partes = entry.getKey().split("\\|");
+                    String tipoTrabajador = partes[0];
+                    String codArea = partes[1];
+                    String codSeccion = partes[2];
+                    String clave = entry.getKey();
+
+                    String[] descripciones = descripcionesMap.get(clave);
+                    Map<String, Long> movimientos = entry.getValue();
+
+                    // Calcular total
+                    Long total = movimientos.values().stream().mapToLong(Long::longValue).sum();
+
+                    return IndicadoresSeccionDto.builder()
+                            .tipoTrabajador(tipoTrabajador)
+                            .descTipoTrabajador(descripciones[0])
+                            .codArea(codArea)
+                            .descArea(descripciones[1])
+                            .codSeccion(codSeccion)
+                            .descSeccion(descripciones[2])
+                            .descCentroCosto(descripciones[3])
+                            .ingresoPlanta(movimientos.getOrDefault("1", 0L))
+                            .salidaPlanta(movimientos.getOrDefault("2", 0L))
+                            .salidaAlmorzar(movimientos.getOrDefault("3", 0L))
+                            .regresoAlmorzar(movimientos.getOrDefault("4", 0L))
+                            .salidaComision(movimientos.getOrDefault("5", 0L))
+                            .retornoComision(movimientos.getOrDefault("6", 0L))
+                            .ingresoProduccion(movimientos.getOrDefault("7", 0L))
+                            .salidaProduccion(movimientos.getOrDefault("8", 0L))
+                            .salidaCenar(movimientos.getOrDefault("9", 0L))
+                            .regresoCenar(movimientos.getOrDefault("10", 0L))
+                            .total(total)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
     /**
      * Obtener dashboard completo
      */
@@ -417,5 +691,53 @@ public class DashboardService {
         } else {
             return "PENDIENTE";
         }
+    }
+
+    private String obtenerDescTipoTrabajador(String tipoTrabajador) {
+        Map<String, String> descripciones = Map.of(
+                "O", "OBRERO",
+                "E", "EMPLEADO",
+                "C", "CONTRATISTA",
+                "P", "PRACTICANTE"
+        );
+        return descripciones.getOrDefault(tipoTrabajador, "DESCONOCIDO");
+    }
+
+    private String obtenerDescAreaDesdeBD(String codArea) {
+        return areaRepository.findById(codArea)
+                .map(Area::getDescripcionArea)
+                .orElse("ÁREA DESCONOCIDA");
+    }
+
+    private String obtenerDescSeccionDesdeBD(String codArea, String codSeccion) {
+        SeccionId seccionId = new SeccionId(codArea, codSeccion);
+        return seccionRepository.findById(seccionId)
+                .map(Seccion::getDescripcionSeccion)
+                .orElse("SECCIÓN DESCONOCIDA");
+    }
+
+    private String obtenerDescCentroCostoDesdeCodArea(String codArea) {
+        // Mapear área a centro de costo usando la descripción del área
+        return obtenerDescAreaDesdeBD(codArea);
+    }
+
+    // Mantenemos los métodos legacy por compatibilidad
+    private String obtenerDescArea(String codArea) {
+        Map<String, String> descripciones = Map.of(
+                "1", "PRODUCCIÓN",
+                "2", "ADMINISTRACIÓN",
+                "3", "LOGÍSTICA",
+                "4", "MANTENIMIENTO",
+                "5", "SEGURIDAD",
+                "6", "COMEDOR",
+                "7", "TRANSPORTE"
+        );
+        return descripciones.getOrDefault(codArea, "ÁREA DESCONOCIDA");
+    }
+
+    private String obtenerDescSeccion(String codArea, String codSeccion) {
+        // Aquí podríamos implementar lógica más compleja si hay secciones específicas por área
+        // Por ahora devolvemos una descripción genérica
+        return "SECCIÓN " + codSeccion;
     }
 }

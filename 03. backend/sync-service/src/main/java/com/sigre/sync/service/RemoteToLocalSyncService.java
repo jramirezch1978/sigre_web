@@ -23,6 +23,12 @@ public class RemoteToLocalSyncService {
     private final MaestroLocalRepository maestroLocalRepository;
     private final CentrosCostoRemoteRepository centrosCostoRemoteRepository;
     private final CentrosCostoLocalRepository centrosCostoLocalRepository;
+    private final TipoTrabajadorRemoteRepository tipoTrabajadorRemoteRepository;
+    private final TipoTrabajadorLocalRepository tipoTrabajadorLocalRepository;
+    private final AreaRemoteRepository areaRemoteRepository;
+    private final AreaLocalRepository areaLocalRepository;
+    private final SeccionRemoteRepository seccionRemoteRepository;
+    private final SeccionLocalRepository seccionLocalRepository;
     private final RrhhAsignaTrjtRelojRemoteRepository rrhhAsignaTrjtRelojRemoteRepository;
     private final RrhhAsignaTrjtRelojLocalRepository rrhhAsignaTrjtRelojLocalRepository;
     private final TurnoRemoteRepository turnoRemoteRepository;
@@ -166,7 +172,232 @@ public class RemoteToLocalSyncService {
             return false;
         }
     }
-    
+
+    /**
+     * Sincronizar tabla tipo_trabajador de Oracle → PostgreSQL
+     */
+    @Transactional("localTransactionManager")
+    public boolean sincronizarTipoTrabajador() {
+        log.info("🔥 Iniciando sincronización de tabla TIPO_TRABAJADOR (Remote → Local)");
+        String tabla = "tipo_trabajador";
+        resetearContadores(tabla);
+
+        try {
+            // Obtener todos los tipos de trabajador de Oracle
+            List<TipoTrabajadorRemote> tiposRemote = tipoTrabajadorRemoteRepository.findAll();
+            Set<String> tiposRemoteKeys = tiposRemote.stream()
+                    .map(TipoTrabajadorRemote::getTipoTrabajador)
+                    .collect(Collectors.toSet());
+            log.info("📊 Encontrados {} tipos de trabajador en bd_remota", tiposRemote.size());
+
+            // Obtener todos los tipos locales
+            List<TipoTrabajadorLocal> tiposLocal = tipoTrabajadorLocalRepository.findAll();
+            log.info("📊 Encontrados {} tipos de trabajador en bd_local", tiposLocal.size());
+
+            // PASO 1: Eliminar registros que no existen en remoto
+            for (TipoTrabajadorLocal tipoLocal : tiposLocal) {
+                if (!tiposRemoteKeys.contains(tipoLocal.getTipoTrabajador())) {
+                    tipoTrabajadorLocalRepository.delete(tipoLocal);
+                    eliminados.merge(tabla, 1, Integer::sum);
+                    log.debug("🗑️ Eliminado tipo de trabajador local que no existe en remoto: {}",
+                            tipoLocal.getTipoTrabajador());
+                }
+            }
+
+            // PASO 2: Insertar o actualizar registros desde remoto
+            for (TipoTrabajadorRemote tipoRemote : tiposRemote) {
+                try {
+                    procesarTipoTrabajador(tipoRemote, tabla);
+                } catch (Exception e) {
+                    errores.merge(tabla, 1, Integer::sum);
+                    String error = String.format("Error en tipo de trabajador %s: %s",
+                            tipoRemote.getTipoTrabajador(), e.getMessage());
+                    erroresSincronizacion.add(error);
+                    log.error("❌ {}", error, e);
+                }
+            }
+
+            // Verificar cantidades
+            long totalRemoto = tipoTrabajadorRemoteRepository.count();
+            long totalLocal = tipoTrabajadorLocalRepository.count();
+
+            if (totalRemoto != totalLocal) {
+                log.warn("⚠️ Discrepancia en cantidades - Remoto: {} | Local: {}", totalRemoto, totalLocal);
+            } else {
+                log.info("✅ Cantidades sincronizadas - Total: {} registros", totalLocal);
+            }
+
+            log.info("✅ Sincronización TIPO_TRABAJADOR completada - Insertados: {} | Actualizados: {} | Eliminados: {} | Errores: {}",
+                    insertados.get(tabla), actualizados.get(tabla), eliminados.get(tabla), errores.get(tabla));
+
+            return errores.get(tabla) == 0;
+
+        } catch (Exception e) {
+            log.error("❌ Error crítico en sincronización de TIPO_TRABAJADOR", e);
+            erroresSincronizacion.add("Error crítico en tabla tipo_trabajador: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Sincronizar tabla area de Oracle → PostgreSQL
+     */
+    @Transactional("localTransactionManager")
+    public boolean sincronizarArea() {
+        log.info("🔥 Iniciando sincronización de tabla AREA (Remote → Local)");
+        String tabla = "area";
+        resetearContadores(tabla);
+
+        try {
+            // Obtener todos las áreas de Oracle
+            List<AreaRemote> areasRemote = areaRemoteRepository.findAll();
+            Set<String> codigosRemote = areasRemote.stream()
+                    .map(AreaRemote::getCodArea)
+                    .collect(Collectors.toSet());
+            log.info("📊 Encontradas {} áreas en bd_remota", areasRemote.size());
+
+            // Obtener todos las áreas locales
+            List<AreaLocal> areasLocal = areaLocalRepository.findAll();
+            log.info("📊 Encontradas {} áreas en bd_local", areasLocal.size());
+
+            // PASO 1: Eliminar registros que no existen en remoto
+            for (AreaLocal areaLocal : areasLocal) {
+                if (!codigosRemote.contains(areaLocal.getCodArea())) {
+                    areaLocalRepository.delete(areaLocal);
+                    eliminados.merge(tabla, 1, Integer::sum);
+                    log.debug("🗑️ Eliminada área local que no existe en remoto: {}",
+                            areaLocal.getCodArea());
+                }
+            }
+
+            // PASO 2: Insertar o actualizar registros desde remoto
+            for (AreaRemote areaRemote : areasRemote) {
+                try {
+                    procesarArea(areaRemote, tabla);
+                } catch (Exception e) {
+                    errores.merge(tabla, 1, Integer::sum);
+                    String error = String.format("Error en área %s: %s",
+                            areaRemote.getCodArea(), e.getMessage());
+                    erroresSincronizacion.add(error);
+                    log.error("❌ {}", error, e);
+                }
+            }
+
+            // Verificar cantidades
+            long totalRemoto = areaRemoteRepository.count();
+            long totalLocal = areaLocalRepository.count();
+
+            if (totalRemoto != totalLocal) {
+                log.warn("⚠️ Discrepancia en cantidades - Remoto: {} | Local: {}", totalRemoto, totalLocal);
+            } else {
+                log.info("✅ Cantidades sincronizadas - Total: {} registros", totalLocal);
+            }
+
+            log.info("✅ Sincronización AREA completada - Insertados: {} | Actualizados: {} | Eliminados: {} | Errores: {}",
+                    insertados.get(tabla), actualizados.get(tabla), eliminados.get(tabla), errores.get(tabla));
+
+            return errores.get(tabla) == 0;
+
+        } catch (Exception e) {
+            log.error("❌ Error crítico en sincronización de AREA", e);
+            erroresSincronizacion.add("Error crítico en tabla area: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Sincronizar tabla seccion de Oracle → PostgreSQL
+     */
+    @Transactional("localTransactionManager")
+    public boolean sincronizarSeccion() {
+        log.info("🔥 Iniciando sincronización de tabla SECCION (Remote → Local)");
+        String tabla = "seccion";
+        resetearContadores(tabla);
+
+        try {
+            // Obtener todas las secciones de Oracle
+            List<SeccionRemote> seccionesRemote = seccionRemoteRepository.findAll();
+            Set<SeccionRemoteId> idsRemote = seccionesRemote.stream()
+                    .map(seccion -> {
+                        // Crear ID con trim para evitar problemas con espacios en blanco
+                        SeccionRemoteId id = seccion.getId();
+                        return new SeccionRemoteId(
+                            id.getCodArea() != null ? id.getCodArea().trim() : null,
+                            id.getCodSeccion() != null ? id.getCodSeccion().trim() : null
+                        );
+                    })
+                    .collect(Collectors.toSet());
+            log.info("📊 Encontradas {} secciones en bd_remota", seccionesRemote.size());
+
+            // Obtener todas las secciones locales
+            List<SeccionLocal> seccionesLocal = seccionLocalRepository.findAll();
+            log.info("📊 Encontradas {} secciones en bd_local", seccionesLocal.size());
+
+            // Debug: Mostrar algunos IDs para verificar
+            if (!seccionesRemote.isEmpty()) {
+                SeccionRemote primera = seccionesRemote.get(0);
+                log.debug("📊 Ejemplo ID remoto: '{}' - '{}' (con espacios: '{}')",
+                    primera.getCodArea(), primera.getCodSeccion(),
+                    primera.getCodArea() + "|" + primera.getCodSeccion());
+                log.debug("📊 ID remoto después de trim: '{}' - '{}'",
+                    primera.getCodArea() != null ? primera.getCodArea().trim() : null,
+                    primera.getCodSeccion() != null ? primera.getCodSeccion().trim() : null);
+            }
+            if (!seccionesLocal.isEmpty()) {
+                SeccionLocal primeraLocal = seccionesLocal.get(0);
+                log.debug("📊 Ejemplo ID local: '{}' - '{}' (con espacios: '{}')",
+                    primeraLocal.getCodArea(), primeraLocal.getCodSeccion(),
+                    primeraLocal.getCodArea() + "|" + primeraLocal.getCodSeccion());
+                log.debug("📊 ID local después de trim: '{}' - '{}'",
+                    primeraLocal.getCodArea() != null ? primeraLocal.getCodArea().trim() : null,
+                    primeraLocal.getCodSeccion() != null ? primeraLocal.getCodSeccion().trim() : null);
+            }
+
+            // PASO 1: Eliminar registros que no existen en remoto
+            for (SeccionLocal seccionLocal : seccionesLocal) {
+                if (!idsRemote.contains(seccionLocal.getId())) {
+                    seccionLocalRepository.delete(seccionLocal);
+                    eliminados.merge(tabla, 1, Integer::sum);
+                    log.debug("🗑️ Eliminada sección local que no existe en remoto: {} - {}",
+                            seccionLocal.getCodArea(), seccionLocal.getCodSeccion());
+                }
+            }
+
+            // PASO 2: Insertar o actualizar registros desde remoto
+            for (SeccionRemote seccionRemote : seccionesRemote) {
+                try {
+                    procesarSeccion(seccionRemote, tabla);
+                } catch (Exception e) {
+                    errores.merge(tabla, 1, Integer::sum);
+                    String error = String.format("Error en sección %s-%s: %s",
+                            seccionRemote.getCodArea(), seccionRemote.getCodSeccion(), e.getMessage());
+                    erroresSincronizacion.add(error);
+                    log.error("❌ {}", error, e);
+                }
+            }
+
+            // Verificar cantidades
+            long totalRemoto = seccionRemoteRepository.count();
+            long totalLocal = seccionLocalRepository.count();
+
+            if (totalRemoto != totalLocal) {
+                log.warn("⚠️ Discrepancia en cantidades - Remoto: {} | Local: {}", totalRemoto, totalLocal);
+            } else {
+                log.info("✅ Cantidades sincronizadas - Total: {} registros", totalLocal);
+            }
+
+            log.info("✅ Sincronización SECCION completada - Insertados: {} | Actualizados: {} | Eliminados: {} | Errores: {}",
+                    insertados.get(tabla), actualizados.get(tabla), eliminados.get(tabla), errores.get(tabla));
+
+            return errores.get(tabla) == 0;
+
+        } catch (Exception e) {
+            log.error("❌ Error crítico en sincronización de SECCION", e);
+            erroresSincronizacion.add("Error crítico en tabla seccion: " + e.getMessage());
+            return false;
+        }
+    }
+
     /**
      * Sincronizar tarjetas de reloj
      */
@@ -337,6 +568,9 @@ public class RemoteToLocalSyncService {
                 .flagMarcaReloj(remote.getFlagMarcaReloj())
                 .flagEstadoCivil(remote.getFlagEstadoCivil())
                 .flagSexo(remote.getFlagSexo())
+                .tipoTrabajador(remote.getTipoTrabajador())
+                .codSeccion(remote.getCodSeccion())
+                .codArea(remote.getCodArea())
                 .fechaSync(LocalDate.now())
                 .estadoSync("S")
                 .build();
@@ -390,7 +624,10 @@ public class RemoteToLocalSyncService {
                !equals(remote.getDni(), local.getDni()) ||
                !equals(remote.getFechaIngreso(), local.getFechaIngreso()) ||
                !equals(remote.getFechaNacimiento(), local.getFechaNacimiento()) ||
-               !equals(remote.getFechaCese(), local.getFechaCese());
+               !equals(remote.getFechaCese(), local.getFechaCese()) ||
+               !equals(remote.getTipoTrabajador(), local.getTipoTrabajador()) ||
+               !equals(remote.getCodSeccion(), local.getCodSeccion()) ||
+               !equals(remote.getCodArea(), local.getCodArea());
     }
     
     private boolean hayDiferenciasCentro(CentrosCostoRemote remote, CentrosCostoLocal local) {
@@ -435,6 +672,9 @@ public class RemoteToLocalSyncService {
         local.setFlagMarcaReloj(remote.getFlagMarcaReloj());
         local.setFlagEstadoCivil(remote.getFlagEstadoCivil());
         local.setFlagSexo(remote.getFlagSexo());
+        local.setTipoTrabajador(remote.getTipoTrabajador());
+        local.setCodSeccion(remote.getCodSeccion());
+        local.setCodArea(remote.getCodArea());
         local.setFechaSync(LocalDate.now());
         local.setEstadoSync("S");
     }
@@ -745,7 +985,240 @@ public class RemoteToLocalSyncService {
                 .intentosSync(0)
                 .build();
     }
-    
+
+    private void procesarTipoTrabajador(TipoTrabajadorRemote tipoRemote, String tabla) {
+        String tipoTrabajador = tipoRemote.getTipoTrabajador();
+
+        Optional<TipoTrabajadorLocal> tipoLocalOpt = tipoTrabajadorLocalRepository.findById(tipoTrabajador);
+
+        if (tipoLocalOpt.isEmpty()) {
+            // INSERTAR nuevo registro
+            TipoTrabajadorLocal nuevoTipo = convertirTipoTrabajadorRemoteToLocal(tipoRemote);
+            tipoTrabajadorLocalRepository.save(nuevoTipo);
+            insertados.merge(tabla, 1, Integer::sum);
+            log.debug("➕ Insertado tipo de trabajador: {}", tipoTrabajador);
+
+        } else {
+            // ACTUALIZAR si hay cambios reales
+            TipoTrabajadorLocal tipoLocal = tipoLocalOpt.get();
+
+            if (hayDiferenciasTipoTrabajador(tipoRemote, tipoLocal)) {
+                actualizarTipoTrabajadorLocal(tipoLocal, tipoRemote);
+                tipoTrabajadorLocalRepository.save(tipoLocal);
+                actualizados.merge(tabla, 1, Integer::sum);
+                log.debug("🔄 Actualizado tipo de trabajador: {}", tipoTrabajador);
+            }
+        }
+    }
+
+    private TipoTrabajadorLocal convertirTipoTrabajadorRemoteToLocal(TipoTrabajadorRemote remote) {
+        return TipoTrabajadorLocal.builder()
+                .tipoTrabajador(remote.getTipoTrabajador())
+                .descripcionTipoTrabajador(remote.getDescripcionTipoTrabajador())
+                .flagEmisionBoleta(remote.getFlagEmisionBoleta())
+                .flagEstado(remote.getFlagEstado())
+                .libroPlanilla(remote.getLibroPlanilla())
+                .libroIntGrati(remote.getLibroIntGrati())
+                .libroIntRemun(remote.getLibroIntRemun())
+                .libroIntPagoGrati(remote.getLibroIntPagoGrati())
+                .libroIntPagoRemun(remote.getLibroIntPagoRemun())
+                .libroProvCts(remote.getLibroProvCts())
+                .libroProvGrati(remote.getLibroProvGrati())
+                .flagReplicacion(remote.getFlagReplicacion())
+                .diaMinDescanso(remote.getDiaMinDescanso())
+                .diasTrabHabFijo(remote.getDiasTrabHabFijo())
+                .factorCostoHr(remote.getFactorCostoHr())
+                .cuentaContableCtsCargo(remote.getCuentaContableCtsCargo())
+                .cuentaContableCtsAbono(remote.getCuentaContableCtsAbono())
+                .flagTablaOrigen(remote.getFlagTablaOrigen())
+                .documentoAfectaPresupuesto(remote.getDocumentoAfectaPresupuesto())
+                .cuentaPresupAfectaCts(remote.getCuentaPresupAfectaCts())
+                .documentoAfectaPresupCts(remote.getDocumentoAfectaPresupCts())
+                .flagDestajoJornal(remote.getFlagDestajoJornal())
+                .libroProvVacac(remote.getLibroProvVacac())
+                .flagIngresoBoleta(remote.getFlagIngresoBoleta())
+                .cuentaPresupLbs(remote.getCuentaPresupLbs())
+                .flagSectorAgrario(remote.getFlagSectorAgrario())
+                .periodoBoleta(remote.getPeriodoBoleta())
+                .fechaSync(LocalDate.now())
+                .estadoSync("S")
+                .build();
+    }
+
+    private boolean hayDiferenciasTipoTrabajador(TipoTrabajadorRemote remote, TipoTrabajadorLocal local) {
+        return !equals(remote.getDescripcionTipoTrabajador(), local.getDescripcionTipoTrabajador()) ||
+               !equals(remote.getFlagEmisionBoleta(), local.getFlagEmisionBoleta()) ||
+               !equals(remote.getFlagEstado(), local.getFlagEstado()) ||
+               !equals(remote.getLibroPlanilla(), local.getLibroPlanilla()) ||
+               !equals(remote.getLibroIntGrati(), local.getLibroIntGrati()) ||
+               !equals(remote.getLibroIntRemun(), local.getLibroIntRemun()) ||
+               !equals(remote.getLibroIntPagoGrati(), local.getLibroIntPagoGrati()) ||
+               !equals(remote.getLibroIntPagoRemun(), local.getLibroIntPagoRemun()) ||
+               !equals(remote.getLibroProvCts(), local.getLibroProvCts()) ||
+               !equals(remote.getLibroProvGrati(), local.getLibroProvGrati()) ||
+               !equals(remote.getFlagReplicacion(), local.getFlagReplicacion()) ||
+               !equals(remote.getDiaMinDescanso(), local.getDiaMinDescanso()) ||
+               !equals(remote.getDiasTrabHabFijo(), local.getDiasTrabHabFijo()) ||
+               !equals(remote.getFactorCostoHr(), local.getFactorCostoHr()) ||
+               !equals(remote.getCuentaContableCtsCargo(), local.getCuentaContableCtsCargo()) ||
+               !equals(remote.getCuentaContableCtsAbono(), local.getCuentaContableCtsAbono()) ||
+               !equals(remote.getFlagTablaOrigen(), local.getFlagTablaOrigen()) ||
+               !equals(remote.getDocumentoAfectaPresupuesto(), local.getDocumentoAfectaPresupuesto()) ||
+               !equals(remote.getCuentaPresupAfectaCts(), local.getCuentaPresupAfectaCts()) ||
+               !equals(remote.getDocumentoAfectaPresupCts(), local.getDocumentoAfectaPresupCts()) ||
+               !equals(remote.getFlagDestajoJornal(), local.getFlagDestajoJornal()) ||
+               !equals(remote.getLibroProvVacac(), local.getLibroProvVacac()) ||
+               !equals(remote.getFlagIngresoBoleta(), local.getFlagIngresoBoleta()) ||
+               !equals(remote.getCuentaPresupLbs(), local.getCuentaPresupLbs()) ||
+               !equals(remote.getFlagSectorAgrario(), local.getFlagSectorAgrario()) ||
+               !equals(remote.getPeriodoBoleta(), local.getPeriodoBoleta());
+    }
+
+    private void actualizarTipoTrabajadorLocal(TipoTrabajadorLocal local, TipoTrabajadorRemote remote) {
+        local.setDescripcionTipoTrabajador(remote.getDescripcionTipoTrabajador());
+        local.setFlagEmisionBoleta(remote.getFlagEmisionBoleta());
+        local.setFlagEstado(remote.getFlagEstado());
+        local.setLibroPlanilla(remote.getLibroPlanilla());
+        local.setLibroIntGrati(remote.getLibroIntGrati());
+        local.setLibroIntRemun(remote.getLibroIntRemun());
+        local.setLibroIntPagoGrati(remote.getLibroIntPagoGrati());
+        local.setLibroIntPagoRemun(remote.getLibroIntPagoRemun());
+        local.setLibroProvCts(remote.getLibroProvCts());
+        local.setLibroProvGrati(remote.getLibroProvGrati());
+        local.setFlagReplicacion(remote.getFlagReplicacion());
+        local.setDiaMinDescanso(remote.getDiaMinDescanso());
+        local.setDiasTrabHabFijo(remote.getDiasTrabHabFijo());
+        local.setFactorCostoHr(remote.getFactorCostoHr());
+        local.setCuentaContableCtsCargo(remote.getCuentaContableCtsCargo());
+        local.setCuentaContableCtsAbono(remote.getCuentaContableCtsAbono());
+        local.setFlagTablaOrigen(remote.getFlagTablaOrigen());
+        local.setDocumentoAfectaPresupuesto(remote.getDocumentoAfectaPresupuesto());
+        local.setCuentaPresupAfectaCts(remote.getCuentaPresupAfectaCts());
+        local.setDocumentoAfectaPresupCts(remote.getDocumentoAfectaPresupCts());
+        local.setFlagDestajoJornal(remote.getFlagDestajoJornal());
+        local.setLibroProvVacac(remote.getLibroProvVacac());
+        local.setFlagIngresoBoleta(remote.getFlagIngresoBoleta());
+        local.setCuentaPresupLbs(remote.getCuentaPresupLbs());
+        local.setFlagSectorAgrario(remote.getFlagSectorAgrario());
+        local.setPeriodoBoleta(remote.getPeriodoBoleta());
+        local.setFechaSync(LocalDate.now());
+        local.setEstadoSync("S");
+        log.info("📋 Campos actualizados: TODOS los 27 campos copiados desde Oracle");
+    }
+
+    private void procesarArea(AreaRemote areaRemote, String tabla) {
+        String codArea = areaRemote.getCodArea();
+
+        Optional<AreaLocal> areaLocalOpt = areaLocalRepository.findById(codArea);
+
+        if (areaLocalOpt.isEmpty()) {
+            // INSERTAR nuevo registro
+            AreaLocal nuevaArea = convertirAreaRemoteToLocal(areaRemote);
+            areaLocalRepository.save(nuevaArea);
+            insertados.merge(tabla, 1, Integer::sum);
+            log.debug("➕ Insertada área: {}", codArea);
+
+        } else {
+            // ACTUALIZAR si hay cambios reales
+            AreaLocal areaLocal = areaLocalOpt.get();
+
+            if (hayDiferenciasArea(areaRemote, areaLocal)) {
+                actualizarAreaLocal(areaLocal, areaRemote);
+                areaLocalRepository.save(areaLocal);
+                actualizados.merge(tabla, 1, Integer::sum);
+                log.debug("🔄 Actualizada área: {}", codArea);
+            }
+        }
+    }
+
+    private AreaLocal convertirAreaRemoteToLocal(AreaRemote remote) {
+        return AreaLocal.builder()
+                .codArea(remote.getCodArea())
+                .codJefeArea(remote.getCodJefeArea())
+                .descripcionArea(remote.getDescripcionArea())
+                .flagReplicacion(remote.getFlagReplicacion())
+                .fechaSync(LocalDate.now())
+                .estadoSync("S")
+                .build();
+    }
+
+    private boolean hayDiferenciasArea(AreaRemote remote, AreaLocal local) {
+        return !equals(remote.getCodJefeArea(), local.getCodJefeArea()) ||
+               !equals(remote.getDescripcionArea(), local.getDescripcionArea()) ||
+               !equals(remote.getFlagReplicacion(), local.getFlagReplicacion());
+    }
+
+    private void actualizarAreaLocal(AreaLocal local, AreaRemote remote) {
+        local.setCodJefeArea(remote.getCodJefeArea());
+        local.setDescripcionArea(remote.getDescripcionArea());
+        local.setFlagReplicacion(remote.getFlagReplicacion());
+        local.setFechaSync(LocalDate.now());
+        local.setEstadoSync("S");
+        log.info("📋 Campos actualizados: Área {} actualizada desde Oracle", remote.getCodArea());
+    }
+
+    private void procesarSeccion(SeccionRemote seccionRemote, String tabla) {
+        SeccionRemoteId remoteId = seccionRemote.getId();
+        SeccionLocalId localId = new SeccionLocalId(remoteId.getCodArea(), remoteId.getCodSeccion());
+
+        Optional<SeccionLocal> seccionLocalOpt = seccionLocalRepository.findById(localId);
+
+        if (seccionLocalOpt.isEmpty()) {
+            // INSERTAR nuevo registro
+            SeccionLocal nuevaSeccion = convertirSeccionRemoteToLocal(seccionRemote);
+            seccionLocalRepository.save(nuevaSeccion);
+            insertados.merge(tabla, 1, Integer::sum);
+            log.debug("➕ Insertada sección: {}-{}", seccionRemote.getCodArea(), seccionRemote.getCodSeccion());
+
+        } else {
+            // ACTUALIZAR si hay cambios reales
+            SeccionLocal seccionLocal = seccionLocalOpt.get();
+
+            if (hayDiferenciasSeccion(seccionRemote, seccionLocal)) {
+                actualizarSeccionLocal(seccionLocal, seccionRemote);
+                seccionLocalRepository.save(seccionLocal);
+                actualizados.merge(tabla, 1, Integer::sum);
+                log.debug("🔄 Actualizada sección: {}-{}", seccionRemote.getCodArea(), seccionRemote.getCodSeccion());
+            }
+        }
+    }
+
+    private SeccionLocal convertirSeccionRemoteToLocal(SeccionRemote remote) {
+        return SeccionLocal.builder()
+                .id(new SeccionLocalId(remote.getCodArea(), remote.getCodSeccion()))
+                .codJefeSeccion(remote.getCodJefeSeccion())
+                .descripcionSeccion(remote.getDescripcionSeccion())
+                .porcentajeSctrIpss(remote.getPorcentajeSctrIpss())
+                .porcentajeSctrOnp(remote.getPorcentajeSctrOnp())
+                .flagReplicacion(remote.getFlagReplicacion())
+                .flagEstado(remote.getFlagEstado())
+                .fechaSync(LocalDate.now())
+                .estadoSync("S")
+                .build();
+    }
+
+    private boolean hayDiferenciasSeccion(SeccionRemote remote, SeccionLocal local) {
+        return !equals(remote.getCodJefeSeccion(), local.getCodJefeSeccion()) ||
+               !equals(remote.getDescripcionSeccion(), local.getDescripcionSeccion()) ||
+               !equals(remote.getPorcentajeSctrIpss(), local.getPorcentajeSctrIpss()) ||
+               !equals(remote.getPorcentajeSctrOnp(), local.getPorcentajeSctrOnp()) ||
+               !equals(remote.getFlagReplicacion(), local.getFlagReplicacion()) ||
+               !equals(remote.getFlagEstado(), local.getFlagEstado());
+    }
+
+    private void actualizarSeccionLocal(SeccionLocal local, SeccionRemote remote) {
+        local.setCodJefeSeccion(remote.getCodJefeSeccion());
+        local.setDescripcionSeccion(remote.getDescripcionSeccion());
+        local.setPorcentajeSctrIpss(remote.getPorcentajeSctrIpss());
+        local.setPorcentajeSctrOnp(remote.getPorcentajeSctrOnp());
+        local.setFlagReplicacion(remote.getFlagReplicacion());
+        local.setFlagEstado(remote.getFlagEstado());
+        local.setFechaSync(LocalDate.now());
+        local.setEstadoSync("S");
+        log.info("📋 Campos actualizados: Sección {}-{} actualizada desde Oracle",
+                remote.getCodArea(), remote.getCodSeccion());
+    }
+
     public int getInsertados(String tabla) {
         return insertados.getOrDefault(tabla, 0);
     }

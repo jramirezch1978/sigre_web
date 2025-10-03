@@ -78,7 +78,19 @@ public class MaestroLocal {
     
     @Column(name = "FLAG_SEXO", length = 1)
     private String flagSexo;
-    
+
+    @Column(name = "TIPO_TRABAJADOR", length = 3)
+    private String tipoTrabajador;
+
+    @Column(name = "COD_SECCION", length = 3)
+    private String codSeccion;
+
+    @Column(name = "COD_AREA", length = 1)
+    private String codArea;
+
+    @Column(name = "FULL_NAME_TRABAJADOR", insertable = false, updatable = false)
+    private String fullNameTrabajador;
+
     // Campos de auditoría para sincronización
     @Column(name = "FECHA_SYNC")
     private LocalDate fechaSync;

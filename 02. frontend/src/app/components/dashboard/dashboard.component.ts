@@ -24,6 +24,7 @@ import {
 } from '../../services/dashboard.service';
 import { FloatingClockComponent } from '../floating-clock/floating-clock.component';
 import { NotImplementedService } from '../../services/not-implemented.service';
+import { CentrosCostoDashboardComponent } from '../centros-costo-dashboard/centros-costo-dashboard.component';
 
 declare var Chart: any; // Para Chart.js
 
@@ -43,7 +44,8 @@ declare var Chart: any; // Para Chart.js
     MatToolbarModule,
     MatMenuModule,
     MatDividerModule,
-    FloatingClockComponent
+    FloatingClockComponent,
+    CentrosCostoDashboardComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -588,6 +590,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onComedoresMenu() { this.notImplementedService.menuNotImplemented('Módulo de Comedores'); }
   onReportesMenu() { this.notImplementedService.menuNotImplemented('Módulo de Reportes'); }
   onCentrosCostoMenu() { this.notImplementedService.menuNotImplemented('Módulo de Centros de Costo'); }
+  onIndicadoresCentrosCosto() {
+    this.router.navigate(['/centros-costo-dashboard']);
+  }
   onConfiguracionMenu() { this.notImplementedService.menuNotImplemented('Módulo de Configuración'); }
   onAdministracionMenu() { this.notImplementedService.menuNotImplemented('Módulo de Administración'); }
 

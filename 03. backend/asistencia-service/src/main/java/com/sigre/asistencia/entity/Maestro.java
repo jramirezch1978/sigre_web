@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(of = "codTrabajador")
-@ToString(exclude = {"tarjetasAsignadas", "racionesSeleccionadas", "centroCostoEntity"})
+@ToString(exclude = {"tarjetasAsignadas", "racionesSeleccionadas", "centroCostoEntity", "tipoTrabajadorEntity", "area", "seccion"})
 public class Maestro {
     
     @Id
@@ -71,6 +71,31 @@ public class Maestro {
     
     @Column(name = "CENCOS", length = 10, nullable = false)
     private String centroCosto;
+
+    @Column(name = "TIPO_TRABAJADOR", length = 3)
+    private String tipoTrabajador;
+
+    @Column(name = "COD_AREA", length = 1)
+    private String codArea;
+
+    @Column(name = "COD_SECCION", length = 3)
+    private String codSeccion;
+
+    // Relaciones
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TIPO_TRABAJADOR", referencedColumnName = "TIPO_TRABAJADOR", insertable = false, updatable = false)
+    private TipoTrabajador tipoTrabajadorEntity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COD_AREA", referencedColumnName = "COD_AREA", insertable = false, updatable = false)
+    private Area area;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+        @JoinColumn(name = "COD_AREA", referencedColumnName = "codArea", insertable = false, updatable = false),
+        @JoinColumn(name = "COD_SECCION", referencedColumnName = "codSeccion", insertable = false, updatable = false)
+    })
+    private Seccion seccion;
     
     @Column(name = "FLAG_MARCA_RELOJ", length = 1)
     @Builder.Default
