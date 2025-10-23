@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,4 +36,9 @@ public class AsistenciaRequestDto {
     private String direccionIp;
     private String observaciones;
     private String turno;
+    
+    /**
+     * Fecha y hora exacta de la marcación
+     */
+    private LocalDateTime fechaMarcacion;
 }

@@ -32,7 +32,10 @@ public class AsistenciaHt580Remote {
     private String flagInOut; // 1=Ingreso, 2=Salida, ..., 10=REGRESO_CENAR
     
     @Column(name = "FEC_REGISTRO", nullable = false)
-    private LocalDateTime fechaRegistro;
+    private LocalDateTime fechaRegistro;  // Fecha y hora de guardado en BD
+    
+    @Column(name = "FEC_MARCACION", nullable = false)
+    private LocalDateTime fecMarcacion;  // Fecha y hora exacta de la marcación
     
     @Column(name = "FEC_MOVIMIENTO", nullable = false)
     private LocalDate fechaMovimiento;  // ✅ DATE sin hora (índice único)
@@ -51,4 +54,7 @@ public class AsistenciaHt580Remote {
     
     @Column(name = "LECTURA_PDA", length = 3000)
     private String lecturaPda;
+    
+    @Column(name = "RECKEY_REF", length = 12)
+    private String reckeyRef; // Referencia a la marcación relacionada (01 o 03/05/07/09)
 }

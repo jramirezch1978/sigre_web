@@ -24,7 +24,10 @@ public class AsistenciaHt580Local {
     private String reckey;
     
     @Column(name = "EXTERNAL_ID", length = 12, unique = true)
-    private String externalId; // ID único de Oracle (único)
+    private String externalId; // ID de Oracle de este registro
+    
+    @Column(name = "EXTERNAL_ID_REF", length = 12)
+    private String externalIdRef; // ID de Oracle de la marcación relacionada
     
     @Column(name = "COD_ORIGEN", length = 2)
     private String codOrigen;
@@ -36,7 +39,10 @@ public class AsistenciaHt580Local {
     private String flagInOut; // 1=Ingreso, 2=Salida, ..., 10=REGRESO_CENAR
     
     @Column(name = "FEC_REGISTRO", nullable = false)
-    private LocalDateTime fechaRegistro;
+    private LocalDateTime fechaRegistro;  // Fecha y hora de guardado en BD
+    
+    @Column(name = "FEC_MARCACION", nullable = false)
+    private LocalDateTime fecMarcacion;  // Fecha y hora exacta de la marcación
     
     @Column(name = "FEC_MOVIMIENTO", nullable = false)
     private LocalDate fechaMovimiento;  // ✅ DATE sin hora (índice único)
@@ -58,6 +64,9 @@ public class AsistenciaHt580Local {
     
     @Column(name = "LECTURA_PDA", length = 3000)
     private String lecturaPda;
+    
+    @Column(name = "RECKEY_REF", length = 12)
+    private String reckeyRef; // Referencia a marcación relacionada: última 01 para la mayoría, o 03/05/07/09 para regresos
     
     // Campos de auditoría para sincronización
     @Column(name = "FECHA_SYNC")

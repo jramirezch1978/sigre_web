@@ -32,7 +32,10 @@ public class AsistenciaHt580 {
     private String flagInOut;  // 1=Ingreso, 2=Salida, ..., 10=REGRESO_CENAR
     
     @Column(name = "FEC_REGISTRO", nullable = false)
-    private LocalDateTime fechaRegistro;
+    private LocalDateTime fechaRegistro;  // Fecha y hora de guardado en BD
+    
+    @Column(name = "FEC_MARCACION", nullable = false)
+    private LocalDateTime fecMarcacion;  // Fecha y hora exacta de la marcación
     
     @Column(name = "FEC_MOVIMIENTO", nullable = false)
     private LocalDate fechaMovimiento;  // ✅ DATE sin hora (índice único)
@@ -61,6 +64,9 @@ public class AsistenciaHt580 {
     @Column(name = "FLAG_ESTADO", length = 1, nullable = false)
     @Builder.Default
     private String flagEstado = "1";
+    
+    @Column(name = "RECKEY_REF", length = 12)
+    private String reckeyRef; // Referencia a marcación relacionada: última 01 para la mayoría, o 03/05/07/09 para regresos
     
     // ===== CAMPOS DE SINCRONIZACIÓN =====
     

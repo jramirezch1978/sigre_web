@@ -40,6 +40,34 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     Optional<AsistenciaHt580> findTopByCodigoOrderByFechaRegistroDesc(String codigo);
     
     /**
+     * ✅ NUEVA LÓGICA DE TURNOS - OPTIMIZADA CON ÍNDICES
+     * Buscar última marcación INGRESO_PLANTA (tipo 01) de un trabajador
+     * Esta es la marcación "raíz" de donde se heredan turno y reckey_ref
+     * 
+     * OPTIMIZACIÓN: Usa índice en (codigo, flag_in_out, fec_registro)
+     */
+    @Query(value = "SELECT * FROM asistencia_ht580 " +
+           "WHERE codigo = :codigo " +
+           "AND flag_in_out = '1' " +
+           "ORDER BY fec_registro DESC " +
+           "LIMIT 1", 
+           nativeQuery = true)
+    Optional<AsistenciaHt580> findUltimaMarcacion01ByTrabajador(@Param("codigo") String codigo);
+    
+    /**
+     * Buscar última marcación específica de un trabajador (para tipos 03, 05, 07, 09)
+     * OPTIMIZACIÓN: Consulta nativa para mejor performance
+     */
+    @Query(value = "SELECT * FROM asistencia_ht580 " +
+           "WHERE codigo = :codigo " +
+           "AND flag_in_out = :flagInOut " +
+           "ORDER BY fec_registro DESC " +
+           "LIMIT 1",
+           nativeQuery = true)
+    Optional<AsistenciaHt580> findUltimaMarcacionByTipoAndTrabajador(@Param("codigo") String codigo, 
+                                                                     @Param("flagInOut") String flagInOut);
+    
+    /**
      * Buscar asistencias en un rango de fechas
      */
     @Query("SELECT a FROM AsistenciaHt580 a " +

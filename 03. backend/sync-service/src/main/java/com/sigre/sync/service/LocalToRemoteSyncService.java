@@ -173,14 +173,28 @@ public class LocalToRemoteSyncService {
                         log.info("🔄 Asistencia Oracle REAL (consultada): {}", asistenciaSaved.toString());
                     }
 
-                    // ✅ ACTUALIZAR registro con external_id de Oracle (NO eliminar)
-                    asistenciaLocal.setExternalId(oracleReckey); // ✅ ID de Oracle en external_id
-                    asistenciaLocal.setFechaUpdate(LocalDateTime.now()); // ✅ Marcar como actualizado
+                    // ✅ ACTUALIZAR registro con external_id de Oracle
+                    asistenciaLocal.setExternalId(oracleReckey); // ID de Oracle de este registro
+                    asistenciaLocal.setFechaUpdate(LocalDateTime.now());
+                    
+                    // ✅ NUEVA LÓGICA: Si tiene reckey_ref, guardar también el external_id de la referencia
+                    if (asistenciaLocal.getReckeyRef() != null && !asistenciaLocal.getReckeyRef().trim().isEmpty()) {
+                        Optional<AsistenciaHt580Local> marcacionRef = asistenciaLocalRepository.findById(asistenciaLocal.getReckeyRef());
+                        if (marcacionRef.isPresent() && marcacionRef.get().getExternalId() != null) {
+                            asistenciaLocal.setExternalIdRef(marcacionRef.get().getExternalId());
+                            log.info("🔗 External_id_ref guardado: {} (de reckey_ref={})", 
+                                    marcacionRef.get().getExternalId(), asistenciaLocal.getReckeyRef());
+                        } else {
+                            log.warn("⚠️ No se pudo obtener external_id para reckey_ref={}", asistenciaLocal.getReckeyRef());
+                        }
+                    }
+                    
                     asistenciaLocal.setEstadoSync("S");
                     asistenciaLocal.setFechaSync(LocalDateTime.now());
                     asistenciaLocalRepository.save(asistenciaLocal);
                     
-                    log.info("✅ External_id actualizado: {} → {}", asistenciaLocal.getReckey(), oracleReckey);
+                    log.info("✅ External_id actualizado: {} → {} | External_id_ref: {}", 
+                            asistenciaLocal.getReckey(), oracleReckey, asistenciaLocal.getExternalIdRef());
                 
                 } else {
                     // ❌ NO se encontró registro en Oracle - ERROR crítico
@@ -204,6 +218,7 @@ public class LocalToRemoteSyncService {
                         
                         //Actualizo los campos de la asistencia remota
                         asistenciaRemote.setFlagInOut(asistenciaLocal.getFlagInOut());
+                        asistenciaRemote.setFecMarcacion(asistenciaLocal.getFecMarcacion());  // ✅ Fecha/hora de marcación
                         asistenciaRemote.setFechaMovimiento(asistenciaLocal.getFechaMovimiento());
                         asistenciaRemote.setCodUsuario(asistenciaLocal.getCodUsuario());
                         asistenciaRemote.setDireccionIp(asistenciaLocal.getDireccionIp());
@@ -251,20 +266,40 @@ public class LocalToRemoteSyncService {
     
     /**
      * Convertir entidad local a remota
+     * NUEVA LÓGICA: Si tiene reckey_ref local, buscar su external_id y usarlo como reckey_ref en Oracle
      */
     private AsistenciaHt580Remote convertirLocalToRemote(AsistenciaHt580Local local) {
+        String reckeyRefParaOracle = null;
+        
+        // Si tiene reckey_ref local, buscar el external_id correspondiente
+        if (local.getReckeyRef() != null && !local.getReckeyRef().trim().isEmpty()) {
+            Optional<AsistenciaHt580Local> marcacionReferencia = asistenciaLocalRepository.findById(local.getReckeyRef());
+            
+            if (marcacionReferencia.isPresent() && marcacionReferencia.get().getExternalId() != null) {
+                // Usar el external_id de la referencia como reckey_ref en Oracle
+                reckeyRefParaOracle = marcacionReferencia.get().getExternalId();
+                log.debug("🔗 Referencia resuelta: reckey_ref_local={} → external_id={}", 
+                        local.getReckeyRef(), reckeyRefParaOracle);
+            } else {
+                log.warn("⚠️ No se encontró external_id para reckey_ref={}, se enviará NULL a Oracle", 
+                        local.getReckeyRef());
+            }
+        }
+        
         return AsistenciaHt580Remote.builder()
                 .reckey(local.getReckey())
                 .codOrigen(local.getCodOrigen())
                 .codigo(local.getCodigo())
                 .flagInOut(local.getFlagInOut())
-                .fechaRegistro(local.getFechaRegistro())
+                // NO enviar fechaRegistro - Oracle lo genera automáticamente con la fecha del servidor
+                .fecMarcacion(local.getFecMarcacion())  // ✅ Fecha y hora exacta de marcación
                 .fechaMovimiento(local.getFechaMovimiento())
                 .codUsuario(local.getCodUsuario())
                 .direccionIp(local.getDireccionIp())
                 .flagVerifyType(local.getFlagVerifyType())
                 .turno(local.getTurno())
                 .lecturaPda(local.getLecturaPda())
+                .reckeyRef(reckeyRefParaOracle)  // ID de Oracle de la referencia
                 .build();
     }
     
@@ -475,6 +510,7 @@ public class LocalToRemoteSyncService {
     private boolean sonDiferentes(AsistenciaHt580Local local, AsistenciaHt580Remote oracle) {
         return !local.getCodigo().equals(oracle.getCodigo()) ||
                !local.getFlagInOut().equals(oracle.getFlagInOut()) ||
+               !local.getFecMarcacion().equals(oracle.getFecMarcacion()) ||  // ✅ Comparar fec_marcacion
                !local.getFechaMovimiento().equals(oracle.getFechaMovimiento()) ||
                !local.getCodUsuario().trim().equals(oracle.getCodUsuario().trim()) ||
                !local.getDireccionIp().equals(oracle.getDireccionIp());
@@ -486,6 +522,7 @@ public class LocalToRemoteSyncService {
     private void actualizarRegistroOracle(AsistenciaHt580Local local, AsistenciaHt580Remote oracle) {
         oracle.setCodigo(local.getCodigo());
         oracle.setFlagInOut(local.getFlagInOut());
+        oracle.setFecMarcacion(local.getFecMarcacion());  // ✅ Actualizar fec_marcacion
         oracle.setFechaMovimiento(local.getFechaMovimiento());
         oracle.setCodUsuario(local.getCodUsuario());
         oracle.setDireccionIp(local.getDireccionIp());

@@ -264,18 +264,83 @@ public class TicketAsistenciaService {
     
     /**
      * Crear registro en asistencia_ht580
+     * NUEVA LÓGICA: Solo marcación 01 calcula turno, las demás heredan turno y reckey_ref
      */
     private String crearRegistroAsistencia(TicketAsistencia ticket) {
         try {
+            String tipoMovimiento = ticket.getTipoMovimiento();
+            String turnoAsignado;
+            String reckeyRef = null;
+            
+            // LÓGICA SEGÚN TIPO DE MOVIMIENTO
+            if ("1".equals(tipoMovimiento)) {
+                // TIPO 01 (INGRESO_PLANTA): Calcular turno normalmente
+                turnoAsignado = turnoService.determinarTurnoActual(ticket.getFechaMarcacion());
+                reckeyRef = null; // No tiene referencia
+                
+                log.info("📍 Tipo 01 - INGRESO_PLANTA | Turno calculado: {}", turnoAsignado);
+                
+            } else {
+                // TODOS LOS DEMÁS TIPOS (02-10): Heredar turno de la última marcación 01
+                Optional<AsistenciaHt580> ultimaMarcacion01 = asistenciaRepository.findUltimaMarcacion01ByTrabajador(ticket.getCodTrabajador());
+                
+                if (ultimaMarcacion01.isEmpty()) {
+                    String error = String.format(
+                        "No se encontró una marcación de INGRESO_PLANTA (tipo 01) previa para el trabajador %s. " +
+                        "Debe marcar primero el ingreso antes de registrar otros movimientos.",
+                        ticket.getCodTrabajador()
+                    );
+                    log.error("❌ {}", error);
+                    throw new RuntimeException(error);
+                }
+                
+                // Heredar turno de la última marcación 01
+                turnoAsignado = ultimaMarcacion01.get().getTurno();
+                
+                // Determinar reckey_ref según el tipo de movimiento
+                if ("4".equals(tipoMovimiento)) {
+                    // REGRESO_ALMORZAR: buscar última marcación 03
+                    reckeyRef = asistenciaRepository.findUltimaMarcacionByTipoAndTrabajador(ticket.getCodTrabajador(), "3")
+                        .map(AsistenciaHt580::getReckey)
+                        .orElse(ultimaMarcacion01.get().getReckey()); // Fallback a marcación 01
+                    log.info("📍 Tipo 04 - REGRESO_ALMORZAR | Turno heredado: {} | Ref a marcación 03", turnoAsignado);
+                    
+                } else if ("6".equals(tipoMovimiento)) {
+                    // RETORNO_COMISION: buscar última marcación 05
+                    reckeyRef = asistenciaRepository.findUltimaMarcacionByTipoAndTrabajador(ticket.getCodTrabajador(), "5")
+                        .map(AsistenciaHt580::getReckey)
+                        .orElse(ultimaMarcacion01.get().getReckey());
+                    log.info("📍 Tipo 06 - RETORNO_COMISION | Turno heredado: {} | Ref a marcación 05", turnoAsignado);
+                    
+                } else if ("8".equals(tipoMovimiento)) {
+                    // SALIDA_PRODUCCION: buscar última marcación 07
+                    reckeyRef = asistenciaRepository.findUltimaMarcacionByTipoAndTrabajador(ticket.getCodTrabajador(), "7")
+                        .map(AsistenciaHt580::getReckey)
+                        .orElse(ultimaMarcacion01.get().getReckey());
+                    log.info("📍 Tipo 08 - SALIDA_PRODUCCION | Turno heredado: {} | Ref a marcación 07", turnoAsignado);
+                    
+                } else if ("10".equals(tipoMovimiento)) {
+                    // REGRESO_CENAR: buscar última marcación 09
+                    reckeyRef = asistenciaRepository.findUltimaMarcacionByTipoAndTrabajador(ticket.getCodTrabajador(), "9")
+                        .map(AsistenciaHt580::getReckey)
+                        .orElse(ultimaMarcacion01.get().getReckey());
+                    log.info("📍 Tipo 10 - REGRESO_CENAR | Turno heredado: {} | Ref a marcación 09", turnoAsignado);
+                    
+                } else {
+                    // TIPOS 02, 03, 05, 07, 09: Referenciar a la última marcación 01
+                    reckeyRef = ultimaMarcacion01.get().getReckey();
+                    log.info("📍 Tipo {} | Turno heredado: {} | Ref a última marcación 01", tipoMovimiento, turnoAsignado);
+                }
+            }
+            
             // ✅ VALIDACIÓN ANTI-DUPLICADOS - Verificar índice único
             // IX_ASISTENCIA_HT5801: COD_ORIGEN + CODIGO + FLAG_IN_OUT + FEC_MOVIMIENTO + TURNO
-            String turnoActual = turnoService.determinarTurnoActual(ticket.getFechaMarcacion());
             boolean existeDuplicado = asistenciaRepository.existeDuplicado(
                     ticket.getCodOrigen(),
                     ticket.getCodTrabajador(),
                     ticket.getTipoMovimiento(),
-                    ticket.getFechaMarcacion().toLocalDate(),  // Convertir a LocalDate
-                    turnoActual
+                    ticket.getFechaMarcacion().toLocalDate(),
+                    turnoAsignado
             );
             
             if (existeDuplicado) {
@@ -285,7 +350,7 @@ public class TicketAsistenciaService {
                     ticket.getCodOrigen(),
                     ticket.getTipoMovimiento(),
                     ticket.getFechaMarcacion().toLocalDate(),
-                    turnoActual
+                    turnoAsignado
                 );
                 log.warn(mensajeError);
                 throw new RuntimeException("Ya existe una marcación idéntica. No se permiten duplicados.");
@@ -296,24 +361,25 @@ public class TicketAsistenciaService {
             
             AsistenciaHt580 asistencia = AsistenciaHt580.builder()
                     .reckey(reckey)
-                    .codOrigen(ticket.getCodOrigen()) // ✅ CORREGIDO - usar cod_origen del frontend
+                    .codOrigen(ticket.getCodOrigen())
                     .codigo(ticket.getCodTrabajador())
-                    .flagInOut(ticket.getTipoMovimiento()) // ✅ CORREGIDO - ticket ya tiene número 1-10
-                    .fechaRegistro(LocalDateTime.now())
-                    .fechaMovimiento(ticket.getFechaMarcacion().toLocalDate())  // ✅ Convertir a LocalDate
-                    .codUsuario(codUsuarioSistema) // ✅ PARÁMETRO configurable (no usar ticket.getUsuarioSistema())
+                    .flagInOut(ticket.getTipoMovimiento())
+                    .fechaRegistro(LocalDateTime.now())  // Cuando se guarda en BD
+                    .fecMarcacion(ticket.getFechaMarcacion())  // ✅ Fecha y hora exacta de marcación
+                    .fechaMovimiento(ticket.getFechaMarcacion().toLocalDate())  // Solo fecha (índice único)
+                    .codUsuario(codUsuarioSistema)
                     .direccionIp(ticket.getDireccionIp())
-                    .flagVerifyType("1") // Web validation
-                    .tipoMarcacion(ticket.getTipoMarcaje()) // ✅ ticket ya tiene número 1-2 mapeado
-                    .turno(turnoActual)  // Reutilizar el turno ya calculado
-                    .lecturaPda(ticket.getCodigoInput()) // ✅ Guardar código ingresado original en LECTURA_PDA
+                    .flagVerifyType("1")
+                    .tipoMarcacion(ticket.getTipoMarcaje())
+                    .turno(turnoAsignado)  // Turno calculado o heredado
+                    .lecturaPda(ticket.getCodigoInput())
+                    .reckeyRef(reckeyRef)  // Referencia a marcación relacionada
                     .build();
             
             // 🔍 DEBUG ASISTENCIA - Mostrar fechas que se van a guardar  
             log.info("🔍 DEBUG ASISTENCIA - fechaMovimiento que se guardará: {}", asistencia.getFechaMovimiento());
             log.info("🔍 DEBUG ASISTENCIA - fechaRegistro que se guardará: {}", asistencia.getFechaRegistro());
-            log.info("🔍 DEBUG ASISTENCIA - Diferencia en minutos: {}", 
-                    java.time.Duration.between(asistencia.getFechaMovimiento(), asistencia.getFechaRegistro()).toMinutes());
+            log.info("🔍 DEBUG ASISTENCIA - Turno asignado: {} | Reckey_ref: {}", asistencia.getTurno(), asistencia.getReckeyRef());
             
             asistencia = asistenciaRepository.save(asistencia);
             log.info("✅ Asistencia creada: {} para trabajador: {}", reckey, ticket.getCodTrabajador());
@@ -487,9 +553,9 @@ public class TicketAsistenciaService {
                 return;
             }
             
-            // Calcular horas transcurridas desde último registro
+            // Calcular horas transcurridas desde la fecha/hora de marcación (no registro)
             long horasTranscurridas = java.time.Duration.between(
-                    ultimaAsistencia.getFechaRegistro(), 
+                    ultimaAsistencia.getFecMarcacion(), 
                     LocalDateTime.now()
             ).toHours();
             
@@ -502,41 +568,29 @@ public class TicketAsistenciaService {
             log.info("🚨 Auto-cierre necesario | Trabajador: {} | Horas: {}/{} | Registro: {}", 
                     codTrabajador, horasTranscurridas, autoCierreHoras, ultimaAsistencia.getFechaRegistro());
             
-            // Determinar hora de cierre del turno correspondiente
-            // Como fechaMovimiento ahora es LocalDate, usamos la fecha de registro para calcular
-            LocalDateTime horaCierre = this.calcularHoraCierreTurno(ultimaAsistencia.getFechaRegistro());
-            
-            // ✅ VALIDACIÓN ANTI-DUPLICADOS - Verificar índice único
-            // Evitar crear auto-cierres duplicados si ya existe uno para la misma fecha y turno
-            boolean existeDuplicado = asistenciaRepository.existeDuplicado(
-                    ultimaAsistencia.getCodOrigen(),
-                    codTrabajador,
-                    "2", // Tipo de movimiento: Salida
-                    horaCierre.toLocalDate(),  // Convertir a LocalDate
-                    ultimaAsistencia.getTurno()  // Mismo turno del ingreso
+            // Determinar hora de cierre del turno usando fecha de movimiento y turno de la marcación 01
+            LocalDateTime horaCierre = this.calcularHoraCierreTurno(
+                    ultimaAsistencia.getFechaMovimiento(), 
+                    ultimaAsistencia.getTurno()
             );
-            
-            if (existeDuplicado) {
-                log.warn("⚠️ Auto-cierre YA EXISTE para trabajador {} en fecha {} - Omitiendo duplicado", 
-                         codTrabajador, horaCierre);
-                return;
-            }
             
             // Crear registro de salida automática tipo 2 DIRECTO en asistencia_ht580
             LocalDateTime ahoraPrecisa = LocalDateTime.now();
             
             AsistenciaHt580 salidaAutomatica = AsistenciaHt580.builder()
-                    .reckey(UUID.randomUUID().toString().replace("-", "").substring(0, 12)) // ✅ CORREGIDO: Solo 12 caracteres
+                    .reckey(UUID.randomUUID().toString().replace("-", "").substring(0, 12))
                     .codOrigen(ultimaAsistencia.getCodOrigen())
                     .codigo(codTrabajador)
-                    .fechaMovimiento(horaCierre.toLocalDate())  // ✅ Convertir a LocalDate
+                    .fechaRegistro(ahoraPrecisa)  // Cuando se guarda en BD
+                    .fecMarcacion(horaCierre)  // ✅ Fecha y hora de cierre del turno
+                    .fechaMovimiento(horaCierre.toLocalDate())  // Solo fecha
                     .tipoMarcacion(ultimaAsistencia.getTipoMarcacion())
                     .flagInOut("2") // Movimiento tipo 2 = Salida de planta
-                    .fechaRegistro(ahoraPrecisa) // Fecha de registro ACTUAL para ser el último
-                    .codUsuario(codUsuarioSistema) // ✅ PARÁMETRO configurable
+                    .codUsuario(codUsuarioSistema)
                     .direccionIp("AUTO-CLOSE")
                     .flagVerifyType("1")
                     .turno(ultimaAsistencia.getTurno())
+                    .reckeyRef(ultimaAsistencia.getReckey())  // Referenciar a la marcación 01 que se está cerrando
                     .flagEstado("1")
                     .observaciones(String.format("Auto-cierre - %d horas transcurridas", horasTranscurridas))
                     .build();
@@ -578,43 +632,56 @@ public class TicketAsistenciaService {
     }
     
     /**
-     * Calcular hora de cierre del turno basado en la hora de ingreso
+     * Calcular fecha y hora de cierre del turno
+     * 
+     * @param fechaMovimientoIngreso Fecha de movimiento de la marcación 01 (LocalDate)
+     * @param codigoTurno Código del turno de la marcación 01
+     * @return Fecha y hora de cierre calculada
      */
-    private LocalDateTime calcularHoraCierreTurno(LocalDateTime fechaIngreso) {
+    private LocalDateTime calcularHoraCierreTurno(LocalDate fechaMovimientoIngreso, String codigoTurno) {
         try {
-            // Buscar turno activo que coincida con la hora de ingreso
-            List<com.sigre.asistencia.entity.Turno> turnosActivos = turnoRepository.findByFlagEstadoOrderByTurno("1");
+            // Buscar información del turno en la tabla
+            Optional<com.sigre.asistencia.entity.Turno> turnoOpt = turnoRepository.findById(codigoTurno);
             
-            for (com.sigre.asistencia.entity.Turno turno : turnosActivos) {
-                if (turno.getHoraInicioNorm() != null && turno.getHoraFinalNorm() != null) {
-                    
-                    LocalDateTime inicioTurno = fechaIngreso.toLocalDate().atTime(turno.getHoraInicioNorm().toLocalTime());
-                    LocalDateTime finTurno = fechaIngreso.toLocalDate().atTime(turno.getHoraFinalNorm().toLocalTime());
-                    
-                    // Si el turno termina al día siguiente (turno nocturno)
-                    if (finTurno.isBefore(inicioTurno)) {
-                        finTurno = finTurno.plusDays(1);
-                    }
-                    
-                    // Verificar si el ingreso está dentro de este turno (con tolerancia de 2 horas)
-                    if (fechaIngreso.isAfter(inicioTurno.minusHours(2)) && 
-                        fechaIngreso.isBefore(inicioTurno.plusHours(2))) {
-                        log.info("🕐 Turno identificado: {} | Inicio: {} | Fin: {}", 
-                                turno.getTurno(), inicioTurno, finTurno);
-                        return finTurno;
-                    }
-                }
+            if (turnoOpt.isEmpty()) {
+                String error = String.format("No se encontró turno %s en la base de datos", codigoTurno);
+                log.error("❌ {}", error);
+                throw new RuntimeException(error);
             }
             
-            // Si no encuentra turno específico, usar horario estándar (8 horas después)
-            LocalDateTime horaCierreEstandar = fechaIngreso.plusHours(8);
-            log.warn("⚠️ No se encontró turno específico, usando cierre estándar: {}", horaCierreEstandar);
-            return horaCierreEstandar;
+            com.sigre.asistencia.entity.Turno turno = turnoOpt.get();
+            
+            if (turno.getHoraInicioNorm() == null || turno.getHoraFinalNorm() == null) {
+                String error = String.format("Turno %s no tiene horas configuradas", codigoTurno);
+                log.error("❌ {}", error);
+                throw new RuntimeException(error);
+            }
+            
+            java.time.LocalTime horaInicio = turno.getHoraInicioNorm().toLocalTime();
+            java.time.LocalTime horaFin = turno.getHoraFinalNorm().toLocalTime();
+            
+            LocalDateTime fechaHoraCierre;
+            
+            // Determinar si es turno nocturno (cruza medianoche)
+            if (horaFin.isBefore(horaInicio)) {
+                // TURNO NOCTURNO: hora_fin < hora_inicio
+                // El cierre es al DÍA SIGUIENTE de la marcación 01
+                fechaHoraCierre = fechaMovimientoIngreso.plusDays(1).atTime(horaFin);
+                log.info("🌙 Turno nocturno {} | Fecha ingreso: {} | Hora fin: {} | Cierre: {} (día siguiente)", 
+                        codigoTurno, fechaMovimientoIngreso, horaFin, fechaHoraCierre);
+            } else {
+                // TURNO NORMAL: hora_fin > hora_inicio
+                // El cierre es el MISMO DÍA de la marcación 01
+                fechaHoraCierre = fechaMovimientoIngreso.atTime(horaFin);
+                log.info("☀️ Turno normal {} | Fecha ingreso: {} | Hora fin: {} | Cierre: {} (mismo día)", 
+                        codigoTurno, fechaMovimientoIngreso, horaFin, fechaHoraCierre);
+            }
+            
+            return fechaHoraCierre;
             
         } catch (Exception e) {
-            log.error("❌ Error calculando hora de cierre: {}", e.getMessage());
-            // Fallback: 8 horas después del ingreso
-            return fechaIngreso.plusHours(8);
+            log.error("❌ Error calculando hora de cierre: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al calcular hora de cierre del turno: " + e.getMessage());
         }
     }
     

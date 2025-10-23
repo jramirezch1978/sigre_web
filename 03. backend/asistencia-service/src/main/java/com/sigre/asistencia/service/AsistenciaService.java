@@ -46,21 +46,26 @@ public class AsistenciaService {
             // Generar RECKEY único
             String reckey = generarReckey();
             
-            // Determinar flag IN/OUT basado en el tipo de movimiento (ahora usa números 1-8)
+            // Determinar flag IN/OUT basado en el tipo de movimiento
             String flagInOut = mapearTipoMovimientoANumero(request.getTipoMovimiento());
             
+            // Usar fecha de marcación del frontend (o actual si no viene)
+            LocalDateTime fechaMarcacion = request.getFechaMarcacion() ;
+            
+            LocalDateTime fechaRegistro = LocalDateTime.now();
+            
             // Crear registro de asistencia
-            LocalDateTime ahora = LocalDateTime.now();
             AsistenciaHt580 asistencia = AsistenciaHt580.builder()
                     .reckey(reckey)
-                    .codOrigen(request.getCodOrigen() != null ? request.getCodOrigen() : "SE") // ✅ Usar codOrigen del request, fallback a SE
+                    .codOrigen(request.getCodOrigen() != null ? request.getCodOrigen() : "SE")
                     .codigo(request.getCodTrabajador())
                     .flagInOut(flagInOut)
-                    .fechaRegistro(ahora)
-                    .fechaMovimiento(ahora.toLocalDate())  // ✅ Convertir a LocalDate
+                    .fechaRegistro(fechaRegistro)  // Cuando se guarda en BD
+                    .fecMarcacion(fechaMarcacion)  // Del frontend o actual
+                    .fechaMovimiento(fechaMarcacion.toLocalDate())  // Solo fecha
                     .codUsuario(request.getCodUsuario())
                     .direccionIp(request.getDireccionIp())
-                    .flagVerifyType("1") // Tipo verificación por defecto
+                    .flagVerifyType("1")
                     .turno(request.getTurno() != null ? request.getTurno() : "0001")
                     .lecturaPda(String.format("Marcaje %s - %s", request.getTipoMarcaje(), request.getTipoMovimiento()))
                     .tipoMarcacion(determinarTipoMarcacion(request.getTipoMarcaje()))
