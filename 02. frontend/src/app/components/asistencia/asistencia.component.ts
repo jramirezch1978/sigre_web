@@ -396,6 +396,19 @@ export class AsistenciaComponent implements OnInit {
     console.log('🕐 Fuente de tiempo:', infoTiempo.sourceInfo);
     console.log('🟢/🔴 Servidor conectado:', infoTiempo.isServerConnected);
 
+    // Obtener horarios permitidos desde configuración (para validación en backend)
+    const config = this.configService.getCurrentConfig();
+    const horariosPermitidos = {
+      salidaAlmorzar: {
+        inicio: config.raciones?.reglas?.botonMarcacionSalidaAlmorzar?.inicio || '12:00',
+        fin: config.raciones?.reglas?.botonMarcacionSalidaAlmorzar?.fin || '15:00'
+      },
+      salidaCenar: {
+        inicio: config.raciones?.reglas?.botonMarcacionSalidaCenar?.inicio || '19:30',
+        fin: config.raciones?.reglas?.botonMarcacionSalidaCenar?.fin || '21:00'
+      }
+    };
+
     const request = {
       codigoInput: this.codigoInput.trim(),
       codOrigen: this.configService.getCodOrigen(), // Código de origen desde configuración
@@ -403,7 +416,8 @@ export class AsistenciaComponent implements OnInit {
       tipoMovimiento: this.tipoMovimientoSeleccionado,
       direccionIp: this.deviceIP,
       fechaMarcacion: fechaMarcacionCentralizada, // ✅ Hora del reloj centralizado (servidor o dispositivo)
-      racionesSeleccionadas: racionesParaApi
+      racionesSeleccionadas: racionesParaApi,
+      horariosPermitidos: horariosPermitidos // ✅ Horarios desde appsettings.json para validación backend
     };
     
     console.log('📤 Enviando request a API:', request);
@@ -451,9 +465,26 @@ export class AsistenciaComponent implements OnInit {
       },
       error: (error) => {
         console.error('❌ Error llamando API de marcación:', error);
+        
+        // Construir mensaje de error más detallado
+        let mensajeError = 'Error de conexión con el servidor.';
+        
+        if (error.status === 500) {
+          mensajeError = 'Error interno del servidor al procesar la marcación. Por favor contacte al administrador.';
+          console.error('🔴 Error 500 - Error interno del servidor:', error);
+        } else if (error.status === 400) {
+          mensajeError = error.error?.mensajeError || 'Datos inválidos. Verifique la información ingresada.';
+          console.error('🟡 Error 400 - Solicitud incorrecta:', error);
+        } else if (error.status === 0) {
+          mensajeError = 'No se pudo conectar con el servidor. Verifique su conexión a internet.';
+          console.error('🔴 Error de red - Sin conexión:', error);
+        } else {
+          mensajeError = `Error del servidor (${error.status}). ${error.error?.mensajeError || 'Por favor intente nuevamente.'}`;
+          console.error('🔴 Error HTTP inesperado:', error);
+        }
 
-        // Error crítico de conexión - también detiene el proceso
-        this.mostrarErrorCritico('Error de conexión con el servidor. Los datos no se pudieron procesar.');
+        // Error crítico - mostrar popup con detalles
+        this.mostrarErrorCritico(mensajeError);
 
         this.limpiarCamposParaSiguienteTrabajador();
         

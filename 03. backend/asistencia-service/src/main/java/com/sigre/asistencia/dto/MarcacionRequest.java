@@ -53,6 +53,12 @@ public class MarcacionRequest {
     private List<RacionSeleccionada> racionesSeleccionadas;
     
     /**
+     * Horarios permitidos para validación (desde appsettings.json del frontend)
+     * Solo para movimientos 3 (Salida a Almorzar) y 9 (Salida a Cenar)
+     */
+    private HorariosPermitidos horariosPermitidos;
+    
+    /**
      * DTO interno para raciones seleccionadas
      */
     @Data
@@ -64,5 +70,30 @@ public class MarcacionRequest {
         private String codigoRacion;
         private String nombreRacion;
         private String fechaServicio; // Fecha en formato ISO String desde frontend
+    }
+    
+    /**
+     * DTO para horarios permitidos de movimientos
+     * Enviados desde frontend (appsettings.json)
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class HorariosPermitidos {
+        private HorarioRango salidaAlmorzar;  // Movimiento 3
+        private HorarioRango salidaCenar;     // Movimiento 9
+    }
+    
+    /**
+     * DTO para rango de horario (inicio-fin)
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class HorarioRango {
+        private String inicio; // Formato: "HH:mm"
+        private String fin;    // Formato: "HH:mm"
     }
 }

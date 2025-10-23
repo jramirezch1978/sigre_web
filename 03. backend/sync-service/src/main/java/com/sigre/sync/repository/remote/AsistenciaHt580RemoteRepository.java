@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -26,7 +26,7 @@ public interface AsistenciaHt580RemoteRepository extends JpaRepository<Asistenci
            "WHERE a.codOrigen       = :codOrigen " +
            "  AND a.codigo          = :codigo " +
            "  AND a.flagInOut       = :flagInOut " +
-           "  AND TO_CHAR(a.fechaMovimiento, 'dd/mm/yyyy hh24:mi:ss') = TO_CHAR(:fechaMovimiento, 'dd/mm/yyyy hh24:mi:ss') " +
+           "  AND a.fechaMovimiento = :fechaMovimiento " +
            "  AND TRIM(a.codUsuario) = TRIM(:codUsuario) " +
            "  AND a.direccionIp     = :direccionIp " +
            "  AND TRIM(a.turno)     = TRIM(:turno) " +
@@ -36,7 +36,7 @@ public interface AsistenciaHt580RemoteRepository extends JpaRepository<Asistenci
             @Param("codOrigen") String codOrigen,
             @Param("codigo") String codigo,
             @Param("flagInOut") String flagInOut,
-            @Param("fechaMovimiento") LocalDateTime fechaMovimiento,
+            @Param("fechaMovimiento") LocalDate fechaMovimiento,
             @Param("codUsuario") String codUsuario,
             @Param("direccionIp") String direccionIp,
             @Param("turno") String turno,

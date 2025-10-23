@@ -45,8 +45,8 @@ public class TicketAsistencia {
     @Column(name = "tipo_marcaje", columnDefinition = "CHAR(1)", nullable = false)
     private String tipoMarcaje; // Números: 1=puerta-principal, 2=area-produccion, 3=comedor
     
-    @Column(name = "tipo_movimiento", columnDefinition = "CHAR(1)", nullable = false)
-    private String tipoMovimiento; // Números del 1-8 según tipo: 1=INGRESO_PLANTA, 2=SALIDA_PLANTA, etc.
+    @Column(name = "tipo_movimiento", columnDefinition = "CHAR(2)", nullable = false)
+    private String tipoMovimiento; // Números del 1-10 según tipo: 1=INGRESO_PLANTA, 2=SALIDA_PLANTA, ..., 10=REGRESO_CENAR
     
     @Column(name = "direccion_ip", nullable = false, length = 20)
     private String direccionIp; // IP del dispositivo marcador

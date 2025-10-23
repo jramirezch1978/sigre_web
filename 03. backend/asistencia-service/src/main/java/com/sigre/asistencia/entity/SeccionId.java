@@ -1,11 +1,15 @@
 package com.sigre.asistencia.entity;
 
+import jakarta.persistence.Column;
 import java.io.Serializable;
 import java.util.Objects;
 
 public class SeccionId implements Serializable {
 
+    @Column(name = "CODAREA", length = 2)
     private String codArea;
+    
+    @Column(name = "CODSECCION", length = 3)
     private String codSeccion;
 
     public SeccionId() {}

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +12,10 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatNativeDateModule } from '@angular/material/core';
 import { HttpClientModule } from '@angular/common/http';
 import { Subscription, interval } from 'rxjs';
 
@@ -24,7 +29,6 @@ import {
 } from '../../services/dashboard.service';
 import { FloatingClockComponent } from '../floating-clock/floating-clock.component';
 import { NotImplementedService } from '../../services/not-implemented.service';
-import { CentrosCostoDashboardComponent } from '../centros-costo-dashboard/centros-costo-dashboard.component';
 
 declare var Chart: any; // Para Chart.js
 
@@ -34,6 +38,7 @@ declare var Chart: any; // Para Chart.js
   imports: [
     CommonModule,
     HttpClientModule,
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -44,8 +49,11 @@ declare var Chart: any; // Para Chart.js
     MatToolbarModule,
     MatMenuModule,
     MatDividerModule,
-    FloatingClockComponent,
-    CentrosCostoDashboardComponent
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatNativeDateModule,
+    FloatingClockComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -68,6 +76,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   cargandoDatos = true;
   error: string | null = null;
   ultimaActualizacion: Date = new Date();
+  
+  // Filtro de fecha
+  fechaSeleccionada: Date = new Date();
+  maxDate: Date = new Date();
 
   // Ya no necesitamos configuraciones de columnas porque están hardcodeadas en el HTML
 
@@ -106,7 +118,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       
       // Intentar cargar datos reales, si falla mostrar datos de prueba
       try {
-        await this.cargarDashboard();
+        await this.cargarDashboard(this.fechaSeleccionada);
         await this.cargarDatosAdicionales(); // Cargar raciones y trabajadores únicos
       } catch (error) {
         console.log('🔧 Backend no disponible, generando datos de prueba...');
@@ -135,7 +147,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  async cargarDashboard() {
+  async cargarDashboard(fecha?: Date) {
     this.cargandoDatos = true;
     this.error = null;
 
@@ -146,7 +158,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       await this.dashboardService['configService'].waitForConfig();
       console.log('✅ Configuración cargada');
       
-      await this.dashboardService.actualizarDashboard();
+      // Formatear fecha si existe
+      const fechaStr = fecha ? this.formatearFechaParaApi(fecha) : undefined;
+      if (fechaStr) {
+        console.log('📅 Cargando datos para fecha:', fechaStr);
+      }
+      
+      await this.dashboardService.actualizarDashboard(fechaStr);
       this.ultimaActualizacion = new Date();
       console.log('✅ Dashboard cargado exitosamente');
       this.mostrarMensaje('Dashboard actualizado correctamente');
@@ -315,12 +333,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private configurarActualizacionAutomatica() {
-    // Actualizar cada 30 segundos
+    // Actualizar cada 30 segundos solo si está viendo la fecha de hoy
     this.subscriptions.add(
       interval(30000).subscribe(async () => {
         try {
-          await this.cargarDashboard();
-          await this.cargarDatosAdicionales();
+          // Solo actualizar automáticamente si está viendo hoy
+          const hoy = new Date();
+          const esHoy = this.fechaSeleccionada.toDateString() === hoy.toDateString();
+          
+          if (esHoy) {
+            console.log('🔄 Actualización automática...');
+            await this.cargarDashboard(this.fechaSeleccionada);
+            await this.cargarDatosAdicionales();
+          }
         } catch (error) {
           console.warn('⚠️ Error en actualización automática:', error);
         }
@@ -541,6 +566,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return (value / 1000).toFixed(1) + 'K';
     }
     return value.toString();
+  }
+
+  formatearFechaParaApi(fecha: Date): string {
+    const year = fecha.getFullYear();
+    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+    const day = String(fecha.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  onFechaChange() {
+    console.log('📅 Fecha seleccionada:', this.fechaSeleccionada);
+    this.cargarDashboard(this.fechaSeleccionada);
+  }
+
+  onHoy() {
+    this.fechaSeleccionada = new Date();
+    this.cargarDashboard(this.fechaSeleccionada);
+  }
+
+  onAyer() {
+    const ayer = new Date();
+    ayer.setDate(ayer.getDate() - 1);
+    this.fechaSeleccionada = ayer;
+    this.cargarDashboard(this.fechaSeleccionada);
   }
 
   getTotalMarcajes(): number {

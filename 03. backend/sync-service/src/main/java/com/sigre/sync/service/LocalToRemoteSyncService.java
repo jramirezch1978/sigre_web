@@ -50,6 +50,9 @@ public class LocalToRemoteSyncService {
         log.info("📤 Iniciando sincronización de tabla ASISTENCIA_HT580 (Local → Remote)");
         
         try {
+            // ✅ PASO 0: Resetear registros bloqueados (PRIMERO, antes de todo)
+            resetearRegistrosBloqueados();
+            
             // Resetear contadores
             resetearContadores();
             
@@ -491,6 +494,83 @@ public class LocalToRemoteSyncService {
         oracle.setLecturaPda(local.getLecturaPda());
         
         asistenciaRemoteRepository.save(oracle);
+    }
+    
+    /**
+     * ✅ RESETEO AUTOMÁTICO DE REGISTROS BLOQUEADOS
+     * Busca registros que agotaron sus reintentos (intentos_sync >= maxRetries)
+     * y que llevan más de 3 horas bloqueados, para darles una nueva oportunidad
+     */
+    @Transactional("localTransactionManager")
+    private void resetearRegistrosBloqueados() {
+        try {
+            log.info("🔄 PASO 0: Verificando registros bloqueados para reseteo automático...");
+            
+            // Calcular timestamp de hace 3 horas
+            LocalDateTime hace3Horas = LocalDateTime.now().minusHours(3);
+            
+            // Buscar registros que cumplan TODAS estas condiciones:
+            // 1. intentos_sync >= maxRetries (agotaron reintentos)
+            // 2. (fecha_sync IS NULL O external_id IS NULL) (nunca se sincronizó exitosamente)
+            // 3. fecha_registro < hace 3 horas (llevan más de 3 horas bloqueados)
+            List<AsistenciaHt580Local> registrosBloqueados = asistenciaLocalRepository.findAll()
+                .stream()
+                .filter(a -> a.getCodOrigen() != null && a.getCodOrigen().equals(codOrigenConfiguracion))
+                .filter(a -> "E".equals(a.getEstadoSync())) // Solo errores
+                .filter(a -> a.getIntentosSync() != null && a.getIntentosSync() >= maxRetries) // Agotó reintentos
+                .filter(a -> a.getFechaSync() == null || a.getExternalId() == null) // Nunca sincronizó exitosamente
+                .filter(a -> a.getFechaRegistro() != null && a.getFechaRegistro().isBefore(hace3Horas)) // Más de 3 horas
+                .toList();
+            
+            if (registrosBloqueados.isEmpty()) {
+                log.info("✅ No hay registros bloqueados para resetear");
+                return;
+            }
+            
+            log.info("🔄 Encontrados {} registros bloqueados que cumplen condiciones de reseteo:", 
+                    registrosBloqueados.size());
+            log.info("   - intentos_sync >= {} (maxRetries)", maxRetries);
+            log.info("   - fecha_sync IS NULL O external_id IS NULL");
+            log.info("   - fecha_registro > 3 horas de antigüedad");
+            
+            // Resetear cada registro
+            int contadorReseteados = 0;
+            for (AsistenciaHt580Local registro : registrosBloqueados) {
+                try {
+                    // Calcular horas transcurridas desde el registro
+                    long horasTranscurridas = java.time.Duration.between(
+                        registro.getFechaRegistro(), 
+                        LocalDateTime.now()
+                    ).toHours();
+                    
+                    log.debug("🔄 Reseteando registro {} - Intentos: {} | Horas bloqueado: {} | Trabajador: {}", 
+                            registro.getReckey(), 
+                            registro.getIntentosSync(),
+                            horasTranscurridas,
+                            registro.getCodigo());
+                    
+                    // Resetear estado
+                    registro.setEstadoSync("P");  // Volver a Pendiente
+                    registro.setIntentosSync(0);  // Resetear contador
+                    registro.setFechaSync(null);  // Limpiar fecha de sincronización
+                    
+                    asistenciaLocalRepository.save(registro);
+                    contadorReseteados++;
+                    
+                } catch (Exception e) {
+                    log.error("❌ Error reseteando registro {}: {}", registro.getReckey(), e.getMessage());
+                }
+            }
+            
+            if (contadorReseteados > 0) {
+                log.info("✅ RESETEO COMPLETADO: {} registros bloqueados fueron reseteados y estarán disponibles para sincronización", 
+                        contadorReseteados);
+            }
+            
+        } catch (Exception e) {
+            log.error("❌ Error en proceso de reseteo automático de registros bloqueados: {}", e.getMessage(), e);
+            // No detener el proceso de sincronización por este error
+        }
     }
     
     /**

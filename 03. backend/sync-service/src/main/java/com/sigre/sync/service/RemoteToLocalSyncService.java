@@ -317,14 +317,12 @@ public class RemoteToLocalSyncService {
         try {
             // Obtener todas las secciones de Oracle
             List<SeccionRemote> seccionesRemote = seccionRemoteRepository.findAll();
-            Set<SeccionRemoteId> idsRemote = seccionesRemote.stream()
+            // Crear Set con las claves (codArea, codSeccion) con trim aplicado
+            Set<String> keysRemote = seccionesRemote.stream()
                     .map(seccion -> {
-                        // Crear ID con trim para evitar problemas con espacios en blanco
-                        SeccionRemoteId id = seccion.getId();
-                        return new SeccionRemoteId(
-                            id.getCodArea() != null ? id.getCodArea().trim() : null,
-                            id.getCodSeccion() != null ? id.getCodSeccion().trim() : null
-                        );
+                        String codArea = seccion.getCodArea() != null ? seccion.getCodArea().trim() : "";
+                        String codSeccion = seccion.getCodSeccion() != null ? seccion.getCodSeccion().trim() : "";
+                        return codArea + "|" + codSeccion;
                     })
                     .collect(Collectors.toSet());
             log.info("📊 Encontradas {} secciones en bd_remota", seccionesRemote.size());
@@ -355,7 +353,12 @@ public class RemoteToLocalSyncService {
 
             // PASO 1: Eliminar registros que no existen en remoto
             for (SeccionLocal seccionLocal : seccionesLocal) {
-                if (!idsRemote.contains(seccionLocal.getId())) {
+                // Crear clave con trim para comparar
+                String codAreaLocal = seccionLocal.getCodArea() != null ? seccionLocal.getCodArea().trim() : "";
+                String codSeccionLocal = seccionLocal.getCodSeccion() != null ? seccionLocal.getCodSeccion().trim() : "";
+                String keyLocal = codAreaLocal + "|" + codSeccionLocal;
+                
+                if (!keysRemote.contains(keyLocal)) {
                     seccionLocalRepository.delete(seccionLocal);
                     eliminados.merge(tabla, 1, Integer::sum);
                     log.debug("🗑️ Eliminada sección local que no existe en remoto: {} - {}",
@@ -1159,7 +1162,10 @@ public class RemoteToLocalSyncService {
 
     private void procesarSeccion(SeccionRemote seccionRemote, String tabla) {
         SeccionRemoteId remoteId = seccionRemote.getId();
-        SeccionLocalId localId = new SeccionLocalId(remoteId.getCodArea(), remoteId.getCodSeccion());
+        // Aplicar trim para evitar problemas con espacios en blanco en la comparación
+        String codAreaTrim = remoteId.getCodArea() != null ? remoteId.getCodArea().trim() : null;
+        String codSeccionTrim = remoteId.getCodSeccion() != null ? remoteId.getCodSeccion().trim() : null;
+        SeccionLocalId localId = new SeccionLocalId(codAreaTrim, codSeccionTrim);
 
         Optional<SeccionLocal> seccionLocalOpt = seccionLocalRepository.findById(localId);
 
@@ -1168,7 +1174,6 @@ public class RemoteToLocalSyncService {
             SeccionLocal nuevaSeccion = convertirSeccionRemoteToLocal(seccionRemote);
             seccionLocalRepository.save(nuevaSeccion);
             insertados.merge(tabla, 1, Integer::sum);
-            log.debug("➕ Insertada sección: {}-{}", seccionRemote.getCodArea(), seccionRemote.getCodSeccion());
 
         } else {
             // ACTUALIZAR si hay cambios reales
@@ -1178,14 +1183,17 @@ public class RemoteToLocalSyncService {
                 actualizarSeccionLocal(seccionLocal, seccionRemote);
                 seccionLocalRepository.save(seccionLocal);
                 actualizados.merge(tabla, 1, Integer::sum);
-                log.debug("🔄 Actualizada sección: {}-{}", seccionRemote.getCodArea(), seccionRemote.getCodSeccion());
             }
         }
     }
 
     private SeccionLocal convertirSeccionRemoteToLocal(SeccionRemote remote) {
+        // Aplicar trim para evitar problemas con espacios en blanco
+        String codAreaTrim = remote.getCodArea() != null ? remote.getCodArea().trim() : null;
+        String codSeccionTrim = remote.getCodSeccion() != null ? remote.getCodSeccion().trim() : null;
+        
         return SeccionLocal.builder()
-                .id(new SeccionLocalId(remote.getCodArea(), remote.getCodSeccion()))
+                .id(new SeccionLocalId(codAreaTrim, codSeccionTrim))
                 .codJefeSeccion(remote.getCodJefeSeccion())
                 .descripcionSeccion(remote.getDescripcionSeccion())
                 .porcentajeSctrIpss(remote.getPorcentajeSctrIpss())
@@ -1215,8 +1223,6 @@ public class RemoteToLocalSyncService {
         local.setFlagEstado(remote.getFlagEstado());
         local.setFechaSync(LocalDate.now());
         local.setEstadoSync("S");
-        log.info("📋 Campos actualizados: Sección {}-{} actualizada desde Oracle",
-                remote.getCodArea(), remote.getCodSeccion());
     }
 
     public int getInsertados(String tabla) {

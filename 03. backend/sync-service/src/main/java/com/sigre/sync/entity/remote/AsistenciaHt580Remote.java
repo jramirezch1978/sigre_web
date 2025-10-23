@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "asistencia_ht580")
@@ -27,14 +28,14 @@ public class AsistenciaHt580Remote {
     @Column(name = "CODIGO", length = 20, nullable = false)
     private String codigo;
     
-    @Column(name = "FLAG_IN_OUT", length = 1, nullable = false)
-    private String flagInOut;
+    @Column(name = "FLAG_IN_OUT", length = 2, nullable = false)
+    private String flagInOut; // 1=Ingreso, 2=Salida, ..., 10=REGRESO_CENAR
     
     @Column(name = "FEC_REGISTRO", nullable = false)
     private LocalDateTime fechaRegistro;
     
     @Column(name = "FEC_MOVIMIENTO", nullable = false)
-    private LocalDateTime fechaMovimiento;
+    private LocalDate fechaMovimiento;  // ✅ DATE sin hora (índice único)
     
     @Column(name = "COD_USR", length = 6, nullable = false)
     private String codUsuario;

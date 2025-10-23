@@ -141,8 +141,11 @@ export class DashboardService {
   /**
    * Obtener dashboard completo
    */
-  obtenerDashboardCompleto(): Observable<DashboardResponse> {
-    const url = `${this.baseUrl}/completo`;
+  obtenerDashboardCompleto(fecha?: string): Observable<DashboardResponse> {
+    let url = `${this.baseUrl}/completo`;
+    if (fecha) {
+      url += `?fecha=${fecha}`;
+    }
     console.log('📊 Llamando a dashboard completo:', url);
     return this.http.get<DashboardResponse>(url);
   }
@@ -157,8 +160,12 @@ export class DashboardService {
   /**
    * Obtener marcajes del día actual por hora
    */
-  obtenerMarcajesDelDia(): Observable<MarcajesPorHora> {
-    return this.http.get<MarcajesPorHora>(`${this.baseUrl}/marcajes-del-dia`);
+  obtenerMarcajesDelDia(fecha?: string): Observable<MarcajesPorHora> {
+    let url = `${this.baseUrl}/marcajes-del-dia`;
+    if (fecha) {
+      url += `?fecha=${fecha}`;
+    }
+    return this.http.get<MarcajesPorHora>(url);
   }
 
   /**
@@ -171,15 +178,23 @@ export class DashboardService {
   /**
    * Obtener listado detallado de marcajes del día
    */
-  obtenerListadoMarcajes(): Observable<MarcajeDelDia[]> {
-    return this.http.get<MarcajeDelDia[]>(`${this.baseUrl}/listado-marcajes`);
+  obtenerListadoMarcajes(fecha?: string): Observable<MarcajeDelDia[]> {
+    let url = `${this.baseUrl}/listado-marcajes`;
+    if (fecha) {
+      url += `?fecha=${fecha}`;
+    }
+    return this.http.get<MarcajeDelDia[]>(url);
   }
 
   /**
    * Obtener resumen por centros de costo
    */
-  obtenerResumenCentrosCosto(): Observable<ResumenCentroCosto[]> {
-    return this.http.get<ResumenCentroCosto[]>(`${this.baseUrl}/resumen-centro-costo`);
+  obtenerResumenCentrosCosto(fecha?: string): Observable<ResumenCentroCosto[]> {
+    let url = `${this.baseUrl}/resumen-centro-costo`;
+    if (fecha) {
+      url += `?fecha=${fecha}`;
+    }
+    return this.http.get<ResumenCentroCosto[]>(url);
   }
 
   /**
@@ -192,12 +207,15 @@ export class DashboardService {
   /**
    * Actualizar datos del dashboard y notificar a los suscriptores
    */
-  async actualizarDashboard(): Promise<void> {
+  async actualizarDashboard(fecha?: string): Promise<void> {
     try {
       console.log('🔄 Iniciando actualización del dashboard...');
       console.log('🔗 URL base:', this.baseUrl);
+      if (fecha) {
+        console.log('📅 Fecha filtro:', fecha);
+      }
       
-      const data = await this.obtenerDashboardCompleto().toPromise();
+      const data = await this.obtenerDashboardCompleto(fecha).toPromise();
       console.log('📊 Datos recibidos del dashboard:', data);
       
       if (data) {

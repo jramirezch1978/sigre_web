@@ -630,7 +630,7 @@ public class DashboardService {
                 .tipoMarcaje(asistencia.getTipoMarcacion())
                 .tipoMovimiento(asistencia.getFlagInOut())
                 .descripcionMovimiento(obtenerDescripcionMovimiento(asistencia.getFlagInOut()))
-                .fechaMovimiento(asistencia.getFechaMovimiento())
+                .fechaMovimiento(asistencia.getFechaMovimiento().atStartOfDay())  // ✅ Convertir LocalDate a LocalDateTime
                 .centroCosto(centroCosto)
                 .turno(asistencia.getTurno())
                 .direccionIp(asistencia.getDireccionIp())

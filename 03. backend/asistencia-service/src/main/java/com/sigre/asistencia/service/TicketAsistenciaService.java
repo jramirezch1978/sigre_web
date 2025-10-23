@@ -66,6 +66,9 @@ public class TicketAsistenciaService {
     @Autowired
     private ObjectMapper objectMapper;
     
+    @Autowired
+    private ValidacionHorarioService validacionHorarioService;
+    
     @Value("${asistencia.auto-cierre.horas-limite:13}")
     private int autoCierreHoras;
     
@@ -110,7 +113,22 @@ public class TicketAsistenciaService {
                 return MarcacionResponse.error(validacion.getMensajeError(), request.getCodigoInput());
             }
             
-            // PASO 1.5: Verificar y manejar auto-cierre de marcaciones antiguas
+            // PASO 1.5: Validar horario permitido para el movimiento (SEGURIDAD BACKEND)
+            // Los horarios vienen desde el frontend (appsettings.json)
+            ValidacionHorarioService.ResultadoValidacionHorario validacionHorario = 
+                validacionHorarioService.validarHorarioMovimiento(
+                    request.getTipoMovimiento(), 
+                    fechaConvertida,
+                    request.getHorariosPermitidos()
+                );
+            
+            if (!validacionHorario.isValido()) {
+                log.warn("❌ Movimiento fuera de horario permitido | Tipo: {} | Error: {}", 
+                        request.getTipoMovimiento(), validacionHorario.getMensajeError());
+                return MarcacionResponse.error(validacionHorario.getMensajeError(), request.getCodigoInput());
+            }
+            
+            // PASO 1.6: Verificar y manejar auto-cierre de marcaciones antiguas
             // Nota: Validación de tiempo mínimo ya se hizo en /validar-codigo
             long inicioAutoCierre = System.currentTimeMillis();
             this.procesarAutoCierreSiEsNecesario(validacion.getTrabajador().getCodTrabajador());
@@ -249,6 +267,30 @@ public class TicketAsistenciaService {
      */
     private String crearRegistroAsistencia(TicketAsistencia ticket) {
         try {
+            // ✅ VALIDACIÓN ANTI-DUPLICADOS - Verificar índice único
+            // IX_ASISTENCIA_HT5801: COD_ORIGEN + CODIGO + FLAG_IN_OUT + FEC_MOVIMIENTO + TURNO
+            String turnoActual = turnoService.determinarTurnoActual(ticket.getFechaMarcacion());
+            boolean existeDuplicado = asistenciaRepository.existeDuplicado(
+                    ticket.getCodOrigen(),
+                    ticket.getCodTrabajador(),
+                    ticket.getTipoMovimiento(),
+                    ticket.getFechaMarcacion().toLocalDate(),  // Convertir a LocalDate
+                    turnoActual
+            );
+            
+            if (existeDuplicado) {
+                String mensajeError = String.format(
+                    "❌ DUPLICADO RECHAZADO: Ya existe una marcación para trabajador %s, origen %s, tipo %s, fecha %s, turno %s",
+                    ticket.getCodTrabajador(),
+                    ticket.getCodOrigen(),
+                    ticket.getTipoMovimiento(),
+                    ticket.getFechaMarcacion().toLocalDate(),
+                    turnoActual
+                );
+                log.warn(mensajeError);
+                throw new RuntimeException("Ya existe una marcación idéntica. No se permiten duplicados.");
+            }
+            
             // Generar RECKEY único
             String reckey = generarReckeyUnico();
             
@@ -258,12 +300,12 @@ public class TicketAsistenciaService {
                     .codigo(ticket.getCodTrabajador())
                     .flagInOut(ticket.getTipoMovimiento()) // ✅ CORREGIDO - ticket ya tiene número 1-10
                     .fechaRegistro(LocalDateTime.now())
-                    .fechaMovimiento(ticket.getFechaMarcacion())
+                    .fechaMovimiento(ticket.getFechaMarcacion().toLocalDate())  // ✅ Convertir a LocalDate
                     .codUsuario(codUsuarioSistema) // ✅ PARÁMETRO configurable (no usar ticket.getUsuarioSistema())
                     .direccionIp(ticket.getDireccionIp())
                     .flagVerifyType("1") // Web validation
                     .tipoMarcacion(ticket.getTipoMarcaje()) // ✅ ticket ya tiene número 1-2 mapeado
-                    .turno(turnoService.determinarTurnoActual(ticket.getFechaMarcacion()))
+                    .turno(turnoActual)  // Reutilizar el turno ya calculado
                     .lecturaPda(ticket.getCodigoInput()) // ✅ Guardar código ingresado original en LECTURA_PDA
                     .build();
             
@@ -461,7 +503,24 @@ public class TicketAsistenciaService {
                     codTrabajador, horasTranscurridas, autoCierreHoras, ultimaAsistencia.getFechaRegistro());
             
             // Determinar hora de cierre del turno correspondiente
-            LocalDateTime horaCierre = this.calcularHoraCierreTurno(ultimaAsistencia.getFechaMovimiento());
+            // Como fechaMovimiento ahora es LocalDate, usamos la fecha de registro para calcular
+            LocalDateTime horaCierre = this.calcularHoraCierreTurno(ultimaAsistencia.getFechaRegistro());
+            
+            // ✅ VALIDACIÓN ANTI-DUPLICADOS - Verificar índice único
+            // Evitar crear auto-cierres duplicados si ya existe uno para la misma fecha y turno
+            boolean existeDuplicado = asistenciaRepository.existeDuplicado(
+                    ultimaAsistencia.getCodOrigen(),
+                    codTrabajador,
+                    "2", // Tipo de movimiento: Salida
+                    horaCierre.toLocalDate(),  // Convertir a LocalDate
+                    ultimaAsistencia.getTurno()  // Mismo turno del ingreso
+            );
+            
+            if (existeDuplicado) {
+                log.warn("⚠️ Auto-cierre YA EXISTE para trabajador {} en fecha {} - Omitiendo duplicado", 
+                         codTrabajador, horaCierre);
+                return;
+            }
             
             // Crear registro de salida automática tipo 2 DIRECTO en asistencia_ht580
             LocalDateTime ahoraPrecisa = LocalDateTime.now();
@@ -470,7 +529,7 @@ public class TicketAsistenciaService {
                     .reckey(UUID.randomUUID().toString().replace("-", "").substring(0, 12)) // ✅ CORREGIDO: Solo 12 caracteres
                     .codOrigen(ultimaAsistencia.getCodOrigen())
                     .codigo(codTrabajador)
-                    .fechaMovimiento(horaCierre) // Hora final del turno
+                    .fechaMovimiento(horaCierre.toLocalDate())  // ✅ Convertir a LocalDate
                     .tipoMarcacion(ultimaAsistencia.getTipoMarcacion())
                     .flagInOut("2") // Movimiento tipo 2 = Salida de planta
                     .fechaRegistro(ahoraPrecisa) // Fecha de registro ACTUAL para ser el último

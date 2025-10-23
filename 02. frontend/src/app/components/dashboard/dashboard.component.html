@@ -299,27 +299,45 @@
 
               <!-- Chart Section Header -->
               <div class="row x_title">
-                <div class="col-md-6">
-                  <h3>Actividad de Marcajes <small>Análisis en tiempo real</small></h3>
+                <div class="col-md-12">
+                  <h3>Actividad de Marcajes <small>Análisis de datos</small></h3>
                 </div>
-                <div class="col-md-6">
-                  <div class="filter-actions">
-                    <button mat-stroked-button class="btn-filter" (click)="generarDatosPrueba()">
-                      <mat-icon>science</mat-icon>
-                      Datos Prueba
-                    </button>
-                    <button mat-stroked-button class="btn-filter" (click)="probarConectividad()">
-                      <mat-icon>wifi</mat-icon>
-                      Probar API
-                    </button>
-                    <button mat-stroked-button class="btn-filter" (click)="onFiltrarFechas()">
-                      <mat-icon>date_range</mat-icon>
-                      Filtrar Fechas
-                    </button>
-                    <button mat-stroked-button class="btn-filter" (click)="onExportar()">
-                      <mat-icon>file_download</mat-icon>
-                      Exportar
-                    </button>
+                <div class="col-md-12" style="margin-top: 15px;">
+                  <div class="filter-actions" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <!-- Controles de Fecha -->
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <button mat-raised-button color="primary" class="btn-filter" (click)="onHoy()">
+                        <mat-icon>today</mat-icon>
+                        Hoy
+                      </button>
+                      <button mat-stroked-button class="btn-filter" (click)="onAyer()">
+                        <mat-icon>event</mat-icon>
+                        Ayer
+                      </button>
+                      <mat-form-field appearance="outline" style="width: 180px; margin: 0;">
+                        <mat-label>Seleccionar fecha</mat-label>
+                        <input matInput [matDatepicker]="picker" [(ngModel)]="fechaSeleccionada" 
+                               (dateChange)="onFechaChange()" [max]="maxDate">
+                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+                    
+                    <!-- Botones de Acción -->
+                    <div style="display: flex; gap: 10px;">
+                      <button mat-stroked-button class="btn-filter" (click)="generarDatosPrueba()">
+                        <mat-icon>science</mat-icon>
+                        Datos Prueba
+                      </button>
+                      <button mat-stroked-button class="btn-filter" (click)="probarConectividad()">
+                        <mat-icon>wifi</mat-icon>
+                        Probar API
+                      </button>
+                      <button mat-stroked-button class="btn-filter" (click)="onExportar()">
+                        <mat-icon>file_download</mat-icon>
+                        Exportar
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

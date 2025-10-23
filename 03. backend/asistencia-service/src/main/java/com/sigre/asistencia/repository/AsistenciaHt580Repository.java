@@ -185,6 +185,29 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
      */
     @Query("SELECT COUNT(DISTINCT a.codigo) FROM AsistenciaHt580 a WHERE DATE(a.fechaMovimiento) = CURRENT_DATE")
     Long countTrabajadoresUnicosHoy();
+    
+    /**
+     * ✅ VALIDACIÓN ANTI-DUPLICADOS
+     * Verificar si ya existe una marcación con la MISMA combinación del índice único:
+     * - COD_ORIGEN
+     * - CODIGO (trabajador)
+     * - FLAG_IN_OUT (tipo de movimiento)
+     * - FEC_MOVIMIENTO (solo FECHA, sin hora - tipo DATE en BD)
+     * - TURNO
+     * 
+     * Este índice único es IX_ASISTENCIA_HT5801 en Oracle/PostgreSQL
+     */
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM AsistenciaHt580 a " +
+           "WHERE a.codOrigen = :codOrigen " +
+           "AND a.codigo = :codigo " +
+           "AND a.flagInOut = :flagInOut " +
+           "AND a.fechaMovimiento = :fechaMovimiento " +
+           "AND TRIM(a.turno) = TRIM(:turno)")
+    boolean existeDuplicado(@Param("codOrigen") String codOrigen,
+                           @Param("codigo") String codigo,
+                           @Param("flagInOut") String flagInOut,
+                           @Param("fechaMovimiento") LocalDate fechaMovimiento,
+                           @Param("turno") String turno);
 
     /**
      * Obtener indicadores de centros de costo con movimientos pivoteados por fecha

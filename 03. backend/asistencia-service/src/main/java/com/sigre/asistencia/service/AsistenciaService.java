@@ -57,7 +57,7 @@ public class AsistenciaService {
                     .codigo(request.getCodTrabajador())
                     .flagInOut(flagInOut)
                     .fechaRegistro(ahora)
-                    .fechaMovimiento(ahora)
+                    .fechaMovimiento(ahora.toLocalDate())  // ✅ Convertir a LocalDate
                     .codUsuario(request.getCodUsuario())
                     .direccionIp(request.getDireccionIp())
                     .flagVerifyType("1") // Tipo verificación por defecto
@@ -78,7 +78,7 @@ public class AsistenciaService {
                     request.getTipoMovimiento(),
                     request.getTipoMarcaje(),
                     asistenciaGuardada.getFechaRegistro(),
-                    asistenciaGuardada.getFechaMovimiento(),
+                    asistenciaGuardada.getFechaMovimiento().atStartOfDay(),  // ✅ Convertir LocalDate a LocalDateTime
                     "Asistencia registrada exitosamente"
             );
             
