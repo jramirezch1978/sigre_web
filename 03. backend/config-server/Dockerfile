@@ -21,7 +21,7 @@ COPY config-server/src ./config-server/src
 RUN mvn clean package -DskipTests -pl config-server -am
 
 # Etapa de ejecución
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 
 # Instalar tzdata para timezone y curl para health checks
 RUN apt-get update && apt-get install -y tzdata curl && rm -rf /var/lib/apt/lists/*

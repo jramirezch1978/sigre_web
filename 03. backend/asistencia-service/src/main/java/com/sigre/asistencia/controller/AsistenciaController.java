@@ -24,7 +24,11 @@ public class AsistenciaController {
     
     /**
      * Registrar marcaje de asistencia
+     * 
+     * @deprecated Este endpoint es LEGACY y NO se usa. 
+     *             Use el endpoint /procesar (MarcacionController) que maneja tickets asíncronos.
      */
+    @Deprecated
     @PostMapping("/marcar")
     public ResponseEntity<?> marcarAsistencia(@Valid @RequestBody AsistenciaRequestDto request,
                                              @RequestHeader(value = "X-Forwarded-For", required = false) String xForwardedFor,

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -20,6 +21,7 @@ public interface AsistenciaHt580RemoteRepository extends JpaRepository<Asistenci
     /**
      * Buscar registro recién insertado por Oracle usando campos únicos
      * (para obtener el reckey real generado por trigger)
+     * Ordena por fec_marcacion para encontrar el más reciente
      */
     @Query("SELECT a " +
            "FROM AsistenciaHt580Remote a " +
@@ -27,16 +29,18 @@ public interface AsistenciaHt580RemoteRepository extends JpaRepository<Asistenci
            "  AND a.codigo          = :codigo " +
            "  AND a.flagInOut       = :flagInOut " +
            "  AND a.fechaMovimiento = :fechaMovimiento " +
+           "  AND a.fecMarcacion    = :fecMarcacion " +
            "  AND TRIM(a.codUsuario) = TRIM(:codUsuario) " +
            "  AND a.direccionIp     = :direccionIp " +
            "  AND TRIM(a.turno)     = TRIM(:turno) " +
            "  AND ((:lecturaPda IS NULL AND a.lecturaPda IS NULL) OR a.lecturaPda = :lecturaPda) " +
-           "ORDER BY a.fechaRegistro DESC")
+           "ORDER BY a.fecMarcacion DESC")
     AsistenciaHt580Remote findRegistroRecienInsertado(
             @Param("codOrigen") String codOrigen,
             @Param("codigo") String codigo,
             @Param("flagInOut") String flagInOut,
             @Param("fechaMovimiento") LocalDate fechaMovimiento,
+            @Param("fecMarcacion") LocalDateTime fecMarcacion,
             @Param("codUsuario") String codUsuario,
             @Param("direccionIp") String direccionIp,
             @Param("turno") String turno,

@@ -128,7 +128,10 @@ export class AsistenciaComponent implements OnInit {
     try {
       const apiUrl = this.configService.getApiUrl() + '/api/asistencia/validar-codigo';
   
-      this.http.post<any>(apiUrl, { codigo: this.codigoInput.trim() }).subscribe(
+      this.http.post<any>(apiUrl, { 
+        codigo: this.codigoInput.trim(),
+        codOrigen: this.configService.getCodOrigen()  // ✅ Enviar código de origen
+      }).subscribe(
         {
           next: (response) => {
             if (response.valido) {

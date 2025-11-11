@@ -23,7 +23,7 @@ COPY api-gateway/src ./api-gateway/src
 RUN mvn clean package -DskipTests -pl api-gateway -am
 
 # Etapa de producción
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 

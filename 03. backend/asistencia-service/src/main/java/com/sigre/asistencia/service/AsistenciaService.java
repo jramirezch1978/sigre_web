@@ -26,7 +26,11 @@ public class AsistenciaService {
     
     /**
      * Registrar asistencia de un trabajador
+     * 
+     * @deprecated Este método es LEGACY y NO se usa.
+     *             Use TicketAsistenciaService.crearTicketMarcacion() que maneja flujo con tickets asíncronos.
      */
+    @Deprecated
     @Transactional
     public AsistenciaResponseDto registrarAsistencia(AsistenciaRequestDto request) {
         log.info("Registrando asistencia para trabajador: {} - Movimiento: {}", 

@@ -23,7 +23,7 @@ COPY inventory-service/src ./inventory-service/src
 RUN mvn clean package -DskipTests -pl inventory-service -am
 
 # Etapa de producción
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 

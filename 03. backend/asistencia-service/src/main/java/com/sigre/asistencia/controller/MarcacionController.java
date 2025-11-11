@@ -145,10 +145,11 @@ public class MarcacionController {
             
             // ✅ Trabajador válido - LÓGICA INTELIGENTE: auto-cierre vs tiempo mínimo
             String codTrabajador = resultado.getTrabajador().getCodTrabajador();
+            String codOrigen = request.getCodOrigen();
             
-            // PASO 1: Obtener último movimiento del trabajador
+            // PASO 1: Obtener último movimiento del trabajador (por código Y origen, con filtros)
             AsistenciaHt580 ultimaAsistencia = asistenciaRepository
-                    .findTopByCodigoOrderByFechaRegistroDesc(codTrabajador)
+                    .findUltimaMarcacionConFiltrosByTrabajador(codTrabajador, codOrigen)
                     .orElse(null);
             
             boolean seProcesaAutoCierre = false;
@@ -159,9 +160,9 @@ public class MarcacionController {
                 boolean esIngreso = "1".equals(flagInOut != null ? flagInOut.trim() : "");
                 
                 if (esIngreso) {
-                    // PASO 2a: Es ingreso - verificar si >= 13h para auto-cierre
+                    // PASO 2a: Es ingreso - verificar si >= 13h para auto-cierre (usar FEC_MARCACION)
                     long horasTranscurridas = java.time.Duration.between(
-                            ultimaAsistencia.getFechaRegistro(), 
+                            ultimaAsistencia.getFecMarcacion(), 
                             LocalDateTime.now()
                     ).toHours();
                     
@@ -171,16 +172,16 @@ public class MarcacionController {
                                 codTrabajador, horasTranscurridas, autoCierreHoras);
                         
                         try {
-                            ticketService.procesarAutoCierreSiEsNecesario(codTrabajador);
+                            ticketService.procesarAutoCierreSiEsNecesario(codTrabajador, codOrigen);
                             seProcesaAutoCierre = true;
                             log.info("✅ Auto-cierre completado | Trabajador: {}", codTrabajador);
                         } catch (Exception e) {
                             log.error("❌ Error en auto-cierre | Trabajador: {}: {}", codTrabajador, e.getMessage());
                         }
                     } else {
-                        // PASO 2b: Es ingreso pero < 13h - validar tiempo mínimo
+                        // PASO 2b: Es ingreso pero < 13h - validar tiempo mínimo (usar FEC_MARCACION)
                         long minutosTranscurridos = java.time.Duration.between(
-                                ultimaAsistencia.getFechaRegistro(), 
+                                ultimaAsistencia.getFecMarcacion(), 
                                 LocalDateTime.now()
                         ).toMinutes();
                         
@@ -237,7 +238,7 @@ public class MarcacionController {
             if (seProcesaAutoCierre) {
                 // Si se procesó auto-cierre, obtener el NUEVO último movimiento
                 ultimoMovimientoFinal = asistenciaRepository
-                        .findTopByCodigoOrderByFechaRegistroDesc(codTrabajador)
+                        .findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(codTrabajador, codOrigen)
                         .orElse(ultimaAsistencia);
                         
                 log.info("🔄 Obteniendo último movimiento DESPUÉS del auto-cierre | Trabajador: {}", codTrabajador);
@@ -315,6 +316,7 @@ public class MarcacionController {
     @lombok.Data
     public static class ValidarCodigoRequest {
         private String codigo;
+        private String codOrigen;  // Código de origen (SE, WE, etc.)
     }
     
     @lombok.Data

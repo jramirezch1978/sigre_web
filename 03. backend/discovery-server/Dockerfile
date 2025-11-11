@@ -26,7 +26,7 @@ COPY discovery-server/src ./discovery-server/src
 RUN mvn clean package -DskipTests -pl discovery-server -am
 
 # Etapa de producción
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 

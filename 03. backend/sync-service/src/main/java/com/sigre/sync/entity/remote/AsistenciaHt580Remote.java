@@ -32,7 +32,7 @@ public class AsistenciaHt580Remote {
     private String flagInOut; // 1=Ingreso, 2=Salida, ..., 10=REGRESO_CENAR
     
     @Column(name = "FEC_REGISTRO", nullable = false)
-    private LocalDateTime fechaRegistro;  // Fecha y hora de guardado en BD
+    private LocalDateTime fechaRegistro;  // Se envía desde PostgreSQL, Oracle puede sobrescribirlo con trigger
     
     @Column(name = "FEC_MARCACION", nullable = false)
     private LocalDateTime fecMarcacion;  // Fecha y hora exacta de la marcación

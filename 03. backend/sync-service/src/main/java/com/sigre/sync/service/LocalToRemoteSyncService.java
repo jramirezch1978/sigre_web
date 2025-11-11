@@ -6,10 +6,13 @@ import com.sigre.sync.repository.local.AsistenciaHt580LocalRepository;
 import com.sigre.sync.repository.remote.AsistenciaHt580RemoteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +21,25 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class LocalToRemoteSyncService {
     
     private final AsistenciaHt580LocalRepository asistenciaLocalRepository;
     private final AsistenciaHt580RemoteRepository asistenciaRemoteRepository;
     private final ObjectMapper objectMapper;
+    private final JdbcTemplate jdbcTemplateRemote;
+    
+    // Constructor para inyectar JdbcTemplate
+    public LocalToRemoteSyncService(
+            AsistenciaHt580LocalRepository asistenciaLocalRepository,
+            AsistenciaHt580RemoteRepository asistenciaRemoteRepository,
+            ObjectMapper objectMapper,
+            @Qualifier("remoteDataSource") DataSource remoteDataSource) {
+        this.asistenciaLocalRepository = asistenciaLocalRepository;
+        this.asistenciaRemoteRepository = asistenciaRemoteRepository;
+        this.objectMapper = objectMapper;
+        this.jdbcTemplateRemote = new JdbcTemplate(remoteDataSource);
+    }
     
     @Value("${sync.config.max-retries:5}")
     private int maxRetries;
@@ -147,14 +162,14 @@ public class LocalToRemoteSyncService {
                 asistenciaRemoteRepository.save(asistenciaRemote);
                 oracleInsertados++; // 📊 Contador Oracle
                 
-                // ✅ CONSULTAR Oracle para obtener el reckey REAL generado por trigger  
-                // Con formato de fecha y TRIM para evitar problemas de precisión/padding
+                // ✅ CONSULTAR Oracle para obtener el reckey REAL generado por trigger
                 AsistenciaHt580Remote asistenciaSaved = asistenciaRemoteRepository
                         .findRegistroRecienInsertado(
                                 asistenciaRemote.getCodOrigen(),
                                 asistenciaRemote.getCodigo(), 
                                 asistenciaRemote.getFlagInOut(),
                                 asistenciaRemote.getFechaMovimiento(),
+                                asistenciaRemote.getFecMarcacion(),  // ✅ Agregar fec_marcacion
                                 asistenciaRemote.getCodUsuario(),
                                 asistenciaRemote.getDireccionIp(),
                                 asistenciaRemote.getTurno(),
@@ -265,6 +280,18 @@ public class LocalToRemoteSyncService {
     }
     
     /**
+     * Obtener SYSDATE de Oracle (fecha y hora del servidor Oracle)
+     */
+    private LocalDateTime getSysdateFromOracle() {
+        try {
+            return jdbcTemplateRemote.queryForObject("SELECT SYSDATE FROM DUAL", LocalDateTime.class);
+        } catch (Exception e) {
+            log.warn("⚠️ Error obteniendo SYSDATE de Oracle, usando fecha local: {}", e.getMessage());
+            return LocalDateTime.now();
+        }
+    }
+    
+    /**
      * Convertir entidad local a remota
      * NUEVA LÓGICA: Si tiene reckey_ref local, buscar su external_id y usarlo como reckey_ref en Oracle
      */
@@ -286,13 +313,16 @@ public class LocalToRemoteSyncService {
             }
         }
         
+        // Obtener fecha actual de Oracle
+        LocalDateTime fechaRegistroOracle = getSysdateFromOracle();
+        
         return AsistenciaHt580Remote.builder()
                 .reckey(local.getReckey())
                 .codOrigen(local.getCodOrigen())
                 .codigo(local.getCodigo())
                 .flagInOut(local.getFlagInOut())
-                // NO enviar fechaRegistro - Oracle lo genera automáticamente con la fecha del servidor
-                .fecMarcacion(local.getFecMarcacion())  // ✅ Fecha y hora exacta de marcación
+                .fechaRegistro(fechaRegistroOracle)  // ✅ SYSDATE de Oracle
+                .fecMarcacion(local.getFecMarcacion())  // Fecha y hora exacta de marcación
                 .fechaMovimiento(local.getFechaMovimiento())
                 .codUsuario(local.getCodUsuario())
                 .direccionIp(local.getDireccionIp())
@@ -345,6 +375,7 @@ public class LocalToRemoteSyncService {
                                     nuevoRegistro.getCodigo(), 
                                     nuevoRegistro.getFlagInOut(),
                                     nuevoRegistro.getFechaMovimiento(),
+                                    nuevoRegistro.getFecMarcacion(),  // ✅ Agregar fec_marcacion
                                     nuevoRegistro.getCodUsuario(),
                                     nuevoRegistro.getDireccionIp(),
                                     nuevoRegistro.getTurno(),
@@ -401,6 +432,7 @@ public class LocalToRemoteSyncService {
                                     nuevoRegistroOracle.getCodigo(), 
                                     nuevoRegistroOracle.getFlagInOut(),
                                     nuevoRegistroOracle.getFechaMovimiento(),
+                                    nuevoRegistroOracle.getFecMarcacion(),  // ✅ Agregar fec_marcacion
                                     nuevoRegistroOracle.getCodUsuario(),
                                     nuevoRegistroOracle.getDireccionIp(),
                                     nuevoRegistroOracle.getTurno(),

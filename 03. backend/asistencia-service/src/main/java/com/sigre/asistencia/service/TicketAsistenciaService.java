@@ -131,7 +131,7 @@ public class TicketAsistenciaService {
             // PASO 1.6: Verificar y manejar auto-cierre de marcaciones antiguas
             // Nota: Validación de tiempo mínimo ya se hizo en /validar-codigo
             long inicioAutoCierre = System.currentTimeMillis();
-            this.procesarAutoCierreSiEsNecesario(validacion.getTrabajador().getCodTrabajador());
+            this.procesarAutoCierreSiEsNecesario(validacion.getTrabajador().getCodTrabajador(), request.getCodOrigen());
             long tiempoAutoCierre = System.currentTimeMillis() - inicioAutoCierre;
             log.info("⏱️ Verificación auto-cierre completada en: {} ms", tiempoAutoCierre);
             
@@ -264,7 +264,7 @@ public class TicketAsistenciaService {
     
     /**
      * Crear registro en asistencia_ht580
-     * NUEVA LÓGICA: Solo marcación 01 calcula turno, las demás heredan turno y reckey_ref
+     * LÓGICA: Solo tipo 01 calcula turno, los demás validan último movimiento y heredan turno/referencias
      */
     private String crearRegistroAsistencia(TicketAsistencia ticket) {
         try {
@@ -272,65 +272,90 @@ public class TicketAsistenciaService {
             String turnoAsignado;
             String reckeyRef = null;
             
+            // Buscar última marcación del trabajador (por código Y origen)
+            Optional<AsistenciaHt580> ultimaMarcacion = asistenciaRepository
+                .findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(ticket.getCodTrabajador(), ticket.getCodOrigen());
+            
             // LÓGICA SEGÚN TIPO DE MOVIMIENTO
             if ("1".equals(tipoMovimiento)) {
-                // TIPO 01 (INGRESO_PLANTA): Calcular turno normalmente
+                // TIPO 01 (INGRESO_PLANTA): Calcular turno, sin validaciones
                 turnoAsignado = turnoService.determinarTurnoActual(ticket.getFechaMarcacion());
-                reckeyRef = null; // No tiene referencia
-                
+                reckeyRef = null;
                 log.info("📍 Tipo 01 - INGRESO_PLANTA | Turno calculado: {}", turnoAsignado);
                 
+            } else if ("2".equals(tipoMovimiento)) {
+                // TIPO 02 (SALIDA_PLANTA): Validar que última marcación sea 01
+                validarUltimoMovimientoEs(ultimaMarcacion, "1", "Debe marcar INGRESO_PLANTA antes de marcar SALIDA_PLANTA");
+                turnoAsignado = ultimaMarcacion.get().getTurno();
+                reckeyRef = ultimaMarcacion.get().getReckey();
+                log.info("📍 Tipo 02 - SALIDA_PLANTA | Turno heredado: {} | Ref a 01", turnoAsignado);
+                
+            } else if ("3".equals(tipoMovimiento)) {
+                // TIPO 03 (SALIDA_ALMORZAR): Validar que última marcación sea 01
+                validarUltimoMovimientoEs(ultimaMarcacion, "1", "Debe marcar INGRESO_PLANTA antes de salir a almorzar");
+                turnoAsignado = ultimaMarcacion.get().getTurno();
+                reckeyRef = ultimaMarcacion.get().getReckey();
+                log.info("📍 Tipo 03 - SALIDA_ALMORZAR | Turno heredado: {} | Ref a 01", turnoAsignado);
+                
+            } else if ("4".equals(tipoMovimiento)) {
+                // TIPO 04 (REGRESO_ALMORZAR): Validar que última marcación sea 03
+                validarUltimoMovimientoEs(ultimaMarcacion, "3", "Debe marcar SALIDA_ALMORZAR antes de regresar de almorzar");
+                // Buscar marcación 01 para heredar turno
+                Optional<AsistenciaHt580> marcacion01 = buscarUltimaMarcacionconFiltros(ticket.getCodTrabajador(), ticket.getCodOrigen());
+                turnoAsignado = marcacion01.get().getTurno();
+                reckeyRef = ultimaMarcacion.get().getReckey(); // Referencia a la salida (03)
+                log.info("📍 Tipo 04 - REGRESO_ALMORZAR | Turno de 01: {} | Ref a 03", turnoAsignado);
+                
+            } else if ("5".equals(tipoMovimiento)) {
+                // TIPO 05 (SALIDA_COMISION): Validar que última marcación sea 01
+                validarUltimoMovimientoEs(ultimaMarcacion, "1", "Debe marcar INGRESO_PLANTA antes de salir de comisión");
+                turnoAsignado = ultimaMarcacion.get().getTurno();
+                reckeyRef = ultimaMarcacion.get().getReckey();
+                log.info("📍 Tipo 05 - SALIDA_COMISION | Turno heredado: {} | Ref a 01", turnoAsignado);
+                
+            } else if ("6".equals(tipoMovimiento)) {
+                // TIPO 06 (RETORNO_COMISION): Validar que última marcación sea 05
+                validarUltimoMovimientoEs(ultimaMarcacion, "5", "Debe marcar SALIDA_COMISION antes de retornar de comisión");
+                // Buscar marcación 01 para heredar turno
+                Optional<AsistenciaHt580> marcacion01 = buscarUltimaMarcacionconFiltros(ticket.getCodTrabajador(), ticket.getCodOrigen());
+                turnoAsignado = marcacion01.get().getTurno();
+                reckeyRef = ultimaMarcacion.get().getReckey(); // Referencia a la salida (05)
+                log.info("📍 Tipo 06 - RETORNO_COMISION | Turno de 01: {} | Ref a 05", turnoAsignado);
+                
+            } else if ("7".equals(tipoMovimiento)) {
+                // TIPO 07 (INGRESO_PRODUCCION): Validar que última marcación sea 01
+                validarUltimoMovimientoEs(ultimaMarcacion, "1", "Debe marcar INGRESO_PLANTA antes de ingresar a producción");
+                turnoAsignado = ultimaMarcacion.get().getTurno();
+                reckeyRef = ultimaMarcacion.get().getReckey();
+                log.info("📍 Tipo 07 - INGRESO_PRODUCCION | Turno heredado: {} | Ref a 01", turnoAsignado);
+                
+            } else if ("8".equals(tipoMovimiento)) {
+                // TIPO 08 (SALIDA_PRODUCCION): Validar que última marcación sea 07
+                validarUltimoMovimientoEs(ultimaMarcacion, "7", "Debe marcar INGRESO_PRODUCCION antes de salir de producción");
+                // Buscar marcación 01 para heredar turno
+                Optional<AsistenciaHt580> marcacion01 = buscarUltimaMarcacionconFiltros(ticket.getCodTrabajador(), ticket.getCodOrigen());
+                turnoAsignado = marcacion01.get().getTurno();
+                reckeyRef = ultimaMarcacion.get().getReckey(); // Referencia a la entrada (07)
+                log.info("📍 Tipo 08 - SALIDA_PRODUCCION | Turno de 01: {} | Ref a 07", turnoAsignado);
+                
+            } else if ("9".equals(tipoMovimiento)) {
+                // TIPO 09 (SALIDA_CENAR): Validar que última marcación sea 01
+                validarUltimoMovimientoEs(ultimaMarcacion, "1", "Debe marcar INGRESO_PLANTA antes de salir a cenar");
+                turnoAsignado = ultimaMarcacion.get().getTurno();
+                reckeyRef = ultimaMarcacion.get().getReckey();
+                log.info("📍 Tipo 09 - SALIDA_CENAR | Turno heredado: {} | Ref a 01", turnoAsignado);
+                
+            } else if ("10".equals(tipoMovimiento)) {
+                // TIPO 10 (REGRESO_CENAR): Validar que última marcación sea 09
+                validarUltimoMovimientoEs(ultimaMarcacion, "9", "Debe marcar SALIDA_CENAR antes de regresar de cenar");
+                // Buscar marcación 01 para heredar turno
+                Optional<AsistenciaHt580> marcacion01 = buscarUltimaMarcacionconFiltros(ticket.getCodTrabajador(), ticket.getCodOrigen());
+                turnoAsignado = marcacion01.get().getTurno();
+                reckeyRef = ultimaMarcacion.get().getReckey(); // Referencia a la salida (09)
+                log.info("📍 Tipo 10 - REGRESO_CENAR | Turno de 01: {} | Ref a 09", turnoAsignado);
+                
             } else {
-                // TODOS LOS DEMÁS TIPOS (02-10): Heredar turno de la última marcación 01
-                Optional<AsistenciaHt580> ultimaMarcacion01 = asistenciaRepository.findUltimaMarcacion01ByTrabajador(ticket.getCodTrabajador());
-                
-                if (ultimaMarcacion01.isEmpty()) {
-                    String error = String.format(
-                        "No se encontró una marcación de INGRESO_PLANTA (tipo 01) previa para el trabajador %s. " +
-                        "Debe marcar primero el ingreso antes de registrar otros movimientos.",
-                        ticket.getCodTrabajador()
-                    );
-                    log.error("❌ {}", error);
-                    throw new RuntimeException(error);
-                }
-                
-                // Heredar turno de la última marcación 01
-                turnoAsignado = ultimaMarcacion01.get().getTurno();
-                
-                // Determinar reckey_ref según el tipo de movimiento
-                if ("4".equals(tipoMovimiento)) {
-                    // REGRESO_ALMORZAR: buscar última marcación 03
-                    reckeyRef = asistenciaRepository.findUltimaMarcacionByTipoAndTrabajador(ticket.getCodTrabajador(), "3")
-                        .map(AsistenciaHt580::getReckey)
-                        .orElse(ultimaMarcacion01.get().getReckey()); // Fallback a marcación 01
-                    log.info("📍 Tipo 04 - REGRESO_ALMORZAR | Turno heredado: {} | Ref a marcación 03", turnoAsignado);
-                    
-                } else if ("6".equals(tipoMovimiento)) {
-                    // RETORNO_COMISION: buscar última marcación 05
-                    reckeyRef = asistenciaRepository.findUltimaMarcacionByTipoAndTrabajador(ticket.getCodTrabajador(), "5")
-                        .map(AsistenciaHt580::getReckey)
-                        .orElse(ultimaMarcacion01.get().getReckey());
-                    log.info("📍 Tipo 06 - RETORNO_COMISION | Turno heredado: {} | Ref a marcación 05", turnoAsignado);
-                    
-                } else if ("8".equals(tipoMovimiento)) {
-                    // SALIDA_PRODUCCION: buscar última marcación 07
-                    reckeyRef = asistenciaRepository.findUltimaMarcacionByTipoAndTrabajador(ticket.getCodTrabajador(), "7")
-                        .map(AsistenciaHt580::getReckey)
-                        .orElse(ultimaMarcacion01.get().getReckey());
-                    log.info("📍 Tipo 08 - SALIDA_PRODUCCION | Turno heredado: {} | Ref a marcación 07", turnoAsignado);
-                    
-                } else if ("10".equals(tipoMovimiento)) {
-                    // REGRESO_CENAR: buscar última marcación 09
-                    reckeyRef = asistenciaRepository.findUltimaMarcacionByTipoAndTrabajador(ticket.getCodTrabajador(), "9")
-                        .map(AsistenciaHt580::getReckey)
-                        .orElse(ultimaMarcacion01.get().getReckey());
-                    log.info("📍 Tipo 10 - REGRESO_CENAR | Turno heredado: {} | Ref a marcación 09", turnoAsignado);
-                    
-                } else {
-                    // TIPOS 02, 03, 05, 07, 09: Referenciar a la última marcación 01
-                    reckeyRef = ultimaMarcacion01.get().getReckey();
-                    log.info("📍 Tipo {} | Turno heredado: {} | Ref a última marcación 01", tipoMovimiento, turnoAsignado);
-                }
+                throw new RuntimeException("Tipo de movimiento no reconocido: " + tipoMovimiento);
             }
             
             // ✅ VALIDACIÓN ANTI-DUPLICADOS - Verificar índice único
@@ -531,17 +556,17 @@ public class TicketAsistenciaService {
      * DIRECTO en asistencia_ht580 (no tickets) con hora final del turno correspondiente
      * SÍNCRONO para evitar bloqueos - optimizado para múltiple concurrencia
      */
-    public synchronized void procesarAutoCierreSiEsNecesario(String codTrabajador) {
+    public synchronized void procesarAutoCierreSiEsNecesario(String codTrabajador, String codOrigen) {
         try {
             long inicioTiempo = System.currentTimeMillis();
             
-            // Buscar última marcación del trabajador (ordenado por fecha de REGISTRO)
+            // Buscar última marcación del trabajador (por código Y origen, excluyendo tipos 3-10)
             AsistenciaHt580 ultimaAsistencia = asistenciaRepository
-                    .findTopByCodigoOrderByFechaRegistroDesc(codTrabajador)
+                    .findUltimaMarcacionConFiltrosByTrabajador(codTrabajador, codOrigen)
                     .orElse(null);
             
             if (ultimaAsistencia == null) {
-                log.debug("🔄 Sin marcaciones previas para trabajador: {}", codTrabajador);
+                log.debug("🔄 Sin marcaciones previas para trabajador: {} origen: {}", codTrabajador, codOrigen);
                 return;
             }
             
@@ -603,7 +628,7 @@ public class TicketAsistenciaService {
             
             // VERIFICAR que la nueva salida es ahora el último movimiento
             AsistenciaHt580 verificacionUltimoMovimiento = asistenciaRepository
-                    .findTopByCodigoOrderByFechaRegistroDesc(codTrabajador)
+                    .findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(codTrabajador, codOrigen)
                     .orElse(null);
             
             long tiempoTotal = System.currentTimeMillis() - inicioTiempo;
@@ -722,9 +747,9 @@ public class TicketAsistenciaService {
                         continue;
                     }
                     
-                    // PASO 3: Verificar SI han pasado >= autoCierreHoras horas (usar fecha de REGISTRO)
+                    // PASO 3: Verificar SI han pasado >= autoCierreHoras horas (usar FEC_MARCACION)
                     long horasTranscurridas = java.time.Duration.between(
-                            ultimoMovimiento.getFechaRegistro(), 
+                            ultimoMovimiento.getFecMarcacion(), 
                             LocalDateTime.now()
                     ).toHours();
                     
@@ -739,7 +764,7 @@ public class TicketAsistenciaService {
                             ultimoMovimiento.getCodigo(), horasTranscurridas, autoCierreHoras);
                     
                     // Usar el MISMO método que la marcación inmediata
-                    this.procesarAutoCierreSiEsNecesario(ultimoMovimiento.getCodigo());
+                    this.procesarAutoCierreSiEsNecesario(ultimoMovimiento.getCodigo(), ultimoMovimiento.getCodOrigen());
                     procesadas++;
                     
                 } catch (Exception e) {
@@ -783,6 +808,56 @@ public class TicketAsistenciaService {
                 yield "1";
             }
         };
+    }
+    
+    /**
+     * Validar que el último movimiento sea del tipo esperado
+     */
+    private void validarUltimoMovimientoEs(Optional<AsistenciaHt580> ultimaMarcacion, String tipoEsperado, String mensajeError) {
+        if (ultimaMarcacion.isEmpty()) {
+            String error = "No se encontró ninguna marcación previa. " + mensajeError;
+            log.error("❌ {}", error);
+            throw new RuntimeException(error);
+        }
+        
+        String tipoActual = ultimaMarcacion.get().getFlagInOut().trim();
+        if (!tipoEsperado.equals(tipoActual)) {
+            String error = String.format(
+                "%s. Último movimiento registrado es tipo %s, se esperaba tipo %s",
+                mensajeError, tipoActual, tipoEsperado
+            );
+            log.error("❌ {}", error);
+            throw new RuntimeException(error);
+        }
+    }
+    
+    /**
+     * Buscar última marcación válida (01 o 02) por código y origen
+     * Excluye tipos 3-10 para encontrar el último ingreso válido
+     */
+    private Optional<AsistenciaHt580> buscarUltimaMarcacionconFiltros(String codigo, String codOrigen) {
+        Optional<AsistenciaHt580> marcacion01 = asistenciaRepository.findUltimaMarcacionConFiltrosByTrabajador(codigo, codOrigen);
+        
+        if (marcacion01.isEmpty()) {
+            String error = String.format(
+                "No se encontró marcación de INGRESO_PLANTA (tipo 01) para trabajador %s en origen %s",
+                codigo, codOrigen
+            );
+            log.error("❌ {}", error);
+            throw new RuntimeException(error);
+        }
+        
+        // Verificar que sea tipo 01
+        if (!"1".equals(marcacion01.get().getFlagInOut().trim())) {
+            String error = String.format(
+                "La última marcación válida no es INGRESO_PLANTA (tipo 01), es tipo %s",
+                marcacion01.get().getFlagInOut().trim()
+            );
+            log.error("❌ {}", error);
+            throw new RuntimeException(error);
+        }
+        
+        return marcacion01;
     }
     
     /**

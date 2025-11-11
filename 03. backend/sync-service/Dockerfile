@@ -21,7 +21,7 @@ COPY sync-service/src ./sync-service/src
 RUN mvn clean package -DskipTests -pl sync-service -am
 
 # Etapa de ejecución
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 
 # Instalar tzdata para timezone y curl para health checks
 RUN apt-get update && apt-get install -y tzdata curl && rm -rf /var/lib/apt/lists/*

@@ -22,7 +22,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
            "AND DATE(a.fechaMovimiento) = :fecha " +
            "ORDER BY a.fechaMovimiento DESC")
     List<AsistenciaHt580> findAsistenciasByCodigoAndFecha(@Param("codigo") String codigo, 
-                                                         @Param("fecha") LocalDate fecha);
+                                                          @Param("fecha") LocalDate fecha);
     
     /**
      * Buscar última asistencia de un trabajador
@@ -34,47 +34,37 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     AsistenciaHt580 findUltimaAsistenciaByTrabajador(@Param("codigo") String codigo);
     
     /**
-     * Buscar última asistencia de un trabajador por código (con Optional)
-     * ORDENADO POR FECHA DE REGISTRO (no fecha de movimiento)
+     * Buscar última asistencia de un trabajador por código Y origen
+     * ORDENADO POR FECHA DE REGISTRO
      */
-    Optional<AsistenciaHt580> findTopByCodigoOrderByFechaRegistroDesc(String codigo);
+    Optional<AsistenciaHt580> findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(String codigo, String codOrigen);
     
     /**
      * ✅ NUEVA LÓGICA DE TURNOS - OPTIMIZADA CON ÍNDICES
-     * Buscar última marcación INGRESO_PLANTA (tipo 01) de un trabajador
+     * Buscar última marcación INGRESO_PLANTA (tipo 01) de un trabajador por código Y origen
      * Esta es la marcación "raíz" de donde se heredan turno y reckey_ref
      * 
      * OPTIMIZACIÓN: Usa índice en (codigo, flag_in_out, fec_registro)
      */
-    @Query(value = "SELECT * FROM asistencia_ht580 " +
-           "WHERE codigo = :codigo " +
-           "AND flag_in_out = '1' " +
-           "ORDER BY fec_registro DESC " +
-           "LIMIT 1", 
+    @Query(value = "SELECT * FROM asistencia_ht580 " 
+            + "WHERE codigo = :codigo " 
+            + "AND cod_origen = :codOrigen " 
+            + "AND flag_in_out not in ('3','4','5','6','7','8','9','10')" 
+            + "ORDER BY fec_registro DESC " 
+            + "LIMIT 1", 
            nativeQuery = true)
-    Optional<AsistenciaHt580> findUltimaMarcacion01ByTrabajador(@Param("codigo") String codigo);
-    
-    /**
-     * Buscar última marcación específica de un trabajador (para tipos 03, 05, 07, 09)
-     * OPTIMIZACIÓN: Consulta nativa para mejor performance
-     */
-    @Query(value = "SELECT * FROM asistencia_ht580 " +
-           "WHERE codigo = :codigo " +
-           "AND flag_in_out = :flagInOut " +
-           "ORDER BY fec_registro DESC " +
-           "LIMIT 1",
-           nativeQuery = true)
-    Optional<AsistenciaHt580> findUltimaMarcacionByTipoAndTrabajador(@Param("codigo") String codigo, 
-                                                                     @Param("flagInOut") String flagInOut);
+    Optional<AsistenciaHt580> findUltimaMarcacionConFiltrosByTrabajador(@Param("codigo") String codigo, 
+                                                                        @Param("codOrigen") String codOrigen);
     
     /**
      * Buscar asistencias en un rango de fechas
+     * ACTUALIZADO: fechaMovimiento ahora es LocalDate
      */
     @Query("SELECT a FROM AsistenciaHt580 a " +
            "WHERE a.fechaMovimiento BETWEEN :fechaInicio AND :fechaFin " +
            "ORDER BY a.fechaMovimiento DESC")
-    List<AsistenciaHt580> findAsistenciasByRangoFechas(@Param("fechaInicio") LocalDateTime fechaInicio,
-                                                      @Param("fechaFin") LocalDateTime fechaFin);
+    List<AsistenciaHt580> findAsistenciasByRangoFechas(@Param("fechaInicio") LocalDate fechaInicio,
+                                                      @Param("fechaFin") LocalDate fechaFin);
     
     /**
      * Contar asistencias de un trabajador en una fecha
@@ -137,57 +127,65 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     /**
      * Obtener marcajes agrupados por hora del día actual CORREGIDO
      * Solo del día actual, sin mezclar con otros días
+     * ACTUALIZADO: Agrupa por fechaMovimiento, extrae HOUR de fecMarcacion, excluye AUTO-CLOSE
      */
-    @Query("SELECT EXTRACT(HOUR FROM a.fechaMovimiento) as hora, COUNT(a) as cantidad " +
+    @Query("SELECT EXTRACT(HOUR FROM a.fecMarcacion) as hora, COUNT(a) as cantidad " +
            "FROM AsistenciaHt580 a " +
-           "WHERE DATE(a.fechaMovimiento) = CURRENT_DATE " +
-           "GROUP BY EXTRACT(HOUR FROM a.fechaMovimiento) " +
+           "WHERE a.fechaMovimiento = CURRENT_DATE " +
+           "AND a.direccionIp <> 'AUTO-CLOSE' " +
+           "GROUP BY EXTRACT(HOUR FROM a.fecMarcacion) " +
            "ORDER BY hora")
     List<Object[]> countMarcajesPorHoraHoy();
     
     /**
      * Obtener marcajes del día actual con información detallada para verificación
+     * ACTUALIZADO: Agrupa por fechaMovimiento, extrae HOUR de fecMarcacion, excluye AUTO-CLOSE
      */
     @Query("SELECT " +
-           "DATE(a.fechaMovimiento) as fecha, " +
-           "EXTRACT(HOUR FROM a.fechaMovimiento) as hora, " +
+           "a.fechaMovimiento as fecha, " +
+           "EXTRACT(HOUR FROM a.fecMarcacion) as hora, " +
            "COUNT(a) as cantidad, " +
-           "MIN(a.fechaMovimiento) as primerMarcaje, " +
-           "MAX(a.fechaMovimiento) as ultimoMarcaje " +
+           "MIN(a.fecMarcacion) as primerMarcaje, " +
+           "MAX(a.fecMarcacion) as ultimoMarcaje " +
            "FROM AsistenciaHt580 a " +
-           "WHERE DATE(a.fechaMovimiento) = CURRENT_DATE " +
-           "GROUP BY DATE(a.fechaMovimiento), EXTRACT(HOUR FROM a.fechaMovimiento) " +
+           "WHERE a.fechaMovimiento = CURRENT_DATE " +
+           "AND a.direccionIp <> 'AUTO-CLOSE' " +
+           "GROUP BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion) " +
            "ORDER BY hora")
     List<Object[]> countMarcajesDetalladosHoy();
     
     /**
      * Obtener marcajes agrupados por hora de las últimas 24 horas
      * CORREGIDO: Distingue entre horas del día actual vs día anterior
+     * ACTUALIZADO: Agrupa por fechaMovimiento, extrae HOUR de fecMarcacion, excluye AUTO-CLOSE
      */
     @Query("SELECT " +
            "CASE " +
-           "    WHEN DATE(a.fechaMovimiento) = CURRENT_DATE THEN EXTRACT(HOUR FROM a.fechaMovimiento) " +
-           "    ELSE -(EXTRACT(HOUR FROM a.fechaMovimiento)) " +
+           "    WHEN a.fechaMovimiento = CURRENT_DATE THEN EXTRACT(HOUR FROM a.fecMarcacion) " +
+           "    ELSE -(EXTRACT(HOUR FROM a.fecMarcacion)) " +
            "END as horaConFecha, " +
            "COUNT(a) as cantidad, " +
-           "DATE(a.fechaMovimiento) as fecha " +
+           "a.fechaMovimiento as fecha " +
            "FROM AsistenciaHt580 a " +
-           "WHERE a.fechaMovimiento >= :fechaInicio " +
-           "GROUP BY DATE(a.fechaMovimiento), EXTRACT(HOUR FROM a.fechaMovimiento) " +
-           "ORDER BY DATE(a.fechaMovimiento), EXTRACT(HOUR FROM a.fechaMovimiento)")
+           "WHERE a.fecMarcacion >= :fechaInicio " +
+           "AND a.direccionIp <> 'AUTO-CLOSE' " +
+           "GROUP BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion) " +
+           "ORDER BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion)")
     List<Object[]> countMarcajesPorHoraUltimas24h(@Param("fechaInicio") LocalDateTime fechaInicio);
     
     /**
      * Obtener marcajes de las últimas 24 horas con información detallada por fecha y hora
+     * ACTUALIZADO: Agrupa por fechaMovimiento, extrae HOUR de fecMarcacion, excluye AUTO-CLOSE
      */
     @Query("SELECT " +
-           "DATE(a.fechaMovimiento) as fecha, " +
-           "EXTRACT(HOUR FROM a.fechaMovimiento) as hora, " +
+           "a.fechaMovimiento as fecha, " +
+           "EXTRACT(HOUR FROM a.fecMarcacion) as hora, " +
            "COUNT(a) as cantidad " +
            "FROM AsistenciaHt580 a " +
-           "WHERE a.fechaMovimiento >= :fechaInicio " +
-           "GROUP BY DATE(a.fechaMovimiento), EXTRACT(HOUR FROM a.fechaMovimiento) " +
-           "ORDER BY DATE(a.fechaMovimiento), EXTRACT(HOUR FROM a.fechaMovimiento)")
+           "WHERE a.fecMarcacion >= :fechaInicio " +
+           "AND a.direccionIp <> 'AUTO-CLOSE' " +
+           "GROUP BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion) " +
+           "ORDER BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion)")
     List<Object[]> countMarcajesDetalladoUltimas24h(@Param("fechaInicio") LocalDateTime fechaInicio);
     
     /**
