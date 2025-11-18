@@ -1,0 +1,54 @@
+﻿$PBExportHeader$d_rpt_cg_cc2_detalle2_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=484 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=fecha dbname="fecha" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="proveedor.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ retrieve=" SELECT trunc(b.hora_inicio_descarga) as fecha,
+		  p.proveedor,
+		  p.nom_proveedor,
+		  NVL(SUM(usf_ap_conv_und(b.unidad, 
+			(SELECT und_tm FROM ap_param t WHERE t.origen = 'XX'), 
+			b.cantidad_declarada - b.cantidad_castigada)),0) as cantidad
+	FROM tg_naves  		  tn,
+		  fl_parte_de_pesca a,
+		  fl_venta          b,
+		  proveedor			  p
+  WHERE a.parte_pesca = b.parte_pesca
+    and tn.nave		 = a.nave_real
+    and p.proveedor	 = b.cliente
+	 AND to_char(b.hora_inicio_descarga, 'mmyyyy') = to_char(:ad_fecha, 'mmyyyy')
+	 AND a.flag_arribo_aprobado = '1'
+	 AND a.nave_real = :as_nave
+group by trunc(b.hora_inicio_descarga), p.proveedor, p.nom_proveedor" arguments=(("as_nave", string),("ad_fecha", date)) )
+text(band=header alignment="0" text="" border="0" color="33554432" x="489" y="176" height="56" width="1719" html.valueishtml="0"  name=subtitulo_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="489" y="248" height="56" width="1719" html.valueishtml="0"  name=subtitulo_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="489" y="320" height="56" width="1719" html.valueishtml="0"  name=subtitulo_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Fecha" border="2" color="0" x="5" y="424" height="56" width="343" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Nom Proveedor" border="2" color="0" x="699" y="424" height="56" width="1399" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Proveedor" border="2" color="0" x="352" y="424" height="56" width="343" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Cantidad" border="2" color="0" x="2103" y="424" height="56" width="402" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="60" width="343" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="699" y="4" height="60" width="1399" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="352" y="4" height="60" width="343" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="2103" y="4" height="60" width="402" format="###,##0.00" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(cantidad for all)"border="2" color="33554432" x="2103" y="4" height="60" width="402" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total:" border="0" color="33554432" x="1641" y="4" height="56" width="439" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="" border="0" color="33554432" x="14" y="228" height="40" width="375" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=foreground filename="" x="14" y="16" height="140" width="370" border="0"  name=p_logo visible="1" )
+text(band=foreground alignment="0" text="" border="0" color="33554432" x="14" y="172" height="40" width="375" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2382" y="44" height="44" width="361" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="today()"border="0" color="0" x="2382" y="112" height="44" width="361" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="" border="0" color="33554432" x="2382" y="180" height="44" width="361" html.valueishtml="0"  name=t_usuario visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="2" text="CAPTURA POR EMBARCACIÓN 
+(EN TONELADAS)" border="0" color="33554432" x="489" y="32" height="128" width="1719" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

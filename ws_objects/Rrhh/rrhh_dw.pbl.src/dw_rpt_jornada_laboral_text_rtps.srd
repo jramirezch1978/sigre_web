@@ -1,0 +1,220 @@
+﻿$PBExportHeader$dw_rpt_jornada_laboral_text_rtps.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=84 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(188) updatewhereclause=yes name=dato_rtps dbname="dato_rtps" )
+ retrieve="/*
+       case 
+          when m.fec_cese is null then
+             case
+                when m.fec_ingreso <= to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy') then 
+                   to_char(240)
+                else 
+                   to_char((last_day(to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy')) - m.fec_ingreso + 1) * 8)
+             end
+          when m.fec_cese is not null and m.fec_cese < last_day(to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy')) then
+             case
+                when m.fec_ingreso <= to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy') then 
+                   to_char((m.fec_cese - to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy') + 1) * 8)
+                else 
+                   to_char((m.fec_cese - m.fec_ingreso + 1) * 8)
+             end
+       end
+*/
+
+select distinct 
+		 trim(m.tipo_doc_ident_rtps) || '|' || m.nro_doc_ident_rtps || '|' ||
+		 to_char(pkg_rrhh.of_dias_laborados(
+					m.COD_TRABAJADOR, m.TIPO_TRABAJADOR, 
+					to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy'), 
+					(case
+						when to_char(last_day(to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy')), 'dd') = '31' then
+							last_day(to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy')) - 1
+						else
+							last_day(to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy'))
+					end)
+		 ) * 8) || '|' ||
+       '0' || '|' ||
+       '0' || '|' ||
+       '0' || '|' as dato_rtps
+ from maestro 				m,
+		historico_calculo hc
+where m.cod_trabajador = hc.cod_trabajador
+  and m.tipo_trabajador in((select r.tipo_trab_empleado from rrhhparam r where r.reckey = '1'), 
+									(select r.tipo_trab_func_ger from rrhhparam r where r.reckey = '1'))
+  and m.fec_ingreso <= LAST_DAY(to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy'))
+  and ( m.fec_cese >= to_date('01/' || trim(to_char(:an_mes, '00')) || '/' || to_char(:an_year), 'dd/mm/yyyy') or m.fec_cese is null)
+  and to_char(hc.fec_calc_plan, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+  AND INSTR(:as_cod_origen, hc.COD_ORIGEN) > 0 
+union
+select trim(m.tipo_doc_ident_rtps) || '|' ||
+       m.nro_doc_ident_rtps || '|' ||
+       to_char(trunc(sum(pd.hrs_normales + pd.hrs_noc_extras_35))) || '|' ||
+       to_char(round((sum(pd.hrs_normales + pd.hrs_noc_extras_35) - trunc(sum(pd.hrs_normales + pd.hrs_noc_extras_35))) * 60,0)) || '|' ||
+       to_char(trunc(sum(pd.hrs_extras_25 + pd.hrs_extras_35 + pd.hrs_extras_100))) || '|' ||
+       to_char(round((sum(pd.hrs_extras_25 + pd.hrs_extras_35 + pd.hrs_extras_100) - trunc(sum(pd.hrs_extras_25 + pd.hrs_extras_35 + pd.hrs_extras_100))) * 60,0)) || '|' as dato_rtps
+  from maestro m,
+       pd_jornal_campo pd
+ where pd.cod_trabajador = m.cod_trabajador
+   and to_char(pd.fecha, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+	AND INSTR(:as_cod_origen, M.COD_ORIGEN) > 0 
+group by m.tipo_doc_ident_rtps, m.nro_doc_ident_rtps, 
+			m.apel_paterno || ' ' || m.apel_materno || ', ' || m.nombre1, 
+			m.fec_ingreso
+union
+select s.tipo_doc_ident_rtps || '|' || 
+       s.nro_doc_ident_rtps || '|' ||
+       to_char(trunc(sum(s.hor_diu_nor + s.hor_noc_nor))) || '|' ||
+       to_char(round((sum(s.hor_diu_nor + s.hor_noc_nor) - trunc(sum(s.hor_diu_nor + s.hor_noc_nor))) * 60,0)) || '|' ||
+       to_char(trunc(sum(s.hor_diu_dom + s.hor_noc_dom + s.hor_ext_diu_1 + s.hor_ext_diu_2 + s.hor_ext_noc_1 + s.hor_ext_noc_2 ))) || '|' ||
+       to_char(round((sum(s.hor_diu_dom + s.hor_noc_dom + s.hor_ext_diu_1 + s.hor_ext_diu_2 + s.hor_ext_noc_1 + s.hor_ext_noc_2) - trunc(sum(s.hor_diu_dom + s.hor_noc_dom + s.hor_ext_diu_1 + s.hor_ext_diu_2 + s.hor_ext_noc_1 + s.hor_ext_noc_2))) * 60,0)) || '|' as dato_rtps
+
+  from (
+		Select trim(m.tipo_doc_ident_rtps) as tipo_doc_ident_rtps,
+				 m.nro_doc_ident_rtps        as nro_doc_ident_rtps,
+				 Nvl(Sum(
+							 case when usf_rh_is_dia_descanso_int(m.cod_trabajador, a.fec_movim) = 1 then 
+								a.hor_diu_nor + a.hor_ext_diu_1 + a.hor_ext_diu_2
+							 else
+								0
+							 end ),0) as hor_diu_dom,
+				 Nvl(Sum(
+							 case when usf_rh_is_dia_descanso_int(m.cod_trabajador, a.fec_movim) = 1 then 
+								a.hor_noc_nor + a.hor_ext_noc_1 + a.hor_ext_noc_2
+							 else
+								0
+							 end ),0) as hor_noc_dom,                
+				 Nvl(Sum(case when usf_rh_is_dia_descanso_int(m.cod_trabajador, a.fec_movim) = 0 then 
+								a.hor_diu_nor
+							 else
+								0
+							 end),0) as hor_diu_nor,
+				 Nvl(Sum(case when usf_rh_is_dia_descanso_int(m.cod_trabajador, a.fec_movim) = 0 then 
+								a.hor_ext_diu_1
+							 else
+								0
+							 end),0) as hor_ext_diu_1,
+				 Nvl(Sum(case when usf_rh_is_dia_descanso_int(m.cod_trabajador, a.fec_movim) = 0 then 
+								a.hor_ext_diu_2
+							 else
+								0
+							 end),0) as hor_ext_diu_2,
+				 Nvl(Sum(case when usf_rh_is_dia_descanso_int(m.cod_trabajador, a.fec_movim) = 0 then 
+								a.hor_noc_nor
+							 else
+								0
+							 end),0) as hor_noc_nor,
+				 Nvl(Sum(case when usf_rh_is_dia_descanso_int(m.cod_trabajador, a.fec_movim) = 0 then 
+								a.hor_ext_noc_1
+							 else
+								0
+							 end),0) as hor_ext_noc_1,
+				 Nvl(Sum(case when usf_rh_is_dia_descanso_int(m.cod_trabajador, a.fec_movim) = 0 then 
+								a.hor_ext_noc_2
+							 else
+								0
+							 end),0) as hor_ext_noc_2
+		  from asistencia a, 
+				 maestro 	m
+		 Where a.cod_trabajador = m.cod_trabajador
+			AND INSTR(:as_cod_origen, M.COD_ORIGEN) > 0 
+			and to_char(a.fec_movim, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+		Group by trim(m.tipo_doc_ident_rtps) ,
+				 m.nro_doc_ident_rtps
+		union all
+		Select trim(m.tipo_doc_ident_rtps) as tipo_doc_ident_rtps,
+				 m.nro_doc_ident_rtps        as nro_doc_ident_rtps,
+				 NVL(sum(
+				  case when usf_rh_is_dia_descanso_int(m.cod_trabajador, p.fec_parte) = 1 then 
+					 pd.cant_horas_diu
+				  else
+					 0
+				  end),0) as hrs_diu_dom,
+				 NVL(sum(
+				  case when usf_rh_is_dia_descanso_int(m.cod_trabajador, p.fec_parte) = 1 then 
+					 pd.cant_horas_noc
+				  else
+					 0
+				  end),0) as hrs_noc_dom,
+			  -- Horas Diurnas
+				 NVL(sum(
+				  case when usf_rh_is_dia_descanso_int(m.cod_trabajador, p.fec_parte) = 0 then 
+					 CASE WHEN pd.cant_horas_diu > 8 THEN 8 
+						  ELSE pd.cant_horas_diu END
+				  else
+					 0
+				  end),0) as hrs_dia_nor,
+				 NVL(sum(
+				  case when usf_rh_is_dia_descanso_int(m.cod_trabajador, p.fec_parte) = 0 then 
+					 CASE WHEN pd.cant_horas_diu > 10 THEN 2
+						  when pd.cant_horas_diu > 8 then pd.cant_horas_diu - 8 
+						  else 0 END
+				  else
+					 0
+				  end),0) as hrs_dia_ext_25,
+				 NVL(sum(
+				  case when usf_rh_is_dia_descanso_int(m.cod_trabajador, p.fec_parte) = 0 then 
+					 CASE WHEN pd.cant_horas_diu > 10 THEN pd.cant_horas_diu - 10
+						  else 0 END
+				  else
+					 0
+				  end),0) as hrs_dia_ext_35,
+			  -- Horas Nocturnas
+				 NVL(sum(
+				  case when usf_rh_is_dia_descanso_int(m.cod_trabajador, p.fec_parte) = 0 then 
+					 CASE WHEN pd.cant_horas_noc > 8 THEN 8 
+						  ELSE pd.cant_horas_noc END
+				  else
+					 0
+				  end),0) as hrs_dia_noc,
+				 NVL(sum(
+				  case when usf_rh_is_dia_descanso_int(m.cod_trabajador, p.fec_parte) = 0 then 
+					 CASE   WHEN pd.cant_horas_noc > 10 THEN 2 
+								when pd.cant_horas_noc > 8 then pd.cant_horas_noc - 8 
+						  else 0 END
+				  else
+					 0
+				  end),0) as hrs_noc_ext_25,
+				 NVL(sum(
+				  case when usf_rh_is_dia_descanso_int(m.cod_trabajador, p.fec_parte) = 0 then 
+					 CASE WHEN pd.cant_horas_noc > 10 THEN pd.cant_horas_noc - 10
+					 else 0 END
+				  else
+					 0
+				  end),0) as hrs_noc_ext_35
+		  from tg_pd_destajo     p,
+				 tg_pd_destajo_det pd,
+				 maestro           m,
+				 tg_tarifario      tf
+		 Where p.nro_parte       = pd.nro_parte
+			and pd.cod_trabajador = m.cod_trabajador
+			and p.cod_especie   = tf.cod_especie
+			and p.cod_presentacion = tf.cod_presentacion
+			and p.cod_tarea        = tf.cod_tarea
+			and p.flag_estado 	  <> '0'
+			AND INSTR(:as_cod_origen, M.COD_ORIGEN) > 0 
+			and pd.cant_horas_noc + pd.cant_horas_diu > 0
+			and to_char(p.fec_parte, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+		Group by trim(m.tipo_doc_ident_rtps),
+				 m.nro_doc_ident_rtps        
+		) S       
+group by s.tipo_doc_ident_rtps || '|' ||
+         s.nro_doc_ident_rtps  || '|'
+
+
+" arguments=(("an_year", number),("an_mes", number),("as_cod_origen", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="14" y="4" height="76" width="4562" format="[general]" html.valueishtml="0"  name=dato_rtps visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

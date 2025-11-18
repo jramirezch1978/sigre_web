@@ -1,0 +1,37 @@
+﻿$PBExportHeader$f_protect.srf
+global type f_protect from function_object
+end type
+
+forward prototypes
+global subroutine f_protect (datawindow dw_m, ref integer ii_protect)
+end prototypes
+
+global subroutine f_protect (datawindow dw_m, ref integer ii_protect);String ls_colname, ls_value
+Integer li_totcol, li_x, li_pos
+Long ll_row
+
+ll_row = dw_m.GetRow()
+
+IF ii_protect = 0 THEN
+	ii_protect = 1
+ELSE
+	ii_protect = 0
+END IF
+
+ls_value = String(ii_protect)
+li_totcol = Integer(dw_m.Describe("DataWindow.Column.Count"))
+
+FOR li_x = 1 TO li_totcol
+	ls_colname = "#" + String(li_x) + ".dbName"
+	ls_colname = dw_m.Describe(ls_colname)
+	li_pos = Pos(ls_colname,".")
+	ls_colname = Mid(ls_colname,li_pos + 1)
+	ls_colname = ls_colname + ".Protect=" + ls_value
+	ls_colname = dw_m.Modify(ls_colname)
+NEXT
+
+IF ll_row > 0 THEN		//AND is_dwform = 'tabular'
+	dw_m.SetRow(ll_row)
+END IF
+end subroutine
+

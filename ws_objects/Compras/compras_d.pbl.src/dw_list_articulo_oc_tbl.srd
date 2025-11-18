@@ -1,0 +1,37 @@
+﻿$PBExportHeader$dw_list_articulo_oc_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ retrieve="SELECT DISTINCT 
+		 A.COD_ART,
+       A.DESC_ART,
+       A.UND
+       
+FROM   ARTICULO A,
+       ARTICULO_MOV_PROY  AMP,
+       ORDEN_COMPRA       OC
+
+WHERE  A.COD_ART    = AMP.COD_ART
+  AND  AMP.TIPO_DOC = (SELECT DOC_OC FROM LOGPARAM WHERE RECKEY = '1')
+  AND  OC.NRO_OC    = AMP.NRO_DOC
+  AND  AMP.FLAG_ESTADO <> '0'
+  AND  OC.FLAG_ESTADO <> '0'
+  AND  OC.FEC_REGISTRO BETWEEN :AD_FECHA_INI  AND :AD_FECHA_FIN
+  AND  OC.COD_ORIGEN LIKE :AS_ORIGEN" arguments=(("AD_FECHA_INI", date),("AD_FECHA_FIN", date),("AS_ORIGEN", string))  sort="cod_art A " )
+text(band=header alignment="2" text="Cod Art" border="2" color="8388608" x="5" y="4" height="56" width="357" html.valueishtml="0"  name=articulo_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripcion" border="2" color="8388608" x="366" y="4" height="56" width="1769" html.valueishtml="0"  name=articulo_desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="8388608" x="2139" y="4" height="56" width="160" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="0" height="68" width="357" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="366" y="0" height="68" width="1769" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="2139" y="0" height="68" width="160" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

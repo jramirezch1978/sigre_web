@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_verificacion_monto_oc.srf
+global type f_verificacion_monto_oc from function_object
+end type
+
+forward prototypes
+global subroutine f_verificacion_monto_oc (string as_origen, string as_nro_oc, ref decimal adc_monto_fac, ref decimal adc_monto_prov)
+end prototypes
+
+global subroutine f_verificacion_monto_oc (string as_origen, string as_nro_oc, ref decimal adc_monto_fac, ref decimal adc_monto_prov);
+
+
+
+//recupera monto facturado
+select Nvl(oc.monto_total,0),Nvl(oc.monto_facturado,0)
+  into :adc_monto_prov,:adc_monto_fac
+  from orden_compra oc
+ where (oc.cod_origen = :as_origen ) and
+ 		 (oc.nro_oc		 = :as_nro_oc );
+  
+  
+
+	
+
+
+       
+       
+
+end subroutine
+

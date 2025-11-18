@@ -1,0 +1,50 @@
+﻿$PBExportHeader$d_roles_superpuestos_det.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=448 color="536870912" )
+header[2](height=76 color="536870912" )
+summary(height=84 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=objeto dbname="objeto" )
+ column=(type=number updatewhereclause=yes name=objeto_2 dbname="objeto_2" )
+ retrieve="select go.grupo, 
+       os.sistema || ' ' || go.objeto || ' (' || case go.flag_insertar  when '1' then 'I' else ' ' end
+                         || case go.flag_eliminar  when '1' then 'E' else ' ' end
+                         || case go.flag_modificar when '1' then 'M' else ' ' end
+                         || case go.flag_consultar when '1' then 'C' else ' ' end
+                         || ')' objeto
+  from grp_obj go, objeto_sis os
+ where go.objeto = os.objeto
+   and go.grupo <> 'UsuRes'
+   and go.grupo in ( 
+       select go.grupo
+         from grp_obj go
+        where go.grupo <> 'UsuRes'
+          and go.objeto = :as_objeto
+   )
+  order by os.sistema, go.objeto, go.grupo" arguments=(("as_objeto", string))  sort="objeto A " )
+text(band=background alignment="2" text="Roles super-puestos" border="1" color="0" x="439" y="48" height="80" width="2030" html.valueishtml="0"  name=titulo visible="1"  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=background alignment="1" text="gs_user" border="0" color="0" x="2789" y="92" height="56" width="242" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=background alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="0" x="2587" y="12" height="56" width="443" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=background alignment="1" expression="today()"border="0" color="0" x="2514" y="172" height="56" width="517" format="dd/mm/yyyy   hh:mm:ss" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=background alignment="0" text="Count Of Objeto" border="0" color="33554432" x="9" y="388" height="56" width="1559" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=background alignment="0" text="Grupo" border="0" color="33554432" x="1577" y="388" height="56" width="256" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[1] alignment="0" text="cod_obj" border="0" color="0" x="9" y="272" height="56" width="197" html.valueishtml="0"  name=t_cod_obj visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header[1] filename="gs_logo" x="18" y="12" height="172" width="389" border="0"  name=p_logo visible="1" )
+text(band=header[1] alignment="0" text="gs_empresa" border="0" color="0" x="9" y="200" height="56" width="389" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header[2] alignment="0" text="Objeto" border="0" color="65535" x="9" y="4" height="68" width="1559" html.valueishtml="0"  name=objeto_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header[2] alignment="2" text="@grupo" border="0" color="65535" x="1577" y="4" height="60" width="256" html.valueishtml="0"  name=objeto_2_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header[2] alignment="2" text="Total " border="0" color="65535" x="1842" y="4" height="64" width="210" html.valueishtml="0"  name=grand_count_objeto_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="64" width="1559" format="[general]" html.valueishtml="0"  name=objeto visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="1577" y="4" height="64" width="256" format="[general]" html.valueishtml="0"  name=objeto_2 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="0" color="33554432" x="1842" y="4" height="64" width="210" format="[general]" html.valueishtml="0"  name=grand_count_objeto visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="~"Total~""border="0" color="33554432" x="9" y="4" height="72" width="1559" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(objeto_2 for all )"border="0" color="33554432" x="1577" y="4" height="72" width="256" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_count_objeto for all )"border="0" color="33554432" x="1842" y="4" height="72" width="210" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "grupo" rows = "objeto" values = "count(objeto for crosstab)" sourcenames = "grupo, objeto")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

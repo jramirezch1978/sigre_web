@@ -1,0 +1,42 @@
+﻿$PBExportHeader$d_abc_lista_c_retencion_anulados_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_certificado dbname="retencion_igv_crt.nro_certificado" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_emision dbname="retencion_igv_crt.fecha_emision" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen dbname="retencion_igv_crt.origen" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_reg_caja_ban dbname="retencion_igv_crt.nro_reg_caja_ban" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=proveedor dbname="retencion_igv_crt.proveedor" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="retencion_igv_crt.flag_estado" values="Anulado	0/" )
+ column=(type=char(0) updatewhereclause=yes name=flag_elim dbname="retencion_igv_crt.flag_elim" values="	1/	0" )
+ retrieve="SELECT  ~"RETENCION_IGV_CRT~".~"NRO_CERTIFICADO~" ,
+           ~"RETENCION_IGV_CRT~".~"FECHA_EMISION~" ,
+           ~"RETENCION_IGV_CRT~".~"ORIGEN~" ,
+           ~"RETENCION_IGV_CRT~".~"NRO_REG_CAJA_BAN~" ,
+           ~"RETENCION_IGV_CRT~".~"PROVEEDOR~" ,
+           ~"RETENCION_IGV_CRT~".~"FLAG_ESTADO~" ,
+           null as flag_elim    
+   FROM ~"RETENCION_IGV_CRT~"      
+        WHERE ( ~"RETENCION_IGV_CRT~".~"FLAG_ESTADO~" = '0' ) and
+          ( TO_CHAR(~"RETENCION_IGV_CRT~".~"FECHA_EMISION~",'YYYYMMDD') >= :ad_fecha_inicio ) And 
+          ( TO_CHAR(~"RETENCION_IGV_CRT~".~"FECHA_EMISION~",
+'YYYYMMDD') <= :ad_fecha_final ) And          ( ~"RETENCION_IGV_CRT~".~"NRO_CERTIFICADO~" like :as_nro_certificado )   " update="RETENCION_IGV_CRT" updatewhere=1 updatekeyinplace=yes arguments=(("ad_fecha_inicio", string),("ad_fecha_final", string),("as_nro_certificado", string))  sort="fecha_emision A " )
+text(band=header alignment="2" text="N. Cert." border="2" color="8388608" x="14" y="8" height="64" width="302" html.valueishtml="0"  name=nro_certificado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fec. Emision" border="2" color="8388608" x="320" y="8" height="64" width="293" html.valueishtml="0"  name=fecha_emision_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="617" y="8" height="64" width="160" html.valueishtml="0"  name=origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="R.C.Banco" border="2" color="8388608" x="782" y="8" height="64" width="338" html.valueishtml="0"  name=nro_reg_caja_ban_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Proveedor" border="2" color="8388608" x="1125" y="8" height="64" width="265" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Estado" border="2" color="8388608" x="1394" y="8" height="64" width="265" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="14" y="0" height="68" width="302" format="[general]" html.valueishtml="0"  name=nro_certificado visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="320" y="0" height="68" width="293" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_emision visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="0" x="617" y="0" height="68" width="160" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="0" x="782" y="0" height="68" width="338" format="[general]" html.valueishtml="0"  name=nro_reg_caja_ban visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="0" x="1125" y="0" height="68" width="265" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="0" x="1394" y="0" height="68" width="265" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Eliminación" border="2" color="8388608" x="1664" y="8" height="64" width="251" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=7 alignment="2" tabsequence=10 border="2" color="0" x="1664" y="0" height="68" width="251" format="[general]" html.valueishtml="0"  name=flag_elim visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

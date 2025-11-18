@@ -1,0 +1,60 @@
+﻿$PBExportHeader$d_admin_afp_lista_tbl.srd
+release 11.5;
+datawindow(units=0 timer_interval=0 color=16777215 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=64 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=64 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(2) update=yes updatewhereclause=yes key=yes name=cod_afp dbname="admin_afp.cod_afp" dbalias="afp.cod_afp" validation="match( gettext() , ~"^[A-Za-z][A-Za-z]$~")" validationmsg="'El codigo AFP debe ser un Caracter'" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=desc_afp dbname="admin_afp.desc_afp" dbalias="afp.desc_afp" )
+ column=(type=decimal(2) updatewhereclause=yes name=porc_jubilac dbname="admin_afp.porc_jubilac" dbalias="afp.porc_jubilac" )
+ column=(type=decimal(2) updatewhereclause=yes name=porc_invalidez dbname="admin_afp.porc_invalidez" dbalias="afp.porc_invalidez" )
+ column=(type=decimal(2) updatewhereclause=yes name=porc_comision1 dbname="admin_afp.porc_comision1" dbalias="afp.porc_comision1" )
+ column=(type=decimal(2) updatewhereclause=yes name=porc_comision2 dbname="admin_afp.porc_comision2" dbalias="afp.porc_comision2" )
+ column=(type=decimal(2) updatewhereclause=yes name=imp_tope_jubilac dbname="admin_afp.imp_tope_jubilac" dbalias="afp.imp_tope_jubilac" )
+ column=(type=decimal(2) updatewhereclause=yes name=imp_tope_invalidez dbname="admin_afp.imp_tope_invalidez" dbalias="afp.imp_tope_invalidez" )
+ column=(type=decimal(2) updatewhereclause=yes name=imp_tope_comision1 dbname="admin_afp.imp_tope_comision1" dbalias="afp.imp_tope_comision1" )
+ column=(type=number updatewhereclause=yes name=imp_tope_comision2 dbname="admin_afp.imp_tope_comision2" dbalias="afp.imp_tope_comision2" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="admin_afp.flag_estado" dbalias="afp.flag_estado" )
+ column=(type=char(1) updatewhereclause=yes name=flag_replicacion dbname="admin_afp.flag_replicacion" dbalias="afp.flag_replicacion" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="admin_afp.cod_relacion" dbalias="afp.cod_relacion" )
+ column=(type=decimal(8) updatewhereclause=yes name=factor_interes dbname="admin_afp.factor_interes" dbalias="afp.factor_interes" )
+ column=(type=char(1) updatewhereclause=yes name=flag_aplicar_interes dbname="admin_afp.flag_aplicar_interes" dbalias="afp.flag_aplicar_interes" )
+ column=(type=char(2) updatewhereclause=yes name=cod_pension_rtps dbname="admin_afp.cod_pension_rtps" dbalias="afp.cod_pension_rtps" )
+ column=(type=char(100) updatewhereclause=yes name=desc_pension_rtps dbname="rrhh_pensiones_rtps.desc_pension_rtps" dbalias="r.desc_pension_rtps" )
+ retrieve="  SELECT afp.COD_AFP,   
+         afp.DESC_AFP,   
+         afp.PORC_JUBILAC,   
+         afp.PORC_INVALIDEZ,   
+         afp.PORC_COMISION1,   
+			afp.PORC_COMISION2,   
+         afp.IMP_TOPE_JUBILAC,   
+         afp.IMP_TOPE_INVALIDEZ,   
+         afp.IMP_TOPE_COMISION1,  
+			afp.IMP_TOPE_COMISION2,  
+         afp.FLAG_ESTADO,   
+         afp.FLAG_REPLICACION,   
+         afp.COD_RELACION,   
+         afp.FACTOR_INTERES,   
+         afp.FLAG_APLICAR_INTERES,   
+         afp.COD_PENSION_RTPS,   
+         r.DESC_PENSION_RTPS  
+    FROM ADMIN_AFP afp,   
+         RRHH_PENSIONES_RTPS r  
+   WHERE ( afp.cod_pension_rtps = r.cod_pension_rtps (+))   
+ORDER BY afp.COD_AFP ASC   " update="ADMIN_AFP" updatewhere=1 updatekeyinplace=yes )
+text(band=header alignment="2" text="Código" border="2" color="0" x="5" y="4" height="56" width="229" html.valueishtml="0"  name=cod_afp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="238" y="4" height="56" width="933" html.valueishtml="0"  name=desc_afp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="0" x="5" y="4" height="56" width="229" format="[general]" html.valueishtml="0"  name=cod_afp visible="1" edit.limit=2 edit.case=upper edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="238" y="4" height="56" width="933" format="[general]" html.valueishtml="0"  name=desc_afp visible="1" edit.limit=30 edit.case=upper edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

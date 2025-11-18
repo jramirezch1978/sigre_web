@@ -1,0 +1,70 @@
+﻿$PBExportHeader$d_clientes_v2_ff.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=1504 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cliente dbname="fl_clientes.cliente" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=direccion_oficina dbname="fl_clientes.direccion_oficina" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=direccion_planta dbname="fl_clientes.direccion_planta" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=representante_legal dbname="fl_clientes.representante_legal" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=telefono01 dbname="fl_clientes.telefono01" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=telefono02 dbname="fl_clientes.telefono02" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=fax dbname="fl_clientes.fax" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=ubigeo_oficina dbname="fl_clientes.ubigeo_oficina" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=ubigeo_planta dbname="fl_clientes.ubigeo_planta" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=proveedor dbname="fl_clientes.proveedor" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="fl_clientes.flag_estado" initial="1" values="Activo	1/No activo	0/" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(20) updatewhereclause=yes name=desc_ubigeo_1 dbname="tg_ubigeo.ubige_descripcion" )
+ column=(type=char(20) updatewhereclause=yes name=desc_ubigeo_2 dbname="tg_ubigeo.ubige_descripcion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="fl_clientes.flag_replicacion" )
+ retrieve="  SELECT FLC.CLIENTE,   
+         FLC.DIRECCION_OFICINA,   
+         FLC.DIRECCION_PLANTA,   
+         FLC.REPRESENTANTE_LEGAL,   
+         FLC.TELEFONO01,   
+         FLC.TELEFONO02,   
+         FLC.FAX,   
+         FLC.UBIGEO_OFICINA,   
+         FLC.UBIGEO_PLANTA,   
+         FLC.PROVEEDOR,   
+         FLC.FLAG_ESTADO,   
+         P.NOM_PROVEEDOR,   
+         TG_UBIGEO_A.UBIGE_DESCRIPCION,   
+         TG_UBIGEO_B.UBIGE_DESCRIPCION,
+			FLC.FLAG_REPLICACION
+    FROM FL_CLIENTES FLC,   
+         PROVEEDOR P,   
+         TG_UBIGEO TG_UBIGEO_A,   
+         TG_UBIGEO TG_UBIGEO_B  
+   WHERE FLC.ubigeo_planta = TG_UBIGEO_B.ubigeo_codigo (+)
+     and FLC.ubigeo_oficina = TG_UBIGEO_A.ubigeo_codigo (+)
+     and FLC.CLIENTE = P.PROVEEDOR 
+     and FLC.CLIENTE = :as_proveedor
+" update="FL_CLIENTES" updatewhere=1 updatekeyinplace=no arguments=(("as_proveedor", string)) )
+groupbox(band=detail text="Teléfonos"border="5" color="33554432" x="37" y="436" height="252" width="1312"  name=gb_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+groupbox(band=detail text="Estado"border="5" color="33554432" x="1403" y="436" height="252" width="649"  name=gb_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+groupbox(band=detail text="Dirección"border="5" color="33554432" x="23" y="168" height="240" width="2350"  name=gb_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="33554432" x="265" y="16" height="52" width="325" format="[general]" html.valueishtml="0"  name=cliente pointer="h:\Source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="Código:" border="0" color="33554432" x="55" y="16" height="56" width="192" html.valueishtml="0"  name=cliente_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Representante Legal:" border="0" color="33554432" x="55" y="100" height="56" width="539" html.valueishtml="0"  name=representante_legal_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="5" color="33554432" x="622" y="12" height="56" width="1550" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=4 alignment="0" tabsequence=20 border="5" color="33554432" x="622" y="100" height="52" width="1550" format="[general]" html.valueishtml="0"  name=representante_legal visible="1" edit.limit=50 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="Planta:" border="0" color="33554432" x="46" y="332" height="56" width="197" html.valueishtml="0"  name=direccion_planta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="5" color="33554432" x="1847" y="332" height="56" width="485" format="[general]" html.valueishtml="0"  name=desc_ubigeo_2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=detail alignment="0" text="Oficina:" border="0" color="33554432" x="46" y="248" height="56" width="197" html.valueishtml="0"  name=direccion_oficina_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="5" color="33554432" x="1847" y="248" height="56" width="485" format="[general]" html.valueishtml="0"  name=desc_ubigeo_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=11 alignment="0" tabsequence=100 border="0" color="33554432" x="1541" y="516" height="128" width="347" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" radiobuttons.columns=1 radiobuttons.scale=no radiobuttons.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Fax:" border="0" color="33554432" x="672" y="516" height="56" width="105" html.valueishtml="0"  name=fax_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Oficina:" border="0" color="33554432" x="105" y="516" height="56" width="183" html.valueishtml="0"  name=telefono01_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Planta:" border="0" color="33554432" x="123" y="592" height="56" width="165" html.valueishtml="0"  name=telefono02_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=80 border="5" color="33554432" x="795" y="520" height="52" width="315" format="[general]" html.valueishtml="0"  name=fax visible="1" editmask.mask="##########" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=70 border="5" color="33554432" x="311" y="520" height="52" width="302" format="[general]" html.valueishtml="0"  name=telefono01 visible="1" editmask.mask="##########" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=90 border="5" color="33554432" x="311" y="596" height="52" width="302" format="[general]" html.valueishtml="0"  name=telefono02 visible="1" editmask.mask="##########" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=30 border="5" color="33554432" x="261" y="248" height="56" width="1353" format="[general]" html.valueishtml="0"  name=direccion_oficina visible="1" edit.limit=50 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=50 border="5" color="33554432" x="261" y="332" height="56" width="1353" format="[general]" html.valueishtml="0"  name=direccion_planta visible="1" edit.limit=50 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=40 border="5" color="33554432" x="1632" y="248" height="56" width="197" format="[general]" html.valueishtml="0"  name=ubigeo_oficina pointer="h:\Source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=60 border="5" color="33554432" x="1632" y="332" height="56" width="197" format="[general]" html.valueishtml="0"  name=ubigeo_planta pointer="h:\Source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

@@ -1,0 +1,98 @@
+﻿$PBExportHeader$d_abc_rpt_articulos_iqpf_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 80 print.margin.right = 80 print.margin.top = 70 print.margin.bottom = 70 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=492 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=52 color="536870912" )
+table(column=(type=char(6) updatewhereclause=yes name=almacen dbname="autorizacion_iqpf.almacen" )
+ column=(type=char(60) updatewhereclause=yes name=almacen_desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="autorizacion_iqpf_det.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=datetime updatewhereclause=yes name=fecha_emision dbname="autorizacion_iqpf.fecha_emision" )
+ column=(type=datetime updatewhereclause=yes name=fecha_vencimiento dbname="autorizacion_iqpf.fecha_vencimiento" )
+ column=(type=number updatewhereclause=yes name=cant_autorizada dbname="cant_autorizada" )
+ column=(type=number updatewhereclause=yes name=cantidad_ingresada dbname="cantidad_ingresada" )
+ column=(type=number updatewhereclause=yes name=cantidad_despachada dbname="cantidad_despachada" )
+ retrieve="SELECT AI.ALMACEN,
+       AL.DESC_ALMACEN,
+       AID.COD_ART, A.NOM_ARTICULO, A.UND,
+       AI.FECHA_EMISION,
+       AI.FECHA_VENCIMIENTO,
+       SUM(NVL(AID.CANTIDAD,0) + NVL(AID.AMPLIACIONES,0)) AS Cant_Autorizada,
+             (select sum(nvl(amp.cant_procesada,0))
+                from orden_compra oc,
+                     articulo_mov_proy amp
+               where trunc(oc.fec_registro) BETWEEN trunc(AI.FECHA_EMISION) and trunc(AI.FECHA_VENCIMIENTO)
+                 AND amp.cod_origen         = oc.cod_origen
+                 AND amp.nro_doc            = oc.nro_oc
+                 AND amp.tipo_doc           = (SELECT l.doc_oc FROM logparam l WHERE l.reckey = '1')
+                 AND amp.cod_art =  AID.COD_ART
+                 AND amp.almacen = ai.almacen) AS CANTIDAD_INGRESADA,
+             (SELECT SUM(NVL(AM.CANT_PROCESADA,0))
+                FROM VALE_MOV                     VM,
+                     ARTICULO_MOV                 AM,
+                     ARTICULO_MOV_TIPO            AMT
+       
+                WHERE VM.COD_ORIGEN = AM.COD_ORIGEN
+                  AND VM.NRO_VALE   = AM.NRO_VALE
+                  AND AMT.TIPO_MOV  = VM.TIPO_MOV
+                  AND AMT.FACTOR_SLDO_TOTAL = -1
+                  AND trunc(VM.fec_registro) BETWEEN trunc(AI.FECHA_EMISION) and trunc(AI.FECHA_VENCIMIENTO)
+                  AND VM.ALMACEN = AI.ALMACEN
+                  AND AM.COD_ART = AID.COD_ART) AS CANTIDAD_DESPACHADA
+                        
+  FROM ALMACEN                AL,
+       AUTORIZACION_IQPF      AI,
+       Autorizacion_Iqpf_Det  AID, 
+       ARTICULO               A
+ WHERE AL.ALMACEN(+) = AI.ALMACEN
+   AND AID.NRO_FORMULARIO = AI.NRO_FORMULARIO
+   AND A.COD_ART = AID.COD_ART
+   AND trunc(ai.fecha_emision) BETWEEN trunc(:ad_fecha1) and trunc(:ad_fecha2)
+  
+  GROUP BY AI.ALMACEN,
+       AL.DESC_ALMACEN,
+       AID.COD_ART, A.NOM_ARTICULO,
+       A.UND,
+       AI.FECHA_EMISION,
+       AI.FECHA_VENCIMIENTO" arguments=(("ad_fecha1", date),("ad_Fecha2", date)) )
+bitmap(band=header filename="gs_logo" x="27" y="36" height="184" width="370" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="27" y="236" height="56" width="370" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="CONTROL  GENERAL  DE ARTICULOS IQPF" border="1" color="0" x="1207" y="76" height="92" width="2478" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Hasta" border="2" color="0" x="2450" y="236" height="56" width="242" html.valueishtml="0"  name=fec_hasta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="text" border="2" color="0" x="2706" y="236" height="56" width="370" html.valueishtml="0"  name=t_hasta visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Desde" border="2" color="0" x="1806" y="236" height="56" width="242" html.valueishtml="0"  name=fec_desde_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="text" border="2" color="0" x="2062" y="236" height="56" width="338" html.valueishtml="0"  name=t_desde visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Almacén" border="2" color="0" x="41" y="388" height="44" width="1111" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Almacen" border="2" color="0" x="41" y="444" height="44" width="233" html.valueishtml="0"  name=autorizacion_iqpf_almacen_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Desc Almacen" border="2" color="0" x="288" y="444" height="44" width="864" html.valueishtml="0"  name=almacen_desc_almacen_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Artículo" border="2" color="0" x="1166" y="388" height="44" width="1714" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="1166" y="444" height="44" width="498" html.valueishtml="0"  name=autorizacion_iqpf_det_cod_art_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Nombre" border="2" color="0" x="1678" y="444" height="44" width="1056" html.valueishtml="0"  name=articulo_nom_articulo_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Und" border="2" color="0" x="2747" y="444" height="44" width="133" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Periodo Autorizado" border="2" color="0" x="2894" y="388" height="44" width="416" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="F. Inicio" border="2" color="0" x="2894" y="444" height="44" width="201" html.valueishtml="0"  name=autorizacion_iqpf_fecha_emision_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="F. Fin" border="2" color="0" x="3109" y="444" height="44" width="201" html.valueishtml="0"  name=autorizacion_iqpf_fecha_vencimiento_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Cantidad Autorizada" border="2" color="0" x="3323" y="388" height="100" width="315" html.valueishtml="0"  name=cant_autorizada_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Cantidad Ingresada" border="2" color="0" x="3653" y="388" height="100" width="315" html.valueishtml="0"  name=cantidad_ingresada_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Cantidad Despachada" border="2" color="0" x="3982" y="388" height="100" width="315" html.valueishtml="0"  name=cantidad_despachada_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' / ' + pageCount()"border="0" color="0" x="3781" y="32" height="56" width="530" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="gs_user" border="0" color="0" x="4069" y="112" height="56" width="242" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="3781" y="192" height="56" width="530" format="dd/mm/yyyy  hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="41" y="4" height="44" width="233" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="288" y="4" height="44" width="864" format="[general]" html.valueishtml="0"  name=almacen_desc_almacen visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1166" y="4" height="44" width="498" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1678" y="4" height="44" width="1056" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2747" y="4" height="44" width="133" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2894" y="4" height="44" width="201" format="[shortdate]" html.valueishtml="0"  name=fecha_emision visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="3109" y="4" height="44" width="201" format="[shortdate]" html.valueishtml="0"  name=fecha_vencimiento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="3323" y="4" height="44" width="315" format="###,###.000" html.valueishtml="0"  name=cant_autorizada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="3653" y="4" height="44" width="315" format="###,###.000" html.valueishtml="0"  name=cantidad_ingresada pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="3982" y="4" height="44" width="315" format="###,###.000" html.valueishtml="0"  name=cantidad_despachada pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

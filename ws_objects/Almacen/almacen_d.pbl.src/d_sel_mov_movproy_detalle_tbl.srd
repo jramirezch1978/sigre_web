@@ -1,0 +1,41 @@
+﻿$PBExportHeader$d_sel_mov_movproy_detalle_tbl.srd
+$PBExportComments$Detalle del vale mostrando tipo y numero de documento referencia segun articulo_mov_proy
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=88 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="articulo_mov_proy.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="articulo_mov_proy.nro_doc" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="articulo_mov_proy.cod_origen" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_mov dbname="articulo_mov_proy.nro_mov" )
+ column=(type=number updatewhereclause=yes name=cant_proy dbname="cant_proy" )
+ column=(type=number updatewhereclause=yes name=cant_proc dbname="cant_proc" )
+ retrieve="  SELECT ~"ARTICULO_MOV_PROY~".~"TIPO_DOC~"   ,   
+         ~"ARTICULO_MOV_PROY~".~"NRO_DOC~"    ,   
+			~"ARTICULO_MOV_PROY~".~"COD_ORIGEN~" ,   
+			~"ARTICULO_MOV_PROY~".~"NRO_MOV~"    ,   
+         Sum(nvl(articulo_mov_proy.cant_proyect,0)) as cant_proy,
+         Sum(nvl(articulo_mov_proy.cant_procesada,0)) as cant_proc  
+    FROM ~"ARTICULO_MOV~",   
+         ~"ARTICULO_MOV_PROY~"  
+   WHERE  ( ~"ARTICULO_MOV_PROY~".~"COD_ORIGEN~" = ~"ARTICULO_MOV~".~"ORIGEN_MOV_PROY~" (+)) and  
+          ( ~"ARTICULO_MOV_PROY~".~"NRO_MOV~"    = ~"ARTICULO_MOV~".~"NRO_MOV_PROY~"    (+)) and  
+         ((~"ARTICULO_MOV_PROY~".~"TIPO_DOC~"    = :as_tipo_doc                        ) and  
+          (~"ARTICULO_MOV_PROY~".~"NRO_DOC~"     = :as_nro_doc                         ))    
+GROUP BY ~"ARTICULO_MOV_PROY~".~"TIPO_DOC~"   ,   
+         ~"ARTICULO_MOV_PROY~".~"NRO_DOC~"    ,
+			~"ARTICULO_MOV_PROY~".~"COD_ORIGEN~" ,   
+			~"ARTICULO_MOV_PROY~".~"NRO_MOV~"       
+" arguments=(("as_tipo_doc", string),("as_nro_doc", string)) )
+text(band=header alignment="2" text="Tipo Doc" border="0" color="0" x="14" y="8" height="56" width="238" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Doc" border="0" color="0" x="256" y="8" height="56" width="402" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="14" y="4" height="76" width="238" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="256" y="4" height="76" width="402" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="677" y="4" height="76" width="370" format="[general]" html.valueishtml="0"  name=cant_proy visible="1" editmask.mask="###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1079" y="4" height="76" width="370" format="[general]" html.valueishtml="0"  name=cant_proc visible="1" editmask.mask="###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1993" y="4" height="76" width="457" format="[general]" html.valueishtml="0"  name=nro_mov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1472" y="4" height="76" width="489" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

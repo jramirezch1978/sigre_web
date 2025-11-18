@@ -1,0 +1,48 @@
+﻿$PBExportHeader$d_abc_detalle_peso_x_prod_x_trab_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=72 color="536870912" )
+summary(height=124 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=codprd dbname="pesaje_balanza_dstj.codprd" )
+ column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="pesaje_balanza_dstj.cod_trabajador" )
+ column=(type=decimal(3) updatewhereclause=yes name=peso dbname="pesaje_balanza_dstj.peso" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="pesaje_balanza_dstj.fecha" )
+ column=(type=char(123) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=char(1) updatewhereclause=yes name=flag_ing_inf dbname="flag_ing_inf" values="Manual	M/Automatica	A/" )
+ retrieve="  SELECT ~"PESAJE_BALANZA_DSTJ~".~"CODPRD~",   
+         ~"PESAJE_BALANZA_DSTJ~".~"COD_TRABAJADOR~",   
+         ~"PESAJE_BALANZA_DSTJ~".~"PESO~",   
+         ~"PESAJE_BALANZA_DSTJ~".~"FECHA~",   
+         Nvl(maestro.apel_paterno,' ')||' '||Nvl(maestro.apel_materno,' ') ||' '||Nvl(maestro.nombre1,' ') ||' '|| Nvl(maestro.nombre2,' ') as nombres,   
+         Nvl(flag_ing_inf,'A') AS flag_ing_inf  
+    FROM ~"PESAJE_BALANZA_DSTJ~",   
+         ~"MAESTRO~"  
+   WHERE ( ~"MAESTRO~".~"COD_TRABAJADOR~" = ~"PESAJE_BALANZA_DSTJ~".~"COD_TRABAJADOR~" ) and  
+         ( ( trunc(~"PESAJE_BALANZA_DSTJ~".~"FECHA~") between :ad_fecha_inicio and :ad_fecha_final ) ) and
+			( ~"PESAJE_BALANZA_DSTJ~".~"CODPRD~" = :as_cod_prod									 ) and
+			( ~"MAESTRO~".~"COD_TRABAJADOR~"  = :as_cod_trabajador							 ) 
+
+			
+" arguments=(("ad_fecha_inicio", date),("ad_fecha_final", date),("as_cod_prod", string),("as_cod_trabajador", string))  sort="codprd A cod_trabajador A fecha A " )
+group(level=1 header.height=152 trailer.height=68 by=("codprd" , "cod_trabajador" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Peso" border="2" color="33554432" x="1161" y="12" height="56" width="329" html.valueishtml="0"  name=pesaje_balanza_dstj_peso_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Informacion" border="2" color="33554432" x="617" y="12" height="56" width="539" html.valueishtml="0"  name=pesaje_balanza_dstj_flag_ing_inf_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fecha y Hora" border="2" color="33554432" x="9" y="12" height="56" width="603" html.valueishtml="0"  name=pesaje_balanza_dstj_fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Trabajador :" border="0" color="8388608" x="18" y="12" height="56" width="297" html.valueishtml="0"  name=pesaje_balanza_dstj_cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="0" text="Producto o Actividad :" border="0" color="8388608" x="18" y="88" height="56" width="567" html.valueishtml="0"  name=codprd_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="608" y="88" height="56" width="553" format="[general]" html.valueishtml="0"  name=codprd visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="343" y="12" height="56" width="247" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="603" y="12" height="56" width="1330" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=123 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="33554432" x="617" y="0" height="68" width="539" format="[general]" html.valueishtml="0"  name=flag_ing_inf visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="0" height="68" width="603" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="dd/mm/yyyy hh:mm:ss" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="33554432" x="1161" y="0" height="68" width="329" format="[general]" html.valueishtml="0"  name=peso visible="1" editmask.mask="###,###.000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="1" text="Total :" border="2" color="33554432" x="786" y="4" height="60" width="370" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(  peso  for group 1 )"border="2" color="33554432" x="1161" y="4" height="60" width="329" format="###,###.000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+button(band=summary text="" defaultpicture=yes enabled=yes action="15" border="1" color="0" x="635" y="12" height="108" width="165" vtextalign="0" htextalign="0"  name=b_1 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

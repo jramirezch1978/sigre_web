@@ -1,0 +1,90 @@
+﻿$PBExportHeader$d_rpt_formato_para_let_retencion_xxxx.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 0 print.margin.top = 0 print.margin.bottom = 0 print.paper.source = 0 print.paper.size = 1 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=960 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=592 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=retencion_igv_crt_nro_certificado dbname="retencion_igv_crt.nro_certificado" )
+ column=(type=datetime updatewhereclause=yes name=retencion_igv_crt_fecha_emision dbname="retencion_igv_crt.fecha_emision" )
+ column=(type=char(8) updatewhereclause=yes name=retencion_igv_crt_proveedor dbname="retencion_igv_crt.proveedor" )
+ column=(type=char(3) updatewhereclause=yes name=doc_tipo_cod_sunat dbname="doc_tipo.cod_sunat" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_ref dbname="doc_referencias.tipo_ref" )
+ column=(type=char(10) updatewhereclause=yes name=doc_referencias_nro_ref dbname="doc_referencias.nro_ref" )
+ column=(type=decimal(2) updatewhereclause=yes name=doc_referencias_importe dbname="doc_referencias.importe" )
+ column=(type=decimal(2) updatewhereclause=yes name=impt_ret_igv dbname="doc_referencias.impt_ret_igv" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(11) updatewhereclause=yes name=proveedor_ruc dbname="proveedor.ruc" )
+ column=(type=datetime updatewhereclause=yes name=cntas_pagar_fecha_emision dbname="cntas_pagar.fecha_emision" )
+ column=(type=char(3) updatewhereclause=yes name=cntas_pagar_cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=char(3) updatewhereclause=yes name=letras_x_pagar_cod_moneda dbname="letras_x_pagar.cod_moneda" )
+ column=(type=char(3) updatewhereclause=yes name=soles dbname="soles" )
+ column=(type=char(40) updatewhereclause=yes name=desc_moneda dbname="desc_moneda" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_det dbname="doc_referencias.importe_det" )
+ column=(type=decimal(3) updatewhereclause=yes name=letras_x_pagar_tasa_cambio dbname="letras_x_pagar.tasa_cambio" )
+ column=(type=char(4) updatewhereclause=yes name=ncp dbname="ncp" )
+ retrieve="  SELECT ~"RETENCION_IGV_CRT~".~"NRO_CERTIFICADO~",   
+         ~"RETENCION_IGV_CRT~".~"FECHA_EMISION~",   
+         ~"RETENCION_IGV_CRT~".~"PROVEEDOR~",   
+         ~"DOC_TIPO~".~"COD_SUNAT~",   
+			~"DOC_REFERENCIAS~".~"TIPO_REF~",   
+         ~"DOC_REFERENCIAS~".~"NRO_REF~",   
+         ~"DOC_REFERENCIAS~".~"IMPORTE~",   
+         ~"DOC_REFERENCIAS~".~"IMP_RET_IGV~" AS IMPT_RET_IGV,   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"PROVEEDOR~".~"RUC~",   
+         ~"CNTAS_PAGAR~".~"FECHA_EMISION~",   
+         ~"CNTAS_PAGAR~".~"COD_MONEDA~",   
+			~"LETRAS_X_PAGAR~".~"COD_MONEDA~",
+         (SELECT COD_SOLES FROM LOGPARAM WHERE RECKEY ='1') AS SOLES,   
+         (SELECT DESCRIPCION FROM MONEDA WHERE COD_MONEDA = (SELECT COD_SOLES FROM LOGPARAM WHERE RECKEY ='1')) AS DESC_MONEDA,   
+			~"DOC_REFERENCIAS~".~"IMPORTE~" AS importe_det,
+			~"LETRAS_X_PAGAR~".~"TASA_CAMBIO~" ,
+			(SELECT NOTA_CRED_NFC FROM FINPARAM WHERE RECKEY = '1') AS NCP
+
+    FROM ~"DOC_REFERENCIAS~",   
+         ~"RETENCION_IGV_CRT~",   
+         ~"DOC_TIPO~",   
+         ~"PROVEEDOR~",   
+         ~"CNTAS_PAGAR~",   
+         ~"LETRAS_X_PAGAR~"  
+   WHERE ( ~"RETENCION_IGV_CRT~".~"ORIGEN~" = ~"LETRAS_X_PAGAR~".~"ORIGEN~" ) and  
+         ( ~"RETENCION_IGV_CRT~".~"NRO_LETRA~" = ~"LETRAS_X_PAGAR~".~"NRO_LETRA~" ) and  
+         ( ~"DOC_TIPO~".~"TIPO_DOC~" = ~"DOC_REFERENCIAS~".~"TIPO_REF~" ) and  
+         ( ~"RETENCION_IGV_CRT~".~"COD_RELACION~" = ~"PROVEEDOR~".~"PROVEEDOR~" ) and  
+         ( ~"DOC_REFERENCIAS~".~"COD_RELACION~" = ~"CNTAS_PAGAR~".~"COD_RELACION~" ) and  
+         ( ~"DOC_REFERENCIAS~".~"TIPO_REF~" = ~"CNTAS_PAGAR~".~"TIPO_DOC~" ) and  
+         ( ~"DOC_REFERENCIAS~".~"NRO_REF~" = ~"CNTAS_PAGAR~".~"NRO_DOC~" ) and  
+			( ~"DOC_REFERENCIAS~".~"FLAG_RET_IGV~" = '1'	) and
+         ( ~"LETRAS_X_PAGAR~".~"COD_RELACION~" = ~"DOC_REFERENCIAS~".~"COD_RELACION~" ) and  
+         ( ~"LETRAS_X_PAGAR~".~"NRO_LETRA~" = ~"DOC_REFERENCIAS~".~"NRO_DOC~" ) and  
+	      (~"DOC_REFERENCIAS~".~"TIPO_DOC~"          = (SELECT doc_letra_pagar FROM finparam WHERE reckey = '1') ) AND			
+			
+			( ~"DOC_REFERENCIAS~".~"COD_RELACION~"         = ~"RETENCION_IGV_CRT~".~"PROVEEDOR~" ) and  
+         ( ( ~"RETENCION_IGV_CRT~".~"NRO_CERTIFICADO~" = :as_nro_ret ) )    
+" arguments=(("as_nro_ret", string)) )
+text(band=header alignment="0" text="T.C :" border="0" color="0" x="1417" y="784" height="56" width="160" html.valueishtml="0"  name=t_1 visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=17 alignment="0" tabsequence=32766 border="0" color="0" x="1618" y="784" height="56" width="283" format="[general]" html.valueishtml="0"  name=caja_bancos_tasa_cambio visible="1" editmask.mask="###,###.000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="Trim( String( retencion_igv_crt_fecha_emision,'mm'))"border="0" color="0" x="3305" y="716" height="52" width="55" format="[GENERAL]" html.valueishtml="0"  name=mes visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="Trim( String( retencion_igv_crt_fecha_emision,'dd'))"border="0" color="0" x="3077" y="716" height="52" width="59" format="[GENERAL]" html.valueishtml="0"  name=dia visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="Trim( String( retencion_igv_crt_fecha_emision,'yyyy'))"border="0" color="0" x="3451" y="716" height="52" width="105" format="[GENERAL]" html.valueishtml="0"  name=ano visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=10 alignment="0" tabsequence=32766 border="0" color="0" x="370" y="724" height="52" width="384" format="[general]" html.valueishtml="0"  name=proveedor_ruc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="0" color="0" x="439" y="624" height="56" width="238" format="[general]" html.valueishtml="0"  name=retencion_igv_crt_proveedor visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=9 alignment="0" tabsequence=32766 border="0" color="0" x="695" y="624" height="56" width="1435" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="233" y="4" height="52" width="110" format="[general]" html.valueishtml="0"  name=doc_tipo_cod_sunat visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="mid( doc_referencias_nro_ref   , 1, 3 )"border="0" color="0" x="859" y="4" height="52" width="206" format="[General]" html.valueishtml="0"  name=serie visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="mid( doc_referencias_nro_ref  , 5,6 )"border="0" color="0" x="1262" y="4" height="52" width="256" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="0" x="1906" y="4" height="52" width="416" format="[shortdate] [time]" html.valueishtml="0"  name=cntas_pagar_fecha_emision visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="3095" y="4" height="52" width="91" format="[general]" html.valueishtml="0"  name=soles visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="3200" y="4" height="52" width="288" format="[general]" html.valueishtml="0"  name=caja_bancos_det_impt_ret_igv visible="1" editmask.mask="###,###0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="2523" y="4" height="52" width="91" format="[general]" html.valueishtml="0"  name=cntas_pagar_cod_moneda visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="1" tabsequence=32766 border="0" color="0" x="2629" y="4" height="52" width="288" format="[general]" html.valueishtml="0"  name=importe_det visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="if(tipo_ref = ncp ,  importe_det   ,0)"border="0" color="0" x="2725" y="116" height="56" width="183" format="###,###0.00" html.valueishtml="0"  name=ncp_importe visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="3721" y="116" height="56" width="91" format="[general]" html.valueishtml="0"  name=tipo_ref visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="0" x="3607" y="116" height="56" width="91" format="[general]" html.valueishtml="0"  name=ncp visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="if(tipo_ref = ncp ,  impt_ret_igv    ,0)"border="0" color="0" x="3200" y="116" height="56" width="183" format="###,###0.00" html.valueishtml="0"  name=ncp_ret visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="0" expression="Trim( f_conv_numlet(string( total_retenciones )) )+' '+ upper(trim(desc_moneda ))"border="0" color="0" x="261" y="112" height="64" width="1582" format="[GENERAL]" html.valueishtml="0"  name=total_en_letras visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="1" expression="sum(  (impt_ret_igv - ncp_ret) - ncp_ret for all )"border="0" color="0" x="3200" y="0" height="56" width="288" format="###,###0.00" html.valueishtml="0"  name=total_retenciones visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="1" expression="sum(  (importe_det - ncp_importe) - ncp_importe for all )"border="0" color="0" x="2629" y="0" height="56" width="288" format="###,###0.00" html.valueishtml="0"  name=total_x_doc visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

@@ -1,0 +1,9 @@
+﻿$PBExportHeader$dp_estado_civil.srp
+PIPELINE(source_connect=RTPS,destination_connect=oemlm1_work5,type=refresh,commit=100,errors=100,keyname="rrhh_estado_civil_rtps")
+SOURCE(name="e_civil",COLUMN(type=double,name="codigo",dbtype="Numeric",nulls_allowed=yes)
+ COLUMN(type=varchar,name="descripcio",dbtype="Char(17)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="flag_estado",dbtype="Char(254)",nulls_allowed=yes))
+RETRIEVE(statement="SELECT e_civil.codigo,              e_civil.descripcio  ,  			'1' as flag_estado      FROM e_civil     ")
+DESTINATION(name="rrhh_estado_civil_rtps",COLUMN(type=char,name="cod_estado_civil",dbtype="CHAR(2)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="descripcion",dbtype="VARCHAR2(50)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_estado",dbtype="CHAR(1)",nulls_allowed=yes))

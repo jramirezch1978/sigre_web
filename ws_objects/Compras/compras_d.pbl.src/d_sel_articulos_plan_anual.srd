@@ -1,0 +1,21 @@
+﻿$PBExportHeader$d_sel_articulos_plan_anual.srd
+$PBExportComments$Muestra los articulos segun el plan anual referente a un año
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ retrieve="PBSELECT( VERSION(400) DISTINCT ()TABLE(NAME=~"articulo_mov_proy~" )  TABLE(NAME=~"articulo~" ) COLUMN(NAME=~"articulo_mov_proy.cod_art~") COLUMN(NAME=~"articulo.nom_articulo~") COLUMN(NAME=~"articulo.und~")    JOIN (LEFT=~"articulo_mov_proy.cod_art~"    OP =~"=~"RIGHT=~"articulo.cod_art~" )WHERE(    EXP1 =~"~~~"ARTICULO_MOV_PROY~~~".~~~"TIPO_MOV~~~"~"   OP =~"=~"    EXP2 =~":as_tipo_mov~"    LOGIC =~"and~" ) WHERE(    EXP1 =~"to_char( ~~~"ARTICULO_MOV_PROY~~~".~~~"FEC_PROYECT~~~", 'YYYY')~"   OP =~"=~"    EXP2 =~":as_anio~"    LOGIC =~"and~" ) WHERE(    EXP1 =~"~~~"ARTICULO_MOV_PROY~~~".~~~"FLAG_ESTADO~~~"~"   OP =~"=~"    EXP2 =~"'1'~" ) ) ARG(NAME = ~"as_tipo_mov~" TYPE = string)  ARG(NAME = ~"as_anio~" TYPE = string) " arguments=(("as_tipo_mov", string),("as_anio", string)) )
+text(band=header alignment="2" text="Codigo" border="2" color="0" x="9" y="8" height="56" width="274" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Descripción " border="2" color="0" x="288" y="8" height="56" width="1184" html.valueishtml="0"  name=nom_articulo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Und" border="2" color="0" x="1477" y="8" height="56" width="123" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="4" height="56" width="274" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="288" y="4" height="56" width="1184" format="[general]" html.valueishtml="0"  name=nom_articulo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="1477" y="4" height="56" width="123" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=footer alignment="2" text="text" border="0" color="0" x="1595" y="300" height="56" width="110" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

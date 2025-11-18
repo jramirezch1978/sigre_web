@@ -1,0 +1,58 @@
+﻿$PBExportHeader$f_commit.srf
+global type f_commit from function_object
+end type
+
+forward prototypes
+global function boolean f_commit (ref transaction atr_trans)
+end prototypes
+
+global function boolean f_commit (ref transaction atr_trans);boolean lb_OK 
+string ls_ErrText
+integer li_DbError, li_SQlCode
+
+
+lb_OK = true
+
+choose case atr_trans.SQLCode
+	case -1
+		li_SQlCode = atr_trans.SQlCode
+		li_DbError = atr_trans.SQLDBCode
+		ls_Errtext = 'Error; the statement failed: ' + atr_trans.SQLErrText
+		lb_OK = false
+		
+	case -2
+		li_SQlCode = atr_trans.SQlCode
+		li_DbError = atr_trans.SQLDBCode
+		ls_Errtext = 'ERROR EN CONVERSION ' + atr_trans.SQLErrText
+		lb_OK = false
+		
+	case 100
+		li_SQlCode = atr_trans.SQlCode
+		li_DbError = atr_trans.SQLDBCode
+		ls_Errtext = 'Fetched row not found (Dato o Registro no encontrado) ' + atr_trans.SQLErrText
+		lb_OK = false
+
+
+	case else
+		if atr_trans.SQLCode <> 0 then
+			li_SQlCode = atr_trans.SQlCode
+			li_DbError = atr_trans.SQLDBCode
+			ls_Errtext = atr_trans.SQLErrText
+			lb_OK = false
+		end if
+end choose
+
+if not lb_OK then
+	ROLLBACK using atr_trans;
+	MessageBox('Error en FUNCTIÓN f_commit()', &
+			  "SQLCode: " + String(li_SQLCode) &
+			+ "~r~nSQLDBCode: " + string(li_dbError) &
+			+ "~r~nSQLErrText: " + ls_ErrText, StopSign!)
+	return false
+else
+	// No ha existido ningún error, por lo tanto puedo hacer commit
+	COMMIT using atr_trans;
+	return true
+end if
+end function
+

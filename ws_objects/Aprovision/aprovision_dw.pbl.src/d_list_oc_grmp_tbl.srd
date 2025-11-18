@@ -1,0 +1,56 @@
+﻿$PBExportHeader$d_list_oc_grmp_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=120 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=proveedor dbname="proveedor.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(10) updatewhereclause=yes name=nro_oc dbname="orden_compra.nro_oc" )
+ column=(type=char(1) updatewhereclause=yes name=flag dbname="flag" values="	1/	0" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ column=(type=number updatewhereclause=yes name=impuesto dbname="impuesto" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="orden_compra.fec_registro" )
+ retrieve="SELECT p.proveedor, p.nom_proveedor, oc.nro_oc, '0' AS flag, 
+		 SUM(amp.cant_proyect * amp.precio_unit) AS importe, SUM(amp.impuesto) AS impuesto,
+       oc.fec_registro
+FROM ap_guia_recepcion_det b,
+     proveedor         p,
+     articulo_mov_proy amp,
+     orden_compra      oc
+WHERE p.proveedor = oc.proveedor 
+  and b.origen_oc	= amp.cod_origen
+  and b.amp_oc	   = amp.nro_mov
+  and oc.nro_oc	= amp.nro_doc
+  AND amp.tipo_doc = (SELECT doc_oc FROM logparam WHERE reckey = '1')
+  and p.proveedor like :as_proveedor
+  and trunc(oc.fec_registro) between trunc(:ad_fecha1) and trunc(:ad_fecha2)
+GROUP BY p.proveedor, p.nom_proveedor, oc.nro_oc, oc.fec_registro
+HAVING SUM(amp.cant_facturada) = 0" arguments=(("as_proveedor", string),("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Nombre
+Proveedor" border="2" color="16777215" x="457" y="4" height="112" width="1376" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Flag
+" border="2" color="16777215" x="9" y="4" height="112" width="155" html.valueishtml="0"  name=flag_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Importe
+Total" border="2" color="16777215" x="2633" y="4" height="112" width="421" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Impuesto
+Total" border="2" color="16777215" x="3058" y="4" height="112" width="421" html.valueishtml="0"  name=impuesto_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Codigo
+Proveedor" border="2" color="16777215" x="169" y="4" height="112" width="283" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fecha
+Registro" border="2" color="16777215" x="2171" y="4" height="112" width="457" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="457" y="4" height="64" width="1376" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=10 border="2" color="33554432" x="9" y="4" height="64" width="155" format="[general]" html.valueishtml="0"  name=flag visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2633" y="4" height="64" width="421" format="[general]" html.valueishtml="0"  name=importe visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="3058" y="4" height="64" width="421" format="[general]" html.valueishtml="0"  name=impuesto visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="169" y="4" height="64" width="283" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="33554432" x="2171" y="4" height="64" width="457" format="[shortdate] [time]" html.valueishtml="0"  name=fec_registro visible="1" editmask.mask="dd/mm/yyyy hh:mm:ss" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="N° Orden
+Compra" border="2" color="16777215" x="1838" y="4" height="112" width="329" html.valueishtml="0"  name=nro_oc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="2" color="33554432" x="1838" y="4" height="64" width="329" format="[general]" html.valueishtml="0"  name=nro_oc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,140 @@
+﻿$PBExportHeader$d_cns_errores_ots.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=380 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=number updatewhereclause=yes name=year dbname="year" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="articulo_mov_proy.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="articulo_mov_proy.nro_doc" )
+ column=(type=char(40) updatewhereclause=yes name=titulo dbname="orden_trabajo.titulo" )
+ column=(type=datetime updatewhereclause=yes name=fec_proyect dbname="articulo_mov_proy.fec_proyect" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="operaciones.oper_sec" )
+ column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="operaciones.cod_labor" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="articulo_mov_proy.cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="articulo_mov_proy.cnta_prsp" )
+ column=(type=number updatewhereclause=yes name=costo_unit dbname="costo_unit" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(1) updatewhereclause=yes name=flag_inventariable dbname="flag_inventariable" values="	1/	0" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="flag_estado" values="	1/	0" )
+ column=(type=char(19) updatewhereclause=yes name=obs dbname="obs" )
+ retrieve="Select distinct 
+	 to_number(to_char(amp.fec_proyect, 'YYYY')) as year,
+	 amp.tipo_doc,
+	 amp.nro_doc,
+	 ot.titulo,
+	 amp.fec_proyect as fec_proyect,
+    op.oper_sec,
+    op.cod_labor,
+    amp.cencos,
+    amp.cnta_prsp,
+    usf_cmp_prec_ult_compra(amp.cod_art, amp.almacen) as costo_unit,
+    NVL(amp.cant_proyect,0) - NVL(amp.cant_procesada,0) as cantidad,
+    a.cod_art,
+    a.desc_art,
+    NVL(a.flag_inventariable, '0') as flag_inventariable,
+    NVL(a.flag_estado, '0') as flag_estado,
+    'MATERIALES DE LA OT' as obs
+  from articulo_mov_proy amp , 
+       articulo          a,
+		 orden_trabajo		 ot,
+       operaciones       op,
+		 tt_pto_selec_ots	 b
+ where amp.cod_art = a.cod_art 
+   and ot.nro_orden = amp.nro_doc
+   and amp.TIPO_DOC = (SELECT DOC_OT FROM logparam WHERE RECKEY = '1' )
+   and op.nro_orden = amp.nro_doc
+   and amp.tipo_mov = (select l.oper_cons_interno from logparam l where reckey = '1')
+   and NVL(amp.flag_estado, '0') in ('1', '3')
+   and to_char(amp.fec_proyect, 'yyyy') = to_char(:ani_year)
+   and ot.ot_adm like :asi_ot_adm
+   and ot.nro_orden = b.nro_doc
+   and (amp.cencos is null or amp.cnta_prsp is null
+        or usf_cmp_prec_ult_compra(amp.cod_art, amp.almacen) = 0
+        or NVL(amp.cant_proyect,0) < NVL(amp.cant_procesada,0)
+        or NVL(a.flag_inventariable, '0') = '0'
+        or NVL(a.flag_estado, '0') = '0'
+		  or amp.fec_proyect is null )
+union
+Select distinct 
+	 to_number(to_char(op.fec_inicio, 'YYYY')) as year,
+	 (select doc_ot from logparam where reckey = '1') as tipo_doc,
+	 ot.nro_orden as nro_doc,
+	 ot.titulo,
+	 op.fec_inicio as fec_proyect,
+    op.oper_sec,
+    op.cod_labor,
+    ot.cencos_slc as cencos,
+    l.cnta_prsp_3ro as cnta_prsp,
+    le.costo_unitario as costo_unit,
+    op.cant_proyect as cantidad,
+    '' as cod_art,
+    '' as desc_art,
+    '' as flag_inventariable,
+    '' as flag_estado,
+    'SERVICIOS DE LA OT' as obs
+ from operaciones    op, 
+      labor_ejecutor le,
+      labor          l,
+      orden_trabajo	 ot,
+		tt_pto_selec_ots b
+ where l.cod_labor     = op.cod_labor
+   and le.cod_labor    = op.cod_labor
+   and le.cod_ejecutor = op.cod_ejecutor
+   and op.nro_orden    = ot.nro_orden
+   and NVL(op.flag_estado, '0') = '3'
+   and to_char(op.fec_inicio, 'yyyy') = to_char(:ani_year)
+   and ot.ot_adm like :asi_ot_adm
+	and ot.nro_orden = b.nro_doc
+   and le.cod_ejecutor = (select p.ejecutor_3ro from prod_param p where reckey = '1')
+   and (ot.cencos_slc is null or l.cnta_prsp_3ro is null
+       or NVL(le.costo_unitario,0) = 0 
+		 or NVL(op.cant_proyect,0) = 0
+		 or op.fec_inicio_est is null)" arguments=(("ani_year", number),("asi_ot_adm", string))  sort="obs A " )
+group(level=1 header.height=232 trailer.height=0 by=("obs" ) header.color="536870912" trailer.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="4096" y="68" height="48" width="297" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="4096" y="128" height="48" width="297" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="4096" y="8" height="48" width="297" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="5" y="4" height="160" width="320" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="5" y="176" height="40" width="320" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="ERRORES EN OT" border="0" color="33554432" x="1166" y="56" height="64" width="1769" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1166" y="148" height="56" width="1769" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=16 alignment="0" tabsequence=32766 border="4" color="33554432" x="32" y="24" height="60" width="1289" format="[general]" html.valueishtml="0"  name=obs visible="1" edit.limit=19 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Año" border="2" color="33554432" x="9" y="172" height="56" width="201" html.valueishtml="0"  name=year_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Tipo Doc" border="2" color="33554432" x="215" y="172" height="56" width="224" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Nro Doc" border="2" color="33554432" x="443" y="172" height="56" width="283" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="OT Titulo" border="2" color="33554432" x="731" y="172" height="56" width="928" html.valueishtml="0"  name=titulo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Fec Proyect" border="2" color="33554432" x="1664" y="172" height="56" width="457" html.valueishtml="0"  name=fec_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Oper Sec" border="2" color="33554432" x="2126" y="172" height="56" width="334" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Cod Labor" border="2" color="33554432" x="2464" y="172" height="56" width="334" html.valueishtml="0"  name=cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Cencos" border="2" color="33554432" x="2802" y="172" height="56" width="270" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Cnta Prsp" border="2" color="33554432" x="3077" y="172" height="56" width="366" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Costo Unit" border="2" color="33554432" x="3447" y="172" height="56" width="329" html.valueishtml="0"  name=costo_unit_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Cantidad" border="2" color="33554432" x="3781" y="172" height="56" width="329" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Cod Art" border="2" color="33554432" x="4114" y="172" height="56" width="357" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Desc Art" border="2" color="33554432" x="4475" y="172" height="56" width="1627" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Inventar?" border="2" color="33554432" x="6107" y="172" height="56" width="238" html.valueishtml="0"  name=flag_inventariable_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Estado Art." border="2" color="33554432" x="6350" y="172" height="56" width="297" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="60" width="201" format="[general]" html.valueishtml="0"  name=year visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="215" y="4" height="60" width="224" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="443" y="4" height="60" width="283" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="731" y="4" height="60" width="928" format="[general]" html.valueishtml="0"  name=titulo visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="1664" y="4" height="60" width="457" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_proyect visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2126" y="4" height="60" width="334" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="33554432" x="2464" y="4" height="60" width="334" format="[general]" html.valueishtml="0"  name=cod_labor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="2802" y="4" height="60" width="270" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="3077" y="4" height="60" width="366" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="3447" y="4" height="60" width="329" format="###,##0.00" html.valueishtml="0"  name=costo_unit visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="3781" y="4" height="60" width="329" format="###,##0.0000" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="4114" y="4" height="60" width="357" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="33554432" x="4475" y="4" height="60" width="1627" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="2" color="33554432" x="6107" y="4" height="60" width="238" format="[general]" html.valueishtml="0"  name=flag_inventariable visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="2" tabsequence=32766 border="2" color="33554432" x="6350" y="4" height="60" width="297" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

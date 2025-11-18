@@ -1,0 +1,97 @@
+﻿$PBExportHeader$d_insumo_reservacion_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=60 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_reservacion dbname="reservacion_det.nro_reservacion" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_item dbname="reservacion_det.nro_item" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=org_amp_ref dbname="reservacion_det.org_amp_ref" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_amp_ref dbname="reservacion_det.nro_amp_ref" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_registro dbname="reservacion_det.fec_registro" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_vencimiento dbname="reservacion_det.fec_vencimiento" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="reservacion_det.cod_usr" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cantidad dbname="reservacion_det.cantidad" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cant_procesada dbname="reservacion_det.cant_procesada" )
+ column=(type=char(6) updatewhereclause=yes name=almacen dbname="articulo_mov_proy.almacen" )
+ column=(type=decimal(4) updatewhereclause=yes name=sldo_total dbname="articulo_almacen.sldo_total" )
+ column=(type=char(1) updatewhereclause=yes name=flag_reposicion dbname="flag_reposicion" values="No	0/Si	1/" )
+ column=(type=datetime updatewhereclause=yes name=fec_proyect dbname="articulo_mov_proy.fec_proyect" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="articulo_mov_proy.oper_sec" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="articulo_mov_proy.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="articulo_mov_proy.nro_doc" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="reservacion_det.flag_estado" values="Activo	1/Cerrado	2/Anulado	0/Liberado	3/Liberado x Flag	4/Vencido	5/" )
+ column=(type=decimal(6) updatewhereclause=yes name=precio_unit dbname="articulo_mov_proy.precio_unit" )
+ retrieve="SELECT r.nro_reservacion, 
+		 r.nro_item,
+		 r.org_amp_ref, 
+		 r.nro_amp_ref, 
+		 r.fec_registro,
+		 r.fec_vencimiento,
+		 r.cod_usr,
+		 amp.cod_art, a.desc_art, a.und, r.cantidad, r.cant_procesada, 
+       amp.almacen, aa.sldo_total, 
+		 NVL(aa.flag_reposicion, '0') as flag_reposicion,
+		 amp.fec_proyect, 
+		 amp.oper_sec, amp.tipo_doc, amp.nro_doc, 
+       r.flag_estado, amp.precio_unit
+  FROM reservacion_det 	 	r, 
+		 articulo_mov_proy 	amp, 
+		 articulo_almacen 	aa, 
+		 articulo 				a
+ WHERE r.org_amp_ref = amp.cod_origen 
+   AND r.nro_amp_ref = amp.nro_mov
+   AND amp.cod_art = aa.cod_art 
+   AND amp.almacen = aa.almacen 
+   AND amp.cod_art = a.cod_art 
+   AND a.flag_estado = '1'
+   AND r.nro_reservacion=:as_nro_reserv
+order by r.nro_item" update="reservacion_det" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_reserv", string)) )
+text(band=header alignment="2" text="Cod Art" border="2" color="8388608" x="297" y="0" height="56" width="334" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción de artículo" border="2" color="8388608" x="635" y="0" height="56" width="997" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="8388608" x="1637" y="0" height="56" width="105" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Almacen" border="2" color="8388608" x="1746" y="0" height="56" width="210" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="1961" y="0" height="56" width="302" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro item" border="2" color="8388608" x="9" y="0" height="56" width="283" html.valueishtml="0"  name=nro_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Procesada" border="2" color="8388608" x="2267" y="0" height="56" width="302" html.valueishtml="0"  name=cant_procesada_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Stock" border="2" color="8388608" x="2574" y="0" height="56" width="302" html.valueishtml="0"  name=sldo_total_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio Unit ($)" border="2" color="8388608" x="2880" y="0" height="56" width="334" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Reposic?" border="2" color="8388608" x="3218" y="0" height="56" width="238" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fec Registro" border="2" color="8388608" x="3461" y="0" height="56" width="475" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha proy." border="2" color="8388608" x="3941" y="0" height="56" width="370" html.valueishtml="0"  name=fec_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fec Vencim." border="2" color="8388608" x="4315" y="0" height="56" width="370" html.valueishtml="0"  name=fec_vencimiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Mov" border="2" color="8388608" x="5083" y="0" height="56" width="389" html.valueishtml="0"  name=nro_amp_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="OperSec" border="2" color="8388608" x="5477" y="0" height="56" width="329" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Ord.Trab" border="2" color="8388608" x="5806" y="0" height="56" width="434" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Usuario" border="2" color="8388608" x="6245" y="0" height="56" width="247" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Estado" border="2" color="8388608" x="4690" y="0" height="56" width="389" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="16711680" x="9" y="4" height="60" width="283" format="[general]" html.valueishtml="0"  name=nro_item visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="16711680" x="635" y="4" height="60" width="997" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="16711680" x="1637" y="4" height="60" width="105" format="[general]" html.valueishtml="0"  name=und visible="1" edit.name="unidad" dddw.name=d_dddw_unidad dddw.displaycolumn=und dddw.datacolumn=und dddw.percentwidth=200 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0 dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="16711680" x="1746" y="4" height="60" width="210" format="[general]" html.valueishtml="0"  name=almacen pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="16711680" x="2574" y="4" height="60" width="302" format="###,##0.0000" html.valueishtml="0"  name=sldo_total visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=21 alignment="1" tabsequence=32766 border="2" color="16711680" x="2880" y="4" height="60" width="334" format="#,##0.000" html.valueishtml="0"  name=precio_unit visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="2" color="16711680" x="2267" y="4" height="60" width="302" format="###,##0.0000" html.valueishtml="0"  name=cant_procesada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=15 alignment="2" tabsequence=32766 border="2" color="16711680" x="3218" y="4" height="60" width="238" format="[general]" html.valueishtml="0"  name=flag_reposicion visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=8 alignment="0" tabsequence=10 border="2" color="0" x="297" y="4" height="60" width="334" format="[general]" html.valueishtml="0" protect="0~tif( cant_procesada > 0 ,1,0)"  name=cod_art pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=12 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.required=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=20 border="2" color="0" x="1961" y="4" height="60" width="302" format="###,##0.0000" html.valueishtml="0"  name=cantidad visible="1" editmask.required=yes editmask.mask="#,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="16711680" x="3461" y="4" height="60" width="475" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="16711680" x="4315" y="4" height="60" width="370" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_vencimiento visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=16 alignment="2" tabsequence=32766 border="2" color="16711680~tif( daysafter(  today() , fec_proyect  ) <  articulo_dias_reposicion, 255, 0 )" x="3941" y="4" height="60" width="370" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_proyect visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="2" color="16711680" x="5815" y="4" height="60" width="91" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="6053" y="4" height="60" width="37" format="[general]" html.valueishtml="0"  name=nro_reservacion visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="16711680" x="5083" y="4" height="60" width="105" format="[general]" html.valueishtml="0"  name=org_amp_ref visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="16711680" x="5193" y="4" height="60" width="283" format="[general]" html.valueishtml="0"  name=nro_amp_ref visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=17 alignment="2" tabsequence=32766 border="2" color="16711680" x="5481" y="4" height="60" width="329" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=19 alignment="2" tabsequence=32766 border="2" color="16711680" x="5911" y="4" height="60" width="329" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="16711680" x="6245" y="4" height="60" width="247" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=20 alignment="0" tabsequence=32766 border="2" color="16711680" x="4690" y="4" height="60" width="389" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

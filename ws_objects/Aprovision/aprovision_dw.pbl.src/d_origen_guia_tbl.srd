@@ -1,0 +1,15 @@
+﻿$PBExportHeader$d_origen_guia_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=origen_nombre dbname="nombre" )
+ column=(type=char(2) updatewhereclause=yes name=origen_cod_origen dbname="origen.cod_origen" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"ap_guia_recepcion~" )  TABLE(NAME=~"origen~" ) COMPUTE(NAME=~"distinct RPAD(TRIM(~~~"ORIGEN~~~".~~~"NOMBRE~~~"),50,' ') AS NOMBRE, ~~~"ORIGEN~~~".~~~"COD_ORIGEN~~~"~")    JOIN (LEFT=~"origen.cod_origen~"    OP =~"=~"RIGHT=~"ap_guia_recepcion.origen~" )WHERE(    EXP1 =~"~~~"AP_GUIA_RECEPCION~~~".~~~"FECHA_REGISTRO~~~"~"   OP =~">=~"    EXP2 =~"TO_DATE(:ls_fecha_ini, 'dd/mm/yyyy')~"    LOGIC =~"And~" ) WHERE(    EXP1 =~"~~~"AP_GUIA_RECEPCION~~~".~~~"FECHA_REGISTRO~~~"~"   OP =~"<=~"    EXP2 =~"TO_DATE(:ls_fecha_fin, 'dd/mm/yyyy')~" ) ) ARG(NAME = ~"ls_fecha_ini~" TYPE = string)  ARG(NAME = ~"ls_fecha_fin~" TYPE = string) " arguments=(("ls_fecha_ini", string),("ls_fecha_fin", string)) )
+text(band=header alignment="2" text="Origen
+Nombre" border="6" color="33554432" x="18" y="16" height="52" width="1399" html.valueishtml="0"  name=origen_nombre_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="18" y="12" height="52" width="1399" format="[general]" html.valueishtml="0"  name=origen_nombre visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="1417" y="12" height="52" width="91" format="[general]" html.valueishtml="0"  name=origen_cod_origen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

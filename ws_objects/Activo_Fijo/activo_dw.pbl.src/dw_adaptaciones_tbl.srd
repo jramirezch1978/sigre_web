@@ -1,0 +1,34 @@
+﻿$PBExportHeader$dw_adaptaciones_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cod_activo dbname="af_adaptacion.cod_activo" )
+ column=(type=datetime update=yes updatewhereclause=yes key=yes name=fecha dbname="af_adaptacion.fecha" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=activo_asociado dbname="af_adaptacion.activo_asociado" )
+ column=(type=char(200) update=yes updatewhereclause=yes name=obs dbname="af_adaptacion.obs" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="af_adaptacion.flag_replicacion" )
+ column=(type=char(60) updatewhereclause=yes name=descripcion dbname="af_maestro.descripcion" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"af_adaptacion~" )  TABLE(NAME=~"af_maestro~" ) COLUMN(NAME=~"af_adaptacion.cod_activo~") COLUMN(NAME=~"af_adaptacion.fecha~") COLUMN(NAME=~"af_adaptacion.activo_asociado~") COLUMN(NAME=~"af_adaptacion.obs~") COLUMN(NAME=~"af_adaptacion.flag_replicacion~") COLUMN(NAME=~"af_maestro.descripcion~")    JOIN (LEFT=~"af_adaptacion.activo_asociado~"    OP =~"=~"RIGHT=~"af_maestro.cod_activo~" )WHERE(    EXP1 =~"~~~"AF_ADAPTACION~~~".~~~"COD_ACTIVO~~~"~"   OP =~"=~"    EXP2 =~":as_activo~" ) ) ORDER(NAME=~"af_adaptacion.cod_activo~" ASC=yes )  ORDER(NAME=~"af_adaptacion.fecha~" ASC=yes ) ARG(NAME = ~"as_activo~" TYPE = string) " update="AF_ADAPTACION" updatewhere=1 updatekeyinplace=no arguments=(("as_activo", string)) )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="56" width="343" format="[general]" html.valueishtml="0"  name=cod_activo visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+button(band=detail text="..." filename="~tif( isNull( obs ), 'h:\source\bmp\info.bmp', 'h:\source\bmp\file_open.bmp' )" enabled=yes action="0" border="0" color="33554432" x="2967" y="0" height="64" width="105" vtextalign="0" htextalign="0"  name=b_obs_adaptacion visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="1275" y="4" height="56" width="1545" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=10 border="2" color="33554432" x="878" y="4" height="56" width="393" format="[general]" html.valueishtml="0"  name=activo_asociado pointer="H:\source\Cur\taladro.cur" visible="1" edit.limit=10 edit.case=upper edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="352" y="4" height="56" width="521" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.required=yes editmask.mask="dd/mm/yyyy  hh:mm:ss" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cod
+Activo" border="2" color="8388608" x="5" y="8" height="112" width="343" html.valueishtml="0"  name=cod_activo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Observaciones
+" border="2" color="8388608" x="2825" y="8" height="112" width="389" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Descripción
+" border="2" color="8388608" x="1275" y="8" height="112" width="1545" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Activo
+Asociado" border="2" color="8388608" x="878" y="8" height="112" width="393" html.valueishtml="0"  name=activo_asociado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Fecha
+" border="2" color="8388608" x="352" y="8" height="112" width="521" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,120 @@
+﻿$PBExportHeader$d_rpt_diario_arribo_pesca.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=504 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=156 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=nave dbname="tg_naves.nave" )
+ column=(type=char(50) updatewhereclause=yes name=nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=char(10) updatewhereclause=yes name=parte_pesca dbname="fl_parte_de_pesca.parte_pesca" )
+ column=(type=datetime updatewhereclause=yes name=fecha_hora_zarpe dbname="fl_parte_de_pesca.fecha_hora_zarpe" )
+ column=(type=datetime updatewhereclause=yes name=fecha_hora_arribo dbname="fl_parte_de_pesca.fecha_hora_arribo" )
+ column=(type=char(8) updatewhereclause=yes name=zona_pesca_arribo dbname="fl_parte_de_pesca.zona_pesca_arribo" )
+ column=(type=char(50) updatewhereclause=yes name=descr_zona dbname="tg_zonas_pesca.descr_zona" )
+ column=(type=char(10) updatewhereclause=yes name=bitacora_latitud dbname="fl_bitacora.latitud" )
+ column=(type=char(10) updatewhereclause=yes name=bitacora_longitud dbname="fl_bitacora.longitud" )
+ column=(type=char(8) updatewhereclause=yes name=fl_parte_de_pesca_puerto_arribo dbname="fl_parte_de_pesca.puerto_arribo" )
+ column=(type=char(50) updatewhereclause=yes name=descr_puerto dbname="fl_puertos.descr_puerto" )
+ column=(type=char(50) updatewhereclause=yes name=descr_situacion dbname="fl_motivo_movimiento.descr_situacion" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantidad_estimada dbname="fl_venta.cantidad_estimada" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantidad_real dbname="fl_venta.cantidad_real" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantidad_castigada dbname="fl_venta.cantidad_castigada" )
+ column=(type=decimal(2) updatewhereclause=yes name=precio_unitario dbname="fl_venta.precio_unitario" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="fl_venta.cod_moneda" )
+ column=(type=char(200) updatewhereclause=yes name=observaciones_arribo dbname="fl_parte_de_pesca.observaciones_arribo" )
+ retrieve="SELECT tn.nave, tn.nomb_nave,
+       a.parte_pesca, a.fecha_hora_zarpe, a.fecha_hora_arribo,
+       a.zona_pesca_arribo,
+		 tz.DESCR_ZONA,
+       fb.latitud,
+       fb.longitud,
+       a.puerto_arribo,
+       fp.descr_puerto,
+       fm.descr_situacion,
+       p.nom_proveedor,
+       b.cantidad_estimada,
+       b.cantidad_real,
+       b.cantidad_castigada,
+       b.precio_unitario,
+       b.cod_moneda,
+       a.observaciones_arribo
+FROM fl_parte_de_pesca a,
+     fl_venta          b,
+     tg_naves          tn,
+     fl_puertos        fp,
+     proveedor         p,
+     fl_motivo_movimiento fm,
+     fl_bitacora          fb,
+	  tg_zonas_pesca		  tz
+WHERE a.parte_pesca = b.parte_pesca (+)  
+  AND tn.nave       = a.nave_real
+  AND fp.puerto     = a.puerto_arribo
+  and b.cliente     = b.cliente
+  AND p.proveedor (+)  = b.cliente
+  AND fm.motivo_movimiento = a.situac_arribo
+  and tz.zona_pesca			= a.zona_pesca_arribo
+  AND fb.parte_pesca (+) = a.parte_pesca
+  AND ( trunc(a.fecha_hora_zarpe) between trunc(:ad_fecha1) and trunc(:ad_fecha2) OR
+		  trunc(a.fecha_hora_arribo) between trunc(:ad_fecha1) and trunc(:ad_fecha2) )
+" arguments=(("ad_fecha1", date),("ad_fecha2", date))  sort="nave A parte_pesca A " )
+group(level=1 header.height=80 trailer.height=0 by=("nave" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="686" y="264" height="76" width="1810" html.valueishtml="0"  name=titulo2_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="" border="0" color="0" x="27" y="244" height="56" width="425" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="27" y="312" height="56" width="425" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Parte 
+Pesca" border="2" color="33554432" x="5" y="388" height="112" width="274" html.valueishtml="0"  name=parte_pesca_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha yHora
+de Zarpe" border="2" color="33554432" x="283" y="388" height="112" width="347" html.valueishtml="0"  name=fecha_hora_zarpe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha y Hora
+de Arribo" border="2" color="33554432" x="635" y="388" height="112" width="347" html.valueishtml="0"  name=fecha_hora_arribo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Zona de 
+Pesca" border="2" color="33554432" x="987" y="388" height="112" width="407" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Bitacora
+Latitud" border="2" color="33554432" x="1399" y="388" height="112" width="238" html.valueishtml="0"  name=bitacora_latitud_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Bitacora
+Longitud" border="2" color="33554432" x="1641" y="388" height="112" width="233" html.valueishtml="0"  name=bitacora_longitud_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Puerto de 
+Arribo" border="2" color="33554432" x="1879" y="388" height="112" width="393" html.valueishtml="0"  name=puerto_arribo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Situación
+Arribo" border="2" color="33554432" x="2277" y="388" height="112" width="489" html.valueishtml="0"  name=descr_situacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nombre
+Empresa" border="2" color="33554432" x="2770" y="388" height="112" width="562" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cantidad
+Estimada" border="2" color="33554432" x="3337" y="388" height="112" width="297" html.valueishtml="0"  name=cantidad_estimada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cantidad
+Real" border="2" color="33554432" x="3639" y="388" height="112" width="297" html.valueishtml="0"  name=cantidad_real_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cantidad
+Castigada" border="2" color="33554432" x="3941" y="388" height="112" width="297" html.valueishtml="0"  name=cantidad_castigada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Precio
+Unitario" border="2" color="33554432" x="4242" y="388" height="112" width="338" html.valueishtml="0"  name=precio_unitario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="255" x="14" y="4" height="72" width="293" format="[general]" html.valueishtml="0"  name=nave visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="255" x="334" y="4" height="72" width="1399" format="[general]" html.valueishtml="0"  name=nomb_nave visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="4" color="33554432" x="325" y="80" height="64" width="4549" format="[general]" html.valueishtml="0"  name=observaciones_arribo visible="1" edit.limit=200 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="2" text="Observación" border="0" color="33554432" x="5" y="80" height="64" width="315" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="64" width="274" format="[general]" html.valueishtml="0"  name=parte_pesca visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="283" y="4" height="64" width="347" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=fecha_hora_zarpe visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="635" y="4" height="64" width="347" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=fecha_hora_arribo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="987" y="4" height="64" width="407" format="[general]" html.valueishtml="0"  name=descr_zona visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="1399" y="4" height="64" width="238" format="@@-@@-@@" html.valueishtml="0"  name=bitacora_latitud visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="1641" y="4" height="64" width="233" format="@@-@@-@@" html.valueishtml="0"  name=bitacora_longitud visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="33554432" x="1879" y="4" height="64" width="393" format="[general]" html.valueishtml="0"  name=descr_puerto visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="2277" y="4" height="64" width="489" format="[general]" html.valueishtml="0"  name=descr_situacion visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="33554432" x="2770" y="4" height="64" width="562" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="2" color="33554432" x="4242" y="4" height="64" width="96" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="3337" y="4" height="64" width="297" format="###,##0.000" html.valueishtml="0"  name=cantidad_estimada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="33554432" x="3639" y="4" height="64" width="297" format="###,##0.000" html.valueishtml="0"  name=cantidad_real visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="1" tabsequence=32766 border="2" color="33554432" x="3941" y="4" height="64" width="297" format="###,##0.000" html.valueishtml="0"  name=cantidad_castigada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="1" tabsequence=32766 border="2" color="33554432" x="4343" y="4" height="64" width="238" format="###,##0.000" html.valueishtml="0"  name=precio_unitario visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="Reporte Diario de Arribo
+de Embarcaciones" border="0" color="0" x="686" y="68" height="184" width="1810" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="" border="0" color="0" x="2715" y="228" height="56" width="795" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="'Fecha: ' + string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="2715" y="148" height="56" width="795" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="'Página: ' + page() + ' de ' + pageCount()"border="0" color="0" x="2715" y="68" height="56" width="795" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=foreground filename="" x="27" y="12" height="220" width="425" border="0"  name=p_logo visible="1" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

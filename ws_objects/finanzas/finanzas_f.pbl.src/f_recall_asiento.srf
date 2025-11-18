@@ -1,0 +1,51 @@
+﻿$PBExportHeader$f_recall_asiento.srf
+global type f_recall_asiento from function_object
+end type
+
+forward prototypes
+global function boolean f_recall_asiento (string as_cod_relacion, string as_tipo_doc, string as_nro_doc, string as_cod_moneda, decimal adc_tasa_cambio, datetime adt_fecha, decimal adc_monto_doc, datawindow adw_det)
+end prototypes
+
+global function boolean f_recall_asiento (string as_cod_relacion, string as_tipo_doc, string as_nro_doc, string as_cod_moneda, decimal adc_tasa_cambio, datetime adt_fecha, decimal adc_monto_doc, datawindow adw_det);String   ls_flag_tabla,ls_cnta_ctbl,ls_flag_debhab
+Decimal {2} ldc_saldo_sol,ldc_saldo_dol
+Long     ll_row
+Boolean  lb_ret = TRUE
+
+
+SELECT flag_tabla ,cnta_ctbl ,DECODE(flag_debhab,'D','H','D')
+  INTO :ls_flag_tabla ,:ls_cnta_ctbl ,:ls_flag_debhab
+  FROM doc_pendientes_cta_cte 
+ WHERE ((cod_relacion = :as_cod_relacion ) AND
+ 		  (tipo_doc	    = :as_tipo_doc     ) AND
+		  (nro_doc		 = :as_nro_doc      )) ;
+
+
+
+IF Isnull(ls_cnta_ctbl) OR Trim(ls_cnta_ctbl) = '' THEN
+	Messagebox('Aviso','Documento no Existe en Cuenta Corriente '+as_tipo_doc+' '+as_nro_doc+' Verifique!')
+	lb_ret = FALSE
+END IF
+
+
+IF lb_ret THEN /*INSERTA ASIENTO EN DETALLE*/
+	ll_row = adw_det.InsertRow(0)	
+	
+	adw_det.object.item         [ll_row] = ll_row
+	adw_det.object.cnta_ctbl    [ll_row] =	ls_cnta_ctbl
+	adw_det.object.fec_cntbl    [ll_row] = adt_fecha
+	adw_det.object.det_glosa    [ll_row] = ''
+	adw_det.object.flag_debhab  [ll_row] = ls_flag_debhab
+	adw_det.object.tipo_docref1 [ll_row] = as_tipo_doc
+	adw_det.object.nro_docref1  [ll_row] = as_nro_doc
+	adw_det.object.cod_relacion [ll_row] = as_cod_relacion
+//	adw_det.object.imp_movsol 	 [ll_row] =
+//	adw_det.object.imp_movdol	 [ll_row] =
+	
+END IF
+
+
+
+RETURN lb_ret
+
+end function
+

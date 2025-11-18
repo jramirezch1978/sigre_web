@@ -1,0 +1,68 @@
+﻿$PBExportHeader$d_ap_pd_costo_diario_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=680 color="536870912" )
+summary(height=152 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="ap_pd_descarga.nro_parte" )
+ column=(type=datetime updatewhereclause=yes name=inicio_descarga dbname="ap_pd_descarga_det.inicio_descarga" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="ap_pd_descarga_det.proveedor" )
+ column=(type=char(4000) updatewhereclause=yes name=nom_embarcacion dbname="nom_embarcacion" )
+ column=(type=char(12) updatewhereclause=yes name=matricula dbname="tg_naves.matricula" )
+ column=(type=number updatewhereclause=yes name=peso_tn dbname="peso_tn" )
+ column=(type=number updatewhereclause=yes name=precio_$ dbname="precio_$" )
+ column=(type=number updatewhereclause=yes name=tipo_cambio dbname="tipo_cambio" )
+ retrieve="SELECT PD.NRO_PARTE,
+		 PDD.INICIO_DESCARGA, 
+       PDD.PROVEEDOR, 
+       USF_AP_NOM_PROVEEDOR(PDD.PROVEEDOR) AS NOM_EMBARCACION,
+       N.MATRICULA,
+       USF_AP_CONV_UND(PDD.UND,(SELECT UND_TM FROM AP_PARAM WHERE ORIGEN = 'XX'),PDD.PESO_BRUTO) AS PESO_TN,
+       ROUND(USF_FL_CONV_MON(PDD.PRECIO_VENTA, PDD.COD_MONEDA, (select cod_dolares from logparam where reckey = '1'),
+                       PDD.INICIO_DESCARGA),2) as PRECIO_$,
+       (SELECT NVL(C.VTA_DOL_PROM ,0) FROM CALENDARIO C
+  	      WHERE TRUNC(C.FECHA) = TRUNC(PDD.INICIO_DESCARGA )) AS TIPO_CAMBIO
+FROM  AP_PD_DESCARGA      PD,
+      AP_PD_DESCARGA_DET  PDD,
+      PROVEEDOR           P,
+      TG_NAVES            N      
+WHERE PD.NRO_PARTE  = PDD.NRO_PARTE
+  AND PDD.PROVEEDOR = P.PROVEEDOR
+  AND PDD.PROVEEDOR = N.PROVEEDOR (+)
+  AND PD.NRO_PARTE = :as_nro_parte" arguments=(("as_nro_parte", string)) )
+bitmap(band=header filename="" x="73" y="24" height="316" width="594" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="COSTO DIARIO DE MATERIA PRIMA" border="0" color="0" x="891" y="84" height="80" width="1554" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-13" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Codigo
+Proveedor" border="2" color="33554432" x="87" y="560" height="112" width="334" html.valueishtml="0"  name=ap_pd_descarga_det_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Proveedor / Embarcacion" border="2" color="33554432" x="425" y="560" height="112" width="1797" html.valueishtml="0"  name=nom_embarcacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Matricula
+Nave" border="2" color="33554432" x="2226" y="560" height="112" width="357" html.valueishtml="0"  name=tg_naves_matricula_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Peso 
+Tn" border="2" color="33554432" x="2587" y="560" height="112" width="329" html.valueishtml="0"  name=peso_tn_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+column(band=header id=1 alignment="2" tabsequence=32766 border="4" color="33554432" x="1664" y="196" height="76" width="425" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Nº  DE PARTE:" border="0" color="0" x="1070" y="196" height="80" width="562" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-13" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Precio 
+US $" border="2" color="33554432" x="2921" y="560" height="112" width="329" html.valueishtml="0"  name=precio_$_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2857" y="28" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="2757" y="108" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="3013" y="196" height="56" width="261" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="2944" y="372" height="76" width="329" format="[general]" html.valueishtml="0"  name=tipo_cambio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="1" tabsequence=32766 border="0" color="33554432" x="2907" y="460" height="64" width="366" format="[shortdate] [time]" html.valueishtml="0"  name=inicio_descarga visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fecha  :" border="0" color="0" x="2642" y="460" height="64" width="233" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Tipo de Cambio: " border="0" color="0" x="2377" y="372" height="64" width="498" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="87" y="4" height="76" width="334" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="443" y="4" height="76" width="1774" format="[general]" html.valueishtml="0"  name=nom_embarcacion visible="1" edit.limit=4000 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="2226" y="4" height="76" width="357" format="[general]" html.valueishtml="0"  name=matricula visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="2921" y="4" height="76" width="329" format="#,##0.00" html.valueishtml="0"  name=precio_$ visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="2587" y="4" height="76" width="329" format="#,##0.000" html.valueishtml="0"  name=peso_tn visible="1" editmask.mask="###,##0.000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=summary x1="55" y1="4" x2="3259" y2="4"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(peso_tn for all)"border="2" color="33554432" x="2898" y="20" height="60" width="343" format="#,##0.000" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( precio_$ * peso_tn / compute_2 )"border="2" color="33554432" x="2898" y="84" height="60" width="343" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="  Peso Total  en TN" border="2" color="33554432" x="2181" y="20" height="60" width="713" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=summary alignment="0" text="  Precio Prom. Pond.o  US $" border="2" color="33554432" x="2181" y="84" height="60" width="713" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,45 @@
+﻿$PBExportHeader$d_rpt_fce_total_compras_fpago_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=360 color="536870912" )
+summary(height=116 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(6) updatewhereclause=yes name=forma_pago dbname="orden_compra.forma_pago" )
+ column=(type=char(60) updatewhereclause=yes name=forma_pago_desc_forma_pago dbname="forma_pago.desc_forma_pago" )
+ column=(type=number updatewhereclause=yes name=tot_dolar dbname="tot_dolar" )
+ retrieve="select oc.forma_pago, fp.desc_forma_pago, sum(decode(oc.cod_moneda,
+	  (select cod_dolares from logparam where reckey='1'),
+	  amp.cant_proyect*(amp.precio_unit-amp.decuento),
+	  amp.cant_proyect*(amp.precio_unit-amp.decuento)/USF_CMP_TIPO_CAMBIO(oc.fec_registro))) as tot_dolar
+from orden_compra oc, articulo_mov_proy amp, forma_pago fp
+where oc.cod_origen=amp.cod_origen and
+	  oc.nro_oc=amp.nro_doc and
+	  oc.flag_estado <> '0' and
+	  oc.forma_pago = fp.forma_pago and
+	  amp.tipo_doc=(select l.doc_oc from logparam l where reckey='1') and
+	  amp.flag_estado <> '0' and
+	  (trunc(oc.fec_registro) between :ad_fec_ini and :ad_fec_fin)
+group by oc.forma_pago, fp.desc_forma_pago, oc.cod_moneda
+order by sum(decode(oc.cod_moneda,
+	  (select cod_dolares from logparam where reckey='1'),
+	  amp.cant_proyect*(amp.precio_unit-amp.decuento),
+	  amp.cant_proyect*(amp.precio_unit-amp.decuento)/USF_CMP_TIPO_CAMBIO(oc.fec_registro))) desc" arguments=(("ad_fec_ini", date),("ad_fec_fin", date),("an_total", number)) )
+text(band=header alignment="2" text="ABC FORMA DE PAGO - COMPRAS US$ (Sin IGV)" border="0" color="0" x="594" y="64" height="64" width="1527" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="626" y="144" height="64" width="1463" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="105" y="4" height="64" width="261" format="[general]" html.valueishtml="0"  name=forma_pago visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="384" y="4" height="64" width="1413" format="[general]" html.valueishtml="0"  name=forma_pago_desc_forma_pago visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="1810" y="4" height="64" width="462" format="#,##0.00" html.valueishtml="0"  name=tot_dolar visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="if(  an_total >0,  tot_dolar / an_total *100, 0 )"border="0" color="0" x="2286" y="4" height="64" width="215" format="##0.00" html.valueishtml="0"  name=porc_total visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Total:" border="0" color="0" x="1577" y="24" height="64" width="210" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(tot_dolar for all)"border="0" color="0" x="1810" y="24" height="64" width="462" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(if(  an_total >0,  tot_dolar / an_total *100, 0 ) for all)"border="0" color="0" x="2286" y="24" height="64" width="215" format="##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="F.Pago" border="2" color="0" x="105" y="284" height="64" width="261" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Descripción de forma de pago" border="2" color="0" x="384" y="284" height="64" width="1413" html.valueishtml="0"  name=proveedor_nom_proveedor_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Total US$" border="2" color="0" x="1810" y="284" height="64" width="462" html.valueishtml="0"  name=tot_dolar_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="%" border="2" color="0" x="2286" y="284" height="64" width="215" html.valueishtml="0"  name=porc_total_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

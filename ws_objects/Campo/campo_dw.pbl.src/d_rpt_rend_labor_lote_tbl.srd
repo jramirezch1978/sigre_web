@@ -1,0 +1,75 @@
+﻿$PBExportHeader$d_rpt_rend_labor_lote_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=320 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=fecha dbname="pd_jornal_campo.fecha" )
+ column=(type=char(20) updatewhereclause=yes name=nro_lote dbname="lote_campo.nro_lote" )
+ column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="pd_jornal_campo.cod_labor" )
+ column=(type=char(40) updatewhereclause=yes name=desc_labor dbname="labor.desc_labor" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="labor.und" )
+ column=(type=number updatewhereclause=yes name=rendimiento dbname="rendimiento" )
+ column=(type=number updatewhereclause=yes name=horas dbname="horas" )
+ column=(type=number updatewhereclause=yes name=nro_trabajadores dbname="nro_trabajadores" )
+ column=(type=number updatewhereclause=yes name=promedio dbname="promedio" )
+ column=(type=number updatewhereclause=yes name=avance dbname="avance" )
+ column=(type=number updatewhereclause=yes name=avance_acum dbname="avance_acum" )
+ retrieve="select p.fecha, lc.nro_lote, p.cod_labor, l.desc_labor, l.und,
+       sum(p.rendimiento) as rendimiento,
+       sum(p.hrs_normales + p.hrs_extras_25 + p.hrs_extras_35 + p.hrs_noc_extras_35 + p.hrs_extras_100) as horas,
+		 count(distinct p.cod_trabajador) as nro_trabajadores,
+       CASE  when sum(p.hrs_normales + p.hrs_extras_25 + p.hrs_extras_35 + p.hrs_noc_extras_35 + p.hrs_extras_100) <> 0 then
+             sum(p.rendimiento) / sum(p.hrs_normales + p.hrs_extras_25 + p.hrs_extras_35 + p.hrs_noc_extras_35 + p.hrs_extras_100) 
+       ELSE
+             0
+       END as promedio,
+       usf_cam_avance_x_lote(:as_campana, lc.nro_lote, p.cod_labor, p.fecha) * 100 as avance,
+       usf_cam_avance_x_lote_acum(:as_campana, lc.nro_lote, p.cod_labor, p.fecha) * 100 as avance_acum
+from pd_jornal_campo p,
+     pd_jornal_campo_lote pd,
+     labor                l,
+     lote_campo           lc
+where p.fecha = pd.fecha
+  and p.cod_trabajador = pd.cod_trabajador     
+  and p.nro_item       = pd.nro_item
+  and p.cod_labor      = l.cod_labor
+  and pd.nro_lote      = lc.nro_lote
+  and p.rendimiento    > 0
+  and lc.nro_lote		  = :as_lote
+  and p.cod_labor		  = :as_labor
+  and trunc(p.fecha) between :ad_fecha1 and :ad_fecha2
+group by p.fecha, lc.nro_lote, p.cod_labor, l.desc_labor, l.und" arguments=(("as_campana", string),("as_lote", string),("as_labor", string),("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Fecha
+" border="2" color="33554432" x="5" y="204" height="112" width="311" html.valueishtml="0"  name=pd_jornal_campo_fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Rendimiento
+" border="2" color="33554432" x="320" y="204" height="112" width="443" html.valueishtml="0"  name=rendimiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="1" text="Nro Lote:" border="0" color="33554432" x="69" y="116" height="56" width="366" html.valueishtml="0"  name=lote_campo_nro_lote_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="457" y="112" height="68" width="576" format="[general]" html.valueishtml="0"  name=nro_lote visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Labor:" border="0" color="33554432" x="1056" y="120" height="56" width="201" html.valueishtml="0"  name=cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="64" width="311" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="654" y="4" height="64" width="110" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="320" y="4" height="64" width="329" format="###,##0.000" html.valueishtml="0"  name=rendimiento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total
+Horas" border="2" color="33554432" x="768" y="204" height="112" width="293" html.valueishtml="0"  name=horas_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="768" y="4" height="64" width="293" format="###,##0.000" html.valueishtml="0"  name=horas visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total
+Trabaj" border="2" color="33554432" x="1065" y="204" height="112" width="293" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="1065" y="4" height="64" width="293" format="###,##0" html.valueishtml="0"  name=nro_trabajadores visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Promedio
+x Hora" border="2" color="33554432" x="1362" y="204" height="112" width="293" html.valueishtml="0"  name=promedio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="1362" y="4" height="64" width="293" format="###,##0.000" html.valueishtml="0"  name=promedio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Avance
+%" border="2" color="33554432" x="1659" y="204" height="112" width="293" html.valueishtml="0"  name=avance_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="1659" y="4" height="64" width="293" format="###,##0.00" html.valueishtml="0"  name=avance visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Avance 
+Acum %" border="2" color="33554432" x="1957" y="204" height="112" width="293" html.valueishtml="0"  name=avance_acum_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="1957" y="4" height="64" width="293" format="###,##0.00" html.valueishtml="0"  name=avance_acum visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1275" y="116" height="68" width="942" format="[general]" html.valueishtml="0"  name=desc_labor visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Rendimientos X Fecha" border="0" color="33554432" x="46" y="12" height="64" width="2185" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

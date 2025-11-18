@@ -1,0 +1,21 @@
+﻿$PBExportHeader$f_telefono_empresa.srf
+global type f_telefono_empresa from function_object
+end type
+
+forward prototypes
+global function string f_telefono_empresa (string as_origen)
+end prototypes
+
+global function string f_telefono_empresa (string as_origen);String ls_tel, ls_fax, ls_email, ls_cad
+
+Select telefono, fax, email into :ls_tel, :ls_fax, :ls_email from origen
+  where cod_origen = :as_origen;
+
+ls_Cad = ''
+if not isnull( ls_tel) then ls_cad = 'Tel.: ' + ls_tel 
+if not isnull( ls_fax) then ls_cad += ' Fax: ' + ls_fax
+if not isnull( ls_email) then ls_cad += ' email: ' + ls_email
+  
+Return ls_cad
+end function
+

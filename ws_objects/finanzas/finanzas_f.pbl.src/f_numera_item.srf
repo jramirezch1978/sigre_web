@@ -1,0 +1,25 @@
+﻿$PBExportHeader$f_numera_item.srf
+global type f_numera_item from function_object
+end type
+
+forward prototypes
+global function integer f_numera_item (datawindow idw)
+end prototypes
+
+global function integer f_numera_item (datawindow idw);/* funcion que encuentra el numero siguiente para un item
+   
+	Solo funciona para aquellos dw que tengan el nombre de campo "nro_item"
+*/
+
+Long ll_mayor
+Int j
+
+ll_mayor = 0
+For j = 1 to idw.RowCount()
+	if idw.object.item[j] > ll_mayor then
+		ll_mayor = idw.object.item[j]
+	end if
+Next
+Return ll_mayor + 1
+end function
+

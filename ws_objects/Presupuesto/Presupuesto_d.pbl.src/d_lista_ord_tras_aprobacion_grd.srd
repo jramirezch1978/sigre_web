@@ -1,0 +1,71 @@
+﻿$PBExportHeader$d_lista_ord_tras_aprobacion_grd.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes key=yes name=nro_otr dbname="orden_traslado.nro_otr" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="orden_traslado.flag_estado" values="Anulado	0/Generado	1/Aprobado	2/" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="orden_traslado.fec_registro" )
+ column=(type=char(6) updatewhereclause=yes name=almacen_org dbname="orden_traslado.almacen_org" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen_org dbname="almacen.desc_almacen" )
+ column=(type=char(6) updatewhereclause=yes name=almacen_dst dbname="orden_traslado.almacen_dst" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen_dst dbname="almacen.desc_almacen" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="orden_traslado.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="orden_traslado.nro_doc" )
+ column=(type=char(6) updatewhereclause=yes name=usr_registra dbname="orden_traslado.usr_registra" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=usr_autoriza dbname="orden_traslado.usr_autoriza" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="orden_traslado.flag_replicacion" )
+ retrieve="  SELECT DISTINCT OT.NRO_OTR,   
+         OT.FLAG_ESTADO,   
+         OT.FEC_REGISTRO,   
+         OT.ALMACEN_ORG as almacen_org,   
+         ALMACEN_A.DESC_ALMACEN,   
+         OT.ALMACEN_DST as almacen_dst,   
+         ALMACEN_B.DESC_ALMACEN,   
+         OT.TIPO_DOC,   
+         OT.NRO_DOC,   
+         OT.USR_REGISTRA,   
+         OT.USR_AUTORIZA,
+			OT.FLAG_REPLICACION 
+    FROM ORDEN_TRASLADO OT,   
+         ALMACEN ALMACEN_A,   
+         ALMACEN ALMACEN_B,
+			ARTICULO_MOV_PROY AMP 
+   WHERE OT.ALMACEN_ORG = ALMACEN_A.ALMACEN 
+	  and OT.ALMACEN_DST = ALMACEN_B.ALMACEN 
+	  AND AMP.NRO_DOC 	= OT.NRO_OTR
+ 	  AND AMP.TIPO_DOC	= (SELECT DOC_OTR FROM LOGPARAM WHERE RECKEY = '1')
+	  AND NVL(AMP.CANT_FACTURADA,0) = 0
+	  AND NVL(AMP.CANT_PROCESADA,0) = 0
+	  and OT.FLAG_ESTADO 			= :as_flag_estado
+     and substr(OT.NRO_OTR,1,2) = :as_origen
+			    
+" update="ORDEN_TRASLADO" updatewhere=0 updatekeyinplace=yes arguments=(("as_origen", string),("as_flag_estado", string)) )
+text(band=header alignment="2" text="Nro Orden" border="2" color="16777215" x="151" y="8" height="56" width="402" html.valueishtml="0"  name=nro_otr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Almacen Org" border="2" color="16777215" x="992" y="8" height="56" width="352" html.valueishtml="0"  name=almacen_org_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Almacen Dst" border="2" color="16777215" x="2263" y="8" height="56" width="357" html.valueishtml="0"  name=orden_traslado_almacen_dst_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fec Registro" border="2" color="16777215" x="562" y="8" height="56" width="421" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Usr Registra" border="2" color="16777215" x="4690" y="8" height="56" width="402" html.valueishtml="0"  name=usr_registra_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Usr Autoriza" border="2" color="16777215" x="5102" y="8" height="56" width="402" html.valueishtml="0"  name=usr_autoriza_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="16777215" x="4279" y="8" height="56" width="402" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="16777215" x="4009" y="8" height="56" width="261" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Desc Almacen Dst" border="2" color="16777215" x="2629" y="8" height="56" width="1371" html.valueishtml="0"  name=desc_almacen_dst_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Desc Almacen Origen" border="2" color="16777215" x="1353" y="8" height="56" width="901" html.valueishtml="0"  name=desc_almacen_org_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="151" y="4" height="60" width="402" format="[general]" html.valueishtml="0"  name=nro_otr visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="562" y="4" height="60" width="421" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_registro visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="992" y="4" height="60" width="352" format="[general]" html.valueishtml="0"  name=almacen_org visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="2263" y="4" height="60" width="357" format="[general]" html.valueishtml="0"  name=almacen_dst visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="2" color="33554432" x="4690" y="4" height="60" width="402" format="[general]" html.valueishtml="0"  name=usr_registra visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="2" color="33554432" x="5102" y="4" height="60" width="402" format="[general]" html.valueishtml="0"  name=usr_autoriza visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="4279" y="4" height="60" width="402" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="4009" y="4" height="60" width="261" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="2629" y="4" height="60" width="1371" format="[general]" html.valueishtml="0"  name=desc_almacen_dst visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1353" y="4" height="60" width="901" format="[general]" html.valueishtml="0"  name=desc_almacen_org visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="Bitmap(If( flag_estado ='2', 'H:\source\bmp\chkmark.bmp',''))"border="2" color="0" x="9" y="4" height="60" width="133" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

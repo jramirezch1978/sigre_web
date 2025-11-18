@@ -1,0 +1,9 @@
+﻿$PBExportHeader$d_pipe_situacion_trabajador.srp
+PIPELINE(source_connect=CN_DB_DB1_PROD5,destination_connect=CN_DB_DB1_PROD8,type=append,commit=100,errors=100,keyname="situacion_trabajador")
+SOURCE(name="SITUACION_TRABAJADOR",COLUMN(type=char,name="SITUA_TRABAJ",dbtype="CHAR(1)",key=yes,nulls_allowed=no)
+ COLUMN(type=varchar,name="DESC_SIT_TRAB",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="FLAG_REPLICACION",dbtype="CHAR(1)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"situacion_trabajador~" ) COLUMN(NAME=~"situacion_trabajador.situa_trabaj~") COLUMN(NAME=~"situacion_trabajador.desc_sit_trab~") COLUMN(NAME=~"situacion_trabajador.flag_replicacion~")) ")
+DESTINATION(name="situacion_trabajador",COLUMN(type=char,name="situa_trabaj",dbtype="CHAR(1)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="desc_sit_trab",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1' "))

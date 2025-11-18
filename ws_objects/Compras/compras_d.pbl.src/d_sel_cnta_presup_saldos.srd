@@ -1,0 +1,20 @@
+﻿$PBExportHeader$d_sel_cnta_presup_saldos.srd
+$PBExportComments$Muestra las cuentas presupuestales con sus saldos segun centro de costos indicado
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="tt_pto_control.cnta_prsp" )
+ column=(type=char(50) updatewhereclause=yes name=descripcion dbname="presupuesto_cuenta.descripcion" )
+ column=(type=decimal(2) updatewhereclause=yes name=saldo_ini dbname="tt_pto_control.saldo_ini" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"tt_pto_control~" )  TABLE(NAME=~"presupuesto_cuenta~" ) COLUMN(NAME=~"tt_pto_control.cnta_prsp~") COLUMN(NAME=~"presupuesto_cuenta.descripcion~") COLUMN(NAME=~"tt_pto_control.saldo_ini~")    JOIN (LEFT=~"tt_pto_control.cnta_prsp~"    OP =~"=~"RIGHT=~"presupuesto_cuenta.cnta_prsp~" )) " )
+text(band=header alignment="2" text="Cnta Prsp" border="6" color="0" x="5" y="8" height="56" width="302"  name=cnta_prsp_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Descripcion" border="6" color="0" x="311" y="8" height="56" width="1353"  name=descripcion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Saldo " border="6" color="0" x="1673" y="8" height="56" width="411"  name=saldo_ini_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="5" y="4" height="56" width="302" format="[general]"  name=cnta_prsp edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="311" y="4" height="56" width="1353" format="[general]"  name=descripcion edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="1673" y="4" height="56" width="411" format="#,##0.00"  name=saldo_ini edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,51 @@
+﻿$PBExportHeader$f_genera_registro_cb.srf
+global type f_genera_registro_cb from function_object
+end type
+
+forward prototypes
+global function boolean f_genera_registro_cb (string as_origen, ref long al_nro_reg)
+end prototypes
+
+global function boolean f_genera_registro_cb (string as_origen, ref long al_nro_reg);Boolean 	lb_retorno = TRUE
+Integer	li_integer
+
+SELECT ult_nro 
+	INTO :al_nro_reg 
+FROM num_caja_bancos 
+WHERE origen = :as_origen for update;
+
+if SQLCA.SQLCode = 100 then
+	insert into num_caja_bancos(origen, ult_nro)
+	values(:as_origen, 1);
+	
+	al_nro_reg = 1
+end if
+
+	
+IF Isnull(al_nro_reg) OR al_nro_reg = 0 THEN
+	Messagebox('Aviso','Debe Verificar Tabla de Numeración NUM_CAJA_BANCOS , Comuniquese con Sistemas!')
+	Return FALSE	
+END IF
+
+//*******************************//
+//Actualiza Tabla num_caja_bancos//
+//*******************************//
+
+UPDATE num_caja_bancos
+   SET ult_nro = :al_nro_reg + 1
+ WHERE (origen = :as_origen ) ;
+	
+
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox("SQL error", SQLCA.SQLErrText)
+	lb_retorno = FALSE
+	GOTO SALIDA
+END IF	
+
+
+
+SALIDA:
+RETURN lb_retorno	
+
+end function
+

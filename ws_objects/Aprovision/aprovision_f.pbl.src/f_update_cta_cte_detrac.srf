@@ -1,0 +1,95 @@
+﻿$PBExportHeader$f_update_cta_cte_detrac.srf
+global type f_update_cta_cte_detrac from function_object
+end type
+
+forward prototypes
+global function boolean f_update_cta_cte_detrac (string as_nro_detrac, string as_cod_relacion, date adt_fecha, decimal adc_tasa_cambio, decimal adc_importe, string as_cod_moneda)
+end prototypes
+
+global function boolean f_update_cta_cte_detrac (string as_nro_detrac, string as_cod_relacion, date adt_fecha, decimal adc_tasa_cambio, decimal adc_importe, string as_cod_moneda);String ls_tipo_detr,ls_cod_moneda,ls_flag_cbancos,ls_soles,ls_msj_err
+Date	 ld_fecha_em
+Decimal {2} ldc_importe,ldc_saldo_sol,ldc_saldo_dol
+Decimal {3} ldc_tasa_cambio
+Boolean     lb_ret = true
+
+
+/*actualizar doc directo tipo detraccion*/
+select doc_detrac_cp into :ls_tipo_detr from finparam where reckey = '1' ;
+
+select cod_soles into :ls_soles from logparam where reckey = '1' ;
+
+	
+//*Buscar documento detraccion*//
+select flag_caja_bancos,fecha_emision,cod_moneda,importe_doc,tasa_cambio
+  into :ls_flag_cbancos,:ld_fecha_em,:ls_cod_moneda,:ldc_importe,:ldc_tasa_cambio
+  from cntas_pagar		
+ where (cod_relacion = :as_cod_relacion) and
+ 		 (tipo_doc		= :ls_tipo_detr	) and
+	    (nro_doc		= :as_nro_detrac  ) ;
+		
+if SQLCA.SQLCode = 100 then
+	//no existe documento cta cte4
+else
+	IF ls_flag_cbancos = '1' THEN
+		Rollback ;
+		MessageBox('SQL error', 'No Puede Modificar Documento ya que Doc. detraccion ya ha sido pagado')
+		lb_ret = FALSE
+		GOTO SALIDA
+	END IF	
+	
+	
+	if ld_fecha_em <> adt_fecha OR ls_cod_moneda <> as_cod_moneda OR adc_importe <> ldc_importe OR &
+		ldc_tasa_cambio <> adc_tasa_cambio then //si existe modificaciones actualiza detraccion
+		
+		IF as_cod_moneda = ls_soles THEN
+			ldc_saldo_sol = adc_importe
+			ldc_saldo_dol = Round(adc_importe / adc_tasa_cambio,2)
+		ELSE
+			ldc_saldo_sol = Round(adc_importe * adc_tasa_cambio,2)
+			ldc_saldo_dol = adc_importe
+		END IF
+			
+		
+		update cntas_pagar
+		   set saldo_sol     = :ldc_saldo_sol,saldo_dol   = :ldc_saldo_dol   ,
+				 fecha_emision = :adt_fecha    ,cod_moneda  = :as_cod_moneda   ,
+				 importe_doc	= :adc_importe	 ,tasa_cambio = :adc_tasa_cambio
+		 where (cod_relacion = :as_cod_relacion) and
+		 		 (tipo_doc		= :ls_tipo_detr   ) and
+				 (nro_doc		= :as_nro_detrac  ) ;
+
+				 
+		IF SQLCA.SQLCode = -1 THEN 
+			ls_msj_err = SQLCA.SQLErrText
+			Rollback ;
+       	MessageBox('SQL error', ls_msj_err)
+			lb_ret = FALSE  
+		END IF				 
+				 
+		//error		 
+		//actualiza detalle
+		update cntas_pagar_det
+		   set importe     = :adc_importe
+		 where (cod_relacion = :as_cod_relacion) and
+		 		 (tipo_doc		= :ls_tipo_detr   ) and
+				 (nro_doc		= :as_nro_detrac  ) and
+				 (item			= 1					) ;
+
+		IF SQLCA.SQLCode = -1 THEN 
+			ls_msj_err = SQLCA.SQLErrText
+			Rollback ;
+       	MessageBox('SQL error', ls_msj_err)
+			lb_ret = FALSE  
+		END IF				 
+				 
+		
+		
+	end if		
+end if	
+	
+SALIDA:
+
+
+Return lb_ret		
+end function
+

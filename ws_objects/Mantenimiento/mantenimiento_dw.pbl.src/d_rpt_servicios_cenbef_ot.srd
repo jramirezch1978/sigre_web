@@ -1,0 +1,84 @@
+﻿$PBExportHeader$d_rpt_servicios_cenbef_ot.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=436 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_os dbname="orden_servicio_det.nro_os" )
+ column=(type=datetime updatewhereclause=yes name=fec_proyect dbname="orden_servicio_det.fec_proyect" )
+ column=(type=char(6) updatewhereclause=yes name=servicio dbname="orden_servicio_det.servicio" )
+ column=(type=char(200) updatewhereclause=yes name=descripcion dbname="orden_servicio_det.descripcion" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ column=(type=char(4) updatewhereclause=yes name=ot_tipo dbname="orden_trabajo.ot_tipo" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(10) updatewhereclause=yes name=ot_adm dbname="orden_trabajo.ot_adm" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="orden_servicio_det.cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="orden_servicio_det.cnta_prsp" )
+ column=(type=char(12) updatewhereclause=yes name=centro_benef dbname="orden_trabajo.centro_benef" )
+ retrieve="SELECT osd.nro_os, osd.fec_proyect, osd.servicio,
+       osd.descripcion,
+       usf_fl_conv_mon(osd.importe - osd.decuento, os.cod_moneda, (select cod_dolares from logparam where reckey = '1'), osd.fec_proyect) AS importe,
+       ot.ot_tipo,
+       ot.nro_orden,
+		 ot.ot_adm,
+		 osd.cencos,
+		 osd.cnta_prsp,
+		 ot.centro_benef
+FROM orden_servicio os,
+     orden_servicio_det osd,
+     operaciones        op,
+     orden_trabajo      ot
+WHERE ot.nro_orden = op.nro_orden
+  AND op.oper_sec  = osd.oper_sec
+  AND osd.nro_os   = os.nro_os
+  AND osd.flag_estado     <> '0'
+  AND os.flag_estado     <> '0'
+  AND ot.ot_adm          like :as_ot_adm
+  AND ot.centro_benef    like :as_cenbef
+  and ot.ot_tipo		    like :as_tipo_ot
+  and ot.flag_estado in (:as_estado)
+  AND trunc(osd.fec_proyect) BETWEEN trunc(:ad_fecha1) and trunc(:ad_fecha2)  
+" arguments=(("ad_fecha1", date),("ad_Fecha2", date),("as_tipo_ot", string),("as_ot_adm", string),("as_cenbef", string),("as_estado", stringlist),("as_maquina", string)) )
+text(band=header alignment="1" text="Usuario :" border="0" color="33554432" x="2843" y="112" height="56" width="197" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Fecha :" border="0" color="33554432" x="2843" y="180" height="64" width="197" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Pag :" border="0" color="33554432" x="2843" y="40" height="56" width="197" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="3058" y="112" height="56" width="270" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3058" y="180" height="64" width="270" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="33554432" x="3058" y="40" height="56" width="270" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="32" y="24" height="164" width="480" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="32" y="208" height="56" width="480" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Servicios Ejecutados por Centro de Beneficio" border="0" color="33554432" x="987" y="40" height="80" width="1664" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1083" y="140" height="56" width="1477" html.valueishtml="0"  name=titulo_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1083" y="216" height="56" width="1477" html.valueishtml="0"  name=titulo_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1083" y="292" height="56" width="1477" html.valueishtml="0"  name=titulo_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Importe" border="2" color="33554432" x="2674" y="376" height="56" width="334" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cencos" border="2" color="33554432" x="4160" y="376" height="56" width="302" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cnta Prsp" border="2" color="33554432" x="4466" y="376" height="56" width="302" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="NRO OS" border="2" color="33554432" x="18" y="376" height="56" width="370" html.valueishtml="0"  name=nro_os_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fec Proyect" border="2" color="33554432" x="393" y="376" height="56" width="334" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Servicio" border="2" color="33554432" x="2336" y="376" height="56" width="334" html.valueishtml="0"  name=servicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripcion Servicio" border="2" color="33554432" x="731" y="376" height="56" width="1600" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo OT" border="2" color="33554432" x="3013" y="376" height="56" width="224" html.valueishtml="0"  name=ot_tipo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="33554432" x="3241" y="376" height="56" width="302" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Centro Bef" border="2" color="33554432" x="3547" y="376" height="56" width="302" html.valueishtml="0"  name=cenbef_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="OT ADM" border="2" color="33554432" x="3854" y="376" height="56" width="302" html.valueishtml="0"  name=ot_adm_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2674" y="4" height="60" width="334" format="###,##0.00" html.valueishtml="0"  name=importe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="4160" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="4466" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="18" y="4" height="60" width="370" format="[general]" html.valueishtml="0"  name=nro_os visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="393" y="4" height="60" width="334" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_proyect visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="2336" y="4" height="60" width="334" format="[general]" html.valueishtml="0"  name=servicio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="731" y="4" height="60" width="1600" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="3013" y="4" height="60" width="224" format="[general]" html.valueishtml="0"  name=ot_tipo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="33554432" x="3241" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="2" color="33554432" x="3547" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=centro_benef visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="3854" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=ot_adm visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total:" border="0" color="33554432" x="2354" y="4" height="56" width="315" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(importe for all)"border="2" color="255" x="2674" y="4" height="60" width="334" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="String(rowcount() ) + ' Servicios Ejecutados '"border="0" color="33554432" x="18" y="4" height="56" width="1646" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

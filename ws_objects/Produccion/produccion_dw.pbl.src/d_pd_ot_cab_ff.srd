@@ -1,0 +1,58 @@
+﻿$PBExportHeader$d_pd_ot_cab_ff.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=424 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_parte dbname="pd_ot.nro_parte" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha dbname="pd_ot.fecha" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_supervisor dbname="pd_ot.cod_supervisor" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_administrador dbname="pd_ot.cod_administrador" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=ot_adm dbname="pd_ot.ot_adm" )
+ column=(type=char(40) updatewhereclause=yes name=descripcion dbname="ot_administracion.descripcion" )
+ column=(type=char(93) updatewhereclause=yes name=nom_supervisor dbname="nom_supervisor" )
+ column=(type=char(93) updatewhereclause=yes name=nom_administrador dbname="nom_administrador" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=obs dbname="pd_ot.obs" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=turno dbname="pd_ot.turno" )
+ column=(type=char(40) updatewhereclause=yes name=desc_turno dbname="turno.descripcion" )
+ retrieve="SELECT  A.NRO_PARTE ,
+        A.FECHA ,
+        A.COD_SUPERVISOR ,
+        A.COD_ADMINISTRADOR ,
+		  A.OT_ADM		,
+		  B.DESCRIPCION,
+        LTRIM(RTRIM(MAESTRO_A.NOMBRE1))||'  '||LTRIM(RTRIM(MAESTRO_A.APEL_PATERNO))||' '||LTRIM(RTRIM(MAESTRO_A.APEL_MATERNO)) as nom_supervisor,
+        LTRIM(RTRIM(MAESTRO_B.NOMBRE1))||'  '||LTRIM(RTRIM(MAESTRO_B.APEL_PATERNO))||' '||LTRIM(RTRIM(MAESTRO_B.APEL_MATERNO)) as nom_administrador  ,
+		  A.OBS,
+		  A.TURNO,
+		  T.DESCRIPCION	  
+  FROM  PD_OT A ,
+        MAESTRO MAESTRO_A ,
+        MAESTRO MAESTRO_B ,
+		  OT_ADMINISTRACION B,
+		  TURNO T    
+  WHERE A.COD_SUPERVISOR    = MAESTRO_A.COD_TRABAJADOR (+)
+    and A.COD_ADMINISTRADOR = MAESTRO_B.COD_TRABAJADOR (+)
+    and A.OT_ADM				 = B.OT_ADM	  
+    and A.TURNO				 = T.TURNO (+)	  
+    and A.NRO_PARTE         = :as_nro_parte                   " update="PD_OT" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_parte", string)) )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="0" x="663" y="148" height="48" width="750" format="[general]" html.valueishtml="0"  name=nom_supervisor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="5" color="0" x="663" y="216" height="48" width="750" format="[general]" html.valueishtml="0"  name=nom_administrador visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="5" color="0" x="663" y="284" height="48" width="750" format="[general]" html.valueishtml="0"  name=desc_turno pointer="" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=detail alignment="1" text="Supervisor :" border="0" color="0" x="18" y="144" height="56" width="338" html.valueishtml="0"  name=cod_supervisor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Administrad.:" border="0" color="0" x="18" y="212" height="56" width="338" html.valueishtml="0"  name=cod_administrador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Turno :" border="0" color="0" x="18" y="280" height="56" width="338" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Obs :" border="0" color="0" x="18" y="348" height="56" width="338" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Ot Adm :" border="0" color="0" x="18" y="76" height="56" width="338" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Fecha :" border="0" color="0" x="937" y="8" height="56" width="174" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=10 border="5" color="0" x="1129" y="12" height="48" width="283" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Nro. Parte :" border="0" color="0" x="18" y="8" height="56" width="338" html.valueishtml="0"  name=nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="5" color="0" x="384" y="148" height="48" width="256" format="[general]" html.valueishtml="0"  name=cod_supervisor pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=40 border="5" color="0" x="384" y="216" height="48" width="256" format="[general]" html.valueishtml="0"  name=cod_administrador pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=50 border="5" color="0" x="384" y="284" height="48" width="256" format="[general]" html.valueishtml="0"  name=turno pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=60 border="5" color="0" x="384" y="352" height="48" width="1029" format="[general]" html.valueishtml="0"  name=obs visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=20 border="5" color="0" x="384" y="76" height="52" width="256" format="[general]" html.valueishtml="0"  name=ot_adm pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="5" color="0" x="663" y="76" height="52" width="750" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="5" color="0" x="384" y="12" height="48" width="343" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

@@ -1,0 +1,39 @@
+﻿$PBExportHeader$d_rpt_raciones_zonas_proceso_crs.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=64 color="536870912" )
+header[2](height=72 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=cencos dbname="cencos" )
+ column=(type=number updatewhereclause=yes name=compute_0004 dbname="compute_0004" )
+ retrieve="select t.cencos || t.desc_cencos as Cencos, 
+	    t.desc_zona_proc,
+       t.desc_tipo_racion,
+       nvl(sum(t.nro_raciones),0)
+from vw_com_raciones_zp t
+where trunc(t.fecha_parte) >= :ad_fecha1
+  and to_char(t.fecha_parte) <= :ad_fecha2
+  and substr(t.parte_Racion,1,2) = :as_origen
+  and t.proveedor = :as_proveedor
+  
+  GROUP BY t.cencos || t.desc_cencos, 
+	     t.desc_zona_proc,
+       t.desc_tipo_racion" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_origen", string),("as_proveedor", string))  sort="cencos A " )
+text(band=header[1] alignment="2" text="Tipo Racion" border="2" color="33554432" x="1403" y="8" height="52" width="430" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header[2] alignment="2" text="Cencos" border="2" color="33554432" x="9" y="4" height="56" width="1385" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="@desc_tipo_racion" border="2" color="33554432" x="1403" y="4" height="56" width="430" html.valueishtml="0"  name=compute_0004_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="Total " border="2" color="33554432" x="1842" y="4" height="56" width="544" html.valueishtml="0"  name=grand_sum_compute_0004_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="56" width="1385" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="1403" y="4" height="56" width="430" format="###,##0.00" html.valueishtml="0"  name=compute_0004 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="2" color="255" x="1842" y="4" height="56" width="544" format="###,##0.00" html.valueishtml="0"  name=grand_sum_compute_0004 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="~"Total~""border="0" color="33554432" x="9" y="4" height="56" width="1385" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(compute_0004 for all )"border="2" color="255" x="1403" y="4" height="56" width="430" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_compute_0004 for all )"border="2" color="255" x="1842" y="4" height="56" width="544" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "desc_tipo_racion" rows = "cencos" values = "sum(compute_0004 for crosstab)" sourcenames = "cencos, desc_zona_proc, desc_tipo_racion, compute_0004")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

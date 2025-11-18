@@ -1,0 +1,78 @@
+﻿$PBExportHeader$d_buscar_zarpe_grid.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes name=parte_pesca dbname="fl_parte_de_pesca.parte_pesca" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen dbname="fl_parte_de_pesca.origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=registro_zarpe dbname="fl_parte_de_pesca.registro_zarpe" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=nave_real dbname="fl_parte_de_pesca.nave_real" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=puerto_zarpe dbname="fl_parte_de_pesca.puerto_zarpe" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=situac_zarpe dbname="fl_parte_de_pesca.situac_zarpe" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=zona_pesca_zarpe dbname="fl_parte_de_pesca.zona_pesca_zarpe" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=tiempo_est_oper dbname="fl_parte_de_pesca.tiempo_est_oper" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=unidad_operacion dbname="fl_parte_de_pesca.unidad_operacion" )
+ column=(type=char(25) updatewhereclause=yes name=unidad_desc_unidad dbname="unidad.desc_unidad" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_hora_zarpe dbname="fl_parte_de_pesca.fecha_hora_zarpe" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_hora_est_arribo dbname="fl_parte_de_pesca.fecha_hora_est_arribo" )
+ column=(type=char(200) update=yes updatewhereclause=yes name=observ_zarpe dbname="fl_parte_de_pesca.observ_zarpe" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_zarpe_aprobado dbname="fl_parte_de_pesca.flag_zarpe_aprobado" )
+ column=(type=char(6) updatewhereclause=yes name=fl_parte_de_pesca_usr_aprob_datos dbname="fl_parte_de_pesca.usr_aprob_datos" )
+ column=(type=char(50) updatewhereclause=yes name=fl_puertos_descr_puerto dbname="fl_puertos.descr_puerto" )
+ column=(type=char(50) updatewhereclause=yes name=fl_motivo_movimiento_descr_situacion dbname="fl_motivo_movimiento.descr_situacion" )
+ column=(type=char(50) updatewhereclause=yes name=tg_zonas_pesca_descr_zona dbname="tg_zonas_pesca.descr_zona" )
+ column=(type=char(50) updatewhereclause=yes name=tg_naves_nomb_nave dbname="tg_naves.nomb_nave" )
+ retrieve="  SELECT FLPP.PARTE_PESCA,   
+         FLPP.ORIGEN,   
+         FLPP.REGISTRO_ZARPE,   
+         FLPP.NAVE_REAL,   
+         FLPP.PUERTO_ZARPE,   
+         FLPP.SITUAC_ZARPE,   
+         FLPP.ZONA_PESCA_ZARPE,   
+         FLPP.TIEMPO_EST_OPER,   
+         FLPP.UNIDAD_OPERACION,   
+			UND.DESC_UNIDAD,
+         FLPP.FECHA_HORA_ZARPE,   
+         FLPP.FECHA_HORA_EST_ARRIBO,   
+         FLPP.OBSERV_ZARPE,   
+         FLPP.FLAG_ZARPE_APROBADO,   
+			FLPP.USR_APROB_DATOS,
+         FP.DESCR_PUERTO,   
+         FLMM.DESCR_SITUACION,   
+         TZP.DESCR_ZONA,   
+         TN.NOMB_NAVE  
+    FROM FL_PARTE_DE_PESCA FLPP,   
+         TG_NAVES TN,   
+         FL_PUERTOS FP,   
+         FL_MOTIVO_MOVIMIENTO FLMM,   
+         TG_ZONAS_PESCA TZP,
+		   UNIDAD UND
+   WHERE FLPP.NAVE_REAL = TN.NAVE 
+     and FLPP.PUERTO_ZARPE = FP.PUERTO 
+     and FLPP.SITUAC_ZARPE = FLMM.MOTIVO_MOVIMIENTO 
+     and FLPP.ZONA_PESCA_ZARPE = TZP.ZONA_PESCA
+	  and FLPP.UNIDAD_OPERACION = UND.UND 
+	  AND FLPP.REGISTRO_ZARPE IS NOT NULL
+     AND FLPP.NAVE_REAL = :AS_NAVE
+ 
+" arguments=(("AS_NAVE", string)) )
+text(band=header alignment="2" text="Parte Pesca" border="2" color="33554432" x="9" y="8" height="56" width="329" html.valueishtml="0"  name=parte_pesca_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Registro Zarpe" border="2" color="33554432" x="347" y="8" height="56" width="384" html.valueishtml="0"  name=registro_zarpe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Codigo Nave" border="2" color="33554432" x="741" y="8" height="56" width="338" html.valueishtml="0"  name=nave_real_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha Hora Zarpe" border="2" color="33554432" x="4690" y="8" height="56" width="603" html.valueishtml="0"  name=fecha_hora_zarpe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Puerto Zarpe" border="2" color="0" x="1833" y="8" height="56" width="754" html.valueishtml="0"  name=fl_puertos_descr_puerto_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Situacion Zarpe" border="2" color="0" x="2597" y="8" height="56" width="933" html.valueishtml="0"  name=fl_motivo_movimiento_descr_situacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Zonas Pesca" border="2" color="0" x="3538" y="8" height="56" width="1143" html.valueishtml="0"  name=tg_zonas_pesca_descr_zona_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nombre Nave" border="2" color="0" x="1088" y="8" height="56" width="736" html.valueishtml="0"  name=tg_naves_nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="329" format="[general]" html.valueishtml="0"  name=parte_pesca visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="347" y="4" height="64" width="384" format="[general]" html.valueishtml="0"  name=registro_zarpe visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="741" y="4" height="64" width="338" format="[general]" html.valueishtml="0"  name=nave_real visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="33554432" x="4690" y="4" height="64" width="603" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=fecha_hora_zarpe visible="1" editmask.mask="dd/mm/yyyy hh:mm" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="2" color="33554432" x="1833" y="4" height="64" width="754" format="[general]" html.valueishtml="0"  name=fl_puertos_descr_puerto visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="2" color="33554432" x="2597" y="4" height="64" width="933" format="[general]" html.valueishtml="0"  name=fl_motivo_movimiento_descr_situacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="2" color="33554432" x="3538" y="4" height="64" width="1143" format="[general]" html.valueishtml="0"  name=tg_zonas_pesca_descr_zona visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="2" color="33554432" x="1088" y="4" height="64" width="736" format="[general]" html.valueishtml="0"  name=tg_naves_nomb_nave visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

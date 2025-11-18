@@ -1,0 +1,47 @@
+﻿$PBExportHeader$d_abc_lista_og_pag_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="solicitud_giro.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="solicitud_giro.nro_doc" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="solicitud_giro.cod_moneda" )
+ column=(type=datetime updatewhereclause=yes name=fecha_emision dbname="solicitud_giro.fecha_emision" )
+ column=(type=number updatewhereclause=yes name=tasa_cambio dbname="tasa_cambio" )
+ column=(type=char(60) updatewhereclause=yes name=descripcion dbname="descripcion" )
+ column=(type=decimal(2) updatewhereclause=yes name=saldo dbname="solicitud_giro.saldo" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="codigo_relacion.nombre" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="solicitud_giro.cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="solicitud_giro.cnta_prsp" )
+ retrieve="  SELECT ~"SOLICITUD_GIRO~".~"COD_RELACION~",   
+         (select doc_sol_giro from finparam where reckey = '1' ) as tipo_doc,   
+         ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~" as nro_doc,   
+         ~"SOLICITUD_GIRO~".~"COD_MONEDA~",   
+         ~"SOLICITUD_GIRO~".~"FECHA_EMISION~",   
+			usf_fin_tasa_cambio(~"SOLICITUD_GIRO~".~"FECHA_EMISION~") as tasa_cambio,
+         substr(descripcion,1,60) as descripcion,   
+         ~"SOLICITUD_GIRO~".~"IMPORTE~" as saldo,   
+         ~"CODIGO_RELACION~".~"NOMBRE~"  ,
+			~"SOLICITUD_GIRO~".~"CENCOS~",
+			~"SOLICITUD_GIRO~".~"CNTA_PRSP~"
+    FROM ~"SOLICITUD_GIRO~",   
+         ~"CODIGO_RELACION~"  
+   WHERE ( ~"SOLICITUD_GIRO~".~"COD_RELACION~" = ~"CODIGO_RELACION~".~"COD_RELACION~" ) and  
+         ( ( ~"SOLICITUD_GIRO~".~"FLAG_ESTADO~" = '2' ) )    and
+			( ~"SOLICITUD_GIRO~".~"COD_RELACION~" = :as_cod_relacion )
+" arguments=(("as_cod_relacion", string)) )
+text(band=header alignment="2" text="C.Relación" border="2" color="8388608" x="9" y="8" height="56" width="238"  name=cod_relacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T.doc" border="2" color="8388608" x="251" y="8" height="56" width="165"  name=tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc." border="2" color="8388608" x="421" y="8" height="56" width="306"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="731" y="8" height="56" width="462"  name=moneda_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo" border="2" color="8388608" x="1198" y="8" height="56" width="338"  name=saldo_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="64" width="238" format="[general]"  name=cod_relacion edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="251" y="0" height="64" width="165" format="[general]"  name=tipo_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="421" y="0" height="64" width="306" format="[general]"  name=nro_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="0" x="731" y="0" height="64" width="462" format="[general]"  name=cod_moneda dddw.name=d_dddw_moneda_tbl dddw.displaycolumn=descripcion dddw.datacolumn=cod_moneda dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="0" x="1198" y="0" height="64" width="338" format="[general]"  name=saldo editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,25 @@
+﻿$PBExportHeader$f_ultima_marca_balanza.srf
+global type f_ultima_marca_balanza from function_object
+end type
+
+forward prototypes
+global function string f_ultima_marca_balanza (date ad_fecha)
+end prototypes
+
+global function string f_ultima_marca_balanza (date ad_fecha);String ls_mensaje
+
+DECLARE PB_USF_OPE_ULTIMA_MARCA PROCEDURE FOR USF_OPE_ULTIMA_MARCA (:ad_fecha);
+EXECUTE PB_USF_OPE_ULTIMA_MARCA ;
+
+
+
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox("SQL error", SQLCA.SQLErrText)
+END IF
+
+FETCH PB_USF_OPE_ULTIMA_MARCA INTO :ls_mensaje ;
+CLOSE PB_USF_OPE_ULTIMA_MARCA ;
+
+Return ls_mensaje
+end function
+

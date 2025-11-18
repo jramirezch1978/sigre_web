@@ -1,0 +1,40 @@
+﻿$PBExportHeader$f_fecha_fin.srf
+global type f_fecha_fin from function_object
+end type
+
+forward prototypes
+global function datetime f_fecha_fin (datetime ad_fecha_inicio)
+end prototypes
+
+global function datetime f_fecha_fin (datetime ad_fecha_inicio);datetime ld_fecha_fin
+integer li_day, li_after, li_dia_ini, li_dia_fin
+
+// La semana inicia un Jueves(5) y termina un miercoles(4)
+li_dia_ini = 2
+li_dia_fin = 1
+
+li_day = DayNumber( Date( ad_fecha_inicio) )
+
+if li_day <> li_dia_fin then 
+
+	If li_day < li_dia_fin then
+		li_after = li_dia_fin - li_day
+	elseif li_day > li_dia_fin then
+		li_after = 7 - li_day + li_dia_fin
+	end if
+		
+	ld_fecha_fin = datetime(relativedate( date(ad_fecha_inicio), li_after ))
+
+else
+	ld_fecha_fin = datetime(relativedate( date(ad_fecha_inicio), 6 ))
+	
+end if
+
+// la fecha final depende de la ultima semana y es el ultimo dia del año
+if year(date(ad_fecha_inicio)) <> year( date(ld_fecha_fin) ) then
+	ld_fecha_fin = Datetime(date('31/12/' + string( year( date( ad_fecha_inicio ) ) ) ) )
+end if
+
+return ld_fecha_fin
+end function
+

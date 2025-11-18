@@ -1,0 +1,67 @@
+﻿$PBExportHeader$d_abc_cntas_x_pagar_impuesto_liq_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=4 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_relacion dbname="cp_doc_det_imp.cod_relacion" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_doc dbname="cp_doc_det_imp.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_doc dbname="cp_doc_det_imp.nro_doc" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="cp_doc_det_imp.item" )
+ column=(type=char(5) update=yes updatewhereclause=yes key=yes name=tipo_impuesto dbname="cp_doc_det_imp.tipo_impuesto" )
+ column=(type=char(1) updatewhereclause=yes name=signo dbname="impuestos_tipo.signo" )
+ column=(type=decimal(2) updatewhereclause=yes name=tasa_impuesto dbname="impuestos_tipo.tasa_impuesto" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="cp_doc_det_imp.importe" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_ctbl dbname="impuestos_tipo.cnta_ctbl" )
+ column=(type=char(40) updatewhereclause=yes name=desc_impuesto dbname="impuestos_tipo.desc_impuesto" )
+ column=(type=char(1) updatewhereclause=yes name=flag_dh_cxp dbname="impuestos_tipo.flag_dh_cxp" )
+ column=(type=char(150) updatewhereclause=yes name=desc_cnta dbname="cntbl_cnta.desc_cnta" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="solicitud_giro_liq_det.cod_moneda" )
+ column=(type=decimal(3) updatewhereclause=yes name=tasa_cambio dbname="solicitud_giro_liq_det.tasa_cambio" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda_cab dbname="solicitud_giro.cod_moneda_cab" )
+ retrieve="  SELECT ~"CP_DOC_DET_IMP~".~"COD_RELACION~",   
+         ~"CP_DOC_DET_IMP~".~"TIPO_DOC~",   
+         ~"CP_DOC_DET_IMP~".~"NRO_DOC~",   
+         ~"CP_DOC_DET_IMP~".~"ITEM~",   
+         ~"CP_DOC_DET_IMP~".~"TIPO_IMPUESTO~",   
+         ~"IMPUESTOS_TIPO~".~"SIGNO~",   
+         ~"IMPUESTOS_TIPO~".~"TASA_IMPUESTO~",   
+         ~"CP_DOC_DET_IMP~".~"IMPORTE~",   
+         ~"IMPUESTOS_TIPO~".~"CNTA_CTBL~",   
+         ~"IMPUESTOS_TIPO~".~"DESC_IMPUESTO~",   
+         ~"IMPUESTOS_TIPO~".~"FLAG_DH_CXP~",   
+         ~"CNTBL_CNTA~".~"DESC_CNTA~",   
+         ~"SOLICITUD_GIRO_LIQ_DET~".~"COD_MONEDA~",   
+         ~"SOLICITUD_GIRO_LIQ_DET~".~"TASA_CAMBIO~",   
+         ~"SOLICITUD_GIRO~".~"COD_MONEDA~" AS COD_MONEDA_CAB  
+    FROM ~"CP_DOC_DET_IMP~",   
+         ~"IMPUESTOS_TIPO~",   
+         ~"SOLICITUD_GIRO_LIQ_DET~",   
+         ~"CNTBL_CNTA~",   
+         ~"SOLICITUD_GIRO~"  
+   WHERE ( ~"CP_DOC_DET_IMP~".~"TIPO_IMPUESTO~" = ~"IMPUESTOS_TIPO~".~"TIPO_IMPUESTO~" ) and  
+         ( ~"SOLICITUD_GIRO_LIQ_DET~".~"ITEM~" = ~"CP_DOC_DET_IMP~".~"ITEM~" ) and  
+         ( ~"SOLICITUD_GIRO_LIQ_DET~".~"PROVEEDOR~" = ~"CP_DOC_DET_IMP~".~"COD_RELACION~" ) and  
+         ( ~"SOLICITUD_GIRO_LIQ_DET~".~"TIPO_DOC~" = ~"CP_DOC_DET_IMP~".~"TIPO_DOC~" ) and  
+         ( ~"SOLICITUD_GIRO_LIQ_DET~".~"NRO_DOC~" = ~"CP_DOC_DET_IMP~".~"NRO_DOC~" ) and  
+         ( ~"IMPUESTOS_TIPO~".~"CNTA_CTBL~" = ~"CNTBL_CNTA~".~"CNTA_CTBL~" ) and  
+         ( ~"SOLICITUD_GIRO_LIQ_DET~".~"ORIGEN~" = ~"SOLICITUD_GIRO~".~"ORIGEN~" ) and  
+         ( ~"SOLICITUD_GIRO_LIQ_DET~".~"NRO_SOLICITUD~" = ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~" ) and  
+         ( ( ~"SOLICITUD_GIRO_LIQ_DET~".~"ORIGEN~" = :as_origen ) AND  
+         ( ~"SOLICITUD_GIRO_LIQ_DET~".~"NRO_SOLICITUD~" = :as_nro_solicitud ) )    
+" update="CP_DOC_DET_IMP" updatewhere=1 updatekeyinplace=yes arguments=(("as_origen", string),("as_nro_solicitud", string)) )
+text(band=header alignment="2" text="Item" border="2" color="8388608" x="9" y="8" height="56" width="142"  name=item_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tipo Impuesto" border="2" color="8388608" x="155" y="8" height="56" width="370"  name=tipo_impuesto_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Signo" border="2" color="8388608" x="530" y="8" height="56" width="151"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tasa %" border="2" color="8388608" x="686" y="8" height="56" width="261"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="2" color="8388608" x="951" y="8" height="56" width="325"  name=importe_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="9" y="0" height="60" width="142" format="[general]"  name=item edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="530" y="0" height="60" width="151" format="[general]"  name=signo edit.limit=0 edit.case=any edit.autoselect=yes edit.required=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="0" x="686" y="0" height="60" width="261" format="[general]"  name=tasa_impuesto edit.limit=0 edit.case=any edit.autoselect=yes edit.required=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=10 border="2" color="0" x="155" y="0" height="60" width="370" format="[general]"  name=tipo_impuesto dddw.name=d_dddw_impuestos dddw.displaycolumn=desc_impuesto dddw.datacolumn=tipo_impuesto dddw.percentwidth=470 dddw.lines=3 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.required=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=20 border="2" color="0" x="951" y="0" height="60" width="325" format="###,###.00"  name=importe editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="f_convertir_monto_pagos( cod_moneda , importe , cod_moneda_cab , tasa_cambio )"border="2" color="0" x="1280" y="0" height="60" width="325" format="###,###.00"  name=importe_x_conv  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Importe" border="2" color="8388608" x="1280" y="8" height="56" width="325"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

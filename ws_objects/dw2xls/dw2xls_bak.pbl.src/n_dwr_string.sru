@@ -1,0 +1,1244 @@
+﻿$PBExportHeader$n_dwr_string.sru
+$PBExportComments$By PBKiller v2.5.18(http://kivens.nease.net)
+forward
+global type n_dwr_string from nonvisualobject
+end type
+end forward
+
+global type n_dwr_string from nonvisualobject autoinstantiate
+end type
+global n_dwr_string n_dwr_string
+
+forward prototypes
+public function long of_arraytostring (string as_source[],string as_delimiter,ref string as_ref_string)
+public function long of_countoccurrences (string as_source,string as_target)
+public function long of_countoccurrences (string as_source,string as_target,boolean ab_ignorecase)
+public function string of_dos2win (string str)
+public function string of_getkeyvalue (string as_source,string as_keyword,string as_separator)
+public function string of_gettoken (ref string as_source,string as_separator)
+public function string of_globalreplace (string as_source,string as_old,string as_new)
+public function string of_globalreplace (string as_source,string as_old,string as_new,boolean ab_ignorecase)
+public function boolean of_isalpha (string as_source)
+public function boolean of_isalphanum (string as_source)
+public function boolean of_isarithmeticoperator (string as_source)
+public function boolean of_iscomparisonoperator (string as_source)
+public function boolean of_isempty (string as_source)
+public function boolean of_isformat (string as_source)
+public function boolean of_islower (string as_source)
+public function boolean of_isnum (string as_source)
+public function boolean of_isprintable (string as_source)
+public function boolean of_ispunctuation (string as_source)
+public function boolean of_isspace (string as_source)
+public function boolean of_isupper (string as_source)
+public function boolean of_iswhitespace (string as_source)
+public function long of_lastpos (string as_source,string as_target)
+public function long of_lastpos (string as_source,string as_target,long al_start)
+public function string of_lefttrim (string as_source)
+public function string of_lefttrim (string as_source,boolean ab_remove_spaces)
+public function string of_lefttrim (string as_source,boolean ab_remove_spaces,boolean ab_remove_nonprint)
+public function string of_padleft (string as_source,long al_length)
+public function string of_padleft (string as_source,long al_length,string as_symbol)
+public function string of_padright (string as_source,long al_length)
+public function string of_padright (string as_source,long al_length,string as_symbol)
+public function long of_parsetoarray (string as_source,string as_delimiter,ref string as_array[])
+public function string of_quote (string as_source)
+public function string of_remove_last_spaces_and_empty_rows (string as_source)
+public function string of_remove_last_spaces_empty_rows (string as_source)
+public function string of_removenonprint (string as_source)
+public function string of_removewhitespace (string as_source)
+public function string of_righttrim (string as_source)
+public function string of_righttrim (string as_source,boolean ab_remove_spaces)
+public function string of_righttrim (string as_source,boolean ab_remove_spaces,boolean ab_remove_nonprint)
+public function integer of_setkeyvalue (ref string as_source,string as_keyword,string as_keyvalue,string as_separator)
+public function integer of_stringtoarray (string as_source,string as_separator,ref string as_result[])
+public function string of_text_for_expression (string a_str)
+public function string of_text_for_text (string a_str)
+public function string of_trim (string as_source)
+public function string of_trim (string as_source,boolean ab_remove_spaces)
+public function string of_trim (string as_source,boolean ab_remove_spaces,boolean ab_remove_nonprint)
+public function string of_win2dos (string str)
+public function string of_wordcap (string as_source)
+end prototypes
+
+public function long of_arraytostring (string as_source[],string as_delimiter,ref string as_ref_string);long ll_dellen
+long ll_pos
+long ll_count
+long ll_arrayupbound
+string ls_holder
+boolean lb_entryfound = false
+
+ll_arrayupbound = upperbound(as_source)
+
+if ((isnull(as_delimiter)) or ( not ll_arrayupbound > 0)) then
+	return -1
+end if
+
+as_ref_string = ""
+
+for ll_count = 1 to ll_arrayupbound
+
+	if as_source[ll_count] <> "" then
+
+		if len(as_ref_string) = 0 then
+			as_ref_string = as_source[ll_count]
+		else
+			as_ref_string = as_ref_string + as_delimiter + as_source[ll_count]
+		end if
+
+	end if
+
+next
+
+return 1
+end function
+
+public function long of_countoccurrences (string as_source,string as_target);long ll_count
+long ll_null
+
+if ((isnull(as_source)) or (isnull(as_target))) then
+	setnull(ll_null)
+	return ll_null
+end if
+
+ll_count = of_countoccurrences(as_source,as_target,true)
+return ll_count
+end function
+
+public function long of_countoccurrences (string as_source,string as_target,boolean ab_ignorecase);long ll_count
+long ll_pos
+long ll_len
+long ll_null
+
+if (((isnull(as_source)) or (isnull(as_target))) or isnull(ab_ignorecase)) then
+	setnull(ll_null)
+	return ll_null
+end if
+
+if ab_ignorecase then
+	as_source = lower(as_source)
+	as_target = lower(as_target)
+end if
+
+ll_len = len(as_target)
+ll_count = 0
+ll_pos = pos(as_source,as_target)
+
+do while ll_pos > 0
+	ll_count ++
+	ll_pos = pos(as_source,as_target,ll_pos + ll_len)
+loop
+
+return ll_count
+end function
+
+public function string of_dos2win (string str);char ch[]
+long num
+long i
+integer code
+string ret
+
+ch = str
+num = len(str)
+
+for i = 1 to num
+	code = asc(ch[i])
+
+	choose case code
+		case 128 to 175
+			code = code + 64
+			ch[i] = char(code)
+		case 204 to 240
+			code = code + 16
+			ch[i] = char(code)
+	end choose
+
+next
+
+ret = ch
+return ret
+end function
+
+public function string of_getkeyvalue (string as_source,string as_keyword,string as_separator);boolean lb_done = false
+integer li_keyword
+integer li_separator
+integer li_equal
+string ls_keyvalue
+string ls_null
+
+if (((isnull(as_source)) or (isnull(as_keyword))) or (isnull(as_separator))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+ls_keyvalue = ""
+
+do while  not lb_done
+	li_keyword = pos(lower(as_source),lower(as_keyword))
+
+	if li_keyword > 0 then
+		as_source = lefttrim(right(as_source,len(as_source) - (li_keyword + len(as_keyword) - 1)))
+
+		if left(as_source,1) = "=" then
+			li_separator = pos(as_source,as_separator,2)
+
+			if li_separator > 0 then
+				ls_keyvalue = mid(as_source,2,li_separator - 2)
+			else
+				ls_keyvalue = mid(as_source,2)
+			end if
+
+			ls_keyvalue = trim(ls_keyvalue)
+			lb_done = true
+		end if
+
+	else
+		lb_done = true
+	end if
+
+loop
+
+return ls_keyvalue
+end function
+
+public function string of_gettoken (ref string as_source,string as_separator);integer li_pos
+string ls_ret
+string ls_null
+
+if ((isnull(as_source)) or (isnull(as_separator))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+li_pos = pos(as_source,as_separator)
+
+if li_pos = 0 then
+	ls_ret = as_source
+	as_source = ""
+else
+	ls_ret = mid(as_source,1,li_pos - 1)
+	as_source = right(as_source,len(as_source) - (li_pos + len(as_separator) - 1))
+end if
+
+return ls_ret
+end function
+
+public function string of_globalreplace (string as_source,string as_old,string as_new);integer li_start
+integer li_oldlen
+integer li_newlen
+string ls_null
+
+if (((isnull(as_source)) or (isnull(as_old))) or (isnull(as_new))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+as_source = of_globalreplace(as_source,as_old,as_new,true)
+return as_source
+end function
+
+public function string of_globalreplace (string as_source,string as_old,string as_new,boolean ab_ignorecase);long ll_start
+long ll_oldlen
+long ll_newlen
+string ls_source
+string ls_null
+
+if ((((isnull(as_source)) or (isnull(as_old))) or (isnull(as_new))) or isnull(ab_ignorecase)) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+ll_oldlen = len(as_old)
+ll_newlen = len(as_new)
+
+if ab_ignorecase then
+	as_old = lower(as_old)
+	ls_source = lower(as_source)
+else
+	ls_source = as_source
+end if
+
+ll_start = pos(ls_source,as_old)
+
+do while ll_start > 0
+	as_source = replace(as_source,ll_start,ll_oldlen,as_new)
+
+	if ab_ignorecase then
+		ls_source = lower(as_source)
+	else
+		ls_source = as_source
+	end if
+
+	ll_start = pos(ls_source,as_old,ll_start + ll_newlen)
+loop
+
+return as_source
+end function
+
+public function boolean of_isalpha (string as_source);long ll_count
+long ll_length
+char lc_char[]
+integer li_ascii
+boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+ll_length = len(as_source)
+
+if ll_length = 0 then
+	return false
+end if
+
+lc_char = as_source
+
+do while ll_count < ll_length
+	ll_count ++
+	li_ascii = asc(lc_char[ll_count])
+
+	if (((li_ascii < 65) or (li_ascii > 90 and li_ascii < 97)) or (li_ascii > 122)) then
+		return false
+	end if
+
+loop
+
+return true
+end function
+
+public function boolean of_isalphanum (string as_source);long ll_count
+long ll_length
+char lc_char[]
+integer li_ascii
+boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+ll_length = len(as_source)
+
+if ll_length = 0 then
+	return false
+end if
+
+lc_char = as_source
+
+do while ll_count < ll_length
+	ll_count ++
+	li_ascii = asc(lc_char[ll_count])
+
+	if ((((li_ascii < 48) or (li_ascii > 57 and li_ascii < 65)) or (li_ascii > 90 and li_ascii < 97)) or (li_ascii > 122)) then
+		return false
+	end if
+
+loop
+
+return true
+end function
+
+public function boolean of_isarithmeticoperator (string as_source);long ll_count
+long ll_length
+char lc_char[]
+integer li_ascii
+boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+ll_length = len(as_source)
+
+if ll_length = 0 then
+	return false
+end if
+
+lc_char = as_source
+
+do while ll_count < ll_length
+	ll_count ++
+	li_ascii = asc(lc_char[ll_count])
+
+	if (((((((li_ascii = 40) or (li_ascii = 41)) or (li_ascii = 43)) or (li_ascii = 45)) or (li_ascii = 42)) or (li_ascii = 47)) or (li_ascii = 94)) then
+	else
+		return false
+	end if
+
+loop
+
+return true
+end function
+
+public function boolean of_iscomparisonoperator (string as_source);long ll_count
+long ll_length
+char lc_char[]
+integer li_ascii
+boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+ll_length = len(as_source)
+
+if ll_length = 0 then
+	return false
+end if
+
+lc_char = as_source
+
+do while ll_count < ll_length
+	ll_count ++
+	li_ascii = asc(lc_char[ll_count])
+
+	if (((li_ascii = 60) or (li_ascii = 61)) or (li_ascii = 62)) then
+	else
+		return false
+	end if
+
+loop
+
+return true
+end function
+
+public function boolean of_isempty (string as_source);if ((isnull(as_source)) or (len(as_source) = 0)) then
+	return true
+end if
+
+return false
+end function
+
+public function boolean of_isformat (string as_source);long ll_count
+long ll_length
+char lc_char[]
+integer li_ascii
+boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+ll_length = len(as_source)
+
+if ll_length = 0 then
+	return false
+end if
+
+lc_char = as_source
+
+do while ll_count < ll_length
+	ll_count ++
+	li_ascii = asc(lc_char[ll_count])
+
+	if ((((li_ascii >= 33 and li_ascii <= 47) or (li_ascii >= 58 and li_ascii <= 64)) or (li_ascii >= 91 and li_ascii <= 96)) or (li_ascii >= 123 and li_ascii <= 126)) then
+	else
+		return false
+	end if
+
+loop
+
+return true
+end function
+
+public function boolean of_islower (string as_source);boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+if as_source = lower(as_source) then
+	return true
+else
+	return false
+end if
+end function
+
+public function boolean of_isnum (string as_source);long ll_count
+long ll_length
+char lc_char[]
+integer li_ascii
+boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+ll_length = len(as_source)
+
+if ll_length = 0 then
+	return false
+end if
+
+lc_char = as_source
+
+do while ll_count < ll_length
+	ll_count ++
+	li_ascii = asc(lc_char[ll_count])
+
+	if ((li_ascii < 48) or (li_ascii > 57)) then
+		return false
+	end if
+
+loop
+
+return true
+end function
+
+public function boolean of_isprintable (string as_source);long ll_count
+long ll_length
+char lc_char[]
+integer li_ascii
+boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+ll_length = len(as_source)
+
+if ll_length = 0 then
+	return false
+end if
+
+lc_char = as_source
+
+do while ll_count < ll_length
+	ll_count ++
+	li_ascii = asc(lc_char[ll_count])
+
+	if ((li_ascii < 32) or (li_ascii > 126)) then
+		return false
+	end if
+
+loop
+
+return true
+end function
+
+public function boolean of_ispunctuation (string as_source);long ll_count
+long ll_length
+char lc_char[]
+integer li_ascii
+boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+ll_length = len(as_source)
+
+if ll_length = 0 then
+	return false
+end if
+
+lc_char = as_source
+
+do while ll_count < ll_length
+	ll_count ++
+	li_ascii = asc(lc_char[ll_count])
+
+	if ((((((((li_ascii = 33) or (li_ascii = 34)) or (li_ascii = 39)) or (li_ascii = 44)) or (li_ascii = 46)) or (li_ascii = 58)) or (li_ascii = 59)) or (li_ascii = 63)) then
+	else
+		return false
+	end if
+
+loop
+
+return true
+end function
+
+public function boolean of_isspace (string as_source);boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+if len(as_source) = 0 then
+	return false
+end if
+
+if trim(as_source) = "" then
+	return true
+end if
+
+return false
+end function
+
+public function boolean of_isupper (string as_source);boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+if as_source = upper(as_source) then
+	return true
+else
+	return false
+end if
+end function
+
+public function boolean of_iswhitespace (string as_source);long ll_count
+long ll_length
+char lc_char[]
+integer li_ascii
+boolean lb_null = false
+
+if isnull(as_source) then
+	setnull(lb_null)
+	return lb_null
+end if
+
+ll_length = len(as_source)
+
+if ll_length = 0 then
+	return false
+end if
+
+lc_char = as_source
+
+do while ll_count < ll_length
+	ll_count ++
+	li_ascii = asc(lc_char[ll_count])
+
+	if (((((((li_ascii = 8) or (li_ascii = 9)) or (li_ascii = 10)) or (li_ascii = 11)) or (li_ascii = 12)) or (li_ascii = 13)) or (li_ascii = 32)) then
+	else
+		return false
+	end if
+
+loop
+
+return true
+end function
+
+public function long of_lastpos (string as_source,string as_target);long ll_null
+
+if ((isnull(as_source)) or (isnull(as_target))) then
+	setnull(ll_null)
+	return ll_null
+end if
+
+return of_lastpos(as_source,as_target,len(as_source))
+end function
+
+public function long of_lastpos (string as_source,string as_target,long al_start);long ll_cnt
+long ll_pos
+
+if (((isnull(as_source)) or (isnull(as_target))) or (isnull(al_start))) then
+	setnull(ll_cnt)
+	return ll_cnt
+end if
+
+if len(as_source) = 0 then
+	return 0
+end if
+
+if al_start = 0 then
+	al_start = len(as_source)
+end if
+
+for ll_cnt = al_start to 1 step -1
+	ll_pos = pos(as_source,as_target,ll_cnt)
+
+	if ll_pos = ll_cnt then
+		return ll_cnt
+	end if
+
+next
+
+return 0
+end function
+
+public function string of_lefttrim (string as_source);string ls_null
+
+if isnull(as_source) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+return of_lefttrim(as_source,true,false)
+end function
+
+public function string of_lefttrim (string as_source,boolean ab_remove_spaces);string ls_null
+
+if ((isnull(as_source)) or (isnull(ab_remove_spaces))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+return of_lefttrim(as_source,ab_remove_spaces,false)
+end function
+
+public function string of_lefttrim (string as_source,boolean ab_remove_spaces,boolean ab_remove_nonprint);char lc_char
+boolean lb_char = false
+boolean lb_printable_char = false
+string ls_null
+
+if (((isnull(as_source)) or (isnull(ab_remove_spaces))) or (isnull(ab_remove_nonprint))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+if ab_remove_spaces and ab_remove_nonprint then
+
+	do while len(as_source) > 0 and ( not lb_char)
+		lc_char = as_source
+
+		if of_isprintable(lc_char) and ( not of_isspace(lc_char)) then
+			lb_char = true
+		else
+			as_source = mid(as_source,2)
+		end if
+
+	loop
+
+	return as_source
+else
+
+	if ab_remove_nonprint then
+
+		do while len(as_source) > 0 and ( not lb_printable_char)
+			lc_char = as_source
+
+			if of_isprintable(lc_char) then
+				lb_printable_char = true
+			else
+				as_source = mid(as_source,2)
+			end if
+
+		loop
+
+		return as_source
+	else
+
+		if ab_remove_spaces then
+			return lefttrim(as_source)
+		end if
+
+	end if
+
+end if
+
+return as_source
+end function
+
+public function string of_padleft (string as_source,long al_length);long ll_cnt
+string ls_return
+string ls_null
+
+if ((isnull(as_source)) or (isnull(al_length))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+if al_length <= len(as_source) then
+	return as_source
+end if
+
+ls_return = space(al_length - len(as_source)) + as_source
+return ls_return
+end function
+
+public function string of_padleft (string as_source,long al_length,string as_symbol);string str
+
+if (((isnull(as_source)) or (isnull(al_length))) or (isnull(as_symbol))) then
+	return as_source
+end if
+
+str = as_source
+
+if al_length > len(str) then
+	str = fill(as_symbol,al_length)
+	str = replace(str,al_length - len(as_source) + 1,len(as_source),as_source)
+end if
+
+return str
+end function
+
+public function string of_padright (string as_source,long al_length);long ll_cnt
+string ls_return
+string ls_null
+
+if ((isnull(as_source)) or (isnull(al_length))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+if al_length <= len(as_source) then
+	return as_source
+end if
+
+ls_return = as_source + space(al_length - len(as_source))
+return ls_return
+end function
+
+public function string of_padright (string as_source,long al_length,string as_symbol);string str
+
+if (((isnull(as_source)) or (isnull(al_length))) or (isnull(as_symbol))) then
+	return as_source
+end if
+
+str = as_source
+
+if al_length > len(str) then
+	str = fill(as_symbol,al_length)
+	str = replace(str,1,len(as_source),as_source)
+end if
+
+return str
+end function
+
+public function long of_parsetoarray (string as_source,string as_delimiter,ref string as_array[]);long ll_dellen
+long ll_pos
+long ll_count
+long ll_start
+long ll_length
+string ls_holder
+long ll_null
+
+if ((isnull(as_source)) or (isnull(as_delimiter))) then
+	setnull(ll_null)
+	return ll_null
+end if
+
+if trim(as_source) = "" then
+	return 0
+end if
+
+ll_dellen = len(as_delimiter)
+ll_pos = pos(upper(as_source),upper(as_delimiter))
+
+if ll_pos = 0 then
+	as_array[1] = as_source
+	return 1
+end if
+
+ll_count = 0
+ll_start = 1
+
+do while ll_pos > 0
+	ll_length = ll_pos - ll_start
+	ls_holder = mid(as_source,ll_start,ll_length)
+	ll_count ++
+	as_array[ll_count] = ls_holder
+	ll_start = ll_pos + ll_dellen
+	ll_pos = pos(upper(as_source),upper(as_delimiter),ll_start)
+loop
+
+ls_holder = mid(as_source,ll_start,len(as_source))
+
+if len(ls_holder) > 0 then
+	ll_count ++
+	as_array[ll_count] = ls_holder
+end if
+
+return ll_count
+end function
+
+public function string of_quote (string as_source);if isnull(as_source) then
+	return as_source
+end if
+
+return ("~"" + as_source + "~"")
+end function
+
+public function string of_remove_last_spaces_and_empty_rows (string as_source);string str = ""
+string s[]
+long cnt
+long i
+boolean flag = true
+
+cnt = of_parsetoarray(as_source,"~r~n",s)
+
+for i = cnt to 1 step -1
+	s[i] = of_righttrim(s[i])
+
+	if flag and s[i] = "" then
+		cnt --
+	else
+		flag = false
+	end if
+
+next
+
+if cnt > 0 then
+	str = s[1]
+end if
+
+for i = 2 to cnt
+	str = str + "~r~n" + s[i]
+next
+
+return str
+end function
+
+public function string of_remove_last_spaces_empty_rows (string as_source);string str = ""
+string s[]
+long cnt
+long i
+boolean flag = true
+
+cnt = of_parsetoarray(as_source,"~r~n",s)
+
+for i = cnt to 1 step -1
+	s[i] = of_righttrim(s[i])
+
+	if flag and s[i] = "" then
+		cnt --
+	else
+		flag = false
+	end if
+
+next
+
+if cnt > 0 then
+	str = s[1]
+end if
+
+for i = 2 to cnt
+	str = str + "~r~n" + s[i]
+next
+
+return str
+end function
+
+public function string of_removenonprint (string as_source);char lch_char
+boolean lb_printable_char = false
+long ll_pos = 1
+long ll_loop
+string ls_source
+long ll_source_len
+string ls_null
+
+if isnull(as_source) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+ls_source = as_source
+ll_source_len = len(ls_source)
+
+for ll_loop = 1 to ll_source_len
+	lch_char = mid(ls_source,ll_pos,1)
+
+	if of_isprintable(lch_char) then
+		ll_pos ++
+	else
+		ls_source = replace(ls_source,ll_pos,1,"")
+	end if
+
+next
+
+return ls_source
+end function
+
+public function string of_removewhitespace (string as_source);char lch_char
+boolean lb_printable_char = false
+long ll_pos = 1
+long ll_loop
+string ls_source
+long ll_source_len
+string ls_null
+
+if isnull(as_source) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+ls_source = as_source
+ll_source_len = len(ls_source)
+
+for ll_loop = 1 to ll_source_len
+	lch_char = mid(ls_source,ll_pos,1)
+
+	if not of_iswhitespace(lch_char) then
+		ll_pos ++
+	else
+		ls_source = replace(ls_source,ll_pos,1,"")
+	end if
+
+next
+
+return ls_source
+end function
+
+public function string of_righttrim (string as_source);string ls_null
+
+if isnull(as_source) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+return of_righttrim(as_source,true,false)
+end function
+
+public function string of_righttrim (string as_source,boolean ab_remove_spaces);string ls_null
+
+if ((isnull(as_source)) or (isnull(ab_remove_spaces))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+return of_righttrim(as_source,ab_remove_spaces,false)
+end function
+
+public function string of_righttrim (string as_source,boolean ab_remove_spaces,boolean ab_remove_nonprint);boolean lb_char = false
+char lc_char
+boolean lb_printable_char = false
+string ls_null
+
+if (((isnull(as_source)) or (isnull(ab_remove_spaces))) or (isnull(ab_remove_nonprint))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+if ab_remove_spaces and ab_remove_nonprint then
+
+	do while len(as_source) > 0 and ( not lb_char)
+		lc_char = right(as_source,1)
+
+		if of_isprintable(lc_char) and ( not of_isspace(lc_char)) then
+			lb_char = true
+		else
+			as_source = left(as_source,len(as_source) - 1)
+		end if
+
+	loop
+
+	return as_source
+else
+
+	if ab_remove_nonprint then
+
+		do while len(as_source) > 0 and ( not lb_printable_char)
+			lc_char = right(as_source,1)
+
+			if of_isprintable(lc_char) then
+				lb_printable_char = true
+			else
+				as_source = left(as_source,len(as_source) - 1)
+			end if
+
+		loop
+
+		return as_source
+	else
+
+		if ab_remove_spaces then
+			return righttrim(as_source)
+		end if
+
+	end if
+
+end if
+
+return as_source
+end function
+
+public function integer of_setkeyvalue (ref string as_source,string as_keyword,string as_keyvalue,string as_separator);integer li_found = -1
+integer li_keyword
+integer li_separator
+integer li_equal
+string ls_temp
+integer li_null
+
+if ((((isnull(as_source)) or (isnull(as_keyword))) or (isnull(as_keyvalue))) or (isnull(as_separator))) then
+	setnull(li_null)
+	return li_null
+end if
+
+do
+	li_keyword = pos(lower(as_source),lower(as_keyword),li_keyword + 1)
+
+	if li_keyword > 0 then
+		ls_temp = lefttrim(right(as_source,len(as_source) - (li_keyword + len(as_keyword) - 1)))
+
+		if left(ls_temp,1) = "=" then
+			li_equal = pos(as_source,"=",li_keyword + 1)
+			li_separator = pos(as_source,as_separator,li_equal + 1)
+
+			if li_separator > 0 then
+				as_source = left(as_source,li_equal) + as_keyvalue + as_separator + right(as_source,len(as_source) - li_separator)
+			else
+				as_source = left(as_source,li_equal) + as_keyvalue
+			end if
+
+			li_found = 1
+		end if
+
+	end if
+
+loop while li_keyword > 0
+
+return li_found
+end function
+
+public function integer of_stringtoarray (string as_source,string as_separator,ref string as_result[]);string ret[]
+integer num
+
+as_result = ret
+
+do while len(as_source) > 0
+	as_result[num + 1] = of_gettoken(as_source,as_separator)
+	num = num + 1
+loop
+
+return num
+end function
+
+public function string of_text_for_expression (string a_str);string ret
+
+ret = of_globalreplace(a_str,"~~","~~~~~~~~")
+ret = of_globalreplace(ret,"~"","~~~"")
+ret = of_globalreplace(ret,"'","~~~~'")
+
+if isnull(ret) then
+	ret = ""
+end if
+
+return ret
+end function
+
+public function string of_text_for_text (string a_str);string ret
+
+ret = of_globalreplace(a_str,"&","&&")
+ret = of_globalreplace(ret,"~~","~~~~")
+ret = of_globalreplace(ret,"'","~~'")
+ret = of_globalreplace(ret,"~"","~~~"")
+return ret
+end function
+
+public function string of_trim (string as_source);string ls_null
+
+if isnull(as_source) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+return of_trim(as_source,true,false)
+end function
+
+public function string of_trim (string as_source,boolean ab_remove_spaces);string ls_null
+
+if ((isnull(as_source)) or (isnull(ab_remove_spaces))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+return of_trim(as_source,ab_remove_spaces,false)
+end function
+
+public function string of_trim (string as_source,boolean ab_remove_spaces,boolean ab_remove_nonprint);string ls_null
+
+if (((isnull(as_source)) or (isnull(ab_remove_spaces))) or (isnull(ab_remove_nonprint))) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+if ab_remove_spaces and ab_remove_nonprint then
+	as_source = of_lefttrim(as_source,ab_remove_spaces,ab_remove_nonprint)
+	as_source = of_righttrim(as_source,ab_remove_spaces,ab_remove_nonprint)
+else
+
+	if ab_remove_nonprint then
+		as_source = of_lefttrim(as_source,ab_remove_spaces,ab_remove_nonprint)
+		as_source = of_righttrim(as_source,ab_remove_spaces,ab_remove_nonprint)
+	else
+
+		if ab_remove_spaces then
+			as_source = trim(as_source)
+		end if
+
+	end if
+
+end if
+
+return as_source
+end function
+
+public function string of_win2dos (string str);char ch[]
+long num
+long i
+integer code
+string ret
+
+ch = str
+num = len(str)
+
+for i = 1 to num
+	code = asc(ch[i])
+
+	choose case code
+		case 192 to 239
+			code = code - 64
+			ch[i] = char(code)
+		case 220 to 256
+			code = code - 16
+			ch[i] = char(code)
+	end choose
+
+next
+
+ret = ch
+return ret
+end function
+
+public function string of_wordcap (string as_source);integer li_pos
+boolean lb_capnext = false
+string ls_ret
+long ll_stringlength
+char lc_char
+char lc_string[]
+string ls_null
+
+if isnull(as_source) then
+	setnull(ls_null)
+	return ls_null
+end if
+
+ll_stringlength = len(as_source)
+
+if ll_stringlength = 0 then
+	return as_source
+end if
+
+lc_string = lower(as_source)
+lb_capnext = true
+
+for li_pos = 1 to ll_stringlength
+	lc_char = lc_string[li_pos]
+
+	if not of_isalpha(lc_char) then
+		lb_capnext = true
+	else
+
+		if lb_capnext then
+			lc_string[li_pos] = upper(lc_char)
+			lb_capnext = false
+		end if
+
+	end if
+
+next
+
+ls_ret = lc_string
+return ls_ret
+end function
+
+on n_dwr_string.create
+triggerevent("constructor")
+end on
+
+on n_dwr_string.destroy
+triggerevent("destructor")
+end on
+

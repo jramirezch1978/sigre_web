@@ -1,0 +1,49 @@
+﻿$PBExportHeader$d_doc_pendientes_pagos_masivos_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="doc_pendientes_cta_cte.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="doc_pendientes_cta_cte.nro_doc" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="doc_pendientes_cta_cte.cod_moneda" )
+ column=(type=decimal(2) updatewhereclause=yes name=sldo_sol dbname="doc_pendientes_cta_cte.sldo_sol" )
+ column=(type=decimal(2) updatewhereclause=yes name=saldo_dol dbname="doc_pendientes_cta_cte.saldo_dol" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="doc_pendientes_cta_cte.cod_relacion" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tabla dbname="doc_pendientes_cta_cte.flag_tabla" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="vw_fin_doc_general.origen" )
+ column=(type=char(1) updatewhereclause=yes name=flag_cxp dbname="flag_cxp" )
+ retrieve="  SELECT ~"DP~".~"TIPO_DOC~",   
+         ~"DP~".~"NRO_DOC~",   
+         ~"DP~".~"COD_MONEDA~",   
+         ~"DP~".~"SLDO_SOL~",   
+         ~"DP~".~"SALDO_DOL~",   
+         ~"DP~".~"COD_RELACION~",   
+         ~"DP~".~"FLAG_TABLA~",   
+         ~"VW~".~"ORIGEN~"  ,
+			Decode(dp.flag_debhab,'H','+','-') as flag_cxp
+    FROM ~"DOC_PENDIENTES_CTA_CTE~" ~"DP~",   
+         ~"VW_FIN_DOC_GENERAL~" ~"VW~"  
+   WHERE ( ~"VW~".~"TIPO_DOC~" = ~"DP~".~"TIPO_DOC~" ) and  
+         ( ~"VW~".~"NRO_DOC~" = ~"DP~".~"NRO_DOC~" ) and  
+         ( ~"VW~".~"COD_RELACION~" = ~"DP~".~"COD_RELACION~" ) and  
+         ((dp.cod_relacion = :as_cod_relacion ) AND  
+         (dp.cod_moneda    = :as_cod_moneda  )) AND  
+         (dp.tipo_doc not in (SELECT doc_sol_giro FROM finparam WHERE reckey = '1' ))    
+" arguments=(("as_cod_relacion", string),("as_cod_moneda", string)) )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="9" y="12" height="56" width="169"  name=origen_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="8388608" x="183" y="12" height="56" width="229"  name=tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="416" y="12" height="56" width="283"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="704" y="12" height="56" width="183"  name=cod_moneda_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="S.Soles" border="2" color="8388608" x="891" y="12" height="56" width="311"  name=sldo_sol_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="S.Dolares" border="2" color="8388608" x="1207" y="12" height="56" width="329"  name=doc_pendientes_cta_cte_saldo_dol_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="0" x="9" y="0" height="64" width="169" format="[general]"  name=origen edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="0" x="183" y="0" height="64" width="229" format="[general]"  name=tipo_doc edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="416" y="0" height="64" width="283" format="[general]"  name=nro_doc edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="0" x="704" y="0" height="64" width="183" format="[general]"  name=cod_moneda edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="891" y="0" height="64" width="311" format="[general]"  name=sldo_sol editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="0" x="1207" y="0" height="64" width="329" format="[general]"  name=saldo_dol editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="255" x="347" y="84" height="56" width="320" format="[general]"  name=flag_cxp edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

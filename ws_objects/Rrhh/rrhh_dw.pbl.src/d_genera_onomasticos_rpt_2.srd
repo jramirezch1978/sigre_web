@@ -1,0 +1,56 @@
+﻿$PBExportHeader$d_genera_onomasticos_rpt_2.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=576 color="536870912" )
+summary(height=4 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=maestro_cod_trabajador dbname="maestro.cod_trabajador" )
+ column=(type=char(123) updatewhereclause=yes name=trabajador dbname="trabajador" )
+ column=(type=datetime updatewhereclause=yes name=maestro_fec_nacimiento dbname="maestro.fec_nacimiento" )
+ column=(type=char(30) updatewhereclause=yes name=tipo_trabajador_desc_tipo_tra dbname="tipo_trabajador.desc_tipo_tra" )
+ column=(type=char(18) updatewhereclause=yes name=onomastico dbname="onomastico" )
+ retrieve="SELECT  distinct
+        m.cod_trabajador,
+        m.apel_paterno||' '||m.apel_materno||' '||m.nombre1||' '||m.nombre2 AS ~"TRABAJADOR~",
+        m.fec_nacimiento,
+        tp.desc_tipo_tra,
+		   	   TO_CHAR(m.fec_nacimiento,'DD')|| '  ' || decode(TO_CHAR(m.fec_nacimiento,'mm'),01,' de  Enero',02,'de  Febrero',
+                                                       03,'de  Marzo',04, 'de  Abril', 05,'de  Mayo', 06, 'de  Junio', 07, 'de  Julio',
+                                                       08,'de  Agosto', 09, 'de  Septiembre', 10,'de  Octubre', 11, 'de  Noviembre',
+                                                       12,'de  Diciembre', null,'No definida') as onomastico
+                
+  FROM origen              o,
+       maestro             m,
+       tipo_trabajador     tp,
+       area                a,
+       seccion             S
+   
+    WHERE         
+			m.cod_origen      = o.cod_origen
+   and m.cod_origen        = :as_origen
+   and m.tipo_trabajador   = tp.tipo_trabajador
+   and m.tipo_trabajador  like :as_tipo
+   and m.flag_estado = :as_estado
+	  
+   ORDER BY TO_CHAR(m.fec_nacimiento,'MM'), tp.desc_tipo_tra" arguments=(("as_origen", string),("as_tipo", string),("as_estado", string)) )
+group(level=1 header.height=0 trailer.height=0 by=("tipo_trabajador_desc_tipo_tra" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="0" text="DE" border="0" color="0" x="206" y="364" height="64" width="96" html.valueishtml="0"  name=t_3 visible="1"  font.face="Perpetua" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text=":" border="0" color="0" x="306" y="364" height="64" width="50" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="4" color="0" x="384" y="364" height="64" width="1029" html.valueishtml="0"  name=t_tipo visible="1"  font.face="Calisto MT" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text=":" border="0" color="0" x="306" y="276" height="64" width="50" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="4" color="0" x="384" y="276" height="64" width="1024" html.valueishtml="0"  name=t_origen visible="1"  font.face="Calisto MT" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="DE" border="0" color="0" x="206" y="276" height="64" width="96" html.valueishtml="0"  name=t_2 visible="1"  font.face="Perpetua" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="206" y="64" height="172" width="389" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Lista de Onomásticos" border="0" color="0" x="718" y="100" height="120" width="1111" html.valueishtml="0"  name=t_1 visible="1"  font.face="Pristina" font.height="-16" font.weight="700"  font.family="4" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="187" y="4" height="56" width="416" format="[general]" html.valueishtml="0"  name=maestro_cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="608" y="4" height="56" width="1330" format="[general]" html.valueishtml="0"  name=trabajador visible="1" edit.limit=123 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="1943" y="4" height="56" width="416" format="[general]" html.valueishtml="0"  name=onomastico visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Apellidos y Nombres" border="2" color="0" x="608" y="472" height="56" width="1330" html.valueishtml="0"  name=trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Onomástico" border="2" color="0" x="1943" y="472" height="56" width="416" html.valueishtml="0"  name=compute_0005_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="187" y="472" height="56" width="416" html.valueishtml="0"  name=maestro_cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

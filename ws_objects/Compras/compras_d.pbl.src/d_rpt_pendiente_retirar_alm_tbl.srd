@@ -1,0 +1,94 @@
+﻿$PBExportHeader$d_rpt_pendiente_retirar_alm_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 90 print.margin.right = 90 print.margin.top = 80 print.margin.bottom = 80 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=648 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=orden_trabajo_nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(43) updatewhereclause=yes name=nro_mov dbname="nro_mov" )
+ column=(type=char(12) updatewhereclause=yes name=articulo_mov_proy_cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=articulo_desc_art dbname="articulo.desc_art" )
+ column=(type=number updatewhereclause=yes name=cantidad_proyectada dbname="cantidad_proyectada" )
+ column=(type=number updatewhereclause=yes name=cantidad_procesada dbname="cantidad_procesada" )
+ column=(type=number updatewhereclause=yes name=cantidad_reservada dbname="cantidad_reservada" )
+ column=(type=number updatewhereclause=yes name=cantidad_pen_atender dbname="cantidad_pen_atender" )
+ column=(type=number updatewhereclause=yes name=cantidad_comprada dbname="cantidad_comprada" )
+ column=(type=number updatewhereclause=yes name=canti_ingresada_alm dbname="canti_ingresada_alm" )
+ column=(type=number updatewhereclause=yes name=pendiente_de_compra dbname="pendiente_de_compra" )
+ column=(type=number updatewhereclause=yes name=saldo_solicitado dbname="saldo_solicitado" )
+ column=(type=number updatewhereclause=yes name=saldo_total_x_almacen dbname="saldo_total_x_almacen" )
+ retrieve="SELECT DISTINCT ot.nro_orden,
+       amp.cod_origen||' '||amp.nro_mov AS nro_mov,
+       amp.cod_art,
+       a.desc_art,
+       nvl(usf_cmp_cant_proyect(amp.cod_origen, amp.nro_mov),0) AS cantidad_proyectada,
+       nvl(usf_cmp_cant_procesada(amp.cod_origen, amp.nro_mov),0) AS cantidad_procesada,
+       nvl(usf_cmp_cant_reservada(amp.cod_origen, amp.nro_mov, amp.almacen),0) AS cantidad_reservada,
+       nvl(usf_cmp_ot_pen_atender(amp.cod_origen, amp.nro_mov, amp.almacen),0) AS cantidad_pen_atender,
+       nvl(usf_cmp_comprada_x_amp(amp.cod_origen, amp.nro_mov, amp.almacen),0) AS cantidad_comprada,
+       nvl(usf_cmp_cant_procesada_oc(amp.cod_origen, amp.nro_mov, amp.almacen),0) AS canti_ingresada_alm,
+       nvl(usf_cmp_cant_pen_d_compra(amp.cod_origen, amp.nro_mov, amp.almacen),0) pendiente_de_compra,
+       NVL(usf_alm_saldo_solic(al.cod_art),0) AS saldo_solicitado,
+       NVL(usf_saldo_total_x_alm(A.COD_ART, AMP.ALMACEN),0) AS saldo_total_x_almacen
+       
+    
+  FROM orden_trabajo      ot,
+       articulo_mov_proy  amp,
+       articulo           a,
+       articulo_almacen   al,
+       ORDEN_COMPRA       OC
+
+ WHERE ot.nro_orden(+)    = amp.nro_doc
+   AND a.cod_art(+)       = amp.cod_art
+   AND AMP.COD_ART        = AL.COD_ART(+)
+   AND AMP.ALMACEN        = AL.ALMACEN(+)
+   AND OC.COD_ORIGEN(+)   = AMP.COD_ORIGEN
+   AND OC.NRO_OC(+)       = AMP.NRO_DOC
+   AND ot.ot_adm          = :as_ot_adm
+   AND amp.almacen        = :as_almacen
+   AND amp.cod_origen     = :as_origen
+   AND trunc(amp.fec_proyect) BETWEEN trunc(:ad_fecha1) AND trunc(:ad_fecha2)" arguments=(("as_ot_adm", string),("as_almacen", string),("as_origen", string),("ad_fecha1", date),("ad_fecha2", date)) )
+bitmap(band=header filename="" x="23" y="28" height="252" width="498" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Atención de Requerimientos por Ordenes de Trabajo" border="0" color="0" x="1152" y="112" height="80" width="1883" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="3890" y="16" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="3790" y="96" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="4046" y="184" height="56" width="261" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nro. OT" border="2" color="0" x="18" y="532" height="112" width="256" html.valueishtml="0"  name=orden_trabajo_nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro Mov" border="2" color="0" x="279" y="532" height="112" width="224" html.valueishtml="0"  name=nro_mov_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cod Art" border="2" color="0" x="507" y="532" height="112" width="251" html.valueishtml="0"  name=articulo_mov_proy_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Articulo
+Desc Art" border="2" color="0" x="763" y="532" height="112" width="1088" html.valueishtml="0"  name=articulo_desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="OT" border="2" color="0" x="1856" y="532" height="48" width="1070" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cant. Proy" border="2" color="0" x="1856" y="584" height="60" width="256" html.valueishtml="0"  name=cantidad_proyectada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cant. Proc" border="2" color="0" x="2117" y="584" height="60" width="265" html.valueishtml="0"  name=cantidad_procesada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cant. Rese" border="2" color="0" x="2386" y="584" height="60" width="265" html.valueishtml="0"  name=cantidad_reservada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cant. Pend" border="2" color="0" x="2656" y="584" height="60" width="270" html.valueishtml="0"  name=cantidad_pen_atender_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="OC" border="2" color="0" x="2926" y="532" height="48" width="667" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cant. Comp" border="2" color="0" x="2930" y="584" height="60" width="302" html.valueishtml="0"  name=cantidad_comprada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Pend. Compra" border="2" color="0" x="3237" y="584" height="60" width="357" html.valueishtml="0"  name=pendiente_de_compra_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Saldo Solicitado" border="2" color="0" x="3598" y="532" height="112" width="334" html.valueishtml="0"  name=saldo_solicitado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cant. Total Ingre a Almac." border="2" color="0" x="3936" y="532" height="112" width="361" html.valueishtml="0"  name=canti_ingresada_alm_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Saldo Total X Almacen" border="2" color="0" x="4297" y="532" height="112" width="334" html.valueishtml="0"  name=saldo_total_x_almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Del:" border="0" color="0" x="1522" y="296" height="56" width="142" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Al:" border="0" color="0" x="2185" y="296" height="56" width="142" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="4" color="0" x="1696" y="296" height="56" width="425" html.valueishtml="0"  name=t_fecha1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="4" color="0" x="2427" y="296" height="56" width="425" html.valueishtml="0"  name=t_fecha2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="18" y="4" height="52" width="256" format="[general]" html.valueishtml="0"  name=orden_trabajo_nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="279" y="4" height="52" width="224" format="[general]" html.valueishtml="0"  name=nro_mov visible="1" edit.limit=43 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="507" y="4" height="52" width="251" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="763" y="4" height="52" width="1088" format="[general]" html.valueishtml="0"  name=articulo_desc_art visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="1856" y="4" height="52" width="256" format="#,###,##0.0000" html.valueishtml="0"  name=cantidad_proyectada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2117" y="4" height="52" width="265" format="#,###,##0.0000" html.valueishtml="0"  name=cantidad_procesada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2386" y="4" height="52" width="265" format="#,###,##0.0000" html.valueishtml="0"  name=cantidad_reservada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="2656" y="4" height="52" width="270" format="#,###,##0.0000" html.valueishtml="0"  name=cantidad_pen_atender visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="2930" y="4" height="52" width="302" format="#,###,##0.0000" html.valueishtml="0"  name=cantidad_comprada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="3237" y="4" height="52" width="352" format="#,###,##0.0000" html.valueishtml="0"  name=pendiente_de_compra visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="2" color="33554432" x="3593" y="4" height="52" width="334" format="#,###,##0.0000" html.valueishtml="0"  name=saldo_solicitado visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="3931" y="4" height="52" width="361" format="#,###,##0.0000" html.valueishtml="0"  name=canti_ingresada_alm visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="2" color="33554432" x="4297" y="4" height="52" width="334" format="#,###,##0.0000" html.valueishtml="0"  name=saldo_total_x_almacen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,35 @@
+﻿$PBExportHeader$d_abc_conteo_inventario_grd.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="inventario_conteo.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=articulo_desc_art dbname="articulo.desc_art" )
+ column=(type=decimal(4) updatewhereclause=yes name=sldo_total dbname="inventario_conteo.sldo_total" )
+ column=(type=decimal(4) updatewhereclause=yes name=sldo_conteo dbname="inventario_conteo.sldo_conteo" )
+ retrieve="select ia.cod_art, 
+		 a.desc_art, 
+		 ia.sldo_total, 
+		 ia.sldo_conteo
+from  inventario_conteo 	ia, 
+	   articulo 				a
+where ia.cod_art=a.cod_art 
+  and almacen		=:as_almacen
+  and nro_conteo 	= :an_conteo" arguments=(("as_almacen", string),("an_conteo", number)) )
+text(band=header alignment="2" text="Diferencias" border="2" color="0" x="2427" y="4" height="56" width="453" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Descripción Artículo" border="2" color="0" x="389" y="4" height="56" width="1193" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Cod Art" border="2" color="0" x="9" y="4" height="56" width="370" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Sldo Total" border="2" color="0" x="1591" y="4" height="56" width="407" html.valueishtml="0"  name=sldo_total_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Sldo Conteo" border="2" color="0" x="2007" y="4" height="56" width="411" html.valueishtml="0"  name=sldo_conteo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="2" color="0" x="389" y="4" height="60" width="1193" format="[general]" html.valueishtml="0"  name=articulo_desc_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="2" color="0" x="9" y="4" height="60" width="370" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="abs(sldo_total -  sldo_conteo) "border="2" color="0" x="2427" y="4" height="60" width="453" format="[General]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=3 alignment="1" tabsequence=30 border="2" color="0" x="1595" y="4" height="60" width="402" format="[general]" html.valueishtml="0"  name=sldo_total visible="1" editmask.mask="###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="1" tabsequence=40 border="2" color="0" x="2011" y="4" height="60" width="407" format="[general]" html.valueishtml="0"  name=sldo_conteo visible="1" editmask.required=yes editmask.mask="###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

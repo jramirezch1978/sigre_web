@@ -1,0 +1,68 @@
+﻿$PBExportHeader$d_abc_proy_hrs_jornal_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=120 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(6) update=yes updatewhereclause=yes key=yes name=campana dbname="cam_proy_horas_jornal.campana" )
+ column=(type=char(100) updatewhereclause=yes name=desc_campana dbname="campanas.descripcion" )
+ column=(type=char(20) update=yes updatewhereclause=yes key=yes name=nro_lote dbname="cam_proy_horas_jornal.nro_lote" )
+ column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_labor dbname="cam_proy_horas_jornal.cod_labor" )
+ column=(type=char(40) updatewhereclause=yes name=desc_labor dbname="labor.desc_labor" )
+ column=(type=datetime update=yes updatewhereclause=yes key=yes name=fec_programada dbname="cam_proy_horas_jornal.fec_programada" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_registro dbname="cam_proy_horas_jornal.fec_registro" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=hrs_programadas dbname="cam_proy_horas_jornal.hrs_programadas" )
+ column=(type=decimal(8) update=yes updatewhereclause=yes name=hrs_ejec_normal dbname="cam_proy_horas_jornal.hrs_ejec_normal" )
+ column=(type=decimal(8) update=yes updatewhereclause=yes name=hrs_ejec_extras dbname="cam_proy_horas_jornal.hrs_ejec_extras" )
+ retrieve="select a.campana, c.descripcion,
+       a.nro_lote, 
+       a.cod_labor, l.desc_labor,
+       a.fec_programada,
+       a.fec_registro,
+       a.hrs_programadas,
+       a.hrs_ejec_normal,
+       a.hrs_ejec_extras 
+from cam_proy_horas_jornal a,
+     campanas              c,
+     lote_campo            lc,
+     labor                 l
+where a.campana = c.campana
+  and a.nro_lote = lc.nro_lote
+  and a.cod_labor = l.cod_labor    
+  and a.nro_lote = :as_nro_lote
+  and trunc(a.fec_programada) between :ad_fecha1 and :ad_fecha2 
+order by a.cod_labor, a.fec_programada" update="cam_proy_horas_jornal" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_lote", string),("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Código
+Campaña" border="2" color="33554432" x="5" y="4" height="112" width="297" html.valueishtml="0"  name=campana_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Descripcion de la 
+Campaña" border="2" color="33554432" x="306" y="4" height="112" width="795" html.valueishtml="0"  name=campanas_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Código 
+Labor" border="2" color="33554432" x="1106" y="4" height="112" width="352" html.valueishtml="0"  name=cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Descripción
+de la Labor" border="2" color="33554432" x="1463" y="4" height="112" width="1056" html.valueishtml="0"  name=desc_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Fecha 
+Programada" border="2" color="33554432" x="2523" y="4" height="112" width="402" html.valueishtml="0"  name=fec_programada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Horas
+Programadas" border="2" color="33554432" x="2930" y="4" height="112" width="352" html.valueishtml="0"  name=hrs_programadas_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Horas
+Ejec Normal" border="2" color="33554432" x="3287" y="4" height="112" width="352" html.valueishtml="0"  name=hrs_ejec_normal_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Horas
+Ejec Extras" border="2" color="33554432" x="3643" y="4" height="112" width="352" html.valueishtml="0"  name=hrs_ejec_extras_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="306" y="4" height="68" width="795" format="[general]" html.valueishtml="0"  name=desc_campana visible="1" edit.limit=100 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1463" y="4" height="68" width="1056" format="[general]" html.valueishtml="0"  name=desc_labor visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+column(band=detail id=6 alignment="2" tabsequence=40 border="2" color="33554432" x="2523" y="4" height="68" width="402" format="[shortdate] [time]" html.valueishtml="0"  name=fec_programada visible="1" editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=50 border="2" color="33554432" x="2930" y="4" height="68" width="352" format="###,##0.00" html.valueishtml="0"  name=hrs_programadas visible="1" editmask.required=yes editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="3287" y="4" height="68" width="352" format="###,##0.00" html.valueishtml="0"  name=hrs_ejec_normal visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="3643" y="4" height="68" width="352" format="###,##0.00" html.valueishtml="0"  name=hrs_ejec_extras visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="2" color="33554432" x="5" y="4" height="68" width="297" format="[general]" html.valueishtml="0"  name=campana pointer="H:\source\Cur\taladro.cur" visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=30 border="2" color="33554432" x="1106" y="4" height="68" width="352" format="[general]" html.valueishtml="0"  name=cod_labor pointer="H:\source\Cur\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(hrs_programadas for all)"border="2" color="33554432" x="2930" y="4" height="68" width="352" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(hrs_ejec_normal for all)"border="2" color="33554432" x="3287" y="4" height="68" width="352" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(hrs_ejec_extras for all)"border="2" color="33554432" x="3643" y="4" height="68" width="352" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=summary alignment="1" text="Total Horas:" border="0" color="33554432" x="2341" y="8" height="56" width="567" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

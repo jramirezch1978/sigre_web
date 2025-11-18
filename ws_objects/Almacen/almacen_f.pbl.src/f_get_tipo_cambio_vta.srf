@@ -1,0 +1,46 @@
+﻿$PBExportHeader$f_get_tipo_cambio_vta.srf
+global type f_get_tipo_cambio_vta from function_object
+end type
+
+forward prototypes
+global function decimal f_get_tipo_cambio_vta (date ad_fecha)
+end prototypes
+
+global function decimal f_get_tipo_cambio_vta (date ad_fecha);// Verifica que tipo de cambio exista
+Decimal{2} ld_cambio
+
+Select NVL(vta_dol_prom,0)
+  into :ld_cambio 
+  from calendario 
+ where TRUNC(fecha) = :ad_fecha;
+
+if sqlca.sqlcode < 0 then
+	Messagebox( "Error", sqlca.sqlerrtext)
+	Return 0
+end if
+
+if sqlca.sqlcode = 100 then
+	select NVL(ULT_TIPO_CAM,0)
+		into :ld_cambio
+	from logparam
+	where reckey = '1';
+	
+	if SQLCA.SQLCode = 100 then
+		Messagebox( "Error", "No ha definido ningun parametro en logparam")		
+		return 0
+	end if
+	
+	if ld_cambio = 0 or isnull( ld_cambio) then
+		Messagebox( "Error Logparam", "Tasa de cambio en Logparam no debe ser Cero" )
+		return 0
+	end if
+end if
+
+if ld_cambio = 0 or isnull( ld_cambio) then
+	Messagebox( "Error Compra Dolares Promedio", "Tasa de cambio no debe ser Cero~r~nPara el dia " + String( ad_fecha) )
+	return 0
+end if
+
+Return ld_cambio
+end function
+

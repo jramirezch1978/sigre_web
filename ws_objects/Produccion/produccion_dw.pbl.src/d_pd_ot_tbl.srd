@@ -1,0 +1,32 @@
+﻿$PBExportHeader$d_pd_ot_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=128 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="pd_ot.nro_parte" )
+ column=(type=char(40) updatewhereclause=yes name=descripcion dbname="ot_administracion.descripcion" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="pd_ot.fecha" )
+ retrieve="  SELECT ~"PD_OT~".~"NRO_PARTE~",   
+         ~"OT_ADMINISTRACION~".~"DESCRIPCION~",   
+         ~"PD_OT~".~"FECHA~"  
+    FROM ~"PD_OT~",   
+         ~"OT_ADMINISTRACION~"  
+   WHERE ( ot_administracion.ot_adm (+) = pd_ot.ot_adm) and  
+         ( ( trunc(~"PD_OT~".~"FECHA~") between :adi_ini and :adi_fin ) and
+				 pd_ot.ot_adm = :as_ot_adm )   
+ORDER BY ~"PD_OT~".~"FECHA~" DESC   
+" arguments=(("adi_ini", date),("adi_fin", date),("as_ot_adm", string)) )
+text(band=header alignment="2" text="Parte Diario" border="2" color="16777215" x="5" y="8" height="56" width="1481" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Nro Parte" border="2" color="16777215" x="5" y="68" height="56" width="329" html.valueishtml="0"  name=nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Fecha" border="2" color="16777215" x="338" y="68" height="56" width="283" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Ot Administracion" border="2" color="16777215" x="626" y="68" height="56" width="859" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="52" width="329" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="347" y="4" height="52" width="274" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="626" y="4" height="52" width="859" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

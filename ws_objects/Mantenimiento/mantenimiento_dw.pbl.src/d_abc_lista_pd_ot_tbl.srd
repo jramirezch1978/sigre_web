@@ -1,0 +1,25 @@
+﻿$PBExportHeader$d_abc_lista_pd_ot_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_parte dbname="pd_ot.nro_parte" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha dbname="pd_ot.fecha" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_uso dbname="pd_ot.flag_uso" values="Mantenimiento	M/Fabrica	F/Taller	T/Administracion	A/Sistemas	S/" )
+ column=(type=char(4) updatewhereclause=yes name=ejecut dbname="compute_0004" )
+ retrieve="SELECT po.nro_parte, po.fecha, po.flag_uso, max(pod.cod_ejecutor)
+FROM pd_ot po, pd_ot_det pod
+WHERE po.nro_parte = pod.nro_parte 
+GROUP BY po.nro_parte, po.fecha, po.flag_uso" )
+text(band=header alignment="2" text="Nro Parte" border="2" color="0" x="9" y="8" height="60" width="261"  name=n_parte_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha" border="2" color="0" x="274" y="8" height="60" width="315"  name=fecha_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text=" Uso" border="2" color="0" x="594" y="8" height="60" width="238"  name=flag_uso_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ejecutor" border="2" color="0" x="837" y="8" height="60" width="238"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=detail alignment="0" expression="Trim(String( nro_parte ))"border="2" color="0" x="9" y="4" height="64" width="261" format="[GENERAL]"  name=n_parte  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="274" y="4" height="64" width="315" format="[shortdate] [time]"  name=fecha editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="594" y="4" height="64" width="238" format="[general]"  name=flag_uso ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="837" y="4" height="64" width="238" format="[general]"  name=ejecut edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,23 @@
+﻿$PBExportHeader$f_cod_moneda_dolares.srf
+global type f_cod_moneda_dolares from function_object
+end type
+
+forward prototypes
+global function string f_cod_moneda_dolares ()
+end prototypes
+
+global function string f_cod_moneda_dolares ();//******** VALOR DE LA MONEDA EN SOLES *************** //
+String ls_dolares
+
+SELECT COD_DOLARES
+INTO   :ls_dolares
+FROM   LOGPARAM  
+WHERE  RECKEY ='1' ;
+
+IF Isnull(ls_dolares) or trim(ls_dolares) ='' THEN
+	Messagebox('INGRESE un VALOR EN LA TABLA LOGPARAM','FALTA EL CODIGO DE DOLARES')
+END IF
+
+Return ls_dolares
+end function
+

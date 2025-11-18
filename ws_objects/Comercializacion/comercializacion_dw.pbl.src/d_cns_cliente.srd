@@ -1,0 +1,43 @@
+﻿$PBExportHeader$d_cns_cliente.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 selected.mouse=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cliente dbname="cliente.cliente" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(30) updatewhereclause=yes name=canal_descripcion dbname="canal_distribucion.descripcion" )
+ column=(type=char(50) updatewhereclause=yes name=sub_canal_descripcion dbname="canal_distribucion_det.descripcion" )
+ column=(type=number updatewhereclause=yes name=dir dbname="dir" )
+ retrieve="  SELECT ~"CLIENTE~".~"CLIENTE~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"CANAL_DISTRIBUCION~".~"DESCRIPCION~",   
+         ~"CANAL_DISTRIBUCION_DET~".~"DESCRIPCION~",
+         (Select Count(*) From direcciones Where codigo = ~"CLIENTE~".~"CLIENTE~"
+         And flag_uso = '1' And flag_dir_comercial = '1') As dir
+    FROM ~"CLIENTE~",   
+         ~"PROVEEDOR~",   
+         ~"CANAL_DISTRIBUCION~",   
+         ~"CANAL_DISTRIBUCION_DET~"  
+   WHERE ( ~"PROVEEDOR~".~"PROVEEDOR~" = ~"CLIENTE~".~"CLIENTE~" ) and  
+         ( ~"CANAL_DISTRIBUCION_DET~".~"CANAL~" = ~"CANAL_DISTRIBUCION~".~"CANAL~" ) and  
+         ( ~"CLIENTE~".~"CANAL~" = ~"CANAL_DISTRIBUCION_DET~".~"CANAL~" ) and  
+         ( ~"CLIENTE~".~"SUB_CANAL~" = ~"CANAL_DISTRIBUCION_DET~".~"SUB_CANAL~" ) 
+   Group By ~"CLIENTE~".~"CLIENTE~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"CANAL_DISTRIBUCION~".~"DESCRIPCION~",   
+         ~"CANAL_DISTRIBUCION_DET~".~"DESCRIPCION~"" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="64" width="270" format="[general]" html.valueishtml="0"  name=cliente visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif ( dir > 0 , RGB( 239, 254, 205 ) , RGB( 255,255,255 ) )" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="288" y="0" height="64" width="1289" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif ( dir > 0 , RGB( 239, 254, 205 ) , RGB( 255,255,255 ) )" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1586" y="0" height="64" width="649" format="[general]" html.valueishtml="0"  name=canal_descripcion visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif ( dir > 0 , RGB( 239, 254, 205 ) , RGB( 255,255,255 ) )" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="2245" y="0" height="64" width="750" format="[general]" html.valueishtml="0"  name=sub_canal_descripcion visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif ( dir > 0 , RGB( 239, 254, 205 ) , RGB( 255,255,255 ) )" )
+text(band=header alignment="2" text="Cliente" border="2" color="33554432" x="9" y="4" height="56" width="270" html.valueishtml="0"  name=cliente_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nom Proveedor" border="2" color="33554432" x="288" y="4" height="56" width="1289" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Canal Descripcion" border="2" color="33554432" x="1586" y="4" height="56" width="649" html.valueishtml="0"  name=canal_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Sub Canal Descripcion" border="2" color="33554432" x="2245" y="4" height="56" width="750" html.valueishtml="0"  name=sub_canal_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

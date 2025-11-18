@@ -1,0 +1,26 @@
+﻿$PBExportHeader$f_imp_cheque_voucher.srf
+global type f_imp_cheque_voucher from function_object
+end type
+
+forward prototypes
+global function boolean f_imp_cheque_voucher ()
+end prototypes
+
+global function boolean f_imp_cheque_voucher ();String  ls_print
+Boolean lb_ret = TRUE
+
+ls_print = ProfileString ('win.ini', 'Devices','CHEQ-VOUCHER','')
+
+IF Isnull(ls_print) OR Trim(ls_print) = '' THEN
+	Messagebox('Aviso','Debe Definir Impresora CHEQ VOUCHER , Comuniquese con Soporte - Sistemas')
+	lb_ret = FALSE
+	GOTO SALIDA
+END IF	
+
+SetProfileString('c:\windows\win.ini','windows','device','CHEQ-VOUCHER,EPSON9,LPT1')
+
+SALIDA:
+
+Return lb_ret
+end function
+

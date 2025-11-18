@@ -1,0 +1,9 @@
+﻿$PBExportHeader$d_pipe_profesion.srp
+PIPELINE(source_connect=CN_DB_DB1_PROD5,destination_connect=CN_DB_DB1_PROD8,type=update,commit=100,errors=100,keyname="profesion")
+SOURCE(name="PROFESION",COLUMN(type=char,name="COD_PROFESION",dbtype="CHAR(3)",key=yes,nulls_allowed=no)
+ COLUMN(type=varchar,name="DESC_PROFESION",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="FLAG_REPLICACION",dbtype="CHAR(1)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"profesion~" ) COLUMN(NAME=~"profesion.cod_profesion~") COLUMN(NAME=~"profesion.desc_profesion~") COLUMN(NAME=~"profesion.flag_replicacion~")) ")
+DESTINATION(name="profesion",COLUMN(type=char,name="cod_profesion",dbtype="CHAR(3)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="desc_profesion",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1' "))

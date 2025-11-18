@@ -1,0 +1,22 @@
+﻿$PBExportHeader$f_convertir_monto_ret.srf
+global type f_convertir_monto_ret from function_object
+end type
+
+forward prototypes
+global function decimal f_convertir_monto_ret (string as_cod_moneda_og, decimal adc_importe, decimal adc_tasa_cambio, string as_soles, string as_dolares)
+end prototypes
+
+global function decimal f_convertir_monto_ret (string as_cod_moneda_og, decimal adc_importe, decimal adc_tasa_cambio, string as_soles, string as_dolares);Decimal {2} ldc_importe
+
+
+if Not(adc_importe = 0 ) then
+	if as_cod_moneda_og = as_dolares then
+		ldc_importe =Round( adc_importe / adc_tasa_cambio,2)
+	else
+		ldc_importe = adc_importe
+	end if
+end if	
+
+return ldc_importe
+end function
+

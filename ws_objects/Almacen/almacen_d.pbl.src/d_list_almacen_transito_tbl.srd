@@ -1,0 +1,63 @@
+﻿$PBExportHeader$d_list_almacen_transito_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(6) update=yes updatewhereclause=yes name=almacen dbname="almacen.almacen" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos dbname="almacen.cencos" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=direccion dbname="almacen.direccion" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=area_total dbname="almacen.area_total" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=vol_total dbname="almacen.vol_total" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_responsable dbname="almacen.cod_responsable" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_tipo_almacen dbname="almacen.flag_tipo_almacen" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=almacen_cod_origen dbname="almacen.cod_origen" )
+ column=(type=char(60) updatewhereclause=yes name=usuario_nombre dbname="usuario.nombre" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(50) updatewhereclause=yes name=origen_nombre dbname="origen.nombre" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="almacen.flag_estado" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_cntrl_lote dbname="almacen.flag_cntrl_lote" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=distrito dbname="almacen.distrito" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=provincia dbname="almacen.provincia" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=departamento dbname="almacen.departamento" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="almacen.flag_replicacion" )
+ retrieve="SELECT  A.ALMACEN ,
+        A.CENCOS ,
+        A.DESC_ALMACEN ,
+        A.DIRECCION ,
+        A.AREA_TOTAL ,
+        A.VOL_TOTAL ,
+        A.COD_RESPONSABLE ,
+        A.FLAG_TIPO_ALMACEN ,
+        A.COD_ORIGEN ,
+        USUARIO.NOMBRE ,
+        CENTROS_COSTO.DESC_CENCOS ,
+        ORIGEN.NOMBRE ,
+        A.FLAG_ESTADO ,
+        A.FLAG_CNTRL_LOTE,
+		  A.DISTRITO,
+	     A.PROVINCIA,
+		  A.DEPARTAMENTO,
+		  A.FLAG_REPLICACION
+FROM ALMACEN  A,
+     ORIGEN ,
+     CENTROS_COSTO ,
+     USUARIO     
+WHERE A.COD_ORIGEN 		= ORIGEN.COD_ORIGEN (+)
+  and A.CENCOS 			= CENTROS_COSTO.CENCOS (+)
+  and A.COD_RESPONSABLE = USUARIO.COD_USR (+)  
+  and A.flag_tipo_almacen = 'O'
+ORDER BY A.ALMACEN          ASC    
+
+" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="265" y="4" height="56" width="1691" format="[general]" html.valueishtml="0"  name=desc_almacen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="14" y="4" height="56" width="247" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="265" y="4" height="56" width="1691" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="14" y="4" height="56" width="247" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

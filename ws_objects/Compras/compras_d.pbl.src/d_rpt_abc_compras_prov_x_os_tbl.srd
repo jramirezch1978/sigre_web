@@ -1,0 +1,70 @@
+﻿$PBExportHeader$d_rpt_abc_compras_prov_x_os_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=568 color="536870912" )
+summary(height=108 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=proveedor dbname="proveedor.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=monto_dol dbname="monto_dol" )
+ column=(type=number updatewhereclause=yes name=items dbname="items" )
+ column=(type=number updatewhereclause=yes name=compute_0005 dbname="compute_0005" )
+ retrieve="Select p.proveedor,
+		 p.nom_proveedor,
+		 sum( usf_fl_conv_mon(osd.importe - osd.decuento, os.cod_moneda, (select cod_dolares from logparam where reckey = '1'), osd.fec_proyect) ) as monto_dol,
+		 count(*) as items,
+		 (SELECT COUNT(s.proveedor)
+               FROM orden_servicio s
+              WHERE trunc(s.fec_registro) between trunc(:ad_fec_ini) and trunc(:ad_fec_fin)
+  				    AND s.cod_origen like :as_origen
+  					 AND s.proveedor = p.proveedor)
+from orden_servicio_det osd,
+     orden_servicio		os,
+     proveedor				p
+where os.nro_os = osd.nro_os
+  and os.proveedor = p.proveedor
+  and osd.flag_Estado <> '0'
+  and os.flag_estado <> '0'
+  and trunc(os.fec_registro) between trunc(:ad_fec_ini) and trunc(:ad_fec_fin)
+  and os.cod_origen like :as_origen
+group by p.proveedor,
+		 	p.nom_proveedor
+order by monto_dol desc
+
+" arguments=(("ad_fec_ini", date),("ad_fec_fin", date),("as_origen", string)) )
+text(band=header alignment="2" text="Código
+Proveedor" border="2" color="16777215" x="274" y="444" height="120" width="320" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nombre
+del Proveedor" border="2" color="16777215" x="599" y="444" height="120" width="1339" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Total
+Compra US$" border="2" color="16777215" x="1943" y="444" height="120" width="402" html.valueishtml="0"  name=monto_dol_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+bitmap(band=header filename="" x="14" y="16" height="204" width="329" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="14" y="248" height="56" width="325" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2661" y="16" height="56" width="347" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2661" y="96" height="56" width="347" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="2661" y="172" height="56" width="347" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="818" y="132" height="60" width="1664" html.valueishtml="0"  name=titulo_1 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="RESUMEN DE PROVEDORES POR ORDEN DE SERVICIO" border="0" color="33554432" x="818" y="52" height="60" width="1664" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="818" y="208" height="60" width="1664" html.valueishtml="0"  name=titulo_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="1943" y="4" height="60" width="402" format="###,##0.00" html.valueishtml="0"  name=monto_dol pointer="" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="274" y="4" height="60" width="320" format="[general]" html.valueishtml="0"  name=proveedor pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="599" y="4" height="60" width="1339" format="[general]" html.valueishtml="0"  name=nom_proveedor pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+rectangle(band=summary x="270" y="4" height="96" width="2999"  name=r_1 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+text(band=summary alignment="1" text="Total General" border="0" color="0" x="416" y="28" height="56" width="672" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Porcentaje
+" border="2" color="16777215" x="2949" y="444" height="120" width="297" html.valueishtml="0"  name=porcentaje_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+compute(band=detail alignment="1" expression=" monto_dol / total_compra *100"border="2" color="0" x="2949" y="4" height="60" width="297" format="##0.00" html.valueishtml="0"  name=porcentaje pointer="" visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Nro. Items" border="2" color="16777215" x="2597" y="444" height="120" width="347" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="2597" y="4" height="60" width="347" format="[general]" html.valueishtml="0"  name=items visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Nro.   OS's" border="2" color="16777215" x="2350" y="444" height="120" width="242" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=5 alignment="1" tabsequence=0 border="2" color="0" x="2350" y="4" height="60" width="242" html.valueishtml="0"  name=compute_0005 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(porcentaje for all)"border="2" color="255" x="2949" y="20" height="60" width="297" format="##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(items for all)"border="2" color="255" x="2592" y="20" height="60" width="352" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(compute_0005 for all)"border="2" color="255" x="2350" y="20" height="60" width="242" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(monto_dol for all)"border="2" color="255" x="1943" y="20" height="60" width="402" format="###,##0.00" html.valueishtml="0"  name=total_compra visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

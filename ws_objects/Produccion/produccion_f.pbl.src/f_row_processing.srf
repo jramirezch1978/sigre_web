@@ -1,0 +1,41 @@
+﻿$PBExportHeader$f_row_processing.srf
+global type f_row_processing from function_object
+end type
+
+forward prototypes
+global function boolean f_row_processing (datawindow ad_id, string as_form)
+end prototypes
+
+global function boolean f_row_processing (datawindow ad_id, string as_form);// Funcion que valida campos que son requeridos
+// Argumentos:	ad_id	   Datawindow a verificar
+//				   as_form   Tipo de form del dw
+// Valor de Retorno: boolean
+
+DwItemStatus l_rowstatus
+Integer li_col
+Long ll_row, j, k
+String ls_colname
+
+// Verifica todos los campos y valida en aquellos que son requeridos
+For j = 1 to ad_id.RowCount()
+	l_rowStatus = ad_id.GetItemStatus( j, 0, primary!)
+	if l_rowStatus = newmodified! or l_rowstatus = datamodified! then
+		
+		ll_row = j   // Numero de fila a evaluar
+		li_col = 1   // numero de la columna a evaluar
+		ad_id.FindRequired( primary!, ll_row, li_col, ls_colname, true )
+
+		if ll_row = j then
+			Messagebox( "Error", "Campo Requerido en " + ls_colname, stopsign!)
+			ad_id.ScrollToRow( j )
+			if as_form <> 'form' then
+				f_select_current_row(ad_id)			
+			end if	
+			ad_id.SetColumn( li_col)
+			Return False		
+		end if	
+	end if	
+Next
+Return true
+end function
+

@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_lista_presupuesto_cuenta.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes name=niv1 dbname="presupuesto_cuenta.niv1" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=niv2 dbname="presupuesto_cuenta.niv2" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=niv3 dbname="presupuesto_cuenta.niv3" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cnta_prsp dbname="presupuesto_cuenta.cnta_prsp" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=descripcion dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(30) updatewhereclause=yes name=presupuesto_cuenta_niv1_descripcion dbname="presupuesto_cuenta_niv1.descripcion" )
+ column=(type=char(30) updatewhereclause=yes name=presupuesto_cuenta_niv2_descripcion dbname="presupuesto_cuenta_niv2.descripcion" )
+ column=(type=char(30) updatewhereclause=yes name=presupuesto_cuenta_niv3_descripcion dbname="presupuesto_cuenta_niv3.descripcion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="presupuesto_cuenta.flag_replicacion" )
+ column=(type=char(800) update=yes updatewhereclause=yes name=descripcion_larga dbname="presupuesto_cuenta.descripcion_larga" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="presupuesto_cuenta.flag_estado" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=tipo_cuenta dbname="presupuesto_cuenta.tipo_cuenta" )
+ column=(type=char(50) updatewhereclause=yes name=desc_tipo_prsp dbname="tipo_prtda_prsp_det.desc_tipo_prsp" )
+ retrieve="  SELECT ~"PRESUPUESTO_CUENTA~".~"NIV1~",   
+         ~"PRESUPUESTO_CUENTA~".~"NIV2~",   
+         ~"PRESUPUESTO_CUENTA~".~"NIV3~",   
+         ~"PRESUPUESTO_CUENTA~".~"CNTA_PRSP~",   
+         ~"PRESUPUESTO_CUENTA~".~"DESCRIPCION~",   
+         ~"PRESUPUESTO_CUENTA_NIV1~".~"DESCRIPCION~",   
+         ~"PRESUPUESTO_CUENTA_NIV2~".~"DESCRIPCION~",   
+         ~"PRESUPUESTO_CUENTA_NIV3~".~"DESCRIPCION~",   
+         ~"PRESUPUESTO_CUENTA~".~"FLAG_REPLICACION~",   
+         ~"PRESUPUESTO_CUENTA~".~"DESCRIPCION_LARGA~",   
+         ~"PRESUPUESTO_CUENTA~".~"FLAG_ESTADO~",   
+         ~"PRESUPUESTO_CUENTA~".~"TIPO_CUENTA~",   
+         ~"TIPO_PRTDA_PRSP_DET~".~"DESC_TIPO_PRSP~"  
+    FROM ~"PRESUPUESTO_CUENTA~",   
+         ~"PRESUPUESTO_CUENTA_NIV1~",   
+         ~"PRESUPUESTO_CUENTA_NIV2~",   
+         ~"PRESUPUESTO_CUENTA_NIV3~",   
+         ~"TIPO_PRTDA_PRSP_DET~"  
+   WHERE ( tipo_prtda_prsp_det.tipo_prtda_prsp (+) = presupuesto_cuenta.tipo_cuenta) and  
+         ( ~"PRESUPUESTO_CUENTA~".~"NIV3~" = ~"PRESUPUESTO_CUENTA_NIV3~".~"NIV3~" ) and  
+         ( ~"PRESUPUESTO_CUENTA~".~"NIV1~" = ~"PRESUPUESTO_CUENTA_NIV3~".~"NIV1~" ) and  
+         ( ~"PRESUPUESTO_CUENTA~".~"NIV2~" = ~"PRESUPUESTO_CUENTA_NIV3~".~"NIV2~" ) and  
+         ( ~"PRESUPUESTO_CUENTA_NIV3~".~"NIV1~" = ~"PRESUPUESTO_CUENTA_NIV2~".~"NIV1~" ) and  
+         ( ~"PRESUPUESTO_CUENTA_NIV3~".~"NIV2~" = ~"PRESUPUESTO_CUENTA_NIV2~".~"NIV2~" ) and  
+         ( ~"PRESUPUESTO_CUENTA_NIV1~".~"NIV1~" = ~"PRESUPUESTO_CUENTA_NIV2~".~"NIV1~" )   
+ORDER BY ~"PRESUPUESTO_CUENTA~".~"CNTA_PRSP~" ASC   " update="PRESUPUESTO_CUENTA" updatewhere=0 updatekeyinplace=yes )
+text(band=header alignment="2" text="Cuenta" border="2" color="0" x="5" y="8" height="64" width="334" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="343" y="8" height="64" width="1399" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="5" y="0" height="64" width="334" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="343" y="0" height="64" width="1399" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,94 @@
+﻿$PBExportHeader$d_ple_detalle_cnta_10_32_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(100) updatewhereclause=yes name=texto dbname="texto" )
+ retrieve="select to_char(PKG_UTILITY.of_last_day(:an_year, :an_mes), 'yyyymmdd')   || '|'    	-- 1. periodo
+    || trim(cad.cnta_ctbl)                   || '|'    										-- 2. Cuenta Contable
+    || case
+			when bc.flag_flujo_caja = '1' then
+				nvl(b.cod_banco_rtps, '99')
+			else
+				'99'
+		 end     || '|'    																				-- 3. Entidad Financiera
+    || case
+			when bc.flag_flujo_caja = '1' then
+				trim(bc.cod_ctabco)
+			else
+				'-'
+		 end                   						|| '|'    										-- 4. Nro Cuenta
+    || case 
+       	when bc.cod_moneda = 'US$' or bc.cod_moneda is null then 'USD'
+        else 'PEN'
+       end                                   || '|'    										-- 5. Tipo de Moneda
+    || case
+         when sum(DECODE(cad.flag_debhab, 'D', cad.imp_movsol, 0)) > sum(DECODE(cad.flag_debhab, 'H', cad.imp_movsol, 0)) then
+           trim(to_char(sum(DECODE(cad.flag_debhab, 'D', cad.imp_movsol, 0)) - sum(DECODE(cad.flag_debhab, 'H', cad.imp_movsol, 0)), '99999999990.00'))
+         else
+           '0.00'
+       end                                   || '|'    										-- 6. saldo deudor
+    || case
+         when sum(DECODE(cad.flag_debhab, 'D', cad.imp_movsol, 0)) < sum(DECODE(cad.flag_debhab, 'H', cad.imp_movsol, 0)) then
+           trim(to_char(sum(DECODE(cad.flag_debhab, 'H', cad.imp_movsol, 0)) - sum(DECODE(cad.flag_debhab, 'D', cad.imp_movsol, 0)), '99999999990.00'))
+         else
+           '0.00'
+       end                                   || '|'    										-- 7. saldo acreedor
+    || '1'                                   || '|'    										-- 8. Estado de la operacion
+	 || '||||||||'																							-- 9-16 campos de libre utilizacion
+	 as texto
+from cntbl_asiento ca,
+     cntbl_asiento_det cad,
+     banco_cnta        bc,
+     banco             b
+where ca.origen = cad.origen
+  and ca.ano    = cad.ano
+  and ca.mes    = cad.mes
+  and ca.nro_libro = cad.nro_libro
+  and ca.nro_asiento = cad.nro_asiento     
+  and cad.cod_ctabco = bc.cod_ctabco         (+)
+  and bc.cod_banco   = b.cod_banco           (+)
+  and ca.ano         = :an_year
+  and ca.mes         <= :an_mes
+  and cad.cnta_ctbl  like '10%'
+  and ca.flag_estado <> '0'
+group by cad.cnta_ctbl,
+         case
+				when bc.flag_flujo_caja = '1' then
+					nvl(b.cod_banco_rtps, '99')
+				else
+					'99'
+			 end,
+         case
+				when bc.flag_flujo_caja = '1' then
+					trim(bc.cod_ctabco)
+				else
+					'-'
+			 end ,
+         case 
+          when bc.cod_moneda = 'US$' or bc.cod_moneda is null then 'USD'
+          else 'PEN'
+         end  
+having round(sum(DECODE(cad.flag_debhab, 'D', cad.imp_movsol, 0)) - sum(DECODE(cad.flag_debhab, 'H', cad.imp_movsol, 0)),2) <> 0
+order by cad.cnta_ctbl, 
+			case
+				when bc.flag_flujo_caja = '1' then
+					nvl(b.cod_banco_rtps, '99')
+				else
+					'99'
+			 end
+" arguments=(("an_year", number),("an_mes", number)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="5" y="0" height="64" width="7026" format="[general]" html.valueishtml="0"  name=texto visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="400"  font.family="3" font.pitch="1" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

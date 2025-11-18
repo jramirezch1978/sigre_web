@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_cns_oventa_cnta_cob_grd.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_ov dbname="nro_ov" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="orden_venta.fec_registro" )
+ column=(type=char(10) updatewhereclause=yes name=ot_gastos dbname="orden_venta.ot_gastos" )
+ column=(type=char(12) updatewhereclause=yes name=articulo_mov_proy_cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=articulo_desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_proy_cant_proyect dbname="articulo_mov_proy.cant_proyect" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_proy_cant_procesada dbname="articulo_mov_proy.cant_procesada" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_proy_cant_facturada dbname="articulo_mov_proy.cant_facturada" )
+ retrieve="select distinct(ov.nro_ov), ov.fec_registro, ov.ot_gastos, amp.cod_art, a.desc_art, a.und, amp.cant_proyect, 
+		amp.cant_procesada, amp.cant_facturada
+ from cntas_cobrar cc, cntas_cobrar_det ccd, orden_venta ov, articulo_mov_proy amp, articulo a
+where (cc.tipo_doc = ccd.tipo_doc and 
+       cc.nro_doc = ccd.nro_doc and 
+       cc.flag_estado <> '0' and 
+       cc.tipo_doc = :as_doc_cxc and 
+       cc.nro_doc = :as_nro_doc) and 
+      (ccd.nro_ref = ov.nro_ov and 
+       ccd.tipo_ref = :as_doc_ov) and 
+      (ov.cod_origen = amp.cod_origen and 
+       ov.nro_ov = amp.nro_doc and 
+       amp.tipo_doc = :as_doc_ov and 
+		 ov.flag_estado<>'0' and 
+		 amp.flag_estado<>'0') and 
+       (amp.cod_art=a.cod_art)" update="orden_venta" updatewhere=1 updatekeyinplace=no arguments=(("as_doc_cxc", string),("as_nro_doc", string),("as_doc_ov", string)) )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="33554432" x="9" y="8" height="76" width="302" format="[general]" html.valueishtml="0"  name=nro_ov visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="33554432" x="320" y="0" height="64" width="288" format="[shortdate] [time]" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="0" color="33554432" x="617" y="0" height="64" width="261" format="[general]" html.valueishtml="0"  name=ot_gastos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=40 border="0" color="33554432" x="887" y="0" height="64" width="315" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cod_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=50 border="0" color="33554432" x="1211" y="0" height="64" width="1801" format="[general]" html.valueishtml="0"  name=articulo_desc_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=60 border="0" color="33554432" x="3022" y="0" height="64" width="119" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=70 border="0" color="33554432" x="3150" y="0" height="64" width="411" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cant_proyect visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=80 border="0" color="33554432" x="3570" y="0" height="64" width="379" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cant_procesada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=90 border="0" color="33554432" x="3959" y="0" height="64" width="416" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cant_facturada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Ov" border="2" color="33554432" x="9" y="8" height="56" width="302" html.valueishtml="0"  name=nro_ov_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="0" text="Fec Registro" border="2" color="33554432" x="320" y="8" height="56" width="288" html.valueishtml="0"  name=orden_venta_fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="0" text="Ot Gastos" border="2" color="33554432" x="617" y="8" height="56" width="261" html.valueishtml="0"  name=orden_venta_ot_gastos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="0" text="Artículo" border="2" color="33554432" x="887" y="8" height="56" width="315" html.valueishtml="0"  name=articulo_mov_proy_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="0" text="Descipción artículo" border="2" color="33554432" x="1211" y="8" height="56" width="1801" html.valueishtml="0"  name=articulo_desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="0" text="Und" border="2" color="33554432" x="3022" y="8" height="56" width="119" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cant Proyectada" border="2" color="33554432" x="3150" y="8" height="56" width="411" html.valueishtml="0"  name=articulo_mov_proy_cant_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cant Procesada" border="2" color="33554432" x="3570" y="8" height="56" width="379" html.valueishtml="0"  name=articulo_mov_proy_cant_procesada_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cant Facturada" border="2" color="33554432" x="3959" y="8" height="56" width="416" html.valueishtml="0"  name=articulo_mov_proy_cant_facturada_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

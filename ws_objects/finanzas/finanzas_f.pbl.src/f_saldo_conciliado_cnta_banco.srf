@@ -1,0 +1,30 @@
+﻿$PBExportHeader$f_saldo_conciliado_cnta_banco.srf
+global type f_saldo_conciliado_cnta_banco from function_object
+end type
+
+forward prototypes
+global function decimal f_saldo_conciliado_cnta_banco (string as_cnta_banco, long al_ano, long al_mes)
+end prototypes
+
+global function decimal f_saldo_conciliado_cnta_banco (string as_cnta_banco, long al_ano, long al_mes);Decimal {2} ldc_saldo
+
+/*Recuperar saldo bancario y saldo conciliado*/
+/*buscar saldo bancario*/
+select saldo_conciliado into :ldc_saldo
+  from saldo_banco_mes
+ where (cod_ctabco = :as_cnta_banco ) and
+ 		 (ano			 = :al_ano 		   ) and
+		 (mes			 = :al_mes	 	   ) ;
+
+
+
+
+if Isnull(ldc_saldo) then
+	ldc_saldo = 0.00
+end if
+
+
+
+Return ldc_saldo
+end function
+

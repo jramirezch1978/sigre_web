@@ -1,0 +1,84 @@
+﻿$PBExportHeader$d_rpt_rend_jornal_labor_cst.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=384 color="536870912" )
+header[2](height=96 color="536870912" )
+header[3](height=52 color="536870912" )
+summary(height=64 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=nom_trabajador dbname="nom_trabajador" )
+ column=(type=number updatewhereclause=yes name=rendimiento dbname="rendimiento" )
+ column=(type=number updatewhereclause=yes name=horas dbname="horas" )
+ column=(type=number updatewhereclause=yes name=val dbname="val" )
+ retrieve="select lc.nro_lote, p.cod_labor, l.desc_labor, l.und,
+		 m.cod_trabajador,
+		 m.apel_paterno || ' ' || m.apel_materno || ', ' || m.nombre1 as full_name,
+       m.cod_trabajador || ' - ' || m.apel_paterno || ' ' || m.apel_materno || ', ' || m.nombre1 as nom_trabajador,
+       sum(p.rendimiento) as rendimiento,
+       sum(p.hrs_normales + p.hrs_extras_25 + p.hrs_extras_35 + p.hrs_noc_extras_35 + p.hrs_extras_100) as horas,
+       CASE  when sum(p.hrs_normales + p.hrs_extras_25 + p.hrs_extras_35 + p.hrs_noc_extras_35 + p.hrs_extras_100) <> 0 then
+             sum(p.rendimiento) / sum(p.hrs_normales + p.hrs_extras_25 + p.hrs_extras_35 + p.hrs_noc_extras_35 + p.hrs_extras_100) 
+       ELSE
+             0
+       END as promedio
+from pd_jornal_campo p,
+     pd_jornal_campo_lote pd,
+     labor                l,
+	  lote_campo			  lc,
+     maestro              m
+where p.fecha = pd.fecha
+  and p.cod_trabajador = pd.cod_trabajador     
+  and p.nro_item       = pd.nro_item
+  and p.cod_labor      = l.cod_labor
+  and p.cod_trabajador = m.cod_trabajador
+  and pd.nro_lote		  = lc.nro_lote
+  and p.rendimiento    > 0
+  and p.cod_labor      = :as_labor
+  and trunc(p.fecha)  between :ad_fecha1 and :ad_fecha2
+group by lc.nro_lote, p.cod_labor, l.desc_labor, l.und, 
+			m.cod_trabajador,
+		   m.apel_paterno || ' ' || m.apel_materno || ', ' || m.nombre1,
+			m.cod_trabajador || ' - ' || m.apel_paterno || ' ' || m.apel_materno || ', ' || m.nombre1
+order by lc.nro_lote, p.cod_labor, promedio desc" arguments=(("as_labor", string),("ad_fecha1", date),("ad_fecha2", date))  sort="grand_sum_val D " )
+text(band=header[2] alignment="2" text="@lote_campo_nro_lote" border="2" color="33554432" x="1147" y="4" height="88" width="622" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="Total 
+Rendim." border="2" color="33554432" x="1774" y="4" height="88" width="229" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="Total 
+Horas" border="2" color="33554432" x="2011" y="4" height="88" width="229" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="Promedio 
+Total" border="2" color="33554432" x="2249" y="4" height="88" width="224" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[3] alignment="0" text="Nom Trabajador" border="2" color="33554432" x="9" y="4" height="44" width="1129" html.valueishtml="0"  name=nom_trabajador_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="Rendim." border="2" color="33554432" x="1147" y="4" height="44" width="206" html.valueishtml="0"  name=rendimiento_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="Horas" border="2" color="33554432" x="1362" y="4" height="44" width="187" html.valueishtml="0"  name=horas_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="Promedio" border="2" color="33554432" x="1559" y="4" height="44" width="206" html.valueishtml="0"  name=val_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="56" width="1129" format="[general]" html.valueishtml="0"  name=nom_trabajador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="1559" y="4" height="56" width="206" format="###,##0.00" html.valueishtml="0"  name=val visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1362" y="4" height="56" width="187" format="###,##0.00" html.valueishtml="0"  name=horas visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="1147" y="4" height="56" width="206" format="###,##0.00" html.valueishtml="0"  name=rendimiento visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="2" color="33554432" x="1774" y="4" height="56" width="229" format="###,##0.00" html.valueishtml="0"  name=grand_sum_rendimiento visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(2)"border="2" color="33554432" x="2011" y="4" height="56" width="229" format="###,##0.00" html.valueishtml="0"  name=grand_sum_horas visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1) / crosstabsum(2)"border="2" color="33554432" x="2249" y="4" height="56" width="224" format="###,##0.00" html.valueishtml="0"  name=grand_sum_val visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="~"Resumen Total~""border="2" color="33554432" x="9" y="4" height="56" width="1129" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(rendimiento for all )"border="2" color="33554432" x="1147" y="4" height="56" width="206" format="###,#00.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(horas for all )"border="2" color="33554432" x="1362" y="4" height="56" width="187" format="###,#00.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(rendimiento for all ) / sum(horas for all )"border="2" color="33554432" x="1559" y="4" height="56" width="206" format="###,#00.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_rendimiento for all )"border="2" color="33554432" x="1774" y="4" height="56" width="229" format="###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_horas for all )"border="2" color="33554432" x="2011" y="4" height="56" width="229" format="###,##0.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( grand_sum_rendimiento for all ) / sum(  grand_sum_horas for all )"border="2" color="33554432" x="2249" y="4" height="56" width="224" format="###,##0.00" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="" border="0" color="0" x="32" y="320" height="48" width="402" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Garamond" font.height="-8" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=foreground filename="" x="27" y="20" height="216" width="407" border="0"  name=p_logo visible="1" )
+text(band=foreground alignment="2" text="" border="0" color="0" x="32" y="256" height="48" width="402" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Garamond" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="Rendimiento de Personal x Lote" border="0" color="8388608" x="471" y="36" height="88" width="2208" html.valueishtml="0"  name=t_11 visible="1"  font.face="Bookman Old Style" font.height="-14" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="2" text="" border="0" color="0" x="471" y="148" height="52" width="2208" html.valueishtml="0"  name=t_titulo1 visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="" border="0" color="0" x="471" y="220" height="52" width="2208" html.valueishtml="0"  name=t_titulo2 visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="" border="0" color="0" x="471" y="292" height="52" width="2208" html.valueishtml="0"  name=t_titulo3 visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=foreground alignment="0" expression="today()"border="0" color="0" x="2802" y="48" height="52" width="146" format="dd/mm/yyyy" html.valueishtml="0"  name=compute_8 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="" border="0" color="0" x="2802" y="120" height="52" width="398" html.valueishtml="0"  name=t_usuario visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=foreground alignment="0" expression="'Pag : ' + page() + ' de ' + pageCount()"border="0" color="0" x="2802" y="184" height="52" width="814" format="[general]" html.valueishtml="0"  name=compute_9 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "lote_campo_nro_lote" rows = "nom_trabajador" values = "sum(rendimiento for crosstab), sum(horas for crosstab), sum(rendimiento for crosstab) / sum(horas for crosstab)" sourcenames = "lote_campo_nro_lote, pd_jornal_campo_cod_labor, labor_desc_labor, labor_und, maestro_cod_trabajador, full_name, nom_trabajador, rendimiento, horas, promedio")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

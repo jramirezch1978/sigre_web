@@ -1,0 +1,88 @@
+﻿$PBExportHeader$f_insert_cta_cte_detrac.srf
+global type f_insert_cta_cte_detrac from function_object
+end type
+
+forward prototypes
+global function boolean f_insert_cta_cte_detrac (string as_cod_rel, string as_nro_doc, date adt_fecha_doc, string as_cod_moneda, decimal adc_tasa_cambio, string as_cod_usr, string as_origen, string as_descrip, decimal adc_importe_doc)
+end prototypes
+
+global function boolean f_insert_cta_cte_detrac (string as_cod_rel, string as_nro_doc, date adt_fecha_doc, string as_cod_moneda, decimal adc_tasa_cambio, string as_cod_usr, string as_origen, string as_descrip, decimal adc_importe_doc);String  ls_msj_err   ,ls_forma_pago ,ls_cencos  ,ls_cnta_prsp ,&
+		  ls_soles		,ls_dolares	   ,ls_doc_det ,ls_pcon,ls_centro_benef
+Decimal {2} ldc_saldo_sol ,ldc_saldo_dol
+Boolean lb_ret = TRUE		 
+
+select cod_soles,cod_dolares 
+	into :ls_soles,:ls_dolares 
+from logparam where reckey = '1' ;
+
+select doc_detrac_cp,pago_contado 
+  into :ls_doc_det,:ls_pcon 
+  from finparam where reckey = '1' ;
+
+select cen_bef_gen_oc 
+  into :ls_centro_benef
+  from origen 
+ where cod_origen = :as_origen ;
+  
+IF as_cod_moneda = ls_soles THEN
+	ldc_saldo_sol = adc_importe_doc
+	ldc_saldo_dol = Round(adc_importe_doc / adc_tasa_cambio,2)
+ELSE
+	ldc_saldo_sol = Round(adc_importe_doc * adc_tasa_cambio,2)
+	ldc_saldo_dol = adc_importe_doc
+END IF
+
+/*documento detraccion*/
+select cencos_detraccion,cnta_prsp_detraccion 
+  into :ls_cencos,:ls_cnta_prsp 
+  from finparam where reckey = '1' ;
+
+
+Insert Into cntas_pagar
+(cod_relacion     ,tipo_doc 		    ,nro_doc     		 ,flag_estado , 
+ fecha_registro   ,fecha_emision     ,vencimiento 		 ,forma_pago  ,	
+ cod_moneda		   ,tasa_cambio	    ,cod_usr	  		 ,origen		  ,
+ descripcion	   ,flag_provisionado ,importe_doc	    ,saldo_sol	  ,
+ saldo_dol		   ,flag_control_reg  ,flag_replicacion )  
+Values
+(:as_cod_rel	 ,:ls_doc_det       ,:as_nro_doc      ,'1'				,
+ :adt_fecha_doc ,:adt_fecha_doc    ,:adt_fecha_doc   ,:ls_pcon       ,
+ :as_cod_moneda ,:adc_tasa_cambio  ,:as_cod_usr	    ,:as_origen	   ,
+ :as_descrip	 ,'D'					 ,:adc_importe_doc ,:ldc_saldo_sol  ,
+ :ldc_saldo_dol ,'1'					 ,'1')  ;
+ 
+ 
+IF SQLCA.SQLCode = -1 THEN 
+	lb_ret = FALSE
+   ls_msj_err = SQLCA.SQLErrText
+	Rollback ;
+	MessageBox('Error Cntas Pagar',ls_msj_err)
+	GOTO SALIDA
+END IF 
+ 
+ 
+ 
+Insert Into cntas_pagar_det
+(cod_relacion ,tipo_doc ,nro_doc ,item 	,
+ descripcion  ,cantidad	,importe ,cencos	,
+ cnta_prsp    ,flag_replicacion,centro_benef)
+Values
+(:as_cod_rel   ,:ls_doc_det ,:as_nro_doc 	 ,'1' 		 ,
+ substr(:as_descrip,1,60)   ,'1'			 ,:adc_importe_doc ,:ls_cencos ,
+ :ls_cnta_prsp ,'1',:ls_centro_benef) ;
+
+
+IF SQLCA.SQLCode = -1 THEN 
+	lb_ret = FALSE
+   ls_msj_err = SQLCA.SQLErrText
+	Rollback ;
+	MessageBox('Error Cntas Pagar det',ls_msj_err)
+	GOTO SALIDA	
+END IF 
+
+
+SALIDA:
+
+Return lb_ret
+end function
+

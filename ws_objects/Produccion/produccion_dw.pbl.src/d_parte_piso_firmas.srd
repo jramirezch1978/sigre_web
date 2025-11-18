@@ -1,0 +1,47 @@
+﻿$PBExportHeader$d_parte_piso_firmas.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=244 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_parte dbname="tg_parte_piso_firmas.nro_parte" )
+ column=(type=char(6) update=yes updatewhereclause=yes key=yes name=cod_usr dbname="tg_parte_piso_firmas.cod_usr" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_firma dbname="tg_parte_piso_firmas.fecha" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="tg_parte_piso_firmas.flag_replicacion" initial="1" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=aprobador dbname="tg_parte_piso_firmas.aprobador" )
+ column=(type=char(60) updatewhereclause=yes name=usuario_nombre dbname="usuario.nombre" )
+ retrieve="  SELECT ~"TG_PARTE_PISO_FIRMAS~".~"NRO_PARTE~",   
+         ~"TG_PARTE_PISO_FIRMAS~".~"COD_USR~",   
+         ~"TG_PARTE_PISO_FIRMAS~".~"FECHA~",   
+         ~"TG_PARTE_PISO_FIRMAS~".~"FLAG_REPLICACION~",   
+         ~"TG_PARTE_PISO_FIRMAS~".~"APROBADOR~",   
+         ~"USUARIO~".~"NOMBRE~"  
+    FROM ~"TG_PARTE_PISO_FIRMAS~",   
+         ~"APROB_PARTE_PISO~",   
+         ~"USUARIO~",   
+         ~"TG_PARTE_PISO~"  
+   WHERE ( aprob_parte_piso.aprobador (+) = tg_parte_piso_firmas.aprobador) and  
+         ( usuario.cod_usr (+) = tg_parte_piso_firmas.cod_usr) and  
+         ( tg_parte_piso.nro_parte (+) = tg_parte_piso_firmas.nro_parte) and  
+         ( ~"USUARIO~".~"COD_USR~" = ~"APROB_PARTE_PISO~".~"APROBADOR~" ) and  
+				tg_parte_piso_firmas.nro_parte = :as_nro_parte" update="TG_PARTE_PISO_FIRMAS" updatewhere=1 updatekeyinplace=yes arguments=(("as_nro_parte", string)) )
+text(band=header alignment="2" text="Nro Parte" border="2" color="16777215" x="3383" y="0" height="116" width="366" html.valueishtml="0"  name=tg_parte_piso_firmas_nro_parte_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Tg Parte Piso Firmas
+Flag Replicacion" border="2" color="16777215" x="3913" y="64" height="112" width="603" html.valueishtml="0"  name=tg_parte_piso_firmas_flag_replicacion_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Ususario" border="2" color="16777215" x="4622" y="76" height="116" width="366" html.valueishtml="0"  name=tg_parte_piso_firmas_cod_usr_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Usuario(s) que Firman el Parte" border="4" color="0" x="960" y="28" height="64" width="965" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Aprobador" border="2" color="16777215" x="274" y="184" height="56" width="384" html.valueishtml="0"  name=tg_parte_piso_firmas_aprobador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Nombre" border="2" color="16777215" x="672" y="184" height="56" width="1243" html.valueishtml="0"  name=usuario_nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Fecha / Firma" border="2" color="16777215" x="1929" y="184" height="56" width="517" html.valueishtml="0"  name=tg_parte_piso_firmas_fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="3465" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_parte visible="0" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="3927" y="28" height="56" width="55" format="[general]" html.valueishtml="0"  name=flag_replicacion visible="0" edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2469" y="4" height="56" width="384" format="[general]" html.valueishtml="0"  name=aprobador pointer="H:\source\CUR\taladro.cur" visible="0" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=10 border="2" color="33554432" x="274" y="4" height="56" width="384" format="[general]" html.valueishtml="0"  name=cod_usr pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="672" y="4" height="56" width="1243" format="[general]" html.valueishtml="0"  name=usuario_nombre visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="2" color="33554432" x="1929" y="4" height="56" width="517" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_firma visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

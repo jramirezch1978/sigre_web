@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_rpt_liq_anual_retenciones_retribuc_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=632 color="536870912" )
+header[2](height=76 color="536870912" )
+summary(height=84 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=number updatewhereclause=yes name=valor dbname="valor" )
+ retrieve="  SELECT to_char(hc.fec_calc_plan,'yyyy/mm') as anomes     ,
+         Nvl(m.nro_afp_trabaj,'XXXXXXXXXXXX')||' '||Nvl(m.apel_paterno,' ') ||' '|| Nvl(m.apel_materno,' ') ||' '|| Nvl(m.nombre1,' ') ||' '|| Nvl(m.nombre2,' ') as nombres,
+			Sum(hc.imp_soles) as valor
+    FROM historico_calculo hc,   
+         maestro m
+   WHERE ( hc.cod_trabajador = m.cod_trabajador ) and
+				(hc.concep          in (select gc.concepto_gen from grupo_calculo gc
+                               where gc.grupo_calculo  in (select v.afp_comision
+                                                             from rrhhparam_cconcep v 
+                                                            where v.reckey = '1' 
+                                                           union
+                                                           select v.afp_invalidez
+                                                             from rrhhparam_cconcep v 
+                                                            where v.reckey = '1'  ))        ) and
+         (to_char(hc.fec_calc_plan,'yyyy') = :as_ano )  and
+			(m.cod_afp			  = :as_cod_afp) AND
+			(m.cod_origen = :as_cod_origen)
+GROUP BY to_char(hc.fec_calc_plan,'yyyy/mm')   ,
+         Nvl(m.nro_afp_trabaj,'XXXXXXXXXXXX')||' '||Nvl(m.apel_paterno,' ') ||' '|| Nvl(m.apel_materno,' ') ||' '|| Nvl(m.nombre1,' ') ||' '|| Nvl(m.nombre2,' ') 
+	" arguments=(("as_ano", string),("as_cod_afp", string),("as_cod_origen", string))  sort="Mid(nombres,14) A " )
+text(band=header[2] alignment="0" text="CUSPP / NOMBRES" border="0" color="33554432" x="9" y="4" height="56" width="1134" html.valueishtml="0"  name=nombres_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="2" text="@anomes" border="0" color="33554432" x="1152" y="4" height="56" width="242" html.valueishtml="0"  name=valor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="2" text="TOTAL" border="0" color="33554432" x="1403" y="4" height="56" width="265" html.valueishtml="0"  name=grand_sum_valor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="76" width="1134" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="33554432" x="1152" y="4" height="76" width="242" format="[general]" html.valueishtml="0"  name=valor visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="0" color="33554432" x="1403" y="4" height="76" width="265" format="###,###.00" html.valueishtml="0"  name=grand_sum_valor visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(valor for all )"border="0" color="33554432" x="1152" y="4" height="76" width="242" format="###,###.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_valor for all )"border="0" color="33554432" x="1403" y="4" height="76" width="265" format="###,###.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="Empresa :" border="0" color="33554432" x="69" y="360" height="56" width="297" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="" border="0" color="0" x="398" y="360" height="56" width="1623" html.valueishtml="0"  name=t_empresa visible="1"  slideup=directlyabove  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="RUC :" border="0" color="33554432" x="73" y="436" height="56" width="178" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="" border="0" color="33554432" x="283" y="436" height="56" width="1733" html.valueishtml="0"  name=t_ruc visible="1"  slideup=directlyabove  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="Liquidación Correspondiente a los Afiliados de" border="0" color="33554432" x="73" y="576" height="44" width="1015" html.valueishtml="0"  name=t_5 visible="1"  slideup=directlyabove  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="" border="0" color="0" x="1111" y="576" height="48" width="667" html.valueishtml="0"  name=t_afp visible="1"  slideup=directlyabove  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="por Retenciones y Retribuciones" border="0" color="0" x="1797" y="576" height="48" width="1253" html.valueishtml="0"  name=t_6 visible="1"  slideup=directlyabove  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="2" text="( Ley 27605 )" border="0" color="33554432" x="1957" y="208" height="44" width="293" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="LIQUIDACION ANUAL DE APORTES Y RETENCIONES PREVISIONALES
+RETENCIONES Y RETRIBUCIONES" border="0" color="33554432" x="1221" y="52" height="128" width="2030" html.valueishtml="0"  name=t_1 visible="1"  moveable=1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=foreground filename="H:\Source\BMP\blanco.bmp" x="50" y="20" height="192" width="379" border="0"  name=p_logo visible="1"  slideup=directlyabove )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "anomes" rows = "nombres" values = "sum(valor for crosstab)" sourcenames = "anomes, nombres, valor")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

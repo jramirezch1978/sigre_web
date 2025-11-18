@@ -1,0 +1,21 @@
+﻿$PBExportHeader$f_ruc_empresa.srf
+global type f_ruc_empresa from function_object
+end type
+
+forward prototypes
+global function string f_ruc_empresa (string as_empresa)
+end prototypes
+
+global function string f_ruc_empresa (string as_empresa);// funcion que devuelve la direccion del codigo relacion
+String ls_ruc
+
+Select ruc into :ls_ruc
+	 from empresa
+  	 where cod_empresa = :as_empresa;
+
+if ISNULL( ls_ruc ) then  ls_ruc = ''
+
+Return ls_ruc
+
+end function
+

@@ -1,0 +1,81 @@
+﻿$PBExportHeader$d_facturacion_operac_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=512 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912"  height.autosize=yes)
+table(column=(type=char(10) updatewhereclause=yes name=orden_trabajo_ot_adm dbname="orden_trabajo.ot_adm" )
+ column=(type=char(40) updatewhereclause=yes name=ot_administracion_descripcion dbname="ot_administracion.descripcion" )
+ column=(type=char(8) updatewhereclause=yes name=operaciones_proveedor dbname="operaciones.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(8) updatewhereclause=yes name=operaciones_cod_labor dbname="operaciones.cod_labor" )
+ column=(type=char(4) updatewhereclause=yes name=operaciones_cod_ejecutor dbname="operaciones.cod_ejecutor" )
+ column=(type=char(10) updatewhereclause=yes name=operaciones_oper_sec dbname="operaciones.oper_sec" )
+ column=(type=decimal(0) updatewhereclause=yes name=item dbname="facturacion_operacion.item" )
+ column=(type=decimal(3) updatewhereclause=yes name=cantidad dbname="facturacion_operacion.cantidad" )
+ column=(type=decimal(2) updatewhereclause=yes name=operaciones_has dbname="operaciones.has" )
+ column=(type=char(200) updatewhereclause=yes name=descripcion dbname="facturacion_operacion.descripcion" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="facturacion_operacion.und" )
+ column=(type=decimal(2) updatewhereclause=yes name=precio dbname="facturacion_operacion.precio" )
+ retrieve="select ot.ot_adm, oad.descripcion, o.proveedor, p.nom_proveedor, ot.nro_orden, 
+		 o.cod_labor, o.cod_ejecutor, o.oper_sec, f.item, f.cantidad, o.has, f.descripcion, f.und, f.precio
+from orden_trabajo ot, operaciones o, facturacion_operacion f, 
+     proveedor p, ot_administracion oad
+where ot.nro_orden=o.nro_orden and
+      ot.ot_adm = oad.ot_adm and
+      ot.ot_adm = :as_ot_adm and
+      o.oper_sec = f.oper_sec and
+      o.proveedor = p.proveedor and
+		f.tipo_doc is null 
+order by ot.ot_adm, o.proveedor, ot.nro_orden, o.oper_sec, f.item" arguments=(("as_ot_adm", string)) )
+group(level=1 header.height=96 trailer.height=84 by=("orden_trabajo_ot_adm" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=108 trailer.height=68 by=("operaciones_proveedor" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="OPERACIONES PPROGRAMADAS PARA FACTURAR" border="0" color="0" x="974" y="52" height="64" width="1545" html.valueishtml="0"  name=t_titulo visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="37" y="24" height="240" width="480" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Orden
+Trabajo" border="2" color="8388608" x="215" y="396" height="112" width="370" html.valueishtml="0"  name=orden_trabajo_nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="OperSec
+" border="2" color="8388608" x="590" y="396" height="112" width="302" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Item
+" border="2" color="8388608" x="896" y="396" height="112" width="119" html.valueishtml="0"  name=facturacion_operacion_tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ejecut
+" border="2" color="8388608" x="1019" y="396" height="112" width="178" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Código
+Labor" border="2" color="8388608" x="1202" y="396" height="112" width="233" html.valueishtml="0"  name=operaciones_cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripcion
+de labor" border="2" color="8388608" x="1440" y="396" height="112" width="1038" html.valueishtml="0"  name=facturacion_operacion_precio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio
+unitario" border="2" color="8388608" x="2862" y="396" height="112" width="306" html.valueishtml="0"  name=precio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad
+Ejecutada" border="2" color="8388608" x="2597" y="396" height="112" width="261" html.valueishtml="0"  name=operaciones_cant_real_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und
+" border="2" color="8388608" x="2482" y="396" height="112" width="114" html.valueishtml="0"  name=facturacion_operacion_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Valor
+venta" border="2" color="8388608" x="3173" y="396" height="112" width="306" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="33554432" x="3200" y="36" height="64" width="274" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3200" y="184" height="64" width="274" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="2971" y="40" height="56" width="210" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="2971" y="112" height="56" width="210" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="2971" y="188" height="56" width="210" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="255" x="32" y="24" height="56" width="270" format="[general]" html.valueishtml="0"  name=orden_trabajo_ot_adm visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="255" x="320" y="24" height="56" width="923" format="[general]" html.valueishtml="0"  name=ot_administracion_descripcion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="105" y="24" height="56" width="274" format="[general]" html.valueishtml="0"  name=operaciones_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="398" y="24" height="56" width="1271" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="215" y="8" height="60" width="370" format="[general]" html.valueishtml="0"  name=orden_trabajo_nro_orden visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="590" y="8" height="56" width="302" format="[general]" html.valueishtml="0"  name=operaciones_oper_sec visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="0" color="33554432" x="896" y="8" height="56" width="119" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="1019" y="8" height="56" width="178" format="[general]" html.valueishtml="0"  name=operaciones_cod_ejecutor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1202" y="8" height="56" width="233" format="[general]" html.valueishtml="0"  name=operaciones_cod_labor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="1440" y="8" height="56" width="1038" format="[general]" html.valueishtml="0"  name=descripcion visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="2482" y="8" height="56" width="114" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="0" color="33554432" x="2862" y="8" height="56" width="306" format="#,##0.00" html.valueishtml="0"  name=precio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="2597" y="8" height="56" width="261" format="#,##0.00" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" cantidad * precio "border="0" color="0" x="3173" y="8" height="56" width="306" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.2 alignment="1" text="SubTotal por proveedor:" border="0" color="0" x="2427" y="8" height="56" width="535" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.2 alignment="1" expression="sum( cantidad * precio  for group 2)"border="0" color="0" x="3173" y="4" height="56" width="306" format="#,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum( cantidad * precio  for group 1)"border="0" color="0" x="3173" y="12" height="56" width="306" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=trailer.1 alignment="0" text="Total por ot_adm:" border="0" color="0" x="2313" y="12" height="56" width="553" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

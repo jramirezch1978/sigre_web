@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_rpt_saldo_grupo_articulo_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=440 color="536870912" )
+summary(height=128 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(6) update=yes updatewhereclause=yes name=almacen dbname="articulo_almacen.almacen" )
+ column=(type=char(60) updatewhereclause=yes name=almacen_desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=char(12) update=yes updatewhereclause=yes name=cod_art dbname="articulo_almacen.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=number updatewhereclause=yes name=stk_und dbname="stk_und" )
+ column=(type=number updatewhereclause=yes name=stk_bolsa dbname="stk_bolsa" )
+ retrieve="SELECT al.almacen, alm.desc_almacen, al.cod_art, aa.nom_articulo, aa.und, 
+       ROUND(al.sldo_total,2) as stk_und, 
+       ROUND(al.sldo_total*aa.peso_und/:an_factor,2) as stk_bolsa
+  FROM articulo aa, articulo_almacen al, rel_articulo_grupo ra, almacen alm
+ WHERE aa.cod_art = al.cod_art AND 
+       aa.cod_art = ra.cod_art AND
+       al.almacen = alm.almacen AND
+       ra.grupo_art = :as_grupo AND
+       al.sldo_total > 0 AND
+       aa.peso_und > 0
+order by al.almacen, al.cod_art " arguments=(("as_grupo", string),("an_factor", number)) )
+group(level=1 header.height=80 trailer.height=96 by=("almacen" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Descripción de Artículo" border="2" color="33554432" x="626" y="372" height="64" width="1275" html.valueishtml="0"  name=articulo_nom_articulo_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Artículo" border="2" color="33554432" x="251" y="372" height="64" width="357" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="1915" y="372" height="64" width="114" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Stock Und" border="2" color="33554432" x="2043" y="372" height="64" width="384" html.valueishtml="0"  name=stk_und_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Stock bolsa" border="2" color="33554432" x="2441" y="372" height="64" width="384" html.valueishtml="0"  name=stk_bolsa_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Saldos por almacen" border="0" color="33554432" x="581" y="48" height="64" width="1751" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="581" y="164" height="64" width="1751" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Almacen" border="2" color="33554432" x="46" y="372" height="64" width="192" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+bitmap(band=header filename="" x="14" y="16" height="204" width="347" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="9" y="236" height="40" width="352" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="2459" y="176" height="40" width="402" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="33554432" x="2459" y="104" height="40" width="402" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2459" y="40" height="40" width="402" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=70 border="2" color="33554432" x="256" y="12" height="56" width="1381" format="[general]" html.valueishtml="0"  name=almacen_desc_almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=1 alignment="0" tabsequence=10 border="2" color="33554432" x="46" y="12" height="56" width="192" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=30 border="2" color="33554432" x="2441" y="8" height="64" width="366" format="#,##0.00" html.valueishtml="0"  name=stk_bolsa visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="2" color="33554432" x="251" y="8" height="64" width="357" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=40 border="2" color="33554432" x="626" y="8" height="64" width="1275" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=50 border="2" color="33554432" x="1915" y="8" height="64" width="114" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=60 border="2" color="33554432" x="2043" y="8" height="64" width="384" format="#,##0.00" html.valueishtml="0"  name=stk_und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="1" text="Resumen por almacen :" border="0" color="0" x="1431" y="16" height="56" width="594" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(stk_bolsa for group 1)"border="0" color="33554432" x="2441" y="16" height="64" width="366" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Resumen general :" border="0" color="8388608" x="1339" y="36" height="56" width="475" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(stk_bolsa for all)"border="0" color="8388608" x="2437" y="36" height="64" width="366" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

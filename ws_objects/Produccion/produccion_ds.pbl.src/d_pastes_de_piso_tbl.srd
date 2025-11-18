@@ -1,0 +1,57 @@
+﻿$PBExportHeader$d_pastes_de_piso_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="tg_parte_piso.nro_parte" )
+ column=(type=char(50) updatewhereclause=yes name=tg_parte_piso_documento_desc dbname="tg_parte_piso.documento_desc" )
+ column=(type=datetime updatewhereclause=yes name=tg_parte_piso_fecha_parte dbname="tg_parte_piso.fecha_parte" )
+ column=(type=char(6) updatewhereclause=yes name=tg_parte_piso_cod_usr dbname="tg_parte_piso.cod_usr" )
+ column=(type=char(15) updatewhereclause=yes name=formato dbname="tg_parte_piso.formato" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_version dbname="tg_parte_piso.nro_version" )
+ column=(type=char(200) updatewhereclause=yes name=tg_fmt_med_act_descripcion dbname="tg_fmt_med_act.descripcion" )
+ column=(type=char(6) updatewhereclause=yes name=tg_parte_piso_cod_planta dbname="tg_parte_piso.cod_planta" )
+ column=(type=char(40) updatewhereclause=yes name=tg_plantas_desc_planta dbname="tg_plantas.desc_planta" )
+ retrieve="SELECT DISTINCT pp.nro_parte,
+       pp.documento_desc,
+       pp.fecha_parte,
+       pp.cod_usr,
+       pp.formato,
+		 pp.nro_version,
+       f.descripcion,
+       pp.cod_planta,
+       p.desc_planta
+
+  FROM tg_parte_piso 		pp,
+       tg_fmt_med_act 		f,
+       tg_plantas 			p
+
+ WHERE pp.formato              			= f.formato(+)
+       AND pp.nro_version		    		= f.nro_version(+)
+       AND pp.cod_planta        			= p.cod_planta(+)
+       AND TRIM(PP.FORMATO)            like :as_formato
+		 AND TRIM(PP.COD_PLANTA)         like :as_cod_planta
+       AND trunc(pp.fecha_parte)       BETWEEN trunc(:ad_fecha1) AND trunc(:ad_fecha2)
+  " arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_cod_planta", string),("as_formato", string)) )
+text(band=header alignment="2" text="Nro Parte" border="2" color="0" x="9" y="8" height="56" width="338" html.valueishtml="0"  name=tg_parte_piso_nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha" border="2" color="0" x="352" y="8" height="56" width="251" html.valueishtml="0"  name=tg_parte_piso_fecha_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Formato - Version" border="2" color="0" x="608" y="8" height="56" width="480" html.valueishtml="0"  name=tg_parte_piso_formato_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="1093" y="8" height="56" width="1925" html.valueishtml="0"  name=tg_fmt_med_act_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Planta" border="2" color="0" x="3282" y="8" height="56" width="1042" html.valueishtml="0"  name=tg_parte_piso_cod_planta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="User" border="2" color="0" x="3026" y="8" height="56" width="251" html.valueishtml="0"  name=tg_parte_piso_cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="2254" y="100" height="52" width="1152" format="[general]" html.valueishtml="0"  name=tg_parte_piso_documento_desc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="56" width="338" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="352" y="4" height="56" width="251" format="[shortdate] [time]" html.valueishtml="0"  name=tg_parte_piso_fecha_parte visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="608" y="4" height="56" width="325" format="[general]" html.valueishtml="0"  name=formato visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="951" y="4" height="56" width="137" format="[general]" html.valueishtml="0"  name=nro_version visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="1093" y="4" height="56" width="1925" format="[general]" html.valueishtml="0"  name=tg_fmt_med_act_descripcion visible="1" edit.limit=200 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="3282" y="4" height="56" width="50" format="[general]" html.valueishtml="0"  name=tg_parte_piso_cod_planta visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="3342" y="4" height="56" width="983" format="[general]" html.valueishtml="0"  name=tg_plantas_desc_planta visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="3026" y="4" height="56" width="251" format="[general]" html.valueishtml="0"  name=tg_parte_piso_cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

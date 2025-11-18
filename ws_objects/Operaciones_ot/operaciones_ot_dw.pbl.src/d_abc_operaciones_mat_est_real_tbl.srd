@@ -1,0 +1,101 @@
+﻿$PBExportHeader$d_abc_operaciones_mat_est_real_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=208 color="536870912" )
+summary(height=80 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912"  height.autosize=yes)
+table(column=(type=char(8) updatewhereclause=yes name=operaciones_cod_labor dbname="operaciones.cod_labor" )
+ column=(type=char(100) updatewhereclause=yes name=operaciones_desc_operacion dbname="operaciones.desc_operacion" )
+ column=(type=char(3) updatewhereclause=yes name=labor_und dbname="labor.und" )
+ column=(type=char(4) updatewhereclause=yes name=operaciones_cod_ejecutor dbname="operaciones.cod_ejecutor" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="vale_mov.fec_registro" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="vale_mov.cod_usr" )
+ column=(type=char(11) updatewhereclause=yes name=und_avance dbname="und_avance" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ column=(type=number updatewhereclause=yes name=costo_unit dbname="costo_unit" )
+ column=(type=number updatewhereclause=yes name=total_us dbname="total_us" )
+ column=(type=number updatewhereclause=yes name=avance dbname="avance" )
+ column=(type=number updatewhereclause=yes name=ratio_costo dbname="ratio_costo" )
+ column=(type=number updatewhereclause=yes name=ratio_avance dbname="ratio_avance" )
+ retrieve="select op.cod_labor      ,
+       op.desc_operacion ,
+       lb.und            ,
+       op.cod_ejecutor   ,
+       am.cod_art        ,
+       art.nom_articulo  ,
+       art.und           ,
+       vm.fec_registro   ,
+       vm.cod_usr        ,
+		 decode(lb.flag_tipo_has,'1','Factor','T','Has Totales','N','Has netas','H','Tonelada','C','Caja') AS und_avance,
+       sum(am.cant_procesada) as cantidad  ,     
+       Round(Nvl(am.precio_unit,0) / usf_fin_tasa_cambio(sysdate),2) as costo_unit,
+       Round(sum(am.cant_procesada) * Round(Nvl(am.precio_unit,0) / usf_fin_tasa_cambio(sysdate),2),2) as   total_us,
+       Decode(Nvl(sum(op.avance_esperado),0),0,1,Nvl(sum(op.avance_esperado),0)) as avance,
+       Round(Round(sum(am.cant_procesada) * Round(Nvl(am.precio_unit,0) / usf_fin_tasa_cambio(sysdate),2),2) / Decode(sum(am.cant_procesada),0,1,sum(am.cant_procesada)),2) as ratio_costo,
+       Round(Round(sum(am.cant_procesada) * Round(Nvl(am.precio_unit,0) / usf_fin_tasa_cambio(sysdate),2),2) / Decode(Nvl(sum(op.avance_esperado),0),0,1,Nvl(sum(op.avance_esperado),0)),2) as ratio_avance
+  from operaciones op,labor lb,articulo_mov am,articulo art,vale_mov vm
+ where (op.cod_labor   = lb.cod_labor  ) and
+       (op.oper_sec    = am.oper_sec   ) and
+       (am.cod_art     = art.cod_art   ) and
+		 (am.flag_estado <> '0' 		   ) and
+		 (op.tipo_orden  = (select doc_ot from prod_param where reckey = '1') ) and
+       (am.cod_origen  = vm.cod_origen ) and
+       (am.nro_vale    = vm.nro_vale   ) and
+		 (op.nro_orden	  = :as_nro_orden )
+group by op.cod_labor         ,
+         op.desc_operacion    ,
+         lb.und               ,
+         op.cod_ejecutor      ,
+         am.cod_art           ,
+         art.nom_articulo     ,
+         art.und              ,
+         Nvl(am.precio_unit,0),
+         vm.fec_registro      ,
+         vm.cod_usr        	,
+			lb.flag_tipo_has
+       " arguments=(("as_nro_orden", string))  sort="operaciones_cod_labor A operaciones_desc_operacion A labor_und A operaciones_cod_ejecutor A " )
+text(band=header alignment="2" text="Labor" border="2" color="8388608" x="9" y="148" height="56" width="247" html.valueishtml="0"  name=operaciones_cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="0" text="Materiales - Costo Real" border="0" color="8388608" x="23" y="64" height="56" width="613" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Descripción de Labor" border="2" color="8388608" x="261" y="148" height="56" width="809" html.valueishtml="0"  name=operaciones_desc_operacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="8388608" x="1074" y="148" height="56" width="123" html.valueishtml="0"  name=labor_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ejec" border="2" color="8388608" x="1202" y="148" height="56" width="137" html.valueishtml="0"  name=operaciones_cod_ejecutor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha" border="2" color="8388608" x="1344" y="148" height="56" width="274" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Usuario" border="2" color="8388608" x="1623" y="148" height="56" width="169" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Articulo" border="2" color="8388608" x="1797" y="148" height="56" width="334" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="8388608" x="2135" y="148" height="56" width="544" html.valueishtml="0"  name=articulo_nom_articulo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="8388608" x="2683" y="148" height="56" width="133" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="2821" y="148" height="56" width="265" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Costo Unit" border="2" color="8388608" x="3090" y="148" height="56" width="297" html.valueishtml="0"  name=costo_unit_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Avance" border="2" color="8388608" x="3392" y="148" height="56" width="192" html.valueishtml="0"  name=avance_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und Av." border="2" color="8388608" x="3589" y="148" height="56" width="178" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Total US $" border="2" color="8388608" x="3771" y="148" height="56" width="261" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ratio Costo" border="2" color="8388608" x="4037" y="148" height="56" width="247" html.valueishtml="0"  name=ratio_costo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ratio Av." border="2" color="8388608" x="4288" y="148" height="56" width="206" html.valueishtml="0"  name=ratio_avance_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="76" width="247" format="[general]" html.valueishtml="0"  name=operaciones_cod_labor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="261" y="0" height="76" width="809" format="[general]" html.valueishtml="0"  name=operaciones_desc_operacion visible="1" height.autosize=yes edit.limit=100 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1074" y="0" height="76" width="123" format="[general]" html.valueishtml="0"  name=labor_und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1202" y="0" height="76" width="137" format="[general]" html.valueishtml="0"  name=operaciones_cod_ejecutor visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="1344" y="0" height="76" width="274" format="dd/mm/yy" html.valueishtml="0"  name=fec_registro visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="1623" y="0" height="76" width="169" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1797" y="0" height="76" width="334" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2135" y="0" height="76" width="544" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" height.autosize=yes edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="2683" y="0" height="76" width="133" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="2821" y="0" height="76" width="265" format="[general]" html.valueishtml="0"  name=cantidad visible="1" editmask.mask="###,###.000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="3392" y="0" height="76" width="192" format="[general]" html.valueishtml="0"  name=avance visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="2" color="33554432" x="3589" y="0" height="76" width="178" format="[general]" html.valueishtml="0"  name=und_avance visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="2" color="33554432" x="3771" y="0" height="76" width="261" format="[general]" html.valueishtml="0"  name=total_us visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="33554432" x="4037" y="0" height="76" width="247" format="[general]" html.valueishtml="0"  name=ratio_costo visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="1" tabsequence=32766 border="2" color="33554432" x="4288" y="0" height="76" width="206" format="[general]" html.valueishtml="0"  name=ratio_avance visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="2" color="33554432" x="3090" y="0" height="76" width="297" format="[general]" html.valueishtml="0"  name=costo_unit visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total :" border="2" color="8388608" x="2725" y="0" height="72" width="361" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=summary alignment="1" expression="sum(  total_us  for all )"border="2" color="0" x="3090" y="0" height="72" width="297" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+
+sparse(names="operaciones_cod_labor	operaciones_desc_operacion	labor_und	operaciones_cod_ejecutor")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

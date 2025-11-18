@@ -1,0 +1,49 @@
+﻿$PBExportHeader$d_plant_presup_det_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_plantilla dbname="fl_plant_presup_det.cod_fl_plantilla" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp dbname="fl_plant_presup_det.cnta_prsp" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos dbname="fl_plant_presup_det.cencos" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="fl_plant_presup_det.item" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=descripcion dbname="fl_plant_presup_det.descripcion" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=ratio dbname="fl_plant_presup_det.ratio" )
+ column=(type=char(50) updatewhereclause=yes name=descr_cuenta dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="fl_plant_presup_det.flag_replicacion" )
+ retrieve="  SELECT FPPD.COD_FL_PLANTILLA,   
+         FPPD.CNTA_PRSP,   
+			FPPD.CENCOS,
+			FPPD.ITEM,
+			FPPD.DESCRIPCION,
+			CC.DESC_CENCOS,
+         FPPD.RATIO,   
+         PC.DESCRIPCION,
+			FPPD.FLAG_REPLICACION  
+    FROM FL_PLANT_PRESUP_DET FPPD,   
+         PRESUPUESTO_CUENTA PC,
+			CENTROS_COSTO CC  
+   WHERE FPPD.CNTA_PRSP = PC.CNTA_PRSP
+	  AND CC.CENCOS = FPPD.CENCOS
+	  and FPPD.Cod_fl_plantilla = :as_plantilla
+	
+" update="FL_PLANT_PRESUP_DET" updatewhere=0 updatekeyinplace=no arguments=(("as_plantilla", string)) )
+text(band=header alignment="2" text="Cnta Prsp" border="2" color="33554432" x="242" y="8" height="56" width="315" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Ratio" border="2" color="33554432" x="2478" y="8" height="56" width="265" html.valueishtml="0"  name=ratio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cencos" border="2" color="0" x="1289" y="8" height="56" width="261" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Desc Cencos" border="2" color="0" x="1559" y="8" height="56" width="910" html.valueishtml="0"  name=desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Item" border="2" color="33554432" x="9" y="8" height="56" width="224" html.valueishtml="0"  name=fl_plant_presup_det_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion" border="2" color="33554432" x="2752" y="8" height="56" width="745" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion Cnta Prsp" border="2" color="33554432" x="567" y="8" height="56" width="713" html.valueishtml="0"  name=descr_cuenta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=7 alignment="1" tabsequence=30 border="2" color="33554432" x="2478" y="4" height="64" width="265" format="###,##0.0000" html.valueishtml="0"  name=ratio visible="1" editmask.mask="###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="1559" y="4" height="64" width="910" format="[general]" html.valueishtml="0"  name=desc_cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="224" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=5 alignment="0" tabsequence=40 border="2" color="33554432" x="2752" y="4" height="64" width="745" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=10 border="2" color="33554432" x="242" y="4" height="64" width="315" format="[general]" html.valueishtml="0"  name=cnta_prsp pointer="\SOURCE\CUR\taladro.cur" visible="1" edit.limit=10 edit.case=upper edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="2" color="33554432" x="1289" y="4" height="64" width="261" format="[general]" html.valueishtml="0"  name=cencos pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="567" y="4" height="64" width="713" format="[general]" html.valueishtml="0"  name=descr_cuenta visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

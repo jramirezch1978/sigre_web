@@ -1,0 +1,145 @@
+﻿$PBExportHeader$m_main.srm
+forward
+global type m_main from menu
+end type
+type m_file from menu within m_main
+end type
+type m_chat from menu within m_file
+end type
+type m_exit from menu within m_file
+end type
+type m_file from menu within m_main
+m_chat m_chat
+m_exit m_exit
+end type
+type m_help from menu within m_main
+end type
+type m_about from menu within m_help
+end type
+type m_help from menu within m_main
+m_about m_about
+end type
+global type m_main from menu
+m_file m_file
+m_help m_help
+end type
+end forward
+
+global type m_main from menu
+m_file m_file
+m_help m_help
+end type
+global m_main m_main
+
+on m_main.create
+m_main=this
+call super::create
+this.text = "m_main"
+this.m_file=create m_file
+this.m_help=create m_help
+this.Item[UpperBound(this.Item)+1]=this.m_file
+this.Item[UpperBound(this.Item)+1]=this.m_help
+end on
+
+on m_main.destroy
+call super::destroy
+destroy(this.m_file)
+destroy(this.m_help)
+end on
+
+type m_file from menu within m_main
+m_chat m_chat
+m_exit m_exit
+end type
+
+on m_file.create
+call super::create
+this.text = "&File"
+this.m_chat=create m_chat
+this.m_exit=create m_exit
+this.Item[UpperBound(this.Item)+1]=this.m_chat
+this.Item[UpperBound(this.Item)+1]=this.m_exit
+end on
+
+on m_file.destroy
+call super::destroy
+destroy(this.m_chat)
+destroy(this.m_exit)
+end on
+
+type m_chat from menu within m_file
+end type
+
+event clicked;Open(w_chat)
+
+end event
+
+on m_chat.create
+call super::create
+this.text = "&Chat"
+this.microhelp = "Open the chat window"
+this.toolbaritemname = "Custom011!"
+this.toolbaritemtext = "Chat,Open the chat window"
+end on
+
+on m_chat.destroy
+call super::destroy
+end on
+
+type m_exit from menu within m_file
+end type
+
+on m_exit.create
+call super::create
+this.text = "E&xit"
+this.microhelp = "Exit the program"
+this.toolbaritemname = "Exit!"
+this.toolbaritemtext = "Exit,Exit the program"
+end on
+
+on m_exit.destroy
+call super::destroy
+end on
+
+event clicked;Close(ParentWindow)
+
+end event
+
+type m_help from menu within m_main
+m_about m_about
+end type
+
+on m_help.create
+call super::create
+this.text = "&Help"
+this.m_about=create m_about
+this.Item[UpperBound(this.Item)+1]=this.m_about
+end on
+
+on m_help.destroy
+call super::destroy
+destroy(this.m_about)
+end on
+
+type m_about from menu within m_help
+end type
+
+event clicked;String ls_msg
+
+ls_msg += "Written by Roland Smith~r~n~r~n"
+ls_msg += "www.topwizprogramming.com"
+
+MessageBox("About PBChat", ls_msg)
+
+end event
+
+on m_about.create
+call super::create
+this.text = "&About"
+this.microhelp = "About the program"
+end on
+
+on m_about.destroy
+call super::destroy
+end on
+

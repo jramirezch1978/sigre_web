@@ -1,0 +1,461 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # INFRAESTRUCTURA BASE
+  # ========================================
+  
+  service-discovery:
+    build: ./service-discovery
+    container_name: sigre-service-discovery
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - sigre-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  config-server:
+    build: ./config-server
+    container_name: sigre-config-server
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+    depends_on:
+      service-discovery:
+        condition: service_healthy
+    networks:
+      - sigre-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: sigre-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+    depends_on:
+      - service-discovery
+      - config-server
+    networks:
+      - sigre-network
+
+  # ========================================
+  # SERVICIOS CORE
+  # ========================================
+  
+  seguridad-service:
+    build: ./seguridad-service
+    container_name: sigre-seguridad-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - ORACLE_PORT=1521
+      - ORACLE_SERVICE=ORCL
+      - ORACLE_USERNAME=${ORACLE_USERNAME:-sigre_user}
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD:-sigre_password}
+      - REDIS_HOST=redis
+    depends_on:
+      - service-discovery
+      - oracle-db
+      - redis
+    networks:
+      - sigre-network
+
+  # ========================================
+  # MÓDULOS FINANCIEROS Y CONTABLES
+  # ========================================
+  
+  contabilidad-service:
+    build: ./contabilidad-service
+    container_name: sigre-contabilidad-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - service-discovery
+      - seguridad-service
+      - oracle-db
+      - rabbitmq
+    networks:
+      - sigre-network
+
+  finanzas-service:
+    build: ./finanzas-service
+    container_name: sigre-finanzas-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - service-discovery
+      - seguridad-service
+      - contabilidad-service
+    networks:
+      - sigre-network
+
+  # ========================================
+  # MÓDULOS OPERATIVOS
+  # ========================================
+  
+  almacen-service:
+    build: ./almacen-service
+    container_name: sigre-almacen-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - service-discovery
+      - contabilidad-service
+    networks:
+      - sigre-network
+
+  rrhh-service:
+    build: ./rrhh-service
+    container_name: sigre-rrhh-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - service-discovery
+      - finanzas-service
+    networks:
+      - sigre-network
+
+  produccion-service:
+    build: ./produccion-service
+    container_name: sigre-produccion-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - service-discovery
+      - almacen-service
+    networks:
+      - sigre-network
+
+  flota-service:
+    build: ./flota-service
+    container_name: sigre-flota-service
+    ports:
+      - "8087:8087"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+    depends_on:
+      - service-discovery
+      - produccion-service
+    networks:
+      - sigre-network
+
+  comercializacion-service:
+    build: ./comercializacion-service
+    container_name: sigre-comercializacion-service
+    ports:
+      - "8088:8088"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - service-discovery
+      - almacen-service
+      - finanzas-service
+    networks:
+      - sigre-network
+
+  compras-service:
+    build: ./compras-service
+    container_name: sigre-compras-service
+    ports:
+      - "8089:8089"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - service-discovery
+      - almacen-service
+      - finanzas-service
+    networks:
+      - sigre-network
+
+  aprovision-service:
+    build: ./aprovision-service
+    container_name: sigre-aprovision-service
+    ports:
+      - "8090:8090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+    depends_on:
+      - service-discovery
+      - almacen-service
+    networks:
+      - sigre-network
+
+  asistencia-service:
+    build: ./asistencia-service
+    container_name: sigre-asistencia-service
+    ports:
+      - "8091:8091"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+    depends_on:
+      - service-discovery
+      - rrhh-service
+    networks:
+      - sigre-network
+
+  comedor-service:
+    build: ./comedor-service
+    container_name: sigre-comedor-service
+    ports:
+      - "8092:8092"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+    depends_on:
+      - service-discovery
+    networks:
+      - sigre-network
+
+  mantenimiento-service:
+    build: ./mantenimiento-service
+    container_name: sigre-mantenimiento-service
+    ports:
+      - "8093:8093"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+    depends_on:
+      - service-discovery
+    networks:
+      - sigre-network
+
+  operaciones-service:
+    build: ./operaciones-service
+    container_name: sigre-operaciones-service
+    ports:
+      - "8094:8094"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - service-discovery
+      - almacen-service
+    networks:
+      - sigre-network
+
+  campo-service:
+    build: ./campo-service
+    container_name: sigre-campo-service
+    ports:
+      - "8095:8095"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+    depends_on:
+      - service-discovery
+      - almacen-service
+    networks:
+      - sigre-network
+
+  activo-fijo-service:
+    build: ./activo-fijo-service
+    container_name: sigre-activo-fijo-service
+    ports:
+      - "8096:8096"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - service-discovery
+      - contabilidad-service
+    networks:
+      - sigre-network
+
+  auditoria-service:
+    build: ./auditoria-service
+    container_name: sigre-auditoria-service
+    ports:
+      - "8097:8097"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+      - MONGODB_HOST=mongodb
+    depends_on:
+      - service-discovery
+      - mongodb
+    networks:
+      - sigre-network
+
+  sig-service:
+    build: ./sig-service
+    container_name: sigre-sig-service
+    ports:
+      - "8098:8098"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+    depends_on:
+      - service-discovery
+    networks:
+      - sigre-network
+
+  presupuesto-service:
+    build: ./presupuesto-service
+    container_name: sigre-presupuesto-service
+    ports:
+      - "8099:8099"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+      - ORACLE_HOST=oracle-db
+    depends_on:
+      - service-discovery
+      - contabilidad-service
+    networks:
+      - sigre-network
+
+  # ========================================
+  # INFRAESTRUCTURA DE DATOS
+  # ========================================
+  
+  oracle-db:
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    container_name: sigre-oracle-db
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    environment:
+      - ORACLE_PWD=${ORACLE_SYS_PASSWORD:-Oracle123}
+      - ORACLE_CHARACTERSET=AL32UTF8
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    networks:
+      - sigre-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: sigre-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - sigre-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: sigre-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin123
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - sigre-network
+
+  mongodb:
+    image: mongo:7
+    container_name: sigre-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin123
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - sigre-network
+
+  # ========================================
+  # MONITOREO
+  # ========================================
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sigre-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - sigre-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sigre-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - sigre-network
+
+networks:
+  sigre-network:
+    driver: bridge
+
+volumes:
+  oracle-data:
+  redis-data:
+  rabbitmq-data:
+  mongodb-data:
+  prometheus-data:
+  grafana-data:

@@ -1,0 +1,74 @@
+﻿$PBExportHeader$d_rpt_pre_asiento_codrel_error_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=380 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=cntbl_pre_asiento_origen dbname="cntbl_pre_asiento.origen" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntbl_pre_asiento_nro_libro dbname="cntbl_pre_asiento.nro_libro" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntbl_pre_asiento_nro_provisional dbname="cntbl_pre_asiento.nro_provisional" )
+ column=(type=char(3) updatewhereclause=yes name=cntbl_pre_asiento_cod_moneda dbname="cntbl_pre_asiento.cod_moneda" )
+ column=(type=decimal(3) updatewhereclause=yes name=cntbl_pre_asiento_tasa_cambio dbname="cntbl_pre_asiento.tasa_cambio" )
+ column=(type=datetime updatewhereclause=yes name=cntbl_pre_asiento_fec_registro dbname="cntbl_pre_asiento.fec_registro" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntbl_pre_asiento_det_item dbname="cntbl_pre_asiento_det.item" )
+ column=(type=char(10) updatewhereclause=yes name=cntbl_pre_asiento_det_cnta_ctbl dbname="cntbl_pre_asiento_det.cnta_ctbl" )
+ column=(type=char(8) updatewhereclause=yes name=cntbl_pre_asiento_det_cod_relacion dbname="cntbl_pre_asiento_det.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=cntbl_pre_asiento_det_tipo_docref dbname="cntbl_pre_asiento_det.tipo_docref" )
+ column=(type=char(15) updatewhereclause=yes name=cntbl_pre_asiento_det_nro_docref1 dbname="cntbl_pre_asiento_det.nro_docref1" )
+ retrieve="  SELECT ~"CNTBL_PRE_ASIENTO~".~"ORIGEN~",   
+         ~"CNTBL_PRE_ASIENTO~".~"NRO_LIBRO~",   
+         ~"CNTBL_PRE_ASIENTO~".~"NRO_PROVISIONAL~",   
+         ~"CNTBL_PRE_ASIENTO~".~"COD_MONEDA~",   
+         ~"CNTBL_PRE_ASIENTO~".~"TASA_CAMBIO~",   
+         ~"CNTBL_PRE_ASIENTO~".~"FEC_REGISTRO~",   
+         ~"CNTBL_PRE_ASIENTO_DET~".~"ITEM~",   
+         ~"CNTBL_PRE_ASIENTO_DET~".~"CNTA_CTBL~",   
+         ~"CNTBL_PRE_ASIENTO_DET~".~"COD_RELACION~",   
+         ~"CNTBL_PRE_ASIENTO_DET~".~"TIPO_DOCREF~",   
+         ~"CNTBL_PRE_ASIENTO_DET~".~"NRO_DOCREF1~"  
+    FROM ~"CNTBL_CNTA~",   
+         ~"CNTBL_PRE_ASIENTO~",   
+         ~"CNTBL_PRE_ASIENTO_DET~"  
+   WHERE ( ~"CNTBL_PRE_ASIENTO~".~"ORIGEN~" = ~"CNTBL_PRE_ASIENTO_DET~".~"ORIGEN~" ) and  
+         ( ~"CNTBL_PRE_ASIENTO~".~"NRO_LIBRO~" = ~"CNTBL_PRE_ASIENTO_DET~".~"NRO_LIBRO~" ) and  
+         ( ~"CNTBL_PRE_ASIENTO~".~"NRO_PROVISIONAL~" = ~"CNTBL_PRE_ASIENTO_DET~".~"NRO_PROVISIONAL~" ) and  
+         ( ~"CNTBL_PRE_ASIENTO_DET~".~"CNTA_CTBL~" = ~"CNTBL_CNTA~".~"CNTA_CTBL~" ) and  
+         ( ( trunc(~"CNTBL_PRE_ASIENTO~".~"FEC_CNTBL~" ) >= :ad_fec_ini ) AND  
+         ( trunc(~"CNTBL_PRE_ASIENTO~".~"FEC_CNTBL~" ) <= :ad_fec_fin ) AND  
+         ( ~"CNTBL_CNTA~".~"FLAG_ESTADO~" <> '0' ) AND  
+         ( ~"CNTBL_CNTA~".~"CNTA_CTBL~" <> '0' ) AND  
+         ( ~"CNTBL_CNTA~".~"FLAG_CODREL~" = '1' ) AND  
+         ((~"CNTBL_PRE_ASIENTO_DET~".~"COD_RELACION~" is null) OR
+			 (~"CNTBL_PRE_ASIENTO_DET~".~"TIPO_DOCREF~" is null) OR
+			 (~"CNTBL_PRE_ASIENTO_DET~".~"NRO_DOCREF1~" is null)) )    
+" arguments=(("ad_fec_ini", date),("ad_fec_fin", date)) )
+bitmap(band=header filename="" x="18" y="16" height="224" width="421" border="0"  name=p_logo )
+text(band=header alignment="2" text="text" border="0" color="0" x="795" y="168" height="56" width="1531"  name=t_texto  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Error en pre asientos contables x código de relación" border="0" color="0" x="795" y="56" height="64" width="1531"  name=t_1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2528" y="20" height="56" width="347" format="[general]"  name=page_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2528" y="100" height="56" width="347" format="dd/mm/yyyy"  name=date_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Provisional" border="2" color="0" x="407" y="316" height="56" width="329"  name=cntbl_pre_asiento_nro_provisional_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Mon" border="2" color="0" x="750" y="316" height="56" width="110"  name=cntbl_pre_asiento_cod_moneda_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T.Cambio" border="2" color="0" x="873" y="316" height="56" width="283"  name=cntbl_pre_asiento_tasa_cambio_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha" border="2" color="0" x="1170" y="316" height="56" width="315"  name=cntbl_pre_asiento_fec_registro_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Item" border="2" color="0" x="1499" y="316" height="56" width="160"  name=cntbl_pre_asiento_det_item_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cnta Ctbl" border="2" color="0" x="1673" y="316" height="56" width="302"  name=cntbl_pre_asiento_det_cnta_ctbl_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cod Rel" border="2" color="0" x="1989" y="316" height="56" width="306"  name=cntbl_pre_asiento_det_cod_relacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T.Doc" border="2" color="0" x="2309" y="316" height="56" width="174"  name=cntbl_pre_asiento_det_tipo_docref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Origen" border="2" color="0" x="32" y="316" height="56" width="160"  name=cntbl_pre_asiento_origen_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Libro" border="2" color="0" x="206" y="316" height="56" width="187"  name=cntbl_pre_asiento_nro_libro_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="0" x="2496" y="316" height="56" width="329"  name=cntbl_pre_asiento_det_nro_docref1_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="32" y="4" height="76" width="160" format="[general]"  name=cntbl_pre_asiento_origen edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="0" x="206" y="4" height="76" width="187" format="[general]"  name=cntbl_pre_asiento_nro_libro edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="407" y="4" height="76" width="329" format="[general]"  name=cntbl_pre_asiento_nro_provisional edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="750" y="4" height="76" width="110" format="[general]"  name=cntbl_pre_asiento_cod_moneda edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="873" y="4" height="76" width="283" format="[general]"  name=cntbl_pre_asiento_tasa_cambio edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="1170" y="4" height="76" width="315" format="dd/mm/yyyy"  name=cntbl_pre_asiento_fec_registro edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="1499" y="4" height="76" width="160" format="[general]"  name=cntbl_pre_asiento_det_item edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="1673" y="4" height="76" width="302" format="[general]"  name=cntbl_pre_asiento_det_cnta_ctbl edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="1989" y="4" height="76" width="306" format="[general]"  name=cntbl_pre_asiento_det_cod_relacion edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="2309" y="4" height="76" width="174" format="[general]"  name=cntbl_pre_asiento_det_tipo_docref edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="2496" y="4" height="76" width="329" format="[general]"  name=cntbl_pre_asiento_det_nro_docref1 edit.limit=15 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_abc_ot_cab_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=344 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_parte dbname="pd_ot.nro_parte" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha dbname="pd_ot.fecha" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_supervisor dbname="pd_ot.cod_supervisor" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_administrador dbname="pd_ot.cod_administrador" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=ot_adm dbname="pd_ot.ot_adm" )
+ column=(type=char(40) updatewhereclause=yes name=descripcion dbname="ot_administracion.descripcion" )
+ column=(type=char(93) updatewhereclause=yes name=nom_supervisor dbname="nom_supervisor" )
+ column=(type=char(93) updatewhereclause=yes name=nom_administrador dbname="nom_administrador" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=obs dbname="pd_ot.obs" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="pd_ot.flag_replicacion" )
+ retrieve="SELECT  ~"PD_OT~".~"NRO_PARTE~" ,
+        ~"PD_OT~".~"FECHA~" ,
+        ~"PD_OT~".~"COD_SUPERVISOR~" ,
+        ~"PD_OT~".~"COD_ADMINISTRADOR~" ,
+		  ~"PD_OT~".~"OT_ADM~"		,
+		  ~"OT_ADMINISTRACION~".~"DESCRIPCION~",
+        LTRIM(RTRIM(~"MAESTRO_A~".~"NOMBRE1~"))||'  '||LTRIM(RTRIM(~"MAESTRO_A~".~"APEL_PATERNO~"))||' '||LTRIM(RTRIM(~"MAESTRO_A~".~"APEL_MATERNO~")) as nom_supervisor,
+        LTRIM(RTRIM(~"MAESTRO_B~".~"NOMBRE1~"))||'  '||LTRIM(RTRIM(~"MAESTRO_B~".~"APEL_PATERNO~"))||' '||LTRIM(RTRIM(~"MAESTRO_B~".~"APEL_MATERNO~")) as nom_administrador  ,
+		 ~"PD_OT~".~"OBS~" ,
+       ~"PD_OT~".~"FLAG_REPLICACION~"			  
+
+  FROM ~"PD_OT~" ,
+       ~"MAESTRO~" ~"MAESTRO_A~" ,
+       ~"MAESTRO~" ~"MAESTRO_B~" ,
+		 ~"OT_ADMINISTRACION~"    
+  WHERE (~"PD_OT~".~"COD_SUPERVISOR~"    = ~"MAESTRO_A~".~"COD_TRABAJADOR~" (+)) and 
+        (~"PD_OT~".~"COD_ADMINISTRADOR~" = ~"MAESTRO_B~".~"COD_TRABAJADOR~" (+)) and
+		  (~"PD_OT~".~"OT_ADM~"				 = ~"OT_ADMINISTRACION~".~"OT_ADM~"	  ) and	
+       ((~"PD_OT~".~"NRO_PARTE~"         = :as_nro_parte                   ))  " update="PD_OT" updatewhere=1 updatekeyinplace=yes arguments=(("as_nro_parte", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="5" color="255" x="393" y="8" height="48" width="343" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Fecha :" border="0" color="0" x="951" y="8" height="48" width="169" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=20 border="5" color="0" x="393" y="72" height="52" width="247" format="[general]" html.valueishtml="0"  name=ot_adm visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="5" color="0" x="393" y="144" height="48" width="247" format="[general]" html.valueishtml="0"  name=cod_supervisor visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=40 border="5" color="0" x="393" y="212" height="48" width="247" format="[general]" html.valueishtml="0"  name=cod_administrador visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=50 border="5" color="0" x="393" y="280" height="48" width="1024" format="[general]" html.valueishtml="0"  name=obs visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="5" color="255" x="672" y="72" height="52" width="750" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="0" x="672" y="144" height="48" width="750" format="[general]" html.valueishtml="0"  name=nom_supervisor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="5" color="0" x="672" y="212" height="48" width="750" format="[general]" html.valueishtml="0"  name=nom_administrador visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="2" tabsequence=10 border="5" color="0" x="1138" y="8" height="48" width="283" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="N.Parte :" border="0" color="0" x="18" y="8" height="56" width="352" html.valueishtml="0"  name=nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Ot Adm :" border="0" color="0" x="18" y="72" height="56" width="352" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Supervisor :" border="0" color="0" x="18" y="144" height="56" width="352" html.valueishtml="0"  name=cod_supervisor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Administrador :" border="0" color="0" x="18" y="212" height="56" width="352" html.valueishtml="0"  name=cod_administrador_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Obs :" border="0" color="0" x="18" y="280" height="56" width="352" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,78 @@
+﻿$PBExportHeader$d_abc_anular_asiento_trip_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=decimal(0) updatewhereclause=yes name=ano dbname="fl_consist_incent_trab.ano" )
+ column=(type=decimal(0) updatewhereclause=yes name=mes dbname="fl_consist_incent_trab.mes" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="fl_consist_incent_trab.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="fl_consist_incent_trab.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="fl_consist_incent_trab.nro_doc" )
+ column=(type=char(180) updatewhereclause=yes name=descripcion dbname="cntas_pagar.descripcion" )
+ column=(type=datetime updatewhereclause=yes name=fecha_registro dbname="cntas_pagar.fecha_registro" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="cntas_pagar.cod_usr" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_doc dbname="cntas_pagar.importe_doc" )
+ column=(type=char(166) updatewhereclause=yes name=voucher dbname="voucher" )
+ column=(type=char(8) updatewhereclause=yes name=confin dbname="fl_consist_incent_trab.confin" )
+ column=(type=decimal(2) updatewhereclause=yes name=quinta_categ dbname="fl_consist_incent_trab.dscto_quinta_categ" )
+ column=(type=char(1) updatewhereclause=yes name=flag dbname="flag" values="	1/	0" )
+ column=(type=char(2) updatewhereclause=yes name=org_asiento dbname="fl_consist_incent_trab.org_asiento" )
+ column=(type=decimal(0) updatewhereclause=yes name=ano_asiento dbname="fl_consist_incent_trab.ano_asiento" )
+ column=(type=decimal(0) updatewhereclause=yes name=mes_asiento dbname="fl_consist_incent_trab.mes_asiento" )
+ column=(type=decimal(0) updatewhereclause=yes name=libro_asiento dbname="fl_consist_incent_trab.libro_asiento" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_asiento dbname="fl_consist_incent_trab.nro_asiento" )
+ retrieve="select a.ano, a.mes, a.cod_relacion, p.nom_proveedor,
+       a.tipo_doc, a.nro_doc, b.descripcion, b.fecha_registro, b.cod_moneda,
+       b.cod_usr, b.importe_doc,
+		 a.org_asiento || '-' || to_char(a.ano_asiento) || '-' || to_char(a.mes_asiento) 
+		 || '-' || to_char(a.libro_asiento) || '-' || to_char(a.nro_asiento) as voucher,
+		 a.confin,
+		 a.dscto_quinta_categ,
+		 '1' as flag,
+		 a.org_asiento, a.ano_asiento, a.mes_asiento, a.libro_asiento, a.nro_asiento
+from fl_consist_incent_trab a,
+     cntas_pagar            b,
+     fl_tripulantes         ft,
+     proveedor              p
+where a.tipo_doc = b.tipo_doc 
+  and a.nro_doc  = b.nro_doc
+  and a.cod_relacion = b.cod_relacion     
+  and p.proveedor = ft.tripulante
+  and ft.tripulante = a.cod_relacion
+  and a.ano = :ani_year
+  and a.mes = :ani_mes
+  and a.nro_asiento is not null" arguments=(("ani_year", number),("ani_mes", number)) )
+text(band=header alignment="2" text="Codigo" border="2" color="33554432" x="133" y="12" height="56" width="251" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nom Tripulante" border="2" color="33554432" x="389" y="12" height="56" width="928" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T.Doc" border="2" color="33554432" x="1321" y="12" height="56" width="137" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="33554432" x="1463" y="12" height="56" width="315" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripcion" border="2" color="33554432" x="1783" y="12" height="56" width="736" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fec.Registro" border="2" color="33554432" x="2523" y="12" height="56" width="325" html.valueishtml="0"  name=fecha_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Mon." border="2" color="33554432" x="2853" y="12" height="56" width="137" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="2" color="33554432" x="3195" y="12" height="56" width="329" html.valueishtml="0"  name=importe_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Usuario" border="2" color="33554432" x="2994" y="12" height="56" width="197" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Voucher" border="2" color="33554432" x="3863" y="12" height="56" width="407" html.valueishtml="0"  name=voucher_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Quinta Categ" border="2" color="33554432" x="3529" y="12" height="56" width="329" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Confin" border="2" color="33554432" x="4274" y="12" height="56" width="297" html.valueishtml="0"  name=confin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=15 alignment="2" tabsequence=10 border="2" color="33554432" x="18" y="4" height="56" width="110" format="[general]" html.valueishtml="0"  name=flag visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="133" y="4" height="56" width="251" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="389" y="4" height="56" width="928" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1321" y="4" height="56" width="137" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="1463" y="4" height="56" width="315" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="1783" y="4" height="56" width="736" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=180 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="2523" y="4" height="56" width="325" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="2853" y="4" height="56" width="137" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="2994" y="4" height="56" width="197" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="3195" y="4" height="56" width="329" format="###,##0.00" html.valueishtml="0"  name=importe_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="3529" y="4" height="56" width="329" format="###,##0.000" html.valueishtml="0"  name=quinta_categ visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="3863" y="4" height="56" width="407" format="[general]" html.valueishtml="0"  name=voucher visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="33554432" x="4274" y="4" height="56" width="297" format="[general]" html.valueishtml="0"  name=confin pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

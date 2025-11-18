@@ -1,0 +1,35 @@
+﻿$PBExportHeader$ds_estandares_guia_grid.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cod_estandar dbname="ap_guia_recepcion_calidad.cod_estandar" )
+ column=(type=char(50) updatewhereclause=yes name=desc_estandar dbname="tg_estandar.estandar_desc" )
+ column=(type=decimal(3) updatewhereclause=yes name=valor dbname="ap_guia_recepcion_calidad.calidad_det_valor" )
+ column=(type=decimal(3) updatewhereclause=yes name=lectura_min dbname="tg_estandar.lectura_min" )
+ column=(type=decimal(3) updatewhereclause=yes name=lectura_max dbname="tg_estandar.lectura_max" )
+ retrieve="select a.cod_estandar, 
+		 c.estandar_desc, 
+       a.calidad_det_valor,
+		 c.lectura_min,
+ 		 c.lectura_max
+from 	ap_guia_recepcion_calidad a,
+		ap_guia_recepcion_det b,
+      tg_estandar c
+where b.cod_maquina = a.cod_maquina
+  and b.nro_reporte = a.nro_reporte
+  and c.cod_estandar = a.cod_estandar
+  and b.cod_guia_rec = :as_guia
+  and a.cod_maquina = :as_maq
+  and a.nro_reporte = :as_ticket
+" arguments=(("as_guia", string),("as_maq", string),("as_ticket", string)) )
+text(band=header alignment="0" text="Tg Estandar Lectura Min" border="0" color="33554432" x="1029" y="4" height="56" width="398" html.valueishtml="0"  name=tg_estandar_lectura_min_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Tg Estandar Lectura Max" border="0" color="33554432" x="1435" y="4" height="56" width="402" html.valueishtml="0"  name=tg_estandar_lectura_max_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=cod_estandar visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="347" y="8" height="76" width="416" format="[general]" html.valueishtml="0"  name=desc_estandar visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="773" y="8" height="76" width="247" format="[general]" html.valueishtml="0"  name=valor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1029" y="8" height="76" width="398" format="[general]" html.valueishtml="0"  name=lectura_min visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1435" y="8" height="76" width="402" format="[general]" html.valueishtml="0"  name=lectura_max visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

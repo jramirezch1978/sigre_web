@@ -1,0 +1,34 @@
+﻿$PBExportHeader$f_get_cod_nave.srf
+global type f_get_cod_nave from function_object
+end type
+
+forward prototypes
+global function string f_get_cod_nave (string as_origen)
+end prototypes
+
+global function string f_get_cod_nave (string as_origen);string ls_mensaje, ls_cod_nave
+
+//create or replace function USF_FL_COD_NAVE
+//(ac_cod_origen origen.cod_origen%type)
+//return varchar2 is
+
+DECLARE USF_FL_COD_NAVE PROCEDURE FOR
+		USF_FL_COD_NAVE( :gs_origen );
+
+EXECUTE USF_FL_COD_NAVE;
+
+IF SQLCA.sqlcode = -1 THEN
+	ls_mensaje = "FUNCTION USF_FL_COD_NAVE: " + SQLCA.SQLErrText
+	Rollback ;
+	MessageBox('SQL error', ls_mensaje, StopSign!)	
+	SetNull(ls_cod_nave)
+	return ls_cod_nave
+END IF
+
+
+FETCH USF_FL_COD_NAVE INTO :ls_cod_nave ;
+CLOSE USF_FL_COD_NAVE ;
+
+return ls_cod_nave
+end function
+

@@ -1,0 +1,24 @@
+﻿$PBExportHeader$f_valida_transaccion.srf
+global type f_valida_transaccion from function_object
+end type
+
+forward prototypes
+global function boolean f_valida_transaccion (transaction atr_transaccion)
+end prototypes
+
+global function boolean f_valida_transaccion (transaction atr_transaccion);IF atr_transaccion.sqlcode<>-1 then
+	Return True
+ELSE
+	String	ls_ErrText
+	Integer	li_DbCode
+
+	ls_ErrText 	= atr_transaccion.SqlErrText
+	li_DbCode	= atr_transaccion.SqlDbCode
+
+	Rollback Using atr_transaccion;
+
+	MessageBox("Error Base de Datos "+atr_transaccion.dbms,"["+string(li_DbCode)+"] "+ls_ErrText)
+	Return False
+END IF
+end function
+

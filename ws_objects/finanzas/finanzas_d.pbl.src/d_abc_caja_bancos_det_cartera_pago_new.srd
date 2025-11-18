@@ -1,0 +1,126 @@
+﻿$PBExportHeader$d_abc_caja_bancos_det_cartera_pago_new.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen dbname="caja_bancos_det.origen" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_registro dbname="caja_bancos_det.nro_registro" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="caja_bancos_det.item" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="caja_bancos_det.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="caja_bancos_det.nro_doc" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="caja_bancos_det.importe" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flab_tabor dbname="caja_bancos_det.flab_tabor" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_cxp dbname="caja_bancos_det.flag_cxp" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="caja_bancos_det.cod_moneda" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen_doc dbname="caja_bancos_det.origen_doc" )
+ column=(type=char(1) updatewhereclause=yes name=t_tipdoc dbname="t_tipdoc" )
+ column=(type=char(0) updatewhereclause=yes name=cod_moneda_cab dbname="cod_moneda_cab" )
+ column=(type=number updatewhereclause=yes name=tasa_cambio dbname="tasa_cambio" )
+ column=(type=char(0) updatewhereclause=yes name=flag_impuesto dbname="caja_bancos_det.flag_impuesto" )
+ column=(type=char(0) updatewhereclause=yes name=flag_doc dbname="caja_bancos_det.flag_doc" )
+ column=(type=char(0) updatewhereclause=yes name=flag_partida dbname="caja_bancos_det.flag_partida" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="caja_bancos_det.cod_relacion" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=impt_ret_igv dbname="caja_bancos_det.impt_ret_igv" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_ret_igv dbname="caja_bancos_det.flag_ret_igv" values="	1/	0" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_flujo_caja dbname="caja_bancos_det.flag_flujo_caja" values="	1/	0" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=factor dbname="caja_bancos_det.factor" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_provisionado dbname="caja_bancos_det.flag_provisionado" initial="O" values="Referencia	R/Directo	D/Indirecto	N/Orden de Giro	O/" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos dbname="caja_bancos_det.cencos" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp dbname="caja_bancos_det.cnta_prsp" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=confin dbname="caja_bancos_det.confin" )
+ column=(type=char(8) updatewhereclause=yes name=matriz_cntbl dbname="concepto_financiero.matriz_cntbl" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(3) updatewhereclause=yes name=soles dbname="soles" )
+ column=(type=char(3) updatewhereclause=yes name=dolares dbname="dolares" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="caja_bancos_det.flag_replicacion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_aplic_comp dbname="caja_bancos_det.flag_aplic_comp" values="	1/	0" )
+ column=(type=char(12) update=yes updatewhereclause=yes name=centro_benef dbname="caja_bancos_det.centro_benef" )
+ retrieve="  SELECT ~"CAJA_BANCOS_DET~".~"ORIGEN~"      ,   
+         ~"CAJA_BANCOS_DET~".~"NRO_REGISTRO~",   
+         ~"CAJA_BANCOS_DET~".~"ITEM~"        ,   
+         ~"CAJA_BANCOS_DET~".~"TIPO_DOC~"    ,   
+         ~"CAJA_BANCOS_DET~".~"NRO_DOC~"     ,   
+         ~"CAJA_BANCOS_DET~".~"IMPORTE~"     ,   
+         ~"CAJA_BANCOS_DET~".~"FLAB_TABOR~"  ,  
+			~"CAJA_BANCOS_DET~".~"FLAG_CXP~"    , 
+         ~"CAJA_BANCOS_DET~".~"COD_MONEDA~"  ,
+			~"CAJA_BANCOS_DET~".~"ORIGEN_DOC~"  ,
+			DECODE(~"CAJA_BANCOS_DET~".~"TIPO_DOC~",(SELECT doc_sol_giro FROM finparam WHERE reckey = '1'),NULL,'1') AS T_TIPDOC,
+         ''    AS COD_MONEDA_CAB            ,   
+         0.000 AS TASA_CAMBIO               ,
+			NULL  AS FLAG_IMPUESTO             ,
+			NULL  AS FLAG_DOC						  ,
+			NULL  AS FLAG_PARTIDA				  ,
+			~"CAJA_BANCOS_DET~".~"COD_RELACION~"   ,
+			~"CAJA_BANCOS_DET~".~"IMPT_RET_IGV~"   ,
+			~"CAJA_BANCOS_DET~".~"FLAG_RET_IGV~"   ,
+			~"CAJA_BANCOS_DET~".~"FLAG_FLUJO_CAJA~",
+			~"CAJA_BANCOS_DET~".~"FACTOR~"		     ,
+			~"CAJA_BANCOS_DET~".~"FLAG_PROVISIONADO~" ,
+			~"CAJA_BANCOS_DET~".~"CENCOS~"		     ,
+			~"CAJA_BANCOS_DET~".~"CNTA_PRSP~"	     ,
+			~"CAJA_BANCOS_DET~".~"CONFIN~"	     	  ,
+			~"CONCEPTO_FINANCIERO~".~"MATRIZ_CNTBL~",
+			~"PROVEEDOR~".~"NOM_PROVEEDOR~"	      ,
+			(select cod_soles   from logparam where reckey = '1') as soles   ,
+			(select cod_dolares from logparam where reckey = '1') as dolares ,
+			~"CAJA_BANCOS_DET~".~"FLAG_REPLICACION~",	     	   
+			~"CAJA_BANCOS_DET~".~"FLAG_APLIC_COMP~"	 ,
+   	   ~"CAJA_BANCOS_DET~".~"CENTRO_BENEF~"	 
+    FROM ~"CAJA_BANCOS_DET~",
+			~"CONCEPTO_FINANCIERO~" 	,
+			~"PROVEEDOR~"
+   WHERE ( ~"CAJA_BANCOS_DET~".~"CONFIN~"		  = ~"CONCEPTO_FINANCIERO~".~"CONFIN~"    ) AND
+			( ~"CAJA_BANCOS_DET~".~"COD_RELACION~" = ~"PROVEEDOR~".~"PROVEEDOR~"        (+)) AND
+			( ~"CAJA_BANCOS_DET~".~"ORIGEN~"       = :as_origen			                 ) AND
+			( ~"CAJA_BANCOS_DET~".~"NRO_REGISTRO~" = :al_nro_registro					     ) 
+" update="CAJA_BANCOS_DET" updatewhere=1 updatekeyinplace=yes arguments=(("as_origen", string),("al_nro_registro", number)) )
+text(band=header alignment="2" text="Item" border="2" color="8388608" x="9" y="8" height="56" width="329" html.valueishtml="0"  name=item_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T. Documento" border="2" color="8388608" x="1833" y="8" height="56" width="379" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro. Doc." border="2" color="8388608" x="2217" y="8" height="56" width="302" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="2" color="8388608" x="2958" y="8" height="56" width="329" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe x Conversión" border="2" color="8388608" x="3291" y="8" height="56" width="498" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Retención" border="2" color="8388608" x="3794" y="8" height="56" width="242" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="2523" y="8" height="56" width="430" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe Retención" border="2" color="8388608" x="4041" y="8" height="56" width="421" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cencos" border="2" color="8388608" x="4466" y="8" height="56" width="279" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cnta. Prsp." border="2" color="8388608" x="4750" y="8" height="56" width="315" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Provisionado" border="2" color="8388608" x="5070" y="8" height="56" width="370" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Flujo de Caja" border="2" color="8388608" x="5445" y="8" height="56" width="334" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Confin" border="2" color="8388608" x="5783" y="8" height="56" width="256" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="C.Relación" border="2" color="8388608" x="343" y="8" height="56" width="329" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nombres" border="2" color="8388608" x="677" y="8" height="56" width="1152" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Compesación" border="2" color="8388608" x="6043" y="8" height="56" width="338" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="D. Financiera" border="2" color="8388608" x="6386" y="8" height="56" width="325" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="C. Beneficio" border="2" color="8388608" x="6715" y="8" height="56" width="498" html.valueishtml="0"  name=centro_benef_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="255" x="9" y="88" height="56" width="539" format="[general]" html.valueishtml="0"  name=cod_moneda_cab visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="2" color="255" x="782" y="88" height="56" width="398" format="[general]" html.valueishtml="0"  name=flag_impuesto visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="2" color="255" x="576" y="88" height="56" width="183" format="[general]" html.valueishtml="0"  name=flag_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=21 alignment="0" tabsequence=32766 border="2" color="255" x="1193" y="88" height="56" width="512" format="[general]" html.valueishtml="0"  name=factor visible="1" editmask.mask="##" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="2" color="255" x="1737" y="88" height="56" width="187" format="[general]" html.valueishtml="0"  name=flag_partida visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=26 alignment="0" tabsequence=32766 border="2" color="255" x="1966" y="92" height="56" width="416" format="[general]" html.valueishtml="0"  name=matriz_cntbl visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="9" y="0" height="56" width="329" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="2" tabsequence=10 border="2" color="0" x="343" y="0" height="56" width="329" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=20 border="2" color="0" x="1833" y="0" height="56" width="379" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=40 border="2" color="0" x="2958" y="0" height="56" width="329" format="[general]" html.valueishtml="0"  name=importe visible="1" editmask.mask="######,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="f_convertir_monto_pagos( cod_moneda, importe , cod_moneda_cab ,tasa_cambio , soles , dolares )   "border="2" color="0" x="3291" y="0" height="56" width="498" format="######,###.00" html.valueishtml="0"  name=monto_conv visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=19 alignment="2" tabsequence=50 border="2" color="0" x="3794" y="0" height="56" width="242" format="[general]" html.valueishtml="0"  name=flag_ret_igv visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=30 border="2" color="0" x="2217" y="0" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="0" x="2523" y="0" height="56" width="430" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=18 alignment="1" tabsequence=60 border="2" color="0" x="4041" y="0" height="56" width="421" format="[general]" html.valueishtml="0"  name=impt_ret_igv visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=23 alignment="0" tabsequence=70 border="2" color="0" x="4466" y="0" height="56" width="279" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=24 alignment="0" tabsequence=80 border="2" color="0" x="4750" y="0" height="56" width="315" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=22 alignment="2" tabsequence=32766 border="2" color="0" x="5070" y="0" height="56" width="370" format="[general]" html.valueishtml="0"  name=flag_provisionado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=20 alignment="2" tabsequence=90 border="2" color="0" x="5445" y="0" height="56" width="334" format="[general]" html.valueishtml="0"  name=flag_flujo_caja visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=yes checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=27 alignment="0" tabsequence=32766 border="2" color="0" x="677" y="0" height="56" width="1152" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=25 alignment="0" tabsequence=100 border="2" color="0" x="5783" y="0" height="56" width="256" format="[general]" html.valueishtml="0"  name=confin visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.required=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=31 alignment="2" tabsequence=110 border="2" color="0" x="6043" y="0" height="56" width="338" format="[general]" html.valueishtml="0"  name=flag_aplic_comp visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+button(band=detail text="..." enabled=yes action="0" border="0" color="0" x="6391" y="4" height="56" width="325" vtextalign="0" htextalign="0"  name=b_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=32 alignment="0" tabsequence=120 border="2" color="0" x="6715" y="0" height="56" width="498" format="[general]" html.valueishtml="0"  name=centro_benef visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,47 @@
+﻿$PBExportHeader$f_generacion_glosa_cargo.srf
+global type f_generacion_glosa_cargo from function_object
+end type
+
+forward prototypes
+global subroutine f_generacion_glosa_cargo (datawindow adw_1, datawindow adw_2, datastore ads_1, long al_row_det, string as_cnta_cntbl, string as_desc_cnta)
+end prototypes
+
+global subroutine f_generacion_glosa_cargo (datawindow adw_1, datawindow adw_2, datastore ads_1, long al_row_det, string as_cnta_cntbl, string as_desc_cnta);/****************************************************/
+/*LLenado de Datastore en Caso de Cargo             */
+/* adw_1 = Cabecera de Caja Bancos					    */
+/* adw_2 = Detalle  de Caja Bancos						 */
+/* ads_1 = Datastore de Datos Para Glosa				 */
+/* al_row_det = Linea de Detalle de caja_bancos_det */
+/****************************************************/
+Long   ll_ins_ds
+
+ads_1.Reset()
+
+ll_ins_ds = ads_1.InsertRow(0)
+
+//--Cabecera
+ads_1.Object.origen		 	[ll_ins_ds] = adw_1.Object.origen		  [1]
+ads_1.Object.fecha_emision [ll_ins_ds] = adw_1.Object.fecha_emision [1]
+ads_1.Object.cod_ctabco	 	[ll_ins_ds] = adw_1.Object.cod_ctabco	  [1]
+ads_1.Object.tasa_cambio 	[ll_ins_ds] = adw_1.Object.tasa_cambio	  [1]
+ads_1.Object.imp_total	 	[ll_ins_ds] = adw_1.Object.imp_total	  [1]
+ads_1.Object.nro_registro 	[ll_ins_ds] = adw_1.Object.nro_registro  [1]
+ads_1.Object.nro_libro		[ll_ins_ds] = adw_1.Object.nro_libro	  [1]
+ads_1.Object.nro_asiento   [ll_ins_ds] = adw_1.Object.nro_asiento	  [1]
+ads_1.Object.ano				[ll_ins_ds] = adw_1.Object.ano			  [1]
+ads_1.Object.mes		  		[ll_ins_ds] = adw_1.Object.mes			  [1]
+ads_1.Object.obs		  		[ll_ins_ds] = adw_1.Object.obs			  [1]
+//--Detalle
+ads_1.Object.item			   [ll_ins_ds] = adw_2.object.item		 	  [al_row_det]
+ads_1.Object.cod_relacion	[ll_ins_ds] = adw_2.object.cod_relacion  [al_row_det]
+ads_1.Object.nom_proveedor [ll_ins_ds] = adw_2.object.nom_proveedor [al_row_det]
+ads_1.Object.tipo_doc		[ll_ins_ds] = adw_2.object.tipo_doc		  [al_row_det]
+ads_1.Object.nro_doc			[ll_ins_ds] = adw_2.object.nro_doc		  [al_row_det]
+ads_1.Object.importe			[ll_ins_ds] = adw_2.object.importe		  [al_row_det]
+//--Cuenta Contable
+ads_1.Object.cnta_ctbl		[ll_ins_ds] = as_cnta_cntbl
+ads_1.Object.desc_cnta		[ll_ins_ds] = Mid(as_desc_cnta,1,60)
+
+
+end subroutine
+

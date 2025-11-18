@@ -1,0 +1,59 @@
+﻿$PBExportHeader$f_direccion_codrel.srf
+global type f_direccion_codrel from function_object
+end type
+
+forward prototypes
+global function string f_direccion_codrel (string as_codrel)
+end prototypes
+
+global function string f_direccion_codrel (string as_codrel);// funcion que devuelve la direccion del codigo relacion
+String ls_dir,ls_tipo
+//long ln_count
+//
+//ls_dir = ''
+//Select count(*) into :ln_count	 
+//	 from direcciones 
+//  	 where codigo = :as_codrel;
+//
+//if ln_count > 0 then	
+//Select dir_pais, dir_dep_estado, dir_provincia, dir_ciudad, dir_distrito, dir_urbanizacion, 
+//    dir_direccion, dir_mnz, dir_lote, dir_numero into :ls_dir_pais, :ls_dir_dep_estado, 
+//	 :ls_dir_provincia, :ls_dir_ciudad, :ls_dir_distrito, :ls_dir_urbanizacion, 
+//    :ls_dir_direccion, :ls_dir_mnz, :ls_dir_lote, :ls_dir_numero
+//	 from direcciones 
+//  	 where codigo = :as_codrel;
+//
+//if ISNULL( ls_dir_pais ) then  ls_dir_pais = ''
+//if ISNULL( ls_dir_dep_estado ) then ls_dir_dep_estado = ''
+//if ISNULL( ls_dir_provincia ) then ls_dir_provincia = ''
+//if ISNULL( ls_dir_ciudad ) then ls_dir_ciudad = ''
+//if ISNULL( ls_dir_distrito ) then ls_dir_distrito = ''
+//if ISNULL( ls_dir_urbanizacion ) then ls_dir_urbanizacion = ''
+//if ISNULL( ls_dir_direccion ) then ls_dir_direccion = ''
+//if ISNULL( ls_dir_mnz ) then ls_dir_mnz = ''
+//if ISNULL( ls_dir_lote ) then ls_dir_lote = ''
+//if ISNULL( ls_dir_numero ) then ls_dir_numero = ''
+//
+//ls_dir = ls_dir_direccion + ' ' + ls_dir_numero + ' ' +  ls_dir_mnz + ' ' + &
+//  ls_dir_lote + ' ' + ls_dir_urbanizacion + ' ' + ls_dir_distrito + ' ' + & 
+//  ls_dir_provincia + ' ' + ls_dir_dep_estado + ' ' + ls_dir_pais
+//
+ls_tipo = '1' //facturacion
+
+DECLARE usp_proc PROCEDURE  FOR usf_cmp_direccion_codrel(:as_codrel,:ls_tipo);
+
+execute usp_proc;
+if sqlca.sqlcode <> 0 then
+	messagebox( "Error", sqlca.sqlerrtext)
+end if
+
+fetch usp_proc into :ls_dir;
+
+Close usp_proc;
+//end if
+
+
+Return ls_dir
+
+end function
+

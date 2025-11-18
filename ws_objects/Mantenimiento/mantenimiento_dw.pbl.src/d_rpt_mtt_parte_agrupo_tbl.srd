@@ -1,0 +1,92 @@
+﻿$PBExportHeader$d_rpt_mtt_parte_agrupo_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=560 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=4 color="536870912" )
+detail(height=68 color="536870912"  height.autosize=yes)
+table(column=(type=char(8) updatewhereclause=yes name=mt_pd_grupo_trab_cod_maquina dbname="mt_pd_grupo_trab.cod_maquina" )
+ column=(type=char(10) updatewhereclause=yes name=mt_pd_grupo_trab_nro_parte dbname="mt_pd_grupo_trab.nro_parte" )
+ column=(type=datetime updatewhereclause=yes name=mt_pd_grupo_trab_fecha dbname="mt_pd_grupo_trab.fecha" )
+ column=(type=char(4) updatewhereclause=yes name=mt_pd_grupo_trab_turno dbname="mt_pd_grupo_trab.turno" )
+ column=(type=char(8) updatewhereclause=yes name=mt_pd_grupo_trab_det_cod_maquina dbname="mt_pd_grupo_trab_det.cod_maquina" )
+ column=(type=decimal(3) updatewhereclause=yes name=mt_pd_grupo_trab_det_und_trabajadas dbname="mt_pd_grupo_trab_det.und_trabajadas" )
+ column=(type=char(8) updatewhereclause=yes name=mt_pd_grupo_incidencia_cod_incidencia dbname="mt_pd_grupo_incidencia.cod_incidencia" )
+ column=(type=decimal(3) updatewhereclause=yes name=mt_pd_grupo_incidencia_und_no_trabaj dbname="mt_pd_grupo_incidencia.und_no_trabaj" )
+ column=(type=char(6) updatewhereclause=yes name=mt_pd_grupo_incidencia_causa_falla dbname="mt_pd_grupo_incidencia.causa_falla" )
+ column=(type=char(200) updatewhereclause=yes name=mt_pd_grupo_incidencia_obs dbname="mt_pd_grupo_incidencia.obs" )
+ column=(type=decimal(3) updatewhereclause=yes name=mt_pd_grupo_trab_und_trabajadas dbname="mt_pd_grupo_trab.und_trabajadas" )
+ column=(type=char(100) updatewhereclause=yes name=maquina_desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(100) updatewhereclause=yes name=maquina_desc_maq dbname="maquina.desc_maq" )
+ retrieve="  SELECT ~"MT_PD_GRUPO_TRAB~".~"COD_MAQUINA~",   
+         ~"MT_PD_GRUPO_TRAB~".~"NRO_PARTE~",   
+         ~"MT_PD_GRUPO_TRAB~".~"FECHA~",   
+         ~"MT_PD_GRUPO_TRAB~".~"TURNO~",   
+         ~"MT_PD_GRUPO_TRAB_DET~".~"COD_MAQUINA~",   
+         ~"MT_PD_GRUPO_TRAB_DET~".~"UND_TRABAJADAS~",   
+         ~"MT_PD_GRUPO_INCIDENCIA~".~"COD_INCIDENCIA~",   
+         ~"MT_PD_GRUPO_INCIDENCIA~".~"UND_NO_TRABAJ~",   
+         ~"MT_PD_GRUPO_INCIDENCIA~".~"CAUSA_FALLA~",   
+         ~"MT_PD_GRUPO_INCIDENCIA~".~"OBS~",   
+         ~"MT_PD_GRUPO_TRAB~".~"UND_TRABAJADAS~",   
+         ~"MAQUINA_A~".~"DESC_MAQ~",   
+         ~"MAQUINA_B~".~"DESC_MAQ~"  
+    FROM ~"MT_PD_GRUPO_TRAB~",   
+         ~"MT_PD_GRUPO_TRAB_DET~",   
+         ~"MT_PD_GRUPO_INCIDENCIA~",   
+         ~"MAQUINA~" ~"MAQUINA_A~",   
+         ~"MAQUINA~" ~"MAQUINA_B~",   
+         ~"TT_MTT_EQUIPOS~"  
+   WHERE ( mt_pd_grupo_incidencia.nro_parte (+) = mt_pd_grupo_trab_det.nro_parte) and  
+         ( mt_pd_grupo_incidencia.cod_maquina (+) = mt_pd_grupo_trab_det.cod_maquina) and  
+         ( ~"MT_PD_GRUPO_TRAB_DET~".~"NRO_PARTE~" = ~"MT_PD_GRUPO_TRAB~".~"NRO_PARTE~" ) and  
+         ( ~"MT_PD_GRUPO_TRAB~".~"COD_MAQUINA~" = ~"MAQUINA_A~".~"COD_MAQUINA~" ) and  
+         ( ~"MT_PD_GRUPO_TRAB_DET~".~"COD_MAQUINA~" = ~"MAQUINA_B~".~"COD_MAQUINA~" ) and  
+         ( ~"MT_PD_GRUPO_TRAB~".~"COD_MAQUINA~" = ~"TT_MTT_EQUIPOS~".~"COD_MAQUINA~" ) and  
+         ( ( to_char(~"MT_PD_GRUPO_TRAB~".~"FECHA~",'yyyymmdd') >= :as_fecha_inicio ) AND  
+         ( to_char(~"MT_PD_GRUPO_TRAB~".~"FECHA~",'yyyymmdd') <= :as_fecha_final ) )    
+" arguments=(("as_fecha_inicio", string),("as_fecha_final", string))  sort="mt_pd_grupo_trab_cod_maquina A maquina_desc_maq A mt_pd_grupo_trab_det_cod_maquina A maquina_desc_maq A mt_pd_grupo_trab_fecha A mt_pd_grupo_trab_turno A " )
+group(level=1 header.height=68 trailer.height=0 by=("mt_pd_grupo_trab_cod_maquina" , "maquina_desc_maq" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=76 trailer.height=0 by=("mt_pd_grupo_trab_det_cod_maquina" , "maquina_desc_maq" , "mt_pd_grupo_trab_nro_parte" , "mt_pd_grupo_trab_fecha" , "mt_pd_grupo_trab_turno" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Uni. No Trab." border="2" color="8388608" x="352" y="500" height="56" width="302" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Causa" border="2" color="8388608" x="658" y="500" height="56" width="443" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Maquina" border="2" color="8388608" x="14" y="440" height="56" width="334" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Incidencia" border="2" color="8388608" x="14" y="500" height="56" width="334" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Equipo " border="2" color="8388608" x="14" y="380" height="56" width="334" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Observaciones" border="2" color="8388608" x="1106" y="500" height="56" width="2226" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="8388608" x="352" y="440" height="56" width="887" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Parte" border="2" color="8388608" x="1243" y="440" height="56" width="302" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Unid. Trab. x Parte" border="2" color="8388608" x="1550" y="440" height="56" width="443" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha" border="2" color="8388608" x="1998" y="440" height="56" width="329" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Turno" border="2" color="8388608" x="2331" y="440" height="56" width="315" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Unid. Trab. x Detalle de Parte" border="2" color="8388608" x="2651" y="440" height="56" width="681" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Parte Diario de Agruphor" border="0" color="33554432" x="1211" y="40" height="76" width="1088" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="2" expression="' Desde : ' + Mid(as_fecha_inicio ,7,2) +'/'+ Mid(as_fecha_inicio ,5,2)  +'/'+ Mid(as_fecha_inicio ,1,4) +' Hasta : '+Mid( as_fecha_final  ,7,2) +'/'+ Mid( as_fecha_final  ,5,2)  +'/'+ Mid( as_fecha_final  ,1,4) "border="0" color="33554432" x="1138" y="144" height="76" width="1239" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Usuario :" border="0" color="33554432" x="2843" y="112" height="56" width="197" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Fecha :" border="0" color="33554432" x="2843" y="180" height="64" width="197" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Pag :" border="0" color="33554432" x="2843" y="40" height="56" width="197" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="3058" y="112" height="56" width="270" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3058" y="180" height="64" width="270" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="33554432" x="3058" y="40" height="56" width="270" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="32" y="24" height="164" width="480" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="32" y="208" height="56" width="480" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="4" height="56" width="334" format="[general]" html.valueishtml="0"  name=mt_pd_grupo_trab_cod_maquina visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="352" y="4" height="56" width="1330" format="[general]" html.valueishtml="0"  name=maquina_desc_maq visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=5 alignment="0" tabsequence=32766 border="0" color="8388608" x="14" y="0" height="68" width="334" format="[general]" html.valueishtml="0"  name=mt_pd_grupo_trab_det_cod_maquina visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=13 alignment="0" tabsequence=32766 border="0" color="8388608" x="352" y="0" height="68" width="887" format="[general]" html.valueishtml="0"  name=maquina_desc_maq_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=2 alignment="0" tabsequence=32766 border="0" color="8388608" x="1243" y="0" height="68" width="302" format="[general]" html.valueishtml="0"  name=mt_pd_grupo_trab_nro_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=11 alignment="2" tabsequence=32766 border="0" color="8388608" x="1550" y="0" height="68" width="443" format="[general]" html.valueishtml="0"  name=mt_pd_grupo_trab_und_trabajadas visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=3 alignment="2" tabsequence=32766 border="0" color="8388608" x="1998" y="0" height="68" width="329" format="[shortdate] [time]" html.valueishtml="0"  name=mt_pd_grupo_trab_fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=4 alignment="0" tabsequence=32766 border="0" color="8388608" x="2331" y="0" height="68" width="315" format="[general]" html.valueishtml="0"  name=mt_pd_grupo_trab_turno visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=6 alignment="1" tabsequence=32766 border="0" color="8388608" x="2651" y="0" height="68" width="681" format="[general]" html.valueishtml="0"  name=mt_pd_grupo_trab_det_und_trabajadas visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="255" x="352" y="0" height="60" width="302" format="[general]" html.valueishtml="0"  name=mt_pd_grupo_incidencia_und_no_trabaj visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="0" color="255" x="658" y="0" height="60" width="443" format="[general]" html.valueishtml="0"  name=mt_pd_grupo_incidencia_causa_falla visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="255" x="14" y="0" height="60" width="334" format="[general]" html.valueishtml="0"  name=mt_pd_grupo_incidencia_cod_incidencia visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="255" x="1106" y="0" height="60" width="2226" format="[general]" html.valueishtml="0"  name=mt_pd_grupo_incidencia_obs visible="1" edit.limit=200 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripción" border="2" color="8388608" x="352" y="380" height="56" width="2981" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1138" y="236" height="56" width="1239" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

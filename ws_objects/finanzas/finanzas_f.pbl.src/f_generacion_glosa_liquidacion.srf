@@ -1,0 +1,56 @@
+﻿$PBExportHeader$f_generacion_glosa_liquidacion.srf
+global type f_generacion_glosa_liquidacion from function_object
+end type
+
+forward prototypes
+global subroutine f_generacion_glosa_liquidacion (datawindow adw_1, datawindow adw_2, datastore ads_1, long al_row_det, string as_cnta_cntbl, string as_desc_cnta)
+end prototypes
+
+global subroutine f_generacion_glosa_liquidacion (datawindow adw_1, datawindow adw_2, datastore ads_1, long al_row_det, string as_cnta_cntbl, string as_desc_cnta);/****************************************************/
+/*LLenado de Datastore en Caso de Liquidación       */
+/* adw_1 = Cabecera de Solicitud Giro					 */
+/* adw_2 = Detalle de Liquidacion de Solicitud Giro */
+/* ads_1 = Datastore de Datos Para Glosa				 */
+/* al_row_det = Linea de Detalle de Liquidación		 */
+/****************************************************/
+
+Long   ll_ins_ds
+String ls_descripcion
+
+DO WHILE ads_1.Rowcount() > 0
+	ads_1.deleterow(0)
+LOOP
+
+ll_ins_ds = ads_1.InsertRow(0)
+/*Cabecera de Solicitud de Giro*/
+ads_1.Object.origen_sg            [ll_ins_ds] = adw_1.Object.origen 			    [1]
+ads_1.Object.nro_solicitud_sg     [ll_ins_ds] = adw_1.Object.nro_solicitud     [1]
+ads_1.Object.cod_relacion_sg      [ll_ins_ds] = adw_1.Object.cod_relacion      [1]
+ads_1.Object.nom_proveedor_sg     [ll_ins_ds] = adw_1.Object.nom_proveedor     [1]
+ads_1.Object.aprobacion_sg		    [ll_ins_ds] = adw_1.Object.aprobacion		    [1]
+ads_1.Object.nombre_sg			    [ll_ins_ds] = adw_1.Object.nombre			    [1]
+ads_1.Object.fecha_aprobacion_sg  [ll_ins_ds] = adw_1.Object.fecha_aprobacion  [1]
+ads_1.Object.usuario_aprob_sg 	 [ll_ins_ds] = adw_1.Object.usuario_aprob		 [1]
+ads_1.Object.importe_liquidado_sg [ll_ins_ds] = adw_1.Object.importe_liquidado [1]
+ads_1.Object.importe_sg			    [ll_ins_ds] = adw_1.Object.importe_doc		 [1]
+
+
+ls_descripcion = adw_2.Object.descripcion [al_row_det]
+/*Detalle de Liquidacion de Solicitud de Giro*/
+ads_1.Object.origen			 [ll_ins_ds] = adw_2.Object.origen 	    [al_row_det]
+ads_1.Object.cod_relacion	 [ll_ins_ds] = adw_2.Object.proveedor   [al_row_det] 
+ads_1.Object.tipo_doc		 [ll_ins_ds] = adw_2.Object.tipo_doc    [al_row_det]
+ads_1.Object.nro_doc			 [ll_ins_ds] = adw_2.Object.nro_doc	    [al_row_det]
+ads_1.Object.cod_moneda		 [ll_ins_ds] = adw_2.Object.cod_moneda  [al_row_det]
+ads_1.Object.tasa_cambio	 [ll_ins_ds] = adw_2.Object.tasa_cambio [al_row_det]
+ads_1.Object.descripcion	 [ll_ins_ds] = adw_2.Object.descripcion [al_row_det]
+ads_1.Object.obs				 [ll_ins_ds] = adw_2.Object.descripcion [al_row_det]
+ads_1.Object.fecha_registro [ll_ins_ds] = adw_2.Object.fecha_doc	 [al_row_det]
+ads_1.Object.fecha_emision  [ll_ins_ds] = adw_2.Object.fecha_doc	 [al_row_det]
+ads_1.Object.vencimiento	 [ll_ins_ds] = adw_2.Object.fecha_doc	 [al_row_det]
+ads_1.Object.total_pagar	 [ll_ins_ds] = adw_2.Object.importe		 [al_row_det]
+ads_1.Object.cnta_ctbl		 [ll_ins_ds] = as_cnta_cntbl
+ads_1.Object.desc_cnta		 [ll_ins_ds] = as_desc_cnta
+
+end subroutine
+

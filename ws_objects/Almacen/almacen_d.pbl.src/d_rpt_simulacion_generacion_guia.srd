@@ -1,0 +1,121 @@
+﻿$PBExportHeader$d_rpt_simulacion_generacion_guia.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=160 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=tt_guia_cod_origen dbname="tt_guia.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=tt_guia_nro_guia dbname="tt_guia.nro_guia" )
+ column=(type=char(6) updatewhereclause=yes name=tt_guia_almacen dbname="tt_guia.almacen" )
+ column=(type=datetime updatewhereclause=yes name=tt_guia_fec_registro dbname="tt_guia.fec_registro" )
+ column=(type=char(1) updatewhereclause=yes name=tt_guia_flag_estado dbname="tt_guia.flag_estado" )
+ column=(type=char(2) updatewhereclause=yes name=tt_guia_motivo_traslado dbname="tt_guia.motivo_traslado" )
+ column=(type=char(8) updatewhereclause=yes name=tt_guia_cliente dbname="tt_guia.cliente" )
+ column=(type=char(40) updatewhereclause=yes name=tt_guia_destinatario dbname="tt_guia.destinatario" )
+ column=(type=char(40) updatewhereclause=yes name=tt_guia_nom_chofer dbname="tt_guia.nom_chofer" )
+ column=(type=char(200) updatewhereclause=yes name=tt_guia_destino dbname="tt_guia.destino" )
+ column=(type=char(6) updatewhereclause=yes name=tt_guia_cod_usr dbname="tt_guia.cod_usr" )
+ column=(type=char(8) updatewhereclause=yes name=tt_guia_prov_transp dbname="tt_guia.prov_transp" )
+ column=(type=char(100) updatewhereclause=yes name=tt_guia_obs dbname="tt_guia.obs" )
+ column=(type=char(10) updatewhereclause=yes name=tt_guia_vale_nro_vale dbname="tt_guia_vale.nro_vale" )
+ column=(type=char(2) updatewhereclause=yes name=tt_guia_vale_origen_guia dbname="tt_guia_vale.origen_guia" )
+ column=(type=char(2) updatewhereclause=yes name=tt_guia_vale_origen_vale dbname="tt_guia_vale.origen_vale" )
+ column=(type=char(12) updatewhereclause=yes name=articulo_mov_cod_art dbname="articulo_mov.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=number updatewhereclause=yes name=compute_0020 dbname="compute_0020" )
+ retrieve="  SELECT ~"TT_GUIA~".~"COD_ORIGEN~",   
+         ~"TT_GUIA~".~"NRO_GUIA~",   
+         ~"TT_GUIA~".~"ALMACEN~",   
+         ~"TT_GUIA~".~"FEC_REGISTRO~",   
+         ~"TT_GUIA~".~"FLAG_ESTADO~",   
+         ~"TT_GUIA~".~"MOTIVO_TRASLADO~",   
+         ~"TT_GUIA~".~"CLIENTE~",   
+         ~"TT_GUIA~".~"DESTINATARIO~",   
+         ~"TT_GUIA~".~"NOM_CHOFER~",   
+         ~"TT_GUIA~".~"DESTINO~",   
+         ~"TT_GUIA~".~"COD_USR~",   
+         ~"TT_GUIA~".~"PROV_TRANSP~",   
+         ~"TT_GUIA~".~"OBS~",   
+         ~"TT_GUIA_VALE~".~"NRO_VALE~",   
+         ~"TT_GUIA_VALE~".~"ORIGEN_GUIA~",   
+         ~"TT_GUIA_VALE~".~"ORIGEN_VALE~",   
+         ~"ARTICULO_MOV~".~"COD_ART~",   
+         ~"ARTICULO~".~"NOM_ARTICULO~",   
+         ~"ARTICULO~".~"UND~",   
+         sum(nvl(articulo_mov.cant_procesada,0))  
+    FROM ~"TT_GUIA~",   
+         ~"TT_GUIA_VALE~",   
+         ~"VALE_MOV~",   
+         ~"ARTICULO_MOV~",   
+         ~"ARTICULO~"  
+   WHERE ( ~"TT_GUIA~".~"NRO_GUIA~" = ~"TT_GUIA_VALE~".~"NRO_GUIA~" ) and  
+         ( ~"TT_GUIA_VALE~".~"NRO_VALE~" = ~"VALE_MOV~".~"NRO_VALE~" ) and  
+         ( ~"ARTICULO_MOV~".~"COD_ORIGEN~" = ~"VALE_MOV~".~"COD_ORIGEN~" ) and  
+         ( ~"ARTICULO_MOV~".~"NRO_VALE~" = ~"VALE_MOV~".~"NRO_VALE~" ) and  
+         ( ~"ARTICULO~".~"COD_ART~" = ~"ARTICULO_MOV~".~"COD_ART~" ) and  
+         ( ~"TT_GUIA_VALE~".~"ORIGEN_VALE~" = ~"VALE_MOV~".~"COD_ORIGEN~" )   
+GROUP BY ~"TT_GUIA~".~"COD_ORIGEN~",   
+         ~"TT_GUIA~".~"NRO_GUIA~",   
+         ~"TT_GUIA~".~"ALMACEN~",   
+         ~"TT_GUIA~".~"FEC_REGISTRO~",   
+         ~"TT_GUIA~".~"FLAG_ESTADO~",   
+         ~"TT_GUIA~".~"MOTIVO_TRASLADO~",   
+         ~"TT_GUIA~".~"CLIENTE~",   
+         ~"TT_GUIA~".~"DESTINATARIO~",   
+         ~"TT_GUIA~".~"NOM_CHOFER~",   
+         ~"TT_GUIA~".~"DESTINO~",   
+         ~"TT_GUIA~".~"COD_USR~",   
+         ~"TT_GUIA~".~"PROV_TRANSP~",   
+         ~"TT_GUIA~".~"OBS~",   
+         ~"TT_GUIA_VALE~".~"NRO_VALE~",   
+         ~"TT_GUIA_VALE~".~"ORIGEN_GUIA~",   
+         ~"TT_GUIA_VALE~".~"ORIGEN_VALE~",   
+         ~"ARTICULO_MOV~".~"COD_ART~",   
+         ~"ARTICULO~".~"NOM_ARTICULO~",   
+         ~"ARTICULO~".~"UND~"   
+"  sort="tt_guia_cod_origen A tt_guia_nro_guia A " )
+group(level=1 header.height=760 trailer.height=0 by=("tt_guia_cod_origen" , "tt_guia_nro_guia" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text=" Simulación Generación de Guias de Remisión" border="1" color="0" x="709" y="40" height="80" width="1979" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Fecha de Registro :" border="0" color="0" x="928" y="92" height="56" width="430" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Motivo Traslado :" border="0" color="0" x="928" y="176" height="56" width="430" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Prov. Transporte :" border="0" color="0" x="928" y="260" height="56" width="430" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Nombre Chofer :" border="0" color="0" x="928" y="344" height="56" width="430" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="1376" y="176" height="56" width="114" format="[general]" html.valueishtml="0"  name=tt_guia_motivo_traslado visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="1376" y="92" height="56" width="530" format="[shortdate] [time]" html.valueishtml="0"  name=tt_guia_fec_registro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=12 alignment="2" tabsequence=32766 border="2" color="33554432" x="1376" y="260" height="56" width="293" format="[general]" html.valueishtml="0"  name=tt_guia_prov_transp visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="1376" y="344" height="56" width="1522" format="[general]" html.valueishtml="0"  name=tt_guia_nom_chofer visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="393" y="92" height="56" width="174" format="[general]" html.valueishtml="0"  name=tt_guia_cod_origen visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="393" y="176" height="56" width="283" format="[general]" html.valueishtml="0"  name=tt_guia_nro_guia visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="393" y="260" height="56" width="283" format="[general]" html.valueishtml="0"  name=tt_guia_almacen visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=7 alignment="2" tabsequence=32766 border="2" color="33554432" x="393" y="344" height="56" width="283" format="[general]" html.valueishtml="0"  name=tt_guia_cliente visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Destinatario :" border="0" color="0" x="37" y="448" height="56" width="334" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Destino :" border="0" color="0" x="37" y="528" height="56" width="334" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Observación :" border="0" color="0" x="37" y="608" height="56" width="334" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Origen :" border="0" color="0" x="37" y="92" height="56" width="334" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Nro. Guia :" border="0" color="0" x="37" y="176" height="56" width="334" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Almacen :" border="0" color="0" x="37" y="260" height="56" width="334" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Cliente :" border="0" color="0" x="37" y="344" height="56" width="334" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="393" y="444" height="60" width="2505" format="[general]" html.valueishtml="0"  name=tt_guia_destinatario visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="393" y="524" height="60" width="2505" format="[general]" html.valueishtml="0"  name=tt_guia_destino visible="1" edit.limit=200 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=13 alignment="0" tabsequence=32766 border="2" color="33554432" x="393" y="604" height="60" width="2505" format="[general]" html.valueishtml="0"  name=tt_guia_obs visible="1" edit.limit=100 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=11 alignment="2" tabsequence=32766 border="2" color="33554432" x="2693" y="92" height="56" width="197" format="[general]" html.valueishtml="0"  name=tt_guia_cod_usr visible="1"  resizeable=1 edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Usuario :" border="0" color="0" x="2359" y="92" height="56" width="315" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Origen" border="2" color="0" x="133" y="696" height="56" width="197" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header.1 alignment="2" text="Nro. Vale" border="2" color="0" x="334" y="696" height="56" width="283" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header.1 alignment="2" text="Articulo" border="2" color="0" x="622" y="696" height="56" width="315" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=16 alignment="2" tabsequence=32766 border="4" color="33554432" x="133" y="0" height="64" width="197" format="[general]" html.valueishtml="0"  name=tt_guia_vale_origen_vale visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="4" color="33554432" x="334" y="0" height="64" width="283" format="[general]" html.valueishtml="0"  name=tt_guia_vale_nro_vale visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="2" tabsequence=32766 border="4" color="33554432" x="622" y="0" height="64" width="315" format="[general]" html.valueishtml="0"  name=articulo_mov_cod_art visible="1" edit.limit=12 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Unidad" border="2" color="0" x="2816" y="696" height="56" width="192" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header.1 alignment="2" text="Cantidad" border="2" color="0" x="2473" y="696" height="56" width="338" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=19 alignment="2" tabsequence=32766 border="4" color="33554432" x="2816" y="0" height="64" width="192" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="1" tabsequence=32766 border="4" color="33554432" x="2473" y="0" height="64" width="338" format="###,##0.00" html.valueishtml="0"  name=compute_0020 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Descripción" border="2" color="0" x="942" y="696" height="56" width="1527" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="4" color="33554432" x="942" y="0" height="64" width="1527" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,27 @@
+﻿$PBExportHeader$f_prom_ultimos_meses.srf
+global type f_prom_ultimos_meses from function_object
+end type
+
+forward prototypes
+global function decimal f_prom_ultimos_meses (integer ani_year, integer ani_mes, string asi_origen, string asi_planta)
+end prototypes
+
+global function decimal f_prom_ultimos_meses (integer ani_year, integer ani_mes, string asi_origen, string asi_planta);// funcion que devuelve el promedio de las dos maxminas demandas de
+// los 6 ultimos meses a partir de la fecha actual..
+Dec ldc_prom_max_6
+
+DECLARE USP_PROD_PROM_6_ULT_MESES PROCEDURE FOR USP_PROD_PROM_6_ULT_MESES(:ani_year, :ani_mes, :asi_origen, :asi_planta);
+
+EXECUTE USP_PROD_PROM_6_ULT_MESES;
+
+IF sqlca.sqlcode = 100 THEN
+		messagebox( "Control de Energía", sqlca.sqlerrtext)
+END IF
+
+FETCH USP_PROD_PROM_6_ULT_MESES INTO :ldc_prom_max_6;
+
+CLOSE USP_PROD_PROM_6_ULT_MESES;
+	 
+Return ldc_prom_max_6;
+end function
+

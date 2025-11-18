@@ -1,0 +1,41 @@
+﻿$PBExportHeader$d_dddw_tipo_doc_param_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=finparam_doc_ventas dbname="finparam.doc_ventas" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="doc_grupo_relacion.tipo_doc" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_serie dbname="doc_tipo_usuario.nro_serie" )
+ column=(type=char(4000) updatewhereclause=yes name=tipser dbname="tipser" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_libro dbname="doc_tipo.nro_libro" )
+ column=(type=char(25) updatewhereclause=yes name=desc_tipo_doc dbname="doc_tipo.desc_tipo_doc" )
+ column=(type=char(6) updatewhereclause=yes name=doc_tipo_usuario_cod_usr dbname="doc_tipo_usuario.cod_usr" )
+ retrieve="  SELECT ~"FINPARAM~".~"DOC_VENTAS~",   
+         ~"DOC_GRUPO_RELACION~".~"TIPO_DOC~",   
+         ~"DOC_TIPO_USUARIO~".~"NRO_SERIE~",   
+		   ~"DOC_GRUPO_RELACION~".~"TIPO_DOC~"||lpad(to_char(~"DOC_TIPO_USUARIO~".~"NRO_SERIE~") ,(select digitos_serie from finparam where reckey = '1'),'0') as tipser,  
+         ~"DOC_TIPO~".~"NRO_LIBRO~",   
+         ~"DOC_TIPO~".~"DESC_TIPO_DOC~",   
+         ~"DOC_TIPO_USUARIO~".~"COD_USR~"  
+    FROM ~"FINPARAM~",   
+         ~"DOC_GRUPO_RELACION~",   
+         ~"DOC_TIPO_USUARIO~",   
+         ~"DOC_TIPO~"  
+   WHERE ( ~"DOC_GRUPO_RELACION~".~"TIPO_DOC~" = ~"DOC_TIPO_USUARIO~".~"TIPO_DOC~" ) and  
+         ( ~"DOC_TIPO_USUARIO~".~"TIPO_DOC~" = ~"DOC_TIPO~".~"TIPO_DOC~" ) and  
+         ( ~"FINPARAM~".~"DOC_VENTAS~" = ~"DOC_GRUPO_RELACION~".~"GRUPO~" ) and  
+         ( ( ~"FINPARAM~".~"RECKEY~" = '1' ) )    
+" )
+text(band=header alignment="2" text="Tipo" border="2" color="8388608" x="9" y="8" height="56" width="137"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="8388608" x="151" y="8" height="56" width="517"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nº Serie" border="2" color="8388608" x="672" y="8" height="56" width="183"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nº Libro" border="2" color="8388608" x="859" y="8" height="56" width="178"  name=t_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="56" width="137" format="[general]"  name=tipo_doc edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="151" y="0" height="56" width="517" format="[general]"  name=desc_tipo_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="672" y="0" height="56" width="183" format="[general]"  name=nro_serie edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="0" x="859" y="0" height="56" width="178" format="[general]"  name=nro_libro edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=0 border="0" color="0" x="1312" y="0" height="56" width="2743"  name=tipser  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

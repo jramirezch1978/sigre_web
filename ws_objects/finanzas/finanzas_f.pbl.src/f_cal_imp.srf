@@ -1,0 +1,28 @@
+﻿$PBExportHeader$f_cal_imp.srf
+global type f_cal_imp from function_object
+end type
+
+forward prototypes
+global function decimal f_cal_imp (string as_tip_imp, decimal adc_import_total, ref string as_signo)
+end prototypes
+
+global function decimal f_cal_imp (string as_tip_imp, decimal adc_import_total, ref string as_signo);Decimal {2} ldc_importe_imp,ldc_tasa_impuesto
+String      ls_signo
+
+
+SELECT tasa_impuesto ,   
+       signo
+  INTO :ldc_tasa_impuesto,   
+       :ls_signo  
+  FROM impuestos_tipo
+ WHERE (tipo_impuesto = :as_tip_imp)   ;
+ 
+
+
+ldc_importe_imp = Round((adc_import_total * ldc_tasa_impuesto ) / 100,2)
+
+Messagebox('ldc_importe_imp',ldc_importe_imp)
+
+Return ldc_importe_imp
+end function
+

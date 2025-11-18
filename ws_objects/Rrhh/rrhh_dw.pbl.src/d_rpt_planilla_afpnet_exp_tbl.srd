@@ -1,0 +1,200 @@
+﻿$PBExportHeader$d_rpt_planilla_afpnet_exp_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=72 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(141) updatewhereclause=yes name=datos dbname="datos" )
+ retrieve="select rpad(to_char(rownum), 5, ' ') 											||		-- 1. Numero de Secuencia
+       rpad(trim(substr(nro_afp_trabaj,1,12)), 12, ' ') 					||		-- 2. CUSSP
+		 tipo_doc_afpnet 																||		-- 3. Tipo Documento AFP
+       rpad(trim(substr(nro_doc_ident_rtps,1,20)), 20, ' ') 			||		-- 4. Nro Documento Identidad
+       rpad(trim(substr(apel_paterno,1, 20)), 20, ' ') 					|| 	-- 5. Apellido Paterno
+       rpad(trim(substr(apel_materno,1, 20)), 20, ' ') 					||		-- 6. Apellido Materino
+       rpad(trim(substr(nombres,1, 20)), 20, ' ') 							||		-- 7. Nombres
+		 relacion_laboral 															|| 	-- 8. Relación Laboral
+		 inicio_relacion									   						|| 	-- 9. Inicio de Relación Laboral
+		 fin_relacion 																	|| 	-- 10. Cese de Relación Laboral
+		 excepcion_aportar				 											|| 	-- 11. Excepción de Aportar
+       lpad(replace(trim(remuneracion), '.', ''),9, '0')					|| 	-- 12. Remuneracion Asegurable
+       lpad(trim(replace(aporte_vol_fin_prev,'.', '')), 9, '0')		|| 	-- 13. Monto aporte voluntario con fin previsional
+       lpad(trim(replace(aporte_vol_sin_fin_prev,'.', '')), 9, '0') 	|| 	-- 14. Monto aporte voluntario sin fin previsional
+       lpad(trim(replace(aporte_empleador,'.', '')), 9, '0') 			|| 	-- 15. Aporte Voluntario del empleador
+       tipo_trabajador 																||		-- 16. Tipo de Trabajador 
+       lpad(substr(cod_afp,1,2),2, ' ') 												-- 17. Codigo de AFP
+	as datos	
+from (
+			select replace(m.nro_afp_trabaj,chr(9), '') as nro_afp_trabaj, 
+					 r.tipo_doc_afpnet as tipo_doc_ident_rtps,
+					 m.nro_doc_ident_rtps,
+					 m.apel_paterno, m.apel_materno, trim(trim(m.nombre1) || ' ' || trim(m.nombre2)) as nombres,
+					 case
+						when m.fec_cese is null then 
+							'S'
+						when m.fec_cese is not null and to_char(m.fec_cese, 'yyyymm') >= trim(to_char(:an_year, '0000')) || trim(to_char(:an_mes, '00')) then
+							'S'
+						else
+							'N'
+					 end as relacion_laboral, 																		-- 8. Relación Laboral
+					 case
+						when to_char(m.fec_ingreso, 'yyyymm') =  trim(to_char(:an_year, '0000')) || trim(to_char(:an_mes, '00')) then 
+							'S'
+						else
+							'N'
+					 end as inicio_relacion, 																		-- 9. Inicio de Relación Laboral
+					 case
+						when m.fec_cese is not null and to_char(m.fec_cese, 'yyyymm') =  trim(to_char(:an_year, '0000')) || trim(to_char(:an_mes, '00')) then 
+							'S'
+						else
+							'N'
+					 end as fin_relacion, 																				-- 10. Cese de Relación Laboral
+					 ' ' as excepcion_aportar, 																		-- 11. Excepción de Aportar
+					 tt.base_imponible  as rem_computable,
+					 to_char(tt.base_imponible, '0000000.00') as remuneracion,
+					 to_char(0, '0000000.00') as aporte_vol_fin_prev,
+					 to_char(0, '0000000.00') as aporte_vol_sin_fin_prev,
+					 to_char(0, '0000000.00') as aporte_empleador,
+					 case
+						when m.tipo_trabajador = 'TRI' then
+							'P'
+						else
+							'N' 
+					 end as tipo_trabajador,
+					 tt.cod_afp,
+					 r.tipo_doc_afpnet
+			from maestro m,
+				  rrhh_documento_identidad_rtps r,
+				  (select cod_trabajador, max(cod_afp) as cod_afp,
+					  ((select NVL(sum(c.imp_soles),0)
+							from calculo c,
+								  grupo_calculo_det  gcd
+						  where c.concep          = gcd.concepto_calc
+							 and c.cod_trabajador  = s.cod_trabajador
+							 and gcd.GRUPO_CALCULO = (select concep_calculo_afp from rrhhparam_cconcep where reckey = '1')
+							 and to_char(c.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))) +
+						(select NVL(sum(hc.imp_soles),0)
+							from historico_calculo hc,
+								  grupo_calculo_det  gcd
+						  where hc.concep         = gcd.concepto_calc
+							 and hc.cod_trabajador = s.cod_trabajador
+							 and gcd.GRUPO_CALCULO = (select concep_calculo_afp from rrhhparam_cconcep where reckey = '1')
+							 and to_char(hc.FEC_CALC_PLAN, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))) +
+						(select nvl(sum(b.importe),0)
+							from liquidacion_benef a,
+								  liquidacion_benef_det b
+						  where a.nro_liquidacion = b.nro_liquidacion
+							 and to_Char(a.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+							 and a.nro_liquidacion in (select nro_liquidacion from liquidacion_benef_det where flag_titulo_lbs = '5')
+							 and b.flag_titulo_lbs = '4'
+							 and a.flag_estado   <> '0'
+							 and a.cod_trabajador = s.cod_trabajador)) as base_imponible
+						  from (select distinct m1.cod_trabajador, m1.cod_afp
+									 from calculo   c1,
+											maestro   m1
+									where c1.cod_trabajador  = m1.cod_trabajador
+									  and to_char(c1.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+									  and (m1.cod_afp is not null and m1.cod_afp not in ('CB'))
+								  union
+								  select distinct hc.cod_trabajador, hc.cod_afp
+									 from historico_calculo hc
+									where to_char(hc.FEC_CALC_PLAN, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+									  and (hc.cod_afp is not null and hc.cod_afp not in ('CB'))
+								  union
+								  select distinct a.cod_trabajador, m1.cod_afp
+									 from liquidacion_benef a,
+											liquidacion_benef_det b,
+											maestro               m1
+									where a.nro_liquidacion = b.nro_liquidacion
+									  and a.cod_trabajador = m1.cod_trabajador
+									  and to_Char(a.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+									  and a.nro_liquidacion in (select nro_liquidacion from liquidacion_benef_det where flag_titulo_lbs = '5')
+									  and b.flag_titulo_lbs = '4'
+									  and a.flag_estado   <> '0'
+									  and (m1.cod_afp is not null and m1.cod_afp not in ('CB'))) s
+						 group by cod_trabajador) tt
+			where m.tipo_doc_ident_rtps = r.cod_doc_identidad
+   		  and m.cod_trabajador		 = tt.cod_trabajador
+			  --and m.nro_afp_trabaj is not null
+			  --and nvl(m.flag_pensionista, '0') = '0'
+			  AND INSTR(:as_cod_origen, M.COD_ORIGEN) > 0 
+			  and INSTR(:as_tipo_trabaj, M.tipo_trabajador) > 0 
+			  and tt.base_imponible > 0
+			union
+			select replace(m.nro_afp_trabaj,chr(9), '') as nro_afp_trabaj, 
+					 r.tipo_doc_afpnet as tipo_doc_ident_rtps,
+					 m.nro_doc_ident_rtps,
+					 m.apel_paterno, m.apel_materno, trim(trim(m.nombre1) || ' ' || trim(m.nombre2)) as nombres,
+					 case
+						when m.fec_cese is null then 
+						  'S'
+						when m.fec_cese is not null and to_char(m.fec_cese, 'yyyymm') >= trim(to_char(:an_year, '0000')) || trim(to_char(:an_mes, '00')) then
+						  'S'
+						else
+						  'N'
+					 end as relacion_laboral,                                     -- 8. Relación Laboral
+					 case
+						when to_char(m.fec_ingreso, 'yyyymm') =  trim(to_char(:an_year, '0000')) || trim(to_char(:an_mes, '00')) then 
+						  'S'
+						else
+						  'N'
+					 end as inicio_relacion,                                    -- 9. Inicio de Relación Laboral
+					 case
+						when m.fec_cese is not null and to_char(m.fec_cese, 'yyyymm') =  trim(to_char(:an_year, '0000')) || trim(to_char(:an_mes, '00')) then 
+						  'S'
+						else
+						  'N'
+					 end as fin_relacion,                                         -- 10. Cese de Relación Laboral
+					 'O' as excepcion_aportar,                                    -- 11. Excepción de Aportar
+					 0.00 as rem_computable,
+					 '0000000.00' as remuneracion,
+					 to_char(0, '0000000.00') as aporte_vol_fin_prev,
+					 to_char(0, '0000000.00') as aporte_vol_sin_fin_prev,
+					 to_char(0, '0000000.00') as aporte_empleador,
+					 case
+						when m.tipo_trabajador = 'TRI' then
+							'P'
+						else
+							'N' 
+					 end as tipo_trabajador,
+					 m.cod_afp,
+					 r.tipo_doc_afpnet
+			from maestro m,
+				  rrhh_documento_identidad_rtps r
+			where m.tipo_doc_ident_rtps = r.cod_doc_identidad
+			  and m.nro_afp_trabaj is not null 
+			  and m.cod_afp is not null
+			  and m.cod_trabajador not in (select distinct c1.cod_trabajador 
+														from calculo c1 
+													  where to_char(c1.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+													 union
+													 select distinct c2.cod_trabajador 
+																  from historico_calculo c2 
+																 where to_char(c2.FEC_CALC_PLAN, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+													 union
+													 select cod_trabajador
+													 from liquidacion_benef
+													 where to_Char(fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00')))
+				and nvl(m.flag_pensionista, '0') = '0'
+				and m.flag_estado = '1'
+				and m.flag_cal_plnlla = '1'
+ 				and to_char(m.fec_ingreso, 'yyyymm') <= trim(to_char(:an_year, '0000')) || trim(to_char(:an_mes, '00'))
+				and (m.fec_cese is null or (m.fec_cese is not null and to_char(m.fec_cese, 'yyyymm') >= trim(to_char(:an_year, '0000')) || trim(to_char(:an_mes, '00'))))
+				AND INSTR(:as_cod_origen, M.COD_ORIGEN) > 0 
+				and INSTR(:as_tipo_trabaj, M.tipo_trabajador) > 0 
+		  order by apel_paterno, apel_materno, nombres
+		) s
+--order by apel_paterno, apel_materno, nombres
+" arguments=(("as_cod_origen", string),("as_tipo_trabaj", string),("an_year", number),("an_mes", number)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="5" y="0" height="60" width="4389" format="[general]" html.valueishtml="0"  name=datos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

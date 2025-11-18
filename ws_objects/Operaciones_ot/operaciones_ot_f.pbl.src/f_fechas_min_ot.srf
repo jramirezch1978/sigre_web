@@ -1,0 +1,47 @@
+﻿$PBExportHeader$f_fechas_min_ot.srf
+global type f_fechas_min_ot from function_object
+end type
+
+forward prototypes
+global function datetime f_fechas_ot (integer as_nro_orden)
+global function datetime f_fechas_min_ot (string as_nro_orden)
+end prototypes
+
+global function datetime f_fechas_ot (integer as_nro_orden);Datetime ldt_fecha_min,ldt_fecha_max
+
+DECLARE PB_usp_ope_fec_inicial_maximo PROCEDURE FOR usp_ope_fec_inicial_maximo 
+(:as_nro_orden);
+EXECUTE PB_usp_ope_fec_inicial_maximo ;
+
+
+
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox("SQL error", SQLCA.SQLErrText)
+END IF
+
+FETCH PB_usp_ope_fec_inicial_maximo INTO :ldt_fecha_min,:ldt_fecha_max ;
+CLOSE PB_usp_ope_fec_inicial_maximo ;
+
+
+Return ldt_fecha_min
+end function
+
+global function datetime f_fechas_min_ot (string as_nro_orden);Datetime ldt_fecha_min,ldt_fecha_max
+
+DECLARE PB_usp_ope_fec_inicial_maximo PROCEDURE FOR usp_ope_fec_inicial_maximo 
+(:as_nro_orden);
+EXECUTE PB_usp_ope_fec_inicial_maximo ;
+
+
+
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox("SQL error", SQLCA.SQLErrText)
+END IF
+
+FETCH PB_usp_ope_fec_inicial_maximo INTO :ldt_fecha_min,:ldt_fecha_max ;
+CLOSE PB_usp_ope_fec_inicial_maximo ;
+
+
+Return ldt_fecha_min
+end function
+

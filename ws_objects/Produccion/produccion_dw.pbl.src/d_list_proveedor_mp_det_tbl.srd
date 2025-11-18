@@ -1,0 +1,56 @@
+﻿$PBExportHeader$d_list_proveedor_mp_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="nro_parte" )
+ column=(type=decimal(0) updatewhereclause=yes name=item dbname="item" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=peso_neto dbname="peso_neto" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="und" )
+ column=(type=datetime updatewhereclause=yes name=inicio_descarga dbname="inicio_descarga" )
+ column=(type=char(8) updatewhereclause=yes name=nro_placa dbname="nro_placa" )
+ column=(type=char(50) updatewhereclause=yes name=descr_especie dbname="descr_especie" )
+ retrieve="SELECT a.nro_parte, a.item, a.proveedor, p.nom_proveedor, 
+       (a.peso_bruto + a.peso_variacion * DECODE(a.flag_variacion, 'C', -1, 1)) AS peso_neto,
+       a.und,
+       a.inicio_descarga,
+       a.nro_placa,
+		 te.descr_especie
+  FROM AP_PD_DESCARGA_DET A,
+       (SELECT T.NRO_PARTE, T.ITEM
+          FROM AP_PD_DESCARGA_DET T
+        MINUS
+        SELECT M.AP_NRO_PARTE, M.AP_NRO_ITEM 
+          FROM PROD_PARTE_PROD_RECEP_MP M) B,
+       proveedor p,
+		 tg_especies te
+ WHERE A.NRO_PARTE = B.NRO_PARTE
+   AND a.proveedor = p.proveedor
+   and te.especie  = a.especie
+   AND A.ITEM = B.ITEM
+   and trunc(a.inicio_descarga) between :ad_fecha1 and :ad_fecha2
+   and a.proveedor = :as_proveedor
+order by a.inicio_descarga" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_proveedor", string)) )
+text(band=header alignment="2" text="Nro Parte" border="2" color="33554432" x="5" y="4" height="56" width="302" html.valueishtml="0"  name=nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Item" border="2" color="33554432" x="311" y="4" height="56" width="178" html.valueishtml="0"  name=item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Inicio Descarga" border="2" color="33554432" x="777" y="4" height="56" width="503" html.valueishtml="0"  name=inicio_descarga_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Desc Especie" border="2" color="33554432" x="1285" y="4" height="56" width="503" html.valueishtml="0"  name=descr_especie_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Peso Neto" border="2" color="33554432" x="1792" y="4" height="56" width="329" html.valueishtml="0"  name=peso_neto_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="2126" y="4" height="56" width="110" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="68" width="302" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="311" y="4" height="68" width="178" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="33554432" x="777" y="4" height="68" width="503" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=inicio_descarga visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="1285" y="4" height="68" width="503" format="[general]" html.valueishtml="0"  name=descr_especie visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="1792" y="4" height="68" width="329" format="[general]" html.valueishtml="0"  name=peso_neto visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2126" y="4" height="68" width="110" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Placa" border="2" color="33554432" x="494" y="4" height="56" width="279" html.valueishtml="0"  name=nro_placa_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="494" y="4" height="68" width="279" format="[general]" html.valueishtml="0"  name=nro_placa visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,19 @@
+﻿$PBExportHeader$d_articulo_ot_saldo_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_almacen.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ retrieve="select aa.cod_art, a.desc_art 
+   from articulo_almacen aa 
+      inner join articulo a on aa.cod_art = a.cod_art
+   where aa.sldo_total > 0
+      and aa.almacen = :asi_almacen
+      and aa.cod_art in (select amp.cod_art from articulo_mov_proy amp inner join operaciones o on amp.oper_sec = o.oper_sec where o.nro_orden = :asi_nro_orden)
+	order by a.desc_art" arguments=(("asi_almacen", string),("asi_nro_orden", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="52" width="261" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="274" y="4" height="52" width="1934" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

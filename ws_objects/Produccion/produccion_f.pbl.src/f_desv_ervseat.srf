@@ -1,0 +1,67 @@
+﻿$PBExportHeader$f_desv_ervseat.srf
+global type f_desv_ervseat from function_object
+end type
+
+forward prototypes
+global function decimal f_desv_ervseat ()
+end prototypes
+
+global function decimal f_desv_ervseat ();//Para Calcular El Porcentaje de la Desviacion De Energia Reactiva.....
+
+Dec		ldc_resultado_resta, ldc_valor1, ldc_valor2, &
+			ldc_resultado_resta_1, ldc_valor1_1, ldc_valor2_1, &
+			ldc_resul
+			
+	
+integer	ll_2, ll_i, ll_2_1, ll_i_1
+
+	  ldc_resultado_resta 	= 0
+	  
+	  ll_2 = 2
+	
+	  FOR ll_i = 1 to w_pr320_consumo_energia.dw_detail.rowcount() - 1
+			
+			ldc_valor1 				= w_pr320_consumo_energia.dw_detail.object.lect_ener_activa [ll_i]
+			ldc_valor2 				= w_pr320_consumo_energia.dw_detail.object.lect_ener_activa [ll_2]
+			ldc_resultado_resta 	= ldc_valor2 - ldc_valor1
+			
+		   IF ldc_resultado_resta = 0 THEN
+				
+				ldc_resul = 0
+				
+			else
+				
+				ll_2_1 = 2
+	
+	  			FOR ll_i_1 = 1 to w_pr320_consumo_energia.dw_detail.rowcount() - 1
+			
+				ldc_valor1_1 				= w_pr320_consumo_energia.dw_detail.object.lect_ener_react [ll_i_1]
+				ldc_valor2_1 				= w_pr320_consumo_energia.dw_detail.object.lect_ener_react [ll_2_1]
+				ldc_resultado_resta_1 	= ldc_valor2_1 - ldc_valor1_1
+
+				if ldc_resultado_resta = 0 then
+					messagebox('Control de Energia', 'No Puede hacer Divisiones entre Cero(0)')
+					ldc_resultado_resta = ldc_resultado_resta + 1
+					ldc_resul = 0
+				
+				else
+					
+					ldc_resul = (ldc_resultado_resta_1) / (ldc_resultado_resta_1 + 0.0005)
+					
+				end if
+				
+							
+				ll_2_1 = ll_2_1 + 1
+
+				next
+			
+		end if
+				
+				ll_2 = ll_2 + 1
+				
+			next
+			
+		Return ldc_resul
+
+end function
+

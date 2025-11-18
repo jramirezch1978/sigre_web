@@ -1,0 +1,57 @@
+﻿$PBExportHeader$d_parte_pesca_grid.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes name=parte_pesca dbname="fl_parte_de_pesca.parte_pesca" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen dbname="fl_parte_de_pesca.origen" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=nave_real dbname="fl_parte_de_pesca.nave_real" )
+ column=(type=char(50) updatewhereclause=yes name=nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tipo_flota dbname="tg_naves.flag_tipo_flota" values="Propia	P/Terceros	T/" )
+ column=(type=number updatewhereclause=yes name=pesca_total dbname="compute_0006" )
+ column=(type=datetime updatewhereclause=yes name=fecha_hora_zarpe dbname="fl_parte_de_pesca.fecha_hora_zarpe" )
+ column=(type=datetime updatewhereclause=yes name=fecha_hora_arribo dbname="fl_parte_de_pesca.fecha_hora_arribo" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="fl_parte_de_pesca.nro_orden" )
+ retrieve="  SELECT FLPP.PARTE_PESCA,   
+         FLPP.ORIGEN,   
+         FLPP.NAVE_REAL,   
+         TG_NAVES.NOMB_NAVE,   
+         TG_NAVES.FLAG_TIPO_FLOTA,
+         usf_fl_pesca_arribo(FLPP.PARTE_PESCA),
+			flpp.fecha_hora_zarpe,
+			flpp.fecha_hora_arribo,
+			flpp.nro_orden
+    FROM FL_PARTE_DE_PESCA FLPP,   
+         TG_NAVES  
+   WHERE FLPP.NAVE_REAL = TG_NAVES.NAVE
+	  and FLPP.NAVE_REAL LIKE :as_nave
+     and ( trunc(FLPP.fecha_hora_zarpe) between trunc(:ad_fecha1) and  trunc(:ad_fecha2) 
+    	  or trunc(FLPP.fecha_hora_arribo) between trunc(:ad_fecha1) and trunc(:ad_fecha2) )
+ORDER BY FLPP.PARTE_PESCA ASC     
+
+" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_nave", string)) )
+text(band=header alignment="2" text="Parte Pesca" border="2" color="33554432" x="1083" y="8" height="56" width="329" html.valueishtml="0"  name=parte_pesca_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Org" border="2" color="33554432" x="1422" y="8" height="56" width="174" html.valueishtml="0"  name=origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Codigo Nave" border="2" color="33554432" x="1605" y="8" height="56" width="361" html.valueishtml="0"  name=nave_real_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nombre de la Nave" border="2" color="0" x="1975" y="8" height="56" width="818" html.valueishtml="0"  name=nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Tipo Flota" border="2" color="0" x="2802" y="8" height="56" width="370" html.valueishtml="0"  name=flag_tipo_flota_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Pesca Total" border="2" color="0" x="3182" y="8" height="56" width="471" html.valueishtml="0"  name=pesca_total_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha Zarpe" border="2" color="0" x="9" y="8" height="56" width="507" html.valueishtml="0"  name=fecha_hora_zarpe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha de Arribo" border="2" color="0" x="526" y="8" height="56" width="549" html.valueishtml="0"  name=fecha_hora_arribo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Orden de Trabajo" border="2" color="33554432" x="3653" y="8" height="56" width="475" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="1083" y="4" height="64" width="329" format="[general]" html.valueishtml="0"  name=parte_pesca visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="1422" y="4" height="64" width="174" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1605" y="4" height="64" width="361" format="[general]" html.valueishtml="0"  name=nave_real visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1975" y="4" height="64" width="818" format="[general]" html.valueishtml="0"  name=nomb_nave visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2802" y="4" height="64" width="370" format="[general]" html.valueishtml="0"  name=flag_tipo_flota visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="3186" y="4" height="64" width="457" format="###,##0.0000" html.valueishtml="0"  name=pesca_total visible="1" editmask.mask="###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="507" format="dd/mm/yyyy hh:mm am/pm" html.valueishtml="0"  name=fecha_hora_zarpe visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="526" y="4" height="64" width="549" format="dd/mm/yyyy hh:mm am/pm" html.valueishtml="0"  name=fecha_hora_arribo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="3653" y="4" height="64" width="475" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

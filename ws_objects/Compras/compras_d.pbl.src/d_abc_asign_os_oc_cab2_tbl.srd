@@ -1,0 +1,47 @@
+﻿$PBExportHeader$d_abc_asign_os_oc_cab2_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_os dbname="orden_servicio.nro_os" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="orden_servicio.flag_estado" values="Anulado	0/Activo	1/Cerrado	2/Pendiente VoBo	3/" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="orden_servicio.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="orden_servicio.fec_registro" )
+ column=(type=char(6) updatewhereclause=yes name=forma_pago dbname="orden_servicio.forma_pago" )
+ column=(type=char(60) updatewhereclause=yes name=desc_forma_pago dbname="forma_pago.desc_forma_pago" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="orden_servicio.cod_moneda" )
+ retrieve="select distinct a.nro_os, a.flag_estado, a.proveedor, p.nom_proveedor, a.fec_registro,
+       a.forma_pago, fp.desc_forma_pago, a.cod_moneda
+from orden_servicio a,
+	  oc_det_os_Det  b,
+     proveedor      p,
+     forma_pago     fp
+where a.nro_os = b.nro_os
+  and p.proveedor = a.proveedor
+  and fp.forma_pago = a.forma_pago
+  and ( (:as_flag = '1' and trunc(a.fec_registro) between trunc(:ad_fecha1) and trunc(:ad_Fecha2)) or
+		  (:as_flag = '0') )" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_flag", string)) )
+text(band=header alignment="2" text="Nro Os" border="2" color="33554432" x="18" y="16" height="56" width="384" html.valueishtml="0"  name=nro_os_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="2" color="33554432" x="18" y="0" height="64" width="384" format="[general]" html.valueishtml="0"  name=nro_os visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Estado" border="2" color="33554432" x="407" y="16" height="56" width="265" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="407" y="0" height="64" width="265" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fec Registro" border="2" color="33554432" x="677" y="16" height="56" width="471" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="677" y="0" height="64" width="471" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Proveedor" border="2" color="33554432" x="1152" y="16" height="56" width="288" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1152" y="0" height="64" width="288" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nom Proveedor" border="2" color="33554432" x="1445" y="16" height="56" width="1399" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="F. Pago" border="2" color="33554432" x="2848" y="16" height="56" width="201" html.valueishtml="0"  name=forma_pago_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1445" y="0" height="64" width="1399" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="2848" y="0" height="64" width="201" format="[general]" html.valueishtml="0"  name=forma_pago visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Desc Forma Pago" border="2" color="33554432" x="3054" y="16" height="56" width="914" html.valueishtml="0"  name=desc_forma_pago_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="3054" y="0" height="64" width="914" format="[general]" html.valueishtml="0"  name=desc_forma_pago visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Moneda" border="2" color="33554432" x="3973" y="16" height="56" width="233" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="3973" y="0" height="64" width="233" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

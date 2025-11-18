@@ -1,0 +1,40 @@
+﻿$PBExportHeader$uf_save_dw_as_excel_parm.srf
+$PBExportComments$By PBKiller v2.5.18(http://kivens.nease.net)
+global type uf_save_dw_as_excel_parm from function_object
+end type
+
+forward prototypes
+global function integer uf_save_dw_as_excel_parm (ref datawindow adw_dw,readonly string as_filename,ref n_dwr_service_parm anvo_parm)
+end prototypes
+
+global function integer uf_save_dw_as_excel_parm (ref datawindow adw_dw,readonly string as_filename,ref n_dwr_service_parm anvo_parm);integer li_ret = 1
+n_dwr_nested_service_parm lnvo_nested_parm
+n_dwr_service lnvo_dwr
+n_dwr_workbook lnv_book
+
+if isnull(anvo_parm) then
+	anvo_parm = create n_dwr_service_parm
+end if
+
+lnvo_dwr = create n_dwr_service
+lnv_book = create n_dwr_workbook
+li_ret = lnvo_dwr.of_create(adw_dw,lnv_book,as_filename,anvo_parm,lnvo_nested_parm)
+
+if li_ret = 1 then
+	li_ret = lnvo_dwr.of_process()
+end if
+
+if li_ret = 1 then
+	lnvo_dwr.of_close()
+end if
+
+destroy(lnv_book)
+destroy(lnvo_dwr)
+
+if li_ret <> 1 then
+	filedelete(as_filename)
+end if
+
+return li_ret
+end function
+

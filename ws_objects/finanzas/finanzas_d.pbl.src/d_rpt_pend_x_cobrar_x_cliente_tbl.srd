@@ -1,0 +1,100 @@
+﻿$PBExportHeader$d_rpt_pend_x_cobrar_x_cliente_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=524 color="536870912" )
+summary(height=156 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=datetime update=yes updatewhereclause=yes name=fecha_vencimiento dbname="cntas_cobrar.fecha_vencimiento" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="cntas_cobrar.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="cntas_cobrar.nro_doc" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_documento dbname="cntas_cobrar.fecha_documento" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_presentacion dbname="cntas_cobrar.fecha_presentacion" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="cntas_cobrar.cod_relacion" )
+ column=(type=char(40) updatewhereclause=yes name=obs dbname="compute_0007" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="cntas_cobrar.cod_moneda" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe_a_cobrar dbname="cntas_cobrar.importe_a_cobrar" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe_cobrado dbname="cntas_cobrar.importe_cobrado" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="codigo_relacion.nombre" )
+ column=(type=number updatewhereclause=yes name=imp_cobrar dbname="imp_cobrar" )
+ column=(type=number updatewhereclause=yes name=imp_cobrado dbname="imp_cobrado" )
+ column=(type=datetime updatewhereclause=yes name=fecha_actual dbname="fecha_actual" )
+ retrieve="  SELECT ~"CNTAS_COBRAR~".~"FECHA_VENCIMIENTO~",   
+         ~"CNTAS_COBRAR~".~"TIPO_DOC~",   
+         ~"CNTAS_COBRAR~".~"NRO_DOC~",   
+         ~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~",   
+         ~"CNTAS_COBRAR~".~"FECHA_PRESENTACION~",   
+         ~"CNTAS_COBRAR~".~"COD_RELACION~",   
+			rtrim(ltrim(~"CNTAS_COBRAR~".~"OBSERVACION~")),   
+         ~"CNTAS_COBRAR~".~"COD_MONEDA~",   
+         ~"CNTAS_COBRAR~".~"IMPORTE_A_COBRAR~",   
+         ~"CNTAS_COBRAR~".~"IMPORTE_COBRADO~",   
+         ~"CODIGO_RELACION~".~"NOMBRE~"  ,
+			DECODE(~"CNTAS_COBRAR~".~"TIPO_DOC~",(SELECT NOTA_CREDITO FROM FINPARAM WHERE RECKEY = '1'),-~"CNTAS_COBRAR~".~"IMPORTE_A_COBRAR~",~"CNTAS_COBRAR~".~"IMPORTE_A_COBRAR~") AS IMP_COBRAR,
+			DECODE(~"CNTAS_COBRAR~".~"TIPO_DOC~",(SELECT NOTA_CREDITO FROM FINPARAM WHERE RECKEY = '1'),-~"CNTAS_COBRAR~".~"IMPORTE_COBRADO~",~"CNTAS_COBRAR~".~"IMPORTE_COBRADO~") AS IMP_COBRADO,
+			(SELECT SYSDATE FROM DUAL) AS FECHA_ACTUAL
+    FROM ~"CNTAS_COBRAR~",   
+         ~"CODIGO_RELACION~",  
+			~"TT_FIN_ORIGENES~"
+   WHERE ( ~"CNTAS_COBRAR~".~"COD_RELACION~" = ~"CODIGO_RELACION~".~"COD_RELACION~" )    AND
+			( ~"CNTAS_COBRAR~".~"FLAG_ESTADO~" IN ('1','4') )   AND
+			( ~"CNTAS_COBRAR~".~"ORIGEN~"      = ~"TT_FIN_ORIGENES~".~"COD_ORIGEN~" ) AND
+			( ~"CNTAS_COBRAR~".~"FECHA_VENCIMIENTO~"  < (SELECT SYSDATE FROM DUAL) )
+" arguments=(("as_empresa", string),("as_usuario", string))  sort="fecha_vencimiento A " )
+text(band=header alignment="2" text="REPORTE DE CUENTAS X COBRAR X FECHAS" border="0" color="0" x="1390" y="60" height="76" width="1623"  name=t_2  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="H:\Source\Bmp\blanco.bmp" x="37" y="20" height="164" width="466" border="0"  name=p_logo )
+text(band=header alignment="2" text="Total Venta
+ Dolares" border="2" color="8388608" x="3680" y="408" height="112" width="334"  name=t_10  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo Dolares" border="2" color="8388608" x="4018" y="408" height="112" width="334"  name=t_12  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo Soles" border="2" color="8388608" x="4357" y="408" height="112" width="334"  name=t_11  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha
+Vencimiento" border="2" color="8388608" x="14" y="408" height="112" width="306"  name=fecha_vencimiento_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo
+ Documento" border="2" color="8388608" x="325" y="408" height="112" width="370"  name=tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro
+ Documento" border="2" color="8388608" x="699" y="408" height="112" width="311"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha
+Documento" border="2" color="8388608" x="1015" y="408" height="112" width="306"  name=fecha_documento_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha
+ Presentación" border="2" color="8388608" x="1326" y="408" height="112" width="306"  name=fecha_presentacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Dias Demora
+Presentación" border="2" color="8388608" x="1637" y="408" height="112" width="306"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Dias Demora
+Cobranza" border="2" color="8388608" x="1947" y="408" height="112" width="306"  name=t_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Codigo
+Relación" border="2" color="8388608" x="2258" y="408" height="112" width="279"  name=cod_relacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Razon Social" border="2" color="8388608" x="2542" y="408" height="112" width="795"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Total Venta
+ Soles" border="2" color="8388608" x="3342" y="408" height="112" width="334"  name=t_9  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=header alignment="2" expression=" as_empresa "border="0" color="0" x="37" y="200" height="56" width="466" format="[GENERAL]"  name=compute_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="4407" y="8" height="64" width="256" format="[general]"  name=page_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="4219" y="8" height="64" width="174"  name=t_6  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="4407" y="84" height="64" width="256" format="dd/mm/yyyy"  name=date_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="4219" y="84" height="64" width="174"  name=t_7  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="as_usuario "border="0" color="0" x="4407" y="160" height="56" width="256" format="[GENERAL]"  name=compute_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Usuario :" border="0" color="0" x="4197" y="160" height="56" width="197"  name=t_8  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if ( cod_moneda = f_cod_moneda_soles(), imp_cobrado ,0.00)"border="2" color="8388608" x="3392" y="92" height="68" width="334" format="#,##0.00;(#,##0.00)"  name=cobrado_soles  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if ( cod_moneda = f_cod_moneda_dolares(), imp_cobrado ,0.00)"border="2" color="8388608" x="3744" y="92" height="68" width="334" format="#,##0.00;(#,##0.00)"  name=cobrado_dolares  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=10 border="0" color="0" x="14" y="0" height="68" width="306" format="[shortdate] [time]"  name=fecha_vencimiento editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=20 border="0" color="0" x="325" y="0" height="68" width="370" format="[general]"  name=tipo_doc edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=30 border="0" color="0" x="699" y="0" height="68" width="311" format="[general]"  name=nro_doc edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=40 border="0" color="0" x="1015" y="0" height="68" width="306" format="[shortdate] [time]"  name=fecha_documento editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=50 border="0" color="0" x="1326" y="0" height="68" width="306" format="[shortdate] [time]"  name=fecha_presentacion editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="daysafter(  fecha_presentacion ,  fecha_documento  )"border="0" color="0" x="1637" y="0" height="68" width="306" format="[GENERAL]"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="if ( fecha_actual > fecha_vencimiento , daysafter(fecha_actual ,fecha_vencimiento) ,0)"border="0" color="0" x="1947" y="0" height="68" width="306" format="[GENERAL]"  name=dias_demora  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=60 border="0" color="0" x="2258" y="0" height="68" width="279" format="[general]"  name=cod_relacion edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="2542" y="0" height="68" width="795" format="[general]"  name=nombre edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if (isnull(monto_soles),0, monto_soles ) - if (isnull( cobrado_soles  ),0,  cobrado_soles  )"border="0" color="0" x="4018" y="0" height="68" width="334" format="#,##0.00;(#,##0.00)"  name=saldo_soles  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if (isnull(monto_dolares),0, monto_dolares ) - if (isnull( cobrado_dolares  ),0,  cobrado_dolares  )"border="0" color="0" x="4357" y="0" height="68" width="334" format="#,##0.00;(#,##0.00)"  name=saldo_dolares  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if ( dias_demora <> 0 ,  monto_soles ,0.00)"border="0" color="8388608" x="3397" y="172" height="56" width="329" format="#,##0.00;(#,##0.00)"  name=monto_retrasado_soles  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if ( dias_demora <> 0 ,   monto_dolares  ,0.00)"border="0" color="8388608" x="3749" y="168" height="56" width="329" format="#,##0.00;(#,##0.00)"  name=monto_retrasado_dolares  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if ( cod_moneda = f_cod_moneda_soles(), imp_cobrar ,0.00)"border="0" color="0" x="3342" y="0" height="68" width="334" format="#,##0.00;(#,##0.00)"  name=monto_soles  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if ( cod_moneda = f_cod_moneda_dolares(), imp_cobrar ,0.00)"border="0" color="0" x="3680" y="0" height="68" width="334" format="#,##0.00;(#,##0.00)"  name=monto_dolares  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(   monto_dolares   for all )"border="0" color="8388608" x="3680" y="0" height="56" width="334" format="#,##0.00;(#,##0.00)"  name=sum_monto_dolares  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( monto_retrasado_dolares    for all )"border="0" color="8388608" x="3680" y="84" height="56" width="334" format="#,##0.00;(#,##0.00)"  name=sum_monto_retrasado_dolares  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  monto_retrasado_soles   for all )"border="0" color="8388608" x="3342" y="84" height="56" width="334" format="#,##0.00;(#,##0.00)"  name=sum_monto_retrasado_soles  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  monto_soles  for all )"border="0" color="8388608" x="3342" y="0" height="56" width="334" format="#,##0.00;(#,##0.00)"  name=sum_monto_soles  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Retrasados :" border="0" color="0" x="3022" y="84" height="56" width="315"  name=t_13  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Totales :" border="0" color="0" x="3022" y="0" height="56" width="315"  name=t_5  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

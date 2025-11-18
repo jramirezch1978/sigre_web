@@ -1,0 +1,87 @@
+﻿$PBExportHeader$m_rbutton_cm750.srm
+forward
+global type m_rbutton_cm750 from menu
+end type
+type m_enviar from menu within m_rbutton_cm750
+end type
+type m_ordendecompra from menu within m_enviar
+end type
+type m_programadecompras from menu within m_enviar
+end type
+type m_enviar from menu within m_rbutton_cm750
+m_ordendecompra m_ordendecompra
+m_programadecompras m_programadecompras
+end type
+global type m_rbutton_cm750 from menu
+m_enviar m_enviar
+end type
+end forward
+
+global type m_rbutton_cm750 from menu
+m_enviar m_enviar
+end type
+global m_rbutton_cm750 m_rbutton_cm750
+
+on m_rbutton_cm750.create
+m_rbutton_cm750=this
+call super::create
+this.text = "m_rbutton_cm750"
+this.m_enviar=create m_enviar
+this.Item[UpperBound(this.Item)+1]=this.m_enviar
+end on
+
+on m_rbutton_cm750.destroy
+call super::destroy
+destroy(this.m_enviar)
+end on
+
+type m_enviar from menu within m_rbutton_cm750
+m_ordendecompra m_ordendecompra
+m_programadecompras m_programadecompras
+end type
+
+on m_enviar.create
+call super::create
+this.text = "Enviar"
+this.m_ordendecompra=create m_ordendecompra
+this.m_programadecompras=create m_programadecompras
+this.Item[UpperBound(this.Item)+1]=this.m_ordendecompra
+this.Item[UpperBound(this.Item)+1]=this.m_programadecompras
+end on
+
+on m_enviar.destroy
+call super::destroy
+destroy(this.m_ordendecompra)
+destroy(this.m_programadecompras)
+end on
+
+type m_ordendecompra from menu within m_enviar
+end type
+
+on m_ordendecompra.create
+call super::create
+this.text = "Orden de Compra"
+end on
+
+on m_ordendecompra.destroy
+call super::destroy
+end on
+
+event clicked;ParentWindow.EVENT Dynamic ue_enviar_oc()
+end event
+
+type m_programadecompras from menu within m_enviar
+end type
+
+on m_programadecompras.create
+call super::create
+this.text = "Programa de Compras"
+end on
+
+on m_programadecompras.destroy
+call super::destroy
+end on
+
+event clicked;ParentWindow.EVENT Dynamic ue_enviar_prog()
+end event
+

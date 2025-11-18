@@ -1,0 +1,79 @@
+﻿$PBExportHeader$d_rpt_venta_x_variacion_precio_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=464 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=fecha_registro dbname="fecha_registro" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_cobrar.cod_moneda" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="cntas_cobrar_det.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntas_cobrar.cod_relacion" )
+ column=(type=char(60) updatewhereclause=yes name=codigo_relacion_nombre dbname="codigo_relacion.nombre" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ column=(type=decimal(6) updatewhereclause=yes name=precio_unitario dbname="cntas_cobrar_det.precio_unitario" )
+ column=(type=decimal(2) updatewhereclause=yes name=descuento dbname="cntas_cobrar_det.descuento" )
+ retrieve="  SELECT to_date(to_char(~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~",'dd/mm/yyyy'),'dd/mm/yyyy') as fecha_registro,   
+			~"CNTAS_COBRAR~".~"COD_MONEDA~",
+         ~"CNTAS_COBRAR_DET~".~"COD_ART~",
+			~"ARTICULO~".~"NOM_ARTICULO~",
+         ~"CNTAS_COBRAR~".~"COD_RELACION~",   
+			~"CODIGO_RELACION~".~"NOMBRE~",
+         Sum(~"CNTAS_COBRAR_DET~".~"CANTIDAD~") as cantidad,   
+			~"CNTAS_COBRAR_DET~".~"PRECIO_UNITARIO~"  ,
+			~"CNTAS_COBRAR_DET~".~"DESCUENTO~" 
+    FROM ~"CNTAS_COBRAR~",   
+         ~"CNTAS_COBRAR_DET~",   
+         ~"ARTICULO~"  ,
+         ~"CODIGO_RELACION~",
+			~"TT_FIN_RPT_ART~"
+   WHERE ( ~"CNTAS_COBRAR_DET~".~"TIPO_DOC~" = ~"CNTAS_COBRAR~".~"TIPO_DOC~" ) and  
+         ( ~"CNTAS_COBRAR_DET~".~"NRO_DOC~"  = ~"CNTAS_COBRAR~".~"NRO_DOC~"  ) and  
+         ( ~"CNTAS_COBRAR_DET~".~"COD_ART~"  = ~"ARTICULO~".~"COD_ART~"      ) and  
+			( ~"TT_FIN_RPT_ART~".~"COD_ART~"    = ~"ARTICULO~".~"COD_ART~"      ) and  
+			( ~"CNTAS_COBRAR~".~"COD_RELACION~" = ~"CODIGO_RELACION~".~"COD_RELACION~" ) and
+         (( to_char(~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~",'yyyymmdd') >= :as_fecha_inicio )  and  
+         (  to_char(~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~",'yyyymmdd') <= :as_fecha_final  )) and
+			( ~"CNTAS_COBRAR~".~"FLAG_ESTADO~" <> '0' ) 
+GROUP BY to_date(to_char(~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~",'dd/mm/yyyy'),'dd/mm/yyyy'),
+			~"CNTAS_COBRAR~".~"COD_MONEDA~",
+	      ~"CNTAS_COBRAR_DET~".~"COD_ART~", 
+			~"ARTICULO~".~"NOM_ARTICULO~",  
+         ~"CNTAS_COBRAR~".~"COD_RELACION~"   ,
+         ~"CNTAS_COBRAR_DET~".~"PRECIO_UNITARIO~"  ,
+			~"CODIGO_RELACION~".~"NOMBRE~",
+			~"CNTAS_COBRAR_DET~".~"DESCUENTO~" 
+" arguments=(("as_fecha_inicio", string),("as_fecha_final", string),("as_empresa", string),("as_user", string))  sort="fecha_registro A cod_art A cantidad D " )
+group(level=1 header.height=76 trailer.height=0 by=("fecha_registro" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=76 trailer.height=0 by=("cod_art" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Ventas de Productos x Fecha" border="0" color="0" x="960" y="68" height="80" width="1239" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="27" y="20" height="172" width="494" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="2" expression="trim( as_empresa )"border="0" color="0" x="27" y="208" height="56" width="494" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="2679" y="56" height="64" width="215" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="2679" y="136" height="56" width="215" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="2679" y="208" height="64" width="215" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2921" y="56" height="64" width="288" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="trim( as_user )"border="0" color="0" x="2921" y="136" height="56" width="288" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="2921" y="208" height="64" width="288" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="C.Relacion" border="2" color="8388608" x="14" y="396" height="64" width="247" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="1902" y="396" height="64" width="325" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio Unit." border="2" color="8388608" x="2231" y="396" height="64" width="325" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nombre" border="2" color="8388608" x="265" y="396" height="64" width="1381" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="1650" y="396" height="64" width="247" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descuento" border="2" color="8388608" x="2560" y="396" height="64" width="325" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Total" border="2" color="8388608" x="2889" y="396" height="64" width="293" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=header alignment="2" expression="'Desde : '+mid(as_fecha_inicio,7,2) +'/'+ mid(as_fecha_inicio,5,2) +'/'+ mid(as_fecha_inicio,1,4) +'     Hasta : '+mid(as_fecha_final,7,2) +'/'+ mid(as_fecha_final,5,2) +'/'+ mid(as_fecha_final,1,4) "border="0" color="0" x="1088" y="184" height="56" width="1019" format="[General]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=1 alignment="2" tabsequence=32766 border="0" color="8388608" x="215" y="8" height="56" width="288" format="[general]" html.valueishtml="0"  name=fecha_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Fecha :" border="0" color="0" x="14" y="8" height="56" width="174" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.2 id=3 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="56" width="325" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+column(band=header.2 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="352" y="8" height="56" width="1586" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="14" y="0" height="68" width="247" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="265" y="0" height="68" width="1381" format="[general]" html.valueishtml="0"  name=codigo_relacion_nombre visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="1902" y="0" height="68" width="325" format="#,##0.00" html.valueishtml="0"  name=cantidad visible="1" editmask.mask="###,###.00###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="2231" y="0" height="68" width="325" format="#,##0.00" html.valueishtml="0"  name=precio_unitario visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="8388608" x="1650" y="0" height="68" width="247" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="( if (isnull(cantidad) ,0, cantidad  ) *  if (isnull(precio_unitario),0, precio_unitario ) ) * (if (isnull(descuento),0, descuento ) / 100)"border="0" color="0" x="2560" y="0" height="68" width="325" format="###,###.00" html.valueishtml="0"  name=desc visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="(if(isNull( cantidad ),0, cantidad ) *  if(isnull(precio_unitario), 0,precio_unitario ) ) -  if (isnull(desc ),0, desc )"border="0" color="0" x="2889" y="0" height="68" width="293" format="###,###.00" html.valueishtml="0"  name=total visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

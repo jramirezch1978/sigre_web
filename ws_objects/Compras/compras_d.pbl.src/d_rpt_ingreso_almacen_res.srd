@@ -1,0 +1,114 @@
+﻿$PBExportHeader$d_rpt_ingreso_almacen_res.srd
+release 9;
+datawindow(units=0 timer_interval=60000 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=1 selected.mouse=no )
+header(height=344 color="536870912" )
+summary(height=56 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=52 color="536870912"  height.autosize=yes)
+table(column=(type=char(10) updatewhereclause=yes name=nro_ot dbname="tt_alm_ingreso_almacen.nro_ot" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_operacion dbname="tt_alm_ingreso_almacen.nro_operacion" )
+ column=(type=char(2) updatewhereclause=yes name=origen_mov dbname="tt_alm_ingreso_almacen.origen_mov" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="tt_alm_ingreso_almacen.cod_art" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_retirada_almacen dbname="tt_alm_ingreso_almacen.cant_retirada_almacen" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_ingreso_alm dbname="tt_alm_ingreso_almacen.cant_ingreso_alm" )
+ column=(type=decimal(6) updatewhereclause=yes name=prec_unit_compra_dol dbname="tt_alm_ingreso_almacen.prec_unit_compra_dol" )
+ column=(type=decimal(6) updatewhereclause=yes name=prec_prom_compra_dol dbname="tt_alm_ingreso_almacen.prec_prom_compra_dol" )
+ column=(type=number updatewhereclause=yes name=cant_pend_retirar_alm dbname="cant_pend_retirar_alm" )
+ column=(type=number updatewhereclause=yes name=tot_pend_retirar_alm_dol dbname="tot_pend_retirar_alm_dol" )
+ column=(type=number updatewhereclause=yes name=tot_pend_retirar_alm_dol2 dbname="tot_pend_retirar_alm_dol2" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="cencos" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="tt_alm_ingreso_almacen.desc_art" )
+ column=(type=char(2) updatewhereclause=yes name=niv1 dbname="tt_alm_ingreso_almacen.niv1" )
+ column=(type=char(30) updatewhereclause=yes name=desc_niv1 dbname="tt_alm_ingreso_almacen.desc_niv1" )
+ column=(type=char(1) updatewhereclause=yes name=flag_reposicion dbname="tt_alm_ingreso_almacen.flag_reposicion" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="tt_alm_ingreso_almacen.desc_cencos" )
+ retrieve="  SELECT TT_ALM_INGRESO_ALMACEN.NRO_OT,   
+         TT_ALM_INGRESO_ALMACEN.NRO_OPERACION,
+			TT_ALM_INGRESO_ALMACEN.ORIGEN_MOV,
+         TT_ALM_INGRESO_ALMACEN.COD_ART,   
+         TT_ALM_INGRESO_ALMACEN.CANT_PROC_AMP AS CANT_RETIRADA_ALMACEN,   
+         TT_ALM_INGRESO_ALMACEN.CANT_INGRESO_ALM,
+         TT_ALM_INGRESO_ALMACEN.PREC_UNIT_COMPRA_DOL,   
+         TT_ALM_INGRESO_ALMACEN.PREC_PROM_COMPRA_DOL,
+			(TT_ALM_INGRESO_ALMACEN.CANT_INGRESO_ALM - TT_ALM_INGRESO_ALMACEN.CANT_PROC_AMP) AS CANT_PEND_RETIRAR_ALM,
+			(TT_ALM_INGRESO_ALMACEN.CANT_INGRESO_ALM - TT_ALM_INGRESO_ALMACEN.CANT_PROC_AMP)*TT_ALM_INGRESO_ALMACEN.PREC_UNIT_COMPRA_DOL AS TOT_PEND_RETIRAR_ALM_DOL,
+			(TT_ALM_INGRESO_ALMACEN.CANT_INGRESO_ALM - TT_ALM_INGRESO_ALMACEN.CANT_PROC_AMP)*TT_ALM_INGRESO_ALMACEN.PREC_PROM_COMPRA_DOL AS TOT_PEND_RETIRAR_ALM_DOL2,
+         Trim(TT_ALM_INGRESO_ALMACEN.CENCOS) as cencos,   
+         TT_ALM_INGRESO_ALMACEN.DESC_ART,
+         TT_ALM_INGRESO_ALMACEN.NIV1,   
+         TT_ALM_INGRESO_ALMACEN.DESC_NIV1,   
+			TT_ALM_INGRESO_ALMACEN.FLAG_REPOSICION,
+         TT_ALM_INGRESO_ALMACEN.DESC_CENCOS  
+    FROM TT_ALM_INGRESO_ALMACEN
+   WHERE TT_ALM_INGRESO_ALMACEN.ORIGEN_MOV IN (:as_origen) AND  
+         TT_ALM_INGRESO_ALMACEN.FLAG_REPOSICION IN (:as_tipo_art_pedido) and
+			((TT_ALM_INGRESO_ALMACEN.CANT_INGRESO_ALM - TT_ALM_INGRESO_ALMACEN.CANT_PROC_AMP)>0 OR :as_flag_saldo_positivo='0')
+GROUP BY TT_ALM_INGRESO_ALMACEN.NRO_OT,   
+         TT_ALM_INGRESO_ALMACEN.NRO_OPERACION,
+			TT_ALM_INGRESO_ALMACEN.ORIGEN_MOV,   
+         TT_ALM_INGRESO_ALMACEN.COD_ART,   
+         TT_ALM_INGRESO_ALMACEN.NIV1,   
+         TT_ALM_INGRESO_ALMACEN.DESC_NIV1,   
+         TT_ALM_INGRESO_ALMACEN.CANT_PROC_AMP,   
+         TT_ALM_INGRESO_ALMACEN.CANT_INGRESO_ALM,
+         TT_ALM_INGRESO_ALMACEN.PREC_UNIT_COMPRA_DOL,   
+         TT_ALM_INGRESO_ALMACEN.PREC_PROM_COMPRA_DOL,
+         TT_ALM_INGRESO_ALMACEN.CENCOS,   
+         TT_ALM_INGRESO_ALMACEN.DESC_ART,
+			TT_ALM_INGRESO_ALMACEN.FLAG_REPOSICION,
+         TT_ALM_INGRESO_ALMACEN.DESC_CENCOS  
+" arguments=(("as_origen", stringlist),("as_tipo_art_pedido", stringlist),("as_flag_saldo_positivo", string))  sort="desc_niv1 A nro_ot A nro_operacion A cod_art A " )
+group(level=1 header.height=80 trailer.height=0 by=("niv1" , "desc_niv1" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Nº OT" border="6" color="33554432" x="9" y="252" height="80" width="219" html.valueishtml="0"  name=nro_ot_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Nº
+Ope" border="6" color="33554432" x="238" y="252" height="80" width="110" html.valueishtml="0"  name=nro_operacion_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Cod Art" border="6" color="33554432" x="357" y="252" height="80" width="201" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Desc Art" border="6" color="0" x="567" y="252" height="80" width="846" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Ingreso
+Almacén" border="6" color="33554432" x="1422" y="252" height="80" width="174" html.valueishtml="0"  name=cant_ingreso_alm_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Salida
+Almacén" border="6" color="0" x="1605" y="252" height="80" width="169" html.valueishtml="0"  name=cant_retirada_almacen_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Pend
+Retirar Alm" border="6" color="8388608" x="1783" y="252" height="80" width="183" html.valueishtml="0"  name=cant_pend_retirar_alm_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Prec Unit
+US$" border="6" color="8388608" x="1975" y="252" height="80" width="215" html.valueishtml="0"  name=prec_unit_compra_dol_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Tot Pend
+Retir Alm US$" border="6" color="8388608" x="2199" y="252" height="80" width="242" html.valueishtml="0"  name=tot_pend_retirar_alm_dol_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Prec Prom
+US$" border="6" color="8388608" x="2450" y="252" height="80" width="210" html.valueishtml="0"  name=prec_prom_compra_dol_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Tot Pend
+Retir Alm US$" border="6" color="8388608" x="2670" y="252" height="80" width="256" html.valueishtml="0"  name=tot_pend_retirar_alm_dol2_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Cencos" border="6" color="33554432" x="2935" y="252" height="80" width="151" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+text(band=header alignment="2" text="Desc Cencos" border="6" color="0" x="3095" y="252" height="80" width="389" html.valueishtml="0"  name=desc_cencos_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="26803961" )
+column(band=header.1 id=14 alignment="0" tabsequence=32766 border="0" color="8388608" x="357" y="12" height="60" width="201" format="[general]" html.valueishtml="0"  name=niv1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=15 alignment="0" tabsequence=32766 border="0" color="8388608" x="567" y="12" height="60" width="846" format="[general]" html.valueishtml="0"  name=desc_niv1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="0" color="33554432" x="2935" y="0" height="48" width="151" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="33554432" x="567" y="0" height="48" width="846" format="[general]" html.valueishtml="0"  name=desc_art visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="33554432" x="3095" y="0" height="48" width="389" format="[general]" html.valueishtml="0"  name=desc_cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="9" y="0" height="48" width="219" format="[general]" html.valueishtml="0"  name=nro_ot visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="238" y="0" height="48" width="110" format="[general]" html.valueishtml="0"  name=nro_operacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="357" y="0" height="48" width="201" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="1422" y="0" height="48" width="174" format="###,##0.00" html.valueishtml="0"  name=cant_ingreso_alm visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="1605" y="0" height="48" width="169" format="###,##0.00" html.valueishtml="0"  name=cant_retirada_almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="8388608" x="1975" y="0" height="48" width="215" format="###,##0.0000" html.valueishtml="0"  name=prec_unit_compra_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="8388608" x="1783" y="0" height="48" width="183" format="###,##0.00" html.valueishtml="0"  name=cant_pend_retirar_alm visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="8388608" x="2199" y="0" height="48" width="242" format="###,##0.00" html.valueishtml="0"  name=tot_pend_retirar_alm_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="8388608" x="2450" y="0" height="48" width="210" format="###,##0.0000" html.valueishtml="0"  name=prec_prom_compra_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="8388608" x="2670" y="0" height="48" width="256" format="###,##0.00" html.valueishtml="0"  name=tot_pend_retirar_alm_dol2 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(tot_pend_retirar_alm_dol for all)"border="0" color="8388608" x="2199" y="8" height="40" width="242" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(tot_pend_retirar_alm_dol2 for all)"border="0" color="8388608" x="2670" y="8" height="40" width="256" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=foreground filename="H:\Source\BMP\blanco.bmp" x="9" y="32" height="120" width="265" border="0"  name=p_logo visible="1" )
+text(band=foreground alignment="1" text="Usuario :" border="0" color="0" x="2619" y="88" height="52" width="315" html.valueishtml="0"  name=t_8 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=foreground alignment="1" expression="today()"border="0" color="0" x="2313" y="152" height="52" width="841" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=compute_14 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=foreground alignment="1" expression="'Pagina: ' + page() + ' De ' + pageCount()"border="0" color="0" x="2350" y="24" height="52" width="805" format="[general]" html.valueishtml="0"  name=compute_15 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="1" text="" border="0" color="0" x="2939" y="88" height="52" width="215" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="" border="0" color="0" x="9" y="168" height="56" width="265" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="" border="0" color="0" x="302" y="168" height="56" width="229" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="VALORIZACION DE SALDOS DE ALMACEN SEGUN INGRESOS A ALMACEN" border="1" color="0" x="329" y="32" height="60" width="1934" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="" border="0" color="0" x="526" y="124" height="56" width="1605" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="nro_ot	nro_operacion	cod_art	desc_art	cant_ingreso_alm	cant_retirada_almacen	cant_pend_retirar_alm	prec_unit_compra_dol	prec_prom_compra_dol	tot_pend_retirar_alm_dol	tot_pend_retirar_alm_dol2")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

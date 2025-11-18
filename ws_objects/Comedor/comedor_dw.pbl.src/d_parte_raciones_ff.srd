@@ -1,0 +1,90 @@
+﻿$PBExportHeader$d_parte_raciones_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=616 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_parte dbname="com_parte_rac.parte_racion" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_comedor dbname="com_parte_rac.tipo_comedor" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="com_parte_rac.cod_moneda" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_registro dbname="com_parte_rac.fecha_registro" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_parte dbname="com_parte_rac.fecha_parte_rac" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="com_parte_rac.flag_estado" values="Activo	1/Anulado	0/Procesado	2/" )
+ column=(type=char(40) updatewhereclause=yes name=desc_moneda dbname="moneda.descripcion" )
+ column=(type=char(50) updatewhereclause=yes name=desc_tipo_comedor dbname="com_tipo_comed.descr_comedor" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_os1 dbname="com_parte_rac.nro_orden" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen_solicitud dbname="com_parte_rac.origen_solicitud" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_solicitud dbname="com_parte_rac.nro_solicitud" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ano dbname="com_parte_rac.ano" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=semana dbname="com_parte_rac.semana" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="com_parte_rac.flag_replicacion" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=parte dbname="com_parte_rac.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(2) updatewhereclause=yes name=origen_os dbname="com_parte_rac.origen_os" )
+ column=(type=char(10) updatewhereclause=yes name=nro_os dbname="com_parte_rac.nro_os" )
+ column=(type=char(1) updatewhereclause=yes name=compute_0019 dbname="compute_0019" )
+ retrieve="  SELECT ~"COM_PARTE_RAC~".~"PARTE_RACION~",   
+         ~"COM_PARTE_RAC~".~"TIPO_COMEDOR~",   
+         ~"COM_PARTE_RAC~".~"COD_MONEDA~",   
+         ~"COM_PARTE_RAC~".~"FECHA_REGISTRO~",   
+         ~"COM_PARTE_RAC~".~"FECHA_PARTE_RAC~",   
+         ~"COM_PARTE_RAC~".~"FLAG_ESTADO~",   
+         ~"MONEDA~".~"DESCRIPCION~",   
+         ~"COM_TIPO_COMED~".~"DESCR_COMEDOR~",   
+         ~"COM_PARTE_RAC~".~"NRO_ORDEN~",   
+         ~"COM_PARTE_RAC~".~"ORIGEN_SOLICITUD~",   
+         ~"COM_PARTE_RAC~".~"NRO_SOLICITUD~",   
+         ~"COM_PARTE_RAC~".~"ANO~",   
+         ~"COM_PARTE_RAC~".~"SEMANA~",   
+         ~"COM_PARTE_RAC~".~"FLAG_REPLICACION~",   
+         ~"COM_PARTE_RAC~".~"PROVEEDOR~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",
+         ~"COM_PARTE_RAC~".~"ORIGEN_OS~",   
+         ~"COM_PARTE_RAC~".~"NRO_OS~",
+			 ' '  
+    FROM ~"COM_PARTE_RAC~",   
+         ~"MONEDA~",   
+         ~"COM_TIPO_COMED~",   
+         ~"PROVEEDOR~",   
+         ~"ORDEN_SERVICIO~"  
+   WHERE ( proveedor.proveedor (+) 			  = com_parte_rac.proveedor) and  
+         ( orden_servicio.cod_origen (+) 	= com_parte_rac.origen_os) and  
+         ( orden_servicio.nro_os (+) 		  = com_parte_rac.nro_os) and  
+         ( ~"COM_PARTE_RAC~".~"COD_MONEDA~" 	= ~"MONEDA~".~"COD_MONEDA~" ) and  
+         ( ~"COM_PARTE_RAC~".~"TIPO_COMEDOR~" = ~"COM_TIPO_COMED~".~"TIPO_COMEDOR~" ) and  
+         ( ( ~"COM_PARTE_RAC~".~"PARTE_RACION~" = :as_nro_parte ) )" update="COM_PARTE_RAC" updatewhere=1 updatekeyinplace=yes arguments=(("as_nro_parte", string)) )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="5" color="16711680" x="297" y="24" height="56" width="453" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=detail alignment="1" text="Nro Parte:" border="0" color="33554432" x="9" y="24" height="56" width="274" html.valueishtml="0"  name=parte_racion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Fec. Parte:" border="0" color="33554432" x="9" y="108" height="56" width="274" html.valueishtml="0"  name=fecha_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Tipo:" border="0" color="33554432" x="9" y="192" height="56" width="274" html.valueishtml="0"  name=tipo_comedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Moneda:" border="0" color="33554432" x="9" y="276" height="56" width="274" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Porveedor:" border="0" color="33554432" x="9" y="352" height="56" width="274" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=10 border="5" color="33554432" x="297" y="108" height="56" width="283" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_parte visible="1" editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="5" color="33554432" x="297" y="192" height="56" width="283" format="[general]" html.valueishtml="0"  name=tipo_comedor pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=4 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="5" color="33554432" x="297" y="276" height="56" width="283" format="[general]" html.valueishtml="0"  name=cod_moneda pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=3 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=70 border="5" color="33554432" x="297" y="352" height="56" width="283" format="[general]" html.valueishtml="0"  name=proveedor pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.required=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=detail x1="9" y1="516" x2="1271" y2="516"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=detail alignment="2" text="Nro de OS:" border="0" color="33554432" x="503" y="544" height="52" width="288" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="5" color="33554432" x="800" y="544" height="56" width="146" format="[general]" html.valueishtml="0"  name=origen_os visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0 edit.displayonly=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=detail alignment="1" text="Estado:" border="0" color="33554432" x="782" y="20" height="56" width="192" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Fec. Registro:" border="0" color="33554432" x="622" y="108" height="56" width="352" html.valueishtml="0"  name=fecha_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=40 border="0" color="8388608" x="997" y="20" height="56" width="343" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="553648127" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="5" color="33554432" x="997" y="108" height="56" width="274" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_registro visible="1" editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="5" color="33554432" x="599" y="192" height="56" width="672" format="[general]" html.valueishtml="0"  name=desc_tipo_comedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="33554432" x="599" y="276" height="56" width="672" format="[general]" html.valueishtml="0"  name=desc_moneda visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=16 alignment="0" tabsequence=80 border="5" color="33554432" x="599" y="356" height="56" width="672" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="5" color="33554432" x="969" y="544" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_os visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0 edit.displayonly=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+button(band=detail text="" filename="H:\Source\Gif\next.gif" enabled=no action="0" border="0" color="0" x="617" y="428" height="72" width="87" vtextalign="0" htextalign="0"  name=b_lanz visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Semana:" border="0" color="33554432" x="18" y="436" height="56" width="261" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="5" color="0" x="297" y="436" height="56" width="165" format="[general]" html.valueishtml="0"  name=ano pointer="" visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="5" color="0" x="485" y="436" height="56" width="105" format="[general]" html.valueishtml="0"  name=semana pointer="" visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=detail alignment="1" text="Sol. Giro:" border="0" color="33554432" x="96" y="728" height="56" width="274" html.valueishtml="0"  name=t_3 visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="5" color="0" x="389" y="728" height="56" width="114" format="[general]" html.valueishtml="0"  name=origen_solicitud pointer="H:\Source\CUR\taladro.cur" visible="0" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=11 alignment="0" tabsequence=60 border="5" color="0" x="530" y="728" height="56" width="453" format="[general]" html.valueishtml="0"  name=nro_solicitud pointer="H:\Source\CUR\taladro.cur" visible="0" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Nro Orden:" border="0" color="33554432" x="101" y="628" height="56" width="274" html.valueishtml="0"  name=nro_orden_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=50 border="5" color="0" x="389" y="632" height="56" width="329" format="[general]" html.valueishtml="0"  name=nro_orden pointer="H:\Source\CUR\taladro.cur" visible="0" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="luis" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><d_parte_raciones_ff><d_parte_raciones_ff_row __pbband=~"detail~"><nro_parte>nro_parte</nro_parte><tipo_comedor>tipo_comedor</tipo_comedor><cod_moneda>cod_moneda</cod_moneda><fecha_registro>fecha_registro</fecha_registro><fecha_parte>fecha_parte</fecha_parte><flag_estado>flag_estado</flag_estado><desc_moneda>desc_moneda</desc_moneda><desc_tipo_comedor>desc_tipo_comedor</desc_tipo_comedor><nro_os1>nro_os1</nro_os1><origen_solicitud>origen_solicitud</origen_solicitud><nro_solicitud>nro_solicitud</nro_solicitud><ano>ano</ano><semana>semana</semana><flag_replicacion>flag_replicacion</flag_replicacion><proveedor>proveedor</proveedor><com_parte_rac_origen_os>origen_os</com_parte_rac_origen_os><com_parte_rac_nro_os>nro_os</com_parte_rac_nro_os></d_parte_raciones_ff_row></d_parte_raciones_ff>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

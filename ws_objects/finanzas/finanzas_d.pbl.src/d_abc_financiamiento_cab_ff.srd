@@ -1,0 +1,94 @@
+﻿$PBExportHeader$d_abc_financiamiento_cab_ff.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=636 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen dbname="financiamiento.origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=num_registro dbname="financiamiento.num_registro" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=cod_ctabco dbname="financiamiento.cod_ctabco" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_emision dbname="financiamiento.fecha_emision" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="financiamiento.nro_doc" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="financiamiento.cod_relacion" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_aval dbname="financiamiento.cod_aval" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=imp_capital dbname="financiamiento.imp_capital" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=imp_interes dbname="financiamiento.imp_interes" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=sldo_capital dbname="financiamiento.sldo_capital" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=sldo_interes dbname="financiamiento.sldo_interes" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=doc_garantia dbname="financiamiento.doc_garantia" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_interes dbname="financiamiento.flag_interes" values="Vencimiento	V/Vencimiento y Moratorio	M/" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="financiamiento.cod_moneda" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_libro dbname="financiamiento.nro_libro" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="financiamiento.cod_usr" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ano dbname="financiamiento.ano" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=mes dbname="financiamiento.mes" values="Enero	1/Febrero	2/Marzo	3/Abril	4/Mayo	5/Junio	6/Julio	7/Agosto	8/Setiembre	9/Octubre	10/Noviembre	11/Diciembre	12/" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_asiento dbname="financiamiento.nro_asiento" )
+ column=(type=decimal(3) update=yes updatewhereclause=yes name=tasa_cambio dbname="financiamiento.tasa_cambio" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=observac dbname="financiamiento.observac" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_aval dbname="proveedor.nom_aval" )
+ retrieve="  SELECT ~"FINANCIAMIENTO~".~"ORIGEN~",   
+         ~"FINANCIAMIENTO~".~"NUM_REGISTRO~",   
+         ~"FINANCIAMIENTO~".~"COD_CTABCO~",   
+         ~"FINANCIAMIENTO~".~"FECHA_EMISION~",   
+         ~"FINANCIAMIENTO~".~"NRO_DOC~",   
+         ~"FINANCIAMIENTO~".~"COD_RELACION~",   
+         ~"FINANCIAMIENTO~".~"COD_AVAL~",   
+         ~"FINANCIAMIENTO~".~"IMP_CAPITAL~",   
+         ~"FINANCIAMIENTO~".~"IMP_INTERES~",   
+         ~"FINANCIAMIENTO~".~"SLDO_CAPITAL~",   
+         ~"FINANCIAMIENTO~".~"SLDO_INTERES~",   
+         ~"FINANCIAMIENTO~".~"DOC_GARANTIA~",   
+         ~"FINANCIAMIENTO~".~"FLAG_INTERES~",   
+         ~"FINANCIAMIENTO~".~"COD_MONEDA~",   
+         ~"FINANCIAMIENTO~".~"NRO_LIBRO~",   
+         ~"FINANCIAMIENTO~".~"COD_USR~",   
+         ~"FINANCIAMIENTO~".~"ANO~",   
+         ~"FINANCIAMIENTO~".~"MES~",   
+         ~"FINANCIAMIENTO~".~"NRO_ASIENTO~",   
+         ~"FINANCIAMIENTO~".~"TASA_CAMBIO~",   
+         ~"FINANCIAMIENTO~".~"OBSERVAC~",   
+         ~"PROVEEDOR_A~".~"NOM_PROVEEDOR~",   
+         ~"PROVEEDOR_B~".~"NOM_PROVEEDOR~"  AS NOM_AVAL
+    FROM ~"FINANCIAMIENTO~",   
+         ~"PROVEEDOR~" ~"PROVEEDOR_A~",   
+         ~"PROVEEDOR~" ~"PROVEEDOR_B~"  
+   WHERE ( ~"FINANCIAMIENTO~".~"COD_RELACION~" = ~"PROVEEDOR_A~".~"PROVEEDOR~" ) and  
+         ( financiamiento.cod_aval = proveedor_b.proveedor (+)) and  
+         ( ( ~"FINANCIAMIENTO~".~"ORIGEN~" = :as_cod_origen ) AND  
+         ( ~"FINANCIAMIENTO~".~"NUM_REGISTRO~" = :as_nro_registro ) )    
+" update="FINANCIAMIENTO" updatewhere=1 updatekeyinplace=yes arguments=(("as_cod_origen", string),("as_nro_registro", string)) )
+text(band=detail alignment="1" text="Documento :" border="0" color="0" x="14" y="120" height="56" width="375"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=5 alignment="0" tabsequence=20 border="5" color="0" x="411" y="120" height="56" width="302" format="[general]"  name=nro_doc edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Cuenta Banco :" border="0" color="0" x="14" y="292" height="56" width="375"  name=cta_banco_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="0" tabsequence=50 border="5" color="0" x="416" y="292" height="56" width="1243" format="[general]"  name=cod_ctabco dddw.name=d_dddw_banco_cntas_tbl dddw.displaycolumn=descripcion dddw.datacolumn=cod_ctabco dddw.percentwidth=168 dddw.lines=3 dddw.limit=0 dddw.allowedit=no dddw.useasborder=yes dddw.case=any dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Origen :" border="0" color="0" x="14" y="36" height="56" width="375"  name=origen_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="5" color="8388608" x="411" y="36" height="56" width="544" format="[general]"  name=origen dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=6 alignment="0" tabsequence=30 border="5" color="0" x="1687" y="124" height="56" width="265" format="[general]" protect="0~tif(isrownew(),0,1)"  name=cod_relacion edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif(isrownew(),rgb(255,255,255),rgb(155,155,155))
+" )
+text(band=detail alignment="1" text="Moneda :" border="0" color="0" x="1691" y="292" height="56" width="270"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=14 alignment="0" tabsequence=60 border="5" color="0" x="1979" y="292" height="56" width="503" format="[general]"  name=cod_moneda dddw.name=d_dddw_tipo_moneda_tbl dddw.displaycolumn=descripcion dddw.datacolumn=cod_moneda dddw.percentwidth=200 dddw.lines=2 dddw.limit=0 dddw.allowedit=no dddw.useasborder=yes dddw.case=any dddw.required=yes dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="2" tabsequence=10 border="5" color="0" x="1687" y="36" height="56" width="265" format="[shortdate] [time]"  name=fecha_emision editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Tasa de Cambio :" border="0" color="0" x="2501" y="292" height="56" width="379"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="5" color="255" x="2830" y="36" height="56" width="329" format="[general]"  name=num_registro edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="0" text="Registro Nº :" border="0" color="0" x="2528" y="36" height="56" width="279"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=20 alignment="1" tabsequence=70 border="5" color="0" x="2898" y="292" height="56" width="261" format="[general]"  name=tasa_cambio editmask.required=yes editmask.mask="###,###.000" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Fecha Emisión :" border="0" color="0" x="1253" y="36" height="56" width="416"  name=fecha_emision_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Proveedor :" border="0" color="0" x="1253" y="120" height="56" width="416"  name=cod_relacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Codigo Aval :" border="0" color="0" x="1253" y="204" height="56" width="416"  name=cod_aval_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Capital :" border="0" color="0" x="14" y="376" height="56" width="375"  name=imp_capital_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=8 alignment="1" tabsequence=80 border="5" color="0" x="411" y="376" height="56" width="329" format="[general]"  name=imp_capital editmask.required=yes editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="5" color="8388608" x="1687" y="376" height="56" width="329" format="[general]"  name=imp_interes editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Interes :" border="0" color="0" x="1253" y="376" height="56" width="416"  name=imp_interes_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+bitmap(band=detail filename="H:\Source\Bmp\file_open.bmp" x="1929" y="472" height="56" width="96" border="6"  name=p_1 visible="1~t0" )
+text(band=detail alignment="1" text="Doc. Garantia :" border="0" color="0" x="14" y="472" height="56" width="375"  name=doc_garantia_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Observaciones :" border="0" color="0" x="14" y="560" height="56" width="375"  name=observac_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Tipo Intereses :" border="0" color="0" x="2103" y="376" height="56" width="416"  name=flag_interes_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=13 alignment="0" tabsequence=90 border="5" color="0" x="2537" y="376" height="56" width="622" format="[general]"  name=flag_interes ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.useasborder=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=100 border="5" color="0" x="411" y="472" height="56" width="1486" format="[general]"  name=doc_garantia edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=21 alignment="0" tabsequence=110 border="5" color="0" x="411" y="560" height="56" width="1691" format="[general]"  name=observac edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=22 alignment="0" tabsequence=32766 border="5" color="0" x="1979" y="124" height="56" width="1179" format="[general]"  name=nom_proveedor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=7 alignment="0" tabsequence=40 border="5" color="0" x="1687" y="204" height="56" width="265" format="[general]"  name=cod_aval edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=23 alignment="0" tabsequence=32766 border="5" color="0" x="1979" y="204" height="56" width="1179"  name=nom_aval  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

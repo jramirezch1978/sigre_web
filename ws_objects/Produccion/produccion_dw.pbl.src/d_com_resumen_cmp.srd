@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_com_resumen_cmp.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=60 color="536870912" )
+header[3](height=0 color="536870912" )
+summary(height=56 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=cencos dbname="cencos" )
+ column=(type=char(20) updatewhereclause=yes name=desc_zona_proc dbname="desc_zona_proc" )
+ column=(type=number updatewhereclause=yes name=nro_prendas dbname="nro_prendas" )
+ column=(type=number updatewhereclause=yes name=compute_0006 dbname="compute_0006" )
+ retrieve="select t.cencos as Cencos,
+       t.desc_zona_proc,
+       trim(substr(t.desc_prenda,1,5))||'- '||to_char(t.tarifa)||' -' AS TARIFA,
+       t.nro_prendas,
+       t.tarifa,
+       T.tarifa*T.nro_prendas
+  from vw_prod_lavado_zp t
+ WHERE SUBSTR(T.nro_Parte, 1, 2) = :as_origen
+   and t.proveedor	= :as_proveedor
+   and trunc(t.fec_parte_lav) BETWEEN trunc(:ad_fecha1) AND trunc(:ad_fecha2)" arguments=(("as_origen", string),("ad_fecha1", date),("ad_fecha2", date),("as_proveedor", string))  sort="cencos A desc_zona_proc A " )
+group(level=1 header.height=0 trailer.height=52 by=("cencos" ) header.color="536870912" trailer.color="536870912" )
+text(band=header[1] alignment="0" text="Tarifa" border="0" color="0" x="187" y="4" height="52" width="411" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="2" text="@tarifa" border="2" color="0" x="608" y="4" height="52" width="302" html.valueishtml="0"  name=t_2 visible="1"  font.face="MS Sans Serif" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="0" text="Tot. Prendas" border="2" color="0" x="914" y="4" height="52" width="238" html.valueishtml="0"  name=t_3 visible="1"  font.face="MS Sans Serif" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="0" text="Tot. Precio" border="2" color="0" x="1161" y="4" height="52" width="247" html.valueishtml="0"  name=t_4 visible="1"  font.face="MS Sans Serif" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[3] alignment="0" text="Cencos" border="0" color="0" x="9" y="4" height="52" width="169" html.valueishtml="0"  name=cencos_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="0" text="Desc Zona Proc" border="0" color="0" x="187" y="4" height="52" width="411" html.valueishtml="0"  name=desc_zona_proc_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="0" text="Sum Of Nro Prendas" border="0" color="0" x="608" y="4" height="52" width="119" html.valueishtml="0"  name=nro_prendas_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="0" text="Sum Of Compute 0006" border="0" color="0" x="736" y="4" height="52" width="169" html.valueishtml="0"  name=compute_0006_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="187" y="8" height="40" width="411" format="[general]" html.valueishtml="0"  name=desc_zona_proc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="8" height="40" width="169" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="608" y="8" height="40" width="119" format="[general]" html.valueishtml="0"  name=nro_prendas visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="736" y="8" height="40" width="169" format="##.0" html.valueishtml="0"  name=compute_0006 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="2" color="33554432" x="914" y="8" height="40" width="238" format="[general]" html.valueishtml="0"  name=grand_sum_nro_prendas visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+compute(band=detail alignment="1" expression="crosstabsum(2)"border="2" color="33554432" x="1161" y="8" height="40" width="247" format="#.0" html.valueishtml="0"  name=grand_sum_compute_0006 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+compute(band=trailer.1 alignment="1" expression="sum(nro_prendas for group 1)"border="4" color="0" x="608" y="4" height="40" width="119" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+compute(band=trailer.1 alignment="1" expression="sum(compute_0006 for group 1)"border="4" color="0" x="736" y="4" height="40" width="169" format="##.0" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+compute(band=trailer.1 alignment="1" expression="sum(grand_sum_nro_prendas for group 1)"border="4" color="0" x="914" y="4" height="40" width="238" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+compute(band=trailer.1 alignment="1" expression="sum(grand_sum_compute_0006 for group 1)"border="4" color="0" x="1161" y="4" height="40" width="247" format="#.0" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+text(band=trailer.1 alignment="1" text="Total. Cencos" border="4" color="0" x="187" y="4" height="40" width="411" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(nro_prendas for all )"border="2" color="0" x="608" y="4" height="44" width="119" format="[general]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=summary alignment="1" expression="sum(compute_0006 for all )"border="2" color="0" x="736" y="4" height="44" width="169" format="##.0" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=summary alignment="1" expression="sum(grand_sum_nro_prendas for all )"border="2" color="0" x="914" y="4" height="44" width="238" format="[general]" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=summary alignment="1" expression="sum(grand_sum_compute_0006 for all )"border="2" color="0" x="1161" y="4" height="44" width="247" format="#.00" html.valueishtml="0"  name=compute_10 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=summary alignment="2" text="Total General" border="2" color="0" x="187" y="4" height="52" width="411" html.valueishtml="0"  name=t_6 visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "tarifa" rows = "cencos, desc_zona_proc" values = "sum(nro_prendas for crosstab), sum(compute_0006 for crosstab)" sourcenames = "cencos, desc_zona_proc, tarifa, nro_prendas, tarifa_0, compute_0006")
+sparse(names="cencos")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

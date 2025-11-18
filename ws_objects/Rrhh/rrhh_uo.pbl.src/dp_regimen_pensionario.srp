@@ -1,0 +1,9 @@
+﻿$PBExportHeader$dp_regimen_pensionario.srp
+PIPELINE(source_connect=oemlm1_work5,destination_connect=oemlm1_work5,type=append,commit=100,errors=100,keyname="rrhh_regimen_pensionario_rtps")
+SOURCE(name="reg_pens",COLUMN(type=double,name="codigo",dbtype="FLOAT",nulls_allowed=yes)
+ COLUMN(type=varchar,name="descripcio",dbtype="VARCHAR2(75)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="flag_estado",dbtype="VARCHAR2(254)",nulls_allowed=yes))
+RETRIEVE(statement="SELECT reg_pens.codigo,              reg_pens.descripcio  ,  			'1' as flag_estado      FROM reg_pens")
+DESTINATION(name="rrhh_regimen_pensionario_rtps",COLUMN(type=char,name="cod_reg_pension",dbtype="CHAR(2)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="descripcion",dbtype="VARCHAR2(100)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_estado",dbtype="CHAR(1)",nulls_allowed=yes))

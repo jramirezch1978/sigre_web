@@ -1,0 +1,93 @@
+﻿$PBExportHeader$d_labor_ff.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=780 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_labor dbname="labor.cod_labor" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_etapa dbname="labor.cod_etapa" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=desc_labor dbname="labor.desc_labor" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="labor.flag_estado" values="Activado	1/Desactivado	0/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_incidencia dbname="labor.flag_incidencia" values="Incidencia	S/No incidencia	N/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_marcador dbname="labor.flag_marcador" values="Labor	0/Marcador	1/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_maq_mo dbname="labor.flag_maq_mo" values="Labor manual	O/Labor mecanizada	M/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_tipo_has dbname="labor.flag_tipo_has" values="Factor 1	1/" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_oper dbname="labor.cnta_oper" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=und dbname="labor.und" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_uso dbname="labor.flag_uso" values="Mantenimiento	M/DMA	D/Fabrica	F/Taller	T/Campo	C/	/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_transporte dbname="labor.flag_transporte" values="Si	S/No	N/" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp dbname="labor.cnta_prsp" )
+ column=(type=char(50) updatewhereclause=yes name=descripcion dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(25) updatewhereclause=yes name=abrev_cnta dbname="cntbl_cnta.abrev_cnta" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp_3ro dbname="labor.cnta_prsp_3ro" )
+ column=(type=char(50) updatewhereclause=yes name=descripcion_1 dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp_insm dbname="labor.cnta_prsp_insm" )
+ column=(type=char(50) updatewhereclause=yes name=desc_cuenta_ins dbname="presupuesto_cuenta.desc_cuenta_ins" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=labor_desc_extendida dbname="labor.desc_extendida" )
+ retrieve="  SELECT ~"LABOR~".~"COD_LABOR~",   
+         ~"LABOR~".~"COD_ETAPA~",   
+         ~"LABOR~".~"DESC_LABOR~",   
+         ~"LABOR~".~"FLAG_ESTADO~",   
+         ~"LABOR~".~"FLAG_INCIDENCIA~",   
+         ~"LABOR~".~"FLAG_MARCADOR~",   
+         ~"LABOR~".~"FLAG_MAQ_MO~",   
+         ~"LABOR~".~"FLAG_TIPO_HAS~",   
+         ~"LABOR~".~"CNTA_OPER~",   
+         ~"LABOR~".~"UND~",   
+         ~"LABOR~".~"FLAG_USO~",   
+         ~"LABOR~".~"FLAG_TRANSPORTE~",   
+         ~"LABOR~".~"CNTA_PRSP~",   
+         ~"PRESUPUESTO_CUENTA_A~".~"DESCRIPCION~",   
+         ~"CNTBL_CNTA~".~"ABREV_CNTA~",   
+         ~"LABOR~".~"CNTA_PRSP_3RO~",   
+         ~"PRESUPUESTO_CUENTA_B~".~"DESCRIPCION~",   
+         ~"LABOR~".~"CNTA_PRSP_INSM~",   
+         presupuesto_cuenta_c.descripcion as desc_cuenta_ins,   
+         ~"LABOR~".~"DESC_EXTENDIDA~"  
+    FROM ~"LABOR~",   
+         ~"PRESUPUESTO_CUENTA~" ~"PRESUPUESTO_CUENTA_A~",   
+         ~"CNTBL_CNTA~",   
+         ~"PRESUPUESTO_CUENTA~" ~"PRESUPUESTO_CUENTA_B~",   
+         ~"PRESUPUESTO_CUENTA~" ~"PRESUPUESTO_CUENTA_C~"  
+   WHERE ( labor.cnta_prsp = presupuesto_cuenta_a.cnta_prsp (+)) and  
+         ( labor.cnta_oper = cntbl_cnta.cnta_ctbl (+)) and  
+         ( labor.cnta_prsp_3ro = presupuesto_cuenta_b.cnta_prsp (+)) and  
+         ( labor.cnta_prsp_insm = presupuesto_cuenta_c.cnta_prsp (+)) and  
+         ( ( ~"LABOR~".~"FLAG_USO~" in ('F','T','A','S','M') ) )   
+ORDER BY ~"LABOR~".~"COD_ETAPA~" ASC   
+" update="LABOR" updatewhere=1 updatekeyinplace=yes  sort="cod_etapa A cod_labor A " )
+text(band=detail alignment="0" text="Labor :" border="0" color="0" x="23" y="16" height="56" width="155"  name=cod_labor_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="5" color="0" x="590" y="16" height="56" width="1339" format="[general]"  name=desc_labor edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="0" x="279" y="16" height="56" width="283" format="[general]" protect="0~tif(isrownew(),0,1)"  name=cod_labor edit.limit=8 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=30 border="5" color="0" x="279" y="96" height="124" width="1650" format="[general]"  name=labor_desc_extendida edit.limit=100 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+groupbox(band=detail text=""border="5" color="0" x="14" y="236" height="240" width="1934"  name=gb_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Marcador :" border="0" color="0" x="23" y="260" height="56" width="238"  name=flag_marcador_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=40 border="5" color="0" x="279" y="260" height="56" width="425" format="[general]"  name=flag_marcador ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Und:" border="0" color="0" x="727" y="260" height="56" width="137"  name=und_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=50 border="5" color="0" x="887" y="260" height="56" width="151" format="[general]"  name=und dddw.name=d_dddw_unidad dddw.displaycolumn=und dddw.datacolumn=und dddw.percentwidth=600 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Actividad :" border="0" color="0" x="1275" y="260" height="56" width="229"  name=cod_etapa_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=60 border="5" color="0" x="1527" y="260" height="56" width="402" format="[general]"  name=cod_etapa dddw.name=d_dddw_etapa dddw.displaycolumn=cod_etapa dddw.datacolumn=cod_etapa dddw.percentwidth=350 dddw.lines=0 dddw.limit=0 dddw.allowedit=yes dddw.useasborder=no dddw.case=any dddw.required=yes dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Maq./Mo :" border="0" color="0" x="23" y="332" height="56" width="238"  name=flag_maq_mo_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=70 border="5" color="0" x="279" y="332" height="56" width="425" format="[general]"  name=flag_maq_mo ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Aplic.:" border="0" color="0" x="727" y="332" height="56" width="137"  name=flag_tipo_has_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=80 border="5" color="0" x="887" y="332" height="56" width="402" format="[general]"  name=flag_tipo_has ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Estado :" border="0" color="0" x="1330" y="332" height="56" width="178"  name=flag_estado_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=90 border="5" color="0" x="1536" y="332" height="56" width="393" format="[general]"  name=flag_estado ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Traslado :" border="0" color="0" x="23" y="404" height="56" width="238"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=100 border="5" color="0" x="279" y="404" height="56" width="425" format="[general]"  name=flag_transporte ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="0" text="Uso:" border="0" color="0" x="722" y="404" height="56" width="101"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=110 border="5" color="0" x="887" y="404" height="56" width="402" format="[general]"  name=flag_uso ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="0" text="Cta.Presup.propio:" border="0" color="0" x="27" y="496" height="56" width="411"  name=cnta_oper_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=120 border="5" color="0" x="466" y="496" height="56" width="311" format="[general]"  name=cnta_prsp pointer="H:\Source\Cur\taladro.cur" edit.limit=10 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="5" color="0" x="805" y="496" height="56" width="1129" format="[general]"  name=descripcion edit.limit=25 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Cta  Presup Terc:" border="0" color="0" x="27" y="568" height="56" width="411"  name=t_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=130 border="5" color="0" x="466" y="568" height="56" width="311" format="[general]"  name=cnta_prsp_3ro edit.limit=10 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="5" color="0" x="805" y="568" height="56" width="1129" format="[general]"  name=descripcion_1 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Cuenta Contable:" border="0" color="0" x="23" y="720" height="56" width="411"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=150 border="5" color="0" x="466" y="720" height="56" width="311" format="[general]"  name=cnta_oper pointer="H:\Source\Cur\taladro.cur" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="5" color="0" x="805" y="720" height="56" width="1129" format="[general]"  name=abrev_cnta edit.limit=25 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="5" color="0" x="805" y="644" height="56" width="1129" format="[general]"  name=desc_cuenta_ins edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Cta.Presup.Ins. :" border="0" color="0" x="23" y="644" height="56" width="411"  name=t_5  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=140 border="5" color="0" x="466" y="644" height="56" width="311" format="[general]"  name=cnta_prsp_insm edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

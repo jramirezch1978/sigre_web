@@ -1,0 +1,40 @@
+﻿$PBExportHeader$d_abc_guia_vales_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_guia dbname="guia.nro_guia" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="guia.cod_origen" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="guia.fec_registro" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="guia.cod_usr" )
+ retrieve="SELECT DISTINCT  ~"GUIA~".~"NRO_GUIA~" ,
+       ~"GUIA~".~"COD_ORIGEN~"   ,
+       ~"GUIA~".~"FEC_REGISTRO~" ,
+       ~"GUIA~".~"COD_USR~"      
+  FROM ~"VALE_MOV~"  ,
+       ~"GUIA_VALE~" ,
+       ~"GUIA~"      ,
+		   ~"MOTIVO_TRASLADO~",
+       ~"LOGPARAM~"  
+ WHERE ~"GUIA_VALE~".~"ORIGEN_VALE~"            = ~"VALE_MOV~".~"COD_ORIGEN~"            
+   and ~"GUIA_VALE~".~"NRO_VALE~"               = ~"VALE_MOV~".~"NRO_VALE~"              
+   and ~"GUIA_VALE~".~"ORIGEN_GUIA~"             = ~"GUIA~".~"COD_ORIGEN~"                
+   and ~"GUIA_VALE~".~"NRO_GUIA~"               = ~"GUIA~".~"NRO_GUIA~"                  
+   and ~"GUIA~".~"MOTIVO_TRASLADO~"             = ~"MOTIVO_TRASLADO~".~"MOTIVO_TRASLADO~"
+	and ~"MOTIVO_TRASLADO~".~"FLAG_FACTURACION~" = '1'                                
+	and ~"GUIA~".~"FLAG_ESTADO~"                 = '1'                                
+	and ~"VALE_MOV~".~"TIPO_REFER~"               IS NULL                             
+   and ~"GUIA~".~"CLIENTE~"                     = :as_cliente                         
+" arguments=(("as_cliente", string)) )
+text(band=header alignment="2" text="Nro Guia" border="2" color="8388608" x="9" y="8" height="56" width="302" html.valueishtml="0"  name=nro_guia_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha de Registro" border="2" color="8388608" x="617" y="8" height="56" width="603" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Usuario" border="2" color="8388608" x="1225" y="8" height="56" width="215" html.valueishtml="0"  name=guia_cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="315" y="8" height="56" width="297" html.valueishtml="0"  name=cod_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="68" width="302" format="[general]" html.valueishtml="0"  name=nro_guia visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="617" y="0" height="68" width="603" format="[shortdate] [time]" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="1225" y="0" height="68" width="215" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="315" y="0" height="68" width="297" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

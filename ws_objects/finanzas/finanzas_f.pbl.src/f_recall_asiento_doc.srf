@@ -1,0 +1,35 @@
+﻿$PBExportHeader$f_recall_asiento_doc.srf
+global type f_recall_asiento_doc from function_object
+end type
+
+forward prototypes
+global subroutine f_recall_asiento_doc (string as_origen, long al_ano, long al_mes, long al_nro_libro, long al_nro_asiento, string as_cod_relacion, string as_tipo_doc, string as_nro_doc, ref string as_cnta_ctbl)
+end prototypes
+
+global subroutine f_recall_asiento_doc (string as_origen, long al_ano, long al_mes, long al_nro_libro, long al_nro_asiento, string as_cod_relacion, string as_tipo_doc, string as_nro_doc, ref string as_cnta_ctbl);/**************************/
+/*Recupera Asiento Generado*/
+/**************************/
+
+SELECT cnta_ctbl    
+  INTO :as_cnta_ctbl
+  FROM cntbl_asiento_det
+ WHERE ((origen       = :as_origen       )  AND
+		  (ano          = :al_ano          )  AND
+		  (mes          = :al_mes          )  AND
+		  (nro_libro    = :al_nro_libro    )  AND
+		  (nro_asiento  = :al_nro_asiento  )) AND
+		 ((cod_relacion = :as_cod_relacion )  AND
+		  (tipo_docref1 = :as_tipo_doc	  )  AND
+		  (nro_docref1  = :as_nro_doc	     )) AND
+		  (item         = (select max(item) from cntbl_asiento_det 
+								  where ((origen       = :as_origen       )  and 
+									      (ano          = :al_ano          )  and
+									      (mes			  = :al_mes          )  and
+ 						               (nro_libro    = :al_nro_libro    )  and
+								         (nro_asiento  = :al_nro_asiento  )) and
+										  ((cod_relacion = :as_cod_relacion )  and
+										   (tipo_docref1 = :as_tipo_doc     )  and
+											(nro_docref1  = :as_nro_doc      )) )) ;
+
+end subroutine
+

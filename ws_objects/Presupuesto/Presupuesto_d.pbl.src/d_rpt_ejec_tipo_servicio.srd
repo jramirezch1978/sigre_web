@@ -1,0 +1,96 @@
+﻿$PBExportHeader$d_rpt_ejec_tipo_servicio.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=524 color="536870912" )
+summary(height=64 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=decimal(0) updatewhereclause=yes name=ano dbname="presupuesto_ejec.ano" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="presupuesto_ejec.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="presupuesto_ejec.cnta_prsp" )
+ column=(type=char(50) updatewhereclause=yes name=desc_cnta_prsp dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(200) updatewhereclause=yes name=descripcion dbname="orden_servicio_det.descripcion" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe dbname="presupuesto_ejec.importe" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc_ref dbname="presupuesto_ejec.tipo_doc_ref" )
+ column=(type=char(8) updatewhereclause=yes name=cod_rel_ref dbname="presupuesto_ejec.cod_rel_ref" )
+ column=(type=char(6) updatewhereclause=yes name=servicio dbname="servicios.servicio" )
+ column=(type=char(60) updatewhereclause=yes name=desc_servicio dbname="servicios.descripcion" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="presupuesto_ejec.fecha" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc_ref dbname="presupuesto_ejec.nro_doc_ref" )
+ column=(type=decimal(0) updatewhereclause=yes name=item_ref dbname="presupuesto_ejec.item_ref" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="presupuesto_ejec.cod_usr" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="orden_servicio_det.flag_estado" values="Anulado	0/Generado	1/Cerrado	2/Por Aprobar	3/" )
+ retrieve="select pe.ano, pe.cencos, cc.desc_cencos, 
+       pe.cnta_prsp, pc.descripcion, osd.descripcion,
+       pe.importe, pe.tipo_doc_ref, pe.cod_rel_ref,
+       s.servicio, s.descripcion,
+		 pe.fecha, pe.nro_doc_ref, pe.item_ref,
+		 p.nom_proveedor,
+		 pe.cod_usr,
+		 osd.flag_estado
+from presupuesto_ejec    pe,
+     orden_servicio_det  osd,
+     servicios           s,
+     centros_costo       cc,
+     presupuesto_cuenta  pc,
+	  proveedor				 p
+where pe.nro_doc_ref     = osd.nro_os
+  and pe.item_ref        = osd.nro_item
+  and s.servicio         = osd.servicio
+  and cc.cencos          = pe.cencos
+  and pc.cnta_prsp       = pe.cnta_prsp
+  and pe.cod_rel_ref		 = p.proveedor
+  and pe.tipo_doc_ref = (select l.doc_os from logparam l where reckey = '1')
+  and pe.cencos in (select cencos from tt_pto_Cencos)
+  and pe.cnta_prsp in (select cnta_prsp from tt_pto_cnta_prsp)
+  and osd.servicio in (select servicio from tt_pto_servicios)
+  and trunc(pe.FECHA) between trunc(:ad_fecha1) and trunc(:ad_fecha2)
+order by s.servicio, pe.cencos, pe.cnta_prsp, pe.fecha" arguments=(("ad_fecha1", date),("ad_fecha2", date)) )
+group(level=1 header.height=80 trailer.height=60 by=("servicio" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=72 trailer.height=60 by=("cencos" , "cnta_prsp" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="2213" y="144" height="64" width="946" html.valueishtml="0"  name=t_titulo1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="2085" y="236" height="64" width="1266" html.valueishtml="0"  name=t_titulo2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ejecucion por Tipo de Servicios" border="0" color="0" x="1637" y="32" height="92" width="1938" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="14" y="16" height="268" width="521" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Ano" border="2" color="16777215" x="5" y="464" height="56" width="155" html.valueishtml="0"  name=ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fecha" border="2" color="16777215" x="165" y="464" height="56" width="352" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="4105" y="208" height="72" width="379" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="4105" y="120" height="56" width="379" html.valueishtml="0"  name=t_usuario visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="0" x="4105" y="16" height="72" width="379" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="d_rtp_ejec_tipo_servicio" border="0" color="0" x="5" y="376" height="56" width="622" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="0" y="304" height="56" width="622" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="T. D." border="2" color="16777215" x="2011" y="464" height="56" width="142" html.valueishtml="0"  name=tipo_doc_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="16777215" x="2158" y="464" height="56" width="338" html.valueishtml="0"  name=nro_doc_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Descripcion" border="2" color="16777215" x="521" y="464" height="56" width="1486" html.valueishtml="0"  name=orden_servicio_det_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=header.1 id=10 alignment="0" tabsequence=32766 border="0" color="16711680" x="32" y="8" height="60" width="233" format="[general]" html.valueishtml="0"  name=servicio visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=11 alignment="0" tabsequence=32766 border="0" color="16711680" x="315" y="8" height="60" width="1678" format="[general]" html.valueishtml="0"  name=desc_servicio visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=2 alignment="0" tabsequence=32766 border="0" color="255" x="151" y="8" height="56" width="302" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=3 alignment="0" tabsequence=32766 border="0" color="255" x="480" y="8" height="56" width="1125" format="[general]" html.valueishtml="0"  name=desc_cencos visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=4 alignment="0" tabsequence=32766 border="0" color="255" x="1719" y="8" height="56" width="370" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=5 alignment="0" tabsequence=32766 border="0" color="255" x="2121" y="8" height="56" width="1399" format="[general]" html.valueishtml="0"  name=desc_cnta_prsp visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="56" width="155" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="2" color="33554432" x="165" y="4" height="56" width="352" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="2011" y="4" height="56" width="142" format="[general]" html.valueishtml="0"  name=tipo_doc_ref visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="0" x="2158" y="4" height="56" width="338" format="[general]" html.valueishtml="0"  name=nro_doc_ref visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="521" y="4" height="56" width="1486" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=200 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nombre Proveedor" border="2" color="16777215" x="2501" y="464" height="56" width="1152" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Importe" border="2" color="16777215" x="3657" y="464" height="56" width="352" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Usuario" border="2" color="16777215" x="4014" y="464" height="56" width="215" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=16 alignment="0" tabsequence=0 border="2" color="0" x="4014" y="4" height="56" width="215" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Estado" border="2" color="16777215" x="4233" y="464" height="56" width="352" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=17 alignment="0" tabsequence=0 border="2" color="0" x="4233" y="4" height="56" width="352" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="2" color="0" x="2501" y="4" height="56" width="1152" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.2 alignment="1" text="Total x Cencos " border="0" color="0" x="2981" y="4" height="52" width="672" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=trailer.1 alignment="1" text="Total x Tipo de Servicio" border="0" color="0" x="2981" y="8" height="52" width="672" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Total" border="0" color="0" x="2981" y="4" height="52" width="672" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="3657" y="4" height="56" width="352" format="###,##0.00" html.valueishtml="0"  name=importe visible="1" edit.limit=0 edit.case=any edit.format="###,##0.00" edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(importe for group 2)"border="2" color="255" x="3657" y="4" height="52" width="352" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(importe for group 1)"border="2" color="16711680" x="3657" y="4" height="52" width="352" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(importe)"border="2" color="33554432" x="3657" y="4" height="52" width="352" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

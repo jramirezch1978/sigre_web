@@ -1,0 +1,62 @@
+﻿$PBExportHeader$d_ap_cons_comp_materiales_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=120 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(60) updatewhereclause=yes name=articulo_desc_almacen dbname="articulo.desc_almacen" )
+ column=(type=datetime updatewhereclause=yes name=vale_mov_fec_registro dbname="vale_mov.fec_registro" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_cant_procesada dbname="articulo_mov.cant_procesada" )
+ column=(type=number updatewhereclause=yes name=impor_cant dbname="impor_cant" )
+ retrieve="SELECT  A.DESC_ALMACEN,
+        VM.FEC_REGISTRO,
+        A.NOM_ARTICULO,
+        A.UND,
+        AM.CANT_PROCESADA,
+        ROUND(AM.CANT_PROCESADA * USF_FL_CONV_MON(AM.PRECIO_UNIT, 
+                AM.COD_MONEDA, (SELECT COD_SOLES FROM LOGPARAM WHERE 
+              RECKEY = '1'),VM.FEC_REGISTRO),2) AS IMPOR_CANT 
+  
+FROM   VALE_MOV                VM,
+       ARTICULO_MOV            AM,
+       ARTICULO_MOV_TIPO       AMT,
+       ARTICULO                A,
+       ALMACEN                 A
+       
+WHERE  VM.COD_ORIGEN                 = AM.COD_ORIGEN
+  AND  VM.NRO_VALE                   = AM.NRO_VALE
+  AND  VM.TIPO_MOV                   = AMT.TIPO_MOV
+  AND  AM.COD_ART                    = A.COD_ART
+  AND  VM.ALMACEN                    = A.ALMACEN
+  AND  NVL(AMT.FACTOR_SLDO_TOTAL, 0) = -1
+  AND  TO_CHAR(VM.FEC_REGISTRO,'yyyymmdd') BETWEEN :AS_FEC_INI AND :AS_FEC_FIN
+  AND  VM.PROVEEDOR = :AS_PROVEEDOR" arguments=(("AS_FEC_INI", string),("AS_FEC_FIN", string),("AS_PROVEEDOR", string)) )
+text(band=header alignment="2" text="Almacen de 
+Materiales" border="2" color="16777215" x="9" y="4" height="112" width="677" html.valueishtml="0"  name=origen_nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fecha
+Registro" border="2" color="16777215" x="690" y="4" height="112" width="416" html.valueishtml="0"  name=vale_mov_fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nombre de Articulo
+" border="2" color="16777215" x="1111" y="4" height="112" width="686" html.valueishtml="0"  name=articulo_nom_articulo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Und
+" border="2" color="16777215" x="1801" y="4" height="112" width="119" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cant.
+" border="2" color="16777215" x="1925" y="4" height="112" width="206" html.valueishtml="0"  name=articulo_mov_cant_procesada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Total
+S/." border="2" color="16777215" x="2135" y="4" height="112" width="265" html.valueishtml="0"  name=impor_cant_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="60" width="677" format="[general]" html.valueishtml="0"  name=articulo_desc_almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="690" y="0" height="60" width="416" format="[shortdate] [time]" html.valueishtml="0"  name=vale_mov_fec_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="1801" y="0" height="60" width="119" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2135" y="0" height="60" width="265" format="#,##0.00" html.valueishtml="0"  name=impor_cant visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="1925" y="0" height="60" width="206" format="#,##0.00" html.valueishtml="0"  name=articulo_mov_cant_procesada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(impor_cant for all)"border="2" color="33554432" x="2135" y="4" height="60" width="265" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(articulo_mov_cant_procesada for all)"border="2" color="33554432" x="1925" y="4" height="60" width="206" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1111" y="0" height="60" width="686" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="TOTALES" border="2" color="0" x="1111" y="4" height="60" width="809" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

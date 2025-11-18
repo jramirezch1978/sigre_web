@@ -1,0 +1,65 @@
+﻿$PBExportHeader$d_rpt_pd_ot_insumos_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=300 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="vw_pr_trab_jornal_x_pd_ot.nro_parte" )
+ column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="vw_pr_trab_jornal_x_pd_ot.cod_trabajador" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="vw_pr_trab_jornal_x_pd_ot.nombre" )
+ column=(type=decimal(2) updatewhereclause=yes name=nro_horas dbname="vw_pr_trab_jornal_x_pd_ot.nro_horas" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="vw_pr_trab_jornal_x_pd_ot.oper_sec" )
+ column=(type=char(40) updatewhereclause=yes name=desc_operacion dbname="vw_pr_trab_jornal_x_pd_ot.desc_operacion" )
+ column=(type=char(40) updatewhereclause=yes name=desc_labor dbname="vw_pr_trab_jornal_x_pd_ot.desc_labor" )
+ column=(type=char(3) updatewhereclause=yes name=unidad dbname="unidad" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_item dbname="vw_pr_trab_jornal_x_pd_ot.nro_item" )
+ column=(type=datetime updatewhereclause=yes name=fec_inicio dbname="vw_pr_trab_jornal_x_pd_ot.fec_inicio" )
+ column=(type=datetime updatewhereclause=yes name=hora_inicio dbname="vw_pr_trab_jornal_x_pd_ot.hora_inicio" )
+ retrieve="SELECT  A.NRO_PARTE ,
+        A.COD_TRABAJADOR ,
+        A.NOMBRE ,
+        A.NRO_HORAS ,
+        A.OPER_SEC ,
+        A.DESC_OPERACION ,
+        A.DESC_LABOR ,
+        (SELECT UND_HR FROM PROD_PARAM WHERE RECKEY = '1') AS UNIDAD ,
+        A.NRO_ITEM,
+     	  A.FEC_INICIO,
+		  A.HORA_INICIO	
+FROM vw_pr_trab_jornal_x_pd_ot A      
+WHERE A.NRO_PARTE = :as_parte 
+ORDER BY A.OPER_SEC       ASC,
+         A.NRO_PARTE      ASC,
+         A.NRO_ITEM       ASC,
+         A.NOMBRE         ASC  " arguments=(("as_parte", string)) )
+group(level=1 header.height=492 trailer.height=64 by=("oper_sec" , "nro_parte" , "nro_item" ) newpage=yes header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="55" y="44" height="204" width="270" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="68" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="148" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="228" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="IINSUMOS POR PARTE DIARIO" border="4" color="0" x="686" y="68" height="72" width="1810" html.valueishtml="0"  name=cabecera_t visible="1"  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="690" y="164" height="92" width="1806" html.valueishtml="0"  name=nro_parte_t visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=5 alignment="2" tabsequence=32766 border="2" color="0" x="631" y="16" height="64" width="434" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=11 alignment="0" tabsequence=32766 border="2" color="0" x="1015" y="124" height="56" width="480" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=hora_inicio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="2" color="0" x="631" y="192" height="156" width="1691" format="[general]" html.valueishtml="0"  name=desc_labor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=6 alignment="0" tabsequence=32766 border="2" color="0" x="1070" y="16" height="64" width="1257" format="[general]" html.valueishtml="0"  name=desc_operacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="137" y="4" height="56" width="256" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="389" y="4" height="56" width="1422" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="0" x="2171" y="4" height="56" width="151" format="[general]" html.valueishtml="0"  name=unidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="1815" y="4" height="56" width="352" format="###,##0.000" html.valueishtml="0"  name=nro_horas visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(nro_horas for group 1)"border="2" color="255" x="1815" y="4" height="56" width="352" format="###,##0.000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Código" border="2" color="33554432" x="137" y="428" height="56" width="247" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Apellidos y Nombre" border="2" color="33554432" x="389" y="428" height="56" width="1422" html.valueishtml="0"  name=nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Trabajador" border="2" color="33554432" x="137" y="368" height="56" width="1673" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Und" border="2" color="33554432" x="2171" y="368" height="116" width="151" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Cantidad" border="2" color="33554432" x="1815" y="368" height="116" width="352" html.valueishtml="0"  name=cant_destajada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Desc Labor" border="2" color="33554432" x="137" y="192" height="56" width="489" html.valueishtml="0"  name=desc_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Fecha Hora Inicio de la Labor" border="2" color="33554432" x="137" y="124" height="56" width="864" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Operación" border="2" color="33554432" x="137" y="16" height="56" width="489" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=trailer.1 alignment="2" text="Total Horas" border="2" color="33554432" x="1486" y="4" height="56" width="325" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

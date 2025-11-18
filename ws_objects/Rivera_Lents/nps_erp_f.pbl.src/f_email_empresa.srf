@@ -1,0 +1,20 @@
+﻿$PBExportHeader$f_email_empresa.srf
+global type f_email_empresa from function_object
+end type
+
+forward prototypes
+global function string f_email_empresa (string as_origen)
+end prototypes
+
+global function string f_email_empresa (string as_origen);String ls_email
+
+Select email 
+	into :ls_email 
+from origen
+where cod_origen = :as_origen;
+
+if Not IsNull(ls_email) then ls_email = 'Email: ' + ls_email
+
+Return ls_email
+end function
+

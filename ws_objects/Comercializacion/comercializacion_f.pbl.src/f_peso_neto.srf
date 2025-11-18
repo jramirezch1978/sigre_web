@@ -1,0 +1,19 @@
+﻿$PBExportHeader$f_peso_neto.srf
+global type f_peso_neto from function_object
+end type
+
+forward prototypes
+global function double f_peso_neto (string as_nro_doc)
+end prototypes
+
+global function double f_peso_neto (string as_nro_doc);decimal peso_bruto
+
+select  sum(cc.peso_bruto*cc.cantidad) 
+	into :peso_bruto
+	from CNTAS_COBRAR_DET cc
+	where cc.nro_doc = :as_nro_doc
+     group by cc.nro_doc;
+
+return peso_bruto
+end function
+

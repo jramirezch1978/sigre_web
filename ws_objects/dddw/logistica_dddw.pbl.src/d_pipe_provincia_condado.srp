@@ -1,0 +1,13 @@
+﻿$PBExportHeader$d_pipe_provincia_condado.srp
+PIPELINE(source_connect=CN_DB_DB1_PROD5,destination_connect=CN_DB_DB1_PROD8,type=update,commit=100,errors=100,keyname="provincia_condado")
+SOURCE(name="PROVINCIA_CONDADO",COLUMN(type=char,name="COD_PAIS",dbtype="CHAR(4)",key=yes,nulls_allowed=no)
+ COLUMN(type=char,name="COD_DPTO",dbtype="CHAR(3)",key=yes,nulls_allowed=no)
+ COLUMN(type=char,name="COD_PROV",dbtype="CHAR(3)",key=yes,nulls_allowed=no)
+ COLUMN(type=varchar,name="DESC_PROV",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="FLAG_REPLICACION",dbtype="CHAR(1)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"provincia_condado~" ) COLUMN(NAME=~"provincia_condado.cod_pais~") COLUMN(NAME=~"provincia_condado.cod_dpto~") COLUMN(NAME=~"provincia_condado.cod_prov~") COLUMN(NAME=~"provincia_condado.desc_prov~") COLUMN(NAME=~"provincia_condado.flag_replicacion~")) ")
+DESTINATION(name="provincia_condado",COLUMN(type=char,name="cod_pais",dbtype="CHAR(4)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=char,name="cod_dpto",dbtype="CHAR(3)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=char,name="cod_prov",dbtype="CHAR(3)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="desc_prov",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1' "))

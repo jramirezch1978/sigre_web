@@ -1,0 +1,26 @@
+﻿$PBExportHeader$f_num_operaciones.srf
+global type f_num_operaciones from function_object
+end type
+
+forward prototypes
+global function boolean f_num_operaciones (ref string as_nro_oper_sec, ref string as_mensaje)
+end prototypes
+
+global function boolean f_num_operaciones (ref string as_nro_oper_sec, ref string as_mensaje);DECLARE PB_USF_CAM_NUM_OPERACIONES PROCEDURE FOR USF_CAM_NUM_OPERACIONES 
+(:gs_origen);
+EXECUTE PB_USF_CAM_NUM_OPERACIONES ;
+
+
+
+IF SQLCA.SQLCode = -1 THEN 
+	as_mensaje = SQLCA.SQLErrText
+	Return false
+	
+END IF
+
+FETCH PB_USF_CAM_NUM_OPERACIONES INTO :as_nro_oper_sec ;
+CLOSE PB_USF_CAM_NUM_OPERACIONES ;
+
+Return true
+end function
+

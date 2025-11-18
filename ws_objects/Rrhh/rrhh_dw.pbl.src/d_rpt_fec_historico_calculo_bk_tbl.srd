@@ -1,0 +1,21 @@
+﻿$PBExportHeader$d_rpt_fec_historico_calculo_bk_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=176 color="536870912" )
+header[2](height=60 color="536870912" )
+header[3](height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=historico_calculo_fec_calc_plan dbname="historico_calculo_fec_calc_plan" )
+ column=(type=datetime updatewhereclause=yes name=val dbname="val" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"historico_calculo~" )  TABLE(NAME=~"maestro~" )  TABLE(NAME=~"tipo_trabajador~" )  TABLE(NAME=~"origen~" ) COLUMN(NAME=~"historico_calculo.fec_calc_plan~") COLUMN(NAME=~"tipo_trabajador.desc_tipo_tra~") COLUMN(NAME=~"origen.nombre~")    JOIN (LEFT=~"historico_calculo.cod_trabajador~"    OP =~"=~"RIGHT=~"maestro.cod_trabajador~" )    JOIN (LEFT=~"tipo_trabajador.tipo_trabajador~"    OP =~"=~"RIGHT=~"maestro.tipo_trabajador~" )    JOIN (LEFT=~"maestro.cod_origen~"    OP =~"=~"RIGHT=~"origen.cod_origen~" )WHERE(    EXP1 =~"TO_CHAR(~~~"HISTORICO_CALCULO~~~".~~~"FEC_CALC_PLAN~~~",'YYYYMM')~"   OP =~"=~"    EXP2 =~":as_cadena~" )  GROUP(NAME=~"historico_calculo.fec_calc_plan~") GROUP(NAME=~"tipo_trabajador.desc_tipo_tra~") GROUP(NAME=~"origen.nombre~")) ARG(NAME = ~"as_cadena~" TYPE = string) " arguments=(("as_cadena", string))  sort="historico_calculo_fec_calc_plan A " )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="76" width="709" format="[shortdate] [time]" html.valueishtml="0"  name=val visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="2" text="@tipo_trabajador_desc_tipo_tra" border="2" color="33554432" x="9" y="4" height="56" width="709" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="@origen_nombre" border="2" color="33554432" x="9" y="4" height="56" width="709" html.valueishtml="0"  name=val_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "tipo_trabajador_desc_tipo_tra, origen_nombre" rows = "historico_calculo_fec_calc_plan" values = " historico_calculo_fec_calc_plan" sourcenames = "historico_calculo_fec_calc_plan, tipo_trabajador_desc_tipo_tra, origen_nombre")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

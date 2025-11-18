@@ -1,0 +1,56 @@
+﻿$PBExportHeader$d_cns_articulo_x_orden_trabajo.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=articulo_mov_proy_nro_doc dbname="articulo_mov_proy.nro_doc" )
+ column=(type=char(10) updatewhereclause=yes name=articulo_mov_proy_cencos dbname="articulo_mov_proy.cencos" )
+ column=(type=datetime updatewhereclause=yes name=articulo_mov_proy_fec_proyect dbname="articulo_mov_proy.fec_proyect" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_proy_cant_proyect dbname="articulo_mov_proy.cant_proyect" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_proy_cant_procesada dbname="articulo_mov_proy.cant_procesada" )
+ column=(type=char(800) updatewhereclause=yes name=orden_trabajo_descripcion dbname="orden_trabajo.descripcion" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_ot_adm dbname="orden_trabajo.ot_adm" )
+ column=(type=char(8) updatewhereclause=yes name=orden_trabajo_responsable dbname="orden_trabajo.responsable" )
+ column=(type=char(92) updatewhereclause=yes name=compute_0009 dbname="compute_0009" )
+ column=(type=char(1) updatewhereclause=yes name=orden_trabajo_flag_estado dbname="orden_trabajo.flag_estado" values="Anulado	0/Activo	1/Cerrado	2/Proyectado	3/" )
+ retrieve="  SELECT ~"ARTICULO_MOV_PROY~".~"NRO_DOC~",   
+         ~"ARTICULO_MOV_PROY~".~"CENCOS~",
+			~"ARTICULO_MOV_PROY~".~"FEC_PROYECT~",
+   		~"ARTICULO_MOV_PROY~".~"CANT_PROYECT~",
+         ~"ARTICULO_MOV_PROY~".~"CANT_PROCESADA~",
+         ~"ORDEN_TRABAJO~".~"DESCRIPCION~",   
+         ~"ORDEN_TRABAJO~".~"OT_ADM~",   
+         ~"ORDEN_TRABAJO~".~"RESPONSABLE~",   
+         MAESTRO.APEL_PATERNO||' '||MAESTRO.APEL_MATERNO||' '||MAESTRO.NOMBRE1,   
+         ~"ORDEN_TRABAJO~".~"FLAG_ESTADO~"
+    FROM ~"ARTICULO_MOV_PROY~" ,   
+         ~"ORDEN_TRABAJO~" ,   
+         ~"MAESTRO~"   
+   WHERE ( ~"ARTICULO_MOV_PROY~".~"NRO_DOC~" = ~"ORDEN_TRABAJO~".~"NRO_ORDEN~" ) and  
+         ( ~"MAESTRO~".~"COD_TRABAJADOR~" = ~"ORDEN_TRABAJO~".~"RESPONSABLE~" ) and  
+         ( ( ARTICULO_MOV_PROY.TIPO_DOC = (Select doc_ot from logparam where reckey=1) ) AND  
+         ( COD_ART = :as_codigo ) AND  
+         ( TRUNC(~"ARTICULO_MOV_PROY~".~"FEC_PROYECT~") >= :ad_desde ) AND  
+         ( TRUNC(~"ARTICULO_MOV_PROY~".~"FEC_PROYECT~") <= :ad_hasta ) )    
+" arguments=(("as_codigo", string),("ad_desde", date),("ad_hasta", date)) )
+text(band=header alignment="2" text="Nro OT" border="0" color="0" x="9" y="4" height="56" width="311" html.valueishtml="0"  name=articulo_mov_proy_nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Cencos" border="0" color="0" x="709" y="4" height="56" width="311" html.valueishtml="0"  name=articulo_mov_proy_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Flag Estado" border="0" color="0" x="2793" y="4" height="56" width="274" html.valueishtml="0"  name=orden_trabajo_flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="0" text="Fec Proyect" border="0" color="0" x="329" y="4" height="56" width="370" html.valueishtml="0"  name=articulo_mov_proy_fec_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="68" width="311" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_nro_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="709" y="0" height="68" width="311" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="1029" y="0" height="68" width="1221" format="[general]" html.valueishtml="0"  name=orden_trabajo_descripcion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="329" y="0" height="68" width="370" format="[shortdate] [time]" html.valueishtml="0"  name=articulo_mov_proy_fec_proyect visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="2263" y="8" height="56" width="265" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cant_proyect visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Descripcion" border="0" color="0" x="1029" y="4" height="56" width="1221" html.valueishtml="0"  name=orden_trabajo_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="0" text="Cant Proyect" border="6" color="0" x="2258" y="4" height="56" width="270" html.valueishtml="0"  name=articulo_mov_proy_cant_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="0" text="Cant Procesada" border="6" color="0" x="2537" y="4" height="56" width="242" html.valueishtml="0"  name=articulo_mov_proy_cant_procesada_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="0" x="2542" y="8" height="56" width="238" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cant_procesada visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="0" x="2793" y="8" height="56" width="274" format="[general]" html.valueishtml="0"  name=orden_trabajo_flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

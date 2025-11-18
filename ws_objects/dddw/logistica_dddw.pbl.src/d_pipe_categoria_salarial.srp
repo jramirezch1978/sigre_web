@@ -1,0 +1,11 @@
+﻿$PBExportHeader$d_pipe_categoria_salarial.srp
+PIPELINE(source_connect=CN_DB_DB1_PROD5,destination_connect=CN_DB_DB1_PROD8,type=update,commit=100,errors=100,keyname="categoria_salarial")
+SOURCE(name="CATEGORIA_SALARIAL",COLUMN(type=char,name="COD_CATEG_SAL",dbtype="CHAR(2)",key=yes,nulls_allowed=no)
+ COLUMN(type=decimal,name="IMP_CATEG_MIN",dbtype="NUMBER(13,2)",nulls_allowed=yes)
+ COLUMN(type=decimal,name="IMP_CATEG_MAX",dbtype="NUMBER(13,2)",nulls_allowed=yes)
+ COLUMN(type=char,name="FLAG_REPLICACION",dbtype="CHAR(1)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"categoria_salarial~" ) COLUMN(NAME=~"categoria_salarial.cod_categ_sal~") COLUMN(NAME=~"categoria_salarial.imp_categ_min~") COLUMN(NAME=~"categoria_salarial.imp_categ_max~") COLUMN(NAME=~"categoria_salarial.flag_replicacion~")) ")
+DESTINATION(name="categoria_salarial",COLUMN(type=char,name="cod_categ_sal",dbtype="CHAR(2)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=decimal,name="imp_categ_min",dbtype="NUMBER(13,2)",nulls_allowed=yes,default_value="0 ")
+ COLUMN(type=decimal,name="imp_categ_max",dbtype="NUMBER(13,2)",nulls_allowed=yes,default_value="0 ")
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1' "))

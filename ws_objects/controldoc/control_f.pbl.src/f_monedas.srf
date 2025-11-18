@@ -1,0 +1,20 @@
+﻿$PBExportHeader$f_monedas.srf
+global type f_monedas from function_object
+end type
+
+forward prototypes
+global subroutine f_monedas (ref string as_cod_soles, ref string as_cod_dolares)
+end prototypes
+
+global subroutine f_monedas (ref string as_cod_soles, ref string as_cod_dolares);SELECT cod_soles,
+		 cod_dolares
+  INTO :as_cod_soles,
+  		 :as_cod_dolares
+ FROM  logparam
+ WHERE reckey = '1' ; 
+ 
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox('SQL error , Recuperación de Moneda', SQLCA.SQLErrText)
+END IF
+end subroutine
+

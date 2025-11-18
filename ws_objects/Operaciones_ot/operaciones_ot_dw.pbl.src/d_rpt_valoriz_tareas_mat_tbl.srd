@@ -1,0 +1,40 @@
+﻿$PBExportHeader$d_rpt_valoriz_tareas_mat_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=156 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="tt_ope_valorizacion_labores.cod_labor" )
+ column=(type=char(40) updatewhereclause=yes name=labor_desc_labor dbname="labor.desc_labor" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="tt_ope_valorizacion_labores.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=decimal(2) updatewhereclause=yes name=cant_propio dbname="tt_ope_valorizacion_labores.cant_propio" )
+ column=(type=decimal(2) updatewhereclause=yes name=precio_propio dbname="tt_ope_valorizacion_labores.precio_propio" )
+ retrieve="select tt.cod_labor, l.desc_labor, tt.cod_art, a.nom_articulo, a.und, tt.cant_propio, 
+       tt.precio_propio
+from tt_ope_valorizacion_labores tt, labor l, articulo a
+where tt.cod_labor = l.cod_labor and
+      tt.cod_art = a.cod_art
+order by tt.cod_labor, tt.cod_art" )
+group(level=1 header.height=88 trailer.height=76 by=("cod_art" ) header.color="536870912" trailer.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="329" y="8" height="56" width="247" format="[general]" html.valueishtml="0"  name=cod_labor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=0 border="2" color="33554432" x="585" y="8" height="56" width="923" html.valueishtml="0"  name=labor_desc_labor visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="18" y="12" height="56" width="302" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=5 alignment="2" tabsequence=0 border="2" color="33554432" x="334" y="12" height="56" width="114" html.valueishtml="0"  name=articulo_und visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=0 border="2" color="33554432" x="462" y="12" height="56" width="1280" html.valueishtml="0"  name=articulo_nom_articulo visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="1518" y="8" height="56" width="329" format="#,##0.00" html.valueishtml="0"  name=cant_propio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="1856" y="8" height="56" width="325" format="#,##0.00" html.valueishtml="0"  name=precio_propio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="round(  cant_propio * precio_propio , 2 )"border="0" color="33554432" x="2190" y="8" height="56" width="283" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(cant_propio for group 1)"border="0" color="33554432" x="1518" y="4" height="56" width="329" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(precio_propio for group 1)"border="0" color="33554432" x="1856" y="4" height="56" width="325" format="#,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(round(  cant_propio * precio_propio , 2 ) for group 1)"border="0" color="33554432" x="2190" y="4" height="56" width="283" format="#,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Artículo" border="2" color="33554432" x="18" y="88" height="56" width="302" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="32501743" )
+text(band=header alignment="2" text="Labor" border="2" color="33554432" x="329" y="88" height="56" width="247" html.valueishtml="0"  name=cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="32501743" )
+text(band=header alignment="2" text="Descripción de labor" border="2" color="33554432" x="585" y="88" height="56" width="923" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="32501743" )
+text(band=header alignment="2" text="Prec.Unit $" border="2" color="33554432" x="1856" y="88" height="56" width="325" html.valueishtml="0"  name=precio_propio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="32501743" )
+text(band=header alignment="2" text="Total US$" border="2" color="33554432" x="2190" y="88" height="56" width="283" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="32501743" )
+text(band=header alignment="2" text="Cantidad" border="2" color="33554432" x="1518" y="88" height="56" width="329" html.valueishtml="0"  name=cant_propio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="32501743" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

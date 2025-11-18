@@ -1,0 +1,81 @@
+﻿$PBExportHeader$d_rpt_plan_anual_compras_x_mes_back.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="Plan Anual de Compras" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=396 color="536870912" )
+summary(height=44 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=number updatewhereclause=yes name=m_ene dbname="m_ene" )
+ column=(type=number updatewhereclause=yes name=m_feb dbname="m_feb" )
+ column=(type=number updatewhereclause=yes name=m_mar dbname="m_mar" )
+ column=(type=number updatewhereclause=yes name=m_abr dbname="m_abr" )
+ column=(type=number updatewhereclause=yes name=m_may dbname="m_may" )
+ column=(type=number updatewhereclause=yes name=m_jun dbname="m_jun" )
+ column=(type=number updatewhereclause=yes name=m_jul dbname="m_jul" )
+ column=(type=number updatewhereclause=yes name=m_ago dbname="m_ago" )
+ column=(type=number updatewhereclause=yes name=m_set dbname="m_set" )
+ column=(type=number updatewhereclause=yes name=m_oct dbname="m_oct" )
+ column=(type=number updatewhereclause=yes name=m_nov dbname="m_nov" )
+ column=(type=number updatewhereclause=yes name=m_dic dbname="m_dic" )
+ retrieve="Select m.cod_art, a.nom_articulo, a.und,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '01', m.cant_proyect,0)) as m_ene,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '02', m.cant_proyect,0)) as m_feb,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '03', m.cant_proyect,0)) as m_mar,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '04', m.cant_proyect,0)) as m_abr,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '05', m.cant_proyect,0)) as m_may,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '06', m.cant_proyect,0)) as m_jun,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '07', m.cant_proyect,0)) as m_jul,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '08', m.cant_proyect,0)) as m_ago,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '09', m.cant_proyect,0)) as m_set,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '10', m.cant_proyect,0)) as m_oct,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '11', m.cant_proyect,0)) as m_nov,
+   SUM( DECODE( TO_CHAR(m.fec_proyect, 'MM'), '12', m.cant_proyect,0)) as m_dic
+    From articulo_mov_proy m, articulo a, tt_alm_seleccion t
+    Where  m.tipo_mov = 'S01' and t.cod_art = m.cod_art and 
+      to_char(m.fec_proyect,'IYYY') = :as_ano  and
+      m.flag_estado = '1' and m.cod_art = a.cod_art
+    Group by m.cod_art, a.nom_articulo, a.und
+    Order By m.cod_art" arguments=(("as_ano", string)) )
+bitmap(band=header filename="" x="27" y="24" height="216" width="389" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="PLAN   ANUAL   DE   COMPRAS" border="0" color="0" x="1769" y="40" height="80" width="1426" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="4069" y="24" height="64" width="448" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="4069" y="104" height="64" width="329" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="now()"border="0" color="0" x="4073" y="184" height="64" width="329" format="hh:mm:ss" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Código" border="6" color="0" x="5" y="336" height="56" width="247" html.valueishtml="0"  name=tt_rpt_plan_anual_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Enero" border="6" color="0" x="1490" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_enero_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Febrero" border="6" color="0" x="1751" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_febrero_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Marzo" border="6" color="0" x="2007" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_marzo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+compute(band=detail alignment="1" expression=" m_ene +  m_feb +  m_mar +  m_abr +  m_may +  m_jun +  m_jul +  m_ago +  m_set +  m_oct +  m_nov +  m_dic "border="0" color="0" x="4576" y="4" height="60" width="242" format="[General]" html.valueishtml="0"  name=compute_16 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="5" y="4" height="56" width="247" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="1490" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_ene visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1751" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_feb visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="2007" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_mar visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=summary x1="23" y1="24" x2="4658" y2="24"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="8388608"  background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Total" border="6" color="0" x="4576" y="336" height="56" width="242" html.valueishtml="0"  name=centros_costo_desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Abril" border="6" color="0" x="2267" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_abril_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="2267" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_abr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Mayo" border="6" color="0" x="2523" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_mayo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="2523" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_may visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Junio" border="6" color="0" x="2779" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_junio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Julio" border="6" color="0" x="3035" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_julio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="2779" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_jun visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="3035" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_jul visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Agosto" border="6" color="0" x="3291" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_agosto_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="3291" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_ago visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Setiemb" border="6" color="0" x="3547" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_setiembre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="0" x="3547" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_set visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Octubre" border="6" color="0" x="3803" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_octubre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="0" x="3803" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_oct visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Noviemb" border="6" color="0" x="4055" y="336" height="56" width="251" html.valueishtml="0"  name=tt_rpt_plan_anual_noviembre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="0" color="0" x="4055" y="4" height="56" width="251" format="[general]" html.valueishtml="0"  name=m_nov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Diciemb" border="6" color="0" x="4315" y="336" height="56" width="242" html.valueishtml="0"  name=tt_rpt_plan_anual_diciembre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="0" color="0" x="4315" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=m_dic visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Descripción" border="6" color="0" x="270" y="336" height="56" width="1102" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=2 alignment="0" tabsequence=0 border="0" color="0" x="270" y="4" height="56" width="1102" html.valueishtml="0"  name=articulo_nom_articulo visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Und" border="6" color="0" x="1381" y="336" height="56" width="91" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=3 alignment="0" tabsequence=0 border="0" color="0" x="1381" y="4" height="56" width="91" html.valueishtml="0"  name=articulo_und visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

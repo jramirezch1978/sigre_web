@@ -1,0 +1,79 @@
+﻿$PBExportHeader$d_rpt_asiento_codrel_error_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=348 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=cntbl_asiento_det_origen dbname="cntbl_asiento_det.origen" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntbl_asiento_det_ano dbname="cntbl_asiento_det.ano" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntbl_asiento_det_mes dbname="cntbl_asiento_det.mes" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntbl_asiento_det_nro_libro dbname="cntbl_asiento_det.nro_libro" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntbl_asiento_det_nro_asiento dbname="cntbl_asiento_det.nro_asiento" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntbl_asiento_det_item dbname="cntbl_asiento_det.item" )
+ column=(type=char(10) updatewhereclause=yes name=cntbl_asiento_det_cnta_ctbl dbname="cntbl_asiento_det.cnta_ctbl" )
+ column=(type=char(8) updatewhereclause=yes name=cntbl_asiento_det_cod_relacion dbname="cntbl_asiento_det.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=cntbl_asiento_det_tipo_docref1 dbname="cntbl_asiento_det.tipo_docref1" )
+ column=(type=char(15) updatewhereclause=yes name=cntbl_asiento_det_nro_docref1 dbname="cntbl_asiento_det.nro_docref1" )
+ retrieve="  SELECT ~"CNTBL_ASIENTO_DET~".~"ORIGEN~",   
+         ~"CNTBL_ASIENTO_DET~".~"ANO~",   
+         ~"CNTBL_ASIENTO_DET~".~"MES~",   
+         ~"CNTBL_ASIENTO_DET~".~"NRO_LIBRO~",   
+         ~"CNTBL_ASIENTO_DET~".~"NRO_ASIENTO~",   
+         ~"CNTBL_ASIENTO_DET~".~"ITEM~",   
+         ~"CNTBL_ASIENTO_DET~".~"CNTA_CTBL~",   
+         ~"CNTBL_ASIENTO_DET~".~"COD_RELACION~",   
+         ~"CNTBL_ASIENTO_DET~".~"TIPO_DOCREF1~",   
+         ~"CNTBL_ASIENTO_DET~".~"NRO_DOCREF1~"  
+    FROM ~"CNTBL_ASIENTO~",   
+         ~"CNTBL_ASIENTO_DET~",   
+         ~"CNTBL_CNTA~"  
+   WHERE ( ~"CNTBL_ASIENTO~".~"ORIGEN~" = ~"CNTBL_ASIENTO_DET~".~"ORIGEN~" ) and  
+         ( ~"CNTBL_ASIENTO~".~"ANO~" = ~"CNTBL_ASIENTO_DET~".~"ANO~" ) and  
+         ( ~"CNTBL_ASIENTO~".~"MES~" = ~"CNTBL_ASIENTO_DET~".~"MES~" ) and  
+         ( ~"CNTBL_ASIENTO~".~"NRO_LIBRO~" = ~"CNTBL_ASIENTO_DET~".~"NRO_LIBRO~" ) and  
+         ( ~"CNTBL_ASIENTO~".~"NRO_ASIENTO~" = ~"CNTBL_ASIENTO_DET~".~"NRO_ASIENTO~" ) and  
+         ( ~"CNTBL_ASIENTO_DET~".~"CNTA_CTBL~" = ~"CNTBL_CNTA~".~"CNTA_CTBL~" ) and  
+         ( ( ~"CNTBL_ASIENTO~".~"ORIGEN~" = :as_origen ) AND  
+         ( ~"CNTBL_ASIENTO~".~"ANO~" = :an_ano ) AND  
+         ( ~"CNTBL_ASIENTO~".~"MES~" = :an_mes ) AND  
+         ( ~"CNTBL_ASIENTO~".~"FLAG_ESTADO~" <> '0' ) AND  
+         ( ~"CNTBL_CNTA~".~"FLAG_ESTADO~" <> '0' ) AND  
+         ( ~"CNTBL_CNTA~".~"FLAG_CODREL~" = '1' ) AND  
+         ((~"CNTBL_ASIENTO_DET~".~"COD_RELACION~" is null) OR
+			 (~"CNTBL_ASIENTO_DET~".~"TIPO_DOCREF1~" is null) OR
+			 (~"CNTBL_ASIENTO_DET~".~"NRO_DOCREF1~" is null) ) )   
+ORDER BY ~"CNTBL_ASIENTO_DET~".~"ORIGEN~" ASC,   
+         ~"CNTBL_ASIENTO_DET~".~"ANO~" ASC,   
+         ~"CNTBL_ASIENTO_DET~".~"MES~" ASC,   
+         ~"CNTBL_ASIENTO_DET~".~"NRO_LIBRO~" ASC,   
+         ~"CNTBL_ASIENTO_DET~".~"NRO_ASIENTO~" ASC,   
+         ~"CNTBL_ASIENTO_DET~".~"ITEM~" ASC   
+" arguments=(("as_origen", string),("an_ano", number),("an_mes", number)) )
+bitmap(band=header filename="" x="27" y="16" height="164" width="297" border="0"  name=p_logo )
+text(band=header alignment="2" text="Error de asientos por código de relación" border="0" color="0" x="585" y="52" height="64" width="1207"  name=t_1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="1966" y="28" height="56" width="334" format="[general]"  name=page_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="1966" y="104" height="56" width="334" format="dd/mm/yyyy"  name=date_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Orig" border="2" color="0" x="101" y="284" height="56" width="114"  name=cntbl_asiento_det_origen_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Año" border="2" color="0" x="229" y="284" height="56" width="160"  name=cntbl_asiento_det_ano_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Mes" border="2" color="0" x="402" y="284" height="56" width="133"  name=cntbl_asiento_det_mes_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Libro" border="2" color="0" x="549" y="284" height="56" width="160"  name=cntbl_asiento_det_nro_libro_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Asiento" border="2" color="0" x="722" y="284" height="56" width="265"  name=cntbl_asiento_det_nro_asiento_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Item" border="2" color="0" x="1001" y="284" height="56" width="146"  name=cntbl_asiento_det_item_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cnta Ctbl" border="2" color="0" x="1161" y="284" height="56" width="302"  name=cntbl_asiento_det_cnta_ctbl_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cod.Relac" border="2" color="0" x="1477" y="284" height="56" width="251"  name=cntbl_asiento_det_cod_relacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="0" x="1742" y="284" height="56" width="183"  name=cntbl_asiento_det_tipo_docref1_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="text" border="0" color="0" x="585" y="152" height="56" width="1211"  name=t_texto  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nro Docum" border="2" color="0" x="1938" y="284" height="56" width="393"  name=cntbl_asiento_det_nro_docref1_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="101" y="0" height="56" width="114" format="[general]"  name=cntbl_asiento_det_origen edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="0" x="229" y="0" height="56" width="160" format="[general]"  name=cntbl_asiento_det_ano edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="402" y="0" height="56" width="133" format="[general]"  name=cntbl_asiento_det_mes edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="549" y="0" height="56" width="160" format="[general]"  name=cntbl_asiento_det_nro_libro edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="722" y="0" height="56" width="265" format="[general]"  name=cntbl_asiento_det_nro_asiento edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="1001" y="0" height="56" width="146" format="[general]"  name=cntbl_asiento_det_item edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1161" y="0" height="56" width="302" format="[general]"  name=cntbl_asiento_det_cnta_ctbl edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1477" y="0" height="56" width="251" format="[general]"  name=cntbl_asiento_det_cod_relacion edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="1742" y="0" height="56" width="183" format="[general]"  name=cntbl_asiento_det_tipo_docref1 edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="1938" y="0" height="56" width="393" format="[general]"  name=cntbl_asiento_det_nro_docref1 edit.limit=15 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

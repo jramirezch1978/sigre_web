@@ -1,0 +1,74 @@
+﻿$PBExportHeader$d_abc_lista_oc_pendientes_no_control_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="orden_compra.cod_origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_oc dbname="orden_compra.nro_oc" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="orden_compra.flag_estado" values="Anulada	0/Generada	1/Atendido Parcial	2/Atendido Total	3/Facturado Parcial	4/Facturado Total	5/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_cotizacion dbname="orden_compra.flag_cotizacion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_importacion dbname="orden_compra.flag_importacion" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=proveedor dbname="orden_compra.proveedor" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=nom_vendedor dbname="orden_compra.nom_vendedor" )
+ column=(type=char(200) update=yes updatewhereclause=yes name=observacion dbname="orden_compra.observacion" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_registro dbname="orden_compra.fec_registro" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=forma_pago dbname="orden_compra.forma_pago" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="orden_compra.cod_moneda" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=monto_total dbname="orden_compra.monto_total" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=monto_facturado dbname="orden_compra.monto_facturado" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="orden_compra.cod_usr" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=sol_cod_origen dbname="orden_compra.sol_cod_origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_sol_comp dbname="orden_compra.nro_sol_comp" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_programa dbname="orden_compra.nro_programa" )
+ column=(type=char(10) updatewhereclause=yes name=job dbname="orden_compra.job" )
+ retrieve="  SELECT ~"ORDEN_COMPRA~".~"COD_ORIGEN~"       , ~"ORDEN_COMPRA~".~"NRO_OC~"          ,   
+         ~"ORDEN_COMPRA~".~"FLAG_ESTADO~"      , ~"ORDEN_COMPRA~".~"FLAG_COTIZACION~" ,   
+         ~"ORDEN_COMPRA~".~"FLAG_IMPORTACION~" , ~"ORDEN_COMPRA~".~"PROVEEDOR~"       ,   
+         ~"ORDEN_COMPRA~".~"NOM_VENDEDOR~"     , ~"ORDEN_COMPRA~".~"OBSERVACION~"     ,   
+         ~"ORDEN_COMPRA~".~"FEC_REGISTRO~"     , ~"ORDEN_COMPRA~".~"FORMA_PAGO~"      ,   
+         ~"ORDEN_COMPRA~".~"COD_MONEDA~"       , ~"ORDEN_COMPRA~".~"MONTO_TOTAL~"     ,   
+         ~"ORDEN_COMPRA~".~"MONTO_FACTURADO~"  , ~"ORDEN_COMPRA~".~"COD_USR~"			,   
+         ~"ORDEN_COMPRA~".~"SOL_COD_ORIGEN~"	 , ~"ORDEN_COMPRA~".~"NRO_SOL_COMP~"		,   
+         ~"ORDEN_COMPRA~".~"NRO_PROGRAMA~"		 , ~"ORDEN_COMPRA~".~"JOB~"  
+    FROM ~"ORDEN_COMPRA~"  ,~"ARTICULO_MOV_PROY~"
+   WHERE ( ~"ORDEN_COMPRA~".~"NRO_OC~"           =  ~"ARTICULO_MOV_PROY~".~"NRO_DOC~"                            ) AND
+         ( ~"ARTICULO_MOV_PROY~".~"TIPO_DOC~"    =  (SELECT DOC_OC FROM LOGPARAM WHERE RECKEY = '1')         ) AND
+         ( Nvl(~"ARTICULO_MOV_PROY~".~"CANT_PROYECT~",0) - Nvl(~"ARTICULO_MOV_PROY~".~"CANT_FACTURADA~",0) > 0 ) AND
+         ( ~"ORDEN_COMPRA~".~"PROVEEDOR~"     =  :as_cod_proveedor                                           ) 
+GROUP BY ~"ORDEN_COMPRA~".~"COD_ORIGEN~",   
+         ~"ORDEN_COMPRA~".~"NRO_OC~",   
+         ~"ORDEN_COMPRA~".~"FLAG_ESTADO~",   
+         ~"ORDEN_COMPRA~".~"FLAG_COTIZACION~",   
+         ~"ORDEN_COMPRA~".~"FLAG_IMPORTACION~",   
+         ~"ORDEN_COMPRA~".~"PROVEEDOR~",   
+         ~"ORDEN_COMPRA~".~"NOM_VENDEDOR~",   
+         ~"ORDEN_COMPRA~".~"OBSERVACION~",   
+         ~"ORDEN_COMPRA~".~"FEC_REGISTRO~",   
+         ~"ORDEN_COMPRA~".~"FORMA_PAGO~",   
+         ~"ORDEN_COMPRA~".~"COD_MONEDA~",   
+         ~"ORDEN_COMPRA~".~"MONTO_TOTAL~",   
+         ~"ORDEN_COMPRA~".~"MONTO_FACTURADO~",   
+         ~"ORDEN_COMPRA~".~"COD_USR~",   
+         ~"ORDEN_COMPRA~".~"SOL_COD_ORIGEN~",   
+         ~"ORDEN_COMPRA~".~"NRO_SOL_COMP~",   
+         ~"ORDEN_COMPRA~".~"NRO_PROGRAMA~",   
+         ~"ORDEN_COMPRA~".~"JOB~"  " arguments=(("as_cod_proveedor", string)) )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="9" y="8" height="112" width="361" html.valueishtml="0"  name=cod_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro.Orden Compra" border="2" color="8388608" x="375" y="8" height="112" width="357" html.valueishtml="0"  name=nro_oc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="F. Registro" border="2" color="8388608" x="1097" y="8" height="112" width="315" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Monto Total" border="2" color="8388608" x="1417" y="8" height="112" width="329" html.valueishtml="0"  name=monto_total_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="1751" y="8" height="112" width="398" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Estado" border="2" color="8388608" x="736" y="8" height="112" width="357" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="0" x="9" y="0" height="68" width="361" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="375" y="0" height="68" width="357" format="[general]" html.valueishtml="0"  name=nro_oc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="0" x="1097" y="0" height="68" width="315" format="[shortdate] [time]" html.valueishtml="0"  name=fec_registro visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="2" color="0" x="1417" y="0" height="68" width="329" format="[general]" html.valueishtml="0"  name=monto_total visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="2" color="0" x="1751" y="0" height="68" width="398" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" dddw.name=d_dddw_moneda_tbl dddw.displaycolumn=descripcion dddw.datacolumn=cod_moneda dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="0" x="736" y="0" height="68" width="357" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,62 @@
+﻿$PBExportHeader$d_cns_pendientes_ot_x_otadm_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912"  height.autosize=yes)
+table(column=(type=char(10) update=yes updatewhereclause=yes name=nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=decimal(0) updatewhereclause=yes name=operaciones_nro_operacion dbname="operaciones.nro_operacion" )
+ column=(type=char(10) updatewhereclause=yes name=operaciones_oper_sec dbname="operaciones.oper_sec" )
+ column=(type=char(150) updatewhereclause=yes name=operaciones_descripcion dbname="operaciones.descripcion" )
+ column=(type=datetime updatewhereclause=yes name=fec_inicio dbname="fec_inicio" )
+ column=(type=char(12) updatewhereclause=yes name=operaciones_codigo dbname="operaciones.codigo" )
+ column=(type=char(60) updatewhereclause=yes name=servicios_desc_codigo dbname="servicios.desc_codigo" )
+ column=(type=number updatewhereclause=yes name=operaciones_cant_proyect dbname="operaciones.cant_proyect" )
+ column=(type=number updatewhereclause=yes name=costo dbname="costo" )
+ retrieve="select ot.nro_orden, o.nro_operacion, o.oper_sec, o.desc_operacion as descripcion, trunc(o.fec_inicio) as fec_inicio, 
+       o.servicio as codigo, s.descripcion as desc_codigo, o.cant_proyect, nvl(o.costo_unit,1) as costo
+from orden_trabajo ot, operaciones o, servicios s 
+where (ot.nro_orden = o.nro_orden and 
+       o.servicio = s.servicio and 
+       o.flag_estado='1' and 
+       o.servicio is not null and 
+       ot.ot_adm=:as_ot_adm) 
+union all        
+select ot.nro_orden, o.nro_operacion, o.oper_sec, a.nom_articulo as dscripcion, trunc(amp.fec_proyect) as fec_inicio, 
+       amp.cod_art as codigo, a.nom_articulo as desc_codigo, amp.cant_proyect, NVL(amp.precio_unit,1) as costo
+from orden_trabajo ot, operaciones o, articulo_mov_proy amp, articulo a 
+where (ot.nro_orden = o.nro_orden and 
+       o.flag_estado='1' and 
+       ot.ot_adm=:as_ot_adm) and 
+     (o.oper_sec = amp.oper_sec and 
+      amp.tipo_mov=:as_tipo_mov and 
+      amp.tipo_doc=:as_tipo_doc) and 
+      amp.flag_estado='1' and 
+      amp.cod_art = a.cod_art and 
+      a.flag_estado ='1'
+      
+" arguments=(("as_ot_adm", string),("as_tipo_mov", string),("as_tipo_doc", string)) )
+text(band=header alignment="2" text="Nro Orden" border="2" color="33554432" x="5" y="8" height="56" width="302" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Operac" border="2" color="33554432" x="311" y="8" height="56" width="160" html.valueishtml="0"  name=operaciones_nro_operacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="OperSec" border="2" color="33554432" x="475" y="8" height="56" width="311" html.valueishtml="0"  name=operaciones_oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="791" y="8" height="56" width="1582" html.valueishtml="0"  name=operaciones_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Descripción de código pendiente" border="2" color="33554432" x="3008" y="8" height="56" width="1623" html.valueishtml="0"  name=servicios_desc_codigo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Código" border="2" color="33554432" x="2679" y="8" height="56" width="325" html.valueishtml="0"  name=operaciones_codigo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Fecha Ini" border="2" color="33554432" x="2377" y="8" height="56" width="297" html.valueishtml="0"  name=fec_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cantidad" border="2" color="33554432" x="4635" y="8" height="56" width="393" html.valueishtml="0"  name=operaciones_cant_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="33554432" x="5033" y="8" height="56" width="375" html.valueishtml="0"  name=costo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="64" width="302" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="311" y="4" height="64" width="160" html.valueishtml="0"  name=operaciones_nro_operacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="475" y="4" height="64" width="311" html.valueishtml="0"  name=operaciones_oper_sec visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="791" y="4" height="64" width="1582" html.valueishtml="0"  name=operaciones_descripcion visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="3008" y="4" height="64" width="1623" html.valueishtml="0"  name=servicios_desc_codigo visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="33554432" x="2679" y="4" height="64" width="325" html.valueishtml="0"  name=operaciones_codigo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="2377" y="4" height="64" width="297" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_inicio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="4635" y="4" height="64" width="393" format="###,###.00" html.valueishtml="0"  name=operaciones_cant_proyect visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="5033" y="4" height="64" width="375" format="###,###.00" html.valueishtml="0"  name=costo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

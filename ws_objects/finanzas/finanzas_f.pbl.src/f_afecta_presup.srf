@@ -1,0 +1,24 @@
+﻿$PBExportHeader$f_afecta_presup.srf
+global type f_afecta_presup from function_object
+end type
+
+forward prototypes
+global function integer f_afecta_presup (long an_mes, long an_ano, string as_cencos, string as_cnta_prsp, decimal an_importe)
+end prototypes
+
+global function integer f_afecta_presup (long an_mes, long an_ano, string as_cencos, string as_cnta_prsp, decimal an_importe);// Evalua presupuesto.
+if TRIM( as_cencos ) <> '' AND TRIM( as_cnta_prsp) <> '' then		
+	Long lpos   			
+
+	DECLARE Afecta_presup PROCEDURE FOR USP_PTO_AFECTA_EJECUCION_PB
+			  (:an_mes, :an_ano, :as_cencos, :as_cnta_prsp,
+			  :an_importe);
+	EXECUTE Afecta_presup;
+	if sqlca.sqlcode = -1 then   // Fallo
+		Messagebox( "Error", sqlca.sqlerrtext, stopsign!)
+		return 0
+	end if
+end if
+return 1
+end function
+

@@ -1,0 +1,30 @@
+﻿$PBExportHeader$f_telefono_codrel.srf
+global type f_telefono_codrel from function_object
+end type
+
+forward prototypes
+global function string f_telefono_codrel (string as_codrel, string as_tipo)
+end prototypes
+
+global function string f_telefono_codrel (string as_codrel, string as_tipo);/*
+  Funcion que retorna el numero de telefono o fax
+  Param.  't' = Telefono
+  			 'f' = fax
+*/
+
+String ls_nro, ls_pais, ls_ciu
+
+if as_tipo = 't' then
+	Select telef_pais, telef_ciudad, telefono into :ls_pais, :ls_ciu, :ls_nro from telefonos 
+  		where codigo = :as_codrel;
+else
+	Select telef_pais, telef_ciudad, telefono into :ls_pais, :ls_ciu, :ls_nro from telefonos 
+  		where codigo = :as_codrel and flag_fax = '1';
+end if
+if ISNULL( ls_pais ) then ls_pais = ''
+if ISNULL( ls_ciu ) then ls_ciu = ''
+if ISNULL( ls_nro ) then ls_nro = ''
+
+Return ls_pais + ' ' + ls_ciu + ' ' + ls_nro
+end function
+

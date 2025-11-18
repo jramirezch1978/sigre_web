@@ -1,0 +1,237 @@
+﻿$PBExportHeader$u_web_browser.sru
+forward
+global type u_web_browser from olecustomcontrol
+end type
+end forward
+
+global type u_web_browser from olecustomcontrol
+integer width = 1655
+integer height = 1032
+integer taborder = 10
+boolean border = false
+string binarykey = "u_web_browser.udo"
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+event statustextchange ( string text )
+event progresschange ( long progress,  long progressmax )
+event commandstatechange ( long command,  boolean enable )
+event downloadbegin ( )
+event downloadcomplete ( )
+event titlechange ( string text )
+event propertychange ( string szproperty )
+event beforenavigate2 ( oleobject pdisp,  any url,  any flags,  any targetframename,  any postdata,  any headers,  ref boolean ab_cancel )
+event newwindow2 ( ref oleobject ppdisp,  ref boolean ab_cancel )
+event navigatecomplete2 ( oleobject pdisp,  any url )
+event documentcomplete ( oleobject pdisp,  any url )
+event onquit ( )
+event onvisible ( boolean ocx_visible )
+event ontoolbar ( boolean toolbar )
+event onmenubar ( boolean menubar )
+event onstatusbar ( boolean statusbar )
+event onfullscreen ( boolean fullscreen )
+event ontheatermode ( boolean theatermode )
+end type
+global u_web_browser u_web_browser
+
+type prototypes
+Function long ShellExecute ( &
+	long hwindow, &
+	string lpOperation, &
+	string lpFile, &
+	string lpParameters, &
+	string lpDirectory, &
+	long nShowCmd &
+	) Library "shell32.dll" Alias for "ShellExecuteW"
+
+Function long GetDesktopWindow ( &
+	) Library "user32.dll"
+
+end prototypes
+
+type variables
+integer OLECMDEXECOPT_DODEFAULT			= 0
+integer OLECMDEXECOPT_PROMPTUSER			= 1
+integer OLECMDEXECOPT_DONTPROMPTUSER	= 2
+integer OLECMDEXECOPT_SHOWHELP			= 3
+
+integer OLECMDID_OPEN					= 1
+integer OLECMDID_NEW						= 2
+integer OLECMDID_SAVE					= 3
+integer OLECMDID_SAVEAS					= 4
+integer OLECMDID_SAVECOPYAS			= 5
+integer OLECMDID_PRINT					= 6
+integer OLECMDID_PRINTPREVIEW			= 7
+integer OLECMDID_PAGESETUP				= 8
+integer OLECMDID_SPELL					= 9
+integer OLECMDID_PROPERTIES			= 10
+integer OLECMDID_CUT						= 11
+integer OLECMDID_COPY					= 12
+integer OLECMDID_PASTE					= 13
+integer OLECMDID_PASTESPECIAL			= 14
+integer OLECMDID_UNDO					= 15
+integer OLECMDID_REDO					= 16
+integer OLECMDID_SELECTALL				= 17
+integer OLECMDID_CLEARSELECTION		= 18
+integer OLECMDID_ZOOM					= 19
+integer OLECMDID_GETZOOMRANGE			= 20
+integer OLECMDID_UPDATECOMMANDS		= 21
+integer OLECMDID_REFRESH				= 22
+integer OLECMDID_STOP					= 23
+integer OLECMDID_HIDETOOLBARS			= 24
+integer OLECMDID_SETPROGRESSMAX		= 25
+integer OLECMDID_SETPROGRESSPOS		= 26
+integer OLECMDID_SETPROGRESSTEXT		= 27
+integer OLECMDID_SETTITLE				= 28
+integer OLECMDID_SETDOWNLOADSTATE	= 29
+integer OLECMDID_STOPDOWNLOAD			= 30
+integer OLECMDID_ONTOOLBARACTIVATED	= 31
+integer OLECMDID_FIND					= 32
+integer OLECMDID_DELETE					= 33
+integer OLECMDID_HTTPEQUIV				= 34
+integer OLECMDID_HTTPEQUIV_DONE		= 35
+integer OLECMDID_ENABLE_INTERACTION	= 36
+integer OLECMDID_ONUNLOAD				= 37
+integer OLECMDID_PROPERTYBAG2			= 38
+integer OLECMDID_PREREFRESH			= 39
+
+end variables
+
+forward prototypes
+public subroutine of_goback ()
+public subroutine of_goforward ()
+public subroutine of_gohome ()
+public subroutine of_refresh ()
+public subroutine of_gosearch ()
+public subroutine of_stop ()
+public subroutine of_execwb (integer command_id, integer execution_option)
+public subroutine of_navigate (string as_url)
+public subroutine of_execwb_saveas ()
+public subroutine of_execwb_save ()
+public subroutine of_execwb_print (boolean ab_prompt)
+public subroutine of_resize (integer ai_newwidth, integer ai_newheight)
+public subroutine of_control_panel (string as_control_app)
+public function string of_get_url ()
+public function string of_get_source ()
+end prototypes
+
+public subroutine of_goback ();// go back one page
+this.object.goBack()
+
+end subroutine
+
+public subroutine of_goforward ();// go forward one page
+this.object.goForward()
+
+end subroutine
+
+public subroutine of_gohome ();// go to home page
+this.object.goHome()
+
+end subroutine
+
+public subroutine of_refresh ();// refresh current page
+this.object.Refresh()
+
+end subroutine
+
+public subroutine of_gosearch ();// go to search page
+this.object.goSearch()
+
+end subroutine
+
+public subroutine of_stop ();// stop current navigate
+this.object.Stop()
+
+end subroutine
+
+public subroutine of_execwb (integer command_id, integer execution_option);// execute web browser command
+this.object.ExecWB(command_id, execution_option, AsStatement!)
+
+end subroutine
+
+public subroutine of_navigate (string as_url);// go to specified file\webpage
+
+SetPointer(HourGlass!)
+
+this.object.Navigate(as_url, 0, "", "", "")
+
+end subroutine
+
+public subroutine of_execwb_saveas ();// open saveas dialog
+//this.of_execwb(OLECMDID_SAVEAS, OLECMDEXECOPT_DODEFAULT)
+this.of_execwb(OLECMDID_SAVEAS, OLECMDEXECOPT_PROMPTUSER)
+
+end subroutine
+
+public subroutine of_execwb_save ();// save the current document
+this.of_execwb(OLECMDID_SAVE, OLECMDEXECOPT_DODEFAULT)
+
+end subroutine
+
+public subroutine of_execwb_print (boolean ab_prompt);// open print dialog
+If ab_prompt Then
+	this.of_execwb(OLECMDID_PRINT, OLECMDEXECOPT_PROMPTUSER)
+Else
+	this.of_execwb(OLECMDID_PRINT, OLECMDEXECOPT_DODEFAULT)
+End If
+
+end subroutine
+
+public subroutine of_resize (integer ai_newwidth, integer ai_newheight);// resize the control
+this.Resize(ai_newwidth, ai_newheight)
+
+// adjust object size to match control size
+this.SetRedraw(False)
+this.Object.Width = UnitsToPixels(ai_newwidth, XUnitsToPixels!)
+this.Object.Height = UnitsToPixels(ai_newheight, YUnitsToPixels!)
+this.SetRedraw(True)
+
+end subroutine
+
+public subroutine of_control_panel (string as_control_app);// this function launches a Control Panel app
+
+String ls_null
+
+SetNull(ls_null)
+
+ShellExecute(GetDesktopWindow(), ls_null, "rundll32.exe", &
+	"shell32.dll,Control_RunDLL " + as_control_app + ",", ls_null, 0)
+
+end subroutine
+
+public function string of_get_url ();// return the current URL
+Return this.Object.LocationURL
+
+end function
+
+public function string of_get_source ();// return the webpage HTML source
+Return this.Object.Document.DocumentElement.InnerHTML
+
+end function
+
+event externalexception;action = ExceptionIgnore!
+
+end event
+
+event error;action = ExceptionIgnore!
+
+end event
+
+on u_web_browser.create
+end on
+
+on u_web_browser.destroy
+end on
+
+
+Start of PowerBuilder Binary Data Section : Do NOT Edit
+0Cu_web_browser.bin 
+2600000a00e011cfd0e11ab1a1000000000000000000000000000000000003003e0009fffe000000060000000000000000000000010000000100000000000010000000000200000001fffffffe0000000000000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfffffffefffffffefffffffeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff006f00520074006f004500200074006e00790072000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000050016ffffffffffffffff000000010000000000000000000000000000000000000000000000000000000062df423001c88c9a00000003000001800000000000500003004f0042005800430054005300450052004d0041000000000000000000000000000000000000000000000000000000000000000000000000000000000102001affffffff00000002ffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000009c00000000004200500043004f00530058004f00540041005200450047000000000000000000000000000000000000000000000000000000000000000000000000000000000001001affffffffffffffff000000038856f96111d0340ac0006ba9a205d74f0000000062df423001c88c9a62df423001c88c9a000000000000000000000000004f00430054004e004e00450053005400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001020012ffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000030000009c000000000000000100000002fffffffe0000000400000005fffffffeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+20ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000004c0000256a00001aaa0000000000000000000000000000000000000000000000000000004c0000000000000000000000010057d0e011cf3573000869ae62122e2b00000008000000000000004c0002140100000000000000c0460000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004c0000256a00001aaa0000000000000000000000000000000000000000000000000000004c0000000000000000000000010057d0e011cf3573000869ae62122e2b00000008000000000000004c0002140100000000000000c0460000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1Cu_web_browser.bin 
+End of PowerBuilder Binary Data Section : No Source Expected After This Point

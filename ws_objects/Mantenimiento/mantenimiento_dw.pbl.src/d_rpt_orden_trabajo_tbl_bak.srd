@@ -1,0 +1,69 @@
+﻿$PBExportHeader$d_rpt_orden_trabajo_tbl_bak.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=664 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=460 color="536870912"  height.autosize=yes)
+table(column=(type=char(2) updatewhereclause=yes name=orden_trabajo_cod_origen dbname="orden_trabajo.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=datetime updatewhereclause=yes name=orden_trabajo_fec_solicitud dbname="orden_trabajo.fec_solicitud" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_nro_solicitud dbname="orden_trabajo.nro_solicitud" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_cencos_slc dbname="orden_trabajo.cencos_slc" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_cencos_rsp dbname="orden_trabajo.cencos_rsp" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(8) updatewhereclause=yes name=orden_trabajo_cliente dbname="orden_trabajo.cliente" )
+ column=(type=datetime updatewhereclause=yes name=orden_trabajo_fec_inicio dbname="orden_trabajo.fec_inicio" )
+ column=(type=char(800) updatewhereclause=yes name=orden_trabajo_descripcion dbname="orden_trabajo.descripcion" )
+ retrieve="SELECT  ~"ORDEN_TRABAJO~".~"COD_ORIGEN~" ,
+        ~"ORDEN_TRABAJO~".~"NRO_ORDEN~" ,
+        ~"ORDEN_TRABAJO~".~"FEC_SOLICITUD~" ,
+        ~"ORDEN_TRABAJO~".~"NRO_SOLICITUD~" ,
+        ~"ORDEN_TRABAJO~".~"CENCOS_SLC~" ,
+        ~"CENTROS_COSTO~".~"DESC_CENCOS~" ,
+        ~"ORDEN_TRABAJO~".~"CENCOS_RSP~" ,
+        ~"PROVEEDOR~".~"NOM_PROVEEDOR~" ,
+        ~"ORDEN_TRABAJO~".~"CLIENTE~" ,
+        ~"ORDEN_TRABAJO~".~"FEC_INICIO~" ,
+        ~"ORDEN_TRABAJO~".~"DESCRIPCION~"     
+FROM    ~"ORDEN_TRABAJO~" ,
+        ~"CENTROS_COSTO~" ,
+        ~"PROVEEDOR~"     
+WHERE  (~"ORDEN_TRABAJO~".~"CENCOS_SLC~"  = ~"CENTROS_COSTO~".~"CENCOS~" (+)) AND
+       (~"ORDEN_TRABAJO~".~"CENCOS_RSP~"  = ~"CENTROS_COSTO~".~"CENCOS~" (+)) AND 
+       (~"PROVEEDOR~".~"PROVEEDOR~" (+)   = ~"ORDEN_TRABAJO~".~"CLIENTE~"   ) AND
+	    ((~"ORDEN_TRABAJO~".~"COD_ORIGEN~" = :as_cod_origen              ) AND    
+       (~"ORDEN_TRABAJO~".~"NRO_ORDEN~"   = :as_nro_orden              ))   " arguments=(("as_empresa", string),("as_usuario", string),("as_cod_origen", string),("as_nro_orden", string)) )
+bitmap(band=header filename="gs_logo" x="69" y="20" height="124" width="206" border="0"  name=p_logo )
+text(band=header alignment="0" text="Fecha de Documento :" border="0" color="0" x="27" y="296" height="52" width="507"  name=t_1  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="0" color="0" x="553" y="296" height="52" width="366" format="[shortdate] [time]"  name=orden_trabajo_fec_solicitud editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="C.C. Solicitante :" border="0" color="0" x="32" y="364" height="52" width="366"  name=t_2  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="0" x="411" y="364" height="52" width="247" format="[general]"  name=orden_trabajo_cencos_slc editmask.mask="######" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=6 alignment="0" tabsequence=32766 border="0" color="0" x="672" y="364" height="52" width="837" format="[general]"  name=centros_costo_desc_cencos edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=9 alignment="0" tabsequence=32766 border="0" color="0" x="238" y="428" height="52" width="261" format="[general]"  name=orden_trabajo_cliente editmask.mask="######" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=11 alignment="0" tabsequence=32766 border="0" color="0" x="37" y="496" height="160" width="3355" format="[general]"  name=orden_trabajo_descripcion edit.limit=800 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Cliente :" border="0" color="0" x="37" y="428" height="52" width="183"  name=t_3  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression=" as_empresa "border="0" color="0" x="37" y="160" height="52" width="256" format="[general]"  name=compute_1  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Pagina :" border="0" color="0" x="2811" y="16" height="52" width="192"  name=t_4  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="Usuario :" border="0" color="0" x="2811" y="84" height="52" width="192"  name=t_5  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="Fecha :" border="0" color="0" x="2811" y="160" height="52" width="192"  name=t_6  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=header alignment="0" expression="'Pag ' + page() + ' / ' + pageCount()"border="0" color="0" x="3017" y="12" height="56" width="293" format="[general]"  name=compute_2  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression=" as_usuario "border="0" color="0" x="3017" y="84" height="52" width="293" format="[general]"  name=compute_3  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3017" y="156" height="56" width="293" format="dd/mm/yyyy"  name=compute_4  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="ORDEN DE TRABAJO :" border="0" color="0" x="919" y="28" height="80" width="869"  name=t_7  font.face="MS Sans Serif" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="Trim( orden_trabajo_cod_origen )"border="0" color="0" x="1815" y="28" height="80" width="114" format="[general]"  name=compute_5  font.face="MS Sans Serif" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="Trim(String(orden_trabajo_nro_orden,'#############' ))"border="0" color="0" x="1952" y="28" height="80" width="544" format="[general]"  name=compute_6  font.face="MS Sans Serif" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Solicitud de OT:" border="0" color="0" x="1673" y="296" height="52" width="352"  name=t_8  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="0" x="2039" y="296" height="52" width="210" format="[general]"  name=orden_trabajo_nro_solicitud editmask.mask="##########" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="C.C. Responsable :" border="0" color="0" x="1673" y="364" height="52" width="416"  name=t_9  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2107" y="364" height="52" width="366" format="[general]"  name=orden_trabajo_cencos_rsp editmask.mask="######" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+report(band=header dataobject="d_rpt_orden_trabajo_cencos_rsp_tbl" x="2496" y="364" height="56" width="891" border="0"  height.autosize=yes criteria="" nest_arguments=(("as_cod_origen"),("an_nro_orden")) trail_footer = yes  name=dw_1  slideup=directlyabove )
+text(band=header alignment="0" text="Fecha Inicio :" border="0" color="0" x="1673" y="428" height="52" width="293"  name=t_10  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=10 alignment="0" tabsequence=32766 border="0" color="0" x="1989" y="428" height="52" width="334" format="[shortdate] [time]"  name=orden_trabajo_fec_inicio editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=8 alignment="0" tabsequence=32766 border="0" color="0" x="512" y="428" height="52" width="997" format="[general]"  name=proveedor_nom_proveedor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+report(band=detail dataobject="d_rpt_orden_mecanica_tbl" x="27" y="160" height="136" width="3397" border="0"  height.autosize=yes criteria="" nest_arguments=((" as_cod_origen "),(" as_nro_orden ")) trail_footer = yes  name=dw_3  slideup=directlyabove )
+report(band=detail dataobject="d_rpt_ord_serv_x_ord_trab_tbl" x="27" y="316" height="136" width="3401" border="0"  height.autosize=yes criteria="" nest_arguments=((" as_cod_origen "),(" as_nro_orden ")) trail_footer = yes  name=dw_4  slideup=directlyabove )
+report(band=detail dataobject="d_rpt_relacion_operaciones_ot_tbl" x="27" y="4" height="136" width="3397" border="0"  height.autosize=yes criteria="" nest_arguments=((" as_nro_orden ")) trail_footer = yes  name=dw_2  slideup=directlyabove )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

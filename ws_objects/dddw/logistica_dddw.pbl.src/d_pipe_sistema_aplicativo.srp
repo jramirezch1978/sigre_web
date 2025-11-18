@@ -1,0 +1,11 @@
+﻿$PBExportHeader$d_pipe_sistema_aplicativo.srp
+PIPELINE(source_connect=CN_DB_DB1_PROD5,destination_connect=CN_DB_DB1_PROD8,type=update,commit=100,errors=100,keyname="sistema_aplicativo")
+SOURCE(name="SISTEMA_APLICATIVO",COLUMN(type=char,name="SISTEMA",dbtype="CHAR(8)",key=yes,nulls_allowed=no)
+ COLUMN(type=varchar,name="DESCRIPCION",dbtype="VARCHAR2(40)",nulls_allowed=yes)
+ COLUMN(type=char,name="FLAG_ESTADO",dbtype="CHAR(1)",nulls_allowed=yes)
+ COLUMN(type=char,name="FLAG_REPLICACION",dbtype="CHAR(1)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"sistema_aplicativo~" ) COLUMN(NAME=~"sistema_aplicativo.sistema~") COLUMN(NAME=~"sistema_aplicativo.descripcion~") COLUMN(NAME=~"sistema_aplicativo.flag_estado~") COLUMN(NAME=~"sistema_aplicativo.flag_replicacion~")) ")
+DESTINATION(name="sistema_aplicativo",COLUMN(type=char,name="sistema",dbtype="CHAR(8)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="descripcion",dbtype="VARCHAR2(40)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_estado",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1' ")
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1' "))

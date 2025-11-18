@@ -1,0 +1,21 @@
+﻿$PBExportHeader$dp_cargo.srp
+PIPELINE(source_connect=RTPS,destination_connect=oemlm1_work5,type=append,commit=100,errors=100,keyname="cargo")
+SOURCE(name="ocupac",COLUMN(type=varchar,name="cod",dbtype="Char(8)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="descripcio",dbtype="Char(89)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="categoria",dbtype="Char(4)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="flag_repli",dbtype="Char(1)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="perfil_rut",dbtype="Char(100)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="flag_estad",dbtype="Char(1)",nulls_allowed=yes)
+ COLUMN(type=double,name="nivel",dbtype="Numeric",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"ocupac~" ) COLUMN(NAME=~"ocupac.cod~") COLUMN(NAME=~"ocupac.descripcio~") COLUMN(NAME=~"ocupac.categoria~") COLUMN(NAME=~"ocupac.flag_repli~") COLUMN(NAME=~"ocupac.perfil_rut~") COLUMN(NAME=~"ocupac.flag_estad~") COLUMN(NAME=~"ocupac.nivel~")) ")
+DESTINATION(name="cargo",COLUMN(type=char,name="cod_cargo",dbtype="CHAR(8)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="desc_cargo",dbtype="VARCHAR2(100)",nulls_allowed=yes)
+ COLUMN(type=char,name="categoria",dbtype="CHAR(4)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1'
+
+")
+ COLUMN(type=varchar,name="perfil_ruta",dbtype="VARCHAR2(100)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_estado",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1'
+
+")
+ COLUMN(type=decimal,name="nivel",dbtype="NUMBER(1,0)",nulls_allowed=yes))

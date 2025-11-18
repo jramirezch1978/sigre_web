@@ -1,0 +1,48 @@
+﻿$PBExportHeader$d_abc_guia_rec_det_precios_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=120 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cod_guia_rec dbname="ap_guias_rec_det_precios.cod_guia_rec" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="ap_guias_rec_det_precios.item" )
+ column=(type=char(3) update=yes updatewhereclause=yes key=yes name=cod_precio dbname="ap_guias_rec_det_precios.cod_precio" )
+ column=(type=char(50) updatewhereclause=yes name=desc_precio dbname="ap_precios_rep.desc_precio" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=monto dbname="ap_guias_rec_det_precios.monto" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="ap_guias_rec_det_precios.cod_usr" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ap_guias_rec_det_precios_flag_replicacion dbname="ap_guias_rec_det_precios.flag_replicacion" initial="1" )
+ retrieve="SELECT  AP1.Cod_Guia_Rec,
+        AP1.Item,
+        AP1.Cod_Precio,
+        AP2.Desc_Precio,
+        AP1.Monto,
+        AP1.Cod_Usr,
+        AP1.Flag_Replicacion
+                   
+FROM    AP_GUIAS_REC_DET_PRECIOS AP1,   
+        AP_PRECIOS_REP           AP2
+         
+WHERE   AP1.COD_GUIA_REC  	=	:AS_COD_GUIA
+   AND  AP1.COD_PRECIO 		=  AP2.COD_PRECIO
+   AND  AP2.FLAG_ESTADO 	= '1'
+   
+" update="AP_GUIAS_REC_DET_PRECIOS" updatewhere=0 updatekeyinplace=yes arguments=(("AS_COD_GUIA", string))  sort="cod_guia_rec A item A cod_precio A " )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="2697" y="4" height="60" width="91" format="[general]" html.valueishtml="0"  name=cod_guia_rec visible="0" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Item
+Guia" border="2" color="16777215" x="14" y="4" height="112" width="174" html.valueishtml="0"  name=ap_guias_rec_det_precios_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="14" y="4" height="60" width="174" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="2" tabsequence=10 border="2" color="33554432" x="192" y="4" height="60" width="187" format="[general]" html.valueishtml="0"  name=cod_precio pointer="h:\source\cur\taladro.cur" visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Precios de Representación" border="2" color="16777215" x="192" y="4" height="56" width="1787" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Monto" border="2" color="16777215" x="1394" y="60" height="56" width="251" html.valueishtml="0"  name=ap_guias_rec_det_precios_monto_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cod Usr" border="2" color="16777215" x="1650" y="60" height="56" width="329" html.valueishtml="0"  name=ap_guias_rec_det_precios_cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="384" y="4" height="60" width="1006" format="[general]" html.valueishtml="0"  name=desc_precio visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=5 alignment="1" tabsequence=20 border="2" color="33554432" x="1394" y="4" height="60" width="251" format="#,###.00" html.valueishtml="0"  name=monto visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="1650" y="4" height="60" width="329" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cod." border="2" color="16777215" x="192" y="60" height="56" width="187" html.valueishtml="0"  name=ap_guias_rec_det_precios_cod_precio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Desc Precio" border="2" color="16777215" x="384" y="60" height="56" width="1006" html.valueishtml="0"  name=ap_precios_rep_desc_precio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

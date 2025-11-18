@@ -1,0 +1,97 @@
+﻿$PBExportHeader$d_proc_liberacion_amp.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_reservacion dbname="reservacion_det.nro_reservacion" )
+ column=(type=decimal(0) updatewhereclause=yes key=yes name=nro_item dbname="reservacion_det.nro_item" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="articulo_mov_proy.oper_sec" )
+ column=(type=char(4) updatewhereclause=yes name=articulo_mov_proy_tipo_doc dbname="articulo_mov_proy.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="articulo_mov_proy.nro_doc" )
+ column=(type=char(2) updatewhereclause=yes name=org_amp_ref dbname="reservacion_det.org_amp_ref" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_amp_ref dbname="reservacion_det.nro_amp_ref" )
+ column=(type=datetime updatewhereclause=yes name=fec_proyect dbname="articulo_mov_proy.fec_proyect" )
+ column=(type=char(6) updatewhereclause=yes name=almacen dbname="articulo_mov_proy.almacen" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cantidad dbname="reservacion_det.cantidad" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_proyect dbname="articulo_mov_proy.cant_proyect" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_procesada dbname="articulo_mov_proy.cant_procesada" )
+ column=(type=decimal(4) updatewhereclause=yes name=sldo_total dbname="articulo_almacen.sldo_total" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_almacen_sldo_reservado dbname="articulo_almacen.sldo_reservado" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="reservacion_det.flag_estado" values="Activo	1/Liberar	5/" )
+ retrieve="SELECT r.nro_reservacion, r.nro_item,
+		 amp.oper_sec,
+		 amp.tipo_doc, amp.nro_doc,
+		 r.org_amp_ref, 
+		 r.nro_amp_ref, 
+		 amp.fec_proyect, 
+		 amp.almacen, 
+       amp.cod_art, a.desc_art, a.und,
+		 r.cantidad, amp.cant_proyect, amp.cant_procesada,
+		 aa.sldo_total, 
+		 aa.sldo_reservado,
+		 r.flag_estado
+  FROM reservacion_det 	 	r, 
+		 articulo_mov_proy 	amp, 
+		 articulo			 	a,
+		 articulo_almacen 	aa
+ WHERE r.org_amp_ref = amp.cod_origen 
+   AND r.nro_amp_ref = amp.nro_mov 
+   AND amp.tipo_doc  = (select doc_ot from logparam where reckey = '1') 
+   and amp.cod_art	= a.cod_art
+	AND amp.cod_art 	= aa.cod_art 
+	AND amp.almacen 	= aa.almacen 
+	AND amp.nro_doc	= :as_nro_ot 
+   and r.flag_estado = '1'
+   and amp.flag_estado = '1'
+order by r.nro_reservacion, r.nro_item
+" update="reservacion_det" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_ot", string)) )
+text(band=header alignment="2" text="Número de 
+Reservacion" border="2" color="8388608" x="9" y="8" height="112" width="320" html.valueishtml="0"  name=nro_reservacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Nro
+Requer." border="2" color="8388608" x="864" y="8" height="112" width="329" html.valueishtml="0"  name=reservacion_det_nro_amp_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Nro
+Item" border="2" color="8388608" x="334" y="8" height="112" width="201" html.valueishtml="0"  name=nro_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Fecha
+Solicitud" border="2" color="8388608" x="1198" y="8" height="112" width="311" html.valueishtml="0"  name=fec_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Código
+Artículo" border="2" color="8388608" x="1513" y="8" height="112" width="352" html.valueishtml="0"  name=articulo_mov_proy_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Descripción 
+Artículo" border="2" color="8388608" x="1870" y="8" height="112" width="1691" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Unidad
+" border="2" color="8388608" x="3566" y="8" height="112" width="197" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Almacen
+" border="2" color="8388608" x="3767" y="8" height="112" width="261" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Cantidad
+Solicitada" border="2" color="8388608" x="4032" y="8" height="112" width="357" html.valueishtml="0"  name=cant_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Cantidad
+Despachada" border="2" color="8388608" x="4393" y="8" height="112" width="357" html.valueishtml="0"  name=cant_procesada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Cantidad
+Reservada" border="2" color="8388608" x="4754" y="8" height="112" width="357" html.valueishtml="0"  name=cant_reservada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Flag
+Estado" border="2" color="8388608" x="5115" y="8" height="112" width="489" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="8388608" x="9" y="4" height="64" width="320" format="[general]" html.valueishtml="0"  name=nro_reservacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="8388608" x="946" y="4" height="64" width="247" format="[general]" html.valueishtml="0"  name=nro_amp_ref visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="8388608" x="864" y="4" height="64" width="78" format="[general]" html.valueishtml="0"  name=org_amp_ref visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="8388608" x="334" y="4" height="64" width="201" format="[general]" html.valueishtml="0"  name=nro_item visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=8 alignment="2" tabsequence=30 border="2" color="8388608" x="1198" y="4" height="64" width="311" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_proyect visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="2" color="8388608" x="1513" y="4" height="64" width="352" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="8388608" x="1870" y="4" height="64" width="1691" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=13 alignment="1" tabsequence=10 border="2" color="33554432" x="4754" y="4" height="64" width="357" format="###,##0.0000" html.valueishtml="0"  name=cantidad visible="1" editmask.mask="###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="8388608" x="3566" y="4" height="64" width="197" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="8388608" x="3767" y="4" height="64" width="261" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="8388608" x="4032" y="4" height="64" width="357" format="###,##0.0000" html.valueishtml="0"  name=cant_proyect visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="8388608" x="4393" y="4" height="64" width="357" format="###,##0.0000" html.valueishtml="0"  name=cant_procesada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=18 alignment="0" tabsequence=20 border="2" color="0" x="5115" y="4" height="64" width="489" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Oper 
+Sec" border="2" color="8388608" x="539" y="8" height="112" width="320" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="8388608" x="539" y="4" height="64" width="320" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

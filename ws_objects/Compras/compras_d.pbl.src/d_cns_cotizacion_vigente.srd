@@ -1,0 +1,84 @@
+﻿$PBExportHeader$d_cns_cotizacion_vigente.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=392 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=cotizacion_provee_bien_det_cod_origen dbname="cotizacion_provee_bien_det.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=nro_cotiza dbname="cotizacion_provee_bien_det.nro_cotiza" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="cotizacion_provee_bien_det.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="cotizacion_provee_bien_det.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_cotizada dbname="cotizacion_provee_bien_det.cant_cotizada" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_procesada dbname="cotizacion_provee_bien_det.cant_procesada" )
+ column=(type=decimal(4) updatewhereclause=yes name=precio_unit dbname="cotizacion_provee_bien_det.precio_unit" )
+ column=(type=decimal(2) updatewhereclause=yes name=decuento dbname="cotizacion_provee_bien_det.decuento" )
+ column=(type=char(25) updatewhereclause=yes name=marca dbname="cotizacion_provee_bien_det.marca" )
+ column=(type=decimal(0) updatewhereclause=yes name=disponibilidad dbname="cotizacion_provee_bien_det.disponibilidad" )
+ column=(type=char(150) updatewhereclause=yes name=observaciones dbname="cotizacion_provee_bien_det.observaciones" )
+ column=(type=datetime updatewhereclause=yes name=fec_vigencia dbname="cotizacion_provee.fec_vigencia" )
+ column=(type=datetime updatewhereclause=yes name=sysdate dbname="cotizacion_provee_bien_det.sysdate" )
+ retrieve="  	  Select cd.cOD_ORIGEN,
+				cd.NRO_COTIZA,
+				cd.PROVEEDOR,
+				p.nom_proveedor,
+				cd.COD_ART,
+				a.desc_art,
+				a.und,
+				cd.CANT_COTIZADA,
+				cd.CANT_PROCESADA,
+				cd.PRECIO_UNIT,
+				cd.DECUENTO,
+				cd.MARCA,
+				cd.DISPONIBILIDAD,
+				cd.OBSERVACIONES,
+				cp.fec_vigencia,
+				SYSDATE
+		from 	cotizacion_provee_bien_det cd, 
+				cotizacion_provee 			cp,
+				proveedor						p,
+				articulo							a
+		where cp.cod_origen = cd.cod_origen 
+		  and cp.nro_cotiza = cd.nro_cotiza 
+	     and cp.proveedor  = cd.proveedor
+		  and a.cod_art 	  = cd.cod_art
+		  and p.proveedor	  = cd.proveedor
+		  and cd.cod_art = :as_cod_art 
+		  and cd.flag_ganador = '1' 
+		  and trunc(cp.fec_vigencia) >= trunc(:ad_fecha)
+order by p.proveedor" arguments=(("as_cod_art", string),("ad_fecha", date)) )
+group(level=1 header.height=92 trailer.height=0 by=("proveedor" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="COTIZACIONES VIGENTES Y APROBADAS" border="0" color="8388608" x="800" y="40" height="88" width="1915" html.valueishtml="0"  name=t_11 visible="1"  font.face="Bookman Old Style" font.height="-14" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="50" y="20" height="216" width="471" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="d_cns_cotazion_vigente" border="0" color="0" x="27" y="260" height="48" width="622" html.valueishtml="0"  name=t_1 visible="1"  font.face="Garamond" font.height="-8" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2971" y="28" height="60" width="329" format="dd/mm/yyyy" html.valueishtml="0"  name=compute_1 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Pag : ' + page() + ' de ' + pageCount()"border="0" color="0" x="2971" y="164" height="60" width="329" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="text" border="0" color="0" x="2971" y="100" height="52" width="357" html.valueishtml="0"  name=t_user visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="768" y="236" height="52" width="274" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1061" y="236" height="52" width="1728" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Cotiza" border="2" color="33554432" x="9" y="332" height="56" width="361" html.valueishtml="0"  name=nro_cotiza_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fec Vigencia" border="2" color="33554432" x="375" y="332" height="56" width="384" html.valueishtml="0"  name=fec_vigencia_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cotizada" border="2" color="33554432" x="763" y="332" height="56" width="352" html.valueishtml="0"  name=cant_cotizada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Precio Unit" border="2" color="33554432" x="1120" y="332" height="56" width="352" html.valueishtml="0"  name=precio_unit_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Decuento" border="2" color="33554432" x="1477" y="332" height="56" width="352" html.valueishtml="0"  name=decuento_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Marca" border="2" color="33554432" x="1833" y="332" height="56" width="613" html.valueishtml="0"  name=marca_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Disponibilidad" border="2" color="33554432" x="2450" y="332" height="56" width="357" html.valueishtml="0"  name=disponibilidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="50" y="8" height="76" width="366" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="443" y="4" height="76" width="1399" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="56" width="361" format="[general]" html.valueishtml="0"  name=nro_cotiza visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="1833" y="4" height="56" width="613" format="[general]" html.valueishtml="0"  name=marca visible="1" edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="2" color="33554432" x="2450" y="4" height="56" width="357" format="[general]" html.valueishtml="0"  name=disponibilidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="1120" y="4" height="56" width="352" format="###,##0.000" html.valueishtml="0"  name=precio_unit visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="1477" y="4" height="56" width="352" format="###,##0.000" html.valueishtml="0"  name=decuento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="2" color="33554432" x="375" y="4" height="56" width="384" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_vigencia visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="763" y="4" height="56" width="352" format="###,##0.0000" html.valueishtml="0"  name=cant_cotizada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Vigentes al:" border="0" color="0" x="1234" y="144" height="52" width="521" html.valueishtml="0"  name=t_2 visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=16 alignment="0" tabsequence=0 border="0" color="33554432" x="1769" y="144" height="52" width="617" format="dd/mm/yyyy" html.valueishtml="0"  name=sysdate visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

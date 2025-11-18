@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_direccion_empresa.srf
+global type f_direccion_empresa from function_object
+end type
+
+forward prototypes
+global function string f_direccion_empresa (string as_origen)
+end prototypes
+
+global function string f_direccion_empresa (string as_origen);// funcion que devuelve la direccion de la empresa
+String ls_dir  //, ls_dir_calle, ls_dir_numero, ls_dir_lote, ls_dir_mnz, ls_dir_urbanizacion, & 
+
+DECLARE usp_proc PROCEDURE  FOR usf_cmp_direccion_empresa(:gnvo_app.is_origen);
+
+execute usp_proc;
+
+if sqlca.sqlcode <> 0 then  
+	if sqlca.sqlcode = 100 then
+		messagebox( "Atencion", "Defina direccion en tabla origen")
+	else
+	  messagebox( "Error en direccion empresa", sqlca.sqlerrtext)
+   end if
+end if
+
+fetch usp_proc into :ls_dir;
+
+close usp_proc;
+Return ls_dir
+end function
+

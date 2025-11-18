@@ -1,0 +1,90 @@
+﻿$PBExportHeader$d_rpt_fact_export_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 0 print.margin.bottom = 320 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=2100 color="536870912" )
+summary(height=248 color="536870912" )
+footer(height=588 color="536870912" )
+detail(height=68 color="536870912"  height.autosize=yes)
+table(column=(type=char(40) updatewhereclause=yes name=moneda_descripcion dbname="moneda.descripcion" )
+ column=(type=char(3) updatewhereclause=yes name=cntas_cobrar_cod_moneda dbname="cntas_cobrar.cod_moneda" )
+ column=(type=decimal(2) updatewhereclause=yes name=cntas_cobrar_importe_doc dbname="cntas_cobrar.importe_doc" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantidad dbname="cntas_cobrar_det.cantidad" )
+ column=(type=decimal(6) updatewhereclause=yes name=precio_unitario dbname="cntas_cobrar_det.precio_unitario" )
+ column=(type=char(800) updatewhereclause=yes name=descripcion dbname="cntas_cobrar_det.descripcion" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="cntas_cobrar_det.cod_art" )
+ column=(type=char(50) updatewhereclause=yes name=puerto_origen dbname="fl_puertos.descr_puerto" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=puerto_destino dbname="fl_puertos.descr_puerto" )
+ column=(type=char(50) updatewhereclause=yes name=asegurador dbname="proveedor.asegurador" )
+ column=(type=char(20) updatewhereclause=yes name=bill_of_lading dbname="factura_exportacion.bill_of_lading" )
+ column=(type=char(40) updatewhereclause=yes name=nom_banco dbname="banco.nom_banco" )
+ column=(type=char(150) updatewhereclause=yes name=nombre_nave dbname="factura_exportacion.nombre_nave" )
+ column=(type=char(4) updatewhereclause=yes name=doc_cobranza dbname="factura_exportacion.doc_cobranza" )
+ column=(type=char(20) updatewhereclause=yes name=nro_cobranza dbname="factura_exportacion.nro_cobranza" )
+ column=(type=char(800) updatewhereclause=yes name=factura_exportacion_glosa_detalle dbname="factura_exportacion.glosa_detalle" )
+ column=(type=datetime updatewhereclause=yes name=fecha_documento dbname="cntas_cobrar.fecha_documento" )
+ retrieve="SELECT M.DESCRIPCION,   
+       CCC.COD_MONEDA,   
+       CCC.IMPORTE_DOC,   
+       CCD.CANTIDAD,   
+       CCD.PRECIO_UNITARIO,   
+       CCD.DESCRIPCION,   
+       CCD.COD_ART,    
+       FPA.DESCR_PUERTO,   
+       PA.NOM_PROVEEDOR,   
+       FPB.DESCR_PUERTO,   
+       PB.NOM_PROVEEDOR AS ASEGURADOR,   
+       FE.BILL_OF_LADING,   
+       B.NOM_BANCO,   
+       FE.NOMBRE_NAVE,   
+       FE.DOC_COBRANZA,   
+       FE.NRO_COBRANZA,   
+       FE.GLOSA_DETALLE,   
+       CCC.FECHA_DOCUMENTO
+         
+FROM   CNTAS_COBRAR             CCC,   
+       MONEDA                   M,   
+       PROVEEDOR                PA,  
+       PROVEEDOR                PB, 
+       CNTAS_COBRAR_DET         CCD,   
+       FACTURA_EXPORTACION      FE,   
+       FL_PUERTOS               FPA,   
+       FL_PUERTOS               FPB,   
+       BANCO                    B
+         
+WHERE  FE.TIPO_DOC            = :AS_TIPO_DOC 
+  AND  FE.NRO_DOC             = :AS_NRO_DOC
+  AND  FE.puerto_origen       = FPA.puerto (+)
+  AND  FE.puerto_destino      = FPB.puerto (+)
+  AND  FE.asegurador          = PB.proveedor (+)
+  AND  FE.banco_cobranza      = B.cod_banco (+)
+  AND  M.COD_MONEDA           = CCC.COD_MONEDA 
+  AND  CCC.COD_RELACION       = PA.PROVEEDOR 
+  AND  CCD.TIPO_DOC           = CCC.TIPO_DOC 
+  AND  CCD.NRO_DOC            = CCC.NRO_DOC 
+  AND  FE.TIPO_DOC            = CCC.TIPO_DOC 
+  AND  FE.NRO_DOC             = CCC.NRO_DOC    " arguments=(("AS_TIPO_DOC", string),("AS_NRO_DOC", string)) )
+column(band=header id=18 alignment="0" tabsequence=32766 border="0" color="0" x="2107" y="760" height="56" width="526" format="[shortdate]" html.valueishtml="0"  name=fecha_documento visible="1" editmask.mask="mm/dd/yy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="/* ((( (if (isnull(cantidad),0,cantidad)) * (if (isnull(precio_unit),0,precio_unit))) - ((( (if (isnull(cantidad),0,cantidad)) * (if (isnull(precio_unit),0,precio_unit))) *   (if (isnull(descuento),0,descuento / 100)) ) )) + (if (isnull(redondeo_manual ),0,redondeo_manual)) ) */"border="0" color="0" x="3310" y="84" height="56" width="183" format="[GENERAL]" html.valueishtml="0"  name=total_redondeo visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="0" expression="f_conv_numlet_f(string(  cntas_cobrar_importe_doc   )) + ' '+UPPER( moneda_descripcion ) "border="0" color="0" x="402" y="4" height="56" width="2094" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=16 alignment="0" tabsequence=32766 border="0" color="0" x="489" y="1328" height="56" width="462" format="[general]" html.valueishtml="0"  name=nro_cobranza visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=12 alignment="0" tabsequence=32766 border="0" color="0" x="2501" y="1148" height="56" width="462" format="[general]" html.valueishtml="0"  name=bill_of_lading visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="BILL OF LADING :" border="0" color="33554432" x="2030" y="1148" height="56" width="425" html.valueishtml="0"  name=t_1 visible="1"  font.face="Times New Roman" font.height="-8" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=header id=10 alignment="0" tabsequence=32766 border="0" color="0" x="1422" y="944" height="56" width="786" format="[general]" html.valueishtml="0"  name=puerto_destino visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=9 alignment="0" tabsequence=32766 border="0" color="0" x="379" y="556" height="56" width="1152" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=13 alignment="0" tabsequence=32766 border="0" color="0" x="379" y="1524" height="56" width="923" format="[general]" html.valueishtml="0"  name=nom_banco visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=14 alignment="0" tabsequence=32766 border="0" color="0" x="379" y="756" height="56" width="1477" format="[general]" html.valueishtml="0"  name=nombre_nave visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=15 alignment="0" tabsequence=32766 border="0" color="0" x="379" y="1328" height="56" width="91" format="[general]" html.valueishtml="0"  name=doc_cobranza visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=11 alignment="0" tabsequence=0 border="0" color="0" x="379" y="1148" height="56" width="1152" html.valueishtml="0"  name=asegurador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=8 alignment="0" tabsequence=32766 border="0" color="0" x="379" y="948" height="56" width="832" format="[general]" html.valueishtml="0"  name=puerto_origen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=summary id=17 alignment="0" tabsequence=32766 border="0" color="0" x="864" y="124" height="120" width="1513" format="[general]" html.valueishtml="0"  name=factura_exportacion_glosa_detalle visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="73" y="4" height="56" width="430" format="[general]" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="521" y="4" height="56" width="1925" format="[general]" html.valueishtml="0"  name=descripcion visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Times New Roman" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="2459" y="4" height="56" width="375" format="[general]" html.valueishtml="0"  name=precio_unitario visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Times New Roman" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( cantidad * precio_unitario  for all)"border="0" color="0" x="2935" y="124" height="56" width="384" format="###,###,##0.00" html.valueishtml="0"  name=total visible="1"  font.face="Times New Roman" font.height="-9" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression=" cantidad * precio_unitario "border="0" color="0" x="2939" y="4" height="56" width="384" format="###,###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Times New Roman" font.height="-9" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

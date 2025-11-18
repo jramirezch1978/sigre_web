@@ -1,0 +1,93 @@
+﻿$PBExportHeader$f_new_asiento.srf
+global type f_new_asiento from function_object
+end type
+
+forward prototypes
+global function boolean f_new_asiento (ref string as_origen, ref long al_nro_libro, ref long al_ano, ref long al_mes, ref long al_nro_asiento, ref string as_mensaje)
+end prototypes
+
+global function boolean f_new_asiento (ref string as_origen, ref long al_nro_libro, ref long al_ano, ref long al_mes, ref long al_nro_asiento, ref string as_mensaje);Boolean lb_retorno =TRUE
+Long    ll_count
+
+SELECT nro_asiento
+  INTO :al_nro_asiento
+  FROM cntbl_libro_mes
+ WHERE ((origen	 = :as_origen   ) AND
+ 		  (nro_libro = :al_nro_libro) AND  
+		  (ano 		 = :al_ano		 ) AND
+		  (mes		 = :al_mes      )) 
+FOR UPDATE NOWAIT		  ;
+
+
+IF Isnull(al_nro_asiento) OR al_nro_asiento = 0 THEN
+	SELECT Count(*)
+  	  INTO :ll_count
+     FROM cntbl_libro_mes
+	  WHERE ((origen	  = :as_origen   ) AND
+ 		      (nro_libro = :al_nro_libro) AND  
+		      (ano 		  = :al_ano		  ) AND
+		      (mes		  = :al_mes      ));
+
+
+	/*Crear Nro de Asiento Mes */
+	IF al_nro_libro > 0 THEN
+		al_nro_asiento = 1 
+
+		IF ll_count = 0 THEN		
+		
+			Insert Into cntbl_libro_mes
+			(origen ,nro_libro ,ano ,mes ,nro_asiento)
+			Values
+			(:as_origen ,:al_nro_libro , :al_ano ,:al_mes, :al_nro_asiento ) ;
+		
+			IF SQLCA.SQLCode = -1 THEN 
+			   as_mensaje = 'SQL error DE F. ASIENTO '+ SQLCA.SQLErrText
+			   lb_retorno = FALSE
+			END IF	
+			
+
+		ELSE
+			UPDATE cntbl_libro_mes
+				SET   nro_asiento = :al_nro_asiento
+			 WHERE ((origen	 = :as_origen   ) AND
+			 		  (nro_libro = :al_nro_libro) AND  
+					  (ano 		 = :al_ano		 ) AND
+					  (mes		 = :al_mes      )) ;
+		
+			IF SQLCA.SQLCode = -1 THEN 
+			   as_mensaje = 'SQL error '+SQLCA.SQLErrText
+			   lb_retorno = FALSE
+			END IF	
+		END IF
+
+	ELSE
+	   as_mensaje = 'Numero de Asiento de Libro No Existe , Verifique Tabla cntbl_libro_mes'
+	   lb_retorno = FALSE
+	END IF
+	
+	/*****/
+
+END IF
+
+
+
+UPDATE cntbl_libro_mes
+   SET nro_asiento = :al_nro_asiento + 1
+ WHERE ((origen	 = :as_origen   ) AND
+ 		  (nro_libro = :al_nro_libro) AND  
+		  (ano 		 = :al_ano		 ) AND
+		  (mes		 = :al_mes      )) ;
+
+
+IF SQLCA.SQLCode = -1 THEN 
+   as_mensaje = 'SQL error '+SQLCA.SQLErrText
+	lb_retorno = FALSE
+END IF	
+ 
+
+
+Return lb_retorno
+
+
+end function
+

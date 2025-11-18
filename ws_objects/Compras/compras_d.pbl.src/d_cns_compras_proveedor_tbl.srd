@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_cns_compras_proveedor_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=512 color="536870912" )
+summary(height=80 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=proveedor dbname="proveedor.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=monto_dol dbname="monto_dol" )
+ column=(type=number updatewhereclause=yes name=monto_sol dbname="monto_sol" )
+ retrieve="select   p.proveedor,
+		   p.nom_proveedor,
+ 		   sum( usf_fl_conv_mon(amp.cant_proyect * (amp.precio_unit - amp.decuento), oc.cod_moneda, (select cod_dolares from logparam where reckey = '1'), fec_proyect) ) as monto_dol,
+			sum( usf_fl_conv_mon(amp.cant_proyect * (amp.precio_unit - amp.decuento), oc.cod_moneda, (select cod_soles from logparam where reckey = '1'), fec_proyect) ) as monto_sol
+from articulo_mov_proy 	amp,
+     orden_compra      	oc,
+  	  proveedor			   p,
+	  tt_alm_seleccion	tt	
+  where oc.nro_oc = amp.nro_doc
+  and amp.tipo_doc = (select doc_oc from logparam where reckey = '1')
+  and oc.proveedor = p.proveedor
+  and tt.proveedor = p.proveedor
+  and amp.flag_Estado <> '0'
+  and oc.flag_estado <> '0'
+  and trunc(oc.fec_registro) between trunc(:ad_fec_ini) and trunc(:ad_fec_fin)
+group by p.proveedor,
+		 	p.nom_proveedor
+ORDER BY monto_dol desc" arguments=(("ad_fec_ini", date),("ad_fec_fin", date)) )
+bitmap(band=header filename="" x="18" y="16" height="244" width="361" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="18" y="284" height="40" width="366" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="18" y="340" height="40" width="366" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2450" y="40" height="40" width="366" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="2450" y="160" height="40" width="366" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="33554432" x="2450" y="100" height="40" width="366" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="741" y="204" height="64" width="1481" html.valueishtml="0"  name=titulo_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="ABC DE PROVEEDORES - ORDEN DE COMPRA" border="0" color="33554432" x="741" y="96" height="64" width="1481" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Proveedor" border="2" color="33554432" x="69" y="444" height="64" width="315" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Razón Social o Nombre" border="2" color="33554432" x="389" y="444" height="64" width="1353" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Monto US$" border="2" color="33554432" x="1746" y="444" height="64" width="462" html.valueishtml="0"  name=monto_dol_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="%" border="2" color="33554432" x="2679" y="444" height="64" width="261" html.valueishtml="0"  name=porc_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Monto S/." border="2" color="33554432" x="2213" y="444" height="64" width="462" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="69" y="4" height="64" width="315" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="389" y="4" height="64" width="1353" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" monto_dol /sum( monto_dol for all ) * 100"border="0" color="33554432" x="2679" y="4" height="64" width="261" format="##0.000" html.valueishtml="0"  name=porc visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="2213" y="4" height="64" width="462" format="###,##0.000" html.valueishtml="0"  name=monto_sol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="33554432" x="1746" y="4" height="64" width="462" format="###,##0.000" html.valueishtml="0"  name=monto_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total" border="0" color="33554432" x="1335" y="8" height="64" width="398" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(monto_dol for all) "border="0" color="134217857" x="1746" y="8" height="64" width="462" format="###,###.000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(monto_sol for all)"border="0" color="134217857" x="2213" y="8" height="64" width="462" format="###,###.000" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

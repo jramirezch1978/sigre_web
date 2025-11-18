@@ -1,0 +1,205 @@
+﻿$PBExportHeader$d_rpt_ple_mayor_v302_tbl.srd
+release 12.5;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=72 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=72 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(381) updatewhereclause=yes name=exp_row dbname="exp_row" )
+ retrieve="select   periodo         || '|' ||  -- 01. MPERIODO
+         voucher         || '|' ||  -- 02. MNUMSIOPE
+         cnta_ctbl       || '|' ||  -- 03. MNUMCTACON
+         fec_contable    || '|' ||  -- 04. MFECOPE
+         glosa           || '|' ||  -- 05. MGLOSA
+         trim(to_char(saldo_deudor,   '9999999990.00'))   || '|' ||  -- 06. MDEBE
+         trim(to_char(saldo_acreedor, '9999999990.00'))   || '|' ||  -- 07. MHABER
+         estado          || '|' ||  -- 08. MESTOPE
+         case
+           when cencos is null then
+             '00000000'
+           else
+             cencos
+         end             || '|' ||  -- 09. MCENCOS
+         voucher         || '|' ||  -- 10. MINTKARDEX
+         voucher         || '|' ||  -- 11. MINTVTACOM
+         voucher         || '|'   -- 12. MINTREG
+         as exp_row
+from (       
+    select -- 01. Periodo
+           trim(to_char(ca.ano,'0000')) || trim(to_char(ca.mes,'00')) || '00' as periodo, 
+           -- 02. Voucher           
+           trim(ca.origen) || trim(to_char(ca.ano, '0000')) || trim(to_char(ca.mes, '00')) || trim(to_char(ca.nro_libro, '00')) || 
+           trim(to_char(ca.nro_asiento, '00000')) || trim(to_char(cad.item, '00000')) as voucher,                                    
+           -- 03. Nro asiento
+           case 
+              when ca.nro_libro = 0 then
+                   'A'
+              when ca.nro_libro = 90 then
+                   'C'
+              else 
+                   'M'
+           end  || trim(to_char(ca.nro_asiento, '000000')) as nro_asiento,                      
+           -- 04. Cuenta contable
+           trim(cad.cnta_ctbl) as cnta_ctbl,                                          
+           -- 05. Unidad Operativa
+           o.nombre as desc_origen,                                                 
+           -- 06. Cencos                                   
+           trim(REPLACE(cad.cencos, 'Ñ', 'N')) as cencos,                                              
+           -- 07. Moneda
+           decode(ca.cod_moneda, PKG_LOGISTICA.of_soles(null), 'PEN', 'USD') as moneda,                
+           -- 08. Tipo Documento Emisor
+           p.tipo_doc_ident,                                                      
+           -- 09. Numero Documento Identidad
+           decode(p.tipo_doc_ident, '6', p.ruc, p.nro_doc_ident) as nro_doc_ident,    
+           -- 10. Tipo de comprobante asociado              
+           decode(dt.cod_sunat, null, '00', dt.cod_sunat) as tipo_docref1,                                     
+           -- 11. serie del comprobante         
+           case
+					when instr(cad.nro_docref1, '-') > 0 then
+						case
+							when substr(cad.nro_docref1, 1, 1) in ('E', 'F', 'B') then
+								substr(cad.nro_docref1, 1, 1) || lpad(substr(cad.nro_docref1, 2, instr(cad.nro_docref1, '-') - 2), 3, '0')
+							else
+								lpad(substr(cad.nro_docref1, 1, instr(cad.nro_docref1, '-') - 1),4,'0')
+						end
+					else
+						'0000'
+				end as serie,                                                      
+           -- 12. Numero del comprobante  
+           case
+					when instr(cad.nro_docref1, '-') > 0 then
+						trim(substr(cad.nro_docref1, instr(cad.nro_docref1, '-') + 1))
+					else
+						trim(decode(cad.nro_docref1, null, '00000000', cad.nro_docref1))
+			  end as numero,                                                        
+           -- 13. Fecha contable
+           trim(to_char(ca.fecha_cntbl, 'dd/mm/yyyy')) as fec_contable,            
+           -- 14. Fecha vencimiento             
+           '' as fecha_vencimiento,                                                
+           -- 15. Fecha de la operacion
+           trim(to_char(ca.fecha_cntbl, 'dd/mm/yyyy')) as fec_operacion,                         
+           -- 16. Glosa principal
+           trim(substr(
+					replace(
+						replace(
+							replace(
+								replace(
+									replace(
+										replace(
+											upper(decode(cad.det_glosa, null, decode(ca.desc_glosa, null, cc.desc_cnta, ca.desc_glosa), cad.det_glosa)),
+										chr(9), ' '),	
+									'Ó', 'O'),
+								'|', ''), 
+							chr(13), ' '),
+						chr(10),' '), 
+					'/', '-'), 1, 200)
+				)  as glosa,	
+           -- 17. Glosa referencial
+           '' as glosa_referencial,                                                
+           -- 18. Movimiento del Debe
+           case 
+              when nvl(sum(decode(cad.flag_debhab, 'D', round(cad.imp_movsol,2), 0.00)),0) > nvl(sum(decode(cad.flag_debhab, 'H', round(cad.imp_movsol,2), 0.00)),0) then
+                   nvl(sum(decode(cad.flag_debhab, 'D', round(cad.imp_movsol,2), 0.00)),0) - nvl(sum(decode(cad.flag_debhab, 'H', round(cad.imp_movsol,2), 0.00)),0)
+              else
+                 0
+           end as saldo_deudor,
+           -- 19. Movimiento del Haber
+           case 
+              when nvl(sum(decode(cad.flag_debhab, 'H', round(cad.imp_movsol,2), 0.00)),0) > nvl(sum(decode(cad.flag_debhab, 'D', round(cad.imp_movsol, 2), 0.00)),0) then
+                   nvl(sum(decode(cad.flag_debhab, 'H', round(cad.imp_movsol,2), 0.00)),0) - nvl(sum(decode(cad.flag_debhab, 'D', round(cad.imp_movsol,2), 0.00)),0)
+              else
+                 0
+           end as saldo_acreedor,
+           -- 20. dato estructurado
+			  '' as dato_codigo,                                              
+           -- 21. Estado de la operacion    
+           '1' as estado                                                       
+
+    from cntbl_asiento     ca,
+         cntbl_asiento_Det cad,
+      cntbl_cnta      cc,
+      origen        o,
+      proveedor      p,
+      doc_tipo        dt
+    where ca.origen       = cad.origen
+      and ca.ano          = cad.ano
+      and ca.mes          = cad.mes
+      and ca.nro_libro     = cad.nro_libro
+      and ca.nro_asiento   = cad.nro_asiento     
+    and cad.cnta_ctbl     = cc.cnta_ctbl
+    and ca.origen      = o.cod_origen
+    and cad.cod_relacion = p.proveedor      (+)
+    and cad.tipo_docref1  = dt.tipo_doc      (+)
+      and ca.ano = :an_year
+      and ca.mes = :an_mes
+      and ca.flag_estado <> '0'
+  group by   trim(to_char(ca.ano,'0000')) || trim(to_char(ca.mes,'00')) || '00',
+             trim(ca.origen) || trim(to_char(ca.ano, '0000')) || trim(to_char(ca.mes, '00')) || 
+          	trim(to_char(ca.nro_libro, '00')) || trim(to_char(ca.nro_asiento, '00000')) || 
+          trim(to_char(cad.item, '00000')),
+          case 
+          when ca.nro_libro = 0 then
+          'A'
+          when ca.nro_libro = 90 then
+          'C'
+          else 
+          'M'
+          end  || trim(to_char(ca.nro_asiento, '000000')),
+             trim(cad.cnta_ctbl),
+          o.nombre,
+          trim(REPLACE(cad.cencos, 'Ñ', 'N')),
+             decode(ca.cod_moneda, PKG_LOGISTICA.of_soles(null), 'PEN', 'USD'),
+          p.tipo_doc_ident,                                                      
+          decode(p.tipo_doc_ident, '6', p.ruc, p.nro_doc_ident),
+          decode(dt.cod_sunat, null, '00', dt.cod_sunat),
+			  case
+						when instr(cad.nro_docref1, '-') > 0 then
+							case
+								when substr(cad.nro_docref1, 1, 1) in ('E', 'F', 'B') then
+									substr(cad.nro_docref1, 1, 1) || lpad(substr(cad.nro_docref1, 2, instr(cad.nro_docref1, '-') - 2), 3, '0')
+								else
+									lpad(substr(cad.nro_docref1, 1, instr(cad.nro_docref1, '-') - 1),4,'0')
+							end
+						else
+							'0000'
+				end,
+			  case
+						when instr(cad.nro_docref1, '-') > 0 then
+							trim(substr(cad.nro_docref1, instr(cad.nro_docref1, '-') + 1))
+						else
+							trim(decode(cad.nro_docref1, null, '00000000', cad.nro_docref1))
+			  end,
+            trim(to_char(ca.fecha_cntbl, 'dd/mm/yyyy')),
+           	trim(substr(
+					replace(
+						replace(
+							replace(
+								replace(
+									replace(
+										replace(
+											upper(decode(cad.det_glosa, null, decode(ca.desc_glosa, null, cc.desc_cnta, ca.desc_glosa), cad.det_glosa)),
+										chr(9), ' '),	
+									'Ó', 'O'),
+								'|', ''), 
+							chr(13), ' '),
+						chr(10),' '), 
+					'/', '-'), 1, 200)
+				) 
+  order by voucher
+)
+WHERE saldo_deudor > 0 or saldo_acreedor > 0
+
+" arguments=(("an_year", number),("an_mes", number)) )
+text(band=header alignment="2" text="Exp Row" border="2" color="33554432" x="9" y="8" height="56" width="6098" html.valueishtml="0"  name=exp_row_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="60" width="6098" format="[general]" html.valueishtml="0"  name=exp_row visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

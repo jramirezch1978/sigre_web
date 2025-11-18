@@ -1,0 +1,90 @@
+﻿$PBExportHeader$f_reporte.srf
+global type f_reporte from function_object
+end type
+
+forward prototypes
+global function datawindow f_reporte (datawindow adw_report, string as_dataobject, string as_titulo)
+end prototypes
+
+global function datawindow f_reporte (datawindow adw_report, string as_dataobject, string as_titulo);SetPointer(HourGlass!)
+
+//datawindow		adw_report
+//w_sys_reporte	w_reporte
+
+string	ls_error
+string	ls_tit
+string	ls_mostrar_logo
+//string	ls_dsc_cia
+
+ls_tit = as_titulo
+
+//ls_mostrar_logo = profilestring (gs_archivo_ini,"REPORTE","MOSTRAR_LOGO","SI")
+//ls_dsc_cia = f_dsc_compania(as_cia)
+
+
+//opensheet(w_reporte,gw_mdi,gi_pto_ventana,LAYERED!)
+
+//if ls_tit<> "@" then
+//	as_titulo = "RPT: "+as_titulo
+//else
+//	as_titulo = as_dataobject
+//	as_titulo = "RPT: "+as_titulo
+//end if
+
+//w_reporte.title=as_titulo+" ( Vista de Pagina ) "
+//w_reporte.is_titulo=as_titulo
+
+//adw_report = w_reporte.dw_form
+
+//if w_reporte.ib_grid = false
+	
+adw_report.dataobject=as_dataobject
+
+adw_report.Modify("DataWindow.Print.Preview.Zoom = 100")
+adw_report.Modify("DataWindow.Print.Preview = Yes")
+//adw_report.Modify("DataWindow.Grid.Lines=1")
+adw_report.Modify("DataWindow.Grid.Lines=0")
+if ls_tit <> "@" then
+	adw_report.Modify('DataWindow.Print.Margin.Left=150')
+	adw_report.Modify('DataWindow.Print.DocumentName='+"'"+mid(as_titulo,6)+"'")
+// CREA EL TITULO
+	adw_report.Modify('create text(band=background alignment="0" text="'+as_titulo+ '" border="0" color="8388608" x="1050" y="70" height="106" width="2000"  name=t  font.face="Arial" font.height="-16" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="16777215" )')
+// CREA EL TEXTO TITANIUM
+	adw_report.Modify('create text(band=background alignment="0" text="TITANIUM" border="0" color="8388608." x="2500" y="320" height="58" width="500"  name=yescom font.face="Arial" font.italic = "1" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.underline="0" background.mode="2" background.color="16777215" )')
+
+// CREA EL LOGOTIPO
+adw_report.Modify('create bitmap(band=Foreground filename="'+ gs_logo+'" border="0" x="280" y="25" height="290" width="510" )')
+// CREA LA FECHA
+	adw_report.modify('create compute(band=background alignment="0" expression="'+"'Fecha : ' + string(today(),'DD/MM/YYYY')"+'" border="0" color="0" x="1050" y="204" height="58" width="537" format="[GENERAL]"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )')
+// CREA LA HORA
+	adw_report.modify('create compute(band=background alignment="0" expression="'+"'Hora  : ' + string(now(),'hh:mm:ss')"+'" border="0" color="0" x="1050" y="271" height="58" width="537" format="[GENERAL]"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )')
+// CREA LA PAGINA
+	adw_report.modify('create compute(band=background alignment="0" expression="'+ "'Pag.  : ' + page() + ' / ' + pagecount()" +'" border="0" color="0" x="1934" y="271" height="58" width="537" format="[GENERAL]"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" name=pagina)')
+// CREA EL USUARIO
+	adw_report.modify('create compute(band=background alignment="0" expression="'+ "'Usuario  : " + gs_user + "'" +'" border="0" color="0" x="1934" y="204" height="58" width="637" format="[GENERAL]"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" name=usuario )')
+// CREA LA CIA
+	adw_report.Modify('create text(band=background alignment="0" text="'+gs_empresa+ '" border="0" color="0" x="100" y="310" height="150" width="900"  name=cia  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="0" Font.Italic = "0" background.mode="2" background.color="16777215" )')
+// CREA LA LINEA DE DIVISION HORIZONTAL (1)
+	adw_report.Modify('create line(band=background x1="47" y1="392" x2="3050" y2="392" pen.style="0" pen.width="4" pen.color="8388608"  background.mode="2" background.color="16777215" )')
+// CREA LA LINEA DE DIVISION HORIZONTAL (2)
+	adw_report.Modify('create line(band=background x1="47" y1="20" x2="3050" y2="20" pen.style="0" pen.width="4" pen.color="8388608"  background.mode="2" background.color="16777215" )')
+// CREA LA LINEA DE DIVISION VERTICAL (1)
+	adw_report.Modify('create line(band=background x1="1000" y1="20" x2="1000" y2="392" pen.style="0" pen.width="4" pen.color="8388608"  background.mode="2" background.color="16777215" )')
+// CREA LA LINEA DE DIVISION VERTICAL (2)
+	adw_report.Modify('create line(band=background x1="3050" y1="20" x2="3050" y2="392" pen.style="0" pen.width="4" pen.color="8388608"  background.mode="2" background.color="16777215" )')
+// CREA LA LINEA DE DIVISION VERTICAL (3)
+	adw_report.Modify('create line(band=background x1="47" y1="20" x2="47" y2="392" pen.style="0" pen.width="4" pen.color="8388608"  background.mode="2" background.color="16777215" )')
+// CREA EL TEXTO FILTRO v_filtro
+	adw_report.Modify('create text(band=background alignment="0" text="" border="0" color="8388608." x="47" y="394" height="116" width="3000"  name=v_filtro font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.underline="0" background.mode="2" background.color="16777215" )')
+// DESHABILITA LA SELECCION POR MOUSE
+	adw_report.Modify("DataWindow.Selected.Mouse=No")
+end if
+
+adw_report.Settransobject(SQLCA)
+adw_report.visible = true
+adw_report.setfocus()
+setpointer(arrow!)
+return adw_report
+
+end function
+

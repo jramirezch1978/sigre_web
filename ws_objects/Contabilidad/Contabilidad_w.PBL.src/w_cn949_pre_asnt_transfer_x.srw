@@ -1,0 +1,465 @@
+﻿$PBExportHeader$w_cn949_pre_asnt_transfer_x.srw
+forward
+global type w_cn949_pre_asnt_transfer_x from w_prc
+end type
+type cb_revertir from commandbutton within w_cn949_pre_asnt_transfer_x
+end type
+type st_5 from statictext within w_cn949_pre_asnt_transfer_x
+end type
+type sle_libro from singlelineedit within w_cn949_pre_asnt_transfer_x
+end type
+type sle_mes from singlelineedit within w_cn949_pre_asnt_transfer_x
+end type
+type sle_ano from singlelineedit within w_cn949_pre_asnt_transfer_x
+end type
+type cb_cancelar from commandbutton within w_cn949_pre_asnt_transfer_x
+end type
+type cb_generar from commandbutton within w_cn949_pre_asnt_transfer_x
+end type
+type cb_test from commandbutton within w_cn949_pre_asnt_transfer_x
+end type
+type st_4 from statictext within w_cn949_pre_asnt_transfer_x
+end type
+type st_3 from statictext within w_cn949_pre_asnt_transfer_x
+end type
+type st_2 from statictext within w_cn949_pre_asnt_transfer_x
+end type
+type st_1 from statictext within w_cn949_pre_asnt_transfer_x
+end type
+type r_1 from rectangle within w_cn949_pre_asnt_transfer_x
+end type
+end forward
+
+global type w_cn949_pre_asnt_transfer_x from w_prc
+integer width = 1477
+integer height = 1116
+string title = "Generacion de pre asientos de transferencia de gastos (CN949)"
+cb_revertir cb_revertir
+st_5 st_5
+sle_libro sle_libro
+sle_mes sle_mes
+sle_ano sle_ano
+cb_cancelar cb_cancelar
+cb_generar cb_generar
+cb_test cb_test
+st_4 st_4
+st_3 st_3
+st_2 st_2
+st_1 st_1
+r_1 r_1
+end type
+global w_cn949_pre_asnt_transfer_x w_cn949_pre_asnt_transfer_x
+
+on w_cn949_pre_asnt_transfer_x.create
+int iCurrent
+call super::create
+this.cb_revertir=create cb_revertir
+this.st_5=create st_5
+this.sle_libro=create sle_libro
+this.sle_mes=create sle_mes
+this.sle_ano=create sle_ano
+this.cb_cancelar=create cb_cancelar
+this.cb_generar=create cb_generar
+this.cb_test=create cb_test
+this.st_4=create st_4
+this.st_3=create st_3
+this.st_2=create st_2
+this.st_1=create st_1
+this.r_1=create r_1
+iCurrent=UpperBound(this.Control)
+this.Control[iCurrent+1]=this.cb_revertir
+this.Control[iCurrent+2]=this.st_5
+this.Control[iCurrent+3]=this.sle_libro
+this.Control[iCurrent+4]=this.sle_mes
+this.Control[iCurrent+5]=this.sle_ano
+this.Control[iCurrent+6]=this.cb_cancelar
+this.Control[iCurrent+7]=this.cb_generar
+this.Control[iCurrent+8]=this.cb_test
+this.Control[iCurrent+9]=this.st_4
+this.Control[iCurrent+10]=this.st_3
+this.Control[iCurrent+11]=this.st_2
+this.Control[iCurrent+12]=this.st_1
+this.Control[iCurrent+13]=this.r_1
+end on
+
+on w_cn949_pre_asnt_transfer_x.destroy
+call super::destroy
+destroy(this.cb_revertir)
+destroy(this.st_5)
+destroy(this.sle_libro)
+destroy(this.sle_mes)
+destroy(this.sle_ano)
+destroy(this.cb_cancelar)
+destroy(this.cb_generar)
+destroy(this.cb_test)
+destroy(this.st_4)
+destroy(this.st_3)
+destroy(this.st_2)
+destroy(this.st_1)
+destroy(this.r_1)
+end on
+
+event open;call super::open;String ls_ano, ls_mes, ls_nro_libro
+Long ll_nro_libro
+// Proceso CPEX (Contabilidad productos exonerados)
+ls_ano = string( year( today() ) )
+ls_mes = string( month( today() ) )
+select libro_prod_exo into :ll_nro_libro from cntblparam where reckey='1';
+					
+sle_ano.text = ls_ano
+sle_mes.text = ls_mes
+sle_libro.text = string(ll_nro_libro)
+
+end event
+
+type cb_revertir from commandbutton within w_cn949_pre_asnt_transfer_x
+integer x = 750
+integer y = 844
+integer width = 302
+integer height = 80
+integer taborder = 60
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Revertir"
+end type
+
+event clicked;string  ls_ano, ls_mes, ls_nro_libro
+Integer li_rpta
+
+cb_test.enabled = false
+cb_generar.enabled = false
+cb_revertir.enabled = false
+
+sle_ano.enabled = false
+sle_mes.enabled = false
+
+ls_ano = sle_ano.text
+ls_mes = sle_mes.text
+ls_nro_libro = sle_libro.text
+
+li_rpta = MessageBox( 'Aviso', "Esta seguro", Question!, OKCancel!, 2 )
+
+If li_rpta = 1 then
+	DECLARE PB_USP_REVERSION_ASIENTOS PROCEDURE FOR USP_CNT_REVERSION_ASIENTOS ( 
+   	:ls_ano, :ls_mes, :ls_nro_libro ) ;
+	execute PB_USP_REVERSION_ASIENTOS  ;
+
+	if sqlca.sqlcode = -1 Then
+		MessageBox( 'Error', "Procedimiento <<USP_CNT_REVERSION_ASIENTOS>> no concluyo correctamente", StopSign! )
+		rollback ;
+	else
+		MessageBox( 'Mensaje', "Proceso terminado" )
+		commit ;
+	End If
+		
+	Close PB_USP_REVERSION_ASIENTOS ;
+end if
+cb_test.enabled = true
+cb_generar.enabled = true
+cb_revertir.enabled = true
+sle_ano.enabled = true
+sle_mes.enabled = true
+end event
+
+type st_5 from statictext within w_cn949_pre_asnt_transfer_x
+integer x = 174
+integer y = 180
+integer width = 1134
+integer height = 64
+integer textsize = -11
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+long backcolor = 67108864
+string text = "Transferencia de gastos"
+alignment alignment = center!
+boolean focusrectangle = false
+end type
+
+type sle_libro from singlelineedit within w_cn949_pre_asnt_transfer_x
+integer x = 809
+integer y = 584
+integer width = 187
+integer height = 64
+integer taborder = 30
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+boolean enabled = false
+borderstyle borderstyle = stylelowered!
+end type
+
+type sle_mes from singlelineedit within w_cn949_pre_asnt_transfer_x
+integer x = 809
+integer y = 496
+integer width = 187
+integer height = 64
+integer taborder = 20
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+borderstyle borderstyle = stylelowered!
+end type
+
+type sle_ano from singlelineedit within w_cn949_pre_asnt_transfer_x
+integer x = 809
+integer y = 404
+integer width = 187
+integer height = 64
+integer taborder = 10
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+borderstyle borderstyle = stylelowered!
+end type
+
+type cb_cancelar from commandbutton within w_cn949_pre_asnt_transfer_x
+integer x = 1097
+integer y = 844
+integer width = 302
+integer height = 80
+integer taborder = 70
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Cancelar"
+end type
+
+event clicked;close(parent)
+end event
+
+type cb_generar from commandbutton within w_cn949_pre_asnt_transfer_x
+integer x = 375
+integer y = 840
+integer width = 302
+integer height = 84
+integer taborder = 50
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Generar"
+end type
+
+event clicked;string  ls_ano, ls_mes, ls_fecha, ls_nro_libro
+
+cb_test.enabled = false
+cb_revertir.enabled = false
+cb_generar.enabled = false
+cb_cancelar.enabled = false
+sle_ano.enabled = false
+sle_mes.enabled = false
+
+ls_ano = sle_ano.text
+ls_mes = sle_mes.text
+ls_nro_libro = sle_libro.text
+
+DECLARE PB_USP_CNT_940_PROD_EXO PROCEDURE FOR USP_CNT_940_PROD_EXO ( 
+   :ls_ano, :ls_mes, :gs_origen, :gs_user ) ;
+execute PB_USP_CNT_940_PROD_EXO  ;
+
+if sqlca.sqlcode = -1 Then
+	MessageBox( 'Error', "Procedimiento <<USP_CNT_940_PROD_EXO>> no concluyo correctamente", StopSign! )
+	rollback ;
+else
+	MessageBox( 'Mensaje', "Proceso terminado" )
+	commit ;
+End If
+		
+Close pb_usp_cnt_940_prod_exo ;
+cb_test.enabled = true
+cb_generar.enabled = true
+cb_revertir.enabled = true
+cb_cancelar.enabled = true
+sle_ano.enabled = true
+sle_mes.enabled = true
+end event
+
+type cb_test from commandbutton within w_cn949_pre_asnt_transfer_x
+integer x = 37
+integer y = 844
+integer width = 302
+integer height = 80
+integer taborder = 40
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Test"
+end type
+
+event clicked;String ls_ano, ls_mes, ls_nro_libro, ls_descripcion, ls_cod_proceso, ls_ind
+Long ll_count, ll_libro_prod_exo, ll_nro_libro, ll_nro_existe
+Date ld_fecha_obj_final
+Boolean lb_ok = true
+
+ls_ano = sle_ano.text
+ls_mes = sle_mes.text
+ls_nro_libro = sle_libro.text
+ls_cod_proceso = 'CPEX'  // Contabilidad, Productos exonerados
+ls_ind = 'F'
+// Inactivando los botones
+cb_test.enabled = false
+cb_revertir.enabled = false
+cb_generar.enabled = false
+cb_cancelar.enabled = false
+sle_ano.enabled = false
+sle_mes.enabled = false
+
+DECLARE pb_fecha_ini_fin PROCEDURE FOR
+usf_cnt_fecha_ini_fin(:ls_ano, :ls_mes, :ls_ind) ;
+
+EXECUTE pb_fecha_ini_fin ;     // Verifica fecha final
+
+FETCH pb_fecha_ini_fin INTO :ld_fecha_obj_final ;
+
+IF ls_nro_libro='0' then
+	MessageBox('Error', 'Nro de libro errado. Configurar en CNTBLPARAM')
+end if
+
+// Verificando si datos ingresados no son nulos
+DECLARE pb_usp_cnt_error_asiento PROCEDURE FOR usp_cnt_error_asiento(:ls_descripcion) ;
+IF isnull(ls_ano) then
+	MessageBox('Error', 'Año no puede ser nulo')
+end if ;
+	
+If isnull(ls_mes) then 
+	MessageBox('Error', 'Mes no puede ser nulo')
+end if
+
+if isnull(ls_nro_libro) then
+	MessageBox('Error', 'Nro de libro no puede ser nulo')
+end if
+
+// Verificando si proceso ya fue generado
+
+DECLARE pb_proceso_existe PROCEDURE FOR
+usf_cnt_proceso_existe(:ls_cod_proceso, :ld_fecha_obj_final) ;
+
+EXECUTE pb_proceso_existe ;     // Verifica si proceso existe
+
+FETCH pb_proceso_existe INTO :ll_nro_existe ;
+
+//messagebox('Aviso', ll_nro_existe )
+if ll_nro_existe = 0 then
+	MessageBox('Aviso', 'Proceso ya fue generado anteriormente')
+end if
+
+CLOSE pb_fecha_ini_fin ;
+CLOSE pb_proceso_existe ;
+
+// Activando los botones
+cb_test.enabled = true
+cb_revertir.enabled = true
+cb_generar.enabled = true
+cb_cancelar.enabled = true
+sle_ano.enabled = true
+sle_mes.enabled = true
+
+MessageBox('Aviso', 'Fin de testeo')
+end event
+
+type st_4 from statictext within w_cn949_pre_asnt_transfer_x
+integer x = 366
+integer y = 580
+integer width = 357
+integer height = 64
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+long backcolor = 67108864
+string text = "Libro contable :"
+boolean focusrectangle = false
+end type
+
+type st_3 from statictext within w_cn949_pre_asnt_transfer_x
+integer x = 366
+integer y = 492
+integer width = 357
+integer height = 64
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+long backcolor = 67108864
+string text = "Mes"
+boolean focusrectangle = false
+end type
+
+type st_2 from statictext within w_cn949_pre_asnt_transfer_x
+integer x = 366
+integer y = 404
+integer width = 357
+integer height = 64
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+long backcolor = 67108864
+string text = "Año"
+boolean focusrectangle = false
+end type
+
+type st_1 from statictext within w_cn949_pre_asnt_transfer_x
+integer x = 155
+integer y = 68
+integer width = 1134
+integer height = 64
+integer textsize = -11
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+long backcolor = 67108864
+string text = "Generacion de pre asientos"
+alignment alignment = center!
+boolean focusrectangle = false
+end type
+
+type r_1 from rectangle within w_cn949_pre_asnt_transfer_x
+integer linethickness = 1
+long fillcolor = 12632256
+integer x = 274
+integer y = 348
+integer width = 827
+integer height = 356
+end type
+

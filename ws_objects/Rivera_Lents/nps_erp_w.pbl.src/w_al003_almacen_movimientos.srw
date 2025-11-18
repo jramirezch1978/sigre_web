@@ -1,0 +1,169 @@
+﻿$PBExportHeader$w_al003_almacen_movimientos.srw
+forward
+global type w_al003_almacen_movimientos from w_abc_mastdet_smpl
+end type
+end forward
+
+global type w_al003_almacen_movimientos from w_abc_mastdet_smpl
+integer width = 2866
+integer height = 2212
+string title = "Movimientos Permitidos por Almacen (AL003)"
+end type
+global w_al003_almacen_movimientos w_al003_almacen_movimientos
+
+on w_al003_almacen_movimientos.create
+int iCurrent
+call super::create
+end on
+
+on w_al003_almacen_movimientos.destroy
+call super::destroy
+if IsValid(MenuID) then destroy(MenuID)
+end on
+
+event ue_open_pre;call super::ue_open_pre;//f_centrar( this )
+
+ii_lec_mst = 0
+
+dw_master.retrieve( gnvo_app.invo_empresa.is_empresa)
+end event
+
+event ue_insert();// Override
+// Fuerza a que no adicione en dw_master
+
+
+Long  ll_row
+
+if idw_1 = dw_master then return
+ll_row = idw_1.Event ue_insert()
+
+IF ll_row <> -1 THEN
+	THIS.EVENT ue_insert_pos(ll_row)
+end if
+
+end event
+
+event ue_dw_share();call super::ue_dw_share;dwobject dwo
+
+dw_master.event clicked(0,0,dw_master.getrow(),dwo)
+end event
+
+event ue_update_pre;call super::ue_update_pre;dw_detail.of_set_flag_replicacion( )
+end event
+
+type p_pie from w_abc_mastdet_smpl`p_pie within w_al003_almacen_movimientos
+end type
+
+type ole_skin from w_abc_mastdet_smpl`ole_skin within w_al003_almacen_movimientos
+end type
+
+type uo_h from w_abc_mastdet_smpl`uo_h within w_al003_almacen_movimientos
+end type
+
+type st_box from w_abc_mastdet_smpl`st_box within w_al003_almacen_movimientos
+end type
+
+type phl_logonps from w_abc_mastdet_smpl`phl_logonps within w_al003_almacen_movimientos
+end type
+
+type p_mundi from w_abc_mastdet_smpl`p_mundi within w_al003_almacen_movimientos
+end type
+
+type p_logo from w_abc_mastdet_smpl`p_logo within w_al003_almacen_movimientos
+end type
+
+type st_horizontal from w_abc_mastdet_smpl`st_horizontal within w_al003_almacen_movimientos
+end type
+
+type st_filter from w_abc_mastdet_smpl`st_filter within w_al003_almacen_movimientos
+end type
+
+type uo_filter from w_abc_mastdet_smpl`uo_filter within w_al003_almacen_movimientos
+end type
+
+type dw_master from w_abc_mastdet_smpl`dw_master within w_al003_almacen_movimientos
+integer x = 517
+integer y = 316
+integer width = 1806
+integer height = 628
+string dataobject = "d_abc_almacen_tbl"
+end type
+
+event dw_master::constructor;call super::constructor;ii_ck[1] = 1				// columnas de lectrua de este dw
+ii_dk[1] = 1 	      // columnas que se pasan al detalle
+end event
+
+event dw_master::ue_output(long al_row);call super::ue_output;THIS.EVENT ue_retrieve_det(al_row)
+
+idw_det.ScrollToRow(al_row)
+
+
+end event
+
+event dw_master::ue_retrieve_det_pos(any aa_id[]);call super::ue_retrieve_det_pos;idw_det.retrieve(aa_id[1])
+end event
+
+type dw_detail from w_abc_mastdet_smpl`dw_detail within w_al003_almacen_movimientos
+event ue_display ( string as_columna,  long al_row )
+integer x = 517
+integer y = 952
+integer width = 1801
+integer height = 860
+string dataobject = "d_abc_almacen_movimiento_tbl"
+end type
+
+event dw_detail::ue_display(string as_columna, long al_row);boolean lb_ret
+string ls_codigo, ls_data, ls_sql
+choose case lower(as_columna)
+	case "tipo_mov"
+		ls_sql = "SELECT TIPO_MOV AS tipo_movimiento, " &
+				  + "DESC_TIPO_MOV AS DESCRIPCION_tipo_mov " &
+				  + "FROM articulo_mov_tipo " &
+				  + "WHERE FLAG_ESTADO = '1'"
+
+		lb_ret = f_lista(ls_sql, ls_codigo, ls_data, '2')
+
+		if ls_codigo <> '' then
+			this.object.tipo_mov			[al_row] = ls_codigo
+			this.object.desc_tipo_mov	[al_row] = ls_data
+			this.ii_update = 1
+		end if
+
+end choose
+
+end event
+
+event dw_detail::constructor;call super::constructor;ii_ck[1] = 1				// columnas de lectrua de este dw
+ii_rk[1] = 1 	      // columnas que recibimos del master
+
+end event
+
+event dw_detail::rowfocuschanged;call super::rowfocuschanged;f_select_current_row( this)
+end event
+
+event dw_detail::itemchanged;call super::itemchanged;string ls_data, ls_null
+SetNull(ls_null)
+this.AcceptText()
+choose case lower(dwo.name)
+	case "tipo_mov"
+		select desc_tipo_mov
+			into :ls_data
+		from articulo_mov_tipo
+		where tipo_mov = :data
+		  and flag_estado = '1';
+
+		if SQLCA.SQLCode = 100 then
+			Messagebox('Aviso', "TIPO DE MOVIMIENTO NO EXISTE O NO ESTA ACTIVO", StopSign!)
+			this.object.tipo_mov			[row] = ls_null
+			this.object.desc_tipo_mov	[row] = ls_null
+			return 1
+		end if
+
+		this.object.desc_tipo_mov	[row] = ls_data
+
+end choose
+end event
+
+event dw_detail::itemerror;call super::itemerror;return 1
+end event
+

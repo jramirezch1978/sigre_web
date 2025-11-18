@@ -1,0 +1,47 @@
+﻿$PBExportHeader$d_art_dev_pres_sal_grd.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=64 color="536870912" )
+summary(height=64 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_mov_sal dbname="art_devol_prest_enlace.nro_mov_sal" )
+ column=(type=char(6) updatewhereclause=yes name=tipo_mov dbname="art_devol_prestamo.tipo_mov" )
+ column=(type=char(60) updatewhereclause=yes name=desc_tipo_mov dbname="articulo_mov_tipo.desc_tipo_mov" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="art_devol_prestamo.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_mov_ing dbname="art_devol_prest_enlace.nro_mov_ing" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="art_devol_prest_enlace.flag_replicacion" )
+ retrieve="  SELECT A.NRO_MOV_SAL,   
+         B.TIPO_MOV,   
+         D.DESC_TIPO_MOV,   
+         B.COD_ART,   
+         C.DESC_ART,   
+         (B.CANT_SALIDA - B.CANT_INGRESO) AS CANTIDAD,
+			A.NRO_MOV_ING,
+			A.FLAG_REPLICACION 
+    FROM ART_DEVOL_PREST_ENLACE  A,   
+         ART_DEVOL_PRESTAMO  		B,   
+         ARTICULO                C,   
+         ARTICULO_MOV_TIPO       D
+   WHERE A.NRO_MOV_SAL = B.NRO_MOV 
+     and D.TIPO_MOV    = B.TIPO_MOV 
+     and B.COD_ART     = C.COD_ART 
+     and A.NRO_MOV_ING = :as_nro_mov_ing
+     and B.FLAG_ESTADO <> '0'
+ORDER BY A.NRO_MOV_SAL ASC   " update="ART_DEVOL_PREST_ENLACE" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_mov_ing", string)) )
+text(band=header alignment="2" text="Desc Artículo" border="0" color="16777215" x="1061" y="4" height="56" width="1056" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Mov Sal" border="0" color="16777215" x="9" y="4" height="56" width="357" html.valueishtml="0"  name=nro_mov_sal_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Tipo Mov" border="0" color="16777215" x="370" y="4" height="56" width="265" html.valueishtml="0"  name=tipo_mov_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cod Art" border="0" color="16777215" x="640" y="4" height="56" width="416" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cantidad" border="0" color="16777215" x="2121" y="4" height="56" width="407" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1061" y="4" height="64" width="1056" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="357" format="[general]" html.valueishtml="0"  name=nro_mov_sal visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="370" y="4" height="64" width="265" format="[general]" html.valueishtml="0"  name=tipo_mov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="640" y="4" height="64" width="416" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2121" y="4" height="64" width="407" format="###,##0.0000" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total" border="0" color="0" x="1851" y="4" height="56" width="242" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(cantidad for all)"border="2" color="255" x="2121" y="4" height="56" width="407" format="###,##0.0000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

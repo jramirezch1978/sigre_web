@@ -1,0 +1,45 @@
+﻿$PBExportHeader$d_rpt_stock_valorizado_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=520 color="536870912" )
+summary(height=128 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(6) updatewhereclause=yes name=almacen dbname="articulo_almacen.almacen" )
+ column=(type=char(60) updatewhereclause=yes name=almacen_desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=char(8) updatewhereclause=yes name=articulo_cod_clase dbname="articulo.cod_clase" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_clase_desc_clase dbname="articulo_clase.desc_clase" )
+ column=(type=number updatewhereclause=yes name=costo_dol dbname="costo_dol" )
+ retrieve="select aa.almacen, a.desc_almacen, 
+       ar.cod_clase, acl.desc_clase, 
+       round(sum(aa.sldo_total*aa.costo_prom_dol),2) as costo_dol
+from articulo_almacen aa, almacen a, articulo ar, articulo_clase acl
+where aa.almacen = a.almacen and
+      a.flag_tipo_almacen='M' and      
+      aa.sldo_total >0 and
+      aa.cod_art=ar.cod_art and
+      ar.cod_clase = acl.cod_clase and
+		ar.cod_clase = :as_clase
+group by aa.almacen, a.desc_almacen, ar.cod_clase, acl.desc_clase
+order by ar.cod_clase, aa.almacen
+      " arguments=(("as_clase", string)) )
+text(band=header alignment="2" text="Almacen" border="2" color="0" x="256" y="448" height="64" width="233" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+text(band=header alignment="2" text="Descripción de almacén" border="2" color="0" x="503" y="448" height="64" width="1518" html.valueishtml="0"  name=almacen_desc_almacen_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+text(band=header alignment="2" text="Costo valorizado US$" border="2" color="0" x="2034" y="448" height="64" width="599" html.valueishtml="0"  name=costo_dol_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+bitmap(band=header filename="" x="14" y="16" height="236" width="370" border="0"  name=p_logo visible="1" )
+text(band=header alignment="1" text="" border="0" color="0" x="14" y="284" height="48" width="370" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2363" y="24" height="48" width="425" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="0" x="2363" y="168" height="48" width="425" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="33554432" x="2363" y="96" height="48" width="425" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Valorización en US$ por almacén" border="0" color="0" x="617" y="56" height="80" width="1568" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="617" y="172" height="64" width="1568" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="256" y="4" height="64" width="233" format="[general]" html.valueishtml="0"  name=almacen pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="503" y="4" height="64" width="1518" format="[general]" html.valueishtml="0"  name=almacen_desc_almacen pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="2034" y="4" height="64" width="599" format="#,##0.00" html.valueishtml="0"  name=costo_dol pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(costo_dol for all)"border="0" color="33554432" x="2034" y="16" height="64" width="599" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total US$ :" border="0" color="0" x="1650" y="24" height="64" width="315" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

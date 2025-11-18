@@ -1,0 +1,30 @@
+﻿$PBExportHeader$f_dw2xls.srf
+global type f_dw2xls from function_object
+end type
+
+forward prototypes
+global function integer f_dw2xls (datawindow a_dw, string as_filename, string as_filetype, boolean ab_showtips, boolean ab_setborder, boolean ab_setbackcolor, boolean ab_mergecolumnheader, string as_objname, integer ai_printheader, boolean ab_openexcel)
+end prototypes
+
+global function integer f_dw2xls (datawindow a_dw, string as_filename, string as_filetype, boolean ab_showtips, boolean ab_setborder, boolean ab_setbackcolor, boolean ab_mergecolumnheader, string as_objname, integer ai_printheader, boolean ab_openexcel);IF Not IsValid(a_dw) Then
+	Return -1
+END IF
+
+
+n_cst_dw2excel  n_excel
+
+//n_Excel.OF_SetFileType(as_FileType)
+//n_Excel.OF_SetShowTips(ab_ShowTips)
+n_Excel.OF_SetGridBorder(ab_SetBorder)
+//n_Excel.OF_SetBackColor(ab_SetBackColor)
+n_excel.OF_MergeColumnHeader(ab_MergeColumnHeader,as_ObjName)
+n_Excel.OF_SetPrintHeader(ai_printheader)
+n_Excel.OF_OpenExcelFile(ab_OpenExcel)
+n_Excel.OF_SetTipsWindow("w_tipsabc","正在生成Excel文件,请稍候.....")
+
+Return n_excel.OF_dw2Excel(a_dw,as_FileName)
+
+
+
+end function
+

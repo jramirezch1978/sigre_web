@@ -1,0 +1,123 @@
+﻿$PBExportHeader$f_backup.srf
+global type f_backup from function_object
+end type
+
+forward prototypes
+global subroutine f_backup ()
+end prototypes
+
+global subroutine f_backup ();String 	ls_usuario, ls_clave, ls_esquema, ls_file_zip, ls_file_bat, ls_path, ls_servidor, ls_prefijo, &
+			ls_n, ls_cmd
+DateTime ldt_today
+integer 	li_i, li_n
+n_cst_encriptor lnvo_enc
+
+lnvo_enc = create n_cst_encriptor
+lnvo_enc.is_key 	= "ProfileString(ls_inifilePasswordgs_empresa)"
+
+// Obtengo el archivo bat
+ls_file_bat  = ProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP"), lnvo_enc.of_encriptar('FILE_BAT'), "")
+if trim(ls_file_bat) = "" then
+	ls_file_bat = "backup.bat"
+	setProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP"), lnvo_enc.of_encriptar('FILE_BAT'), &
+		lnvo_enc.of_encriptar( ls_file_bat ) )
+else
+	ls_file_bat = lnvo_enc.of_desencriptar( ls_file_bat )
+end if
+
+//Obtengo el path donde guardar el backup en caliente
+ls_path = ProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP"), lnvo_enc.of_encriptar('PATH'), "")
+if trim(ls_path) = "" then
+	ls_path = "c:\backup"
+	setProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP"), lnvo_enc.of_encriptar('PATH'), &
+		lnvo_enc.of_encriptar( ls_path ) )
+else
+	ls_path = lnvo_enc.of_desencriptar( ls_path )
+end if
+
+if len(ls_path) > 0 and right(ls_path, 1) = '\' then
+	ls_path = mid(ls_path, 1, len(ls_path) - 1)
+end if
+
+//Obtengo el número de esquemas a los cuales les voy a sacar backup
+ls_n = ProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP"), lnvo_enc.of_encriptar('MAXIMO'), "")
+if ls_n = "" then
+	ls_n = "20"
+	setProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP"), lnvo_enc.of_encriptar('MAXIMO'), ls_n)
+end if
+li_n = Integer(ls_n)
+
+// Luego recorro cada uno de los backups para sacar los datos
+for li_i=1 to li_n
+	ls_esquema = ProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP"), &
+			lnvo_enc.of_encriptar('ESQUEMA'), "")
+			
+	if trim(ls_esquema) <> "" then
+		ls_esquema = lnvo_enc.of_desencriptar( ls_esquema )
+		
+		//Obtengo el usuario administrador de la base de datos
+		ls_usuario = ProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP_" + ls_esquema), &
+				lnvo_enc.of_encriptar('USERID'), "")
+				
+		if trim(ls_usuario) = "" then
+			ls_usuario = "system"
+			setProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP_" + ls_esquema), &
+					lnvo_enc.of_encriptar('USERID'), lnvo_enc.of_encriptar( ls_usuario ) )
+		else
+			ls_usuario = lnvo_enc.of_desencriptar( ls_usuario )
+		end if
+		
+		//Obtengo la contraseña del usuario administrador de la base de datos
+		ls_clave = ProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP_" + ls_esquema), &
+				lnvo_enc.of_encriptar('CLAVE'), "")
+				
+		if trim(ls_clave) = "" then
+			ls_clave = "master"
+			setProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP_" + ls_esquema), &
+					lnvo_enc.of_encriptar('CLAVE'), lnvo_enc.of_encriptar( ls_clave ) )
+		else
+			ls_clave = lnvo_enc.of_desencriptar( ls_clave )
+		end if
+		
+		//Obtengo el nombre del servidor
+		ls_servidor = ProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP_" + ls_esquema), &
+				lnvo_enc.of_encriptar('SERVIDOR'), "")
+				
+		if trim(ls_servidor) = "" then
+			ls_servidor = "lc1"
+			setProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP_" + ls_esquema), &
+					lnvo_enc.of_encriptar('SERVIDOR'), lnvo_enc.of_encriptar( ls_servidor ) )
+		else
+			ls_servidor = lnvo_enc.of_desencriptar( ls_servidor )
+		end if
+		
+		//Obtengo el prefijo del backup
+		ls_prefijo = ProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP_" + ls_esquema), &
+				lnvo_enc.of_encriptar('PREFIJO'), "")
+				
+		if trim(ls_prefijo) = "" then
+			ls_prefijo = "bk_" + ls_esquema
+			setProfileString(gs_inifile, lnvo_enc.of_encriptar("BACKUP_" + ls_esquema), &
+					lnvo_enc.of_encriptar('PREFIJO'), lnvo_enc.of_encriptar( ls_prefijo ) )
+		else
+			ls_prefijo = lnvo_enc.of_desencriptar( ls_prefijo )
+		end if
+		
+		//Obtengo la fecha actual
+		ldt_today = DateTime(Today(), Now())
+		
+		//Genero el nombre del archivo
+		ls_file_zip = ls_path + ls_prefijo + string(ldt_today, 'yyyymmdd_hhmm')
+		
+		//genero el comando
+		ls_cmd = ls_file_bat + " " + ls_usuario + " " + ls_clave + " " + ls_servidor + " " + ls_esquema &
+				+ " " + ls_file_zip
+		
+		run(ls_cmd)
+	end if
+next
+
+
+destroy lnvo_enc
+end subroutine
+

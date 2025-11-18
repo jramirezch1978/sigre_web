@@ -1,0 +1,89 @@
+﻿$PBExportHeader$d_detalle_factura_parte_rpt.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=136 color="536870912" )
+header[2](height=136 color="536870912" )
+header[3](height=136 color="536870912" )
+header[4](height=136 color="536870912" )
+header[5](height=136 color="536870912" )
+summary(height=192 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=com_parte_rac_parte_racion dbname="com_parte_rac_parte_racion" )
+ column=(type=number updatewhereclause=yes name=com_part_rac_costo_costo_unit dbname="com_part_rac_costo_costo_unit" )
+ column=(type=number updatewhereclause=yes name=com_parte_rac_det_nro_raciones dbname="com_parte_rac_det_nro_raciones" )
+ retrieve="SELECT distinct a.parte_racion,
+                b.flag_tipo_racion,
+                r.ratio,
+                c.costo_unit,
+                b.nro_raciones,
+                round(c.costo_unit * b.nro_raciones, 2) as Importe,
+                b.cencos,
+                cc.desc_cencos,
+                b.confin,
+                a.cod_moneda,
+                substr(a.parte_racion, 1, 2) as cod_origen,
+                a.fecha_parte_rac
+
+  FROM com_parte_rac       a,
+       com_parte_rac_det   b,
+       com_part_rac_costo  c,
+       centros_costo       cc,
+       com_parte_rac_ratio r
+      
+      where a.parte_racion                           = r.parte_racion
+            and a.parte_racion                       = c.parte_racion
+            and a.parte_racion                       = b.parte_racion
+            and b.parte_racion                       = r.parte_racion
+            and cc.cencos 									  = b.cencos
+            and b.parte_racion                       = c.parte_racion
+            and b.flag_tipo_racion                   = c.flag_tipo_racion
+            and b.flag_tipo_racion                   = r.flag_tipo_racion
+				and NVL(a.flag_estado, '0') = '1'
+				and substr(a.parte_racion, 1, 2) = :as_origen
+        		and Trunc(a.fecha_parte_rac) BETWEEN trunc(:ad_fecha1) AND trunc(:ad_fecha2)
+				
+
+order by a.parte_racion" arguments=(("as_origen", string),("ad_fecha1", date),("ad_fecha2", date))  sort="com_parte_rac_parte_racion A com_part_rac_costo_costo_unit A " )
+group(level=1 header.height=0 trailer.height=192 by=("com_parte_rac_parte_racion" ) header.color="536870912" trailer.color="536870912" )
+text(band=header[1] alignment="0" text="Sum Of Com Parte Rac Det Nro Raciones" border="0" color="33554432" x="9" y="4" height="128" width="768" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[1] alignment="0" text="Com Parte Rac Parte Racion" border="0" color="33554432" x="786" y="4" height="128" width="846" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[1] alignment="0" text="Com Parte Rac Det Nro Raciones" border="0" color="33554432" x="1641" y="4" height="128" width="905" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[1] alignment="0" text="Com Parte Rac Ratio Ratio" border="0" color="33554432" x="2555" y="4" height="128" width="686" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[1] alignment="0" text="Com Part Rac Costo Costo Unit" border="0" color="33554432" x="3250" y="4" height="128" width="686" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="0" text="@com_parte_rac_parte_racion" border="0" color="33554432" x="1641" y="4" height="128" width="905" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="0" text="@com_parte_rac_ratio_ratio Sum Of Com Parte Rac Det Nro Raciones" border="0" color="33554432" x="2555" y="4" height="128" width="686" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="0" text="@com_parte_rac_det_nro_raciones Sum Of Com Parte Rac Det Nro Raciones" border="0" color="33554432" x="3250" y="4" height="128" width="686" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="0" text="@com_parte_rac_parte_racion Sum Of Com Parte Rac Det Nro Raciones" border="0" color="33554432" x="3945" y="4" height="128" width="686" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="0" text="@com_parte_rac_det_nro_raciones" border="0" color="33554432" x="1641" y="4" height="128" width="905" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[4] alignment="0" text="@com_parte_rac_ratio_ratio" border="0" color="33554432" x="1641" y="4" height="128" width="905" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[5] alignment="0" text="Com Parte Rac Parte Racion" border="0" color="33554432" x="9" y="4" height="128" width="768" html.valueishtml="0"  name=com_parte_rac_parte_racion_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[5] alignment="0" text="Com Part Rac Costo Costo Unit" border="0" color="33554432" x="786" y="4" height="128" width="846" html.valueishtml="0"  name=com_part_rac_costo_costo_unit_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[5] alignment="0" text="@com_part_rac_costo_costo_unit" border="0" color="33554432" x="1641" y="4" height="128" width="905" html.valueishtml="0"  name=com_parte_rac_det_nro_raciones_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[5] alignment="0" text="Grand Total " border="0" color="33554432" x="4640" y="4" height="128" width="686" html.valueishtml="0"  name=comp4_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="76" width="768" format="[general]" html.valueishtml="0"  name=com_parte_rac_parte_racion visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="33554432" x="786" y="4" height="76" width="846" format="[general]" html.valueishtml="0"  name=com_part_rac_costo_costo_unit visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="33554432" x="1641" y="4" height="76" width="905" format="[general]" html.valueishtml="0"  name=com_parte_rac_det_nro_raciones visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1, 2, ~"@com_parte_rac_parte_racion@com_parte_rac_det_nro_raciones@com_parte_rac_ratio_ratio~")"border="0" color="33554432" x="2555" y="4" height="76" width="686" format="[general]" html.valueishtml="0"  name=sum_com_parte_rac_det_nro_raciones visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" crosstab.repeat=yes )
+compute(band=detail alignment="1" expression="crosstabsum(1, 3, ~"@com_parte_rac_parte_racion@com_parte_rac_det_nro_raciones~")"border="0" color="33554432" x="3250" y="4" height="76" width="686" format="[general]" html.valueishtml="0"  name=sum_com_parte_rac_det_nro_raciones_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" crosstab.repeat=yes )
+compute(band=detail alignment="1" expression="crosstabsum(1, 4, ~"@com_parte_rac_parte_racion~")"border="0" color="33554432" x="3945" y="4" height="76" width="686" format="[general]" html.valueishtml="0"  name=sum_com_parte_rac_det_nro_raciones_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" crosstab.repeat=yes )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="0" color="33554432" x="4640" y="4" height="76" width="686" format="[general]" html.valueishtml="0"  name=comp4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="com_parte_rac_parte_racion + ~" Total~""border="0" color="33554432" x="9" y="4" height="128" width="768" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(com_parte_rac_det_nro_raciones for group 1)"border="0" color="33554432" x="1641" y="4" height="128" width="905" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(sum_com_parte_rac_det_nro_raciones for group 1)"border="0" color="33554432" x="2555" y="4" height="128" width="686" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(sum_com_parte_rac_det_nro_raciones_1 for group 1)"border="0" color="33554432" x="3250" y="4" height="128" width="686" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(sum_com_parte_rac_det_nro_raciones_2 for group 1)"border="0" color="33554432" x="3945" y="4" height="128" width="686" format="[general]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(comp4 for group 1)"border="0" color="33554432" x="4640" y="4" height="128" width="686" format="[general]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="~"Grand Total~""border="0" color="33554432" x="9" y="4" height="128" width="768" format="[general]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(com_parte_rac_det_nro_raciones for all )"border="0" color="33554432" x="1641" y="4" height="128" width="905" format="[general]" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(sum_com_parte_rac_det_nro_raciones for all )"border="0" color="33554432" x="2555" y="4" height="128" width="686" format="[general]" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(sum_com_parte_rac_det_nro_raciones_1 for all )"border="0" color="33554432" x="3250" y="4" height="128" width="686" format="[general]" html.valueishtml="0"  name=compute_10 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(sum_com_parte_rac_det_nro_raciones_2 for all )"border="0" color="33554432" x="3945" y="4" height="128" width="686" format="[general]" html.valueishtml="0"  name=compute_11 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(comp4 for all )"border="0" color="33554432" x="4640" y="4" height="128" width="686" format="[general]" html.valueishtml="0"  name=compute_12 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "com_parte_rac_parte_racion, com_parte_rac_det_nro_raciones, com_parte_rac_ratio_ratio, com_part_rac_costo_costo_unit" rows = "com_parte_rac_parte_racion, com_part_rac_costo_costo_unit" values = "sum(com_parte_rac_det_nro_raciones for crosstab)" sourcenames = "com_parte_rac_parte_racion, com_parte_rac_det_flag_tipo_racion, com_parte_rac_ratio_ratio, com_part_rac_costo_costo_unit, com_parte_rac_det_nro_raciones, importe, com_parte_rac_det_cencos, centros_costo_desc_cencos, com_parte_rac_det_confin, com_parte_rac_cod_moneda, cod_origen, com_parte_rac_fecha_parte_rac")
+sparse(names="com_parte_rac_parte_racion")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,89 @@
+﻿$PBExportHeader$d_sel_articulo_stock.srd
+release 11.5;
+datawindow(units=0 timer_interval=0 color=16777215 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=64 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=4 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=64 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo.cod_art" dbalias="A.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" dbalias="A.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" dbalias="A.und" )
+ column=(type=decimal(6) updatewhereclause=yes name=costo_ult_compra dbname="articulo.costo_ult_compra" dbalias="A.costo_ult_compra" )
+ column=(type=decimal(1) updatewhereclause=yes name=dias_reposicion dbname="articulo.dias_reposicion" dbalias="A.dias_reposicion" )
+ column=(type=char(6) updatewhereclause=yes name=almacen dbname="almacen.almacen" dbalias="AL.almacen" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen dbname="almacen.desc_almacen" dbalias="AL.desc_almacen" )
+ column=(type=char(20) updatewhereclause=yes name=numero_serie dbname="numero_serie" )
+ column=(type=number updatewhereclause=yes name=sldo_total dbname="sldo_total" )
+ column=(type=char(20) updatewhereclause=yes name=codigo_serie dbname="articulo.codigo_serie" dbalias="A.codigo_serie" )
+ retrieve="  SELECT A.COD_ART,   
+         A.DESC_ART,   
+         A.UND,   
+         A.COSTO_ULT_COMPRA,   
+         A.DIAS_REPOSICION,   
+			AL.ALMACEN,
+			AL.DESC_ALMACEN,
+			(select distinct numero_serie 
+			  from articulo_mov am 
+			 where am.numero_serie = :as_nro_serie
+			   and flag_estado <> '0') as numero_serie,
+			CASE WHEN :as_nro_serie is null THEN
+				AA.SLDO_TOTAL
+			ELSE
+				NVL((SELECT SUM(AM.CANT_PROCESADA * AMT.FACTOR_SLDO_TOTAL)
+						 FROM ARTICULO_MOV AM,
+								VALE_MOV		 VM,
+								ARTICULO_MOV_TIPO AMT
+						WHERE AM.NRO_VALE = VM.NRO_VALE
+ 						  AND VM.TIPO_MOV	= AMT.TIPO_MOV
+						  AND VM.FLAG_ESTADO <> '0'
+						  AND AM.FLAG_ESTADO <> '0'
+						  AND AM.NUMERO_SERIE = :as_nro_serie
+						  AND AM.COD_ART		 = :as_cod_art
+						  and vm.almacen		 = al.almacen
+					),0)
+			END AS SLDO_TOTAL,
+			a.codigo_serie   
+    FROM ARTICULO					A,
+			ARTICULO_ALMACEN		AA,
+			ALMACEN					AL
+   WHERE A.COD_ART     = AA.COD_ART
+	  and AA.ALMACEN	  = AL.ALMACEN
+     and A.FLAG_ESTADO = '1' 
+	  AND A.FLAG_INVENTARIABLE = '1' 
+     and A.COD_ART = :as_cod_art
+     and CASE WHEN :as_nro_serie is null THEN
+				AA.SLDO_TOTAL
+			ELSE
+				NVL((SELECT SUM(AM.CANT_PROCESADA * AMT.FACTOR_SLDO_TOTAL)
+						 FROM ARTICULO_MOV AM,
+								VALE_MOV		 VM,
+								ARTICULO_MOV_TIPO AMT
+						WHERE AM.NRO_VALE = VM.NRO_VALE
+ 						  AND VM.TIPO_MOV	= AMT.TIPO_MOV
+						  AND VM.FLAG_ESTADO <> '0'
+						  AND AM.FLAG_ESTADO <> '0'
+						  AND AM.NUMERO_SERIE = :as_nro_serie
+						  AND AM.COD_ART		 = :as_cod_art
+						  and vm.almacen		 = al.almacen
+					),0)
+			END > 0
+" arguments=(("as_cod_art", string),("as_nro_serie", string)) )
+text(band=header alignment="2" text="Numero Serie" border="2" color="0" x="14" y="8" height="52" width="645" html.valueishtml="0"  name=numero_serie_t visible="1"  font.face="Tahoma" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="0" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="0" background.gradient.focus="0" background.gradient.scale="0" background.gradient.spread="0" tooltip.backcolor="0" tooltip.delay.initial="0" tooltip.delay.visible="0" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="0" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Almacen" border="2" color="33554432" x="672" y="8" height="52" width="370" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Tahoma" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="0" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="0" background.gradient.focus="0" background.gradient.scale="0" background.gradient.spread="0" tooltip.backcolor="0" tooltip.delay.initial="0" tooltip.delay.visible="0" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="0" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Desc Almacen" border="2" color="33554432" x="1051" y="8" height="52" width="1065" html.valueishtml="0"  name=desc_almacen_t visible="1"  font.face="Tahoma" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="0" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="0" background.gradient.focus="0" background.gradient.scale="0" background.gradient.spread="0" tooltip.backcolor="0" tooltip.delay.initial="0" tooltip.delay.visible="0" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="0" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Sldo Total" border="2" color="33554432" x="2126" y="8" height="52" width="485" html.valueishtml="0"  name=sldo_total_t visible="1"  font.face="Tahoma" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="0" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="0" background.gradient.focus="0" background.gradient.scale="0" background.gradient.spread="0" tooltip.backcolor="0" tooltip.delay.initial="0" tooltip.delay.visible="0" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="0" tooltip.transparency="0" transparency="0" )
+column(band=detail id=8 alignment="0" tabsequence=10 border="2" color="0" x="18" y="4" height="56" width="640" format="[general]" html.valueishtml="0"  name=numero_serie visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes  font.face="Tahoma" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="677" y="4" height="56" width="366" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Tahoma" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="0" x="1056" y="4" height="56" width="1061" format="[general]" html.valueishtml="0"  name=desc_almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Tahoma" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="0" x="2130" y="4" height="56" width="480" format="[general]" html.valueishtml="0"  name=sldo_total visible="1" editmask.mask="###,##0.00" editmask.focusrectangle=no  font.face="Tahoma" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

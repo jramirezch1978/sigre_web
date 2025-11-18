@@ -1,0 +1,120 @@
+﻿$PBExportHeader$m_main.srm
+forward
+global type m_main from menu
+end type
+type m_archivo from menu within m_main
+end type
+type m_otracosa from menu within m_archivo
+end type
+type m_otracosa1 from menu within m_otracosa
+end type
+type m_otracosa from menu within m_archivo
+m_otracosa1 m_otracosa1
+end type
+type m_- from menu within m_archivo
+end type
+type m_salir from menu within m_archivo
+end type
+type m_archivo from menu within m_main
+m_otracosa m_otracosa
+m_- m_-
+m_salir m_salir
+end type
+global type m_main from menu
+m_archivo m_archivo
+end type
+end forward
+
+global type m_main from menu
+m_archivo m_archivo
+end type
+global m_main m_main
+
+on m_main.create
+m_main=this
+call super::create
+this.m_archivo=create m_archivo
+this.Item[UpperBound(this.Item)+1]=this.m_archivo
+end on
+
+on m_main.destroy
+call super::destroy
+destroy(this.m_archivo)
+end on
+
+type m_archivo from menu within m_main
+m_otracosa m_otracosa
+m_- m_-
+m_salir m_salir
+end type
+
+on m_archivo.create
+call super::create
+this.text = "Archivo"
+this.m_otracosa=create m_otracosa
+this.m_-=create m_-
+this.m_salir=create m_salir
+this.Item[UpperBound(this.Item)+1]=this.m_otracosa
+this.Item[UpperBound(this.Item)+1]=this.m_-
+this.Item[UpperBound(this.Item)+1]=this.m_salir
+end on
+
+on m_archivo.destroy
+call super::destroy
+destroy(this.m_otracosa)
+destroy(this.m_-)
+destroy(this.m_salir)
+end on
+
+type m_otracosa from menu within m_archivo
+m_otracosa1 m_otracosa1
+end type
+
+on m_otracosa.create
+call super::create
+this.text = "Otra cosa"
+this.m_otracosa1=create m_otracosa1
+this.Item[UpperBound(this.Item)+1]=this.m_otracosa1
+end on
+
+on m_otracosa.destroy
+call super::destroy
+destroy(this.m_otracosa1)
+end on
+
+type m_otracosa1 from menu within m_otracosa
+end type
+
+on m_otracosa1.create
+call super::create
+this.text = "Otra Cosa 1"
+end on
+
+on m_otracosa1.destroy
+call super::destroy
+end on
+
+type m_- from menu within m_archivo
+end type
+
+on m_-.create
+call super::create
+this.text = "-"
+end on
+
+on m_-.destroy
+call super::destroy
+end on
+
+type m_salir from menu within m_archivo
+end type
+
+on m_salir.create
+call super::create
+this.text = "Salir"
+end on
+
+on m_salir.destroy
+call super::destroy
+end on
+

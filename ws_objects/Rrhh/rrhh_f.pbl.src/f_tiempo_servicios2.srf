@@ -1,0 +1,114 @@
+﻿$PBExportHeader$f_tiempo_servicios2.srf
+global type f_tiempo_servicios2 from function_object
+end type
+
+forward prototypes
+global function string f_tiempo_servicios2 (datetime adt_fec_ingreso, datetime adt_fec_cese)
+end prototypes
+
+global function string f_tiempo_servicios2 (datetime adt_fec_ingreso, datetime adt_fec_cese);string ls_tiempo_servicio = ''
+integer li_year1, li_year2, li_mes1, li_mes2, li_dia1, li_dia2, li_meses = 0, li_dias = 0, li_years = 0
+
+li_year1 = year(Date(adt_fec_ingreso))
+li_year2 = year(Date(adt_fec_cese))
+
+li_mes1 = Month(Date(adt_fec_ingreso))
+li_mes2 = Month(Date(adt_fec_cese))
+
+li_dia1 = day(Date(adt_fec_ingreso))
+li_dia2 = Day(Date(adt_fec_cese))
+
+//Calculo los años
+if li_year1 = li_year2 then
+	li_years = 0
+	
+	if li_mes1 = li_mes2 then
+		li_meses = 0
+		
+		if li_dia1 = 1 and li_dia2 = f_dias_mes(li_mes1, li_year1) then
+			li_meses = 1
+		else
+			li_dias = li_dia2 - li_dia1 + 1
+		end if
+		
+	elseif li_mes2 > li_mes1 then
+		
+		li_meses = li_mes2 - li_mes1 - 1
+		
+		if li_dia1 = 1 then
+			li_meses ++
+			
+			if li_dia2 = f_dias_mes(li_mes2, li_year2) then
+				li_meses ++
+			else
+				li_dias += li_dia2
+			end if
+			
+		elseif li_dia2 = f_dias_mes(li_mes2, li_year2) then
+			
+			li_meses ++
+			li_dias += f_dias_mes(li_mes2, li_year2) - li_dia1 + 1
+			
+		else
+			
+			if li_dia2 >= li_dia1 then
+				li_meses ++
+				li_dias = li_dia2 - li_dia1 + 1
+			else
+				//Cuento los días hasta fin de mes
+				li_dias = f_dias_mes(li_mes1, li_year1) - li_dia1 + 1
+				
+				//Cuento los dias que han transcurrido en el otro mes
+				li_dias += li_dia2
+			end if
+		end if
+		
+	end if
+		
+elseif li_year2 > li_year1 then
+	
+	li_years = li_year2 - li_year1 - 1
+	
+	if li_dia1 = 1 and li_mes1= 1 then
+		li_years ++
+	end if
+	
+	if li_dia1 = 31 and li_mes1= 12 then
+		li_years ++
+	end if
+	
+	if li_years < 0 then li_years = 0
+	
+	if string(li_mes2, '00') + string(li_dia2, '00') <= string(li_mes1, '00') + string(li_dia1, '00') then
+		li_years ++
+		
+		if li_mes2 = li_mes1 then
+			li_meses = 0
+			li_dias = li_dia2 - li_dia1 + 1
+		else
+			li_meses = li_mes2 - li_mes1 - 1
+			if li_dia2 >= li_dia1 then
+				li_meses ++
+				li_dias = li_dia2 - li_dia1 + 1
+			else
+				li_dias = f_dias_mes(li_mes1, li_year1) - li_dia1 + 1 + li_dia2
+			end if
+		end if
+	else
+		//Calculo los meses
+		if Not(li_dia1 = 1 and li_mes1= 1) then
+			if li_dia1 = 1 then
+				li_meses = 12 - li_mes1
+			else
+				li_meses = 12 - li_mes1 - 1
+			end if
+		end if
+	end if
+end if
+
+return string(li_years) + " Año(s), " + string(li_meses) + " Mes(es), " + string(li_dias) + " Día(s)"
+
+
+
+end function
+

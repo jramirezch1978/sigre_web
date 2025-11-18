@@ -1,0 +1,101 @@
+﻿$PBExportHeader$d_sel_mov_proyectados.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=flag_reservado dbname="flag_reservado" values="Reservado	1/No Reservado	0/" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=datetime updatewhereclause=yes name=fec_proyect dbname="articulo_mov_proy.fec_proyect" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="articulo_mov_proy.cencos" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_mov dbname="articulo_mov_proy.nro_mov" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="articulo_mov_proy.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="articulo_mov_proy.cnta_prsp" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="articulo_mov_proy.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="articulo_mov_proy.nro_doc" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="articulo_mov_proy.oper_sec" )
+ column=(type=decimal(4) updatewhereclause=yes name=costo_prom_sol dbname="articulo.costo_prom_sol" )
+ column=(type=decimal(4) updatewhereclause=yes name=costo_prom_dol dbname="articulo.costo_prom_dol" )
+ column=(type=char(1) updatewhereclause=yes name=flag_und2 dbname="flag_und2" )
+ column=(type=char(1) updatewhereclause=yes name=flag_cntrl_lote dbname="articulo.flag_cntrl_lote" )
+ column=(type=char(3) updatewhereclause=yes name=und2 dbname="articulo.und2" )
+ column=(type=decimal(4) updatewhereclause=yes name=factor_conv_und dbname="articulo.factor_conv_und" )
+ column=(type=number updatewhereclause=yes name=precio dbname="precio" )
+ column=(type=char(0) updatewhereclause=yes name=consigna dbname="consigna" )
+ column=(type=char(0) updatewhereclause=yes name=prov dbname="prov" )
+ column=(type=char(0) updatewhereclause=yes name=matriz dbname="matriz" )
+ retrieve="  SELECT /*+ INDEX (~"ARTICULO_MOV_PROY~" ARTICULO_MOV_PROY5) */
+			NVL(~"ARTICULO_MOV_PROY~".~"FLAG_RESERVADO~",'0') as flag_reservado,
+			~"ARTICULO_MOV_PROY~".~"COD_ART~",   
+         ~"ARTICULO_MOV_PROY~".~"FEC_PROYECT~",   
+         ~"ARTICULO~".~"DESC_ART~",   
+         ~"ARTICULO~".~"UND~",   
+         NVL(cant_proyect,0) - NVL(cant_procesada,0) as cantidad,   
+         ~"ARTICULO_MOV_PROY~".~"CENCOS~",   
+         ~"ARTICULO_MOV_PROY~".~"NRO_MOV~",   
+         ~"ARTICULO_MOV_PROY~".~"COD_ORIGEN~",   
+         ~"ARTICULO_MOV_PROY~".~"CNTA_PRSP~",
+  			~"ARTICULO_MOV_PROY~".~"TIPO_DOC~",
+			~"ARTICULO_MOV_PROY~".~"NRO_DOC~",
+			~"ARTICULO_MOV_PROY~".~"OPER_SEC~",
+			~"ARTICULO~".~"COSTO_PROM_SOL~",
+			~"ARTICULO~".~"COSTO_PROM_DOL~",
+			DECODE(~"ARTICULO~".~"FLAG_UND2~",0, null, ~"ARTICULO~".~"FLAG_UND2~") as FLAG_UND2,
+			~"ARTICULO~".~"FLAG_CNTRL_LOTE~",
+			~"ARTICULO~".~"UND2~",
+			~"ARTICULO~".~"FACTOR_CONV_UND~",
+		   0 AS PRECIO,
+			'' AS CONSIGNA,
+			'' AS PROV,
+			'' AS MATRIZ
+    FROM ~"ARTICULO_MOV_PROY~",   
+         ~"ARTICULO~"  
+   WHERE ~"ARTICULO_MOV_PROY~".~"COD_ART~" = ~"ARTICULO~".~"COD_ART~" 
+	  and ~"ARTICULO_MOV_PROY~".~"TIPO_MOV~" = :as_tipo_mov 
+	  AND TRUNC(~"ARTICULO_MOV_PROY~".~"FEC_PROYECT~") <= TRUNC(:ad_fec_proyect)
+	  AND ~"ARTICULO_MOV_PROY~".~"FLAG_ESTADO~" = '1'
+	  AND NVL(CANT_PROCESADA,0) < NVL(CANT_PROYECT,0) 
+     and ~"ARTICULO~".~"FLAG_INVENTARIABLE~" 	= '1'
+     and ~"ARTICULO_MOV_PROY~".~"ALMACEN~" 	= :as_almacen
+     and ~"ARTICULO_MOV_PROY~".~"TIPO_DOC~" 	= :as_tipo_doc
+     and ~"ARTICULO_MOV_PROY~".~"NRO_DOC~" 	= :as_nro_doc
+     and ~"ARTICULO_MOV_PROY~".~"COD_ART~" in (select distinct cod_art 
+											from articulo_almacen 
+											where almacen = :as_almacen
+ 											  and sldo_total > 0 )
+    ORDER BY NVL(~"ARTICULO_MOV_PROY~".~"FLAG_RESERVADO~",'0'), ~"ARTICULO_MOV_PROY~".~"FEC_PROYECT~" DESC" arguments=(("as_tipo_mov", string),("ad_fec_proyect", date),("as_almacen", string),("as_tipo_doc", string),("as_nro_doc", string)) )
+text(band=header alignment="2" text="Reservado?" border="2" color="0" x="9" y="4" height="56" width="375" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="4" height="60" width="375" format="[general]" html.valueishtml="0"  name=flag_reservado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fec Proyect" border="2" color="0" x="389" y="4" height="56" width="311" html.valueishtml="0"  name=fec_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="0" x="389" y="4" height="60" width="311" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_proyect visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Documento" border="2" color="0" x="4512" y="4" height="56" width="293" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Oper.Sec" border="2" color="0" x="4809" y="4" height="56" width="302" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Precio" border="2" color="0" x="5111" y="4" height="56" width="357" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="1106" y="4" height="56" width="1847" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Und" border="2" color="0" x="2958" y="4" height="56" width="123" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Cantidad" border="2" color="0" x="3086" y="4" height="56" width="471" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="C. Costo" border="2" color="0" x="3561" y="4" height="56" width="233" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Cnta.Prsp" border="2" color="0" x="3799" y="4" height="56" width="242" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Nro. Mov." border="2" color="0" x="4046" y="4" height="56" width="325" html.valueishtml="0"  name=nro_mov_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Tipo" border="2" color="0" x="4375" y="4" height="56" width="133" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="0" x="4512" y="4" height="60" width="293" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="0" x="4809" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="1" tabsequence=32766 border="2" color="0" x="5115" y="4" height="60" width="357" format="[general]" html.valueishtml="0"  name=precio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="1106" y="4" height="60" width="1847" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="0" x="2958" y="4" height="60" width="123" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="3086" y="4" height="60" width="471" format="#,##0.0000" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="0" x="3561" y="4" height="60" width="233" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="0" x="3799" y="4" height="60" width="242" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="0" x="4046" y="4" height="60" width="325" format="[general]" html.valueishtml="0"  name=nro_mov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="0" x="4375" y="4" height="60" width="133" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Codigo" border="2" color="0" x="704" y="4" height="56" width="398" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="704" y="4" height="60" width="398" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

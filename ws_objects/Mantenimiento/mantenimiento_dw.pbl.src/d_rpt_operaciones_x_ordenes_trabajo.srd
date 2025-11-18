@@ -1,0 +1,63 @@
+﻿$PBExportHeader$d_rpt_operaciones_x_ordenes_trabajo.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=464 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=orden_trabajo_nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=number updatewhereclause=yes name=costo_labor dbname="costo_labor" )
+ column=(type=number updatewhereclause=yes name=costo_insumo dbname="costo_insumo" )
+ column=(type=decimal(0) updatewhereclause=yes name=operaciones_oper_sec dbname="operaciones.oper_sec" )
+ column=(type=char(4) updatewhereclause=yes name=operaciones_tipo_orden dbname="operaciones.tipo_orden" )
+ column=(type=char(8) updatewhereclause=yes name=operaciones_cod_labor dbname="operaciones.cod_labor" )
+ column=(type=char(40) updatewhereclause=yes name=labor_desc_labor dbname="labor.desc_labor" )
+ retrieve="  SELECT ~"ORDEN_TRABAJO~".~"NRO_ORDEN~",   
+         ROUND(NVL(~"OPERACIONES~".~"CANT_REAL~",0) * NVL(~"LABOR_EJECUTOR~".~"COSTO_UNITARIO~",0),2) AS COSTO_LABOR,   
+         usf_costo_insumo_estimado(~"OPERACIONES~".~"OPER_SEC~") as COSTO_INSUMO,   
+         ~"OPERACIONES~".~"OPER_SEC~",   
+         ~"OPERACIONES~".~"TIPO_ORDEN~",   
+         ~"OPERACIONES~".~"COD_LABOR~",   
+         ~"LABOR~".~"DESC_LABOR~"  
+    FROM ~"ORDEN_TRABAJO~",   
+         ~"OPERACIONES~",   
+         ~"LABOR_EJECUTOR~",   
+         ~"LABOR~"  
+   WHERE ( ~"ORDEN_TRABAJO~".~"NRO_ORDEN~"  = ~"OPERACIONES~".~"NRO_ORDEN~"       ) AND 
+         ( ~"OPERACIONES~".~"COD_LABOR~"    = ~"LABOR_EJECUTOR~".~"COD_LABOR~"    ) AND
+         ( ~"OPERACIONES~".~"COD_EJECUTOR~" = ~"LABOR_EJECUTOR~".~"COD_EJECUTOR~" ) AND
+         ( ~"LABOR_EJECUTOR~".~"COD_LABOR~" = ~"LABOR~".~"COD_LABOR~"             ) AND
+         (( ~"OPERACIONES~".~"TIPO_ORDEN~"  = :as_tipo_orden                  ) AND  
+         ( ~"ORDEN_TRABAJO~".~"NRO_ORDEN~"  = :as_nro_orden                  ))    
+" arguments=(("as_tipo_orden", string),("as_nro_orden", string),("as_empresa", string),("as_usuario", string))  sort="orden_trabajo_nro_orden A operaciones_oper_sec A " )
+rectangle(band=header x="37" y="336" height="108" width="2967"  name=r_1 brush.hatch="7" brush.color="553648127" pen.style="0" pen.width="5" pen.color="33554432"  background.mode="2" background.color="0" )
+text(band=header alignment="2" text="Costo de Orden de Trabajo" border="0" color="0" x="859" y="76" height="80" width="1070"  name=t_1  font.face="MS Sans Serif" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="gs_logo" x="46" y="28" height="188" width="498" border="0"  name=p_logo )
+compute(band=header alignment="2" expression=" as_empresa "border="0" color="0" x="142" y="240" height="52" width="311" format="[general]"  name=compute_1  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="471" y1="340" x2="471" y2="440"  name=l_1 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="12632256" )
+line(band=header x1="882" y1="340" x2="882" y2="440"  name=l_2 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="12632256" )
+line(band=header x1="1326" y1="344" x2="1326" y2="444"  name=l_3 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="12632256" )
+line(band=header x1="2112" y1="332" x2="2112" y2="432"  name=l_4 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="12632256" )
+line(band=header x1="2560" y1="340" x2="2560" y2="440"  name=l_5 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Orden de Trabajo" border="6" color="0" x="59" y="364" height="52" width="393"  name=t_2  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Operaciones" border="6" color="0" x="489" y="364" height="52" width="375"  name=t_3  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Labor" border="6" color="0" x="905" y="364" height="52" width="402"  name=t_4  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripcion" border="6" color="0" x="1339" y="364" height="52" width="754"  name=t_5  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Costo x Labor" border="6" color="0" x="2130" y="364" height="52" width="411"  name=t_6  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Costo x Insumo" border="6" color="0" x="2583" y="364" height="52" width="389"  name=t_7  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=header alignment="0" expression="'Pag : ' + page() + ' de ' + pageCount()"border="0" color="0" x="2533" y="32" height="56" width="411" format="[general]"  name=compute_2  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2533" y="104" height="60" width="411" format="dd/mm/yyyy"  name=compute_3  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Usuario" border="0" color="0" x="2537" y="180" height="52" width="187"  name=t_8  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression=" as_usuario "border="0" color="0" x="2738" y="180" height="52" width="238" format="[general]"  name=compute_4  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="59" y="4" height="52" width="393" format="[general]"  name=orden_trabajo_nro_orden edit.limit=0 edit.case=any edit.autoselect=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="489" y="4" height="52" width="375" format="[general]"  name=operaciones_oper_sec edit.limit=0 edit.case=any edit.autoselect=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="905" y="4" height="52" width="402" format="[general]"  name=operaciones_cod_labor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1339" y="4" height="52" width="754" format="[general]"  name=labor_desc_labor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="0" x="2130" y="4" height="52" width="411" format="#,##0.00"  name=costo_labor editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="2583" y="4" height="52" width="389" format="#,##0.00"  name=costo_insumo editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Totales :" border="0" color="0" x="1888" y="8" height="52" width="187"  name=t_9  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(  costo_labor  for all )"border="0" color="0" x="2126" y="8" height="52" width="411" format="#,##0.00"  name=compute_5  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(  costo_insumo  for all )"border="0" color="0" x="2587" y="8" height="52" width="398" format="#,##0.00"  name=compute_6  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+
+sparse(names="orden_trabajo_nro_orden")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

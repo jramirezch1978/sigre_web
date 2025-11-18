@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_rpt_niv4_movimientos_atrasados_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=440 color="536870912" )
+summary(height=96 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cencos dbname="articulo_mov_proy.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="articulo_mov_proy.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="articulo_mov_proy.nro_doc" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="articulo_mov_proy.oper_sec" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=datetime updatewhereclause=yes name=fec_proyect dbname="articulo_mov_proy.fec_proyect" )
+ column=(type=number updatewhereclause=yes name=dias_atras dbname="dias_atras" )
+ retrieve="select amp.cencos, c.desc_cencos, amp.tipo_doc, amp.nro_doc, amp.oper_sec, amp.cod_art, amp.fec_proyect, round(sysdate-amp.fec_proyect,2) as dias_atras
+from articulo_mov_proy amp, centros_costo c
+where amp.cencos = c.cencos and
+      amp.cant_proyect > amp.cant_procesada and
+      amp.flag_estado='1' and
+      c.cod_n1 = :as_nivel1 and
+      c.cod_n2 = :as_nivel2 and
+      c.cod_n3 = :as_nivel3 and
+      (sysdate - fec_proyect) > 1
+order by amp.cencos, c.desc_cencos, amp.tipo_doc, amp.nro_doc" arguments=(("as_nivel1", string),("as_nivel2", string),("as_nivel3", string)) )
+bitmap(band=header filename="" x="23" y="16" height="188" width="343" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="23" y="220" height="48" width="338" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="C.C. " border="2" color="33554432" x="37" y="368" height="64" width="315" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="366" y="368" height="64" width="1083" html.valueishtml="0"  name=centros_costo_desc_cencos_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="TD" border="2" color="33554432" x="1463" y="368" height="64" width="110" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2807" y="16" height="48" width="288" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2807" y="84" height="48" width="288" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="2807" y="152" height="48" width="288" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="REQUERMIENTOS ATRASADOS" border="0" color="33554432" x="846" y="44" height="64" width="1435" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="846" y="164" height="64" width="1435" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nro. Doc." border="2" color="33554432" x="1586" y="368" height="64" width="334" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Fec.proyec" border="2" color="33554432" x="2670" y="368" height="64" width="297" html.valueishtml="0"  name=fec_proyect_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Días atr." border="2" color="33554432" x="2981" y="368" height="64" width="293" html.valueishtml="0"  name=dias_atras_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="OperSec" border="2" color="33554432" x="1934" y="368" height="64" width="379" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Articulo" border="2" color="33554432" x="2327" y="368" height="64" width="329" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="37" y="8" height="64" width="315" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="8" height="64" width="1083" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1463" y="8" height="64" width="110" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1586" y="8" height="64" width="334" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2670" y="8" height="64" width="297" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_proyect visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="2981" y="12" height="64" width="293" format="#,##0.00" html.valueishtml="0"  name=dias_atras visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1934" y="8" height="64" width="379" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2327" y="8" height="64" width="329" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Promedio de días :" border="0" color="33554432" x="2309" y="20" height="64" width="549" html.valueishtml="0"  name=t_1 visible="0"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="avg(  dias_atras  for all )"border="0" color="0" x="2981" y="20" height="64" width="293" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="0"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

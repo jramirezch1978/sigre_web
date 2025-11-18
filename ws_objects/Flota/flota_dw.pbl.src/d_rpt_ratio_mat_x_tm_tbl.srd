@@ -1,0 +1,58 @@
+﻿$PBExportHeader$d_rpt_ratio_mat_x_tm_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=number updatewhereclause=yes name=importe dbname="tg_naves.importe" )
+ column=(type=number updatewhereclause=yes name=pesca dbname="tg_naves.pesca" )
+ column=(type=number updatewhereclause=yes name=ratio dbname="ratio" )
+ retrieve="select b.nomb_nave, importe, pesca, DECODE(pesca, 0, 0, round(importe / pesca,2)) as ratio
+from (
+      select flon.nave,
+             NVL(sum(usf_fl_conv_mon(am.cant_procesada * am.precio_unit, 
+             am.cod_moneda, (select cod_dolares from logparam where reckey = '1'), vm.fec_registro)),0) as importe,
+             (select NVL(sum(nvl(b.cantidad_real,0) - Nvl(b.cantidad_castigada,0)),0)
+                from fl_parte_de_pesca a,
+                     fl_venta          b
+               where a.parte_pesca = b.parte_pesca
+                 and a.nave_real   = flon.nave
+					  and trunc(b.hora_inicio_descarga) between trunc(:ad_fecha1) and trunc(:ad_fecha2)) as pesca
+    	  from vale_mov           vm,
+             articulo_mov       am,
+             articulo_mov_proy  amp,
+             fl_ot_nave         flon,
+             orden_trabajo      ot
+   	   where vm.nro_vale        = am.nro_vale
+         and am.origen_mov_proy = amp.cod_origen
+         and am.nro_mov_proy    = amp.nro_mov
+         and flon.nro_orden     = amp.nro_doc
+         and ot.nro_orden       = flon.nro_orden
+         and vm.flag_estado     <> '0'
+         and am.flag_estado     <> '0'
+         and amp.tipo_doc       = (select doc_ot from logparam where reckey = '1')
+         and am.cod_art         not in ((select f.petroleo_d2 from fl_paramcosto f where f.reckey = '1'), (select f.art_viveres from fl_paramcosto f where f.reckey = '1'))
+         and trunc(vm.fec_registro) between trunc(:ad_fecha1) and trunc(:ad_fecha2)
+    group by flon.nave
+) a,
+  tg_naves b
+where a.nave = b.nave" arguments=(("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Embarcación" border="2" color="33554432" x="5" y="4" height="56" width="485" html.valueishtml="0"  name=nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="2" color="33554432" x="494" y="4" height="56" width="302" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Pesca" border="2" color="33554432" x="800" y="4" height="56" width="302" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ratio" border="2" color="33554432" x="1106" y="4" height="56" width="238" html.valueishtml="0"  name=ratio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="64" width="485" format="[general]" html.valueishtml="0"  name=nomb_nave visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="494" y="4" height="64" width="302" format="###,##0.00" html.valueishtml="0"  name=importe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="800" y="4" height="64" width="302" format="###,##0.00" html.valueishtml="0"  name=pesca visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="1106" y="4" height="64" width="238" format="###,##0.00" html.valueishtml="0"  name=ratio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total" border="0" color="33554432" x="64" y="4" height="56" width="398" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(importe for all)"border="2" color="33554432" x="494" y="4" height="64" width="302" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(pesca for all)"border="2" color="33554432" x="800" y="4" height="64" width="302" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  importe for all) / sum( pesca for all)"border="2" color="33554432" x="1106" y="4" height="64" width="238" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

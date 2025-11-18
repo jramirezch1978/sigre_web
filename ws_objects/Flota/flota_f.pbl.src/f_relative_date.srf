@@ -1,0 +1,38 @@
+﻿$PBExportHeader$f_relative_date.srf
+global type f_relative_date from function_object
+end type
+
+forward prototypes
+global function datetime f_relative_date (datetime ad_fecha, long al_tiempo, string as_unidad)
+end prototypes
+
+global function datetime f_relative_date (datetime ad_fecha, long al_tiempo, string as_unidad);time lt_time
+long ll_dias
+datetime ld_fecha
+
+if upper(as_unidad) = "HRS" then
+			
+	al_tiempo = al_tiempo * 3600
+	lt_time   = Time(ad_fecha)
+	
+	if Secondsafter(lt_time, 23:59:59 ) +1 >= al_tiempo then
+		ld_fecha = DateTime(Date(ad_fecha), Relativetime(Time(ad_fecha), al_tiempo) )
+	else
+		al_tiempo = al_tiempo - Secondsafter(lt_time, 23:59:59 ) - 1
+		ll_dias = Integer( al_tiempo / 86400 ) + 1
+					
+		if ll_dias > 0 then
+			al_tiempo = al_tiempo - (ll_dias - 1) * 86400
+		end if
+					
+		ld_fecha = DateTime( RelativeDate(Date(ad_fecha), ll_dias ), &
+						Relativetime(00:00:00, al_tiempo))
+	end if
+				
+elseif upper(as_unidad) = "DIA" then
+	ld_fecha = DateTime(RelativeDate(Date(ad_fecha), al_tiempo), Time(ad_fecha))
+end if
+
+return ld_fecha
+end function
+

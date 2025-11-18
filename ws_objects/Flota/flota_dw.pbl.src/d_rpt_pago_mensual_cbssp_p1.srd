@@ -1,0 +1,35 @@
+﻿$PBExportHeader$d_rpt_pago_mensual_cbssp_p1.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=decimal(0) updatewhereclause=yes name=ano dbname="semanas.ano" )
+ column=(type=decimal(0) updatewhereclause=yes name=semana dbname="semanas.semana" )
+ column=(type=char(8) updatewhereclause=yes name=fl_parte_de_pesca_nave_real dbname="fl_parte_de_pesca.nave_real" )
+ column=(type=number updatewhereclause=yes name=pesca dbname="pesca" )
+ retrieve="SELECT s.ano,
+       s.semana,
+       a.nave_real,
+       SUM(b.cantidad_real - b.cantidad_castigada) AS pesca
+FROM fl_parte_de_pesca a,
+     fl_venta          b,
+     semanas           s
+WHERE a.parte_pesca = b.parte_pesca
+  AND trunc(b.hora_inicio_descarga) BETWEEN trunc(s.fecha_inicio) AND trunc(s.fecha_fin)     
+  and a.nave_real = :as_nave
+  and s.ano 		= :an_ano
+  and s.mes			= :an_mes
+  GROUP BY s.ano, s.semana, a.nave_real" arguments=(("as_nave", string),("an_ano", number),("an_mes", number)) )
+text(band=header alignment="2" text="Semana" border="2" color="33554432" x="5" y="4" height="56" width="329" html.valueishtml="0"  name=semanas_semana_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Pesca" border="2" color="33554432" x="338" y="4" height="56" width="329" html.valueishtml="0"  name=pesca_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="215" y="4" height="56" width="119" format="[general]" html.valueishtml="0"  name=semana visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="56" width="206" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="338" y="4" height="56" width="329" format="###,##0.000" html.valueishtml="0"  name=pesca visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(pesca for all)"border="2" color="33554432" x="338" y="4" height="56" width="329" format="###,##0.000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

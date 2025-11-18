@@ -1,0 +1,65 @@
+﻿$PBExportHeader$d_rpt_saldo_x_cnta_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=492 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cnta_ctbl dbname="cntbl_asiento_det.cnta_ctbl" )
+ column=(type=char(150) updatewhereclause=yes name=cntbl_cnta_desc_cnta dbname="cntbl_cnta.desc_cnta" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntbl_asiento_det.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_docref1 dbname="cntbl_asiento_det.tipo_docref1" )
+ column=(type=char(15) updatewhereclause=yes name=nro_docref1 dbname="cntbl_asiento_det.nro_docref1" )
+ column=(type=number updatewhereclause=yes name=saldo_soles dbname="saldo_soles" )
+ column=(type=number updatewhereclause=yes name=saldo_dolares dbname="saldo_dolares" )
+ retrieve="select cd.cnta_ctbl, c.desc_cnta, cd.cod_relacion, p.nom_proveedor, cd.tipo_docref1, cd.nro_docref1,
+	    sum(decode(cd.flag_debhab,'D',cd.imp_movsol *-1,0) + decode(cd.flag_debhab,'H',cd.imp_movsol,0)) as Saldo_soles,
+	    sum(decode(cd.flag_debhab,'D',cd.imp_movdol * -1,0) + decode(cd.flag_debhab,'H',cd.imp_movdol,0)) as Saldo_dolares
+  from cntbl_asiento_det cd, 
+		 proveedor p, 
+		 cntbl_cnta c
+ where cd.cnta_ctbl = c.cnta_ctbl
+   and cd.cod_relacion = p.proveedor(+)
+   and cd.ano= :an_year
+   and mes between :an_mes1 and :an_mes2
+	and substr(cd.cnta_ctbl,1,8)= :as_cntbl_cnta
+group by cd.cnta_ctbl, c.desc_cnta, cd.cod_relacion, p.nom_proveedor, cd.tipo_docref1, cd.nro_docref1
+having sum(decode(cd.flag_debhab,'D',cd.imp_movsol *-1,0) + decode(cd.flag_debhab,'H',cd.imp_movsol,0)) <> 0 or
+	    sum(decode(cd.flag_debhab,'D',cd.imp_movdol * -1,0) + decode(cd.flag_debhab,'H',cd.imp_movdol,0)) <> 0" arguments=(("as_cntbl_cnta", string),("an_year", number),("an_mes1", number),("an_mes2", number)) )
+group(level=1 header.height=84 trailer.height=0 by=("cnta_ctbl" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="14" y="20" height="204" width="357" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="14" y="248" height="60" width="361" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Tipo
+Doc" border="2" color="33554432" x="1966" y="376" height="112" width="169" html.valueishtml="0"  name=tipo_docref1_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Número
+Documento" border="2" color="33554432" x="2139" y="376" height="112" width="347" html.valueishtml="0"  name=nro_docref1_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Saldo
+Soles" border="2" color="33554432" x="2491" y="376" height="112" width="329" html.valueishtml="0"  name=saldo_soles_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Saldo
+Dólares" border="2" color="33554432" x="2825" y="376" height="112" width="370" html.valueishtml="0"  name=saldo_dolares_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=header alignment="0" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="2679" y="40" height="56" width="498" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="2679" y="112" height="56" width="498" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="2679" y="184" height="64" width="498" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Saldo por Tipo de Documento" border="0" color="33554432" x="402" y="32" height="80" width="2231" html.valueishtml="0"  name=t_titulo visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="402" y="140" height="76" width="2231" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="23" y="16" height="60" width="430" format="[general]" html.valueishtml="0"  name=cnta_ctbl visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="471" y="20" height="56" width="2693" format="[general]" html.valueishtml="0"  name=cntbl_cnta_desc_cnta visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1966" y="4" height="60" width="169" format="[general]" html.valueishtml="0"  name=tipo_docref1 visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2139" y="4" height="60" width="347" format="[general]" html.valueishtml="0"  name=nro_docref1 visible="1" edit.limit=15 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2491" y="4" height="60" width="329" format="###,##0.00" html.valueishtml="0"  name=saldo_soles visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="2825" y="4" height="60" width="370" format="###,##0.00" html.valueishtml="0"  name=saldo_dolares visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(saldo_soles for all)"border="2" color="255" x="2491" y="4" height="60" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(saldo_dolares for all)"border="2" color="255" x="2825" y="4" height="60" width="370" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total:" border="0" color="33554432" x="2121" y="4" height="56" width="343" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Código
+Relación" border="2" color="33554432" x="55" y="376" height="112" width="256" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="55" y="4" height="60" width="256" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nombre del
+Proveedor" border="2" color="33554432" x="315" y="376" height="112" width="1646" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="315" y="4" height="60" width="1646" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

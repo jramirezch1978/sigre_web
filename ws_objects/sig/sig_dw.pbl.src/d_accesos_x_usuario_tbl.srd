@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_accesos_x_usuario_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=412 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(6) updatewhereclause=yes name=usuario_cod_usr dbname="usuario.cod_usr" )
+ column=(type=char(60) updatewhereclause=yes name=usuario_nombre dbname="usuario.nombre" )
+ column=(type=char(50) updatewhereclause=yes name=log_objeto_objeto dbname="log_objeto.objeto" )
+ column=(type=char(45) updatewhereclause=yes name=objeto_sis_descripcion dbname="objeto_sis.descripcion" )
+ column=(type=char(8) updatewhereclause=yes name=objeto_sis_sistema dbname="objeto_sis.sistema" )
+ column=(type=number updatewhereclause=yes name=veces dbname="veces" )
+ retrieve="SELECT  ~"USUARIO~".~"COD_USR~" ,
+        ~"USUARIO~".~"NOMBRE~" ,
+        ~"LOG_OBJETO~".~"OBJETO~" ,
+        ~"OBJETO_SIS~".~"DESCRIPCION~" ,
+		  ~"OBJETO_SIS~".~"SISTEMA~" ,
+        count(*) as veces    
+   FROM ~"LOG_OBJETO~" ,
+        ~"OBJETO_SIS~" ,
+        ~"USUARIO~"     
+  WHERE ( ~"USUARIO~".~"COD_USR~" = ~"LOG_OBJETO~".~"COD_USR~" ) and
+        ( ~"LOG_OBJETO~".~"OBJETO~" = ~"OBJETO_SIS~".~"OBJETO~"(+) ) and
+        ( ( ~"LOG_OBJETO~".~"COD_USR~" = :as_usuario ) And
+        ( trunc(~"LOG_OBJETO~".~"FECHA~") between :ad_inicio and :ad_fin ) ) 
+GROUP BY ~"USUARIO~".~"COD_USR~" ,
+         ~"USUARIO~".~"NOMBRE~" ,
+         ~"LOG_OBJETO~".~"OBJETO~" ,
+         ~"OBJETO_SIS~".~"DESCRIPCION~" ,
+         ~"OBJETO_SIS~".~"SISTEMA~"   " arguments=(("as_usuario", string),("ad_inicio", date),("ad_fin", date))  sort="objeto_sis_sistema A log_objeto_objeto A " )
+bitmap(band=header filename="gs_logo" x="18" y="12" height="172" width="389" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="gs_empresa" border="0" color="0" x="14" y="200" height="56" width="389" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="objeto" border="0" color="0" x="32" y="272" height="56" width="192" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="gs_user" border="0" color="0" x="2747" y="92" height="56" width="242" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="0" x="2546" y="12" height="56" width="443" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="2473" y="172" height="56" width="517" format="dd/mm/yyyy   hh:mm:ss" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Accesos a Ventanas x Usuario" border="1" color="0" x="805" y="44" height="64" width="1472" html.valueishtml="0"  name=t_1 visible="1"  font.face="Century Gothic" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="805" y="152" height="56" width="1472" html.valueishtml="0"  name=t_subtitulo visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="763" y="260" height="56" width="192" format="[general]" html.valueishtml="0"  name=usuario_cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="983" y="256" height="56" width="1330" format="[general]" html.valueishtml="0"  name=usuario_nombre visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Objeto" border="2" color="33554432" x="302" y="336" height="56" width="1399" html.valueishtml="0"  name=log_objeto_objeto_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripcion" border="2" color="33554432" x="1705" y="336" height="56" width="1262" html.valueishtml="0"  name=objeto_sis_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Veces" border="2" color="33554432" x="2971" y="336" height="56" width="329" html.valueishtml="0"  name=veces_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sistema" border="2" color="33554432" x="0" y="336" height="56" width="297" html.valueishtml="0"  name=objeto_sis_sistema_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="306" y="4" height="56" width="1399" format="[general]" html.valueishtml="0"  name=log_objeto_objeto visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1710" y="4" height="56" width="1262" format="[general]" html.valueishtml="0"  name=objeto_sis_descripcion visible="1" edit.limit=45 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="2976" y="4" height="56" width="311" format="#,###" html.valueishtml="0"  name=veces visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="if( isNull(objeto_sis_sistema), 'LIBRE',  objeto_sis_sistema  )"border="0" color="33554432" x="0" y="8" height="56" width="293" format="[GENERAL]" html.valueishtml="0"  name=sistema visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="sistema")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

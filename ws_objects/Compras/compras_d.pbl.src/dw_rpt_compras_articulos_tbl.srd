@@ -1,0 +1,185 @@
+﻿$PBExportHeader$dw_rpt_compras_articulos_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=648 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=articulo_mov_proy_cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=tt_cmp_art_sel_desc_art dbname="tt_cmp_art_sel.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=tt_cmp_art_sel_und dbname="tt_cmp_art_sel.und" )
+ column=(type=char(4) updatewhereclause=yes name=year dbname="year" )
+ column=(type=number updatewhereclause=yes name=ene dbname="ene" )
+ column=(type=number updatewhereclause=yes name=p_ene dbname="p_ene" )
+ column=(type=number updatewhereclause=yes name=feb dbname="feb" )
+ column=(type=number updatewhereclause=yes name=p_feb dbname="p_feb" )
+ column=(type=number updatewhereclause=yes name=mar dbname="mar" )
+ column=(type=number updatewhereclause=yes name=p_mar dbname="p_mar" )
+ column=(type=number updatewhereclause=yes name=abr dbname="abr" )
+ column=(type=number updatewhereclause=yes name=p_abr dbname="p_abr" )
+ column=(type=number updatewhereclause=yes name=may dbname="may" )
+ column=(type=number updatewhereclause=yes name=p_may dbname="p_may" )
+ column=(type=number updatewhereclause=yes name=jun dbname="jun" )
+ column=(type=number updatewhereclause=yes name=p_jun dbname="p_jun" )
+ column=(type=number updatewhereclause=yes name=jul dbname="jul" )
+ column=(type=number updatewhereclause=yes name=p_jul dbname="p_jul" )
+ column=(type=number updatewhereclause=yes name=ago dbname="ago" )
+ column=(type=number updatewhereclause=yes name=p_ago dbname="p_ago" )
+ column=(type=number updatewhereclause=yes name=sep dbname="sep" )
+ column=(type=number updatewhereclause=yes name=p_sep dbname="p_sep" )
+ column=(type=number updatewhereclause=yes name=oct dbname="oct" )
+ column=(type=number updatewhereclause=yes name=p_oct dbname="p_oct" )
+ column=(type=number updatewhereclause=yes name=nov dbname="nov" )
+ column=(type=number updatewhereclause=yes name=p_nov dbname="p_nov" )
+ column=(type=number updatewhereclause=yes name=dic dbname="dic" )
+ column=(type=number updatewhereclause=yes name=p_dic dbname="p_dic" )
+ column=(type=number updatewhereclause=yes name=total dbname="total" )
+ column=(type=number updatewhereclause=yes name=p_total dbname="p_total" )
+ retrieve="SELECT  AMP.COD_ART,
+        A.DESC_ART,
+        A.UND,
+        TO_CHAR(OC.FEC_REGISTRO, 'yyyy') AS YEAR,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '01' , AMP.CANT_PROCESADA)) AS ENE,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '01' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_ENE,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '02' , AMP.CANT_PROCESADA)) AS FEB,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '02' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_FEB,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '03' , AMP.CANT_PROCESADA)) AS MAR,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '03' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_MAR,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '04' , AMP.CANT_PROCESADA)) AS ABR,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '04' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_ABR,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '05' , AMP.CANT_PROCESADA)) AS MAY,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '05' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_MAY,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '06' , AMP.CANT_PROCESADA)) AS JUN,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '06' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_JUN,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '07' , AMP.CANT_PROCESADA)) AS JUL,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '07' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_JUL,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '08' , AMP.CANT_PROCESADA)) AS AGO,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '08' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_AGO,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '09' , AMP.CANT_PROCESADA)) AS SEP,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '09' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_SEP,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '10' , AMP.CANT_PROCESADA)) AS OCT,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '10' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_OCT,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '11' , AMP.CANT_PROCESADA)) AS NOV,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '11' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_NOV,
+        SUM(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '12' , AMP.CANT_PROCESADA)) AS DIC,
+        ROUND(AVG(DECODE(TO_CHAR(OC.FEC_REGISTRO, 'MM') , '12' , USF_FL_CONV_MON(AMP.PRECIO_UNIT,
+              AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO))),2) AS P_DIC,
+		  SUM(AMP.CANT_PROCESADA) AS TOTAL,
+        ROUND(AVG(USF_FL_CONV_MON(AMP.PRECIO_UNIT,AMP.COD_MONEDA, :AS_MONEDA, AMP.FEC_REGISTRO)),2) AS P_TOTAL
+
+FROM    ORDEN_COMPRA      OC, 
+        ARTICULO_MOV_PROY AMP,
+        TT_CMP_ART_SEL    A 
+
+WHERE   OC.NRO_OC    = AMP.NRO_DOC
+  AND   AMP.TIPO_DOC = (SELECT DOC_OC FROM LOGPARAM WHERE RECKEY = '1')
+  AND   AMP.COD_ART  = A.COD_ART
+  AND   OC.COD_ORIGEN LIKE :AS_ORIGEN
+  AND   OC.FEC_REGISTRO BETWEEN :AD_FECHA_INI  AND :AD_FECHA_FIN
+  
+GROUP   BY AMP.COD_ART,   
+        A.DESC_ART,
+        A.UND,
+        TO_CHAR(OC.FEC_REGISTRO, 'yyyy')" arguments=(("AS_MONEDA", string),("AS_ORIGEN", string),("AD_FECHA_INI", date),("AD_FECHA_FIN", date)) )
+group(level=1 header.height=96 trailer.height=0 by=("year" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="gs_logo" x="41" y="40" height="236" width="471" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="d_rpt_compras_articulos" border="0" color="0" x="23" y="304" height="48" width="466" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="COMPRA DE MATERIALES" border="0" color="0" x="3090" y="12" height="80" width="960" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="2862" y="132" height="64" width="1417" html.valueishtml="0"  name=t_fecha visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Enero" border="2" color="8388608" x="1943" y="524" height="56" width="512" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Febrero" border="2" color="8388608" x="2459" y="524" height="56" width="512" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Marzo" border="2" color="8388608" x="2976" y="524" height="56" width="512" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Abril" border="2" color="8388608" x="3493" y="524" height="56" width="512" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Mayo" border="2" color="8388608" x="4009" y="524" height="56" width="512" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Junio" border="2" color="8388608" x="4526" y="524" height="56" width="512" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Julio" border="2" color="8388608" x="5042" y="524" height="56" width="512" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Agosto" border="2" color="8388608" x="5559" y="524" height="56" width="512" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Septiembre" border="2" color="8388608" x="6075" y="524" height="56" width="512" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Octubre" border="2" color="8388608" x="6592" y="524" height="56" width="512" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Noviembre" border="2" color="8388608" x="7109" y="524" height="56" width="512" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und
+" border="2" color="8388608" x="1733" y="524" height="116" width="206" html.valueishtml="0"  name=tt_cmp_art_sel_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripcion
+" border="2" color="8388608" x="297" y="524" height="116" width="1431" html.valueishtml="0"  name=tt_cmp_art_sel_desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Codigo
+" border="2" color="8388608" x="5" y="524" height="116" width="288" html.valueishtml="0"  name=articulo_mov_proy_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="1943" y="584" height="56" width="265" html.valueishtml="0"  name=ene_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="2213" y="584" height="56" width="242" html.valueishtml="0"  name=p_ene_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="2459" y="584" height="56" width="265" html.valueishtml="0"  name=feb_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="2729" y="584" height="56" width="242" html.valueishtml="0"  name=p_feb_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="2976" y="584" height="56" width="265" html.valueishtml="0"  name=mar_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="3246" y="584" height="56" width="242" html.valueishtml="0"  name=p_mar_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="3493" y="584" height="56" width="265" html.valueishtml="0"  name=abr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="3762" y="584" height="56" width="242" html.valueishtml="0"  name=p_abr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="4009" y="584" height="56" width="265" html.valueishtml="0"  name=may_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="4279" y="584" height="56" width="242" html.valueishtml="0"  name=p_may_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="4526" y="584" height="56" width="265" html.valueishtml="0"  name=jun_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="4795" y="584" height="56" width="242" html.valueishtml="0"  name=p_jun_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="5042" y="584" height="56" width="265" html.valueishtml="0"  name=jul_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="5559" y="584" height="56" width="265" html.valueishtml="0"  name=ago_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="5312" y="584" height="56" width="242" html.valueishtml="0"  name=p_jul_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="6075" y="584" height="56" width="265" html.valueishtml="0"  name=sep_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="6345" y="584" height="56" width="242" html.valueishtml="0"  name=p_sep_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="6592" y="584" height="56" width="265" html.valueishtml="0"  name=oct_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="6862" y="584" height="56" width="242" html.valueishtml="0"  name=p_oct_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="5829" y="584" height="56" width="242" html.valueishtml="0"  name=p_ago_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="7109" y="584" height="56" width="265" html.valueishtml="0"  name=nov_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="7378" y="584" height="56" width="242" html.valueishtml="0"  name=p_nov_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Diciembre" border="2" color="8388608" x="7625" y="524" height="56" width="512" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="7625" y="584" height="56" width="265" html.valueishtml="0"  name=dic_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="7895" y="584" height="56" width="242" html.valueishtml="0"  name=p_dic_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Totales" border="2" color="8388608" x="8142" y="524" height="56" width="512" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="8142" y="584" height="56" width="265" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="8411" y="584" height="56" width="242" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda : " border="0" color="0" x="27" y="416" height="64" width="288" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="325" y="416" height="64" width="1413" html.valueishtml="0"  name=t_moneda visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="0" x="8059" y="28" height="64" width="562" format="[general]" html.valueishtml="0"  name=page visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="8059" y="116" height="64" width="562" format="[general]" html.valueishtml="0"  name=date visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="8059" y="208" height="56" width="562" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Año  :" border="0" color="8388608" x="73" y="20" height="64" width="169" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="8388608" x="251" y="20" height="64" width="320" format="[general]" html.valueishtml="0"  name=year visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1733" y="0" height="76" width="206" format="[general]" html.valueishtml="0"  name=tt_cmp_art_sel_und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="297" y="0" height="76" width="1431" format="[general]" html.valueishtml="0"  name=tt_cmp_art_sel_desc_art visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="0" height="76" width="288" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="1943" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=ene visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2213" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_ene visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2459" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=feb visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="2729" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_feb visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="2976" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=mar visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="3246" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_mar visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="3493" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=abr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="2" color="33554432" x="3762" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_abr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="2" color="33554432" x="4009" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=may visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="4279" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_may visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="33554432" x="4526" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=jun visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="1" tabsequence=32766 border="2" color="33554432" x="4795" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_jun visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="1" tabsequence=32766 border="2" color="33554432" x="5042" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=jul visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="1" tabsequence=32766 border="2" color="33554432" x="5312" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_jul visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="1" tabsequence=32766 border="2" color="33554432" x="5559" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=ago visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="1" tabsequence=32766 border="2" color="33554432" x="6075" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=sep visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=22 alignment="1" tabsequence=32766 border="2" color="33554432" x="6345" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_sep visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=23 alignment="1" tabsequence=32766 border="2" color="33554432" x="6592" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=oct visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=24 alignment="1" tabsequence=32766 border="2" color="33554432" x="6862" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_oct visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="1" tabsequence=32766 border="2" color="33554432" x="5829" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_ago visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=25 alignment="1" tabsequence=32766 border="2" color="33554432" x="7109" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=nov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=26 alignment="1" tabsequence=32766 border="2" color="33554432" x="7378" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_nov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=27 alignment="1" tabsequence=32766 border="2" color="33554432" x="7625" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=dic visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=29 alignment="1" tabsequence=32766 border="2" color="33554432" x="8142" y="0" height="76" width="265" format="#,###,##0.00" html.valueishtml="0"  name=total visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=28 alignment="1" tabsequence=32766 border="2" color="33554432" x="7895" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_dic visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=30 alignment="1" tabsequence=32766 border="2" color="33554432" x="8411" y="0" height="76" width="242" format="#,###,##0.00" html.valueishtml="0"  name=p_total visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

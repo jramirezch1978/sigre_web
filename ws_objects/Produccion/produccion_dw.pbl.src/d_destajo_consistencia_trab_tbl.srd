@@ -1,0 +1,101 @@
+﻿$PBExportHeader$d_destajo_consistencia_trab_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=580 color="536870912" )
+summary(height=92 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes name=nro_parte dbname="pd_ot_asist_destajo.nro_parte" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_item dbname="pd_ot_asist_destajo.nro_item" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_trabajador dbname="pd_ot_asist_destajo.cod_trabajador" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cant_destajada dbname="pd_ot_asist_destajo.cant_destajada" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=horas_efectivas dbname="pd_ot_asist_destajo.horas_efectivas" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=tarifa_normal dbname="pd_ot_asist_destajo.tarifa_normal" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=factor_calculo dbname="pd_ot_asist_destajo.factor_calculo" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_sub_item dbname="pd_ot_asist_destajo.nro_sub_item" )
+ column=(type=char(60) updatewhereclause=yes name=codigo_relacion_nombre dbname="codigo_relacion.nombre" )
+ column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="pd_ot_det.cod_labor" )
+ column=(type=char(40) updatewhereclause=yes name=desc_labor dbname="labor.desc_labor" )
+ column=(type=decimal(2) updatewhereclause=yes name=cant_labor dbname="pd_ot_det.cant_labor" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="pd_ot.fecha" )
+ column=(type=char(3) updatewhereclause=yes name=und_avance dbname="pd_ot_det.und_avance" )
+ retrieve="  SELECT ~"PD_OT_ASIST_DESTAJO~".~"NRO_PARTE~",   
+         ~"PD_OT_ASIST_DESTAJO~".~"NRO_ITEM~",   
+         ~"PD_OT_ASIST_DESTAJO~".~"COD_TRABAJADOR~",   
+         ~"PD_OT_ASIST_DESTAJO~".~"CANT_DESTAJADA~",   
+         ~"PD_OT_ASIST_DESTAJO~".~"HORAS_EFECTIVAS~",   
+         ~"PD_OT_ASIST_DESTAJO~".~"TARIFA_NORMAL~",   
+         ~"PD_OT_ASIST_DESTAJO~".~"FACTOR_CALCULO~",   
+         ~"PD_OT_ASIST_DESTAJO~".~"NRO_SUB_ITEM~",   
+         ~"CODIGO_RELACION~".~"NOMBRE~",   
+         ~"PD_OT_DET~".~"COD_LABOR~",   
+         ~"LABOR~".~"DESC_LABOR~",   
+         ~"PD_OT_DET~".~"CANT_LABOR~",   
+         ~"PD_OT~".~"FECHA~",   
+         ~"PD_OT_DET~".~"UND_AVANCE~"  
+    FROM ~"PD_OT_ASIST_DESTAJO~",   
+         ~"CODIGO_RELACION~",   
+         ~"PD_OT_DET~",   
+         ~"LABOR~",   
+         ~"PD_OT~"  
+   WHERE ( pd_ot_asist_destajo.cod_trabajador = codigo_relacion.cod_relacion (+)) and  
+         ( pd_ot_asist_destajo.nro_parte = pd_ot_det.nro_parte (+)) and  
+         ( pd_ot_asist_destajo.nro_item = pd_ot_det.nro_item (+)) and  
+         ( pd_ot_det.cod_labor = labor.cod_labor (+)) and  
+         ( pd_ot_asist_destajo.nro_parte = pd_ot.nro_parte (+)) and  
+         ( ( trunc(~"PD_OT~".~"FECHA~") between :adi_fecha_1 and :adi_fecha_2 ) and
+				PD_OT.ot_adm = :ad_ot_adm ) and
+			(  codigo_relacion.cod_relacion like :as_cod_relacion)
+ORDER BY ~"CODIGO_RELACION~".~"NOMBRE~" ASC,   
+         ~"PD_OT~".~"FECHA~" ASC,   
+         ~"PD_OT_ASIST_DESTAJO~".~"NRO_PARTE~" ASC,   
+         ~"PD_OT_DET~".~"COD_LABOR~" ASC   
+" arguments=(("adi_fecha_1", date),("adi_fecha_2", date),("ad_ot_adm", string),("as_cod_relacion", string)) )
+group(level=1 header.height=88 trailer.height=0 by=("cod_trabajador" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=60 trailer.height=0 by=("nro_parte" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="CONSISTENCIA DE DESTAJOS POR TRABAJADOR, POR FECHA DE DESTAJO, OT_ADM Y CÓDIGO DE TRABAJADOR" border="0" color="0" x="311" y="296" height="140" width="2418" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="46" y="44" height="184" width="411" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="37" y="244" height="44" width="411" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="2217" y="32" height="40" width="823" html.valueishtml="0"  name=t_date visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2217" y="128" height="48" width="823" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="0" x="2217" y="80" height="40" width="823" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Labor" border="2" color="33554432" x="23" y="456" height="56" width="1339" html.valueishtml="0"  name=cod_trabajador_tx visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Tarifa
+Normal" border="2" color="33554432" x="1573" y="456" height="112" width="329" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Horas
+Efectivas" border="2" color="33554432" x="1906" y="456" height="112" width="315" html.valueishtml="0"  name=horas_efectivas_tx visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cantidad
+Destajada" border="2" color="33554432" x="2226" y="456" height="112" width="329" html.valueishtml="0"  name=cant_destajada_tx visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Factor
+Calculo" border="2" color="33554432" x="2551" y="456" height="112" width="183" html.valueishtml="0"  name=factor_calculo_tx visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Monto
+Pagado" border="2" color="33554432" x="2734" y="456" height="112" width="329" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nº
+Item" border="2" color="33554432" x="1367" y="456" height="112" width="201" html.valueishtml="0"  name=nro_item_tx visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Código" border="2" color="33554432" x="23" y="512" height="56" width="247" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="274" y="512" height="56" width="1088" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.1 id=9 alignment="0" tabsequence=32766 border="0" color="0" x="800" y="16" height="56" width="1755" format="[general]" html.valueishtml="0"  name=codigo_relacion_nombre visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="0" tabsequence=30 border="0" color="0" x="466" y="16" height="56" width="315" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="TRABAJADOR : " border="2" color="0" x="23" y="16" height="56" width="389" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+compute(band=header.1 alignment="1" expression="sum( factor_calculo  *  tarifa_normal  *  cant_destajada  for group 1)"border="0" color="16711680" x="2679" y="16" height="56" width="384" format="###,###,##0.0000" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.2 alignment="0" text="Parte Diario Nº:" border="2" color="0" x="27" y="4" height="56" width="384" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=header.2 id=1 alignment="0" tabsequence=10 border="0" color="0" x="425" y="4" height="56" width="576" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="0" text="Fecha:" border="0" color="0" x="1166" y="4" height="56" width="165" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.2 id=13 alignment="0" tabsequence=32766 border="0" color="0" x="1344" y="4" height="56" width="462" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.2 alignment="1" expression="sum(cant_destajada for group 2)"border="0" color="0" x="2226" y="4" height="56" width="329" format="###,###,##0.0000" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header.2 alignment="1" expression="sum( factor_calculo  *  tarifa_normal  *  cant_destajada  for group 2)"border="0" color="0" x="2734" y="4" height="56" width="329" format="###,###,##0.0000" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=5 alignment="1" tabsequence=50 border="2" color="33554432" x="1906" y="0" height="60" width="315" format="[general]" html.valueishtml="0"  name=horas_efectivas visible="1" editmask.mask="###,###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=70 border="2" color="33554432" x="2560" y="0" height="60" width="169" format="[general]" html.valueishtml="0"  name=factor_calculo visible="1" editmask.mask="0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=40 border="2" color="33554432" x="2226" y="0" height="60" width="329" format="[general]" html.valueishtml="0"  name=cant_destajada visible="1" editmask.mask="###,###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=60 border="2" color="33554432" x="1573" y="0" height="60" width="329" format="[general]" html.valueishtml="0"  name=tarifa_normal visible="1" editmask.mask="###,###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="trim( string( nro_item , '0000' ) )  + ~"-~" + trim( string(  nro_sub_item , '00') )"border="2" color="33554432" x="1367" y="0" height="60" width="201" format="[General]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="0" x="274" y="0" height="60" width="1088" format="[general]" html.valueishtml="0"  name=desc_labor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="0" x="23" y="0" height="60" width="247" format="[general]" html.valueishtml="0"  name=cod_labor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=detail alignment="1" expression=" factor_calculo  *  tarifa_normal  *  cant_destajada "border="2" color="33554432" x="2734" y="0" height="60" width="329" format="###,###,##0.0000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="SUM( factor_calculo  *  tarifa_normal  *  cant_destajada  for all)"border="4" color="16711680" x="2542" y="32" height="52" width="521" format="###,###,##0.0000" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="TOTAL DESTAJO BÁSICO:" border="0" color="16711680" x="1449" y="36" height="56" width="1074" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

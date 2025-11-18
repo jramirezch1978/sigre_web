@@ -1,0 +1,106 @@
+﻿$PBExportHeader$d_rpt_solic_giro_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=488 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=156 color="536870912"  height.autosize=yes)
+table(column=(type=char(2) update=yes updatewhereclause=yes name=origen dbname="solicitud_giro.origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_solicitud dbname="solicitud_giro.nro_solicitud" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_emision dbname="solicitud_giro.fecha_emision" )
+ column=(type=char(200) update=yes updatewhereclause=yes name=descripcion dbname="solicitud_giro.descripcion" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="solicitud_giro.cod_moneda" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="solicitud_giro.importe" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe_liquidado dbname="solicitud_giro.importe_liquidado" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="solicitud_giro.cod_relacion" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos dbname="solicitud_giro.cencos" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp dbname="solicitud_giro.cnta_prsp" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ano dbname="solicitud_giro.ano" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=mes dbname="solicitud_giro.mes" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_libro dbname="solicitud_giro.nro_libro" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_asiento dbname="solicitud_giro.nro_asiento" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="solicitud_giro.flag_estado" values="Anulada	0/Generada	1/Aprobada	2/Pagada	3/Liq.parcial	4/Liq.total	5/" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=cnt_origen dbname="solicitud_giro.cnt_origen" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_doc dbname="solicitud_giro.importe_doc" )
+ column=(type=char(6) updatewhereclause=yes name=aprobacion dbname="solicitud_giro.aprobacion" )
+ retrieve="  SELECT ~"SOLICITUD_GIRO~".~"ORIGEN~",   
+         ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~",   
+         ~"SOLICITUD_GIRO~".~"FECHA_EMISION~",   
+         ~"SOLICITUD_GIRO~".~"DESCRIPCION~",   
+         ~"SOLICITUD_GIRO~".~"COD_MONEDA~",   
+         ~"SOLICITUD_GIRO~".~"IMPORTE~",   
+         ~"SOLICITUD_GIRO~".~"IMPORTE_LIQUIDADO~",   
+         ~"SOLICITUD_GIRO~".~"COD_RELACION~",   
+         ~"SOLICITUD_GIRO~".~"CENCOS~",   
+         ~"SOLICITUD_GIRO~".~"CNTA_PRSP~",   
+         ~"SOLICITUD_GIRO~".~"ANO~",   
+         ~"SOLICITUD_GIRO~".~"MES~",   
+         ~"SOLICITUD_GIRO~".~"NRO_LIBRO~",   
+         ~"SOLICITUD_GIRO~".~"NRO_ASIENTO~",   
+         ~"SOLICITUD_GIRO~".~"FLAG_ESTADO~",   
+         ~"SOLICITUD_GIRO~".~"CNT_ORIGEN~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"SOLICITUD_GIRO~".~"IMPORTE_DOC~",   
+         ~"SOLICITUD_GIRO~".~"APROBACION~"  
+    FROM ~"SOLICITUD_GIRO~"   ,   
+         ~"PROVEEDOR~"        ,   
+         ~"TT_FIN_PROVEEDOR~"
+   WHERE Nvl(solicitud_giro.aprobacion,'X') in (:as_usuario)   
+	  and ~"SOLICITUD_GIRO~".~"COD_RELACION~" = ~"PROVEEDOR~".~"PROVEEDOR~" 
+     and ~"SOLICITUD_GIRO~".~"COD_RELACION~" = ~"TT_FIN_PROVEEDOR~".~"COD_PROVEEDOR~" 
+     and ~"SOLICITUD_GIRO~".~"ORIGEN~" = :as_origen 
+     AND TRUNC(~"SOLICITUD_GIRO~".~"FECHA_EMISION~") between trunc(:ad_fini) AND trunc(:ad_ffin ) 
+     AND ~"SOLICITUD_GIRO~".~"FLAG_TIPO_MVTO~" = :as_tipo 
+     AND ~"SOLICITUD_GIRO~".~"FLAG_ESTADO~" in ( :as_estado )
+ORDER BY ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~"
+" arguments=(("as_origen", string),("ad_fini", date),("ad_ffin", date),("as_tipo", string),("as_estado", stringlist),("as_usuario", stringlist)) )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="32" y="12" height="196" width="402" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="37" y="228" height="56" width="402" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="RELACION DE ORDENES DE GIRO" border="0" color="0" x="1166" y="84" height="64" width="1298" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="1166" y="172" height="56" width="1298" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="1605" y="248" height="56" width="453" html.valueishtml="0"  name=t_tipo visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag. :" border="0" color="0" x="2853" y="8" height="56" width="210" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="2853" y="76" height="56" width="210" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="2853" y="144" height="56" width="210" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="3081" y="8" height="56" width="288" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3081" y="76" height="56" width="288" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="3081" y="144" height="56" width="288" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="F.emision" border="2" color="0" x="411" y="380" height="48" width="247" html.valueishtml="0"  name=fecha_emision_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Mon" border="2" color="0" x="663" y="380" height="48" width="101" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Imp. Liquid" border="2" color="0" x="992" y="380" height="48" width="283" html.valueishtml="0"  name=importe_liquidado_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cod Rel" border="2" color="0" x="1262" y="380" height="48" width="233" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Imp. Girado" border="2" color="0" x="763" y="380" height="48" width="247" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Or." border="2" color="0" x="9" y="380" height="48" width="82" html.valueishtml="0"  name=origen_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="0" text="Ord.Giro" border="2" color="0" x="96" y="380" height="48" width="311" html.valueishtml="0"  name=nro_solicitud_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nombre / Razón social" border="2" color="0" x="1499" y="380" height="48" width="667" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cencos" border="2" color="0" x="2171" y="380" height="48" width="174" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cnta Prsp" border="2" color="0" x="2350" y="380" height="48" width="261" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Asiento liquidación" border="2" color="0" x="2615" y="380" height="48" width="443" html.valueishtml="0"  name=ano_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Estado" border="2" color="0" x="3063" y="380" height="48" width="251" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Aprobación" border="2" color="0" x="3063" y="432" height="48" width="251" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="9" y="432" height="48" width="3049" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="2" tabsequence=30 border="0" color="0" x="411" y="4" height="56" width="247" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_emision visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=60 border="0" color="0" x="1015" y="4" height="56" width="242" format="#,##0.00" html.valueishtml="0"  name=importe_liquidado visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=70 border="0" color="0" x="1262" y="4" height="56" width="233" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=50 border="0" color="0" x="663" y="4" height="56" width="101" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="1" tabsequence=32766 border="0" color="0" x="763" y="4" height="56" width="247" format="[general]" html.valueishtml="0"  name=importe_doc visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="4" height="56" width="82" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="0" x="96" y="4" height="56" width="311" format="[general]" html.valueishtml="0"  name=nro_solicitud visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="1499" y="4" height="56" width="663" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="2171" y="4" height="56" width="174" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=80 border="0" color="0" x="2350" y="4" height="56" width="261" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=90 border="0" color="0" x="2693" y="4" height="56" width="110" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=140 border="0" color="0" x="2615" y="4" height="56" width="73" format="[general]" html.valueishtml="0"  name=cnt_origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=100 border="0" color="0" x="2807" y="4" height="56" width="64" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=110 border="0" color="0" x="2875" y="4" height="56" width="64" format="[general]" html.valueishtml="0"  name=nro_libro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=120 border="0" color="0" x="2944" y="4" height="56" width="114" format="[general]" html.valueishtml="0"  name=nro_asiento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="2" tabsequence=130 border="0" color="0" x="3063" y="4" height="56" width="247" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=40 border="0" color="0" x="9" y="76" height="56" width="3049" format="[general]" html.valueishtml="0"  name=descripcion visible="1" height.autosize=yes edit.limit=200 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=150 border="0" color="255" x="3063" y="76" height="56" width="251" format="[general]" html.valueishtml="0"  name=aprobacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=detail x1="14" y1="144" x2="3291" y2="144"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

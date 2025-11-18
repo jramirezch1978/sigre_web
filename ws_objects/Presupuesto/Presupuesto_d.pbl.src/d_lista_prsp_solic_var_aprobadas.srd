@@ -1,0 +1,53 @@
+﻿$PBExportHeader$d_lista_prsp_solic_var_aprobadas.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes key=yes name=nro_solicitud dbname="prsp_solicitud_var.nro_solicitud" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tipo_sol dbname="prsp_solicitud_var.flag_tipo_sol" values="Partida Presupuestal	P/Ingresos	I/Produccion	D/Plantilla Ratio	R/" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="prsp_solicitud_var.fec_registro" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="prsp_solicitud_var.flag_estado" values="Anulado	0/Generado	1/Aprobado	2/" )
+ column=(type=char(100) updatewhereclause=yes name=descripcion dbname="prsp_solicitud_var.descripcion" )
+ column=(type=char(6) updatewhereclause=yes name=usr_solicitante dbname="prsp_solicitud_var.usr_solicitante" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="prsp_solicitud_var.flag_replicacion" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=usr_aprobacion dbname="prsp_solicitud_var.usr_aprobacion" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_aprobacion dbname="prsp_solicitud_var.fecha_aprobacion" )
+ retrieve="  SELECT PS.NRO_SOLICITUD,
+         PS.FLAG_TIPO_SOL,   
+		   PS.FEC_REGISTRO,
+         PS.FLAG_ESTADO,   
+			PS.DESCRIPCION,
+			PS.USR_SOLICITANTE,
+			PS.FLAG_REPLICACION,
+			PS.USR_APROBACION,
+			PS.FECHA_APROBACION
+    FROM PRSP_SOLICITUD_VAR 	   PS
+   WHERE substr(PS.NRO_SOLICITUD,1,2) = :as_origen
+	  and ps.flag_estado = '2'
+order by PS.FEC_REGISTRO
+			    
+" update="PRSP_SOLICITUD_VAR" updatewhere=0 updatekeyinplace=yes arguments=(("as_origen", string)) )
+text(band=header alignment="2" text="Nro Solicitud" border="2" color="16777215" x="151" y="4" height="56" width="421" html.valueishtml="0"  name=nro_solicitud_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Tipo Sol" border="2" color="16777215" x="1170" y="4" height="56" width="498" html.valueishtml="0"  name=flag_tipo_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Estado" border="2" color="16777215" x="1678" y="4" height="56" width="379" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Descripcion" border="2" color="16777215" x="2066" y="4" height="56" width="2080" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Usr Solicit." border="2" color="16777215" x="4155" y="4" height="56" width="352" html.valueishtml="0"  name=usr_solicitante_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fecha Aprob" border="2" color="16777215" x="4873" y="4" height="56" width="457" html.valueishtml="0"  name=fecha_aprobacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Usr Aprob." border="2" color="16777215" x="4517" y="4" height="56" width="347" html.valueishtml="0"  name=usr_aprobacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+compute(band=detail alignment="0" expression="Bitmap(If( flag_estado ='2', 'H:\source\bmp\chkmark.bmp','')) "border="2" color="0" x="9" y="4" height="56" width="133" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="151" y="4" height="56" width="421" format="[general]" html.valueishtml="0"  name=nro_solicitud visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="1170" y="4" height="56" width="498" format="[general]" html.valueishtml="0"  name=flag_tipo_sol visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="1678" y="4" height="56" width="379" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="2066" y="4" height="56" width="2080" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="4155" y="4" height="56" width="352" format="[general]" html.valueishtml="0"  name=usr_solicitante visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="0" x="4873" y="4" height="56" width="457" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=fecha_aprobacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="0" x="4517" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=usr_aprobacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Fec Registro" border="2" color="16777215" x="581" y="4" height="56" width="581" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="581" y="4" height="56" width="581" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

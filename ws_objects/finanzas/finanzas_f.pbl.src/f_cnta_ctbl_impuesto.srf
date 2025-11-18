@@ -1,0 +1,19 @@
+﻿$PBExportHeader$f_cnta_ctbl_impuesto.srf
+global type f_cnta_ctbl_impuesto from function_object
+end type
+
+forward prototypes
+global function string f_cnta_ctbl_impuesto (string as_tipo_impuesto, ref string as_desc_impuesto)
+end prototypes
+
+global function string f_cnta_ctbl_impuesto (string as_tipo_impuesto, ref string as_desc_impuesto);String ls_cnta_ctbl
+//********* CUENTA CONTABLE *********//
+
+SELECT CNTA_CTBL    , DESC_IMPUESTO
+INTO   :ls_cnta_ctbl, :as_desc_impuesto
+FROM   IMPUESTOS_TIPO 
+WHERE  TIPO_IMPUESTO =:as_tipo_impuesto;
+
+Return ls_cnta_ctbl
+end function
+

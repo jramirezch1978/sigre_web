@@ -1,0 +1,33 @@
+﻿$PBExportHeader$dw_rpt_estab_trabajador_text_rtps.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(44) updatewhereclause=yes name=datos_rtps dbname="datos_rtps" )
+ retrieve="select m.tipo_doc_ident_rtps ||' |' || m.nro_doc_ident_rtps || '|' ||
+       e.ruc ||'|' || r1.cod_establecimiento || '|'|| 
+       ' ' || '|' as datos_rtps
+from rrhh_trabaj_estab_rtps r1,
+     maestro                m,
+     rrhh_establecimientos_rtps es,
+     empresa                e,
+    (select distinct hc.cod_trabajador 
+      from historico_calculo hc
+      where to_char(hc.fec_calc_plan, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+     union
+     select distinct c.cod_trabajador
+       from calculo c
+     where to_char(c.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))) s1
+where r1.cod_trabajador = m.cod_trabajador
+  and r1.cod_establecimiento = es.cod_establecimiento
+  and es.cod_empresa         = e.cod_empresa
+  and s1.cod_trabajador      = m.cod_trabajador   AND INSTR(:as_origen, M.COD_ORIGEN) > 0 
+
+" arguments=(("an_year", number),("an_mes", number),("as_origen", string)) )
+column(band=detail id=1 alignment="0" tabsequence=0 border="0" color="0" x="0" y="0" height="76" width="2747" html.valueishtml="0"  name=datos_rtps visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

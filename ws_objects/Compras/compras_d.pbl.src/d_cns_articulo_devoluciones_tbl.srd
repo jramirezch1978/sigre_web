@@ -1,0 +1,47 @@
+﻿$PBExportHeader$d_cns_articulo_devoluciones_tbl.srd
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=128 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes key=yes name=cod_origen dbname="articulo_devolucion.cod_origen" )
+ column=(type=decimal(0) updatewhereclause=yes key=yes name=nro_mov dbname="articulo_devolucion.nro_mov" )
+ column=(type=char(6) updatewhereclause=yes name=almacen dbname="articulo_devolucion.almacen" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="articulo_devolucion.proveedor" )
+ column=(type=number updatewhereclause=yes name=ingreso dbname="ingreso" )
+ column=(type=number updatewhereclause=yes name=salida dbname="salida" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="articulo_devolucion.tipo_doc" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_doc dbname="articulo_devolucion.nro_doc" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="articulo_devolucion.fec_registro" )
+ retrieve="  SELECT ~"ARTICULO_DEVOLUCION~".~"COD_ORIGEN~",   
+         ~"ARTICULO_DEVOLUCION~".~"NRO_MOV~",   
+         ~"ARTICULO_DEVOLUCION~".~"ALMACEN~",   
+         ~"ARTICULO_DEVOLUCION~".~"PROVEEDOR~",   
+         DECODE(SUBSTR(~"ARTICULO_DEVOLUCION~".~"TIPO_MOV~",1,1),'I',~"ARTICULO_DEVOLUCION~".~"CANT_DEVUELTA~") AS INGRESO,   
+         DECODE(SUBSTR(~"ARTICULO_DEVOLUCION~".~"TIPO_MOV~",1,1),'S',~"ARTICULO_DEVOLUCION~".~"CANT_DEVUELTA~") AS SALIDA,   
+         ~"ARTICULO_DEVOLUCION~".~"TIPO_DOC~",   
+         ~"ARTICULO_DEVOLUCION~".~"NRO_DOC~",   
+         ~"ARTICULO_DEVOLUCION~".~"FEC_REGISTRO~"   
+  
+    FROM ~"ARTICULO_DEVOLUCION~"  
+   WHERE ~"ARTICULO_DEVOLUCION~".~"COD_ART~" = :as_cod_art    
+" update="ARTICULO_DEVOLUCION" updatewhere=0 updatekeyinplace=no arguments=(("as_cod_art", string)) )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="347" y="0" height="56" width="379" format="[general]"  name=almacen edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="736" y="0" height="56" width="338" format="[general]"  name=proveedor edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="0" x="1083" y="0" height="56" width="251" format="[general]"  name=ingreso editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="1344" y="0" height="56" width="251" format="[general]"  name=salida editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="56" width="329" format="[general]"  name=cod_origen dddw.name=d_dddw_origen_tbl dddw.displaycolumn=desc_origen dddw.datacolumn=cod_origen dddw.percentwidth=100 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="0" x="2126" y="0" height="56" width="288" format="[general]"  name=nro_doc edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="0" x="2423" y="0" height="56" width="329" format="[shortdate] [time]"  name=fec_registro editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="0" x="1605" y="0" height="56" width="512" format="[general]"  name=tipo_doc dddw.name=d_dddw_tipo_doc_tbl dddw.displaycolumn=desc_tipo_doc dddw.datacolumn=tipo_doc dddw.percentwidth=100 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Devoluciones"border="0" color="0" x="14" y="8" height="52" width="407"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" font.underline="1" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Origen"border="2" color="0" x="9" y="72" height="52" width="329"  name=cod_origen_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Almacen"border="2" color="0" x="347" y="72" height="52" width="379"  name=almacen_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Proveedor"border="2" color="0" x="736" y="72" height="52" width="338"  name=proveedor_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Ingreso"border="2" color="0" x="1083" y="72" height="52" width="251"  name=ingreso_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Salida"border="2" color="0" x="1344" y="72" height="52" width="251"  name=salida_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Tipo Doc"border="2" color="0" x="1605" y="72" height="52" width="512"  name=tipo_doc_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nro Doc"border="2" color="0" x="2126" y="72" height="52" width="288"  name=nro_doc_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Fec. Registro"border="2" color="0" x="2423" y="72" height="52" width="329"  name=fec_registro_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

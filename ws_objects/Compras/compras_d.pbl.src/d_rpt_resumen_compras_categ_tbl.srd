@@ -1,0 +1,53 @@
+﻿$PBExportHeader$d_rpt_resumen_compras_categ_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=488 color="536870912" )
+summary(height=100 color="536870912" )
+footer(height=4 color="536870912" )
+detail(height=96 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=origen_nombre dbname="origen.nombre" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="tt_cmp_compras_resumen.cod_origen" )
+ column=(type=char(60) updatewhereclause=yes name=articulo_categ_desc_categoria dbname="articulo_categ.desc_categoria" )
+ column=(type=number updatewhereclause=yes name=total_dol dbname="total_dol" )
+ retrieve="SELECT o.nombre, tt.cod_origen, aca.desc_categoria,
+		 sum(tt.cant_proyect*tt.precio_unit) as total_dol
+  FROM TT_CMP_COMPRAS_RESUMEN tt, 
+		 articulo 					a, 
+		 articulo_sub_categ 		asu, 
+		 articulo_categ 			aca,
+		 origen						o
+ WHERE tt.cod_art    = a.cod_art 
+   AND a.sub_cat_art = asu.cod_sub_cat 
+	AND asu.cat_art   = aca.cat_art 
+   and o.cod_origen	= tt.cod_origen
+GROUP BY o.nombre, tt.cod_origen, aca.desc_categoria
+ORDER BY tt.cod_origen, total_dol desc" )
+group(level=1 header.height=104 trailer.height=88 by=("cod_origen" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="9" y="12" height="240" width="357" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Origen" border="2" color="33554432" x="187" y="420" height="64" width="183" html.valueishtml="0"  name=cod_origen_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Categoría de articulos" border="2" color="33554432" x="384" y="420" height="64" width="1641" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Total US$" border="2" color="33554432" x="2039" y="420" height="64" width="448" html.valueishtml="0"  name=precio_unit_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="0" text="" border="0" color="0" x="9" y="268" height="48" width="357" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="5" y="332" height="48" width="357" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Resumen de compras por categoria de articulos y origen en US$" border="0" color="0" x="485" y="120" height="64" width="1870" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="544" y="212" height="64" width="1737" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2514" y="48" height="48" width="453" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="2514" y="192" height="48" width="453" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="2514" y="120" height="48" width="453" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="%" border="2" color="33554432" x="2501" y="420" height="64" width="283" html.valueishtml="0"  name=descuento_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="16711680" x="393" y="16" height="64" width="1353" format="[general]" html.valueishtml="0"  name=origen_nombre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="16711680" x="187" y="16" height="64" width="183" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="398" y="8" height="76" width="1623" format="[general]" html.valueishtml="0"  name=articulo_categ_desc_categoria visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="2039" y="8" height="76" width="448" format="###,###.00" html.valueishtml="0"  name=total_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" total_dol / total_importe *100"border="0" color="0" x="2501" y="8" height="76" width="283" format="###,##0.00" html.valueishtml="0"  name=porc visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="0" text="Total por origen:" border="0" color="8388608" x="1426" y="12" height="64" width="425" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(total_dol for group 1)"border="0" color="8388608" x="2039" y="4" height="76" width="448" format="###,###.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(porc for group 1) "border="0" color="8388608" x="2501" y="4" height="76" width="283" format="###,###.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Total general:" border="0" color="134217857" x="1353" y="16" height="64" width="425" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(total_dol for all)"border="0" color="134217857" x="2039" y="8" height="76" width="448" format="###,###.00" html.valueishtml="0"  name=total_importe visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(porc for all) "border="0" color="134217857" x="2501" y="8" height="76" width="283" format="###,###.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

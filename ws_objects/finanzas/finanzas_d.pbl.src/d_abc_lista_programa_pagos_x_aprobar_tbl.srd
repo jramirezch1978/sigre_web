@@ -1,0 +1,30 @@
+﻿$PBExportHeader$d_abc_lista_programa_pagos_x_aprobar_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_prog_pago dbname="programacion_pagos_det.nro_prog_pago" )
+ column=(type=char(8) updatewhereclause=yes name=estado dbname="estado" )
+ column=(type=datetime updatewhereclause=yes name=fecha_prog_pago dbname="programacion_pagos.fecha_prog_pago" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="programacion_pagos.cod_usr" )
+ retrieve="select ppd.nro_prog_pago,Decode(ppd.flag_estado,'1','Generado') as estado ,pp.fecha_prog_pago,pp.cod_usr
+  from programacion_pagos pp,programacion_pagos_det ppd
+ where (pp.nro_prog_pago = ppd.nro_prog_pago) and
+       (ppd.flag_estado  = '1'              )
+group by ppd.nro_prog_pago ,ppd.flag_estado,pp.fecha_prog_pago,pp.cod_usr
+order by pp.fecha_prog_pago" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="68" width="366" format="[general]" html.valueishtml="0"  name=nro_prog_pago visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="379" y="0" height="68" width="357" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_prog_pago visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="741" y="0" height="68" width="334" format="[general]" html.valueishtml="0"  name=estado visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1079" y="0" height="68" width="375" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Prog Pago" border="2" color="8388608" x="9" y="12" height="56" width="366" html.valueishtml="0"  name=nro_prog_pago_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Fecha P. Pago" border="2" color="8388608" x="379" y="12" height="56" width="357" html.valueishtml="0"  name=fecha_prog_pago_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Estado" border="2" color="8388608" x="741" y="12" height="56" width="334" html.valueishtml="0"  name=estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Usuario" border="2" color="8388608" x="1079" y="12" height="56" width="375" html.valueishtml="0"  name=programacion_pagos_cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

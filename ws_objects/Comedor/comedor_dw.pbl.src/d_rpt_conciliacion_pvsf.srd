@@ -1,0 +1,78 @@
+﻿$PBExportHeader$d_rpt_conciliacion_pvsf.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=188 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=com_parte_rac_parte_racion dbname="com_parte_rac.parte_racion" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=fecha_parte dbname="fecha_parte" )
+ column=(type=decimal(0) updatewhereclause=yes name=com_parte_rac_semana dbname="com_parte_rac.semana" )
+ column=(type=char(10) updatewhereclause=yes name=com_parte_rac_det_cencos dbname="com_parte_rac_det.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(8) updatewhereclause=yes name=com_parte_rac_det_confin dbname="com_parte_rac_det.confin" )
+ column=(type=char(1) updatewhereclause=yes name=com_parte_rac_det_flag_tipo_racion dbname="com_parte_rac_det.flag_tipo_racion" )
+ column=(type=decimal(3) updatewhereclause=yes name=com_part_rac_costo_costo_parte dbname="com_part_rac_costo.costo_parte" )
+ retrieve="select distinct a.parte_racion,
+                substr(a.parte_racion, 1, 2) as cod_origen,
+                to_char(a.fecha_parte_rac, 'dd/mm/yyyy') AS FECHA_PARTE,
+                a.semana,
+                b.cencos,
+                cc.desc_cencos,
+                b.confin,
+                b.FLAG_TIPO_RACION,
+                c.costo_total as costo_parte       
+
+  from com_parte_rac       a,
+       com_parte_rac_det   b,
+       com_part_rac_costo  c,
+       centros_costo       cc,
+       com_parte_rac_ratio cprr
+ where a.parte_racion = b.parte_racion
+   and substr(a.parte_racion, 1, 2) = :as_origen
+   and a.parte_racion = c.parte_racion
+   and b.cencos = cc.cencos
+   and a.parte_racion = cprr.parte_racion
+   and b.flag_tipo_racion = cprr.flag_tipo_racion
+   and trunc(a.fecha_parte_rac) BETWEEN trunc(:ad_fecha1) AND trunc(:ad_fecha2)
+ 
+ group by a.parte_racion,
+          substr(a.parte_racion, 1, 2),
+          to_char(a.fecha_parte_rac, 'dd/mm/yyyy'),
+          a.semana,
+          b.cencos,
+          cc.desc_cencos,
+          b.confin,
+          b.FLAG_TIPO_RACION,
+          c.costo_total,
+          b.nro_raciones,
+          cprr.ratio,
+          c.costo_unit,
+          c.costo_calc
+
+         " arguments=(("as_origen", string),("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Centro de Costo" border="2" color="0" x="1056" y="48" height="56" width="1051" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Concepto Financiero" border="2" color="0" x="2112" y="48" height="112" width="279" html.valueishtml="0"  name=com_parte_rac_det_confin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Tipo Ración" border="2" color="0" x="2395" y="48" height="112" width="155" html.valueishtml="0"  name=com_parte_rac_det_flag_tipo_racion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Costo de Parte" border="2" color="0" x="2551" y="48" height="112" width="265" html.valueishtml="0"  name=com_part_rac_costo_costo_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cencos" border="2" color="0" x="1056" y="108" height="52" width="210" html.valueishtml="0"  name=com_parte_rac_det_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="0" text="Descripción" border="2" color="0" x="1271" y="108" height="52" width="837" html.valueishtml="0"  name=centros_costo_desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Fecha Parte" border="2" color="0" x="539" y="48" height="112" width="270" html.valueishtml="0"  name=fecha_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Origen" border="2" color="0" x="311" y="48" height="112" width="224" html.valueishtml="0"  name=cod_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="0" height="48" width="302" format="[general]" html.valueishtml="0"  name=com_parte_rac_parte_racion visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="347" y="0" height="48" width="82" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="517" y="0" height="48" width="302" format="[general]" html.valueishtml="0"  name=fecha_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="832" y="0" height="48" width="114" format="[general]" html.valueishtml="0"  name=com_parte_rac_semana visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="1061" y="0" height="48" width="247" format="[general]" html.valueishtml="0"  name=com_parte_rac_det_cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1289" y="0" height="48" width="814" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="2162" y="0" height="48" width="247" format="[general]" html.valueishtml="0"  name=com_parte_rac_det_confin visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="2459" y="4" height="48" width="69" format="[general]" html.valueishtml="0"  name=com_parte_rac_det_flag_tipo_racion visible="1" edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="2537" y="0" height="48" width="270" format="#,##0.00" html.valueishtml="0"  name=com_part_rac_costo_costo_parte visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nº Semana" border="2" color="0" x="814" y="48" height="112" width="238" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nro. Parte" border="2" color="0" x="23" y="48" height="112" width="283" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

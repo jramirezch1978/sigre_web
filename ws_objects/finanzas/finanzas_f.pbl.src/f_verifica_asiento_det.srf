@@ -1,0 +1,47 @@
+﻿$PBExportHeader$f_verifica_asiento_det.srf
+global type f_verifica_asiento_det from function_object
+end type
+
+forward prototypes
+global function boolean f_verifica_asiento_det (datawindow adw_1, ref string as_mensaje)
+end prototypes
+
+global function boolean f_verifica_asiento_det (datawindow adw_1, ref string as_mensaje);/**************************************/
+/*Verificar Cargo y Abono de Asientos */
+/*          Soles y Dolares           */
+/**************************************/
+Boolean     lb_ret = TRUE
+Decimal {2} ldc_monto_cargo_soles,ldc_monto_cargo_dolares,&
+				ldc_monto_abono_soles,ldc_monto_abono_dolares
+
+
+IF adw_1.Rowcount() > 0 THEN
+	ldc_monto_cargo_soles   = adw_1.Object.monto_soles_cargo   [1]
+	ldc_monto_abono_soles   = adw_1.Object.monto_soles_abono   [1]
+	ldc_monto_cargo_dolares = adw_1.Object.monto_dolares_cargo [1]
+	ldc_monto_abono_dolares = adw_1.Object.monto_dolares_abono [1]
+	
+	IF ldc_monto_cargo_soles <> ldc_monto_abono_soles THEN
+		lb_ret = FALSE
+		as_mensaje = 'Monto de Cargo y Abono En Soles es Diferente Verifique!'
+		GOTO SALIDA
+	END IF
+	
+	IF ldc_monto_cargo_dolares <> ldc_monto_abono_dolares THEN
+		lb_ret = FALSE
+		as_mensaje = 'Monto de Cargo y Abono En Dolares es Diferente Verifique!'
+		GOTO SALIDA
+   END IF
+	
+	
+ELSE
+	/**DETALLLE DE ASIENTO VACIO*/
+	lb_ret = FALSE
+	as_mensaje = 'No Ha Genrado Asiento En El Detalle ,Verifique!'
+END IF
+
+SALIDA:
+
+Return lb_ret 
+end function
+

@@ -1,0 +1,67 @@
+﻿$PBExportHeader$d_rpt_pd_det_verificacion_ing_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=428 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="pd_ot_det.nro_parte" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_item dbname="pd_ot_det.nro_item" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="pd_ot_det.oper_sec" )
+ column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="pd_ot_det.cod_labor" )
+ column=(type=char(4) updatewhereclause=yes name=cod_ejecutor dbname="pd_ot_det.cod_ejecutor" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="labor.und" )
+ column=(type=decimal(2) updatewhereclause=yes name=cant_labor dbname="pd_ot_det.cant_labor" )
+ column=(type=datetime updatewhereclause=yes name=hora_inicio dbname="pd_ot_det.hora_inicio" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="pd_ot.fecha" )
+ column=(type=char(40) updatewhereclause=yes name=labor_desc_labor dbname="labor.desc_labor" )
+ retrieve="  SELECT ~"PD_OT_DET~".~"NRO_PARTE~",   
+         ~"PD_OT_DET~".~"NRO_ITEM~",   
+         ~"PD_OT_DET~".~"OPER_SEC~",   
+         ~"PD_OT_DET~".~"COD_LABOR~",   
+         ~"PD_OT_DET~".~"COD_EJECUTOR~",   
+         ~"LABOR~".~"UND~",   
+         ~"PD_OT_DET~".~"CANT_LABOR~",   
+         ~"PD_OT_DET~".~"HORA_INICIO~",   
+         ~"PD_OT~".~"FECHA~",   
+         ~"LABOR~".~"DESC_LABOR~"  
+    FROM ~"PD_OT_DET~",   
+         ~"LABOR~",   
+         ~"PD_OT~"  
+   WHERE ( ~"PD_OT_DET~".~"COD_LABOR~" = ~"LABOR~".~"COD_LABOR~" ) and  
+         ( ~"PD_OT_DET~".~"NRO_PARTE~" = ~"PD_OT~".~"NRO_PARTE~" ) and  
+         ( ( nvl(~"PD_OT_DET~".~"CANT_LABOR~",0) <= 0 ) AND  
+         ( ~"LABOR~".~"UND~" = (select und_hr from prod_param where reckey = '1') ) AND  
+         ( TO_CHAR(~"PD_OT~".~"FECHA~",'YYYYMMDD') >= :as_fecha_inicio ) AND  
+         ( TO_CHAR(~"PD_OT~".~"FECHA~",'YYYYMMDD') <= :as_fecha_final ) )   
+ORDER BY ~"PD_OT_DET~".~"NRO_PARTE~" ASC,   
+         ~"PD_OT_DET~".~"NRO_ITEM~" ASC   
+" arguments=(("as_empresa", string),("as_user", string),("as_fecha_inicio", string),("as_fecha_final", string))  sort="fecha A " )
+text(band=header alignment="2" text="Fecha" border="2" color="8388608" x="338" y="368" height="56" width="297" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nº Parte" border="2" color="8388608" x="640" y="368" height="56" width="297" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Item" border="2" color="8388608" x="942" y="368" height="56" width="169" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Oper Sec" border="2" color="8388608" x="1115" y="368" height="56" width="288" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="8388608" x="1691" y="368" height="56" width="887" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Labor" border="2" color="8388608" x="1408" y="368" height="56" width="279" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ejec" border="2" color="8388608" x="2583" y="368" height="56" width="160" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="8388608" x="2747" y="368" height="56" width="110" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="2862" y="368" height="56" width="329" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+bitmap(band=header filename="H:\source\Bmp\blanco.bmp" x="23" y="8" height="172" width="466" border="0"  name=p_1 visible="1" )
+compute(band=header alignment="0" expression="Trim( as_empresa )"border="0" color="33554432" x="23" y="196" height="56" width="466" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="page() + ' of ' + pageCount()"border="0" color="33554432" x="3269" y="16" height="56" width="411" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Pag :" border="0" color="8388608" x="2971" y="16" height="56" width="274" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="Trim( as_user )"border="0" color="33554432" x="3269" y="88" height="56" width="411" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Usuario :" border="0" color="8388608" x="2971" y="88" height="56" width="274" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Reporte de Labores de Parte Diario" border="0" color="8388608" x="1262" y="36" height="76" width="1147" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Desde : '+Mid(as_fecha_inicio ,7,2)+'/'+Mid(as_fecha_inicio ,5,2)+ '/'+Mid(as_fecha_inicio ,1,4)+'  Hasta : '+Mid(as_fecha_final,7,2)+'/'+Mid(as_fecha_final ,5,2)+ '/'+Mid(as_fecha_final ,1,4)  "border="0" color="33554432" x="1262" y="148" height="56" width="1147" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="338" y="0" height="60" width="297" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="640" y="0" height="60" width="297" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="942" y="0" height="60" width="169" format="[general]" html.valueishtml="0"  name=nro_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1115" y="0" height="60" width="288" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="1691" y="0" height="60" width="887" format="[general]" html.valueishtml="0"  name=labor_desc_labor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1408" y="0" height="60" width="279" format="[general]" html.valueishtml="0"  name=cod_labor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2583" y="0" height="60" width="160" format="[general]" html.valueishtml="0"  name=cod_ejecutor visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="2747" y="0" height="60" width="110" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2862" y="0" height="60" width="329" format="[general]" html.valueishtml="0"  name=cant_labor visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

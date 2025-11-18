@@ -1,0 +1,83 @@
+﻿$PBExportHeader$d_com_costo_por_parte_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=140 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=com_parte_rac_parte_racion dbname="com_parte_rac.parte_racion" )
+ column=(type=char(1) updatewhereclause=yes name=com_parte_rac_det_flag_tipo_racion dbname="com_parte_rac_det.flag_tipo_racion" )
+ column=(type=decimal(2) updatewhereclause=yes name=com_parte_rac_ratio_ratio dbname="com_parte_rac_ratio.ratio" )
+ column=(type=decimal(3) updatewhereclause=yes name=com_part_rac_costo_costo_unit dbname="com_part_rac_costo.costo_unit" )
+ column=(type=decimal(0) updatewhereclause=yes name=com_parte_rac_det_nro_raciones dbname="com_parte_rac_det.nro_raciones" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ column=(type=char(10) updatewhereclause=yes name=com_parte_rac_det_cencos dbname="com_parte_rac_det.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(8) updatewhereclause=yes name=com_parte_rac_det_confin dbname="com_parte_rac_det.confin" )
+ column=(type=char(3) updatewhereclause=yes name=com_parte_rac_cod_moneda dbname="com_parte_rac.cod_moneda" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="cod_origen" )
+ column=(type=datetime updatewhereclause=yes name=com_parte_rac_fecha_parte_rac dbname="com_parte_rac.fecha_parte_rac" )
+ retrieve="SELECT 			 a.parte_racion,
+                b.flag_tipo_racion,
+                r.ratio,
+                c.costo_unit,
+                b.nro_raciones,
+                round(r.ratio * b.nro_raciones, 2) as Importe,
+                b.cencos,
+                cc.desc_cencos,
+                b.confin,
+                a.cod_moneda,
+                substr(a.parte_racion, 1, 2) as cod_origen,
+                a.fecha_parte_rac
+
+  FROM com_parte_rac       a,
+       com_parte_rac_det   b,
+       com_part_rac_costo  c,
+       centros_costo       cc,
+       com_parte_rac_ratio r
+      
+      where a.parte_racion                           = r.parte_racion
+            and a.parte_racion                       = c.parte_racion
+            and a.parte_racion                       = b.parte_racion
+            and b.parte_racion                       = r.parte_racion
+            and b.cencos                             = cc.cencos
+            and b.parte_racion                       = c.parte_racion
+            and b.flag_tipo_racion                   = c.flag_tipo_racion
+            and b.flag_tipo_racion                   = r.flag_tipo_racion
+				and NVL(a.flag_estado, '0') = '1'
+				and substr(a.parte_racion, 1, 2) = :as_origen
+   			and Trunc(a.fecha_parte_rac) BETWEEN trunc(:ad_fecha1) AND trunc(:ad_fecha2)
+				and cc.cencos = b.cencos
+
+order by a.parte_racion" arguments=(("as_origen", string),("ad_fecha1", date),("ad_fecha2", date)) )
+group(level=1 header.height=0 trailer.height=68 by=("com_parte_rac_parte_racion" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Nro. Parte Ración" border="2" color="16777215" x="14" y="16" height="112" width="288" html.valueishtml="0"  name=com_parte_rac_parte_racion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217749" )
+text(band=header alignment="0" text="Ratio" border="2" color="16777215" x="443" y="16" height="112" width="137" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217749" )
+text(band=header alignment="2" text="Tipo Rac." border="2" color="16777215" x="306" y="16" height="112" width="133" html.valueishtml="0"  name=com_parte_rac_det_flag_tipo_racion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217749" )
+text(band=header alignment="2" text="Nro. Raciones" border="2" color="16777215" x="585" y="16" height="112" width="238" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217749" )
+text(band=header alignment="2" text="Código" border="2" color="16777215" x="1115" y="72" height="56" width="206" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217749" )
+text(band=header alignment="2" text="Confin" border="2" color="16777215" x="2409" y="16" height="112" width="165" html.valueishtml="0"  name=com_parte_rac_det_confin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217749" )
+text(band=header alignment="2" text="Descripción" border="2" color="16777215" x="1326" y="72" height="56" width="1079" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217749" )
+text(band=header alignment="2" text="   Centro de Costos" border="2" color="16777215" x="1115" y="16" height="52" width="1289" html.valueishtml="0"  name=com_parte_rac_det_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217749" )
+text(band=header alignment="2" text="Fecha Parte" border="2" color="16777215" x="2578" y="16" height="112" width="297" html.valueishtml="0"  name=com_parte_rac_fecha_parte_rac_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217749" )
+text(band=header alignment="2" text="Importe" border="2" color="16777215" x="827" y="16" height="112" width="283" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217749" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="14" y="4" height="52" width="283" format="[general]" html.valueishtml="0"  name=com_parte_rac_parte_racion visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="443" y="4" height="52" width="137" format="#,##0.00" html.valueishtml="0"  name=com_parte_rac_ratio_ratio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="302" y="4" height="52" width="137" format="[general]" html.valueishtml="0"  name=com_parte_rac_det_flag_tipo_racion visible="1" edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="2414" y="4" height="52" width="169" format="[general]" html.valueishtml="0"  name=com_parte_rac_det_confin visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="1120" y="4" height="52" width="210" format="[general]" html.valueishtml="0"  name=com_parte_rac_det_cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="1335" y="4" height="52" width="1074" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="2" color="33554432" x="2587" y="4" height="52" width="288" format="[shortdate]" html.valueishtml="0"  name=com_parte_rac_fecha_parte_rac visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="837" y="4" height="52" width="279" format="#,##.00" html.valueishtml="0"  name=importe visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="594" y="4" height="52" width="238" format="[general]" html.valueishtml="0"  name=com_parte_rac_det_nro_raciones visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="Sub. Total." border="4" color="0" x="114" y="8" height="56" width="261" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="2" expression="sum(importe for group 1)"border="2" color="33554432" x="837" y="4" height="52" width="274" format="#,##.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(com_parte_rac_det_nro_raciones for group 1)"border="2" color="33554432" x="594" y="4" height="52" width="238" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="Total." border="4" color="0" x="123" y="4" height="56" width="261" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="2" expression="sum(importe for all)"border="2" color="33554432" x="837" y="16" height="52" width="270" format="#,##.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(com_parte_rac_det_nro_raciones for all)"border="2" color="33554432" x="594" y="16" height="52" width="238" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="lg" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><d_com_parte_raciones_origen_tbl><d_com_parte_raciones_origen_tbl_row><com_parte_rac_det_cencos>com_parte_rac_det_cencos</com_parte_rac_det_cencos><centros_costo_desc_cencos>centros_costo_desc_cencos</centros_costo_desc_cencos><d_com_parte_raciones_origen_tbl_group1 __pbband=~"detail~"><com_parte_rac_parte_racion>com_parte_rac_parte_racion</com_parte_rac_parte_racion><com_parte_rac_det_flag_tipo_racion>com_parte_rac_det_flag_tipo_racion</com_parte_rac_det_flag_tipo_racion><importe/><com_parte_rac_det_confin>com_parte_rac_det_confin</com_parte_rac_det_confin><com_parte_rac_cod_moneda/><cod_origen/><com_parte_rac_fecha_parte_rac>com_parte_rac_fecha_parte_rac</com_parte_rac_fecha_parte_rac></d_com_parte_raciones_origen_tbl_group1></d_com_parte_raciones_origen_tbl_row></d_com_parte_raciones_origen_tbl>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

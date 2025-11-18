@@ -1,0 +1,28 @@
+﻿$PBExportHeader$f_ultima_actualizacion.srf
+global type f_ultima_actualizacion from function_object
+end type
+
+forward prototypes
+global function datetime f_ultima_actualizacion ()
+end prototypes
+
+global function datetime f_ultima_actualizacion ();Date ld_Fecha
+Datetime ld_fecha_ult
+
+ld_fecha = today()
+
+DECLARE PB_USF_OPE_ULTIMA_MARCA PROCEDURE FOR USF_OPE_ULTIMA_MARCA 
+(:ld_fecha);
+EXECUTE PB_USF_OPE_ULTIMA_MARCA ;
+
+
+
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox("SQL error", SQLCA.SQLErrText)
+END IF
+
+FETCH PB_USF_OPE_ULTIMA_MARCA INTO :ld_fecha_ult ;
+
+Return ld_fecha_ult
+end function
+

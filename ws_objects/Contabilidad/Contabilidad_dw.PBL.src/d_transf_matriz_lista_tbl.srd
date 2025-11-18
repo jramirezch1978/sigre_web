@@ -1,0 +1,68 @@
+﻿$PBExportHeader$d_transf_matriz_lista_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_sec dbname="transf_matriz.nro_sec" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="transf_matriz.item" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=desc_glosa dbname="transf_matriz.desc_glosa" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos_dest_ini dbname="transf_matriz.cencos_dest_ini" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos_dest_fin dbname="transf_matriz.cencos_dest_fin" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp_ini dbname="transf_matriz.cnta_prsp_ini" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp_fin dbname="transf_matriz.cnta_prsp_fin" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_cntbl_debe dbname="transf_matriz.cnta_cntbl_debe" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_cntbl_haber dbname="transf_matriz.cnta_cntbl_haber" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=factor dbname="transf_matriz.factor" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_fijo_var dbname="transf_matriz.flag_fijo_var" values="Fijo	F/Variable	V/" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_proceso dbname="transf_matriz.cod_proceso" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos_origen dbname="transf_matriz.cencos_origen" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(50) updatewhereclause=yes name=ppto_cta_descrip_ini dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(50) updatewhereclause=yes name=ppto_cta_descrip_fin dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(25) updatewhereclause=yes name=abrev_cnta_debe dbname="cntbl_cnta.abrev_cnta" )
+ column=(type=char(25) updatewhereclause=yes name=abrev_cnta_haber dbname="cntbl_cnta.abrev_cnta" )
+ retrieve="  SELECT ~"TRANSF_MATRIZ~".~"NRO_SEC~",   
+         ~"TRANSF_MATRIZ~".~"ITEM~",   
+         ~"TRANSF_MATRIZ~".~"DESC_GLOSA~",   
+         ~"TRANSF_MATRIZ~".~"CENCOS_DEST_INI~",   
+         ~"TRANSF_MATRIZ~".~"CENCOS_DEST_FIN~",   
+         ~"TRANSF_MATRIZ~".~"CNTA_PRSP_INI~",   
+         ~"TRANSF_MATRIZ~".~"CNTA_PRSP_FIN~",   
+         ~"TRANSF_MATRIZ~".~"CNTA_CNTBL_DEBE~",   
+         ~"TRANSF_MATRIZ~".~"CNTA_CNTBL_HABER~",   
+         ~"TRANSF_MATRIZ~".~"FACTOR~",   
+         ~"TRANSF_MATRIZ~".~"FLAG_FIJO_VAR~",   
+         ~"TRANSF_MATRIZ~".~"COD_PROCESO~",   
+         ~"TRANSF_MATRIZ~".~"CENCOS_ORIGEN~",   
+         ~"CENTROS_COSTO~".~"DESC_CENCOS~",   
+         ~"PRESUPUESTO_CUENTA_A~".~"DESCRIPCION~",   
+         ~"PRESUPUESTO_CUENTA_B~".~"DESCRIPCION~",   
+         ~"CNTBL_CNTA_A~".~"ABREV_CNTA~",   
+         ~"CNTBL_CNTA_B~".~"ABREV_CNTA~"  
+    FROM ~"TRANSF_MATRIZ~",   
+         ~"CENTROS_COSTO~",   
+         ~"PRESUPUESTO_CUENTA~" ~"PRESUPUESTO_CUENTA_A~",   
+         ~"PRESUPUESTO_CUENTA~" ~"PRESUPUESTO_CUENTA_B~",   
+         ~"CNTBL_CNTA~" ~"CNTBL_CNTA_A~",   
+         ~"CNTBL_CNTA~" ~"CNTBL_CNTA_B~"  
+   WHERE ( transf_matriz.cencos_origen = centros_costo.cencos (+)) and  
+         ( transf_matriz.cnta_prsp_ini = presupuesto_cuenta_a.cnta_prsp (+)) and  
+         ( transf_matriz.cnta_prsp_fin = presupuesto_cuenta_b.cnta_prsp (+)) and  
+         ( transf_matriz.cnta_cntbl_debe = cntbl_cnta_a.cnta_ctbl (+)) and  
+         ( transf_matriz.cnta_cntbl_haber = cntbl_cnta_b.cnta_ctbl (+))  
+   ORDER BY ~"TRANSF_MATRIZ~".~"NRO_SEC~", ~"TRANSF_MATRIZ~".~"ITEM~"
+" update="TRANSF_MATRIZ" updatewhere=0 updatekeyinplace=no )
+text(band=header alignment="2" text="Sec." border="2" color="0" x="5" y="4" height="56" width="151" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="0" color="0" x="5" y="4" height="56" width="151" format="[general]" html.valueishtml="0"  name=nro_sec visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Item" border="2" color="0" x="160" y="4" height="56" width="133" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="0" x="160" y="4" height="56" width="133" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="297" y="4" height="56" width="736" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="297" y="4" height="56" width="736" format="[general]" html.valueishtml="0"  name=desc_glosa visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cencos" border="2" color="0" x="1038" y="4" height="56" width="311" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="1038" y="4" height="56" width="311" format="[general]" html.valueishtml="0"  name=cencos_origen visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="F./V." border="2" color="0" x="1353" y="4" height="56" width="197" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="1353" y="4" height="56" width="197" format="[general]" html.valueishtml="0"  name=flag_fijo_var visible="1" ddlb.limit=0 ddlb.allowedit=yes ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

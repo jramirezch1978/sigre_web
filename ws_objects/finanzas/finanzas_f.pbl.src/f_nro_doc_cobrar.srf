@@ -1,0 +1,63 @@
+﻿$PBExportHeader$f_nro_doc_cobrar.srf
+global type f_nro_doc_cobrar from function_object
+end type
+
+forward prototypes
+global function string f_nro_doc_cobrar (string as_tipo_doc)
+end prototypes
+
+global function string f_nro_doc_cobrar (string as_tipo_doc);//********* RECUPERACION NRO DOCUMENTO *********//
+long ll_nro_serie, ll_nro_doc, ll_anch_serie, ll_anch_nro, ll_nro_doc_inc
+String ls_nro_serie, ls_nro_doc
+
+SELECT 	NVL(digitos_serie,0), NVL(digitos_numero,0) 
+INTO   :ll_anch_serie, :ll_anch_nro 
+FROM   finparam 
+WHERE  reckey = '1'
+FOR UPDATE;
+
+IF ll_anch_serie = 0 OR ll_anch_nro = 0 THEN
+	Messagebox('TABLA FINPARAM','VERIFIQUE LA COLUMNA DIGITOS_SERIE, DIGITOS_NUMERO')
+	RETURN '0'
+END IF
+
+SELECT NVL(NRO_SERIE,0) , NVL(ULTIMO_NUMERO,0) 
+INTO   :ll_nro_serie, :ll_nro_doc
+FROM   NUM_DOC_TIPO
+WHERE  TIPO_DOC = :as_tipo_doc
+FOR UPDATE ;
+
+IF ll_nro_doc = 0 OR ll_nro_serie = 0 THEN
+	Messagebox('TABLA NUM DOC TIPO','VERIFIQUE LAS COLUMNAS NRO SERIE, ULTIMO NUMERO')
+	RETURN '0'
+END IF
+
+ls_nro_serie = string(ll_nro_serie)
+ls_nro_doc   = string(ll_nro_doc)
+ll_nro_doc_inc = ll_nro_doc + 1
+
+DO WHILE len(ls_nro_serie) < ll_anch_serie 
+	ls_nro_serie = '0' + ls_nro_serie
+LOOP
+
+DO WHILE len(ls_nro_doc) < ll_anch_nro 
+	ls_nro_doc = '0' + ls_nro_doc
+LOOP
+
+ls_nro_doc = ls_nro_serie + ls_nro_doc
+
+UPDATE NUM_DOC_TIPO
+SET    ULTIMO_NUMERO = :ll_nro_doc_inc
+WHERE  TIPO_DOC = :as_tipo_doc;
+
+IF sqlca.sqlcode = -1 THEN
+	Messagebox('ERROR FUNCION DEL NUMERO DOCUMENTO',sqlca.sqlerrtext)
+	ROLLBACK;
+ELSE
+	COMMIT;
+END IF 
+
+RETURN ls_nro_doc	
+	
+end function
+

@@ -1,0 +1,351 @@
+﻿$PBExportHeader$w_ma500_costos_mantenimiento.srw
+forward
+global type w_ma500_costos_mantenimiento from w_rpt
+end type
+type ddlb_tipo_costo from dropdownlistbox within w_ma500_costos_mantenimiento
+end type
+type ddlb_maquina from uo_ddlb_mtto within w_ma500_costos_mantenimiento
+end type
+type st_2 from statictext within w_ma500_costos_mantenimiento
+end type
+type st_1 from statictext within w_ma500_costos_mantenimiento
+end type
+type cb_3 from commandbutton within w_ma500_costos_mantenimiento
+end type
+type uo_1 from u_ingreso_rango_fechas within w_ma500_costos_mantenimiento
+end type
+type dw_report from u_dw_rpt within w_ma500_costos_mantenimiento
+end type
+type dw_grp from u_dw_grf within w_ma500_costos_mantenimiento
+end type
+type gb_1 from groupbox within w_ma500_costos_mantenimiento
+end type
+end forward
+
+global type w_ma500_costos_mantenimiento from w_rpt
+integer width = 3639
+integer height = 2024
+string title = "Costos de Mantenimiento (MA500)"
+string menuname = "m_rpt_smpl"
+long backcolor = 67108864
+integer ii_x = 0
+ddlb_tipo_costo ddlb_tipo_costo
+ddlb_maquina ddlb_maquina
+st_2 st_2
+st_1 st_1
+cb_3 cb_3
+uo_1 uo_1
+dw_report dw_report
+dw_grp dw_grp
+gb_1 gb_1
+end type
+global w_ma500_costos_mantenimiento w_ma500_costos_mantenimiento
+
+type variables
+
+end variables
+
+forward prototypes
+public function integer of_new_sheet (str_cns_pop astr_1)
+public subroutine of_close_sheet ()
+end prototypes
+
+public function integer of_new_sheet (str_cns_pop astr_1);Integer li_rc
+w_cns_pop	lw_sheet
+					
+li_rc = OpenSheetWithParm(lw_sheet, astr_1, this, 0, Original!)
+ii_x ++
+iw_sheet[ii_x]  = lw_sheet
+					
+RETURN li_rc     		
+
+end function
+
+public subroutine of_close_sheet ();
+Integer	 li_x
+
+FOR li_x = 1 to ii_x							// eliminar todas las ventanas pop
+	IF IsValid(iw_sheet[li_x]) THEN close(iw_sheet[li_x])
+NEXT
+end subroutine
+
+event resize;call super::resize;dw_report.height = newheight - dw_report.y
+dw_grp.height = newheight - dw_grp.y
+dw_grp.width = newwidth - dw_grp.x
+end event
+
+event ue_open_pre();call super::ue_open_pre;of_position(0,0)
+idw_1 = dw_report
+idw_1.SetTransObject(sqlca)
+dw_grp.SetTransObject(sqlca)
+idw_1.ii_zoom_actual = 100
+Trigger Event ue_preview()
+
+
+// ii_help = 101           // help topic
+
+end event
+
+on w_ma500_costos_mantenimiento.create
+int iCurrent
+call super::create
+if this.MenuName = "m_rpt_smpl" then this.MenuID = create m_rpt_smpl
+this.ddlb_tipo_costo=create ddlb_tipo_costo
+this.ddlb_maquina=create ddlb_maquina
+this.st_2=create st_2
+this.st_1=create st_1
+this.cb_3=create cb_3
+this.uo_1=create uo_1
+this.dw_report=create dw_report
+this.dw_grp=create dw_grp
+this.gb_1=create gb_1
+iCurrent=UpperBound(this.Control)
+this.Control[iCurrent+1]=this.ddlb_tipo_costo
+this.Control[iCurrent+2]=this.ddlb_maquina
+this.Control[iCurrent+3]=this.st_2
+this.Control[iCurrent+4]=this.st_1
+this.Control[iCurrent+5]=this.cb_3
+this.Control[iCurrent+6]=this.uo_1
+this.Control[iCurrent+7]=this.dw_report
+this.Control[iCurrent+8]=this.dw_grp
+this.Control[iCurrent+9]=this.gb_1
+end on
+
+on w_ma500_costos_mantenimiento.destroy
+call super::destroy
+if IsValid(MenuID) then destroy(MenuID)
+destroy(this.ddlb_tipo_costo)
+destroy(this.ddlb_maquina)
+destroy(this.st_2)
+destroy(this.st_1)
+destroy(this.cb_3)
+destroy(this.uo_1)
+destroy(this.dw_report)
+destroy(this.dw_grp)
+destroy(this.gb_1)
+end on
+
+event ue_preview();call super::ue_preview;IF ib_preview THEN
+	idw_1.Modify("DataWindow.Print.Preview=No")
+	idw_1.Modify("datawindow.print.preview.zoom = " + String(idw_1.ii_zoom_actual))
+	idw_1.title = "Reporte " + " (Zoom: " + String(idw_1.ii_zoom_actual) + "%)"
+	SetPointer(hourglass!)
+	ib_preview = FALSE
+ELSE
+	idw_1.Modify("DataWindow.Print.Preview=Yes")
+	idw_1.Modify("datawindow.print.preview.zoom = " + String(idw_1.ii_zoom_actual))
+	idw_1.title = "Reporte " + " (Zoom: " + String(idw_1.ii_zoom_actual) + "%)"
+	SetPointer(hourglass!)
+	ib_preview = TRUE
+END IF
+end event
+
+type ddlb_tipo_costo from dropdownlistbox within w_ma500_costos_mantenimiento
+integer x = 1637
+integer y = 104
+integer width = 434
+integer height = 352
+integer taborder = 60
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+string item[] = {"Presupuestal","Proyectado"}
+borderstyle borderstyle = stylelowered!
+end type
+
+event constructor;this.selectitem(1)
+end event
+
+type ddlb_maquina from uo_ddlb_mtto within w_ma500_costos_mantenimiento
+integer x = 471
+integer y = 220
+integer width = 1600
+integer taborder = 50
+end type
+
+event ue_open_pre;call super::ue_open_pre;is_dataobject = 'd_maquina_tbl'
+
+ii_cn1 = 2                     // Nro del campo 1
+ii_cn2 = 1                     // Nro del campo 2
+ii_ck  = 1                     // Nro del campo key
+ii_lc1 = 100                     // Longitud del campo 1
+ii_lc2 = 8							// Longitud del campo 2
+
+
+end event
+
+event constructor;call super::constructor;if this.totalitems() > 0 then this.selectitem(1)
+end event
+
+type st_2 from statictext within w_ma500_costos_mantenimiento
+integer x = 1312
+integer y = 116
+integer width = 325
+integer height = 64
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+long backcolor = 67108864
+string text = "Tipo de costo:"
+boolean focusrectangle = false
+end type
+
+type st_1 from statictext within w_ma500_costos_mantenimiento
+integer x = 64
+integer y = 228
+integer width = 379
+integer height = 64
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+long backcolor = 67108864
+string text = "Equipo/Maquina:"
+boolean focusrectangle = false
+end type
+
+type cb_3 from commandbutton within w_ma500_costos_mantenimiento
+integer x = 2789
+integer y = 132
+integer width = 343
+integer height = 100
+integer taborder = 50
+integer textsize = -8
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "&Procesar"
+end type
+
+event clicked;String ls_cod_maquina,ls_tip_costo
+Date   ld_fecha_inicio, ld_fecha_final
+
+ld_fecha_inicio = uo_1.of_get_fecha1()
+ld_fecha_final  = uo_1.of_get_fecha2()  
+
+
+
+ls_cod_maquina = trim(right(ddlb_maquina.text, 8))
+ls_tip_costo	= ddlb_tipo_costo.text
+
+if trim(ls_tip_costo) = 'Real' then
+	ls_tip_costo = 'R'
+else
+	ls_tip_costo = 'P'
+end if
+
+IF Isnull(ls_cod_maquina) OR Trim(ls_cod_maquina) = '' THEN
+	ls_cod_maquina = '%'
+END IF
+
+IF Isnull(ls_tip_costo) OR Trim(ls_tip_costo) = '' THEN
+	Messagebox('Aviso','Debe Ingresar Tipo de Costo')		
+	Return 
+END IF
+
+ROLLBACK ;
+
+DECLARE pb_usp_cal_op_ot PROCEDURE FOR USP_MTT_CAL_OP_OT
+(:ls_cod_maquina,:ld_fecha_inicio,:ld_fecha_final,:ls_tip_costo)  ;
+
+EXECUTE pb_usp_cal_op_ot;	
+
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox("SQL error", SQLCA.SQLErrText)
+	RETURN
+END IF
+
+dw_report.Retrieve(gs_empresa,gs_user)
+dw_grp.Retrieve()
+dw_report.Object.p_logo.filename = gs_logo
+end event
+
+type uo_1 from u_ingreso_rango_fechas within w_ma500_costos_mantenimiento
+integer x = 32
+integer y = 104
+integer width = 1431
+integer taborder = 40
+end type
+
+event constructor;call super::constructor;of_set_label('Desde:','Hasta:') //para setear la fecha inicial
+of_set_fecha(today(), today()) // para seatear el titulo del boton
+of_set_rango_inicio(date('01/01/1900')) // rango inicial
+of_set_rango_fin(date('31/12/9999')) // rango final
+
+
+end event
+
+on uo_1.destroy
+call u_ingreso_rango_fechas::destroy
+end on
+
+type dw_report from u_dw_rpt within w_ma500_costos_mantenimiento
+integer x = 23
+integer y = 360
+integer width = 2423
+integer height = 720
+integer taborder = 20
+string dataobject = "d_rpt_ot_operaciones_tbl"
+boolean hscrollbar = true
+boolean vscrollbar = true
+end type
+
+event doubleclicked;call super::doubleclicked;String ls_tipo_ot
+str_cns_pop  lstr_1
+
+CHOOSE CASE dwo.name
+		 CASE 'des_tipo_ot'
+				ls_tipo_ot = This.Object.tipo_ot[row]
+				lstr_1.DataObject = 'd_rpt_ot_operaciones_det_tbl' // asignar datawindow
+				lstr_1.title	   = 'Ordenes de Trabajo'				 // asignar titulo de la ventana
+				lstr_1.width 		= 2500		// asignar ancho y altura de ventana
+				lstr_1.height 		= 1300		//
+				lstr_1.arg[1] 		= ls_tipo_ot	
+				
+				of_new_sheet(lstr_1)
+						
+END CHOOSE
+
+
+
+
+end event
+
+type dw_grp from u_dw_grf within w_ma500_costos_mantenimiento
+integer x = 2459
+integer y = 360
+integer width = 1001
+integer height = 720
+string dataobject = "d_rpt_ot_operaciones_grp"
+end type
+
+type gb_1 from groupbox within w_ma500_costos_mantenimiento
+integer x = 18
+integer y = 32
+integer width = 2139
+integer height = 312
+integer taborder = 40
+integer textsize = -8
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+long backcolor = 67108864
+string text = "Ingrese Datos :"
+end type
+

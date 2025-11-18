@@ -1,0 +1,44 @@
+﻿$PBExportHeader$d_rpt_fce_presup_autoriz_x_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=440 color="536870912" )
+summary(height=116 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912"  height.autosize=yes)
+table(column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="tt_sig_presupuesto.cnta_prsp" )
+ column=(type=char(50) updatewhereclause=yes name=presupuesto_cuenta_descripcion dbname="presupuesto_cuenta.descripcion" )
+ column=(type=number updatewhereclause=yes name=tot_presup dbname="tot_presup" )
+ column=(type=number updatewhereclause=yes name=tot_ejecuc dbname="tot_ejecuc" )
+ retrieve="SELECT tt.cnta_prsp, pc.descripcion, 
+       (sum( nvl(tt.presupuesto,0) + nvl(tt.variacion,0))) as tot_presup ,
+       (sum( nvl(tt.ejecucion,0))) as tot_ejecuc
+  FROM tt_sig_presupuesto tt, presupuesto_cuenta pc
+ WHERE tt.cnta_prsp = pc.cnta_prsp and
+		   tt.tipo_gasto = :as_tipo_gasto
+GROUP BY tt.cnta_prsp, pc.descripcion     
+" arguments=(("as_tipo_gasto", string)) )
+bitmap(band=header filename="" x="27" y="20" height="240" width="379" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="27" y="276" height="48" width="384" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Ppto autorizado" border="2" color="33554432" x="1541" y="372" height="64" width="421" html.valueishtml="0"  name=tot_presup_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+text(band=header alignment="2" text="Ejecución" border="2" color="33554432" x="1975" y="372" height="64" width="421" html.valueishtml="0"  name=tot_ejecuc_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+text(band=header alignment="2" text="Ratio" border="2" color="33554432" x="2409" y="372" height="64" width="421" html.valueishtml="0"  name=saldo_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+text(band=header alignment="2" text="Cuenta presupuestal" border="2" color="33554432" x="142" y="372" height="64" width="1385" html.valueishtml="0"  name=presupuesto_cuenta_descripcion_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+text(band=header alignment="2" text="RATIO DE EJECUCION Y PRESUPUESTO  AUTORIZADO" border="0" color="0" x="517" y="48" height="80" width="2107" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="517" y="208" height="64" width="2107" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2679" y="12" height="48" width="370" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="today()"border="0" color="33554432" x="2679" y="76" height="48" width="370" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="2679" y="148" height="48" width="370" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="TOTALES :" border="0" color="0" x="1198" y="28" height="64" width="311" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(tot_presup for all)"border="0" color="0" x="1541" y="28" height="64" width="421" format="#,##0.00" html.valueishtml="0"  name=tot_presup_all visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(tot_ejecuc for all)"border="0" color="0" x="1975" y="28" height="64" width="421" format="#,##0.00" html.valueishtml="0"  name=tot_ejec_all visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="if(  tot_presup_all >0,  tot_ejec_all / tot_presup_all *100, 0)"border="0" color="0" x="2409" y="28" height="64" width="421" format="#,##0.00" html.valueishtml="0"  name=tot_ratio_all visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="82" y="4" height="64" width="41" format="[general]" html.valueishtml="0"  name=cnta_prsp pointer="H:\Source\Cur\taladro.cur" visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="1541" y="8" height="64" width="421" format="#,##0.00" html.valueishtml="0"  name=tot_presup pointer="H:\Source\Cur\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="1975" y="8" height="64" width="421" format="#,##0.00" html.valueishtml="0"  name=tot_ejecuc pointer="H:\Source\Cur\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="if(  tot_presup >0,  tot_ejecuc / tot_presup *100, 0 )"border="0" color="0" x="2409" y="8" height="64" width="421" format="#,##0.00" html.valueishtml="0"  name=saldo pointer="H:\Source\Cur\taladro.cur" visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="146" y="8" height="64" width="1385" format="[general]" html.valueishtml="0"  name=presupuesto_cuenta_descripcion pointer="H:\Source\Cur\taladro.cur" visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

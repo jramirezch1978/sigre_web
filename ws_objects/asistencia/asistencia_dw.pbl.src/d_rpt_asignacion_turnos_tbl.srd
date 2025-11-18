@@ -1,0 +1,54 @@
+﻿$PBExportHeader$d_rpt_asignacion_turnos_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=592 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="rrhh_asignacion_turnos.cod_trabajador" )
+ column=(type=char(92) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=char(9) updatewhereclause=yes name=dia dbname="dia" )
+ column=(type=char(9) updatewhereclause=yes name=mes dbname="mes" )
+ column=(type=char(4) updatewhereclause=yes name=ano dbname="ano" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="rrhh_asignacion_turnos.fecha" )
+ column=(type=char(4) updatewhereclause=yes name=turno dbname="rrhh_asignacion_turnos.turno" )
+ retrieve="select rh.cod_trabajador,Nvl(m.apel_paterno,' ')||' '||Nvl(m.apel_materno,' ')||' '||Nvl(m.nombre1,' ') as nombres,
+       DECODE(trim(to_char(rh.fecha,'DAY')),'MONDAY','Lunes','TUESDAY','Martes','WEDNESDAY','Miercoles','THURSDAY','Jueves','FRIDAY','Viernes','SATURDAY','Sabado','SUNDAY','Domingo','') as dia,
+       DECODE(trim(to_char(rh.fecha,'MONTH')),'JANUARY','Enero'  ,'FEBRUARY','Febrero'  ,'MARCH'    ,'Marzo'    ,
+                                              'APRIL'  ,'Abril'  ,'MAY'      ,'Mayo'     ,'JUNE'     ,'Junio'    ,
+                                              'JULY'   ,'Julio'  ,'AUGUST'   ,'Agosto'   ,'SEPTEMBER','Setiembre',
+                                              'OCTOBER','Octubre','NOVEMBER' ,'Noviembre','DECEMBER' ,'Diciembre',
+                                              '')       as mes               
+       ,to_char(rh.fecha,'yyyy') as ano,
+		 RH.FECHA,RH.TURNO
+
+  from rrhh_asignacion_turnos rh,maestro m
+ where (rh.cod_trabajador = m.cod_trabajador) and
+		 (rh.cod_trabajador = :as_cod_trabajador) and
+       (to_char(rh.fecha,'yyyymm') = :as_anomes)
+order by rh.fecha  " arguments=(("as_cod_trabajador", string),("as_anomes", string)) )
+group(level=1 header.height=92 trailer.height=0 by=("mes" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="1" text="Trabajador :" border="0" color="8388608" x="27" y="408" height="68" width="329" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="389" y="408" height="68" width="293" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="713" y="408" height="68" width="1285" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=92 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="2" expression="'Programacion de Horario del Año '+  ano +' del Mes de  '+ mes "border="0" color="8388608" x="558" y="40" height="116" width="2263" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Dia" border="2" color="8388608" x="9" y="524" height="64" width="261" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+text(band=header alignment="2" text="Fecha" border="2" color="8388608" x="274" y="524" height="64" width="485" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+text(band=header alignment="2" text="Turno" border="2" color="8388608" x="763" y="524" height="64" width="206" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="27" y="16" height="220" width="416" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="27" y="256" height="56" width="416" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3141" y="52" height="64" width="247" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Fecha :" border="0" color="8388608" x="2853" y="52" height="64" width="261" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag :" border="0" color="8388608" x="2853" y="132" height="64" width="261" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="33554432" x="3141" y="132" height="64" width="247" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Usuario :" border="0" color="8388608" x="2853" y="212" height="64" width="261" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="3141" y="212" height="64" width="247" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="4" height="76" width="274" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=9 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="68" width="261" format="[general]" html.valueishtml="0"  name=dia visible="1" edit.limit=9 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="274" y="0" height="68" width="485" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="763" y="0" height="68" width="206" format="[general]" html.valueishtml="0"  name=turno visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

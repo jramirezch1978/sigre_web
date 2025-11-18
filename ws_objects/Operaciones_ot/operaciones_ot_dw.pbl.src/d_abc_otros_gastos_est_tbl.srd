@@ -1,0 +1,51 @@
+﻿$PBExportHeader$d_abc_otros_gastos_est_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=192 color="536870912" )
+summary(height=64 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="ot_otros_gastos.cod_relacion" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="codigo_relacion.nombre" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="ot_otros_gastos.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="ot_otros_gastos.nro_doc" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_doc dbname="cntas_pagar.importe_doc" )
+ column=(type=number updatewhereclause=yes name=total_us dbname="total_us" )
+ retrieve="select oog.cod_relacion ,
+		 cr.nombre        ,
+		 oog.tipo_doc 		,
+		 oog.nro_doc 		,
+       cp.cod_moneda    ,
+		 cp.importe_doc 	,
+       decode(cp.cod_moneda,(select cod_dolares from logparam where reckey = '1'),nvl(cp.importe_doc,0.00) ,(nvl(cp.importe_doc,0.00) / usf_fin_tasa_cambio (sysdate)) ) as total_us
+  from ot_otros_gastos oog,
+       codigo_relacion cr ,
+       cntas_pagar cp
+ where  (oog.cod_relacion  = cr.cod_relacion )  and
+       ((oog.cod_relacion = cp.cod_relacion  )  and
+        (oog.tipo_doc     = cp.tipo_doc      )  and
+        (oog.nro_doc      = cp.nro_doc       )) and
+        (oog.nro_orden    = :as_nro_orden     ) " arguments=(("as_nro_orden", string)) )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1888" y="0" height="72" width="210" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="2103" y="0" height="72" width="302" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="2409" y="0" height="72" width="210" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2624" y="0" height="72" width="325" format="[general]" html.valueishtml="0"  name=importe_doc visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="320" y="0" height="72" width="1563" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="72" width="306" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total US$" border="2" color="8388608" x="2953" y="132" height="56" width="329" html.valueishtml="0"  name=total_us_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cod Relacion" border="2" color="8388608" x="9" y="132" height="56" width="306" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nombre" border="2" color="8388608" x="320" y="132" height="56" width="1563" html.valueishtml="0"  name=nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="8388608" x="1888" y="132" height="56" width="210" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="2103" y="132" height="56" width="302" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="2409" y="132" height="56" width="210" html.valueishtml="0"  name=moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Total" border="2" color="8388608" x="2624" y="132" height="56" width="325" html.valueishtml="0"  name=total_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="0" text="Otros Gastos" border="0" color="8388608" x="18" y="56" height="56" width="439" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2953" y="0" height="72" width="329" format="[general]" html.valueishtml="0"  name=total_us visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  total_us  for all )"border="2" color="0" x="2953" y="0" height="60" width="329" format="###,###.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Total :" border="2" color="8388608" x="2638" y="0" height="60" width="311" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

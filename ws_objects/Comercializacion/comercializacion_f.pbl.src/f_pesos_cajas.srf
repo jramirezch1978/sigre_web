@@ -1,0 +1,20 @@
+﻿$PBExportHeader$f_pesos_cajas.srf
+global type f_pesos_cajas from function_object
+end type
+
+forward prototypes
+global function string f_pesos_cajas (string as_fact)
+end prototypes
+
+global function string f_pesos_cajas (string as_fact);String peso_caja
+
+SELECT wm_concat(' '||qry.peso_bruto||'Kgs') 
+			into  :peso_caja
+			from( select  cc.peso_bruto 
+					from CNTAS_COBRAR_DET cc 
+					where cc.nro_doc = :as_fact  
+					group by cc.peso_bruto)  qry;
+
+return peso_caja
+end function
+

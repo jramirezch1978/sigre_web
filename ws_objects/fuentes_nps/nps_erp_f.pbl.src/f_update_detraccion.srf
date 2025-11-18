@@ -1,0 +1,40 @@
+﻿$PBExportHeader$f_update_detraccion.srf
+global type f_update_detraccion from function_object
+end type
+
+forward prototypes
+global function boolean f_update_detraccion (string as_nro_detrac, date adt_fecha_doc, decimal adc_monto_detrac)
+end prototypes
+
+global function boolean f_update_detraccion (string as_nro_detrac, date adt_fecha_doc, decimal adc_monto_detrac);Boolean lb_ret = true
+String ls_msj_err,ls_tipo_detr,ls_flag_cbancos
+Date    ldt_fecha_reg_detr
+Decimal {2} ldc_monto_detrac_old
+
+		
+select fecha_registro,importe into :ldt_fecha_reg_detr,:ldc_monto_detrac_old
+from detraccion where nro_detraccion = :As_nro_detrac ;
+			
+	
+	
+if (String(adt_fecha_doc,'dd/mm/yyyy') <> String(ldt_fecha_reg_detr,'dd/mm/yyyy')) OR (adc_monto_detrac <> ldc_monto_detrac_old )THEN
+	/****************************************************************************************
+	  REPLICACION
+	 ****************************************************************************************/
+	update detraccion
+	   set fecha_registro = :adt_fecha_doc,importe = :adc_monto_detrac,flag_replicacion = '1'
+	 where nro_detraccion = :as_nro_detrac ;
+	 
+	if SQLCA.SQLCode = -1 then
+      ls_msj_err = SQLCA.SQLErrText
+		rollback ;
+		lb_ret = false
+	end if
+end if
+
+
+
+
+Return lb_ret 
+end function
+

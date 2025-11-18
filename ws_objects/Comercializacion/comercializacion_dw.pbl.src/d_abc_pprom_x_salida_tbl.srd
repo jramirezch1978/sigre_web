@@ -1,0 +1,57 @@
+﻿$PBExportHeader$d_abc_pprom_x_salida_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=352 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=number updatewhereclause=yes name=precio_promedio dbname="precio_promedio" )
+ column=(type=number updatewhereclause=yes name=ano dbname="ano" )
+ column=(type=number updatewhereclause=yes name=compute_0006 dbname="compute_0006" )
+ column=(type=char(9) updatewhereclause=yes name=mes dbname="mes" )
+ retrieve="
+ SELECT ART.COD_ART,ART.NOM_ARTICULO,ART.UND,
+        Round(Sum(CCD.PRECIO_UNITARIO) / COUNT(*),6) as precio_promedio,
+		TO_NUMBER(TO_CHAR(CC.FECHA_DOCUMENTO,'YYYY')) AS ANO,		
+		 TO_NUMBER(TO_CHAR(CC.FECHA_DOCUMENTO,'MM')),		
+       DECODE(TO_NUMBER(TO_CHAR(CC.FECHA_DOCUMENTO,'MM')),1,'Enero'  ,2,'Febrero'  ,3,'Marzo'    ,
+                                            4,'Abril'  ,5,'Mayo'     ,6,'Junio'    ,
+                                            7,'Julio'  ,8,'Agosto'   ,9,'Setiembre', 
+                                            10,'Octubre',11,'Noviembre',12,'Diciembre') AS MES
+  FROM ARTICULO ART,CNTAS_COBRAR CC,CNTAS_COBRAR_DET CCD
+ WHERE  
+        (CC.TIPO_DOC = CCD.TIPO_DOC ) AND
+        (CC.NRO_DOC  = CCD.NRO_DOC  ) AND
+        (CC.FLAG_ESTADO <> '0'      ) AND
+        (ART.COD_ART    = CCD.COD_ART ) AND
+        (CC.FORMA_PAGO  IN (SELECT FP.FORMA_PAGO FROM FORMA_PAGO FP WHERE NVL(FLAG_NO_COBRABLE,'0') = '0') ) AND
+        (CC.TIPO_DOC    IN (SELECT TIPO_DOC FROM DOC_GRUPO_RELACION WHERE GRUPO IN (SELECT DOC_VENTAS FROM FINPARAM))) AND  
+        (CCD.PRECIO_UNITARIO <> 0   ) AND
+        (CCD.COD_ART         = :as_cod_art) AND
+        (TO_CHAR(CC.FECHA_DOCUMENTO,'YYYY') = :al_ano ) 
+GROUP BY ART.COD_ART  ,ART.NOM_ARTICULO,ART.UND,		TO_NUMBER(TO_CHAR(CC.FECHA_DOCUMENTO,'YYYY')) ,		TO_NUMBER(TO_CHAR(CC.FECHA_DOCUMENTO,'MM')   )" arguments=(("as_cod_art", string),("al_ano", number)) )
+group(level=1 header.height=84 trailer.height=0 by=("cod_art" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Precio Promedio" border="2" color="8388608" x="242" y="288" height="60" width="635" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+compute(band=header alignment="2" expression="'Precio Promedio Por Articulos del Año ' + Trim(String(ano ))"border="0" color="33554432" x="731" y="28" height="76" width="1975" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Fecha :" border="0" color="33554432" x="2894" y="40" height="64" width="238" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3150" y="40" height="64" width="247" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Pag. :" border="0" color="33554432" x="2898" y="120" height="56" width="238" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="33554432" x="3150" y="120" height="64" width="247" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="27" y="12" height="184" width="411" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="27" y="208" height="56" width="411" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="3150" y="200" height="56" width="247" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Usuario :" border="0" color="33554432" x="2898" y="200" height="56" width="238" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="8388608" x="1454" y="8" height="64" width="110" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="18" y="8" height="60" width="219" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="242" y="8" height="64" width="635" format="[general]" html.valueishtml="0"  name=precio_promedio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="8388608" x="315" y="8" height="64" width="1125" format="[general]" html.valueishtml="0"  name=nom_articulo visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Mes" border="2" color="8388608" x="18" y="288" height="60" width="219" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=header.1 id=1 alignment="0" tabsequence=0 border="0" color="8388608" x="18" y="8" height="64" width="279" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

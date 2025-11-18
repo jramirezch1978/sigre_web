@@ -1,0 +1,70 @@
+﻿$PBExportHeader$d_list_prog_oc_automatico_usuario_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="prog_compras.cod_origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_programa dbname="prog_compras.nro_programa" )
+ column=(type=char(150) updatewhereclause=yes name=observaciones dbname="prog_compras.observaciones" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="prog_compras.flag_estado" values="Anulado	0/Generado	1/Cerrado	2/" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_registro dbname="prog_compras.fec_registro" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="prog_compras.cod_usr" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="prog_compras.flag_replicacion" )
+ retrieve="  SELECT DISTINCT 
+			PC.COD_ORIGEN,
+      	PC.NRO_PROGRAMA,
+			PC.OBSERVACIONES,
+			PC.FLAG_ESTADO,
+         PC.FEC_REGISTRO,
+         PC.COD_USR,
+         PC.FLAG_REPLICACION  
+  FROM PROG_COMPRAS 		   PC,
+		 PROG_COMPRAS_DET 	PCD,
+		 ARTICULO				A,
+		 COTIZACION				C1,
+		 COTIZACION_PROVEE	C2,
+		 COTIZACION_PROVEE_BIEN_DET C3
+  WHERE PCD.NRO_PROGRAMA = PC.NRO_PROGRAMA
+    and A.COD_ART 		 = PCD.COD_ART
+	 and C1.NRO_COTIZA	 = C2.NRO_COTIZA
+	 AND C2.NRO_COTIZA	 = C3.NRO_COTIZA
+    AND C2.PROVEEDOR	    = C3.PROVEEDOR
+    AND C3.COD_ART		 = PCD.COD_ART
+	 AND NVL(C1.FLAG_ESTADO, '0') = '1'
+    AND NVL(C2.COTIZO, '0') = '1'
+	 AND NVL(C3.FLAG_GANADOR, '0') = '1'
+    AND NVL(C3.PRECIO_UNIT, 0) > 0
+	 AND C1.NRO_COTIZA LIKE :as_nro_cotiza
+    and PCD.FLAG_ESTADO  = '1'
+    and NVL(PCD.cant_proyect,0) - NVL(PCD.cant_procesada,0)  > 0
+	 and TRUNC(PCD.FEC_REQUERIDA) between trunc(:ad_fecha1) and trunc(:ad_fecha2)
+	 and PCD.COD_ART     	like :as_cod_art
+    and UPPER(A.DESC_ART)  like :as_desc_art
+	 and PCD.ALMACEN	   	like :as_almacen
+    and A.SUB_CAT_ART	  	like :as_cod_sub_cat
+    and PC.nro_programa 	like :as_nro_programa
+    and ( PCD.NRO_AMP_OT_REF is null or 
+			( PCD.NRO_AMP_OT_REF is not null and 
+				USF_ALM_CANT_LIBRE_OT(PCD.ORG_AMP_OT_REF, PCD.NRO_AMP_OT_REF) > 0 ) )
+    and pcd.comprador  = :as_user
+  ORDER BY PC.NRO_PROGRAMA ASC   
+" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_cod_art", string),("as_desc_art", string),("as_almacen", string),("as_nro_programa", string),("as_cod_sub_cat", string),("as_nro_cotiza", string),("as_user", string)) )
+text(band=header alignment="2" text="Ori." border="2" color="0" x="9" y="8" height="56" width="128" html.valueishtml="0"  name=cod_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Nro Programa" border="2" color="0" x="142" y="8" height="56" width="402" html.valueishtml="0"  name=nro_programa_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Fecha Registro" border="2" color="0" x="549" y="8" height="56" width="434" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Cod Usuario" border="2" color="0" x="987" y="8" height="56" width="338" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Estado" border="2" color="0" x="1330" y="8" height="56" width="338" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Observaciones" border="2" color="0" x="1673" y="8" height="56" width="914" html.valueishtml="0"  name=observaciones_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="0" x="9" y="4" height="56" width="128" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif ( flag_estado = '0', RGB( 192,192,192), RGB( 255,255,255))" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="142" y="4" height="56" width="402" format="[general]" html.valueishtml="0"  name=nro_programa visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif ( flag_estado = '0', RGB( 192,192,192), RGB( 255,255,255))" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="0" x="549" y="4" height="56" width="434" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif ( flag_estado = '0', RGB( 192,192,192), RGB( 255,255,255))" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="0" x="987" y="4" height="56" width="338" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif ( flag_estado = '0', RGB( 192,192,192), RGB( 255,255,255))" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="0" x="1330" y="4" height="56" width="338" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="1673" y="4" height="56" width="914" format="[general]" html.valueishtml="0"  name=observaciones visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

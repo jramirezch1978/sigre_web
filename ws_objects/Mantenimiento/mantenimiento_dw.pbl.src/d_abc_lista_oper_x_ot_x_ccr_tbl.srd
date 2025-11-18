@@ -1,0 +1,59 @@
+﻿$PBExportHeader$d_abc_lista_oper_x_ot_x_ccr_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="operaciones.cod_labor" )
+ column=(type=char(10) updatewhereclause=yes name=cencos_slc dbname="orden_trabajo.cencos_slc" )
+ column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="ficha_mantenimiento.cod_maquina" )
+ column=(type=char(40) updatewhereclause=yes name=desc_maq dbname="maquina.desc_maq" )
+ column=(type=decimal(0) updatewhereclause=yes name=oper_sec dbname="operaciones.oper_sec" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=datetime updatewhereclause=yes name=fec_inicio dbname="operaciones.fec_inicio" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_personas dbname="operaciones.nro_personas" )
+ column=(type=decimal(2) updatewhereclause=yes name=cant_proyect dbname="operaciones.cant_proyect" )
+ column=(type=datetime updatewhereclause=yes name=fec_inicio_est dbname="operaciones.fec_inicio_est" )
+ retrieve="SELECT op.cod_labor    ,   
+			ot.cencos_slc   ,
+			fm.cod_maquina	 ,
+			m.desc_maq   	 ,
+			op.oper_sec     ,   
+         ot.nro_orden    ,
+		   op.fec_inicio   , 
+         op.nro_personas ,   
+         op.cant_proyect ,  
+		   op.fec_inicio_est
+    FROM operaciones         op,   
+         orden_trabajo       ot,
+			ficha_mantenimiento fm,
+			maquina				  m
+   WHERE (( op.nro_orden  = ot.nro_orden     )  AND  
+          ( op.tipo_orden = (SELECT DOC_OT FROM PROD_PARAM WHERE RECKEY = '1')  )) AND  
+			(( ot.cod_origen = fm.cod_origen(+) )  AND
+			 ( ot.nro_orden  = fm.nro_orden (+) )) AND  
+			 ( fm.cod_maquina= m.cod_maquina(+) )  AND	
+          ( ot.cencos_rsp = :as_cc_resp                 ) AND  
+		   (( TO_CHAR(op.fec_inicio,'yyyymmdd') >= :as_fecha_inicio  ) AND
+		    ( TO_CHAR(op.fec_inicio,'yyyymmdd') <= :as_fecha_final  )) " arguments=(("as_cc_resp", string),("as_fecha_inicio", string),("as_fecha_final", string)) )
+text(band=header alignment="2" text="C.C. Solic." border="2" color="0" x="297" y="8" height="56" width="233"  name=t_5  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Labor" border="2" color="0" x="9" y="8" height="56" width="283"  name=t_6  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="297" y="0" height="56" width="233" format="[general]"  name=cencos_slc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="56" width="283" format="[general]"  name=cod_labor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="535" y="0" height="56" width="233" format="[general]"  name=cod_maquina edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Maquina" border="2" color="0" x="535" y="8" height="56" width="233"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha Inicio" border="2" color="0" x="1358" y="8" height="56" width="297"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro. OT" border="2" color="0" x="1659" y="8" height="56" width="242"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Oper Sec" border="2" color="0" x="1906" y="8" height="56" width="311"  name=operaciones_oper_sec_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Pers." border="2" color="0" x="2222" y="8" height="56" width="224"  name=operaciones_nro_personas_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cant Proy." border="2" color="0" x="2450" y="8" height="56" width="233"  name=operaciones_cant_proyect_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="0" x="1358" y="0" height="56" width="297" format="[shortdate] [time]"  name=fec_inicio editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="1659" y="0" height="56" width="242" format="[general]"  name=nro_orden edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="0" x="1906" y="0" height="56" width="311" format="[general]"  name=oper_sec edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="0" x="2222" y="0" height="56" width="224" format="[general]"  name=nro_personas editmask.mask="###" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="0" x="2450" y="0" height="56" width="233" format="[general]"  name=cant_proyect editmask.mask="###,#####.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="773" y="8" height="56" width="581"  name=t_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=4 alignment="0" tabsequence=0 border="2" color="0" x="773" y="0" height="56" width="581"  name=desc_maq  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

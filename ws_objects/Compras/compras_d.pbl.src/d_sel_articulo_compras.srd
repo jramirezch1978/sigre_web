@@ -1,0 +1,33 @@
+﻿$PBExportHeader$d_sel_articulo_compras.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=codigo dbname="articulo.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=descripcion dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ retrieve="SELECT distinct a.COD_ART, a.desc_art, a.und
+ FROM ARTICULO_MOV_PROY amp,
+		ORDEN_COMPRA 		oc,
+		ARTICULO				a
+WHERE amp.COD_ORIGEN = oc.COD_ORIGEN  
+  and amp.NRO_DOC 	= oc.NRO_OC  
+  and amp.tipo_doc 	= (select doc_oc from logparam where reckey = '1')
+  and amp.cod_art   	= a.cod_art
+  and amp.FLAG_ESTADO <> '0'  
+  AND oc.flag_estado	 <> '0'
+  and trunc(oc.fec_registro) between trunc(:ad_fecha1) and trunc(:ad_fecha2)
+" arguments=(("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Código" border="2" color="33554432" x="5" y="4" height="56" width="357" html.valueishtml="0"  name=codigo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="366" y="4" height="56" width="1618" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="1989" y="4" height="56" width="110" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="56" width="357" format="[general]" html.valueishtml="0"  name=codigo visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="366" y="4" height="56" width="1618" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="1989" y="4" height="56" width="110" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

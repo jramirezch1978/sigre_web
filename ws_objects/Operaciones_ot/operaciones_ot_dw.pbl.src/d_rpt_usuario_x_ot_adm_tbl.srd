@@ -1,0 +1,46 @@
+﻿$PBExportHeader$d_rpt_usuario_x_ot_adm_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=416 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes name=ot_adm dbname="ot_adm_usuario.ot_adm" )
+ column=(type=char(40) updatewhereclause=yes name=ot_administracion_descripcion dbname="ot_administracion.descripcion" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="ot_adm_usuario.cod_usr" )
+ column=(type=char(60) updatewhereclause=yes name=usuario_nombre dbname="usuario.nombre" )
+ column=(type=char(1) updatewhereclause=yes name=aprobador dbname="aprobador" values="No	N/Autorizado	A/Comite	C/" )
+ column=(type=char(1) updatewhereclause=yes name=conform_os dbname="conform_os" values="No	0/Si	1/" )
+ retrieve="select oa.ot_adm, ot.descripcion, oa.cod_usr, u.nombre, 
+		 NVL(oa.flag_aprobador,'N') as aprobador, NVL(oa.flag_conformidad_os,0) as conform_os
+from ot_adm_usuario oa, ot_administracion ot, usuario u 
+where oa.ot_adm=ot.ot_adm and
+      oa.cod_usr=u.cod_usr and 
+      u.flag_estado<>'0' 
+order by oa.ot_adm, oa.cod_usr" )
+bitmap(band=header filename="" x="151" y="12" height="172" width="315" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="151" y="208" height="40" width="315" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="151" y="272" height="40" width="315" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ot Adm" border="2" color="33554432" x="146" y="348" height="56" width="302" html.valueishtml="0"  name=ot_adm_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="MAESTRO DE ADMINISTRADORES DE OT" border="0" color="33554432" x="768" y="64" height="64" width="1691" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Y USUARIOS ANEXADOS" border="0" color="33554432" x="768" y="160" height="64" width="1691" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2807" y="16" height="40" width="256" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="2807" y="148" height="40" width="256" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="2807" y="80" height="40" width="256" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripción OT_ADM" border="2" color="33554432" x="453" y="348" height="56" width="1088" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Usuario" border="2" color="33554432" x="1760" y="348" height="56" width="795" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Aprobador" border="2" color="33554432" x="2560" y="348" height="56" width="256" html.valueishtml="0"  name=flag_aprobador_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Conform.OS" border="2" color="33554432" x="2821" y="348" height="56" width="288" html.valueishtml="0"  name=flag_conformidad_os_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Usuario" border="2" color="33554432" x="1545" y="348" height="56" width="210" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="146" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=ot_adm visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="453" y="4" height="56" width="1088" format="[general]" html.valueishtml="0"  name=ot_administracion_descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1760" y="4" height="56" width="795" format="[general]" html.valueishtml="0"  name=usuario_nombre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1550" y="4" height="56" width="201" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="2560" y="4" height="56" width="256" format="[general]" html.valueishtml="0"  name=aprobador visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="33554432" x="2821" y="4" height="56" width="288" format="[general]" html.valueishtml="0"  name=conform_os visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="ot_adm	ot_administracion_descripcion")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

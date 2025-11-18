@@ -1,0 +1,40 @@
+﻿$PBExportHeader$d_rpt_saldo_codrel_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=424 color="536870912" )
+summary(height=92 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="doc_pendientes_cta_cte.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=saldo_dol dbname="saldo_dol" )
+ retrieve="select d.cod_relacion, p.nom_proveedor, sum(d.saldo_dol*d.factor) as saldo_dol
+from doc_pendientes_cta_cte d, grupo_proveedor_rel gpr, proveedor p
+where (d.cod_relacion = p.proveedor) and
+      (d.cod_relacion = gpr.proveedor) and
+      (p.proveedor = gpr.proveedor) and
+      (gpr.grupo = :as_grupo_rel) and
+      d.cnta_ctbl is not null and
+      ((d.cod_moneda = (SELECT cod_soles from logparam where reckey='1') AND d.sldo_sol > 0) OR 
+       (d.cod_moneda = (SELECT cod_dolares from logparam where reckey='1') AND d.saldo_dol > 0) ) 
+group by d.cod_relacion, p.nom_proveedor" arguments=(("as_grupo_rel", string)) )
+bitmap(band=header filename="" x="101" y="24" height="196" width="357" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="101" y="240" height="48" width="357" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cod.relación" border="2" color="33554432" x="242" y="352" height="64" width="329" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Razón social" border="2" color="33554432" x="585" y="352" height="64" width="1312" html.valueishtml="0"  name=proveedor_nom_proveedor_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Saldo US$" border="2" color="33554432" x="1911" y="352" height="64" width="443" html.valueishtml="0"  name=saldo_dol_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="2126" y="148" height="48" width="357" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="2126" y="84" height="48" width="357" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2126" y="20" height="48" width="357" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="RESUMEN DE CTA.CTE. X ADMINISTRAR" border="0" color="33554432" x="539" y="52" height="64" width="1463" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="539" y="152" height="64" width="1463" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(saldo_dol for all)"border="0" color="33554432" x="1911" y="16" height="64" width="443" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total US%:" border="0" color="0" x="1147" y="16" height="64" width="494" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="242" y="8" height="64" width="329" format="[general]" html.valueishtml="0"  name=cod_relacion pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="585" y="8" height="64" width="1312" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="33554432" x="1911" y="8" height="64" width="443" format="#,##0.00" html.valueishtml="0"  name=saldo_dol pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

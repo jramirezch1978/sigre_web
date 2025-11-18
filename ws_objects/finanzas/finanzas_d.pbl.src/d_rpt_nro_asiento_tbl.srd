@@ -1,0 +1,130 @@
+﻿$PBExportHeader$d_rpt_nro_asiento_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=604 color="536870912" )
+summary(height=116 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=origen dbname="cntbl_asiento.origen" )
+ column=(type=decimal(0) updatewhereclause=yes name=ano dbname="cntbl_asiento.ano" )
+ column=(type=decimal(0) updatewhereclause=yes name=mes dbname="cntbl_asiento.mes" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_libro dbname="cntbl_asiento.nro_libro" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_asiento dbname="cntbl_asiento.nro_asiento" )
+ column=(type=datetime updatewhereclause=yes name=fecha_cntbl dbname="cntbl_asiento.fecha_cntbl" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="cntbl_asiento.cod_usr" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntbl_asiento_det_item dbname="cntbl_asiento_det.item" )
+ column=(type=char(10) updatewhereclause=yes name=cntbl_asiento_det_cnta_ctbl dbname="cntbl_asiento_det.cnta_ctbl" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="cntbl_asiento_det.cencos" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntbl_asiento_det.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=cntbl_asiento_det_tipo_docref1 dbname="cntbl_asiento_det.tipo_docref1" )
+ column=(type=char(15) updatewhereclause=yes name=cntbl_asiento_det_nro_docref1 dbname="cntbl_asiento_det.nro_docref1" )
+ column=(type=char(12) updatewhereclause=yes name=centro_benef dbname="cntbl_asiento_det.centro_benef" )
+ column=(type=char(60) updatewhereclause=yes name=cntbl_asiento_det_det_glosa dbname="cntbl_asiento_det.det_glosa" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=debe_sol dbname="debe_sol" )
+ column=(type=number updatewhereclause=yes name=haber_sol dbname="haber_sol" )
+ column=(type=number updatewhereclause=yes name=debe_dol dbname="debe_dol" )
+ column=(type=number updatewhereclause=yes name=haber_dol dbname="haber_dol" )
+ retrieve="  SELECT ca.ORIGEN,   
+         ca.ANO,   
+         ca.MES,   
+         ca.NRO_LIBRO,   
+         ca.NRO_ASIENTO,   
+         ca.FECHA_CNTBL,  
+         ca.COD_USR,            
+         cd.ITEM,   
+         cd.CNTA_CTBL, 
+         cd.CENCOS,   
+         cd.COD_RELACION,   
+         cd.TIPO_DOCREF1,   
+         cd.NRO_DOCREF1,   
+         cd.CENTRO_BENEF,   
+         cd.DET_GLOSA,
+         p.NOM_PROVEEDOR, 
+         decode(cd.flag_debhab,'D',cd.imp_movsol,0) as debe_sol, 
+         decode(cd.flag_debhab,'H',cd.imp_movsol,0) as haber_sol, 
+         decode(cd.flag_debhab,'D',cd.imp_movdol,0) as debe_dol, 
+         decode(cd.flag_debhab,'H',cd.imp_movdol,0) as haber_dol           
+    FROM CNTBL_ASIENTO ca,   
+         CNTBL_ASIENTO_DET cd,   
+         PROVEEDOR p
+   WHERE ( cd.cod_relacion = p.proveedor (+)) and  
+         ( cd.ORIGEN = ca.ORIGEN ) and  
+         ( cd.ANO = ca.ANO ) and  
+         ( cd.MES = ca.MES ) and  
+         ( cd.NRO_LIBRO = ca.NRO_LIBRO ) and  
+         ( cd.NRO_ASIENTO = ca.NRO_ASIENTO ) and  
+         ( ( ca.ORIGEN = :as_origen ) AND  
+         ( ca.ANO = :an_ano ) AND  
+         ( ca.MES = :an_mes ) AND  
+         ( ca.NRO_LIBRO = :an_libro ) AND  
+         ( ca.NRO_ASIENTO = :an_asiento ) )    
+ORDER BY ca.ORIGEN, ca.ANO, ca.MES, ca.NRO_LIBRO, ca.NRO_ASIENTO, cd.ITEM 
+" arguments=(("as_origen", string),("an_ano", number),("an_mes", number),("an_libro", number),("an_asiento", number)) )
+text(band=header alignment="2" text="Nro." border="2" color="0" x="9" y="472" height="56" width="114" html.valueishtml="0"  name=item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cuenta" border="2" color="0" x="133" y="472" height="56" width="261" html.valueishtml="0"  name=cnta_cntbl_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="DETALLE DEL ASIENTO CONTABLE" border="1" color="0" x="1531" y="104" height="80" width="1463" html.valueishtml="0"  name=t_32 visible="1"  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="0" x="4041" y="40" height="84" width="544" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="gs_user" border="0" color="0" x="4302" y="124" height="56" width="283" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="3835" y="212" height="72" width="750" format="dd/mm/yyyy    hh:mm:ss" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="S O L E S" border="2" color="0" x="3410" y="472" height="56" width="576" html.valueishtml="0"  name=soles_debe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="D O L A R E S" border="2" color="0" x="3995" y="472" height="56" width="576" html.valueishtml="0"  name=dolar_debe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Item" border="2" color="0" x="9" y="536" height="56" width="114" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Documento" border="2" color="0" x="2153" y="472" height="56" width="361" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Haber" border="2" color="0" x="4293" y="536" height="56" width="279" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Debe" border="2" color="0" x="3995" y="536" height="56" width="288" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Haber" border="2" color="0" x="3707" y="536" height="56" width="279" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Debe" border="2" color="0" x="3410" y="536" height="56" width="288" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Detalle" border="2" color="0" x="2523" y="472" height="56" width="878" html.valueishtml="0"  name=glosa_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Glosa" border="2" color="0" x="2523" y="536" height="56" width="878" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Número" border="2" color="0" x="2277" y="536" height="56" width="238" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Tipo" border="2" color="0" x="2153" y="536" height="56" width="114" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="1147" y="472" height="56" width="997" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Proveedor / Cliente" border="2" color="0" x="1147" y="536" height="56" width="997" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Centro" border="2" color="0" x="402" y="472" height="56" width="256" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="919" y="472" height="56" width="219" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Relación" border="2" color="0" x="919" y="536" height="56" width="219" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Centro" border="2" color="0" x="667" y="472" height="56" width="242" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Contable" border="2" color="0" x="133" y="536" height="56" width="261" html.valueishtml="0"  name=cntbl_asiento_det_cnta_ctbl_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Costo" border="2" color="0" x="402" y="536" height="56" width="256" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Benefic" border="2" color="0" x="667" y="536" height="56" width="242" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Fecha Documento" border="0" color="0" x="9" y="400" height="56" width="471" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=6 alignment="0" tabsequence=32766 border="0" color="0" x="494" y="400" height="56" width="384" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_cntbl visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Usuario" border="0" color="0" x="969" y="400" height="56" width="206" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1189" y="400" height="56" width="306" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Año" border="2" color="0" x="1696" y="240" height="64" width="187" html.valueishtml="0"  name=ano_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1897" y="240" height="64" width="165" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Mes" border="2" color="0" x="2085" y="240" height="64" width="151" html.valueishtml="0"  name=mes_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="0" color="0" x="2249" y="240" height="64" width="91" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Libro" border="2" color="0" x="2359" y="240" height="64" width="183" html.valueishtml="0"  name=nro_libro_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="0" x="2555" y="240" height="64" width="105" format="[general]" html.valueishtml="0"  name=nro_libro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Asiento" border="2" color="0" x="2674" y="240" height="64" width="265" html.valueishtml="0"  name=nro_asiento_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2953" y="240" height="64" width="219" format="[general]" html.valueishtml="0"  name=nro_asiento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Origen" border="2" color="0" x="1344" y="240" height="64" width="233" html.valueishtml="0"  name=origen_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="1586" y="240" height="64" width="91" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="48" width="114" format="[general]" html.valueishtml="0"  name=cntbl_asiento_det_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="133" y="4" height="48" width="261" format="[general]" html.valueishtml="0"  name=cntbl_asiento_det_cnta_ctbl visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="1" tabsequence=32766 border="0" color="0" x="4293" y="4" height="48" width="279" format="###,###.00" html.valueishtml="0"  name=haber_dol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="1" tabsequence=32766 border="0" color="0" x="3995" y="4" height="48" width="288" format="###,###.00" html.valueishtml="0"  name=debe_dol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="1" tabsequence=32766 border="0" color="0" x="3707" y="4" height="48" width="279" format="###,###.00" html.valueishtml="0"  name=haber_sol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="1" tabsequence=32766 border="0" color="0" x="3410" y="4" height="48" width="288" format="###,###.00" html.valueishtml="0"  name=debe_sol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="2523" y="4" height="48" width="878" format="[general]" html.valueishtml="0"  name=cntbl_asiento_det_det_glosa visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="2277" y="4" height="48" width="238" format="[general]" html.valueishtml="0"  name=cntbl_asiento_det_nro_docref1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="2153" y="4" height="48" width="114" format="[general]" html.valueishtml="0"  name=cntbl_asiento_det_tipo_docref1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="1147" y="4" height="48" width="997" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="402" y="4" height="48" width="256" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="919" y="4" height="48" width="219" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="667" y="4" height="48" width="242" format="[general]" html.valueishtml="0"  name=centro_benef visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+rectangle(band=summary x="5" y="24" height="84" width="4590"  name=r_1 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="0" )
+text(band=summary alignment="2" text="T  O  T  A  L     G  E  N  E  R  A  L" border="0" color="0" x="1362" y="44" height="44" width="704" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(haber_dol for all) "border="0" color="0" x="4293" y="40" height="48" width="279" format="###,###.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(debe_dol for all)"border="0" color="0" x="3995" y="40" height="48" width="288" format="###,###.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(haber_sol for all)"border="0" color="0" x="3707" y="40" height="48" width="279" format="###,###.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(debe_sol for all) "border="0" color="0" x="3410" y="40" height="48" width="288" format="###,###.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="gs_logo" x="32" y="56" height="244" width="507" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="gs_empresa" border="0" color="0" x="32" y="304" height="68" width="507" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-11" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

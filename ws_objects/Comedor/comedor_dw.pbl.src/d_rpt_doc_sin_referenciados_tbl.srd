@@ -1,0 +1,68 @@
+﻿$PBExportHeader$d_rpt_doc_sin_referenciados_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=492 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cntas_pagar_det_cod_relacion dbname="cntas_pagar_det.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=cntas_pagar_det_tipo_doc dbname="cntas_pagar_det.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=cntas_pagar_det_nro_doc dbname="cntas_pagar_det.nro_doc" )
+ column=(type=char(60) updatewhereclause=yes name=cntas_pagar_det_descripcion dbname="cntas_pagar_det.descripcion" )
+ column=(type=char(2) updatewhereclause=yes name=cntas_pagar_origen dbname="cntas_pagar.origen" )
+ column=(type=number updatewhereclause=yes name=compute_0006 dbname="compute_0006" )
+ retrieve="select cpd.cod_relacion, cpd.tipo_doc, cpd.nro_doc, cpd.descripcion, cp.origen, sum(cpd.importe)
+from (select c2.tipo_doc, c2.nro_doc, c2.cod_relacion
+    from com_compr_pago_det c2
+    minus
+    select cp.tipo_doc, cp.nro_doc, cp.cod_relacion
+    from cntbl_asiento_det b,
+         cntbl_asiento     a,
+         cntas_pagar       cp
+    where a.origen = b.origen
+      and a.ano    = b.ano
+      and a.mes    = b.mes
+      and a.nro_libro = b.nro_libro
+      and a.nro_asiento = b.nro_asiento
+      and a.origen = cp.origen
+      and a.ano    = cp.ano
+      and a.mes    = cp.mes
+      and a.nro_libro = cp.nro_libro
+      and a.nro_asiento = cp.nro_asiento
+      and b.cnta_ctbl = :as_cuenta
+      and b.flag_debhab = 'D'
+      and a.flag_estado <> '0') a1,
+    cntas_pagar             cp,
+    cntas_pagar_det             cpd
+where a1.cod_relacion = cpd.cod_relacion
+  and a1.tipo_doc     = cpd.tipo_doc
+  and a1.nro_doc      = cpd.nro_doc  
+  and cp.cod_relacion = cpd.cod_relacion
+  and cp.tipo_doc     = cpd.tipo_doc
+  and cp.nro_doc      = cpd.nro_doc
+  and cp.ano = :as_year
+group by cpd.cod_relacion, cpd.tipo_doc, cpd.nro_doc, cpd.descripcion, cp.origen
+order by cp.origen" arguments=(("as_year", string),("as_cuenta", string)) )
+bitmap(band=header filename="" x="23" y="28" height="252" width="498" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Codigo de Relacion" border="2" color="16777215" x="242" y="380" height="108" width="265" html.valueishtml="0"  name=cntas_pagar_det_cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Tipo de Documento" border="2" color="16777215" x="512" y="380" height="108" width="297" html.valueishtml="0"  name=cntas_pagar_det_tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Descripcion" border="2" color="16777215" x="1143" y="380" height="108" width="1682" html.valueishtml="0"  name=cntas_pagar_det_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Nro. Documento" border="2" color="16777215" x="814" y="380" height="108" width="325" html.valueishtml="0"  name=cntas_pagar_det_nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Origen" border="2" color="16777215" x="2830" y="380" height="108" width="183" html.valueishtml="0"  name=cntas_pagar_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Importe" border="2" color="16777215" x="3017" y="380" height="108" width="297" html.valueishtml="0"  name=cntas_pagar_det_importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="3022" y="16" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="2921" y="96" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="3177" y="184" height="56" width="261" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Reporte de Comprobantes de pago amarrados a un parte de costos en el Modulo de Comedores que presentan diferencias en su asiento contable ' + ' para el año ' + as_year"border="4" color="0" x="695" y="96" height="232" width="2112" format="[general]" html.valueishtml="0"  name=page_2 visible="1"  font.face="Rockwell" font.height="-11" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1134" y="4" height="48" width="1687" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_descripcion visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2825" y="4" height="48" width="192" format="[general]" html.valueishtml="0"  name=cntas_pagar_origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=0 border="2" color="0" x="3031" y="4" height="48" width="302" format="#,###,##0.00" html.valueishtml="0"  name=compute_0006 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+compute(band=summary alignment="0" expression="sum(compute_0006 for all)"border="2" color="0" x="3031" y="4" height="60" width="302" format="#,###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="242" y="4" height="48" width="261" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="507" y="4" height="48" width="302" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="814" y="4" height="48" width="315" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,736 @@
+﻿$PBExportHeader$m_main.srm
+forward
+global type m_main from menu
+end type
+type m_file from menu within m_main
+end type
+type m_exit from menu within m_file
+end type
+type m_file from menu within m_main
+m_exit m_exit
+end type
+type m_profiles from menu within m_main
+end type
+type m_newprofile from menu within m_profiles
+end type
+type m_connect from menu within m_profiles
+end type
+type m_disconnect from menu within m_profiles
+end type
+type m_stopaction from menu within m_profiles
+end type
+type m_- from menu within m_profiles
+end type
+type m_profiles from menu within m_main
+m_newprofile m_newprofile
+m_connect m_connect
+m_disconnect m_disconnect
+m_stopaction m_stopaction
+m_- m_-
+end type
+type m_local from menu within m_main
+end type
+type m_uploadfiles from menu within m_local
+end type
+type m_uploaddeletefiles from menu within m_local
+end type
+type m_refreshlocal from menu within m_local
+end type
+type m_deletelocalfiles from menu within m_local
+end type
+type m_gotodirectory from menu within m_local
+end type
+type m_mydocuments from menu within m_local
+end type
+type m_cdrive from menu within m_local
+end type
+type m_local from menu within m_main
+m_uploadfiles m_uploadfiles
+m_uploaddeletefiles m_uploaddeletefiles
+m_refreshlocal m_refreshlocal
+m_deletelocalfiles m_deletelocalfiles
+m_gotodirectory m_gotodirectory
+m_mydocuments m_mydocuments
+m_cdrive m_cdrive
+end type
+type m_remote from menu within m_main
+end type
+type m_downloadfiles from menu within m_remote
+end type
+type m_refresh from menu within m_remote
+end type
+type m_deletefiles from menu within m_remote
+end type
+type m_changedirectory from menu within m_remote
+end type
+type m_home from menu within m_remote
+end type
+type m_createdirectory from menu within m_remote
+end type
+type m_deletedirectories from menu within m_remote
+end type
+type m_sendcommand from menu within m_remote
+end type
+type m_remote from menu within m_main
+m_downloadfiles m_downloadfiles
+m_refresh m_refresh
+m_deletefiles m_deletefiles
+m_changedirectory m_changedirectory
+m_home m_home
+m_createdirectory m_createdirectory
+m_deletedirectories m_deletedirectories
+m_sendcommand m_sendcommand
+end type
+type m_help from menu within m_main
+end type
+type m_about from menu within m_help
+end type
+type m_help from menu within m_main
+m_about m_about
+end type
+global type m_main from menu
+m_file m_file
+m_profiles m_profiles
+m_local m_local
+m_remote m_remote
+m_help m_help
+end type
+end forward
+
+global type m_main from menu
+m_file m_file
+m_profiles m_profiles
+m_local m_local
+m_remote m_remote
+m_help m_help
+end type
+global m_main m_main
+
+type variables
+n_dynamicitem in_dyn
+
+end variables
+
+forward prototypes
+public subroutine mf_status (boolean ab_enabled)
+public subroutine mf_stopaction (boolean ab_enabled)
+end prototypes
+
+public subroutine mf_status (boolean ab_enabled);m_local.m_uploadfiles.Enabled	= ab_enabled
+m_local.m_uploadfiles.ToolbarItemVisible = ab_enabled
+m_local.m_uploaddeletefiles.Enabled	= ab_enabled
+
+m_remote.Enabled	= ab_enabled
+m_remote.m_refresh.ToolbarItemVisible = ab_enabled
+m_remote.m_downloadfiles.ToolbarItemVisible = ab_enabled
+
+m_profiles.m_connect.Visible = Not ab_enabled
+m_profiles.m_connect.ToolbarItemVisible = Not ab_enabled
+m_profiles.m_disconnect.Visible = ab_enabled
+m_profiles.m_disconnect.ToolbarItemVisible = ab_enabled
+
+end subroutine
+
+public subroutine mf_stopaction (boolean ab_enabled);m_profiles.m_stopaction.Visible = ab_enabled
+m_profiles.m_stopaction.ToolbarItemVisible = ab_enabled
+
+end subroutine
+
+on m_main.create
+m_main=this
+call super::create
+this.m_file=create m_file
+this.m_profiles=create m_profiles
+this.m_local=create m_local
+this.m_remote=create m_remote
+this.m_help=create m_help
+this.Item[UpperBound(this.Item)+1]=this.m_file
+this.Item[UpperBound(this.Item)+1]=this.m_profiles
+this.Item[UpperBound(this.Item)+1]=this.m_local
+this.Item[UpperBound(this.Item)+1]=this.m_remote
+this.Item[UpperBound(this.Item)+1]=this.m_help
+end on
+
+on m_main.destroy
+call super::destroy
+destroy(this.m_file)
+destroy(this.m_profiles)
+destroy(this.m_local)
+destroy(this.m_remote)
+destroy(this.m_help)
+end on
+
+type m_file from menu within m_main
+m_exit m_exit
+end type
+
+on m_file.create
+call super::create
+this.text = "File"
+this.m_exit=create m_exit
+this.Item[UpperBound(this.Item)+1]=this.m_exit
+end on
+
+on m_file.destroy
+call super::destroy
+destroy(this.m_exit)
+end on
+
+type m_exit from menu within m_file
+end type
+
+event clicked;Close(ParentWindow)
+
+end event
+
+on m_exit.create
+call super::create
+this.text = "Exit~tAlt+F4"
+this.shortcut = 627
+this.microhelp = "Exit the program"
+this.toolbaritemname = "Exit!"
+this.toolbaritemtext = "Exit,Exit the program"
+this.toolbaritemorder = 999
+end on
+
+on m_exit.destroy
+call super::destroy
+end on
+
+type m_profiles from menu within m_main
+m_newprofile m_newprofile
+m_connect m_connect
+m_disconnect m_disconnect
+m_stopaction m_stopaction
+m_- m_-
+end type
+
+on m_profiles.create
+call super::create
+this.text = "Profiles"
+this.m_newprofile=create m_newprofile
+this.m_connect=create m_connect
+this.m_disconnect=create m_disconnect
+this.m_stopaction=create m_stopaction
+this.m_-=create m_-
+this.Item[UpperBound(this.Item)+1]=this.m_newprofile
+this.Item[UpperBound(this.Item)+1]=this.m_connect
+this.Item[UpperBound(this.Item)+1]=this.m_disconnect
+this.Item[UpperBound(this.Item)+1]=this.m_stopaction
+this.Item[UpperBound(this.Item)+1]=this.m_-
+end on
+
+on m_profiles.destroy
+call super::destroy
+destroy(this.m_newprofile)
+destroy(this.m_connect)
+destroy(this.m_disconnect)
+destroy(this.m_stopaction)
+destroy(this.m_-)
+end on
+
+type m_newprofile from menu within m_profiles
+end type
+
+event clicked;// Add a new server profile
+
+// call window function to perform action
+ParentWindow.Dynamic wf_DynamicMenus(0)
+
+end event
+
+on m_newprofile.create
+call super::create
+this.text = "New Profile"
+this.microhelp = "Create a new profile"
+this.toolbaritemname = "New!"
+this.toolbaritemtext = "New,Create a new profile"
+end on
+
+on m_newprofile.destroy
+call super::destroy
+end on
+
+type m_connect from menu within m_profiles
+end type
+
+event clicked;// call window function to perform action
+ParentWindow.Dynamic wf_Connect()
+
+end event
+
+on m_connect.create
+call super::create
+this.text = "Connect"
+this.microhelp = "Connect to favorite profile"
+this.toolbaritemname = "Watcom!"
+this.toolbaritemtext = "Connect,Connect to favorite profile"
+end on
+
+on m_connect.destroy
+call super::destroy
+end on
+
+type m_disconnect from menu within m_profiles
+end type
+
+event clicked;// call window function to perform action
+ParentWindow.Dynamic wf_Disconnect()
+
+end event
+
+on m_disconnect.create
+call super::create
+this.text = "Disconnect"
+this.microhelp = "Disconnect from the remote server"
+this.toolbaritemname = "Close!"
+this.toolbaritemtext = "Disconnect,Disconnect from the remote server"
+end on
+
+on m_disconnect.destroy
+call super::destroy
+end on
+
+type m_stopaction from menu within m_profiles
+end type
+
+on m_stopaction.create
+call super::create
+this.visible = false
+this.text = "Stop Action"
+this.microhelp = "Stop the current FTP action"
+this.toolbaritemvisible = false
+this.toolbaritemname = "RetrieveCancel!"
+this.toolbaritemtext = "Stop,Stop the current FTP action"
+end on
+
+on m_stopaction.destroy
+call super::destroy
+end on
+
+event clicked;// call window function to perform action
+ParentWindow.Dynamic wf_StopAction()
+
+end event
+
+type m_- from menu within m_profiles
+end type
+
+on m_-.create
+call super::create
+this.text = "-"
+end on
+
+on m_-.destroy
+call super::destroy
+end on
+
+type m_local from menu within m_main
+m_uploadfiles m_uploadfiles
+m_uploaddeletefiles m_uploaddeletefiles
+m_refreshlocal m_refreshlocal
+m_deletelocalfiles m_deletelocalfiles
+m_gotodirectory m_gotodirectory
+m_mydocuments m_mydocuments
+m_cdrive m_cdrive
+end type
+
+on m_local.create
+call super::create
+this.text = "Local"
+this.m_uploadfiles=create m_uploadfiles
+this.m_uploaddeletefiles=create m_uploaddeletefiles
+this.m_refreshlocal=create m_refreshlocal
+this.m_deletelocalfiles=create m_deletelocalfiles
+this.m_gotodirectory=create m_gotodirectory
+this.m_mydocuments=create m_mydocuments
+this.m_cdrive=create m_cdrive
+this.Item[UpperBound(this.Item)+1]=this.m_uploadfiles
+this.Item[UpperBound(this.Item)+1]=this.m_uploaddeletefiles
+this.Item[UpperBound(this.Item)+1]=this.m_refreshlocal
+this.Item[UpperBound(this.Item)+1]=this.m_deletelocalfiles
+this.Item[UpperBound(this.Item)+1]=this.m_gotodirectory
+this.Item[UpperBound(this.Item)+1]=this.m_mydocuments
+this.Item[UpperBound(this.Item)+1]=this.m_cdrive
+end on
+
+on m_local.destroy
+call super::destroy
+destroy(this.m_uploadfiles)
+destroy(this.m_uploaddeletefiles)
+destroy(this.m_refreshlocal)
+destroy(this.m_deletelocalfiles)
+destroy(this.m_gotodirectory)
+destroy(this.m_mydocuments)
+destroy(this.m_cdrive)
+end on
+
+type m_uploadfiles from menu within m_local
+event create ( )
+event destroy ( )
+end type
+
+on m_uploadfiles.create
+call super::create
+this.text = "Upload Files~tAlt+U"
+this.shortcut = 597
+this.microhelp = "Upload the selected files"
+this.toolbaritemvisible = false
+this.toolbaritemname = "Custom033!"
+this.toolbaritemtext = "Upload,Upload the selected files"
+end on
+
+on m_uploadfiles.destroy
+call super::destroy
+end on
+
+event clicked;gw_frame.uo_local.of_menufunction(this.ClassName())
+
+end event
+
+type m_uploaddeletefiles from menu within m_local
+event create ( )
+event destroy ( )
+end type
+
+on m_uploaddeletefiles.create
+call super::create
+this.text = "Upload/Delete Files~tAlt+D"
+this.shortcut = 580
+this.microhelp = "Upload the selected files and then delete from local"
+this.toolbaritemvisible = false
+end on
+
+on m_uploaddeletefiles.destroy
+call super::destroy
+end on
+
+event clicked;gw_frame.uo_local.of_menufunction(this.ClassName())
+
+end event
+
+type m_refreshlocal from menu within m_local
+end type
+
+event clicked;gw_frame.uo_local.of_menufunction(this.ClassName())
+
+end event
+
+on m_refreshlocal.create
+call super::create
+this.text = "Refresh~tAlt+R"
+this.shortcut = 594
+this.microhelp = "Refresh the current directory"
+end on
+
+on m_refreshlocal.destroy
+call super::destroy
+end on
+
+type m_deletelocalfiles from menu within m_local
+end type
+
+event clicked;gw_frame.uo_local.of_menufunction(this.ClassName())
+
+end event
+
+on m_deletelocalfiles.create
+call super::create
+this.text = "Delete Files~tAlt+Del"
+this.shortcut = 558
+this.microhelp = "Delete the selected files"
+end on
+
+on m_deletelocalfiles.destroy
+call super::destroy
+end on
+
+type m_gotodirectory from menu within m_local
+end type
+
+event clicked;gw_frame.uo_local.of_menufunction(this.ClassName())
+
+end event
+
+on m_gotodirectory.create
+call super::create
+this.text = "Goto Directory~tAlt+G"
+this.shortcut = 583
+this.microhelp = "Goto pre-defined directories"
+this.toolbaritemname = "Open!"
+this.toolbaritemtext = "Goto,Goto pre-defined directories"
+end on
+
+on m_gotodirectory.destroy
+call super::destroy
+end on
+
+type m_mydocuments from menu within m_local
+end type
+
+event clicked;gw_frame.uo_local.of_menufunction(this.ClassName())
+
+end event
+
+on m_mydocuments.create
+call super::create
+this.text = "My Documents~tAlt+M"
+this.shortcut = 589
+this.microhelp = "Goto My Documents"
+end on
+
+on m_mydocuments.destroy
+call super::destroy
+end on
+
+type m_cdrive from menu within m_local
+end type
+
+event clicked;gw_frame.uo_local.of_menufunction(this.ClassName())
+
+end event
+
+on m_cdrive.create
+call super::create
+this.text = "C Drive~tAlt+C"
+this.shortcut = 579
+this.microhelp = "Goto C Drive Root"
+end on
+
+on m_cdrive.destroy
+call super::destroy
+end on
+
+type m_remote from menu within m_main
+m_downloadfiles m_downloadfiles
+m_refresh m_refresh
+m_deletefiles m_deletefiles
+m_changedirectory m_changedirectory
+m_home m_home
+m_createdirectory m_createdirectory
+m_deletedirectories m_deletedirectories
+m_sendcommand m_sendcommand
+end type
+
+on m_remote.create
+call super::create
+this.text = "Remote"
+this.m_downloadfiles=create m_downloadfiles
+this.m_refresh=create m_refresh
+this.m_deletefiles=create m_deletefiles
+this.m_changedirectory=create m_changedirectory
+this.m_home=create m_home
+this.m_createdirectory=create m_createdirectory
+this.m_deletedirectories=create m_deletedirectories
+this.m_sendcommand=create m_sendcommand
+this.Item[UpperBound(this.Item)+1]=this.m_downloadfiles
+this.Item[UpperBound(this.Item)+1]=this.m_refresh
+this.Item[UpperBound(this.Item)+1]=this.m_deletefiles
+this.Item[UpperBound(this.Item)+1]=this.m_changedirectory
+this.Item[UpperBound(this.Item)+1]=this.m_home
+this.Item[UpperBound(this.Item)+1]=this.m_createdirectory
+this.Item[UpperBound(this.Item)+1]=this.m_deletedirectories
+this.Item[UpperBound(this.Item)+1]=this.m_sendcommand
+end on
+
+on m_remote.destroy
+call super::destroy
+destroy(this.m_downloadfiles)
+destroy(this.m_refresh)
+destroy(this.m_deletefiles)
+destroy(this.m_changedirectory)
+destroy(this.m_home)
+destroy(this.m_createdirectory)
+destroy(this.m_deletedirectories)
+destroy(this.m_sendcommand)
+end on
+
+type m_downloadfiles from menu within m_remote
+event create ( )
+event destroy ( )
+end type
+
+on m_downloadfiles.create
+call super::create
+this.text = "Download Files~tCtrl+D"
+this.shortcut = 324
+this.microhelp = "Download the selected files"
+this.toolbaritemvisible = false
+this.toolbaritemname = "Custom034!"
+this.toolbaritemtext = "Download,Download the selected files"
+end on
+
+on m_downloadfiles.destroy
+call super::destroy
+end on
+
+event clicked;gw_frame.uo_remote.of_menufunction(this.ClassName())
+
+end event
+
+type m_refresh from menu within m_remote
+end type
+
+event clicked;gw_frame.uo_remote.of_menufunction(this.ClassName())
+
+end event
+
+on m_refresh.create
+call super::create
+this.text = "Refresh~tCtrl+R"
+this.shortcut = 338
+this.microhelp = "Refresh the current directory"
+this.toolbaritemvisible = false
+this.toolbaritemname = "Continue!"
+this.toolbaritemtext = "Refresh,Refresh the current directory"
+end on
+
+on m_refresh.destroy
+call super::destroy
+end on
+
+type m_deletefiles from menu within m_remote
+event create ( )
+event destroy ( )
+end type
+
+on m_deletefiles.create
+call super::create
+this.text = "Delete Files~tCtrl+Del"
+this.shortcut = 302
+this.microhelp = "Delete the selected files"
+end on
+
+on m_deletefiles.destroy
+call super::destroy
+end on
+
+event clicked;gw_frame.uo_remote.of_menufunction(this.ClassName())
+
+end event
+
+type m_changedirectory from menu within m_remote
+event create ( )
+event destroy ( )
+end type
+
+on m_changedirectory.create
+call super::create
+this.text = "Change Directory~tCtrl+G"
+this.shortcut = 327
+this.microhelp = "Open the Change Directory window"
+end on
+
+on m_changedirectory.destroy
+call super::destroy
+end on
+
+event clicked;gw_frame.uo_remote.of_menufunction(this.ClassName())
+
+end event
+
+type m_home from menu within m_remote
+end type
+
+event clicked;gw_frame.uo_remote.of_menufunction(this.ClassName())
+
+end event
+
+on m_home.create
+call super::create
+this.text = "Home~tCtrl+H"
+this.shortcut = 328
+this.microhelp = "Go to the home directory"
+end on
+
+on m_home.destroy
+call super::destroy
+end on
+
+type m_createdirectory from menu within m_remote
+event create ( )
+event destroy ( )
+end type
+
+on m_createdirectory.create
+call super::create
+this.text = "Create Directory"
+this.microhelp = "Open the Create Directory window"
+end on
+
+on m_createdirectory.destroy
+call super::destroy
+end on
+
+event clicked;gw_frame.uo_remote.of_menufunction(this.ClassName())
+
+end event
+
+type m_deletedirectories from menu within m_remote
+event create ( )
+event destroy ( )
+end type
+
+on m_deletedirectories.create
+call super::create
+this.text = "Delete Directories"
+this.microhelp = "Delete the selected directories"
+end on
+
+on m_deletedirectories.destroy
+call super::destroy
+end on
+
+event clicked;gw_frame.uo_remote.of_menufunction(this.ClassName())
+
+end event
+
+type m_sendcommand from menu within m_remote
+end type
+
+event clicked;gw_frame.uo_remote.of_menufunction(this.ClassName())
+
+end event
+
+on m_sendcommand.create
+call super::create
+this.text = "Send Command"
+this.microhelp = "Send an FTP command to the server"
+end on
+
+on m_sendcommand.destroy
+call super::destroy
+end on
+
+type m_help from menu within m_main
+m_about m_about
+end type
+
+on m_help.create
+call super::create
+this.text = "Help"
+this.m_about=create m_about
+this.Item[UpperBound(this.Item)+1]=this.m_about
+end on
+
+on m_help.destroy
+call super::destroy
+destroy(this.m_about)
+end on
+
+type m_about from menu within m_help
+end type
+
+event clicked;Open(w_about)
+
+end event
+
+on m_about.create
+call super::create
+this.text = "About"
+end on
+
+on m_about.destroy
+call super::destroy
+end on
+

@@ -1,0 +1,50 @@
+﻿$PBExportHeader$d_cns_guia_x_cnta_cobrar_grd.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes name=nro_guia dbname="guia.nro_guia" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=almacen dbname="guia.almacen" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_registro dbname="guia.fec_registro" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="guia.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=vale_mov_nro_vale dbname="vale_mov.nro_vale" )
+ column=(type=char(12) updatewhereclause=yes name=articulo_mov_cod_art dbname="articulo_mov.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=articulo_desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_cant_procesada dbname="articulo_mov.cant_procesada" )
+ retrieve="select g.nro_guia, g.almacen, g.fec_registro, g.cod_origen, vs.nro_vale, am.cod_art,  a.desc_art, a.und, am.cant_procesada
+from guia g, guia_vale gv, vale_mov vs, articulo_mov am, articulo a 
+where (g.cod_origen = gv.origen_guia and 
+       g.nro_guia = gv.nro_guia) and 
+      (gv.origen_vale = vs.cod_origen and 
+       gv.nro_vale = vs.nro_vale and 
+       vs.cod_origen = am.cod_origen and
+       vs.nro_vale = am.nro_vale and 
+       vs.flag_estado<>'0')  and 
+      (am.cod_art = a.cod_art ) and 
+      g.tipo_doc=:as_tipo_doc and g.nro_doc=:as_nro_doc " arguments=(("as_tipo_doc", string),("as_nro_doc", string)) )
+text(band=header alignment="2" text="Origen" border="2" color="33554432" x="9" y="8" height="56" width="151" html.valueishtml="0"  name=cod_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Nro Guia" border="2" color="33554432" x="169" y="8" height="56" width="302" html.valueishtml="0"  name=nro_guia_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Almacen" border="2" color="33554432" x="480" y="8" height="56" width="233" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Fec Registro" border="2" color="33554432" x="722" y="8" height="56" width="306" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Nro Vale" border="2" color="33554432" x="1038" y="8" height="56" width="311" html.valueishtml="0"  name=vale_mov_nro_vale_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Artículo" border="2" color="33554432" x="1358" y="8" height="56" width="315" html.valueishtml="0"  name=articulo_mov_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Descripción de Artículo" border="2" color="33554432" x="1682" y="8" height="56" width="1481" html.valueishtml="0"  name=articulo_desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="3173" y="8" height="56" width="114" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cant Procesada" border="2" color="33554432" x="3296" y="8" height="56" width="443" html.valueishtml="0"  name=articulo_mov_cant_procesada_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=4 alignment="2" tabsequence=10 border="0" color="33554432" x="9" y="8" height="76" width="151" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=20 border="0" color="33554432" x="169" y="8" height="76" width="302" format="[general]" html.valueishtml="0"  name=nro_guia visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=30 border="0" color="33554432" x="480" y="8" height="76" width="233" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=40 border="0" color="33554432" x="722" y="8" height="76" width="306" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=50 border="0" color="33554432" x="1038" y="8" height="64" width="311" format="[general]" html.valueishtml="0"  name=vale_mov_nro_vale visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=60 border="0" color="33554432" x="1358" y="8" height="64" width="315" format="[general]" html.valueishtml="0"  name=articulo_mov_cod_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=70 border="0" color="33554432" x="1682" y="8" height="64" width="1481" format="[general]" html.valueishtml="0"  name=articulo_desc_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=80 border="0" color="33554432" x="3173" y="8" height="64" width="114" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=90 border="0" color="33554432" x="3301" y="8" height="64" width="439" format="###,###.00" html.valueishtml="0"  name=articulo_mov_cant_procesada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

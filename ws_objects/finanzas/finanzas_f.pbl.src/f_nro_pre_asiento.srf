@@ -1,0 +1,33 @@
+﻿$PBExportHeader$f_nro_pre_asiento.srf
+global type f_nro_pre_asiento from function_object
+end type
+
+forward prototypes
+global function long f_nro_pre_asiento (long al_nro_libro)
+end prototypes
+
+global function long f_nro_pre_asiento (long al_nro_libro);
+//*************FUNCION RETORNA NRO PRE ASIENTO*************//
+
+Long ll_nro_prov
+
+SELECT C.NUM_PROVISIONAL
+INTO :ll_nro_prov
+FROM CNTBL_LIBRO C 
+WHERE C.NRO_LIBRO =:al_nro_libro
+FOR UPDATE ;
+
+If isnull(ll_nro_prov) or ll_nro_prov <= 0 Then
+	MessageBox('AVISO SISTEMA','El Nro Pre - Asiento debe ser > 0, '&
+              +'Verifique si existe el Nro de Libro ')
+End If 
+
+UPDATE  CNTBL_LIBRO C
+SET     C.NUM_PROVISIONAL = :ll_nro_prov + 1
+WHERE   C.NRO_LIBRO =: al_nro_libro;
+
+
+
+Return ll_nro_prov
+end function
+

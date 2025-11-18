@@ -1,0 +1,193 @@
+﻿$PBExportHeader$d_contrato_rrhh_contrato_lbl.srd
+release 9;
+datawindow(units=2 timer_interval=60000 color=1073741824 processing=2 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 300 print.margin.right = 300 print.margin.top = 200 print.margin.bottom = 200 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no label.name="Laser-A4 Full Sheet L7167" label.width=8000 label.height=15000 label.rows=1 label.rows.spacing=0 label.columns=1 label.columns.spacing=0 label.topdown=no label.sheet=no label.shape=roundrectangle label.ellipse_height=0 label.ellipse_width=0 )
+detail(height=15000 color="536870912" )
+table(column=(type=char(123) updatewhereclause=yes name=trabajador dbname="trabajador" )
+ column=(type=char(8) updatewhereclause=yes name=maestro_cod_trabajador dbname="maestro.cod_trabajador" )
+ column=(type=char(30) updatewhereclause=yes name=pais_nacionalidad dbname="pais.nacionalidad" )
+ column=(type=datetime updatewhereclause=yes name=maestro_fec_nacimiento dbname="maestro.fec_nacimiento" )
+ column=(type=datetime updatewhereclause=yes name=maestro_fec_ingreso dbname="maestro.fec_ingreso" )
+ column=(type=number updatewhereclause=yes name=edad dbname="edad" )
+ column=(type=char(100) updatewhereclause=yes name=maestro_domicilio dbname="maestro.domicilio" )
+ column=(type=char(30) updatewhereclause=yes name=distrito_desc_distrito dbname="distrito.desc_distrito" )
+ column=(type=char(30) updatewhereclause=yes name=provincia_condado_desc_prov dbname="provincia_condado.desc_prov" )
+ column=(type=char(30) updatewhereclause=yes name=departamento_estado_desc_dpto dbname="departamento_estado.desc_dpto" )
+ column=(type=char(8) updatewhereclause=yes name=maestro_dni dbname="maestro.dni" )
+ column=(type=char(30) updatewhereclause=yes name=tipo_trabajador_desc_tipo_tra dbname="tipo_trabajador.desc_tipo_tra" )
+ column=(type=char(30) updatewhereclause=yes name=area_desc_area dbname="area.desc_area" )
+ column=(type=char(30) updatewhereclause=yes name=seccion_desc_seccion dbname="seccion.desc_seccion" )
+ column=(type=char(10) updatewhereclause=yes name=t_diaomes dbname="t_diaomes" )
+ column=(type=number updatewhereclause=yes name=t_gdiaomes dbname="t_gdiaomes" )
+ column=(type=number updatewhereclause=yes name=compute_0017 dbname="compute_0017" )
+ column=(type=number updatewhereclause=yes name=compute_0018 dbname="compute_0018" )
+ column=(type=char(1) updatewhereclause=yes name=codigo_c dbname="compute_0019" )
+ retrieve="SELECT  distinct
+        m.apel_paterno||' '||m.apel_materno||' '||m.nombre1||' '||m.nombre2 AS ~"TRABAJADOR~",
+		  m.cod_trabajador,
+        P.NACIONALIDAD,
+        m.fec_nacimiento,
+        m.fec_ingreso,
+        USF_OBTIENE_EDAD(m.fec_nacimiento) as edad,
+        M.DIRECCION AS DOMICILIO,
+        d.desc_distrito,
+        pc.desc_PROV,
+        dp.desc_DPTO,
+        m.dni,
+        TP.DESC_TIPO_TRA,
+        A.DESC_AREA,
+        S.DESC_SECCION,
+		  DECODE(tp.tipo_trabajador, 'EMP','mensuales.',
+									  'por día.') as t_diaomes,
+
+		  DECODE(tp.tipo_trabajador, 'EMP',NVL(USF_OBTIENE_GANANCIA_NETA_D(m.cod_trabajador),0),
+									  NVL(USF_OBTIENE_GANANCIA_NETA(m.cod_trabajador),0)) as t_gdiaomes,
+        USF_OBTIENE_MESES_DE_TRABAJO(:ad_f_cese, :ad_f_ingreso),
+        USF_OBTIENE_PERIODO_PRUEBA (:ad_f_ingreso,:ad_f_prueba),
+		  ' '
+             
+                 
+  FROM origen              o,
+       maestro             m,
+       pais                p,
+       tipo_trabajador     tp,
+       area                a,
+       seccion             S,
+       gan_desct_fijo      g,
+       distrito            d,
+       provincia_condado   pc,
+       departamento_estado dp,
+       ciudad 					c
+  
+  WHERE         
+			m.cod_origen      = o.cod_origen
+   and m.cod_origen        = :as_origen
+   and m.cod_area          = a.COD_AREA
+   and m.cod_area          = :as_area
+   and m.cod_seccion       = s.cod_seccion
+   and m.cod_seccion       = :as_seccion
+   and a.COD_AREA          = s.COD_AREA 
+   and m.tipo_trabajador   = tp.tipo_trabajador
+   and m.tipo_trabajador   = :as_tipo_trabajador
+   and m.cod_trabajador    = g.cod_trabajador (+)
+   and d.cod_distr (+)        = m.cod_distr
+   and d.cod_dpto  (+)        = m.cod_dpto
+   and d.cod_pais  (+)        = m.cod_pais
+   and d.cod_prov  (+)        = m.cod_prov
+   and pc.COD_PAIS (+)        = d.COD_PAIS
+   and pc.COD_DPTO (+)        = d.COD_DPTO
+   and pc.COD_PROV (+)        = d.COD_PROV
+   and m.flag_estado       = :as_flag_estado
+   and dp.COD_PAIS   (+)      = pc.COD_PAIS
+   and dp.COD_DPTO   (+)     = pc.COD_DPTO
+   and p.COD_PAIS    (+)      = dp.COD_PAIS
+   and pc.COD_PAIS         = c.COD_PAIS (+)
+   and pc.COD_DPTO         = c.COD_DPTO (+)
+   and pc.COD_PROV         = c.COD_PROV (+)
+  GROUP BY 
+        
+        m.apel_paterno||' '||m.apel_materno||' '||m.nombre1||' '||m.nombre2,
+		  m.cod_trabajador,
+        P.NACIONALIDAD,
+        m.fec_nacimiento,
+        m.fec_ingreso,
+        M.DIRECCION,
+        d.desc_distrito,
+        pc.desc_PROV,
+        dp.desc_DPTO,
+        m.dni,
+        TP.DESC_TIPO_TRA,
+        A.DESC_AREA,
+        S.DESC_SECCION,
+		  DECODE(tp.tipo_trabajador, 'EMP','mensuales.',
+									  'por día.'),
+		  DECODE(tp.tipo_trabajador, 'EMP',NVL(USF_OBTIENE_GANANCIA_NETA_D(m.cod_trabajador),0),
+									  NVL(USF_OBTIENE_GANANCIA_NETA(m.cod_trabajador),0)),
+        g.imp_gan_desc,   
+        USF_OBTIENE_MESES_DE_TRABAJO(:ad_f_cese, :ad_f_ingreso),
+        USF_OBTIENE_PERIODO_PRUEBA (:ad_f_ingreso,:ad_f_prueba)     
+                " arguments=(("as_origen", string),("as_area", string),("as_seccion", string),("as_tipo_trabajador", string),("as_flag_estado", string),("ad_f_ingreso", date),("ad_f_cese", date),("ad_f_prueba", date)) )
+text(band=detail alignment="2" text="EL TRABAJADOR" border="0" color="8388608" x="916" y="10145" height="114" width="1541" html.valueishtml="0"  name=t_33 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="2" text="       CONSERVERA GARRIDO SA                                           C.P.C ANGEL CONTRERAS CASTILLO                              " border="0" color="8388608" x="4645" y="10208" height="302" width="2343" html.valueishtml="0"  name=t_34 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=detail x1="4791" y1="10177" x2="6947" y2="10187"  name=l_1 visible="1" pen.style="0" pen.width="20" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=detail alignment="2" text="Jefe de Relaciones Industriales" border="0" color="8388608" x="5260" y="10437" height="114" width="1812" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=detail x1="1062" y1="10125" x2="2333" y2="10125"  name=l_2 visible="1" pen.style="0" pen.width="20" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="CLÁUSULA CUARTA
+Considerando la naturaleza del sector, es necesario un periodo de adaptación, por lo que EL TRABAJADOR se someterá a un periodo de prueba de " border="0" color="0" x="291" y="4937" height="229" width="7333" html.valueishtml="0"  name=t_16 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="____________mes(es) con arreglo al Articulo 10 del D.S.N° 003-97-TR." border="0" color="0" x="281" y="5177" height="114" width="3302" html.valueishtml="0"  name=t_43 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=detail filename="" x="10" y="20" height="656" width="1218" border="0"  name=p_logo visible="0" )
+text(band=detail alignment="3" text="El presente contrato queda estipulado en los términos y condiciones referidas el las cláusulas siguientes:" border="0" color="0" x="291" y="1822" height="114" width="5083" html.valueishtml="0"  name=t_6 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="Provincia de____________________Departamento de_________________________a quien en adelante se le denominara simplemente EL TRABAJADOR.  " border="0" color="0" x="291" y="1687" height="114" width="7364" html.valueishtml="0"  name=t_37 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="____________de ______años de edad,  con    domicili o  en ____________________________________________________del distrito de_______________________," border="0" color="0" x="291" y="1541" height="114" width="7375" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="le denominará simplemente LA EMPRESA. El Trabajador:________________________________________identificado con DNI_______________De nacionalidad " border="0" color="0" x="312" y="1427" height="114" width="7333" html.valueishtml="0"  name=t_30 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="8388608" x="291" y="1520" height="114" width="614" format="[general]" html.valueishtml="0"  name=pais_nacionalidad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="8388608" x="3031" y="1416" height="104" width="2031" format="[general]" html.valueishtml="0"  name=trabajador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="8388608" x="6104" y="1416" height="104" width="739" format="[general]" html.valueishtml="0"  name=maestro_dni visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="8388608" x="1052" y="1531" height="104" width="291" format="[general]" html.valueishtml="0"  name=edad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="8388608" x="6510" y="1552" height="93" width="1135" format="[general]" html.valueishtml="0"  name=distrito_desc_distrito visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="0" color="8388608" x="927" y="1677" height="104" width="989" format="[general]" html.valueishtml="0"  name=provincia_condado_desc_prov visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="0" color="8388608" x="2822" y="1677" height="104" width="1250" format="[general]" html.valueishtml="0"  name=departamento_estado_desc_dpto visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="CLÁUSULA PRIMERA 
+La EMPRESA es propietaria de instalaciones de procesamiento de productos Hidrobiológicos ubicados en la caleta de Constante distrito de Sechura, " border="0" color="0" x="302" y="2031" height="229" width="7375" html.valueishtml="0"  name=t_13 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="Provincia de Sechura, Departamento de Piura, cuya producción esta supeditada exclusivamente a la utilización como materia prima del recurso " border="0" color="0" x="302" y="2250" height="229" width="7364" html.valueishtml="0"  name=t_27 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="Hidrobiològico  Anchoveta  y otras  especies  cuya   extracción  es  periódica  y  discontinua   en  función  a la  autorización de permiso de pesca  " border="0" color="0" x="302" y="2354" height="114" width="7375" html.valueishtml="0"  name=t_38 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="emanada del MINISTERIO DE PESQUERÍA, así como la ausencia de dicho recurso por condiciones naturales, lo cual determina que la producción de " border="0" color="0" x="302" y="2489" height="114" width="7364" html.valueishtml="0"  name=t_36 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="CLÁUSULA SEGUNDA
+En  consideración a  lo descrito en la cláusula  anterior  LA EMPRESA, contrata a el TRABAJADOR, a fin que se desempeñe como________________________" border="0" color="0" x="291" y="2916" height="229" width="7406" html.valueishtml="0"  name=t_11 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="8388608" x="1552" y="10270" height="239" width="1479" format="[general]" html.valueishtml="0"  name=maestro_dni_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="DNI" border="0" color="8388608" x="1322" y="10270" height="229" width="208" html.valueishtml="0"  name=t_35 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=18 alignment="2" tabsequence=32766 border="0" color="8388608" x="281" y="5156" height="114" width="583" format="[general]" html.valueishtml="0"  name=compute_0018 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="DNI Nº 25587609,  señalando como domicilio legal en la Urb. El Chipe Jr. Los Tallanes  169 - Provincia y Departamento de Piura. a quien en adelante se " border="0" color="0" x="291" y="1281" height="114" width="7354" html.valueishtml="0"  name=t_4 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="de Contribuyente RUC Nº 20105384590, representada por su Jefe de Relaciones Industriales. El Sr. C.P.C ÁNGEL CONTRERAS CASTILLO, identificado con " border="0" color="0" x="291" y="1166" height="114" width="7354" html.valueishtml="0"  name=t_3 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="hasta el_________________________________________________________inclusive. Queda entendido que el TRABAJADOR, goza  del  derecho preferencial en la " border="0" color="0" x="291" y="4010" height="114" width="7437" html.valueishtml="0"  name=t_17 visible="0"  hidesnaked=1  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="2" text="text" border="0" color="8388608" x="677" y="3989" height="114" width="2916" html.valueishtml="0"  name=t_cese visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="0" color="8388608" x="6354" y="3000" height="114" width="1333" format="[general]" html.valueishtml="0"  name=tipo_trabajador_desc_tipo_tra visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="2" text="Periodo:" border="0" color="0" x="6291" y="104" height="156" width="489" html.valueishtml="0"  name=t_49 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="16777215" x="250" y="729" height="156" width="572" format="[general]" html.valueishtml="0"  name=maestro_cod_trabajador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=19 alignment="2" tabsequence=32766 border="4" color="8388608" x="6812" y="104" height="145" width="718" format="[general]" html.valueishtml="0"  name=codigo_c visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="8388608" x="3072" y="1552" height="93" width="2697" format="[general]" html.valueishtml="0"  name=maestro_domicilio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="2" text="." border="0" color="0" x="6979" y="8322" height="104" width="83" html.valueishtml="0"  name=t_42 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="r" border="0" color="16777215" x="864" y="739" height="114" width="166" html.valueishtml="0"  name=t_numero visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="del Decreto Supremo N° 003-97-TR. tendrá una duración de:_____________________computado a partir del                                                                               " border="0" color="0" x="312" y="3864" height="114" width="7343" html.valueishtml="0"  name=t_14 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="2" text="text" border="0" color="8388608" x="3156" y="3843" height="104" width="1041" html.valueishtml="0"  name=t_duracion visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="2" text="text" border="4" color="8388608" x="5322" y="3833" height="114" width="2333" html.valueishtml="0"  name=t_partir visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="2" text="CONTRATO DE TRABAJO SUJETO A MODALIDAD INTERMITENTE" border="4" color="0" x="2395" y="520" height="145" width="3645" html.valueishtml="0"  name=t_2 visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="Conste por el presente  documento, el Contrato de trabajo sujeto a modalidad intermitente que, de acuerdo a las dispocisiones contenidas " border="0" color="0" x="291" y="937" height="114" width="7354" html.valueishtml="0"  name=t_1 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="2" text="" border="4" color="8388608" x="4250" y="8281" height="114" width="2739" html.valueishtml="0"  name=t_fecha visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="Hecho bajo un mismo tenor y para un  solo efecto, que se firma por triplicado a los" border="0" color="0" x="260" y="8291" height="114" width="3979" html.valueishtml="0"  name=t_32 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="CLÁUSULA OCTAVA
+LA EMPRESA  y  EL TRABAJADOR, declaran  conocer y  haber  quedado  totalmente instruidos de los alcances del Texto Único Ordenado  del D. Leg. 728, " border="0" color="0" x="260" y="7916" height="229" width="7395" html.valueishtml="0"  name=t_46 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="así como de todos y cada uno de los términos y condiciones del presente contrato Individual de Trabajo bajo la Modalidad de Intermitente. " border="0" color="0" x="260" y="8145" height="114" width="7385" html.valueishtml="0"  name=t_29 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="CLÁUSULA SEPTIMA
+EL TRABAJADOR  deberá cumplir con las normas propias del   centro de   trabajo, las   contenidas   en el Reglamento Interno, asì como las normas " border="0" color="0" x="260" y="7364" height="229" width="7385" html.valueishtml="0"  name=t_19 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="laborales,  y las que se impartan por necesidades de servicio en ejercicio de las facultades de la Administracion de LA EMPRESA" border="0" color="0" x="260" y="7604" height="114" width="6083" html.valueishtml="0"  name=t_44 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="en el Decreto Supremo N° 003-97-TR, Ley de Productividad y Competitividad Laboral, celebran: CONSERVERA GARRIDO S.A. con Registro Único " border="0" color="0" x="291" y="1041" height="114" width="7333" html.valueishtml="0"  name=t_28 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="LA EMPRESA  sea una actividad ordinaria y permanente EN LA EMPRESA, pero discontinua." border="0" color="0" x="302" y="2614" height="114" width="7291" html.valueishtml="0"  name=t_12 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text=" reubicar a EL TRABAJADOR(A) en otro puesto de trabajo y/o área y/o sección, en función a las necesidades productivas de LA EMPRESA. " border="0" color="0" x="302" y="3333" height="114" width="6500" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="En el Área de:_______________________________________Sección de:___________________________________________Pudiendo LA EMPRESA unilateralmente" border="0" color="0" x="291" y="3177" height="114" width="7333" html.valueishtml="0"  name=t_31 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="8388608" x="958" y="3156" height="114" width="2000" format="[general]" html.valueishtml="0"  name=area_desc_area visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="8388608" x="3520" y="3156" height="114" width="2218" format="[general]" html.valueishtml="0"  name=seccion_desc_seccion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="CLÁUSULA TERCERA
+El presente Contrato de trabajo sujeto a modalidad intermitente; en aplicación de lo establecido en el Art. 64 a  66 " border="0" color="0" x="302" y="3625" height="229" width="7354" html.valueishtml="0"  name=t_8 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="contratación  una vez  cumplido el plazo del presente contrato debiendo para ello ejercer su derecho comunicándolo a LA EMPRESA por escrito dentro de" border="0" color="0" x="302" y="4156" height="114" width="7354" html.valueishtml="0"  name=t_39 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="oportunamente, salvo que alguna de las partes exprese   su deseo en contrario." border="0" color="0" x="302" y="4666" height="114" width="7375" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="que LA EMPRESA, por razones que su actividad lo  crea conveniente, se podrá suscribir un nuevo contrato por el  periodo que se determine " border="0" color="0" x="302" y="4552" height="114" width="7375" html.valueishtml="0"  name=t_40 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="articulo   80 del D.S N° 001-96-TR; en  consecuencia   al vencimiento del contrato y una vez ejercido el derecho preferencial por EL TRABAJADOR y siempre" border="0" color="0" x="302" y="4416" height="114" width="7364" html.valueishtml="0"  name=t_10 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="los cinco  (5) días   hábiles   de reiniciada   la actividad   de LA EMPRESA , según  lo establecido    por el Art. 64 del D.S. N° 003-97-TR. Concordante  con el" border="0" color="0" x="302" y="4291" height="114" width="7354" html.valueishtml="0"  name=t_18 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="CLÁUSULA QUINTA
+Para precisar las circunstancias y condiciones que se deben observar para la suspensión y reanudación en cada oportunidad de la labor intermitente " border="0" color="0" x="270" y="5541" height="229" width="7395" html.valueishtml="0"  name=t_22 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="Serán suspendidas las labores durante la vigencia del presente Contrato cuando el Ministerio de Pesquería decrete vedas o otras disposiciones que dan " border="0" color="0" x="270" y="5937" height="229" width="7395" html.valueishtml="0"  name=t_23 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="referida en el contrato, LA EMPRESA y EL TRABAJADOR, declararan y acuerdan libremente que:" border="0" color="0" x="270" y="5791" height="114" width="7395" html.valueishtml="0"  name=t_21 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="lugar a la prohibición de la extracción  del recurso Hidrobiològico Anchoveta y otras especies, así también cuando haya una disminución del volumen de " border="0" color="0" x="270" y="6052" height="114" width="7395" html.valueishtml="0"  name=t_47 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="CLÁUSULA SEXTA
+El trabajador laborará en el turno que establezca LA EMPRESA percibiendo una remuneración por todo concepto de S/._____________            " border="0" color="0" x="270" y="6864" height="229" width="7333" html.valueishtml="0"  name=t_26 visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="6614" y="6979" height="135" width="562" format="[general]" html.valueishtml="0"  name=t_diaomes_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="2" tabsequence=32766 border="0" color="8388608" x="5937" y="6958" height="104" width="666" format="#,##00.00" html.valueishtml="0"  name=t_gdiaomes visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="3" text="La vigencia de la suspensión del presente Contrato será en tanto permanezca presente la veda, o durante el lapso  de tiempo que continuen las " border="0" color="0" x="270" y="6302" height="114" width="7385" html.valueishtml="0"  name=t_41 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="antes mencionadas será perfecta, es decir, no se abonará durante su duración remuneración alguna a EL TRABAJADOR." border="0" color="0" x="270" y="6541" height="114" width="7385" html.valueishtml="0"  name=t_20 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="circunstancias de disminución del volumen de extracción, reanudándose automáticamente, tantas veces como sea necesario. La suspención de labores" border="0" color="0" x="270" y="6416" height="114" width="7385" html.valueishtml="0"  name=t_25 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="3" text="extracción por ausencia natural de dichos recursos Hidrobiológicos u otra causa análoga,  situación esta que obviamente no permitiría el acopio residual. " border="0" color="0" x="281" y="6187" height="114" width="7375" html.valueishtml="0"  name=t_24 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

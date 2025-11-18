@@ -1,0 +1,91 @@
+﻿$PBExportHeader$d_list_prsp_caja_det_tbl.srd
+release 11.5;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=120 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=72 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_presupuesto dbname="prsp_caja_det.nro_presupuesto" dbalias="b.nro_presupuesto" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_item dbname="prsp_caja_det.nro_item" dbalias="b.nro_item" )
+ column=(type=char(22) updatewhereclause=yes name=flujo_caja dbname="flujo_caja" )
+ column=(type=char(2) updatewhereclause=yes name=prsp_caja_seccion_cod_seccion dbname="prsp_caja_seccion.cod_seccion" dbalias="s.cod_seccion" )
+ column=(type=char(100) updatewhereclause=yes name=prsp_caja_seccion_desc_seccion dbname="prsp_caja_seccion.desc_seccion" dbalias="s.desc_seccion" )
+ column=(type=char(4) updatewhereclause=yes name=prsp_caja_seccion_det_cod_detalle dbname="prsp_caja_seccion_det.cod_detalle" dbalias="sd.cod_detalle" )
+ column=(type=char(100) updatewhereclause=yes name=prsp_caja_seccion_det_desc_detalle dbname="prsp_caja_seccion_det.desc_detalle" dbalias="sd.desc_detalle" )
+ column=(type=char(10) updatewhereclause=yes name=centros_costo_cencos dbname="centros_costo.cencos" dbalias="cc.cencos" )
+ column=(type=char(80) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" dbalias="cc.desc_cencos" )
+ column=(type=char(8) updatewhereclause=yes name=prsp_caja_det_proveedor dbname="prsp_caja_det.proveedor" dbalias="b.proveedor" )
+ column=(type=char(200) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" dbalias="p.nom_proveedor" )
+ column=(type=char(1000) updatewhereclause=yes name=descripcion dbname="prsp_caja_det.descripcion" dbalias="b.descripcion" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="prsp_caja_det.cod_moneda" dbalias="b.cod_moneda" )
+ column=(type=decimal(4) updatewhereclause=yes name=imp_proyectado dbname="prsp_caja_det.imp_proyectado" dbalias="b.imp_proyectado" )
+ column=(type=decimal(4) updatewhereclause=yes name=imp_ejecutado dbname="prsp_caja_det.imp_ejecutado" dbalias="b.imp_ejecutado" )
+ retrieve="select distinct 
+       b.nro_presupuesto,
+       b.nro_item,
+       case 
+         when s.flag_flujo_caja = '1' then '1.Ingresos Principales'
+         when s.flag_flujo_caja = '2' then '2.Otros ingresos'
+         when s.flag_flujo_caja = '3' then '3.Mano de Obra'
+         when s.flag_flujo_caja = '4' then '4.Materiales'
+         when s.flag_flujo_caja = '5' then '5.Servicios'
+       end as flujo_caja,
+       s.cod_seccion,
+       s.desc_seccion,
+       sd.cod_detalle,
+       sd.desc_detalle,
+       cc.cencos,
+       cc.desc_cencos,
+       b.proveedor,
+       p.nom_proveedor,
+       b.descripcion, 
+       b.cod_moneda,
+       b.imp_proyectado,
+       b.imp_ejecutado
+       
+from prsp_caja 				a,
+     prsp_caja_det 			b,
+     prsp_caja_seccion 		s,
+     prsp_caja_seccion_det sd,
+     centros_costo         cc,
+     proveedor             p
+where a.nro_presupuesto = b.nro_presupuesto  
+  and b.cod_detalle     = sd.cod_detalle
+  and sd.cod_seccion    = s.cod_seccion
+  and b.cencos          = cc.cencos
+  and b.proveedor       = p.proveedor      (+)
+  and a.flag_estado 		<> '0'
+  and b.cod_detalle		= :as_cod_detalle
+  and b.cencos				= :as_cencos
+  and a.nro_presupuesto = :as_nro_presupuesto
+order by s.cod_seccion, sd.cod_detalle  
+        " arguments=(("as_nro_presupuesto", string),("as_cod_detalle", string),("as_cencos", string))  sort="nro_item A " )
+text(band=header alignment="2" text="Nro
+Item" border="2" color="33554432" x="9" y="4" height="112" width="133" html.valueishtml="0"  name=nro_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Cod
+Mon." border="2" color="33554432" x="2560" y="4" height="112" width="137" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Importe
+Proyectado" border="2" color="33554432" x="2702" y="4" height="112" width="343" html.valueishtml="0"  name=imp_proyectado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Importe 
+Ejecutado" border="2" color="33554432" x="3049" y="4" height="112" width="343" html.valueishtml="0"  name=imp_ejecutado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="133" format="[general]" html.valueishtml="0"  name=nro_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="2" color="33554432" x="2560" y="4" height="64" width="137" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="2702" y="4" height="64" width="343" format="###,##0.00" html.valueishtml="0"  name=imp_proyectado visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="33554432" x="3049" y="4" height="64" width="343" format="###,##0.00" html.valueishtml="0"  name=imp_ejecutado visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Proveedor
+Nom Proveedor" border="2" color="33554432" x="146" y="4" height="112" width="1179" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="33554432" x="146" y="4" height="64" width="1179" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=100 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="1" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.tip="~t nom_proveedor " tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Descripción
+Detalle" border="2" color="33554432" x="1330" y="4" height="112" width="1225" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="1330" y="4" height="64" width="1225" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=1000 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="1" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.tip="~t descripcion " tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

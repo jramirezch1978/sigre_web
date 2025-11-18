@@ -1,0 +1,28 @@
+﻿$PBExportHeader$f_tasa_cambio.srf
+global type f_tasa_cambio from function_object
+end type
+
+forward prototypes
+global function decimal f_tasa_cambio ()
+end prototypes
+
+global function decimal f_tasa_cambio ();Decimal {3} ldc_tasa_cambio
+Date        ld_fecha
+
+ld_fecha = Date(String(today(),'dd/mm/yyyy'))
+
+
+
+SELECT vta_dol_prom
+  INTO :ldc_tasa_cambio
+  FROM calendario
+ WHERE trunc(fecha) = :ld_fecha;   
+
+ 
+IF Isnull(ldc_tasa_cambio) OR ldc_tasa_cambio = 0 THEN
+	Messagebox('Aviso','No existe Tasa de Cambio del Dia de Hoy Verifique!')	
+END IF
+
+Return ldc_tasa_cambio
+end function
+

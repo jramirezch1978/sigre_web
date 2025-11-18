@@ -1,0 +1,67 @@
+﻿$PBExportHeader$f_validacion_precedencia.srf
+global type f_validacion_precedencia from function_object
+end type
+
+forward prototypes
+global function boolean f_validacion_precedencia (string as_nro_oper, long al_tot_row)
+end prototypes
+
+global function boolean f_validacion_precedencia (string as_nro_oper, long al_tot_row);string ls_precedencia
+Boolean lb_true = TRUE
+long ll_found=0, sw = 1, il_contador = 0, il_i = 0, il_j = 0
+integer li_arreglo[], li_repeat, li_fila, li_error = 0
+
+IF al_tot_row = 1 THEN
+	RETURN lb_true
+END IF	
+ls_precedencia = TRIM(as_nro_oper)
+li_fila = al_tot_row
+DO WHILE sw = 1
+	IF ISNULL(ls_precedencia) THEN
+		ls_precedencia = "0"
+		RETURN lb_true
+	END IF	
+	IF integer(ls_precedencia) > 0 THEN
+		  ll_found = w_ma014_plant_operacion.dw_detail.Find("nro_operacion="+ls_precedencia+"",1,li_fila)
+	END IF	
+	IF ll_found > 0 THEN 
+		il_contador = il_contador + 1
+		li_arreglo[il_contador] = integer(ls_precedencia)
+		For il_i = 1 TO UpperBound(li_arreglo)
+		    IF il_i > 1 THEN	
+				 li_repeat = 0
+		       For il_j = 1 TO il_i
+			        IF li_arreglo[il_j] = li_arreglo[il_i] THEN
+					     li_repeat = li_repeat + 1 
+				     END IF
+				 next		
+			 END IF
+			 IF li_repeat > 2 THEN
+			    messagebox("Mensaje del Sistema","Referencia Circular")
+				 sw = 0
+				 li_error = 1
+				 lb_true = FALSE
+				 EXIT
+			 END IF		
+		Next	
+	ELSE	
+		IF il_contador = 0 THEN
+		   messagebox("Mensaje del Sistema", "Operación no existe")
+			lb_true = FALSE
+			EXIT
+		ELSE	
+		   messagebox("Mensaje del Sistema","Precedencia ingresado correctamente")
+		END IF	
+      sw = 0
+	END IF
+	IF li_fila = ll_found THEN
+		ls_precedencia =TRIM(as_nro_oper)
+  	ELSE
+		IF ll_found > 0 THEN
+	      ls_precedencia =TRIM(String(w_ma014_plant_operacion.dw_detail.GetItemNumber(ll_found,"nro_precedencia")))
+	   END IF
+	END IF 
+LOOP
+RETURN lb_true
+end function
+

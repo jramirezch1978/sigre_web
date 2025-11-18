@@ -1,0 +1,28 @@
+﻿$PBExportHeader$f_convertir_monto_pagos.srf
+global type f_convertir_monto_pagos from function_object
+end type
+
+forward prototypes
+global function decimal f_convertir_monto_pagos (string as_cod_moneda_det, decimal adc_importe, string as_cod_moneda_cab, decimal adc_tasa_cambio, string as_soles, string as_dolares)
+end prototypes
+
+global function decimal f_convertir_monto_pagos (string as_cod_moneda_det, decimal adc_importe, string as_cod_moneda_cab, decimal adc_tasa_cambio, string as_soles, string as_dolares);
+Decimal ldc_importe
+
+IF as_cod_moneda_cab = as_cod_moneda_det THEN
+		 ldc_importe = Round(adc_importe,2)
+ELSEIF as_cod_moneda_cab = as_soles				THEN
+	IF adc_tasa_cambio > 0.00 THEN	
+		ldc_importe = Round(adc_importe * adc_tasa_cambio,2)
+	END IF
+ELSEIF as_cod_moneda_cab = as_dolares 			THEN	
+	IF adc_tasa_cambio > 0.00 THEN	
+		ldc_importe = Round(adc_importe / adc_tasa_cambio,2)
+	END IF
+	
+END IF
+	
+
+return ldc_importe
+end function
+

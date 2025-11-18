@@ -1,0 +1,79 @@
+﻿$PBExportHeader$f_set_column_select.srf
+$PBExportComments$Return SELECT statement for retrieving column names & labels for a specified table
+global type f_set_column_select from function_object
+end type
+
+forward prototypes
+global function integer f_set_column_select (datawindow adw_datawindow, string as_tablename)
+end prototypes
+
+global function integer f_set_column_select (datawindow adw_datawindow, string as_tablename);// Integer Function F_SET_COLUMN_SELECT (dw_arg, as_tablename)
+
+// In adw_datawindow, sets appropriate SQL Select statement for selecting 
+// column names and labels for a specified table from system catalog
+
+string	ls_sql
+integer	li_ReturnCode
+
+choose case Upper(Left(sqlca.dbms,3) )
+
+	case "SYB", "SYC"	// Sybase SQL Server
+		ls_sql = 'Select pbc_cnam,' &
+				+ ' pbc_cmnt ' &
+				+ 'from pbcatcol ' &
+				+ 'where (object_id(~'' + as_tablename + '~')' &
+				+ ' = pbc_tid) order by pbc_cnam ASC'
+
+	case "GUP"		// SQLBase
+		ls_sql = "Select PBC_CNAM, PBC_CMNT " &
+				+ "from sysadm.PBCATCOL " &
+				+ "where PBC_TNAM = '" + Upper(as_tablename) &
+				+ "' and PBC_OWNR = '" + Upper(sqlca.userid) &
+				+ "' order by 1 ASC"
+
+	case "ODB"		// ODBC
+		ls_sql = "Select PBC_CNAM, PBC_CMNT " &
+				+ "from PBCATCOL " &
+				+ "where PBC_TNAM = '" + Upper(as_tablename) &
+				+ "' and PBC_OWNR = '" + Upper(sqlca.userid) &
+				+ "' order by 1 ASC"
+
+	case "XDB"		// XDB
+		ls_sql = "Select PBC_CNAM, PBC_CMNT " &
+				+ "from PBCATCOL " &
+				+ "where PBC_TNAM = '" + Upper(as_tablename) &
+				+ "' and PBC_OWNR = '" + Upper(sqlca.userid) &
+				+ "' order by 1 ASC"
+
+	case "ORA", "OR6", "OR7"	// ORACLE
+		ls_sql = "Select PBC_CNAM, PBC_CMNT " &
+				+ "from system.PBCATCOL " &
+				+ "where PBC_TNAM = '" + Upper(as_tablename) &
+				+ "' and PBC_OWNR = '" + Upper(sqlca.logid) &
+				+ "' order by 1 ASC"
+
+	case "HPA"		// ALLBASE/SQL
+		ls_sql = "Select PBC_CNAM, PBC_CMNT " &
+				+ "from syssql.PBCATCOL " &
+				+ "where PBC_TNAM = '" + Upper(as_tablename) &
+				+ "' and PBC_OWNR = '" + Upper(sqlca.userid) &
+				+ "' order by 1 ASC"
+
+	case "INF"		// INFORMIX
+		ls_sql = "Select PBC_CNAM, PBC_CMNT " &
+				+ "from 'informix'.PBCATCOL " &
+				+ "where PBC_TNAM = '" + as_tablename &
+				+ "' and PBC_OWNR = '" + sqlca.logid &
+				+ "' order by 1 ASC"
+
+end choose
+
+if Len(ls_sql) > 0 then
+	li_ReturnCode = adw_datawindow.SetSQLSelect(ls_sql)
+	return li_ReturnCode
+else
+	return -1
+end if
+
+end function
+

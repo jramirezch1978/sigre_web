@@ -1,0 +1,44 @@
+﻿$PBExportHeader$f_generacion_glosa_egresos.srf
+global type f_generacion_glosa_egresos from function_object
+end type
+
+forward prototypes
+global subroutine f_generacion_glosa_egresos (datawindow adw_1, datawindow adw_2, datastore ads_1, long al_row_cab, long al_row_det, string as_cnta_cntbl, string as_desc_cnta)
+end prototypes
+
+global subroutine f_generacion_glosa_egresos (datawindow adw_1, datawindow adw_2, datastore ads_1, long al_row_cab, long al_row_det, string as_cnta_cntbl, string as_desc_cnta);/****************************************************/
+/*LLenado de Datastore en Caso de Egresos Directos  */
+/* adw_1 = Cabecera de Caja Bancos					    */
+/* adw_2 = Detalle  de Caja Bancos                  */
+/* ads_1 = Datastore de Datos Para Glosa				 */
+/* al_row_cab = Linea de Cabecera de Caja Bancos	 */
+/* al_row_det = Linea de Detalle de Caja Bancos  	 */
+/****************************************************/
+Long   ll_ins_ds
+
+ads_1.Reset()
+
+ll_ins_ds = ads_1.InsertRow(0)
+/*Cabecera*/
+ads_1.Object.origen			    [ll_ins_ds] = adw_1.Object.origen 				[al_row_cab]
+ads_1.Object.nro_registro      [ll_ins_ds] = adw_1.Object.nro_registro 	 	[al_row_cab]
+ads_1.Object.flag_estado	    [ll_ins_ds] =	adw_1.Object.flag_estado 		[al_row_cab]
+ads_1.Object.fecha_emision	    [ll_ins_ds] =	adw_1.Object.fecha_emision 	[al_row_cab]
+ads_1.Object.flag_pago		    [ll_ins_ds] =	adw_1.Object.flag_pago	 		[al_row_cab]
+ads_1.Object.cod_moneda		    [ll_ins_ds] =	adw_1.Object.cod_moneda 	 	[al_row_cab]
+ads_1.Object.cod_relacion		 [ll_ins_ds] = adw_1.Object.cod_relacion 		[al_row_cab]
+ads_1.Object.cod_usr				 [ll_ins_ds] = adw_1.Object.cod_usr 		 	[al_row_cab]
+ads_1.Object.tasa_cambio       [ll_ins_ds] = adw_1.Object.tasa_cambio 		[al_row_cab] 
+ads_1.Object.imp_total			 [ll_ins_ds] =	adw_1.Object.imp_total 		 	[al_row_cab] 
+ads_1.Object.cod_ctabco			 [ll_ins_ds] = adw_1.Object.cod_ctabco			[al_row_cab]
+ads_1.Object.obs					 [ll_ins_ds] = adw_1.Object.obs					[al_row_cab]
+/*detalle*/
+ads_1.Object.tipo_doc			 [ll_ins_ds] = adw_2.Object.tipo_doc		 	[al_row_det]
+ads_1.Object.nro_doc				 [ll_ins_ds] = adw_2.Object.nro_doc		 		[al_row_det]
+ads_1.Object.importe				 [ll_ins_ds] = adw_2.Object.importe		 		[al_row_det]
+ads_1.Object.cnta_ctbl			 [ll_ins_ds] =	as_cnta_cntbl
+ads_1.Object.desc_cnta			 [ll_ins_ds] =	as_desc_cnta
+
+
+end subroutine
+

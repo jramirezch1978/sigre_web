@@ -1,0 +1,28 @@
+﻿$PBExportHeader$d_dddw_direcciones_x_item.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=decimal(0) updatewhereclause=yes name=item dbname="direcciones.item" )
+ column=(type=char(25) updatewhereclause=yes name=descripcion dbname="direcciones.descripcion" )
+ column=(type=char(8) updatewhereclause=yes name=dir_cod_postal dbname="direcciones.dir_cod_postal" )
+ column=(type=char(231) updatewhereclause=yes name=dir_texto dbname="dir_texto" )
+ retrieve="  SELECT ~"DIRECCIONES~".~"ITEM~"				,
+			~"DIRECCIONES~".~"DESCRIPCION~"	,   
+         ~"DIRECCIONES~".~"DIR_COD_POSTAL~",   
+         nvl( dir_pais, '') || ' ' || nvl( dir_dep_estado,'') || ' ' ||
+			nvl( dir_provincia, '') || ' ' || nvl( dir_ciudad,'') || ' ' || 
+			nvl( dir_distrito, '') || ' ' || nvl( dir_urbanizacion,'') || ' ' || 
+			nvl( dir_direccion, '') || ' ' || nvl( dir_mnz,'') || ' ' || 
+			nvl( dir_lote, '') || ' ' || nvl( dir_numero,'') 
+			 as dir_texto  
+    FROM ~"DIRECCIONES~"  
+   WHERE (~"DIRECCIONES~".~"CODIGO~" = :as_codigo    ) AND
+         (~"DIRECCIONES~".~"ITEM~"	= :an_item		 )
+
+" arguments=(("as_codigo", string),("an_item", number)) )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="5" y="4" height="56" width="713" format="[general]"  name=descripcion edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="722" y="4" height="56" width="1595" format="[general]"  name=dir_texto edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

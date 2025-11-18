@@ -1,0 +1,16 @@
+﻿$PBExportHeader$d_sel_plan_anual_compras.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes name=cencos dbname="articulo_mov_proy.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ retrieve="PBSELECT( VERSION(400) DISTINCT ()TABLE(NAME=~"articulo_mov_proy~" )  TABLE(NAME=~"centros_costo~" ) COLUMN(NAME=~"articulo_mov_proy.cencos~") COLUMN(NAME=~"centros_costo.desc_cencos~")    JOIN (LEFT=~"articulo_mov_proy.cencos~"    OP =~"=~"RIGHT=~"centros_costo.cencos~" )WHERE(    EXP1 =~"TO_CHAR(~~~"ARTICULO_MOV_PROY~~~".~~~"FEC_PROYECT~~~", 'IYYY')~"   OP =~"=~"    EXP2 =~":as_anio~" ) ) ARG(NAME = ~"as_anio~" TYPE = string) " arguments=(("as_anio", string)) )
+text(band=header alignment="2" text="C.Costo" border="2" color="0" x="14" y="8" height="56" width="251"  name=cencos_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="270" y="8" height="56" width="1641"  name=desc_cencos_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=1 alignment="0" tabsequence=40 border="2" color="0" x="14" y="4" height="56" width="251" format="[general]"  name=cencos pointer="" edit.limit=10 edit.case=any edit.autoselect=yes edit.required=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif ( describe( ~"cencos.protect~") = '1', RGB( 192,192,192), RGB( 255,255,255))" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="270" y="4" height="56" width="1641" format="[general]"  name=desc_cencos edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

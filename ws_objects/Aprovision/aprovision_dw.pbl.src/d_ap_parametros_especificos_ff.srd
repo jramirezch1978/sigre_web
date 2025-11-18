@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_ap_parametros_especificos_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=2592 color="536870912" )
+table(column=(type=char(6) update=yes updatewhereclause=yes name=tipo_mov dbname="ap_param.tipo_mov" )
+ column=(type=char(60) updatewhereclause=yes name=desc_tipo_mov dbname="articulo_mov_tipo.desc_tipo_mov" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=almacen dbname="ap_param.almacen" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=porc_detraccion dbname="ap_param.porc_detraccion" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=porc_retencion dbname="ap_param.porc_retencion" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=planta_ritmo dbname="ap_param.planta_ritmo" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=planta_eficiencia dbname="ap_param.planta_eficiencia" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=ratio_descarga dbname="ap_param.ratio_descarga" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen dbname="ap_param.origen" )
+ column=(type=char(50) updatewhereclause=yes name=nom_origen dbname="nom_origen" )
+ retrieve="SELECT  AP.TIPO_MOV, AMT.DESC_TIPO_MOV,
+        AP.ALMACEN,  ALM.DESC_ALMACEN,
+        AP.PORC_DETRACCION,
+        AP.PORC_RETENCION,
+        AP.PLANTA_RITMO,
+        AP.PLANTA_EFICIENCIA,
+        AP.RATIO_DESCARGA,
+		    AP.ORIGEN,  DECODE(AP.ORIGEN, 'XX', 'TODOS', O.NOMBRE) AS NOM_ORIGEN	        
+        
+FROM    AP_PARAM             AP,
+        ARTICULO_MOV_TIPO    AMT,
+        ALMACEN              ALM,
+        ORIGEN               O
+
+WHERE   AP.ORIGEN      = :AS_ORIGEN
+  AND   AP.TIPO_MOV    = AMT.TIPO_MOV (+)
+  AND   AP.ALMACEN     = ALM.ALMACEN  (+)
+  AND   AP.ORIGEN      = O.COD_ORIGEN (+)
+
+
+     
+" arguments=(("AS_ORIGEN", string)) )
+groupbox(band=detail text="Movimientos"border="5" color="33554432" x="59" y="16" height="256" width="1614"  name=gb_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Ritmo:" border="0" color="33554432" x="96" y="384" height="56" width="398" html.valueishtml="0"  name=ap_param_planta_ritmo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=100 border="5" color="33554432" x="549" y="380" height="60" width="329" format="#,##0.00" html.valueishtml="0"  name=planta_ritmo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Ratio Descarga:" border="0" color="33554432" x="96" y="476" height="56" width="398" html.valueishtml="0"  name=ap_param_ratio_descarga_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=110 border="5" color="33554432" x="549" y="476" height="60" width="329" format="#,##0.00" html.valueishtml="0"  name=ratio_descarga visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Eficiencia:" border="0" color="33554432" x="96" y="568" height="56" width="398" html.valueishtml="0"  name=ap_param_planta_eficiencia_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=120 border="5" color="33554432" x="549" y="568" height="60" width="329" format="#,##0.00" html.valueishtml="0"  name=planta_eficiencia visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+groupbox(band=detail text="Valores de Planta"border="5" color="33554432" x="59" y="288" height="384" width="859"  name=gb_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Almacen:" border="0" color="33554432" x="82" y="180" height="56" width="251" html.valueishtml="0"  name=ap_param_almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Tipo Mov:" border="0" color="33554432" x="87" y="84" height="56" width="251" html.valueishtml="0"  name=ap_param_tipo_mov_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="33554432" x="361" y="84" height="60" width="192" format="[general]" html.valueishtml="0"  name=tipo_mov pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="5" color="33554432" x="361" y="180" height="60" width="192" format="[general]" html.valueishtml="0"  name=almacen pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+groupbox(band=detail text="Origen"border="5" color="33554432" x="987" y="524" height="148" width="681"  name=gb_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=5 alignment="1" tabsequence=80 border="5" color="33554432" x="1435" y="352" height="60" width="197" format="#,##0.00" html.valueishtml="0"  name=porc_detraccion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=90 border="5" color="33554432" x="1435" y="436" height="60" width="197" format="#,##0.00" html.valueishtml="0"  name=porc_retencion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Detraccion:" border="0" color="33554432" x="1074" y="352" height="56" width="315" html.valueishtml="0"  name=ap_param_porc_detraccion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Retencion:" border="0" color="33554432" x="1074" y="440" height="56" width="315" html.valueishtml="0"  name=ap_param_porc_retencion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+groupbox(band=detail text="Porcentajes"border="5" color="33554432" x="987" y="288" height="228" width="681"  name=gb_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="5" color="0" x="590" y="84" height="60" width="1047" format="[general]" html.valueishtml="0"  name=desc_tipo_mov visible="1" edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="5" color="0" x="590" y="180" height="60" width="1047" format="[general]" html.valueishtml="0"  name=desc_almacen visible="1" edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="5" color="0" x="1225" y="592" height="60" width="416" format="[general]" html.valueishtml="0"  name=nom_origen visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="5" color="0" x="1088" y="592" height="60" width="105" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

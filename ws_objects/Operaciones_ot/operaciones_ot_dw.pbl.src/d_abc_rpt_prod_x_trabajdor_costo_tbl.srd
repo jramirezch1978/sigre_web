@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_abc_rpt_prod_x_trabajdor_costo_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=484 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="tt_ope_trend_max_min.cod_trabajador" )
+ column=(type=char(20) updatewhereclause=yes name=codprd dbname="tt_ope_trend_max_min.codprd" )
+ column=(type=decimal(3) updatewhereclause=yes name=rend_max dbname="tt_ope_trend_max_min.rend_max" )
+ column=(type=char(13) updatewhereclause=yes name=fecha_rend_max dbname="fecha_rend_max" )
+ column=(type=decimal(3) updatewhereclause=yes name=rend_mind dbname="tt_ope_trend_max_min.rend_mind" )
+ column=(type=char(13) updatewhereclause=yes name=fecha_rend_min dbname="fecha_rend_min" )
+ column=(type=char(123) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=number updatewhereclause=yes name=rend_x_periodo dbname="rend_x_periodo" )
+ retrieve="  select tt_mm.cod_trabajador ,
+         tt_mm.codprd         ,   
+         tt_mm.rend_max       ,   
+         to_char(tt_mm.fecha_rend_max ,'dd/mm/yyyy hh24') as fecha_rend_max,   
+         tt_mm.rend_mind      ,   
+         to_char(tt_mm.fecha_rend_min,'dd/mm/yyyy hh24')  as fecha_rend_min ,
+         nvl(m.apel_materno,' ') ||' '|| nvl(m.apel_paterno,' ') ||' '||nvl(m.nombre1,' ')||' '||nvl(m.nombre2,' ') as nombres  ,
+         (select round(sum(tt.peso) / sum(tt.hora_efectiva ),2) as rendimiento_x_periodo
+           from tt_ope_tefectivo_x_trab tt
+          where tt.cod_trabajador = tt_mm.cod_trabajador and
+                tt.codprd         = tt_mm.codprd         
+       group by tt.cod_trabajador,tt.codprd) as rend_X_periodo
+         
+    from tt_ope_trend_max_min tt_mm ,maestro m
+   where ( tt_mm.cod_trabajador = m.cod_trabajador )  and
+			   ( tt_mm.cod_trabajador like :as_cod_trabajador      )" arguments=(("ad_fecha_inicio", date),("ad_fecha_final", date),("as_cod_trabajador", string))  sort="cod_trabajador A codprd A " )
+group(level=1 header.height=64 trailer.height=0 by=("cod_trabajador" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Actividad" border="2" color="8388608" x="18" y="424" height="56" width="462" html.valueishtml="0"  name=codprd_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="RDTO" border="2" color="8388608" x="485" y="424" height="56" width="274" html.valueishtml="0"  name=rend_x_periodo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="MAX" border="2" color="8388608" x="763" y="424" height="56" width="384" html.valueishtml="0"  name=rend_max_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Dia" border="2" color="8388608" x="1536" y="424" height="56" width="297" html.valueishtml="0"  name=dia_max_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="MIN" border="2" color="8388608" x="1838" y="424" height="56" width="384" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Hora" border="2" color="8388608" x="1152" y="424" height="56" width="379" html.valueishtml="0"  name=hora_max_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Dia" border="2" color="8388608" x="2615" y="424" height="56" width="297" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Hora" border="2" color="8388608" x="2226" y="424" height="56" width="384" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Desde : ' + String(ad_fecha_inicio,'dd/mm/yyyy') +' Hasta : '+ String(ad_fecha_final ,'dd/mm/yyyy')"border="0" color="0" x="777" y="184" height="96" width="1938" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Productividad x Trabajador (Costo)" border="0" color="8388608" x="878" y="64" height="80" width="1705" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag :" border="0" color="8388608" x="2985" y="32" height="68" width="201" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="3200" y="32" height="68" width="329" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="0" text="Trabajador :" border="0" color="8388608" x="14" y="4" height="56" width="357" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="0" x="389" y="4" height="56" width="279" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="0" color="0" x="681" y="4" height="56" width="1093" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="18" y="0" height="72" width="462" format="[general]" html.valueishtml="0"  name=codprd visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="0" x="485" y="0" height="72" width="274" format="[general]" html.valueishtml="0"  name=rend_x_periodo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="2" expression="Mid( fecha_rend_max ,11)+':00 - ' + string(number(mid( fecha_rend_max ,11)) + 1) + ':00' "border="2" color="0" x="1152" y="0" height="72" width="379" format="[GENERAL]" html.valueishtml="0"  name=hora_max visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="2" expression="Mid(fecha_rend_max,1,10 )"border="2" color="0" x="1536" y="0" height="72" width="297" format="[GENERAL]" html.valueishtml="0"  name=dia_max visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="763" y="0" height="72" width="384" format="[general]" html.valueishtml="0"  name=rend_max visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="0" x="1838" y="0" height="72" width="384" format="[general]" html.valueishtml="0"  name=rend_mind visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="2" expression="Mid( fecha_rend_min ,1,10 )"border="2" color="0" x="2615" y="0" height="72" width="297" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="2" expression="Mid(  fecha_rend_min  ,11)+':00 - ' + string(number(mid(  fecha_rend_min  ,11)) + 1) + ':00' "border="2" color="0" x="2226" y="0" height="72" width="384" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="H:\source\BMP\blanco.bmp" x="46" y="16" height="208" width="453" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="46" y="248" height="56" width="453" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Fecha :" border="0" color="8388608" x="2985" y="112" height="56" width="201" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3200" y="112" height="56" width="329" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="8388608" x="2985" y="180" height="56" width="201" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="3200" y="180" height="56" width="329" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

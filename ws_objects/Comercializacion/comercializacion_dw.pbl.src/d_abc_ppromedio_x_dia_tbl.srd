@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_abc_ppromedio_x_dia_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=484 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=number updatewhereclause=yes name=precio_promedio dbname="precio_promedio" )
+ column=(type=datetime updatewhereclause=yes name=fecha_documento dbname="fecha_documento" )
+ retrieve=" SELECT ART.COD_ART,ART.NOM_ARTICULO,ART.UND,
+        Round(Sum(CCD.PRECIO_UNITARIO) / COUNT(*),6) as precio_promedio,
+		    TRUNC(FECHA_DOCUMENTO) as FECHA_DOCUMENTO
+  FROM ARTICULO ART,CNTAS_COBRAR CC,CNTAS_COBRAR_DET CCD
+ WHERE (CC.TIPO_DOC = CCD.TIPO_DOC ) AND
+       (CC.NRO_DOC  = CCD.NRO_DOC  ) AND
+       (CC.FLAG_ESTADO <> '0'      ) AND
+       (ART.COD_ART    = CCD.COD_ART ) AND
+       (CC.FORMA_PAGO  IN (SELECT FP.FORMA_PAGO FROM FORMA_PAGO FP WHERE NVL(FLAG_NO_COBRABLE,'0') = '0') ) AND
+       (CC.TIPO_DOC    IN (SELECT TIPO_DOC FROM DOC_GRUPO_RELACION WHERE GRUPO IN (SELECT DOC_VENTAS FROM FINPARAM))) AND  
+       (CCD.PRECIO_UNITARIO <> 0   ) AND
+       (CCD.COD_ART         = :as_cod_art ) AND
+       (TO_CHAR(CC.FECHA_DOCUMENTO,'YYYYMMDD') >= :as_fecha_inicio and
+		  TO_CHAR(CC.FECHA_DOCUMENTO,'YYYYMMDD') <= :as_fecha_final  ) 
+GROUP BY ART.COD_ART  ,ART.NOM_ARTICULO,ART.UND,TRUNC(FECHA_DOCUMENTO)	" arguments=(("as_fecha_inicio", string),("as_fecha_final", string),("as_cod_art", string))  sort="fecha_documento A " )
+text(band=header alignment="2" text="Precio Promedio por Dia " border="0" color="8388608" x="1134" y="48" height="80" width="946" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Articulo" border="2" color="8388608" x="306" y="424" height="56" width="384" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nombre" border="2" color="8388608" x="695" y="424" height="56" width="1083" html.valueishtml="0"  name=nom_articulo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="8388608" x="1783" y="424" height="56" width="201" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="P. Promedio" border="2" color="8388608" x="1989" y="424" height="56" width="439" html.valueishtml="0"  name=precio_promedio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="F.Documento" border="2" color="8388608" x="2432" y="424" height="56" width="375" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3003" y="40" height="56" width="270" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Fecha :" border="0" color="8388608" x="2752" y="40" height="56" width="229" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="18" y="20" height="224" width="448" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="18" y="264" height="56" width="448" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression=" page() + ' de ' + pageCount()"border="0" color="33554432" x="3003" y="116" height="56" width="270" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Pag :" border="0" color="8388608" x="2752" y="116" height="56" width="229" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="3003" y="200" height="56" width="270" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Usuario :" border="0" color="8388608" x="2752" y="200" height="56" width="229" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="306" y="4" height="68" width="384" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="695" y="4" height="68" width="1083" format="[general]" html.valueishtml="0"  name=nom_articulo visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="1783" y="4" height="68" width="201" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="1989" y="4" height="68" width="439" format="[general]" html.valueishtml="0"  name=precio_promedio visible="1" editmask.mask="###,###.000000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="2432" y="4" height="68" width="375" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_documento visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="cod_art	nom_articulo	und")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

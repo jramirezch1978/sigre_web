@@ -1,0 +1,45 @@
+﻿$PBExportHeader$d_rpt_ap_recep_mp_x_transp_especie_crt.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=424 color="536870912" )
+header[2](height=168 color="536870912" )
+summary(height=92 color="536870912" )
+footer(height=16 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=fecha dbname="fecha" )
+ column=(type=number updatewhereclause=yes name=total dbname="total" )
+ retrieve="Select trunc(apd.inicio_descarga) as fecha, apd.prov_transporte, p.nom_proveedor,
+       Sum(Nvl(apd.peso_bruto,0)) as total
+  From ap_pd_descarga_det apd, ap_pd_descarga ap, proveedor p
+ Where apd.nro_parte = ap.nro_parte
+   and apd.prov_transporte = p.proveedor(+)
+   and apd.especie = :as_especie
+   and trunc(apd.inicio_descarga)BetWeen :ad_fecha_ini and :ad_fecha_fin
+ Group by trunc(apd.inicio_descarga), apd.prov_transporte, p.nom_proveedor
+  Order by trunc(apd.inicio_descarga), apd.prov_transporte" arguments=(("ad_fecha_ini", date),("ad_fecha_fin", date),("as_especie", string))  sort="fecha A " )
+text(band=header[2] alignment="2" text="Fecha" border="0" color="16777215" x="9" y="0" height="164" width="411" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header[2] alignment="2" text="Total" border="0" color="16777215" x="1070" y="0" height="164" width="361" html.valueishtml="0"  name=grand_sum_total_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header[2] alignment="2" text="@proveedor_nom_proveedor" border="0" color="16777215" x="430" y="0" height="164" width="631" html.valueishtml="0"  name=total_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="80" width="411" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="430" y="4" height="80" width="631" format="###,##0.00" html.valueishtml="0"  name=total visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="2" color="33554432" x="1070" y="4" height="80" width="361" format="###,##0.00" html.valueishtml="0"  name=grand_sum_total visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(total for all )"border="2" color="33554432" x="430" y="0" height="88" width="631" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_total for all )"border="2" color="33554432" x="1070" y="0" height="88" width="361" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=foreground filename="gs_logo" x="137" y="124" height="184" width="370" border="0"  name=p_logo visible="1" )
+text(band=foreground alignment="2" text="" border="0" color="0" x="9" y="320" height="40" width="736" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="2" text="Hasta" border="2" color="0" x="1751" y="260" height="56" width="242" html.valueishtml="0"  name=fec_hasta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="text" border="2" color="0" x="1984" y="260" height="56" width="370" html.valueishtml="0"  name=t_hasta visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="'Página ' + page() + ' / ' + pageCount()"border="0" color="0" x="3378" y="132" height="44" width="768" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="Usuario:" border="0" color="0" x="3378" y="208" height="44" width="242" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="" border="0" color="0" x="3634" y="208" height="44" width="274" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="today()"border="0" color="0" x="3378" y="272" height="44" width="142" format="dd/mm/yyyy  hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="2" text="Desde" border="2" color="0" x="1106" y="260" height="56" width="242" html.valueishtml="0"  name=fec_desde_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="text" border="2" color="0" x="1353" y="260" height="56" width="338" html.valueishtml="0"  name=t_desde visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="2" text="Recepción de Materia Prima x Transportista y Especie" border="1" color="0" x="631" y="116" height="92" width="2331" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="2" text="" border="0" color="0" x="1257" y="352" height="56" width="928" html.valueishtml="0"  name=t_comentario visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "proveedor_nom_proveedor" rows = "fecha" values = "sum(total for crosstab)" sourcenames = "fecha, ap_pd_descarga_det_prov_transporte, proveedor_nom_proveedor, total")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

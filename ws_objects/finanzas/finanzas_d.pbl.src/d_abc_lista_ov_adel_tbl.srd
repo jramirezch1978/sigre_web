@@ -1,0 +1,58 @@
+﻿$PBExportHeader$d_abc_lista_ov_adel_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="tt_fin_ov_adel.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="tt_fin_ov_adel.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="tt_fin_ov_adel.nro_doc" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="tt_fin_ov_adel.cod_moneda" )
+ column=(type=decimal(2) updatewhereclause=yes name=saldo_sol dbname="tt_fin_ov_adel.saldo_sol" )
+ column=(type=decimal(2) updatewhereclause=yes name=saldo_dol dbname="tt_fin_ov_adel.saldo_dol" )
+ column=(type=char(1) updatewhereclause=yes name=flag_proc dbname="tt_fin_ov_adel.flag_proc" values="	1/	0" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="tt_fin_ov_adel.origen" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tabor dbname="tt_fin_ov_adel.flag_tabor" )
+ column=(type=char(1) updatewhereclause=yes name=flag_cxp dbname="flag_cxp" )
+ column=(type=number updatewhereclause=yes name=saldo dbname="saldo" )
+ column=(type=char(1) updatewhereclause=yes name=flag_mon dbname="flag_mon" )
+ column=(type=char(1) updatewhereclause=yes name=flag_debhab dbname="tt_fin_ov_adel.flag_debhab" )
+ retrieve="  SELECT ~"TT_FIN_OV_ADEL~".~"COD_RELACION~",   
+         ~"TT_FIN_OV_ADEL~".~"TIPO_DOC~"    ,   
+         ~"TT_FIN_OV_ADEL~".~"NRO_DOC~"     ,   
+         ~"TT_FIN_OV_ADEL~".~"COD_MONEDA~"  ,   
+         ~"TT_FIN_OV_ADEL~".~"SALDO_SOL~"   ,   
+         ~"TT_FIN_OV_ADEL~".~"SALDO_DOL~"   ,   
+         ~"TT_FIN_OV_ADEL~".~"FLAG_PROC~"   ,  
+			~"TT_FIN_OV_ADEL~".~"ORIGEN~"      ,
+			~"TT_FIN_OV_ADEL~".~"FLAG_TABOR~"	 ,	
+         DECODE(tt_fin_ov_adel.flag_debhab,'H','+','-') as flag_cxp,   
+			DECODE(tt_fin_ov_adel.cod_moneda,(select cod_soles from logparam where reckey ='1'),tt_fin_ov_adel.saldo_sol,tt_fin_ov_adel.saldo_dol) as saldo,
+         DECODE(tt_fin_ov_adel.cod_moneda,(select cod_soles from logparam where reckey =1),null,' ') as flag_mon,
+         ~"TT_FIN_OV_ADEL~".~"FLAG_DEBHAB~"  
+    FROM ~"TT_FIN_OV_ADEL~"  
+   WHERE ~"TT_FIN_OV_ADEL~".~"NRO_DOC~" = :as_nro_ov    
+" arguments=(("as_nro_ov", string)) )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="9" y="8" height="56" width="302"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Mon" border="2" color="8388608" x="315" y="8" height="56" width="210"  name=cod_moneda_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo Dol." border="2" color="8388608" x="526" y="8" height="56" width="338"  name=saldo_dol_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo Sol." border="2" color="8388608" x="869" y="8" height="56" width="338"  name=saldo_sol_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Procesar" border="2" color="8388608" x="1211" y="8" height="56" width="224"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="+/-" border="2" color="8388608" x="1440" y="8" height="56" width="128"  name=t_3  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="8388608" x="9" y="0" height="68" width="302" format="[general]"  name=nro_doc edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="315" y="0" height="68" width="210" format="[general]"  name=cod_moneda edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=30 border="2" color="0" x="526" y="0" height="68" width="338" format="[general]" protect="0~tif(isNull( flag_mon ),1,0)"  name=saldo_dol editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif(isNull( flag_mon ),rgb(155,155,155),rgb(255,255,255))
+" )
+column(band=detail id=5 alignment="1" tabsequence=40 border="2" color="0" x="869" y="0" height="68" width="338" format="[general]" protect="0~tif(isNull( flag_mon ),0,1)"  name=saldo_sol editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif(isNull( flag_mon ),rgb(255,255,255),rgb(155,155,155))
+" )
+column(band=detail id=7 alignment="2" tabsequence=20 border="2" color="0" x="1211" y="0" height="68" width="224" format="[general]"  name=flag_proc checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="255" x="1440" y="0" height="68" width="128" format="[general]"  name=flag_cxp edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="8388608" x="18" y="80" height="56" width="201" format="[general]"  name=flag_mon edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="255" x="37" y="244" height="56" width="146" format="[general]"  name=flag_debhab edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="8388608" x="201" y="244" height="56" width="128" format="[general]"  name=tipo_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="8388608" x="361" y="244" height="56" width="183" format="[general]"  name=cod_relacion edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="8388608" x="585" y="244" height="56" width="146" format="[general]"  name=origen edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="8388608" x="773" y="244" height="56" width="146" format="[general]"  name=flag_tabor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,58 @@
+﻿$PBExportHeader$d_rpt_costo_ot_com_resumen_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=532 color="536870912" )
+summary(height=84 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cencos dbname="vw_com_raciones.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="vw_com_raciones.desc_cencos" )
+ column=(type=number updatewhereclause=yes name=nro_raciones dbname="nro_raciones" )
+ column=(type=number updatewhereclause=yes name=costo_calc dbname="costo_calc" )
+ column=(type=number updatewhereclause=yes name=costo_unit dbname="costo_unit" )
+ retrieve="SELECT v.cencos, 
+       v.desc_cencos, 
+       sum(v.nro_raciones) as nro_raciones,
+       sum(v.costo_calc) as costo_calc,
+       sum(v.costo_calc)/ Sum(v.nro_raciones) as Costo_unit
+
+FROM  vw_com_raciones v, 
+	   origen o
+
+WHERE v.nro_orden = :as_orden
+	AND v.COD_ORIGEN = O.COD_ORIGEN
+ 	AND  TRUNC(v.FECHA_PARTE) BETWEEN TRUNC(:ad_Fecha1) AND TRUNC(:ad_fecha2)
+	AND v.COD_ORIGEN = :as_origen  
+
+GROUP BY v.cencos, v.desc_cencos
+
+" arguments=(("as_origen", string),("as_orden", string),("ad_fecha1", date),("ad_fecha2", date)) )
+bitmap(band=header filename="" x="55" y="36" height="208" width="407" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="56" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="124" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="192" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Costo O.T. Comedores (Resumen)" border="0" color="0" x="686" y="68" height="92" width="1682" html.valueishtml="0"  name=cabecera_t visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Nro Orden: ' + as_orden "border="0" color="0" x="686" y="172" height="64" width="1682" format="[general]" html.valueishtml="0"  name=page_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro
+Raciones" border="2" color="33554432" x="1819" y="412" height="116" width="325" html.valueishtml="0"  name=nro_raciones_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Código" border="2" color="33554432" x="421" y="472" height="56" width="370" html.valueishtml="0"  name=tipo_comedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Centro de Costo" border="2" color="33554432" x="421" y="412" height="56" width="1394" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="795" y="472" height="56" width="1019" html.valueishtml="0"  name=descr_comedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="0" text="Del:" border="0" color="0" x="1010" y="248" height="56" width="128" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Al:" border="0" color="0" x="1545" y="248" height="56" width="87" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="1664" y="248" height="56" width="320" html.valueishtml="0"  name=t_fecha2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="1179" y="248" height="56" width="320" html.valueishtml="0"  name=t_fecha1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Costo
+Total" border="2" color="33554432" x="2158" y="412" height="116" width="325" html.valueishtml="0"  name=costo_calc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="421" y="4" height="60" width="370" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="795" y="4" height="60" width="1019" format="[general]" html.valueishtml="0"  name=desc_cencos visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="0" x="1819" y="4" height="60" width="325" format="[general]" html.valueishtml="0"  name=nro_raciones visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="2158" y="4" height="60" width="325" format="###,##0.00" html.valueishtml="0"  name=costo_calc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="Total" border="2" color="33554432" x="1394" y="12" height="60" width="421" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=summary alignment="2" expression="sum(nro_raciones)"border="2" color="0" x="1819" y="12" height="60" width="325" format="[general]" html.valueishtml="0"  name=total_raciones visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(costo_calc)"border="2" color="0" x="2158" y="12" height="60" width="325" format="###,##0.00" html.valueishtml="0"  name=total_costo visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="cambio_de_reporte_701" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><d_rpt_costo_ot_com_resumen_tbl><d_rpt_costo_ot_com_resumen_tbl_row __pbband=~"detail~"><cencos>cencos</cencos><desc_cencos>desc_cencos</desc_cencos><nro_raciones>nro_raciones</nro_raciones><costo_calc>costo_calc</costo_calc><costo_unit/></d_rpt_costo_ot_com_resumen_tbl_row></d_rpt_costo_ot_com_resumen_tbl>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

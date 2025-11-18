@@ -1,0 +1,54 @@
+﻿$PBExportHeader$d_rpt_sig_stock_pptt_x_origen_pend.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=440 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_ov dbname="orden_venta.nro_ov" )
+ column=(type=datetime updatewhereclause=yes name=compute_0002 dbname="compute_0002" )
+ column=(type=char(8) updatewhereclause=yes name=cliente dbname="orden_venta.cliente" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=pendiente dbname="pendiente" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=articulo_desc_art dbname="articulo.desc_art" )
+ retrieve="SELECT ov.nro_ov, trunc(ov.fec_registro), ov.cliente, 
+       p.nom_proveedor,(amp.cant_proyect-amp.cant_procesada)as pendiente , amp.cod_art, a.desc_art
+  FROM articulo_mov_proy amp, articulo a, orden_venta ov, proveedor p, almacen al
+ WHERE amp.cod_origen = ov.cod_origen and
+       amp.nro_doc    = ov.nro_ov     and
+       amp.cod_art    = a.cod_art     And
+       amp.almacen    = al.almacen    And
+       ov.cliente     = p.proveedor   and
+       amp.cod_art    = :as_articulo  And
+       al.cod_origen  = :as_origen    And
+       amp.tipo_doc   = (select l.doc_ov from logparam l where l.reckey='1') and
+       amp.flag_estado='1' " arguments=(("as_origen", string),("as_articulo", string)) )
+group(level=1 header.height=96 trailer.height=76 by=("cod_art" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="14" y="16" height="204" width="347" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="9" y="236" height="40" width="352" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="9" y="288" height="40" width="576" html.valueishtml="0"  name=windows_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Orden venta" border="2" color="33554432" x="334" y="372" height="64" width="334" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Cliente" border="2" color="33554432" x="1120" y="372" height="64" width="1408" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Cantidad Pendiente" border="2" color="33554432" x="2533" y="372" height="64" width="549" html.valueishtml="0"  name=stk_bolsa_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Fecha" border="2" color="33554432" x="672" y="372" height="64" width="443" html.valueishtml="0"  name=nro_vale_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="2679" y="184" height="40" width="402" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="33554432" x="2679" y="112" height="40" width="402" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2679" y="48" height="40" width="402" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="ARTICULOS PENDIENTES DE ENTREGA" border="0" color="33554432" x="521" y="76" height="64" width="2053" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="672" y="164" height="64" width="1751" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="0" text="Articulo :" border="0" color="33554432" x="302" y="16" height="56" width="224" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="0" color="0" x="837" y="16" height="56" width="2089" format="[general]" html.valueishtml="0"  name=articulo_desc_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=6 alignment="0" tabsequence=32766 border="0" color="0" x="549" y="16" height="56" width="279" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="338" y="8" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_ov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="0" x="672" y="8" height="56" width="384" format="dd/mm/yyyy" html.valueishtml="0"  name=compute_0002 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1120" y="8" height="56" width="265" format="[general]" html.valueishtml="0"  name=cliente visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1399" y="8" height="56" width="1138" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="0" x="2565" y="8" height="56" width="498" format="[general]" html.valueishtml="0"  name=pendiente visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=trailer.1 alignment="1" text="Totales :" border="0" color="0" x="2290" y="4" height="56" width="242" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="2" expression="sum(pendiente for group 1)"border="0" color="0" x="2565" y="4" height="56" width="498" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

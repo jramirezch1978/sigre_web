@@ -1,0 +1,25 @@
+﻿$PBExportHeader$f_nro_libro.srf
+global type f_nro_libro from function_object
+end type
+
+forward prototypes
+global function integer f_nro_libro (string as_tipo_doc)
+end prototypes
+
+global function integer f_nro_libro (string as_tipo_doc);Int li_nro_libro
+
+
+SELECT Nvl(nro_libro,0)  
+INTO   :li_nro_libro
+FROM   doc_tipo  
+WHERE  tipo_doc = :as_tipo_doc ; 
+  
+
+
+IF Isnull(li_nro_libro) OR li_nro_libro = 0 THEN
+   Messagebox('Funcion Nro Libro','Verifique, El Tipo de Documento no tiene Libro Considerado en TAbla DOC_TIPO')
+END IF 
+
+Return li_nro_libro
+end function
+

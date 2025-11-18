@@ -1,0 +1,64 @@
+﻿$PBExportHeader$d_abc_lt_x_cobrar_doc_ref_tbl_bak.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=12632256 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_relacion dbname="doc_referencias.cod_relacion" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_doc dbname="doc_referencias.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_doc dbname="doc_referencias.nro_doc" )
+ column=(type=char(1) update=yes updatewhereclause=yes key=yes name=tipo_mov dbname="doc_referencias.tipo_mov" )
+ column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen_ref dbname="doc_referencias.origen_ref" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_ref dbname="doc_referencias.tipo_ref" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_ref dbname="doc_referencias.nro_ref" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="doc_referencias.importe" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flab_tabor dbname="doc_referencias.flab_tabor" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="vw_fin_doc_general.origen" )
+ column=(type=number updatewhereclause=yes name=nro_libro dbname="vw_fin_doc_general.nro_libro" )
+ column=(type=number updatewhereclause=yes name=nro_provisional dbname="vw_fin_doc_general.nro_provisional" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="vw_fin_doc_general.cod_moneda" )
+ column=(type=char(1) updatewhereclause=yes name=flag_signo dbname="doc_tipo.flag_signo" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_ctbl dbname="cntbl_pre_asiento_det.cnta_ctbl" )
+ column=(type=char(1) updatewhereclause=yes name=flag_debhab dbname="flag_debhab" )
+ retrieve="select dr.cod_relacion, dr.tipo_doc, dr.nro_doc, dr.tipo_mov,
+       dr.origen_ref, dr.tipo_ref, dr.nro_ref, dr.importe, dr.flab_tabor,
+       v.origen , v.nro_libro, v.nro_provisional, v.cod_moneda, dt.flag_signo,
+       cp.cnta_ctbl, 
+       decode(cp.flag_debhab,'D','H','D') as flag_debhab
+      
+from   doc_referencias dr , vw_fin_doc_general v, doc_tipo dt,
+       cntbl_pre_asiento_det cp 
+
+where  dr.cod_relacion =:as_relacion and dr.tipo_doc =:as_tipo and dr.nro_doc =:as_nro and
+       dr.tipo_mov =:as_mov and
+       dr.cod_relacion = v.cod_relacion and dr.tipo_doc = v.tipo_doc and
+       dr.nro_doc = v.nro_doc and dr.tipo_ref = dt.tipo_doc and 
+       v.origen = cp.origen and v.nro_libro = cp.nro_libro and v.nro_provisional = cp.nro_provisional and
+       dr.cod_relacion = cp.cod_relacion and dr.tipo_ref = cp.tipo_docref and 
+       dr.nro_ref = cp.nro_docref1
+" update="doc_referencias" updatewhere=1 updatekeyinplace=no arguments=(("as_relacion", string),("as_tipo", string),("as_nro", string),("as_mov", string)) )
+text(band=header alignment="2" text="Nro Ref" border="6" color="0" x="411" y="4" height="56" width="389"  name=nro_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Flab Tabor" border="6" color="0" x="809" y="4" height="56" width="311"  name=obj_1362681  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Ref" border="6" color="0" x="9" y="4" height="56" width="393"  name=tipo_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Importe" border="6" color="0" x="1129" y="4" height="56" width="402"  name=obj_1364037  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cnta Ctbl" border="6" color="0" x="1541" y="8" height="56" width="375"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="D/H" border="6" color="0" x="1925" y="4" height="56" width="142"  name=t_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Signo" border="6" color="0" x="2075" y="4" height="56" width="165"  name=t_1 visible="1~t0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="6" color="0" x="2249" y="4" height="56" width="215"  name=t_2 visible="1~t0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Origen" border="6" color="0" x="2473" y="4" height="56" width="197"  name=t_5 visible="1~t0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Libro" border="6" color="0" x="2679" y="4" height="56" width="270"  name=t_6 visible="1~t0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Provisional" border="6" color="0" x="2958" y="4" height="56" width="462"  name=t_7 visible="1~t0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="0" x="411" y="4" height="56" width="389" format="[general]"  name=nro_ref edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="5" color="0" x="809" y="4" height="56" width="311" format="[general]"  name=flab_tabor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="5" color="0" x="9" y="4" height="56" width="393" format="[general]"  name=tipo_ref edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=10 border="5" color="0" x="1129" y="4" height="56" width="402" format="[general]"  name=importe edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="2" tabsequence=32766 border="5" color="0" x="1541" y="4" height="56" width="375" format="[general]"  name=cnta_ctbl edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="2" tabsequence=32766 border="5" color="0" x="1925" y="4" height="56" width="142" format="[general]"  name=flag_debhab edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="5" color="0" x="2075" y="4" height="56" width="165" format="[general]"  name=flag_signo visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="5" color="0" x="2249" y="4" height="56" width="215" format="[general]"  name=cod_moneda visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="5" color="0" x="2473" y="4" height="56" width="197" format="[general]"  name=origen visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="5" color="0" x="2679" y="4" height="56" width="270" format="[general]"  name=nro_libro visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="5" color="0" x="2958" y="4" height="56" width="462" format="[general]"  name=nro_provisional visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

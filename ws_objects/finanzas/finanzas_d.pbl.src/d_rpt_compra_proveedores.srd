@@ -1,0 +1,58 @@
+﻿$PBExportHeader$d_rpt_compra_proveedores.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 50 print.margin.right = 50 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=452 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cntas_pagar_cod_relacion dbname="cntas_pagar.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(11) updatewhereclause=yes name=proveedor_ruc dbname="proveedor.ruc" )
+ column=(type=char(159) updatewhereclause=yes name=direccion dbname="direccion" )
+ column=(type=number updatewhereclause=yes name=imp_sol dbname="imp_sol" )
+ column=(type=number updatewhereclause=yes name=imp_dol dbname="imp_dol" )
+ retrieve="Select cp.cod_relacion, p.nom_proveedor, p.ruc, 
+       (Select trim(max(d.dir_provincia||' - '||d.dir_ciudad||' - '||d.dir_distrito||' - '||d.dir_direccion))
+          From direcciones d Where d.codigo = cp.cod_relacion And d.flag_uso = '1' )  As direccion,
+       Sum(decode(cp.cod_moneda,:as_sol,cp.importe_doc,
+                                        ROUND(cp.importe_doc * cp.tasa_cambio,2))) As imp_sol,
+       Sum(decode(cp.cod_moneda,:as_dol,cp.importe_doc,
+                                        ROUND(cp.importe_doc / cp.tasa_cambio,2))) As imp_dol
+  From cntas_pagar cp, proveedor p
+ Where cp.cod_relacion         = p.proveedor
+   And trunc(cp.fecha_emision) >= :ad_fec_ini
+   And trunc(cp.fecha_emision) <= :ad_fec_fin
+   And cp.flag_estado          <> '0'
+   And cp.tipo_doc             = (Select doc_fact_pagar From finparam Where reckey = '1')
+   and cp.origen					 like :as_origen
+ Group By cp.cod_relacion, p.nom_proveedor, p.ruc
+ Order By p.nom_proveedor" arguments=(("ad_fec_ini", date),("ad_fec_fin", date),("as_origen", string),("as_sol", string),("as_dol", string),("as_empresa", string),("as_user", string)) )
+bitmap(band=header filename="" x="37" y="64" height="156" width="384" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="2" expression=" as_empresa "border="0" color="0" x="37" y="232" height="60" width="384" format="[GENERAL]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Compra de Proveedores" border="1" color="33554432" x="1531" y="32" height="80" width="1527" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Del : ' + string( ad_fec_ini , 'dd/mm/yyyy') + ' Al : ' + string( ad_fec_fin , 'dd/mm/yyyy')"border="0" color="33554432" x="1531" y="152" height="64" width="1527" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="2" expression="if ( as_origen = '%' , 'Todos los Origenes',  as_origen )"border="0" color="33554432" x="1531" y="240" height="64" width="1527" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Importes" border="2" color="33554432" x="3936" y="332" height="56" width="672" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Dolares" border="2" color="33554432" x="4274" y="392" height="56" width="334" html.valueishtml="0"  name=imp_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Soles" border="2" color="33554432" x="3936" y="392" height="56" width="334" html.valueishtml="0"  name=imp_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Direccion" border="2" color="33554432" x="2053" y="392" height="56" width="1879" html.valueishtml="0"  name=direccion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="R.U.C." border="2" color="33554432" x="1701" y="392" height="56" width="347" html.valueishtml="0"  name=proveedor_ruc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nombre Proveedor" border="2" color="33554432" x="297" y="392" height="56" width="1399" html.valueishtml="0"  name=proveedor_nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Codigo" border="2" color="33554432" x="23" y="392" height="56" width="270" html.valueishtml="0"  name=cntas_pagar_cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+compute(band=header alignment="2" expression="today()"border="0" color="0" x="4123" y="140" height="56" width="453" format="[SHORTDATE] [TIME]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Pagina ' + page() + ' de ' + pageCount()"border="0" color="0" x="4123" y="64" height="64" width="453" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="4128" y="208" height="56" width="215" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression=" as_user "border="0" color="0" x="4357" y="208" height="56" width="219" format="[GENERAL]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="4274" y="0" height="56" width="334" format="###,###,##0.00" html.valueishtml="0"  name=imp_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="3936" y="0" height="56" width="334" format="###,###,##0.00" html.valueishtml="0"  name=imp_sol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="2053" y="0" height="56" width="1879" format="[general]" html.valueishtml="0"  name=direccion visible="1" edit.limit=159 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="1701" y="0" height="56" width="347" format="[general]" html.valueishtml="0"  name=proveedor_ruc visible="1" edit.limit=11 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="297" y="0" height="56" width="1399" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="23" y="0" height="56" width="270" format="[general]" html.valueishtml="0"  name=cntas_pagar_cod_relacion visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  imp_dol  for all )"border="2" color="33554432" x="4274" y="0" height="68" width="334" format="###,###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  imp_sol  for all )"border="2" color="33554432" x="3936" y="0" height="68" width="334" format="###,###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

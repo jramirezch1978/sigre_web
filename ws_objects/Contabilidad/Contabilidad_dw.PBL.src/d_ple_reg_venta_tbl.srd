@@ -1,0 +1,259 @@
+﻿$PBExportHeader$d_ple_reg_venta_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(4000) updatewhereclause=yes name=datos dbname="datos" )
+ retrieve="select trim(to_char(s.ano, '0000')) || trim(to_char(s.mes, '00')) || '00' || '|'    	-- Periodo
+       || s.voucher || '|'                                                             -- Nro voucher
+       || 'M' || trim(s.origen) || trim(to_char(s.nro_asiento, '000000')) || '|'     	-- Nro asiento
+       || case
+      when s.flag_estado <> '0' then
+        to_char(s.fecha_documento, 'dd/mm/yyyy') 
+      else
+        ''
+      end || '|'                                                      						-- Fecha Emision Documento
+       || case
+      when s.tipo_doc_sunat = '14' and s.flag_estado <> '0' then
+        to_char(s.fecha_vencimiento, 'dd/mm/yyyy') 
+      else
+        ''
+      end || '|'                                                      						-- Fecha Vencimiento o de pago
+       || s.tipo_doc_sunat || '|'                                                     	-- Tipo Comprobante de Pago
+       || s.serie                           || '|'                      					-- nro serie
+       || s.nro                             || '|'                      					-- nro documento
+       || case 
+            when s.tipo_doc_sunat in ('00', '03', '12', '13', '87') then ''
+            else ''
+          end || '|'                                                                  	-- Campo 9: Maquina Registradora
+       || case 
+            when length(trim(s.nro_doc_ident)) = 0 then '-'
+            else substr(s.nro_doc_ident, 1, 1) 
+          end || '|'                                                                  	-- Tipo Doc Identidad
+       || case 
+            when length(trim(s.nro_doc_ident)) = 0 then ''
+            else substr(s.nro_doc_ident, 5) 
+          end || '|'                                                                  	-- Nro Doc Identidad
+       || trim(substr(s.nom_proveedor, 1, 100)) || '|'                                	-- Campo 12: Nombre del cliente     
+       || trim(to_char(s.exportaciones, '9999999990.00')) || '|'                      	-- Campo 13: Exportaciones
+       || trim(to_char(s.vtas_gravadas, '9999999990.00')) || '|'                      	-- Campo 14: Base imponible de la operacion gravada
+       || '0.00' || '|'                                                               	-- Campo 15: Descuentos de la base imponible
+       || trim(to_char(s.igv_gravadas, '9999999990.00')) || '|'                       	-- Campo 16: IGV de las operacion gravada
+       || '0.00' || '|'                                                                -- Campo 17: Descuentos del IGV de la operacion gravada
+       || trim(to_char(s.vtas_exoneradas + s.igv_exoneradas, '9999999990.00')) || '|'  -- Campo 18: Monto de las operaciones exoneradas       
+       || trim(to_char(s.vtas_inafectas + s.igv_inafectas, '9999999990.00')) || '|'    -- Campo 19: Monto de las operaciones inafectas
+       || '0.00' || '|'                                                                -- Campo 20: Impuesto Selectivo al consumo
+       || '0.00' || '|'                                                                -- Campo 21: Base imponible de pilado de arroz
+       || '0.00' || '|'                                                                -- Campo 22: Impuesto para el pilado de arroz
+       || trim(to_char(s.icbper, '9999999990.00')) || '|'                     		   -- Campo 23: Impuesto ICBPER
+       || trim(to_char(s.otros_impuestos, '9999999990.00')) || '|'                     -- Campo 24: Otros conceptos o tributos
+       || trim(to_char(s.exportaciones + s.vtas_gravadas + s.igv_gravadas 
+      		+ s.vtas_inafectas + s.igv_inafectas + s.vtas_exoneradas 
+      		+ s.igv_exoneradas + s.icbper, '9999999990.00')) || '|'                    -- Campo 25: Importe total del documento
+       || case 
+            when s.cod_moneda = pkg_logistica.of_soles(null) then 'PEN'
+            else 'USD'
+          end || '|'                                                                   -- Campo 26: Moneda
+       || trim(to_char(s.tasa_cambio, '0.000')) || '|'                                 -- Campo 27: Tasa de cambio
+       || case 
+            when s.fecha_emision_ref is null then ''
+            else to_char(s.fecha_emision_ref, 'dd/mm/yyyy')
+          end || '|'                                                                  	-- Campo 28: Fecha emision referencia
+       || s.tipo_ref || '|'                                                           	-- Campo 29: Tipo de Documento de referencia       
+       || s.serie_ref || '|'                                                          	-- Campo 30: Serie de documento de referencia
+       || s.nro_ref || '|'                                                            	-- Campo 31: Numero de Documento de referencia              
+       || '|'                                                                         	-- Campo 32: Identificacion del Contrato o proyecto
+       || '|'                                                                         	-- Campo 33: Error Tipo 1: Inconsistencia de Tipo de Cambio
+       || '|'                                                                         	-- Campo 34: Indicador de Comprobantes de pago cancelado
+     || case 
+            when s.flag_estado = '0' then '2'
+            else '1'
+          end || '|'                                                                  	-- Campo 35: Indicador de oportunidad
+     as datos
+from (
+    select  cc.nro_asiento,
+        cc.fecha_documento,
+        cc.fecha_vencimiento,
+        cc.tipo_doc, 
+        dt.desc_tipo_doc,
+        pkg_fact_electronica.of_get_serie(cc.nro_doc) as serie,
+        pkg_fact_electronica.of_get_nro(cc.nro_doc)   as nro,
+        cc.nro_doc,
+        cc.cod_relacion,
+        p.nom_proveedor,
+        cc.origen,
+        cc.ano, 
+        cc.mes,
+        cc.origen || trim(to_char(cc.ano, '0000')) || trim(to_char(cc.mes, '00')) || trim(to_char(cc.nro_libro, '00')) || trim(to_char(cc.nro_asiento, '000000')) as voucher,
+        case 
+         when 
+          decode(p.tipo_doc_ident, 6, p.ruc, p.nro_doc_ident) is null then ''
+         else
+          p.tipo_doc_ident || ' - ' || decode(p.tipo_doc_ident, 6, p.ruc, p.nro_doc_ident) 
+        end as nro_doc_ident,
+        cc.tasa_cambio as tasa_cambio,
+        cc.cod_moneda,
+        dt.cod_sunat as tipo_doc_sunat,
+        cc.flag_estado,
+        (
+          select nvl(sum(ccd.cantidad * ccd.precio_unitario*(100 - nvl(ccd.descuento,0))/100 + nvl(ccd.redondeo_manual,0)),0)
+            from cntas_cobrar_det ccd
+           where ccd.tipo_doc = cc.tipo_doc
+            and ccd.nro_doc   = cc.nro_doc
+            and ccd.tipo_cred_fiscal = '09'
+        ) * decode(cc.cod_moneda, PKG_LOGISTICA.of_soles(null), 1, cc.tasa_cambio) * DECODE(dt.flag_signo, '+', 1, -1) as vtas_gravadas,
+        (
+          select nvl(sum(ci.importe), 0) * decode(cc.cod_moneda, PKG_LOGISTICA.of_soles(null), 1, cc.tasa_cambio)
+            from cc_doc_det_imp    ci,
+                 cntas_cobrar_det  ccd,
+                 impuestos_tipo    it
+           where ci.tipo_doc          = ccd.tipo_doc
+             and ci.nro_doc           = ccd.nro_doc
+             and ci.item              = ccd.item
+             and ci.tipo_impuesto     = it.tipo_impuesto
+             and ccd.tipo_doc         = cc.tipo_doc
+             and ccd.nro_doc          = cc.nro_doc
+             and ccd.tipo_cred_fiscal = '09'
+             and it.flag_igv          = '1'
+             and ci.tipo_impuesto     not in (select *
+                                                from table(split(pkg_config.USF_GET_PARAMETER('IMPUESTO_ICBPER', 'ICBPE')))) 
+        ) * DECODE(dt.flag_signo, '+', 1, -1) as igv_gravadas,
+        -- IGV transferencia GRATUITA
+        pkg_sigre_finanzas.of_igv_gratuito(cc.tipo_doc, cc.nro_doc)  * decode(cc.cod_moneda, PKG_LOGISTICA.of_soles(null), 1, cc.tasa_cambio) 
+        * DECODE(dt.flag_signo, '+', 1, -1) as igv_gratuito,
+        (
+          select nvl(sum(ccd.cantidad * ccd.precio_unitario*(100 - nvl(ccd.descuento,0))/100 + nvl(ccd.redondeo_manual,0)),0)
+            from cntas_cobrar_det ccd
+           where ccd.tipo_doc = cc.tipo_doc
+            and ccd.nro_doc   = cc.nro_doc
+            and ccd.tipo_cred_fiscal = '10'
+        ) * decode(cc.cod_moneda, PKG_LOGISTICA.of_soles(null), 1, cc.tasa_cambio) * DECODE(dt.flag_signo, '+', 1, -1) as vtas_inafectas,
+        (
+          select nvl(sum(ci.importe), 0) * decode(cc.cod_moneda, PKG_LOGISTICA.of_soles(null), 1, cc.tasa_cambio)
+            from cc_doc_det_imp    ci,
+                 cntas_cobrar_det  ccd,
+                 impuestos_tipo    it
+           where ci.tipo_doc          = ccd.tipo_doc
+             and ci.nro_doc           = ccd.nro_doc
+             and ci.item              = ccd.item
+             and ci.tipo_impuesto     = it.tipo_impuesto
+             and ccd.tipo_doc         = cc.tipo_doc
+             and ccd.nro_doc          = cc.nro_doc
+             and ccd.tipo_cred_fiscal = '10'
+             and it.flag_igv          = '1'
+             and ci.tipo_impuesto     not in (select *
+                                                from table(split(pkg_config.USF_GET_PARAMETER('IMPUESTO_ICBPER', 'ICBPE')))) 
+        ) as igv_inafectas,
+		  (
+          select nvl(sum(ci.importe), 0) * decode(cc.cod_moneda, PKG_LOGISTICA.of_soles(null), 1, cc.tasa_cambio)
+            from cc_doc_det_imp    ci,
+                 cntas_cobrar_det  ccd,
+                 impuestos_tipo    it
+           where ci.tipo_doc          = ccd.tipo_doc
+             and ci.nro_doc           = ccd.nro_doc
+             and ci.item              = ccd.item
+             and ci.tipo_impuesto     = it.tipo_impuesto
+             and ccd.tipo_doc         = cc.tipo_doc
+             and ccd.nro_doc          = cc.nro_doc
+             and (it.flag_igv         = '0'
+               or ci.tipo_impuesto     in (select *
+                                             from table(split(pkg_config.USF_GET_PARAMETER('IMPUESTO_ICBPER', 'ICBPE'))))) 
+        ) as icbper,
+        (
+          select nvl(sum(ci.importe), 0) * decode(cc.cod_moneda, PKG_LOGISTICA.of_soles(null), 1, cc.tasa_cambio)
+            from cc_doc_det_imp    ci,
+                 cntas_cobrar_det  ccd,
+                 impuestos_tipo    it
+           where ci.tipo_doc          = ccd.tipo_doc
+             and ci.nro_doc           = ccd.nro_doc
+             and ci.item              = ccd.item
+             and ci.tipo_impuesto     = it.tipo_impuesto
+             and ccd.tipo_doc         = cc.tipo_doc
+             and ccd.nro_doc          = cc.nro_doc
+             and it.flag_igv         = '0'
+             and ci.tipo_impuesto    not in (select *
+                                             from table(split(pkg_config.USF_GET_PARAMETER('IMPUESTO_ICBPER', 'ICBPE'))))
+        ) as otros_impuestos,
+        (
+          select nvl(sum(ccd.cantidad * ccd.precio_unitario*(100 - nvl(ccd.descuento,0))/100 + nvl(ccd.redondeo_manual,0)),0)
+            from cntas_cobrar_det ccd
+           where ccd.tipo_doc = cc.tipo_doc
+             and ccd.nro_doc  = cc.nro_doc
+             and ccd.tipo_cred_fiscal = '11'
+        ) * decode(cc.cod_moneda, PKG_LOGISTICA.of_soles(null), 1, cc.tasa_cambio) * DECODE(dt.flag_signo, '+', 1, -1) as vtas_exoneradas,
+        (
+          select nvl(sum(ci.importe), 0) * decode(cc.cod_moneda, PKG_LOGISTICA.of_soles(null), 1, cc.tasa_cambio)
+            from cc_doc_det_imp    ci,
+                 cntas_cobrar_det  ccd,
+                 impuestos_tipo    it
+           where ci.tipo_doc          = ccd.tipo_doc
+             and ci.nro_doc           = ccd.nro_doc
+             and ci.item              = ccd.item
+             and ci.tipo_impuesto     = it.tipo_impuesto
+             and ccd.tipo_doc         = cc.tipo_doc
+             and ccd.nro_doc          = cc.nro_doc
+             and ccd.tipo_cred_fiscal = '11'
+             and it.flag_igv          = '1'
+             and ci.tipo_impuesto     not in (select *
+                                                from table(split(pkg_config.USF_GET_PARAMETER('IMPUESTO_ICBPER', 'ICBPE')))) 
+        ) as igv_exoneradas,
+        (
+          select nvl(sum(ccd.cantidad * ccd.precio_unitario*(100 - nvl(ccd.descuento,0))/100 + nvl(ccd.redondeo_manual,0)),0)
+            from cntas_cobrar_det ccd
+           where ccd.tipo_doc = cc.tipo_doc
+             and ccd.nro_doc  = cc.nro_doc
+             and ccd.tipo_cred_fiscal = '08'
+        ) * decode(cc.cod_moneda, PKG_LOGISTICA.of_soles(null), 1, cc.tasa_cambio) * DECODE(dt.flag_signo, '+', 1, -1) as exportaciones,
+        dr.fecha_emision_ref, 
+        dr.tipo_ref, 
+        dr.serie_ref, 
+        dr.nro_ref,
+        (select nota_credito from finparam where reckey = '1') as ncc
+          
+    from cntas_cobrar     cc,
+          proveedor        p,
+          doc_tipo         dt,
+      (select distinct
+            cc.fecha_documento as fecha_emision_ref, 
+            dt.cod_sunat       as tipo_ref,    
+            pkg_fact_electronica.of_get_serie(dr.nro_ref) as serie_ref,
+            pkg_fact_electronica.of_get_nro(dr.nro_ref)   as nro_ref,  
+            cc.cod_relacion,   
+            dr.tipo_doc, 
+            dr.nro_doc
+        from  cntas_cobrar_det  dr,
+            cntas_cobrar      cc,
+            doc_tipo          dt
+        where dr.tipo_ref    = cc.tipo_doc
+          and dr.nro_ref      = cc.nro_doc 
+          and dr.tipo_ref    = dt.tipo_doc
+          and dr.tipo_doc   in ('NCC', 'NDC') 
+      ) dr
+    where cc.cod_relacion   = p.proveedor
+      and cc.tipo_doc       = dt.tipo_doc
+      and cc.cod_relacion   = dr.cod_relacion (+)
+      and cc.tipo_doc       = dr.tipo_doc     (+)
+      and cc.nro_doc        = dr.nro_doc      (+)
+      and cc.ano            = :ani_year
+      and cc.mes            = :ani_mes
+      and cc.nro_libro      = 04            -- Solo libro de ventas
+    ORDER BY TIPO_DOC_sunat ASC,   
+          serie, 
+       nro
+) s
+
+" arguments=(("ani_year", number),("ani_mes", number)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="56" width="8165" format="[general]" html.valueishtml="0"  name=datos visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Courier New" font.height="-7" font.weight="400"  font.family="3" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

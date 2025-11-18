@@ -1,0 +1,137 @@
+﻿$PBExportHeader$d_remun_gandes_fijos_det_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=512 color="536870912" )
+summary(height=196 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=0 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="gan_desct_fijo.cod_trabajador" )
+ column=(type=char(4) updatewhereclause=yes name=cod_concep dbname="gan_desct_fijo.cod_concep" )
+ column=(type=char(1) updatewhereclause=yes name=flag_trabaj dbname="gan_desct_fijo.flag_trabaj" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="gan_desct_fijo.flag_estado" )
+ column=(type=char(1) updatewhereclause=yes name=flag_bonif_fija_30_25 dbname="flag_bonif_fija_30_25" )
+ column=(type=char(1) updatewhereclause=yes name=situa_trabaj dbname="situa_trabaj" )
+ column=(type=char(10) updatewhereclause=yes name=estado_contrato dbname="estado_contrato" )
+ column=(type=number updatewhereclause=yes name=imp_gan_desc dbname="gan_desct_fijo.imp_gan_desc" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="maestro.cod_origen" )
+ column=(type=char(50) updatewhereclause=yes name=desc_origen dbname="desc_origen" )
+ column=(type=char(3) updatewhereclause=yes name=tipo_trabajador dbname="maestro.tipo_trabajador" )
+ column=(type=char(30) updatewhereclause=yes name=desc_tipo_trab dbname="desc_tipo_trab" )
+ column=(type=char(30) updatewhereclause=yes name=apel_paterno dbname="maestro.apel_paterno" )
+ column=(type=char(30) updatewhereclause=yes name=apel_materno dbname="maestro.apel_materno" )
+ column=(type=char(30) updatewhereclause=yes name=nombre1 dbname="maestro.nombre1" )
+ column=(type=char(30) updatewhereclause=yes name=nombre2 dbname="maestro.nombre2" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="maestro.cencos" )
+ column=(type=char(25) updatewhereclause=yes name=desc_breve dbname="concepto.desc_breve" )
+ column=(type=char(73) updatewhereclause=yes name=seccion dbname="seccion" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ retrieve="select gdf.cod_trabajador, gdf.concep as cod_concep, gdf.flag_trabaj, gdf.flag_estado, nvl(m.bonif_fija_30_25,'0') as flag_bonif_fija_30_25, nvl(m.situa_trabaj,' ') as situa_trabaj, decode(nvl(m.situa_trabaj,' '), 'E', 'ESTABLE', 'S', 'ESTABLE', 'C', 'CONTRATADO', 'OTROS') as estado_contrato, gdf.imp_gan_desc, m.cod_origen, initcap(o.nombre) as desc_origen, m.tipo_trabajador, initcap(tt.desc_tipo_tra) as desc_tipo_trab, m.apel_paterno, m.apel_materno, m.nombre1, m.nombre2, m.cencos, cpt.desc_breve, initcap(trim(a.desc_area) || ' (' || m.cod_area || ') - ' || trim(s.desc_seccion) || ' (' || m.cod_seccion || ')') as seccion, cc.desc_cencos
+      from gan_desct_fijo gdf
+      left outer join maestro m on gdf.cod_trabajador = m.cod_trabajador
+      left outer join tipo_trabajador tt on m.tipo_trabajador = tt.tipo_trabajador
+      left outer join origen o on m.cod_origen = o.cod_origen
+      left outer join concepto cpt on gdf.concep = cpt.concep
+      left outer join area a on m.cod_area = a.cod_area
+      left outer join seccion s on m.cod_area = s.cod_area and m.cod_seccion = s.cod_seccion
+      left outer join centros_costo cc on m.cencos = cc.cencos
+      where gdf.concep in (select c.concep from concepto c where c.flag_estado = '1' and (substr(c.concep,1,2) = (select p.grc_gnn_fija from rrhhparam p where p.reckey = '1') or substr(c.concep,1,2) = (select p.grc_dsc_fijo from rrhhparam p where p.reckey = '1')) and c.concep not in (select g.concepto_gen from grupo_calculo g where g.grupo_calculo in ('030', '031'))) 
+         and gdf.flag_estado = '1'
+         and m.flag_estado = '1'
+         and gdf.imp_gan_desc <> 0
+         and m.situa_trabaj in ('S','E','C')
+         and m.cod_origen in (select oao.cod_origen from ot_adm_origen oao inner join ot_adm_usuario oau on oao.ot_adm = oau.ot_adm where oau.cod_usr = 'mmcsn')
+
+union all
+
+   select gdf.cod_trabajador, (select min(gc.concepto_gen) from grupo_calculo gc where gc.grupo_calculo = (select rhc.bonificacion30 from rrhhparam_cconcep rhc)) as cod_concep, gdf.flag_trabaj, gdf.flag_estado, nvl(m.bonif_fija_30_25,'0') as flag_bonif_fija_30_25, nvl(m.situa_trabaj,' ') as situa_trabaj, decode(nvl(m.situa_trabaj,' '), 'E', 'ESTABLE', 'S', 'ESTABLE', 'C', 'CONTRATADO', 'OTROS') as estado_contrato, round((decode(nvl(m.bonif_fija_30_25,'0'), '1', 0.30, 0) * decode(m.situa_trabaj, 'E', gdf.imp_gan_desc, 'S', gdf.imp_gan_desc, 'C', gdf.imp_gan_desc, 0)),2) as imp_acumula_30, m.cod_origen, initcap(o.nombre) as desc_origen, m.tipo_trabajador, initcap(tt.desc_tipo_tra) as desc_tipo_trab, m.apel_paterno, m.apel_materno, m.nombre1, m.nombre2, m.cencos, cpt.desc_breve, initcap(trim(a.desc_area) || ' (' || m.cod_area || ') - ' || trim(s.desc_seccion) || ' (' || m.cod_seccion || ')') as seccion, cc.desc_cencos
+      from gan_desct_fijo gdf
+      left outer join maestro m on gdf.cod_trabajador = m.cod_trabajador
+            left outer join tipo_trabajador tt on m.tipo_trabajador = tt.tipo_trabajador
+      left outer join origen o on m.cod_origen = o.cod_origen
+      left outer join concepto cpt on gdf.concep = cpt.concep
+      left outer join area a on m.cod_area = a.cod_area
+      left outer join seccion s on m.cod_area = s.cod_area and m.cod_seccion = s.cod_seccion
+      left outer join centros_costo cc on m.cencos = cc.cencos
+      where gdf.concep in (select c.concep from concepto c where c.flag_estado = '1' and (substr(c.concep,1,2) = (select p.grc_gnn_fija from rrhhparam p where p.reckey = '1') or substr(c.concep,1,2) = (select p.grc_dsc_fijo from rrhhparam p where p.reckey = '1')) and c.concep not in (select g.concepto_gen from grupo_calculo g where g.grupo_calculo in ('030', '031')))
+         and gdf.flag_estado = '1'
+         and m.flag_estado = '1'
+         and round((decode(nvl(m.bonif_fija_30_25,'0'), '1', 0.30, 0) * decode(m.situa_trabaj, 'E', gdf.imp_gan_desc, 'S', gdf.imp_gan_desc, 'C', gdf.imp_gan_desc, 0)),2) <> 0
+         and m.situa_trabaj in ('S','E','C')
+         and m.cod_origen in (select oao.cod_origen from ot_adm_origen oao inner join ot_adm_usuario oau on oao.ot_adm = oau.ot_adm where oau.cod_usr = 'mmcsn')
+
+union all
+
+   select gdf.cod_trabajador, (select min(gc.concepto_gen) from grupo_calculo gc where gc.grupo_calculo = (select rhc.bonificacion25 from rrhhparam_cconcep rhc))  as cod_concep, gdf.flag_trabaj, gdf.flag_estado, nvl(m.bonif_fija_30_25,'0') as flag_bonif_fija_30_25, nvl(m.situa_trabaj,' ') as situa_trabaj, decode(nvl(m.situa_trabaj,' '), 'E', 'ESTABLE', 'S', 'ESTABLE', 'C', 'CONTRATADO', 'OTROS') as estado_contrato, round((decode(nvl(m.bonif_fija_30_25,'0'), '2', 0.25, 0) * decode(m.situa_trabaj, 'E', gdf.imp_gan_desc, 'S', gdf.imp_gan_desc, 'C', gdf.imp_gan_desc, 0)),2) as imp_acumula_25, m.cod_origen, initcap(o.nombre) as desc_origen, m.tipo_trabajador, initcap(tt.desc_tipo_tra) as desc_tipo_trab, m.apel_paterno, m.apel_materno, m.nombre1, m.nombre2, m.cencos, cpt.desc_breve, initcap(trim(a.desc_area) || ' (' || m.cod_area || ') - ' || trim(s.desc_seccion) || ' (' || m.cod_seccion || ')') as seccion, cc.desc_cencos
+      from gan_desct_fijo gdf
+      left outer join maestro m on gdf.cod_trabajador = m.cod_trabajador
+      left outer join tipo_trabajador tt on m.tipo_trabajador = tt.tipo_trabajador
+      left outer join origen o on m.cod_origen = o.cod_origen
+      left outer join concepto cpt on gdf.concep = cpt.concep
+      left outer join area a on m.cod_area = a.cod_area
+      left outer join seccion s on m.cod_area = s.cod_area and m.cod_seccion = s.cod_seccion
+      left outer join centros_costo cc on m.cencos = cc.cencos
+      where gdf.concep in (select c.concep from concepto c where c.flag_estado = '1' and (substr(c.concep,1,2) = (select p.grc_gnn_fija from rrhhparam p where p.reckey = '1') or substr(c.concep,1,2) = (select p.grc_dsc_fijo from rrhhparam p where p.reckey = '1')) and c.concep not in (select g.concepto_gen from grupo_calculo g where g.grupo_calculo in ('030', '031')))
+         and gdf.flag_estado = '1'
+         and m.flag_estado = '1'
+         and round((decode(nvl(m.bonif_fija_30_25,'0'), '2', 0.25, 0) * decode(m.situa_trabaj, 'E', gdf.imp_gan_desc, 'S', gdf.imp_gan_desc, 'C', gdf.imp_gan_desc, 0)),2) <> 0
+         and m.situa_trabaj in ('S','E','C')
+         and m.cod_origen in (select oao.cod_origen from ot_adm_origen oao inner join ot_adm_usuario oau on oao.ot_adm = oau.ot_adm where oau.cod_usr = 'mmcsn')
+
+   order by cod_origen, tipo_trabajador, estado_contrato, seccion, apel_paterno, apel_materno, nombre1, nombre2, cod_concep
+   
+   
+" )
+group(level=1 header.height=0 trailer.height=184 by=("cod_origen" , "tipo_trabajador" , "estado_contrato" ) newpage=yes header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=128 trailer.height=116 by=("seccion" , "cencos" ) header.color="536870912" trailer.color="536870912" )
+group(level=3 header.height=112 trailer.height=0 by=("cod_trabajador" ) header.color="536870912" trailer.color="536870912" )
+group(level=4 header.height=60 trailer.height=0 by=("cod_concep" ) header.color="536870912" trailer.color="536870912" )
+rectangle(band=summary x="64" y="56" height="100" width="3182"  name=r_2 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="0" )
+rectangle(band=trailer.1 x="64" y="36" height="104" width="3182"  name=r_1 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+text(band=header alignment="2" text="Conceptos de Ganancias y Descuentos" border="2" color="0" x="1335" y="348" height="56" width="1266" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Trabajador" border="2" color="0" x="64" y="348" height="56" width="1266" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+bitmap(band=header filename="" x="64" y="52" height="184" width="370" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="64" y="248" height="56" width="370" html.valueishtml="0"  name=st_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="562" y="136" height="56" width="69" html.valueishtml="0"  name=st_rango_fecha visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Origen" border="2" color="0" x="827" y="264" height="56" width="219" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Trabajador" border="2" color="0" x="1586" y="264" height="56" width="334" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=12 alignment="2" tabsequence=32766 border="2" color="16711680" x="1925" y="264" height="56" width="530" format="[general]" html.valueishtml="0"  name=desc_tipo_trab visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header id=10 alignment="2" tabsequence=32766 border="2" color="16711680" x="1051" y="264" height="56" width="530" format="[general]" html.valueishtml="0"  name=desc_origen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header id=7 alignment="2" tabsequence=32766 border="0" color="255" x="1006" y="52" height="56" width="1271" format="[general]" html.valueishtml="0"  name=estado_contrato visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="DETALLE DE GANANCIAS Y DESCUENTOS FIJOS" border="1" color="0" x="759" y="140" height="76" width="1765" html.valueishtml="0"  name=st_titulo visible="1"  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="2574" y="248" height="56" width="640" html.valueishtml="0"  name=st_fecha visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2651" y="96" height="56" width="562" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="0" x="2962" y="172" height="56" width="251" html.valueishtml="0"  name=st_usuario visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="/* if( mid(  concep ,1,1 ) = '2',  imp_gan_desc ,0 ) */"border="0" color="33554432" x="2999" y="32" height="52" width="302" format="##,####,###,###.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="/* if( mid(  concep ,1,1 ) = '1',  imp_gan_desc ,0 )  */"border="0" color="33554432" x="2693" y="32" height="52" width="302" format="##,####,###,###.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="255" x="87" y="28" height="56" width="23" format="[general]" html.valueishtml="0"  name=flag_trabaj visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="255" x="224" y="28" height="56" width="23" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="255" x="270" y="28" height="56" width="23" format="[general]" html.valueishtml="0"  name=flag_bonif_fija_30_25 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="255" x="165" y="28" height="56" width="23" format="[general]" html.valueishtml="0"  name=situa_trabaj visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="255" x="987" y="28" height="56" width="992" format="[general]" html.valueishtml="0"  name=imp_gan_desc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.2 id=19 alignment="0" tabsequence=32766 border="0" color="16711680" x="64" y="32" height="56" width="1253" format="[general]" html.valueishtml="0"  name=seccion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="64" y="408" height="56" width="251" html.valueishtml="0"  name=codigo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Apellidos y Nombres" border="2" color="0" x="320" y="408" height="56" width="1010" html.valueishtml="0"  name=nombres_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="1335" y="408" height="56" width="251" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.4 id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1335" y="4" height="52" width="251" format="[general]" html.valueishtml="0"  name=cod_concep visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="1591" y="408" height="56" width="1010" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.4 id=18 alignment="0" tabsequence=32766 border="0" color="0" x="1591" y="4" height="52" width="1010" format="[general]" html.valueishtml="0"  name=desc_breve visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="TotalDesctos." border="2" color="0" x="2912" y="348" height="116" width="302" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+compute(band=header.4 alignment="1" expression="sum(if( mid(  cod_concep ,1,1 ) = '2',  imp_gan_desc ,0 ) for group 4)"border="0" color="0" x="2912" y="4" height="52" width="302" format="##,####,###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="TotalGanancias" border="2" color="0" x="2606" y="348" height="116" width="302" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+compute(band=header.4 alignment="1" expression="sum(if( mid(  cod_concep ,1,1 ) = '1',  imp_gan_desc ,0 )  for group 4) "border="0" color="0" x="2606" y="4" height="52" width="302" format="##,####,###,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(if( mid(  cod_concep ,1,1 ) = '2',  imp_gan_desc ,0 ) for group 1)"border="0" color="16711680" x="2912" y="60" height="52" width="302" format="##,####,###,##0.00" html.valueishtml="0"  name=compute_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(if( mid(  cod_concep ,1,1 ) = '1',  imp_gan_desc ,0 )  for group 1)"border="0" color="16711680" x="2606" y="60" height="52" width="302" format="##,####,###,##0.00" html.valueishtml="0"  name=compute_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="2" expression="~"TOTAL  ~" + TRIM( desc_origen ) + ~"  -  ~" + TRIM( desc_tipo_trab ) + ~"  -  ~" + TRIM(  estado_contrato  )"border="0" color="16711680" x="174" y="60" height="56" width="1806" format="[GENERAL]" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=summary alignment="1" expression="sum(if( mid(  cod_concep ,1,1 ) = '2',  imp_gan_desc ,0 ) for all)"border="0" color="0" x="2912" y="76" height="52" width="302" format="##,####,###,##0.00" html.valueishtml="0"  name=compute_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=summary alignment="1" expression="sum(if( mid(  cod_concep ,1,1 ) = '1',  imp_gan_desc ,0 )  for all)"border="0" color="0" x="2606" y="76" height="52" width="302" format="##,####,###,##0.00" html.valueishtml="0"  name=compute_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=summary alignment="2" expression="~"TOTAL GENERAL~""border="0" color="0" x="174" y="76" height="56" width="1806" format="[GENERAL]" html.valueishtml="0"  name=compute_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.2 alignment="1" expression="sum(if( mid( cod_concep ,1,1 ) = '2',  imp_gan_desc ,0 ) for group 2)"border="2" color="16711680" x="2912" y="32" height="52" width="302" format="##,####,###,##0.00" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.2 alignment="1" expression="sum(if( mid( cod_concep ,1,1 ) = '1',  imp_gan_desc ,0 )  for group 2)"border="2" color="16711680" x="2606" y="32" height="52" width="302" format="##,####,###,##0.00" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=header.3 alignment="1" expression="sum(if( mid(  cod_concep ,1,1 ) = '2',  imp_gan_desc ,0 ) for group 3)"border="0" color="0" x="2912" y="28" height="56" width="302" format="##,####,###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=header.3 alignment="1" expression="sum(if( mid(  cod_concep ,1,1 ) = '1',  imp_gan_desc ,0 )  for group 3)"border="0" color="0" x="2606" y="28" height="56" width="302" format="##,####,###,##0.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=header.3 alignment="0" expression="if(isNull( apel_paterno ), ' ', trim(apel_paterno) ) + ' ' +  if(isNull(  apel_materno  ), ' ',  trim( apel_materno ) ) + ' ' + if(isNull(  nombre1 ), ' ',  trim( nombre1 ) ) + ' ' + if(isNull(  nombre2  ), ' ',  trim( nombre2 ) )"border="0" color="0" x="320" y="28" height="56" width="1408" format="[GENERAL]" html.valueishtml="0"  name=compute_13 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.3 id=1 alignment="0" tabsequence=32766 border="0" color="0" x="64" y="28" height="56" width="251" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.2 id=17 alignment="0" tabsequence=32766 border="0" color="16711680" x="1335" y="32" height="56" width="251" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=20 alignment="0" tabsequence=32766 border="0" color="16711680" x="1591" y="32" height="56" width="1317" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

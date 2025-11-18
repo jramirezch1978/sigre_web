@@ -1,0 +1,20 @@
+﻿$PBExportHeader$f_monto_retenido_x_persona.srf
+global type f_monto_retenido_x_persona from function_object
+end type
+
+forward prototypes
+global function decimal f_monto_retenido_x_persona (string as_cod_trabajador, integer ai_year)
+end prototypes
+
+global function decimal f_monto_retenido_x_persona (string as_cod_trabajador, integer ai_year);Decimal {2} ldc_monto_retenido
+
+select Sum(Valor) 
+  into :ldc_monto_retenido 
+  from rrhh_formato_quinta_cat c
+ where c.cod_trabajador = :as_cod_trabajador 
+   and c.ano            = :ai_year				 
+	and c.factor         = -1;
+		 
+Return ldc_monto_retenido		 
+end function
+

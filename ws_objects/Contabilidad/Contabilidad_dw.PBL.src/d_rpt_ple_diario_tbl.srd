@@ -1,0 +1,284 @@
+﻿$PBExportHeader$d_rpt_ple_diario_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=72 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(4000) updatewhereclause=yes name=exp_row dbname="exp_row" )
+ retrieve="select 	periodo 				|| '|' ||
+       	voucher 				|| '|' ||
+		 	nro_asiento 		|| '|' || -- Numero del asiento
+       	cnta_ctbl 			|| '|' ||
+		 	desc_origen 		|| '|' ||
+			cencos				|| '|' ||
+			moneda				|| '|' ||
+			tipo_doc_ident		|| '|' ||
+			nro_doc_ident		|| '|' ||
+			tipo_docref1		|| '|' ||
+			serie					|| '|' ||
+			numero				|| '|' ||
+			fec_contable		|| '|' ||
+			fecha_vencimiento	|| '|' ||
+			fec_operacion		|| '|' ||
+			glosa					|| '|' ||
+			glosa_referencial	|| '|' ||
+       	trim(to_char(debe, '9999999990.00')) 	|| '|' ||
+       	trim(to_char(haber, '9999999990.00')) 	|| '|' ||
+			dato_codigo			|| '|' ||
+       	estado 				|| '|' ||
+			cod_banco_sunat	|| '|' ||
+			nro_cuenta			|| '|' ||
+		   medio_pago			|| '|' ||
+       	nro_transaccion	|| '|' as exp_row
+from (       
+    select 	trim(to_char(ca.ano,'0000')) || trim(to_char(ca.mes,'00')) || '00' as periodo,						-- 01. Periodo
+           	trim(ca.origen) || trim(to_char(ca.ano, '0000')) || trim(to_char(ca.mes, '00')) || 
+			  	trim(to_char(ca.nro_libro, '00')) || trim(to_char(ca.nro_asiento, '00000')) || 
+			  	trim(to_char(cad.item, '00000')) as voucher,																		-- 02. Voucher
+			  	case 
+				  when ca.nro_libro = 0 then
+					'A'
+				  when ca.nro_libro = 90 then
+					'C'
+				  else 
+					'M'
+			  	end  || trim(to_char(ca.nro_asiento, '000000')) as nro_asiento,											-- 03. Nro asiento
+           	trim(cad.cnta_ctbl) as cnta_ctbl,																					-- 04. Cuenta contable
+			  	o.nombre as desc_origen,																								-- 05. Unidad Operativa																		
+			  	trim(replace(REPLACE(cad.cencos, 'Ñ', 'N'), '_', '-')) as cencos,																	-- 06. Cencos
+           	decode(ca.cod_moneda, PKG_LOGISTICA.of_soles(null), 'PEN', 'USD') as moneda,    						-- 07. Moneda
+			  	p.tipo_doc_ident,																											-- 08. Tipo Documento Emisor
+			  	decode(p.tipo_doc_ident, '6', p.ruc, nvl(p.nro_doc_ident, '0')) as nro_doc_ident,					-- 09. Numero Documento Identidad
+			  	decode(dt.cod_sunat, null, '00', dt.cod_sunat) as tipo_docref1,											-- 10. Tipo de comprobante asociado
+				case
+					when decode(dt.cod_sunat, null, '00', dt.cod_sunat) = '00' then
+						'0000'
+					when cad.nro_docref1 is null or trim(cad.nro_docref1) = '' then
+						'0000'
+					when decode(dt.cod_sunat, null, '00', dt.cod_sunat) = '05' then
+						'4'
+					when instr(replace(cad.nro_docref1, '--', '-'), '-') > 0 then
+						case
+							when decode(dt.cod_sunat, null, '00', dt.cod_sunat) in ('50', '52') then
+								substr(PKG_FACT_ELECTRONICA.of_get_serie(replace(cad.nro_docref1, '--', '-')),2)
+							when cp.serie_cp is not null then
+								cp.serie_cp
+							else
+								PKG_FACT_ELECTRONICA.of_get_serie(replace(cad.nro_docref1, '--', '-'))
+						end
+					else
+						'0000'
+				end as serie,																												-- 11. serie del comprobante
+				replace(
+					replace(
+						replace(
+							case
+								when decode(dt.cod_sunat, null, '00', dt.cod_sunat) = '00' then
+									'00000000'
+								when cad.nro_docref1 is null or trim(cad.nro_docref1) = '' then
+									'00000000'
+								when decode(dt.cod_sunat, null, '00', dt.cod_sunat) in ('50', '52') then
+									substr(PKG_FACT_ELECTRONICA.of_get_nro(replace(cad.nro_docref1, '--', '-')),3)
+								when cp.numero_cp is not null then
+									PKG_UTILITY.of_trim(cp.numero_cp, '0')
+								else
+									PKG_FACT_ELECTRONICA.of_get_nro(replace(cad.nro_docref1, '--', '-'))
+							end
+						,'**** ****', '00000000')
+					,'*', '')
+				,'L_', '') as numero,																									-- 12. Numero del comprobante
+           	trim(to_char(ca.fecha_cntbl, 'dd/mm/yyyy')) as fec_contable, 												-- 13. Fecha contable
+				'' as fecha_vencimiento,																								-- 14. Fecha vencimiento
+				trim(to_char(ca.fecha_cntbl, 'dd/mm/yyyy')) as fec_operacion, 												-- 15. Fecha de la operacion
+				-- 16. Glosa principal
+           	trim(substr(
+							replace(
+								replace(
+									replace(
+										replace(
+											replace(
+												replace(
+													decode(cad.det_glosa, null, decode(ca.desc_glosa, null, cc.desc_cnta, ca.desc_glosa), cad.det_glosa)
+												,'|', ' ')
+											, chr(13) || chr(10), ' ')
+										, chr(9), ' ')
+									, chr(13), ' ')
+								, chr(10), '')
+							, '/', ' ')	
+						, 1, 200)
+				) as glosa,	
+				-- 17. Glosa referencial
+				'' as glosa_referencial,																								
+       	  	abs(nvl(sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0.00)),0)) as debe,						-- 18. Movimientos del debe
+       	  	abs(nvl(sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0.00)),0)) as haber,						-- 19. Movimientos del haber
+				/*case
+					when ca.nro_libro = 4 then '140100'
+					when ca.nro_libro = 3 then
+						case 
+							when (select p.flag_personeria
+									  from cntas_pagar 	cp,
+											 proveedor		p
+									where cp.cod_relacion 	= p.proveedor
+									  and cp.origen 			= ca.origen
+ 									  and cp.ano				= ca.ano
+									  and cp.mes				= ca.mes
+									  and cp.nro_libro		= ca.nro_libro
+									  and cp.nro_asiento		= ca.nro_Asiento) = 'E' then '080200'
+							else
+								'080100'
+						end
+					else	
+						''
+				end*/
+				'' as dato_codigo,																									-- 20. dato estructurado
+			   '1' as estado, 																										-- 21. Estado de la operacion
+       		b.cod_banco_sunat,																									-- 22. Entidad bancaria
+				bc.nro_cuenta,																											-- 23. Cta Banco
+				case
+					when trim(cad.cnta_ctbl) like '10%' then
+						dt.cod_sunat_tabla1  
+					else
+						null
+				end as medio_pago,																									-- 24. Medio de pago
+				case
+					when trim(cad.cnta_ctbl) like '10%' then
+						cad.nro_docref1
+					else
+						null
+				end as nro_transaccion																								-- 25. Numero de Transaccion																								
+    from cntbl_asiento 		ca,
+         cntbl_asiento_Det cad,
+			cntbl_cnta			cc,
+			cntas_pagar			cp,
+			origen				o,
+			proveedor			p,
+			doc_tipo				dt,
+			banco_cnta        bc,
+       	banco             b
+    where ca.origen 			= cad.origen
+      and ca.ano    			= cad.ano
+      and ca.mes    			= cad.mes
+      and ca.nro_libro 		= cad.nro_libro
+      and ca.nro_asiento 	= cad.nro_asiento     
+		and cad.cnta_ctbl	 	= cc.cnta_ctbl
+		and ca.origen			= o.cod_origen
+		and cad.cod_relacion = p.proveedor			(+)
+		and cad.tipo_docref1	= dt.tipo_doc			(+)
+      and cad.cod_relacion	= cp.cod_relacion		(+)
+      and cad.tipo_docref1	= cp.tipo_doc			(+)
+	   and cad.nro_docref1	= cp.nro_doc			(+)
+		and cad.cod_ctabco   = bc.cod_ctabco 		(+)
+   	and bc.cod_banco     = b.cod_banco   		(+)
+      and ca.ano = :an_year
+      and ca.mes = :an_mes
+      and ca.flag_estado <> '0'
+      --and ca.nro_asiento = 89
+  group by 	trim(to_char(ca.ano,'0000')) || trim(to_char(ca.mes,'00')) || '00',
+           	trim(ca.origen) || trim(to_char(ca.ano, '0000')) || trim(to_char(ca.mes, '00')) || 
+			  	trim(to_char(ca.nro_libro, '00')) || trim(to_char(ca.nro_asiento, '00000')) || 
+			  	trim(to_char(cad.item, '00000')),
+			  	case 
+				  when ca.nro_libro = 0 then
+					'A'
+				  when ca.nro_libro = 90 then
+					'C'
+				  else 
+					'M'
+			  	end  || trim(to_char(ca.nro_asiento, '000000')),
+           	trim(cad.cnta_ctbl),
+			  	o.nombre,
+			  	trim(replace(REPLACE(cad.cencos, 'Ñ', 'N'), '_', '-')),
+           	decode(ca.cod_moneda, PKG_LOGISTICA.of_soles(null), 'PEN', 'USD'),
+			  	p.tipo_doc_ident,																											
+			  	decode(p.tipo_doc_ident, '6', p.ruc, nvl(p.nro_doc_ident, '0')),
+			  	decode(dt.cod_sunat, null, '00', dt.cod_sunat),
+				case
+					when decode(dt.cod_sunat, null, '00', dt.cod_sunat) = '00' then
+						'0000'
+					when cad.nro_docref1 is null or trim(cad.nro_docref1) = '' then
+						'0000'
+					when decode(dt.cod_sunat, null, '00', dt.cod_sunat) = '05' then
+						'4'
+					when instr(replace(cad.nro_docref1, '--', '-'), '-') > 0 then
+						case
+							when decode(dt.cod_sunat, null, '00', dt.cod_sunat) in ('50', '52') then
+								substr(PKG_FACT_ELECTRONICA.of_get_serie(replace(cad.nro_docref1, '--', '-')),2)
+							when cp.serie_cp is not null then
+								cp.serie_cp
+							else
+								PKG_FACT_ELECTRONICA.of_get_serie(replace(cad.nro_docref1, '--', '-'))
+						end
+					else
+						'0000'
+				end ,																												
+				replace(
+					replace(
+						replace(
+							case
+								when decode(dt.cod_sunat, null, '00', dt.cod_sunat) = '00' then
+									'00000000'
+								when cad.nro_docref1 is null or trim(cad.nro_docref1) = '' then
+									'00000000'
+								when decode(dt.cod_sunat, null, '00', dt.cod_sunat) in ('50', '52') then
+									substr(PKG_FACT_ELECTRONICA.of_get_nro(replace(cad.nro_docref1, '--', '-')),3)
+								when cp.numero_cp is not null then
+									PKG_UTILITY.of_trim(cp.numero_cp, '0')
+								else
+									PKG_FACT_ELECTRONICA.of_get_nro(replace(cad.nro_docref1, '--', '-'))
+							end
+						,'**** ****', '00000000')
+					,'*', '')
+				,'L_', ''),
+           	trim(to_char(ca.fecha_cntbl, 'dd/mm/yyyy')),
+           	trim(substr(
+							replace(
+								replace(
+									replace(
+										replace(
+											replace(
+												replace(
+													decode(cad.det_glosa, null, decode(ca.desc_glosa, null, cc.desc_cnta, ca.desc_glosa), cad.det_glosa)
+												,'|', ' ')
+											, chr(13) || chr(10), ' ')
+										, chr(9), ' ')
+									, chr(13), ' ')
+								, chr(10), '')
+							, '/', ' ')	
+						, 1, 200)
+				),
+				b.cod_banco_sunat,	
+				bc.nro_cuenta,			
+				case
+					when trim(cad.cnta_ctbl) like '10%' then
+						dt.cod_sunat_tabla1  
+					else
+						null
+				end,
+				case
+					when trim(cad.cnta_ctbl) like '10%' then
+						cad.nro_docref1
+					else
+						null
+				end
+	having 	nvl(sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0.00)),0) <> 0 or
+            nvl(sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0.00)),0) <> 0
+
+  order by voucher
+)
+WHERE debe <> 0 or haber <> 0
+
+" arguments=(("an_year", number),("an_mes", number)) )
+text(band=header alignment="2" text="Exp Row" border="2" color="33554432" x="9" y="8" height="56" width="6098" html.valueishtml="0"  name=exp_row_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="64" width="6098" format="[general]" html.valueishtml="0"  name=exp_row visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

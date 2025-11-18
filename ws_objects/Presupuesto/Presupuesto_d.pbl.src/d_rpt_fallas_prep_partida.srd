@@ -1,0 +1,56 @@
+﻿$PBExportHeader$d_rpt_fallas_prep_partida.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=416 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=ano dbname="presupuesto_partida.ano" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cencos dbname="presupuesto_partida.cencos" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cnta_prsp dbname="presupuesto_partida.cnta_prsp" )
+ column=(type=number update=yes updatewhereclause=yes name=total dbname="total" )
+ column=(type=number update=yes updatewhereclause=yes name=total_2 dbname="total_2" )
+ retrieve="select pp.ano, pp.cencos, pp.cnta_prsp, 
+       pp.proy_ene + pp.proy_feb + pp.proy_mar + pp.proy_abr +
+       pp.proy_may + pp.proy_jun + pp.proy_jul + pp.proy_ago +
+       pp.proy_set + pp.proy_oct + pp.proy_nov + pp.proy_dic  as total,
+       (select sum(round(pd.cantidad * pd.costo_unit,2))
+         from presupuesto_det pd
+        where pd.ano = pp.ano
+          and pd.cencos = pp.cencos
+          and pd.cnta_prsp = pp.cnta_prsp) as total_2
+from presupuesto_partida pp
+where pp.ano = :ani_year
+  and to_char(pp.ano) || pp.cencos || pp.cnta_prsp in (select to_char(ano) || cencos || cnta_prsp
+                                                         from presupuesto_det)
+  and pp.proy_ene + pp.proy_feb + pp.proy_mar + pp.proy_abr +
+       pp.proy_may + pp.proy_jun + pp.proy_jul + pp.proy_ago +
+       pp.proy_set + pp.proy_oct + pp.proy_nov + pp.proy_dic  <>
+       (select sum(round(pd.cantidad * pd.costo_unit,2))
+         from presupuesto_det pd
+        where pd.ano = pp.ano
+          and pd.cencos = pp.cencos
+          and pd.cnta_prsp = pp.cnta_prsp) " update="presupuesto_partida" updatewhere=1 updatekeyinplace=no arguments=(("ani_year", number)) )
+bitmap(band=header filename="gs_logo" x="23" y="24" height="184" width="370" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="23" y="220" height="56" width="370" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="0" x="2578" y="64" height="56" width="544" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="2578" y="140" height="56" width="544" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="2578" y="220" height="56" width="544" format="dd/mm/yyyy    hh:mm:ss" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Ano" border="2" color="33554432" x="9" y="356" height="56" width="329" html.valueishtml="0"  name=ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="23" y="288" height="56" width="370" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="PARTIDAS PRESUPUESTALES CON PROBLEMAS" border="1" color="0" x="658" y="68" height="76" width="1829" html.valueishtml="0"  name=t_32 visible="1"  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="658" y="188" height="76" width="1829" html.valueishtml="0"  name=t_titulo2 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="1" tabsequence=10 border="2" color="33554432" x="9" y="4" height="64" width="329" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cencos" border="2" color="33554432" x="343" y="356" height="56" width="393" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="2" color="33554432" x="343" y="4" height="64" width="393" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Proyectado" border="2" color="33554432" x="1138" y="356" height="56" width="329" html.valueishtml="0"  name=total_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Detalle" border="2" color="33554432" x="1472" y="356" height="56" width="329" html.valueishtml="0"  name=total_2_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=40 border="2" color="33554432" x="1138" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=total visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=50 border="2" color="33554432" x="1472" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=total_2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cnta Prsp" border="2" color="33554432" x="741" y="356" height="56" width="393" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="2" color="33554432" x="741" y="4" height="64" width="393" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

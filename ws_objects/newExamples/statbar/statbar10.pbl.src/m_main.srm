@@ -1,0 +1,56 @@
+﻿$PBExportHeader$m_main.srm
+forward
+global type m_main from menu
+end type
+type m_file from menu within m_main
+end type
+type m_exit from menu within m_file
+end type
+type m_file from menu within m_main
+m_exit m_exit
+end type
+end forward
+
+global type m_main from menu
+m_file m_file
+end type
+global m_main m_main
+
+on m_main.create
+m_main=this
+this.m_file=create m_file
+this.Item[]={this.m_file}
+end on
+
+on m_main.destroy
+destroy(this.m_file)
+end on
+
+type m_file from menu within m_main
+m_exit m_exit
+end type
+
+on m_file.create
+this.Text="&File"
+this.m_exit=create m_exit
+this.Item[]={this.m_exit}
+end on
+
+on m_file.destroy
+destroy(this.m_exit)
+end on
+
+type m_exit from menu within m_file
+end type
+
+event clicked;Close(ParentWindow)
+
+end event
+
+on m_exit.create
+this.Text="E&xit"
+this.Microhelp="Exit Program"
+this.ToolBarItemName="Exit!"
+this.ToolBarItemText="Exit"
+end on
+

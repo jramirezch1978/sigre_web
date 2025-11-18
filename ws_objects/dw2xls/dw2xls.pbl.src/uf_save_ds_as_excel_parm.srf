@@ -1,0 +1,23 @@
+﻿$PBExportHeader$uf_save_ds_as_excel_parm.srf
+global type uf_save_ds_as_excel_parm from function_object
+end type
+
+forward prototypes
+global function integer uf_save_ds_as_excel_parm (ref datastore ads_ds, readonly string as_filename, ref n_dwr_service_parm anvo_parm)
+end prototypes
+
+global function integer uf_save_ds_as_excel_parm (ref datastore ads_ds, readonly string as_filename, ref n_dwr_service_parm anvo_parm);//-- 06.09.2004
+integer li_ret = 0
+
+open(w_ds2xls)
+
+li_ret = w_ds2xls.of_register_ds(ads_ds)
+
+if li_ret = 1 then li_ret = uf_save_dw_as_excel_parm(w_ds2xls.dw_1, as_filename, anvo_parm)
+
+w_ds2xls.of_unregister_ds(ads_ds)
+close(w_ds2xls)
+
+return li_ret
+end function
+

@@ -1,0 +1,38 @@
+﻿$PBExportHeader$d_etiquetas_packing_lbl.srd
+release 9;
+datawindow(units=3 timer_interval=0 color=1073741824 processing=2 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 200 print.margin.right = 200 print.margin.top = 200 print.margin.bottom = 200 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no label.name="Laser Address 0.50 x 1.75 5267" label.width=5000 label.height=2500 label.rows=1 label.rows.spacing=200 label.columns=2 label.columns.spacing=300 label.topdown=no label.sheet=yes label.shape=roundrectangle label.ellipse_height=0 label.ellipse_width=0 )
+detail(height=2513 color="536870912" )
+table(column=(type=char(26) updatewhereclause=yes name=codigo dbname="codigo" )
+ column=(type=char(28) updatewhereclause=yes name=codigo_barras dbname="codigo_barras" )
+ column=(type=char(124) updatewhereclause=yes name=nom_seleccionadora dbname="nom_seleccionadora" )
+ column=(type=char(124) updatewhereclause=yes name=nom_supervisora dbname="nom_supervisora" )
+ column=(type=char(124) updatewhereclause=yes name=nom_pesadora dbname="nom_pesadora" )
+ retrieve="select origen || '-' || ltrim(substr(pr.seleccionadora,2),'0') || '-' || ltrim(substr(pr.supervisora,2),'0') || '-' || ltrim(substr(pr.pesadora,2),'0') as codigo,
+        '*' || origen || '-' || ltrim(substr(pr.seleccionadora,2),'0') || '-' || ltrim(substr(pr.supervisora,2),'0') || '-' || ltrim(substr(pr.pesadora,2),'0') || '*' as codigo_barras,
+       trim(m1.apel_paterno || ' ' || m1.apel_materno || ', ' || m1.nombre1 || ' ' || m1.nombre2) as nom_seleccionadora,
+       trim(m2.apel_paterno || ' ' || m2.apel_materno || ', ' || m2.nombre1 || ' ' || m2.nombre2) as nom_supervisora,
+       trim(m3.apel_paterno || ' ' || m3.apel_materno || ', ' || m3.nombre1 || ' ' || m3.nombre2) as nom_pesadora
+from packing_sel_sup_pes pr,
+     maestro        m1,
+     maestro        m2,
+     maestro        m3,
+	  tt_telecredito,
+	  tt_datos_campo tt
+where pr.seleccionadora = m1.cod_trabajador
+  and pr.supervisora    = m2.cod_trabajador
+  and pr.pesadora       = m3.cod_trabajador
+  and tt.supervisor 	   = pr.seleccionadora
+  and tt.cosechador1		= pr.supervisora
+  and tt.cosechador2    = pr.pesadora" )
+text(band=detail alignment="0" text="AGRILAP S.A. - PACKING" border="0" color="0" x="211" y="52" height="291" width="2989" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="2" text="" border="0" color="0" x="3889" y="105" height="767" width="926" html.valueishtml="0"  name=nro_lote_t visible="1"  font.face="Arial" font.height="-16" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="158" y="317" height="264" width="4788" format="[general]" html.valueishtml="0"  name=nom_seleccionadora visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="158" y="661" height="264" width="4788" format="[general]" html.valueishtml="0"  name=nom_supervisora visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="158" y="1005" height="264" width="4788" format="[general]" html.valueishtml="0"  name=nom_pesadora visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="0" x="132" y="1375" height="476" width="4788" format="[general]" html.valueishtml="0"  name=codigo_barras visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="IDAutomationHC39M" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="0" x="132" y="1852" height="317" width="4788" format="[general]" html.valueishtml="0"  name=codigo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

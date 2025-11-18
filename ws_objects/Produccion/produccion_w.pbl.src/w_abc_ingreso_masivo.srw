@@ -1,0 +1,234 @@
+﻿$PBExportHeader$w_abc_ingreso_masivo.srw
+forward
+global type w_abc_ingreso_masivo from w_abc
+end type
+type st_2 from statictext within w_abc_ingreso_masivo
+end type
+type uo_rango from u_ingreso_rango_fechas_v within w_abc_ingreso_masivo
+end type
+type cb_actualizar from commandbutton within w_abc_ingreso_masivo
+end type
+type st_1 from statictext within w_abc_ingreso_masivo
+end type
+type pb_exit from picturebutton within w_abc_ingreso_masivo
+end type
+end forward
+
+global type w_abc_ingreso_masivo from w_abc
+integer width = 1422
+integer height = 600
+string title = "Actualiza Costo de Producción"
+boolean minbox = false
+boolean maxbox = false
+boolean resizable = false
+windowtype windowtype = response!
+event ue_get_nro_ot ( )
+st_2 st_2
+uo_rango uo_rango
+cb_actualizar cb_actualizar
+st_1 st_1
+pb_exit pb_exit
+end type
+global w_abc_ingreso_masivo w_abc_ingreso_masivo
+
+type variables
+string 	is_cod_origen, is_articulo, is_almace
+
+dec		ildc_cantidad
+
+date		id_fecha
+
+
+end variables
+
+on w_abc_ingreso_masivo.create
+int iCurrent
+call super::create
+this.st_2=create st_2
+this.uo_rango=create uo_rango
+this.cb_actualizar=create cb_actualizar
+this.st_1=create st_1
+this.pb_exit=create pb_exit
+iCurrent=UpperBound(this.Control)
+this.Control[iCurrent+1]=this.st_2
+this.Control[iCurrent+2]=this.uo_rango
+this.Control[iCurrent+3]=this.cb_actualizar
+this.Control[iCurrent+4]=this.st_1
+this.Control[iCurrent+5]=this.pb_exit
+end on
+
+on w_abc_ingreso_masivo.destroy
+call super::destroy
+destroy(this.st_2)
+destroy(this.uo_rango)
+destroy(this.cb_actualizar)
+destroy(this.st_1)
+destroy(this.pb_exit)
+end on
+
+event ue_update;call super::ue_update;//Boolean lb_grabar = TRUE
+//STRING  ls_nro_orden, ls_nro_ot, ls_msj_err
+//
+//ls_nro_ot = trim(sle_nro_orden.text)
+//
+//// Grabar relacion en tabla Ot_otros_gastos
+//
+//INSERT INTO OT_OTROS_GASTOS
+//		(NRO_ORDEN,	COD_RELACION, TIPO_DOC, NRO_DOC)
+//VALUES
+//		(:ls_nro_ot, :is_cod_relacion, :is_tipo_doc, :is_nro_doc);
+//
+//
+//IF SQLCA.SQLCode = -1 THEN 
+//   ls_msj_err =  SQLCA.SQLErrText
+//	lb_grabar = FALSE
+//	GOTO SALIDA_ERR		
+//END IF
+//	
+//
+//IF lb_grabar THEN
+//	Commit ;
+//	Messagebox('Aviso','Operación Satisfactoria !')
+//	ii_grabar 				 = 0
+//	sle_nro_orden.enabled = False
+//	pb_nuevo.Enabled 		 = False
+//	pb_eliminar.Enabled	 = True
+//ELSE
+//	SALIDA_ERR:
+//	Rollback ;
+//	Messagebox('Aviso',ls_msj_err)
+//	Messagebox('Aviso','Se ha procedido al Rollback')
+//END IF
+//
+
+
+end event
+
+event open;// Override
+THIS.EVENT ue_open_pre()
+
+end event
+
+event ue_open_pre;// Override
+
+end event
+
+type st_2 from statictext within w_abc_ingreso_masivo
+integer x = 187
+integer y = 28
+integer width = 1065
+integer height = 72
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long backcolor = 67108864
+string text = "INGRESO MASIVO DE DATOS"
+alignment alignment = center!
+boolean focusrectangle = false
+end type
+
+type uo_rango from u_ingreso_rango_fechas_v within w_abc_ingreso_masivo
+integer x = 37
+integer y = 264
+integer taborder = 30
+boolean bringtotop = true
+long backcolor = 67108864
+end type
+
+event constructor;call super::constructor;String ls_desde
+
+of_set_label('Desde:','Hasta:')
+ 
+ls_desde = '01/' + string(month(today()))+'/' + string(year(today()))
+of_set_fecha(date(ls_desde), today()) 				// para seatear el titulo del boton
+of_set_rango_inicio(date('01/01/1900')) 				// rango inicial
+of_set_rango_fin(date('31/12/9999'))					// rango final
+
+
+end event
+
+on uo_rango.destroy
+call u_ingreso_rango_fechas_v::destroy
+end on
+
+type cb_actualizar from commandbutton within w_abc_ingreso_masivo
+integer x = 759
+integer y = 352
+integer width = 402
+integer height = 100
+integer taborder = 50
+integer textsize = -8
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Aceptar"
+end type
+
+event clicked;date	ld_fecha_1, ld_fecha_2
+
+ld_fecha_1 = date(uo_rango.of_get_fecha1( ))
+ld_fecha_2 = date(uo_rango.of_get_fecha2( ))
+
+if MessageBox('Modulo de Producción','Esta seguro de realizar esta operacion',Question!,yesno!) = 2 then
+					return
+End if
+
+DECLARE USP_PROD_INGRE_COST_DIA PROCEDURE FOR 
+		  USP_PROD_INGRE_COST_DIA(:ld_fecha_1,:ld_fecha_2);
+
+EXECUTE USP_PROD_INGRE_COST_DIA;
+
+IF sqlca.sqlcode = -1 THEN
+		messagebox( "Modulo de Producción", sqlca.sqlerrtext)
+		else
+		messagebox( "Modulo de Producción", 'El proceso se ha realizado de manera satisfactoria')
+END IF
+
+CLOSE USP_PROD_INGRE_COST_DIA;
+
+
+end event
+
+type st_1 from statictext within w_abc_ingreso_masivo
+integer x = 14
+integer y = 196
+integer width = 466
+integer height = 64
+integer textsize = -8
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+boolean underline = true
+long backcolor = 67108864
+string text = "Rango de Fechas"
+alignment alignment = center!
+boolean focusrectangle = false
+end type
+
+type pb_exit from picturebutton within w_abc_ingreso_masivo
+integer x = 1184
+integer y = 348
+integer width = 137
+integer height = 104
+integer taborder = 70
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string picturename = "Exit!"
+alignment htextalign = left!
+string powertiptext = "Salir"
+end type
+
+event clicked;Close(Parent)
+end event
+

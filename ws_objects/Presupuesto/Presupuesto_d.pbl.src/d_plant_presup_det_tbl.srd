@@ -1,0 +1,83 @@
+﻿$PBExportHeader$d_plant_presup_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_plantilla dbname="fl_plant_presup_det.cod_fl_plantilla" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp dbname="fl_plant_presup_det.cnta_prsp" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos dbname="fl_plant_presup_det.cencos" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="fl_plant_presup_det.item" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=descripcion dbname="fl_plant_presup_det.descripcion" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=ratio dbname="fl_plant_presup_det.ratio" )
+ column=(type=char(50) updatewhereclause=yes name=descr_cuenta dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=tipo_prtda_prsp dbname="fl_plant_presup_det.tipo_prtda_prsp" )
+ column=(type=char(50) updatewhereclause=yes name=desc_tipo_prsp dbname="tipo_prtda_prsp_det.desc_tipo_prsp" )
+ column=(type=char(12) update=yes updatewhereclause=yes name=centro_benef dbname="fl_plant_presup_det.centro_benef" )
+ column=(type=char(100) updatewhereclause=yes name=desc_centro dbname="centro_beneficio.desc_centro" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_ingreso_egreso dbname="fl_plant_presup_det.flag_ingreso_egreso" values="Ingresos	I/Egresos	E/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_tipo_compromiso dbname="fl_plant_presup_det.flag_tipo_compromiso" values="Comprometido	C/Discrecional	D/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="fl_plant_presup_det.flag_replicacion" )
+ retrieve="  SELECT FPPD.COD_FL_PLANTILLA,   
+         FPPD.CNTA_PRSP,   
+			FPPD.CENCOS,
+			FPPD.ITEM,
+			FPPD.DESCRIPCION,
+			CC.DESC_CENCOS,
+         FPPD.RATIO,   
+         PC.DESCRIPCION,
+			FPPD.tipo_prtda_prsp,
+			t.desc_tipo_prsp,
+			fppd.centro_benef,
+			cb.desc_centro,
+			fppd.flag_ingreso_egreso,
+			fppd.flag_tipo_compromiso,
+			FPPD.FLAG_REPLICACION  
+    FROM FL_PLANT_PRESUP_DET 	FPPD,   
+         PRESUPUESTO_CUENTA 	PC,
+			CENTROS_COSTO 			CC,
+		   tipo_prtda_prsp_det  t, 
+			centro_beneficio		cb 
+   WHERE FPPD.CNTA_PRSP = PC.CNTA_PRSP
+	  AND CC.CENCOS 		= FPPD.CENCOS
+	  and FPPD.tipo_prtda_prsp = t.tipo_prtda_prsp (+)
+	  and fppd.centro_benef		= cb.centro_benef (+)
+	  and FPPD.Cod_fl_plantilla = :as_plantilla
+order by item
+	
+" update="FL_PLANT_PRESUP_DET" updatewhere=0 updatekeyinplace=yes arguments=(("as_plantilla", string)) )
+text(band=header alignment="2" text="Item" border="2" color="33554432" x="9" y="8" height="56" width="224" html.valueishtml="0"  name=fl_plant_presup_det_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cencos" border="2" color="0" x="238" y="8" height="56" width="315" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Desc Cencos" border="2" color="0" x="558" y="8" height="56" width="1010" html.valueishtml="0"  name=desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cnta Prsp" border="2" color="33554432" x="1573" y="8" height="56" width="315" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion Cnta Prsp" border="2" color="33554432" x="1893" y="8" height="56" width="814" html.valueishtml="0"  name=descr_cuenta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="224" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=3 alignment="0" tabsequence=10 border="2" color="33554432" x="238" y="4" height="64" width="315" format="[general]" html.valueishtml="0"  name=cencos pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="558" y="4" height="64" width="1010" format="[general]" html.valueishtml="0"  name=desc_cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="1893" y="4" height="64" width="814" format="[general]" html.valueishtml="0"  name=descr_cuenta visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="2" color="33554432" x="1573" y="4" height="64" width="315" format="[general]" html.valueishtml="0"  name=cnta_prsp pointer="h:\SOURCE\CUR\taladro.cur" visible="1" edit.limit=10 edit.case=upper edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=40 border="2" color="33554432" x="3031" y="4" height="64" width="315" html.valueishtml="0"  name=flag_tipo_compromiso visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=30 border="2" color="33554432" x="2711" y="4" height="64" width="315" html.valueishtml="0"  name=flag_ingreso_egreso visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Ingr/Egr" border="2" color="33554432" x="2711" y="8" height="56" width="315" html.valueishtml="0"  name=flag_ingreso_egreso_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Comp/Discr" border="2" color="33554432" x="3031" y="8" height="56" width="315" html.valueishtml="0"  name=flag_tipo_compromiso_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Centro Benef" border="2" color="33554432" x="3351" y="8" height="56" width="334" html.valueishtml="0"  name=centro_benef_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=11 alignment="0" tabsequence=50 border="2" color="33554432" x="3351" y="4" height="64" width="334" html.valueishtml="0"  name=centro_benef pointer="h:\SOURCE\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="3689" y="4" height="64" width="814" html.valueishtml="0"  name=desc_centro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Tipo Prtda" border="2" color="33554432" x="4507" y="8" height="56" width="315" html.valueishtml="0"  name=tipo_prtda_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion" border="2" color="33554432" x="5646" y="8" height="56" width="1019" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Ratio" border="2" color="33554432" x="6670" y="8" height="56" width="302" html.valueishtml="0"  name=ratio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=5 alignment="0" tabsequence=70 border="2" color="33554432" x="5646" y="4" height="64" width="1019" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(ratio for all)"border="2" color="255" x="6670" y="4" height="64" width="302" format="###,##0.0000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Total" border="0" color="33554432" x="6135" y="8" height="56" width="494" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=60 border="2" color="33554432" x="4507" y="4" height="64" width="315" format="[general]" html.valueishtml="0"  name=tipo_prtda_prsp pointer="h:\SOURCE\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.required=yes edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Desc Tipo Prtda Prsp" border="2" color="33554432" x="4827" y="8" height="56" width="814" html.valueishtml="0"  name=desc_tipo_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="4827" y="4" height="64" width="814" format="[general]" html.valueishtml="0"  name=desc_tipo_prsp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Desc Centro Benef" border="2" color="33554432" x="3689" y="8" height="56" width="814" html.valueishtml="0"  name=desc_centro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=7 alignment="1" tabsequence=80 border="2" color="33554432" x="6670" y="4" height="64" width="302" format="###,##0.0000" html.valueishtml="0"  name=ratio visible="1" editmask.mask="###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,73 @@
+﻿$PBExportHeader$d_rpt_parte_piso_hora_sin_control_de_crs.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=4 color="536870912" )
+header[3](height=84 color="536870912" )
+header[4](height=84 color="536870912" )
+header[5](height=88 color="536870912" )
+header[6](height=84 color="536870912" )
+header[7](height=52 color="536870912" )
+summary(height=92 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=52 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=nro_control dbname="nro_control" )
+ column=(type=datetime updatewhereclause=yes name=tg_parte_piso_det_hora_inicio dbname="tg_parte_piso_det_hora_inicio" )
+ column=(type=char(20) updatewhereclause=yes name=valor_lectura dbname="valor_lectura" )
+ retrieve="SELECT F.NRO_ATRIBUTO, 
+       INITCAP(F.DESC_CABECERA) AS MAQUINA, 
+       F.ATRIBUTO, 
+       INITCAP(TRIM(A.DESCRIPCION)) AS DESC_ATRIBUTO,
+       F.ATRIBUTO_NIV3, INITCAP(B.DESCRIPCION) AS DES_NIVEL3,
+       F.ATRIBUTO_NIV4, INITCAP(C.DESCRIPCION) AS DES_NIVEL4,
+       TRIM(TO_CHAR(F.MEDICION_MIN, '999,999,990.0')) ||'-'||TRIM(TO_CHAR(F.MEDICION_MAX, '999,999,990.0')) AS LIMITES,
+       PPD.NRO_LECTURA,
+       DECODE(TO_CHAR(PPD.NRO_CONTROL),1,'A','B') AS NRO_CONTROL,
+       TRIM(PPD.VALOR_LECTURA_TEXTO)||TRIM(TO_CHAR(PPD.VALOR_LECT_FEC_HORA,'hh24:mi:ss'))||TRIM(to_char(PPD.VALOR_LECT_NUMERICO, '999,990.0000')) AS VALOR_LECTURA, 
+       PPD.HORA_INICIO
+
+  FROM TG_PARTE_PISO_DET   PPD,
+       MAQUINA             M,
+       TG_MED_ACT_ATRIBUTO A,
+       TG_PARTE_PISO       PP,
+       TG_FMT_MED_ACT_DET  F,
+       TG_MED_ACT_ATRIBUTO B,
+       TG_MED_ACT_ATRIBUTO C
+       
+ WHERE PPD.NRO_PARTE       =  PP.NRO_PARTE
+   AND PPD.FORMATO         =  F.FORMATO(+)
+   AND PPD.NRO_ITEM        =  F.NRO_ITEM(+)
+	AND PPD.NRO_VERSION     =  F.NRO_VERSION(+)
+   AND F.COD_MAQUINA       =  M.COD_MAQUINA(+)
+   AND F.ATRIBUTO          =  A.ATRIBUTO(+)
+   AND PPD.NRO_PARTE       =  :asi_nro_parte
+   AND B.ATRIBUTO(+)       =  F.ATRIBUTO_NIV3
+   AND C.ATRIBUTO(+)       =  F.ATRIBUTO_NIV4
+   AND PPD.NRO_CONTROL     >  0
+   ORDER BY                F.NRO_ATRIBUTO, M.DESC_MAQ, A.DESCRIPCION" arguments=(("asi_nro_parte", string))  sort="nro_control A tg_parte_piso_det_hora_inicio A " )
+text(band=header[1] alignment="0" text=" " border="0" color="33554432" x="9" y="4" height="128" width="50" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[1] alignment="0" text="Tg Fmt Med Act Det Nro Atributo" border="0" color="33554432" x="69" y="4" height="128" width="69" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[1] alignment="0" text="Maquina" border="0" color="33554432" x="142" y="4" height="128" width="119" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="0" text="@tg_fmt_med_act_det_nro_atributo" border="0" color="33554432" x="142" y="4" height="128" width="119" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="@maquina" border="2" color="33554432" x="142" y="4" height="76" width="119" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header[4] alignment="2" text="@desc_atributo" border="2" color="33554432" x="142" y="4" height="76" width="119" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header[5] alignment="2" text="@des_nivel3" border="0" color="33554432" x="142" y="4" height="76" width="119" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[6] alignment="2" text="@des_nivel4" border="0" color="33554432" x="142" y="4" height="76" width="119" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[7] alignment="2" text="@limites" border="2" color="33554432" x="142" y="4" height="44" width="119" html.valueishtml="0"  name=valor_lectura_t visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header[7] alignment="2" text="Hra." border="2" color="33554432" x="69" y="4" height="44" width="64" html.valueishtml="0"  name=tg_parte_piso_det_hora_inicio_t visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header[7] alignment="2" text="Turn." border="2" color="33554432" x="9" y="4" height="44" width="50" html.valueishtml="0"  name=nro_control_t visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="142" y="4" height="44" width="119" format="[general]" html.valueishtml="0"  name=valor_lectura visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="44" width="50" format="[general]" html.valueishtml="0"  name=nro_control visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="69" y="4" height="44" width="64" format="[time]" html.valueishtml="0"  name=tg_parte_piso_det_hora_inicio visible="1" editmask.mask="hh:mm" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="sum(if( len(trim(string(valor_lectura ))) = 0,0,1))"border="2" color="0" x="142" y="124" height="32" width="119" format="[GENERAL]" html.valueishtml="0"  name=count visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Sum:" border="2" color="33554432" x="9" y="4" height="36" width="50" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=summary alignment="0" expression="if ( Not isnull(valor_lectura), sum( number( valor_lectura )), 0)"border="2" color="0" x="142" y="4" height="36" width="119" format="###,##0.0000" html.valueishtml="0"  name=suma visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Pro:" border="2" color="33554432" x="9" y="52" height="36" width="50" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=summary alignment="0" expression=" suma /  count "border="2" color="0" x="142" y="52" height="36" width="119" format="###,##0.0000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-4" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "tg_fmt_med_act_det_nro_atributo, maquina, desc_atributo, des_nivel3, des_nivel4, limites" rows = "nro_control, tg_parte_piso_det_hora_inicio" values = "valor_lectura" sourcenames = "tg_fmt_med_act_det_nro_atributo, maquina, tg_fmt_med_act_det_atributo, desc_atributo, tg_fmt_med_act_det_atributo_niv3, des_nivel3, tg_fmt_med_act_det_atributo_niv4, des_nivel4, limites, tg_parte_piso_det_nro_lectura, nro_control, valor_lectura, tg_parte_piso_det_hora_inicio")
+sparse(names="nro_control")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

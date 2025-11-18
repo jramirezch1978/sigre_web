@@ -1,0 +1,37 @@
+﻿$PBExportHeader$f_insert_detrac.srf
+global type f_insert_detrac from function_object
+end type
+
+forward prototypes
+global function boolean f_insert_detrac (string as_nro_detrac, string as_flag_estado, date adt_fecha_registro, string as_nro_deposito, date adt_fecha_deposito, string as_cod_usr, decimal adc_importe, string as_flag_tabla)
+end prototypes
+
+global function boolean f_insert_detrac (string as_nro_detrac, string as_flag_estado, date adt_fecha_registro, string as_nro_deposito, date adt_fecha_deposito, string as_cod_usr, decimal adc_importe, string as_flag_tabla);Boolean lb_ret = TRUE
+String  ls_msj_err
+
+
+//detracion
+/*********************************************************************
+  REPLICACION
+**********************************************************************/
+Insert Into detraccion 
+(nro_detraccion ,flag_estado,fecha_registro,nro_deposito,
+ fecha_deposito ,cod_usr    ,importe       ,flag_tabla  ,
+ flag_replicacion)
+Values
+(:as_nro_detrac     ,:as_flag_estado,:adt_fecha_registro,:as_nro_deposito,
+ :adt_fecha_deposito,:as_cod_usr    ,:adc_importe	     ,:as_flag_tabla  ,
+ '1');
+ 
+ 
+IF SQLCA.SQLCode = -1 THEN 
+   ls_msj_err = SQLCA.SQLErrText
+	Rollback;
+	lb_ret = FALSE
+END IF
+
+
+
+Return lb_ret 
+end function
+

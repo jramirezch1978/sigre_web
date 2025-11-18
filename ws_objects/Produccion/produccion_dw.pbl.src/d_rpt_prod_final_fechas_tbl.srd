@@ -1,0 +1,65 @@
+﻿$PBExportHeader$d_rpt_prod_final_fechas_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=484 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="pd_ot_prod_final.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="pd_ot.nro_parte" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="pd_ot.fecha" )
+ column=(type=number updatewhereclause=yes name=total_parte dbname="total_parte" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ retrieve="  SELECT A.COD_ART,   
+         B.NOM_ARTICULO,  
+			B.UND,
+			C.NRO_PARTE,
+			C.FECHA,
+			usf_pr_costo_pd_ot(A.NRO_PARTE) as TOTAL_PARTE,
+         SUM(A.CANTIDAD) AS CANTIDAD
+    FROM PD_OT_PROD_FINAL A,   
+         ARTICULO B,   
+         PD_OT C  
+   WHERE A.COD_ART = B.COD_ART 
+	  and A.NRO_PARTE = C.NRO_PARTE 
+	  and to_char(C.FECHA, 'yyyymmdd') >= to_char(:ad_fecha1, 'yyyymmdd')
+	  AND to_char(C.FECHA, 'yyyymmdd') <= to_char(:ad_fecha2, 'yyyymmdd')
+	  AND C.ot_adm = :as_ot_adm
+	  AND SUBSTR(C.NRO_PARTE, 1, 2) LIKE :as_origen
+	  and C.TURNO LIKE :as_turno
+   GROUP BY A.COD_ART, B.NOM_ARTICULO, B.UND, C.NRO_PARTE, C.FECHA, usf_pr_costo_pd_ot(A.NRO_PARTE)
+   ORDER BY A.COD_ART
+  
+" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_ot_adm", string),("as_origen", string),("as_turno", string)) )
+group(level=1 header.height=188 trailer.height=76 by=("cod_art" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="55" y="44" height="204" width="270" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="68" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="148" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="228" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Articulos Producidos" border="4" color="0" x="686" y="32" height="92" width="1810" html.valueishtml="0"  name=cabecera_t visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Desde: ' + string(ad_fecha1) + ' Hasta: ' + string(ad_fecha2)"border="0" color="0" x="686" y="132" height="80" width="1810" format="[general]" html.valueishtml="0"  name=page_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'OT ADM: ' + as_ot_adm"border="0" color="0" x="686" y="216" height="80" width="1810" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="if(as_origen <> '%%', 'ORIGEN: ' + as_origen + ' - ' , '') + if(as_turno <> '%%', 'TURNO: ' + as_turno, '')"border="0" color="0" x="686" y="300" height="80" width="1810" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=1 alignment="2" tabsequence=32766 border="2" color="16711680" x="549" y="60" height="64" width="357" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=2 alignment="2" tabsequence=32766 border="2" color="16711680" x="910" y="60" height="64" width="992" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="96" y="4" height="64" width="306" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="407" y="4" height="64" width="425" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="837" y="4" height="64" width="389" format="###,##0.0000" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="1230" y="4" height="64" width="192" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="255" x="1426" y="4" height="64" width="480" format="###,##0.00" html.valueishtml="0"  name=total_parte visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(cantidad for group 1)"border="2" color="255" x="859" y="4" height="56" width="389" format="###,##0.0000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(total_parte for group 1)"border="2" color="255" x="1449" y="4" height="56" width="462" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Nro Parte" border="2" color="33554432" x="96" y="128" height="56" width="306" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Fecha" border="2" color="33554432" x="407" y="128" height="56" width="425" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Cantidad" border="2" color="33554432" x="837" y="128" height="56" width="389" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Unidad" border="2" color="33554432" x="1230" y="128" height="56" width="192" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Costo ($)" border="2" color="33554432" x="1426" y="128" height="56" width="475" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Producto Final" border="2" color="33554432" x="96" y="60" height="64" width="448" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=trailer.1 alignment="2" text="Total" border="2" color="33554432" x="430" y="4" height="56" width="425" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

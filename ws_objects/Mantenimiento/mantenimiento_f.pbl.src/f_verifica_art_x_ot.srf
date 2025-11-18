@@ -1,0 +1,33 @@
+﻿$PBExportHeader$f_verifica_art_x_ot.srf
+global type f_verifica_art_x_ot from function_object
+end type
+
+forward prototypes
+global function boolean f_verifica_art_x_ot (string as_origen, string as_nro_orden)
+end prototypes
+
+global function boolean f_verifica_art_x_ot (string as_origen, string as_nro_orden);/*FUNCION DE VERIFICACION SI EXISTE ARTICULOS EN ORDEN DE TRABAJO*/
+Boolean lb_ret = TRUE
+Long    ll_count
+
+SELECT Count(*)
+  INTO :ll_count
+  FROM orden_trabajo     ot,
+       articulo_mov_proy am,
+       articulo  			 ar	
+ WHERE ( ot.nro_orden  = am.nro_doc ) and  
+       ( ar.cod_art    = am.cod_art ) and  
+       (( am.tipo_doc = (SELECT doc_ot FROM prod_param WHERE reckey = '1') ) AND  
+       ( ot.cod_origen = :as_origen ) AND  
+       ( ot.nro_orden = :as_nro_orden ) )    ;
+
+
+IF ll_count = 0 THEN
+	lb_ret = FALSE /*NO EXISTE ARTICULOS*/
+ELSE
+	lb_ret = TRUE  /*EXISTE ARTICULOS*/
+END IF	
+
+RETURN lb_ret
+end function
+

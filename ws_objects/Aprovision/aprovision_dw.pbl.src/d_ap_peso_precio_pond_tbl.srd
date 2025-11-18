@@ -1,0 +1,133 @@
+﻿$PBExportHeader$d_ap_peso_precio_pond_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=876 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=fecha dbname="fecha" )
+ column=(type=char(50) updatewhereclause=yes name=descr_especie dbname="descr_especie" )
+ column=(type=number updatewhereclause=yes name=peso_p dbname="peso_p" )
+ column=(type=number updatewhereclause=yes name=peso_t dbname="peso_t" )
+ column=(type=number updatewhereclause=yes name=peso_o dbname="peso_o" )
+ column=(type=number updatewhereclause=yes name=precio_p dbname="precio_p" )
+ column=(type=number updatewhereclause=yes name=precio_t dbname="precio_t" )
+ column=(type=number updatewhereclause=yes name=precio_o dbname="precio_o" )
+ column=(type=number updatewhereclause=yes name=peso_tot dbname="peso_tot" )
+ column=(type=number updatewhereclause=yes name=precio_tot dbname="precio_tot" )
+ retrieve="SELECT TO_CHAR(pdd.inicio_descarga, 'dd') AS fecha,
+       e.descr_especie,
+
+       SUM(DECODE(n.flag_tipo_flota, 'P', 
+           USF_AP_CONV_UND(pdd.und,(SELECT UND_TM FROM AP_PARAM WHERE ORIGEN = 'XX'),
+           NVL(gd.peso_venta,0)),0)) AS peso_P   ,                     
+       
+       SUM( DECODE(n.flag_tipo_flota, 'T', 
+            USF_AP_CONV_UND(pdd.und, (SELECT UND_TM FROM AP_PARAM WHERE ORIGEN = 'XX'),
+            NVL(gd.peso_venta, 0)), 0)) AS peso_T ,      
+
+		 SUM( DECODE(n.flag_tipo_flota, NULL, 
+            USF_AP_CONV_UND(pdd.und, (SELECT UND_TM FROM AP_PARAM WHERE ORIGEN = 'XX'),
+            NVL(gd.peso_venta, 0)), 0)) AS peso_O ,                  
+       
+       DECODE(SUM(DECODE(n.flag_tipo_flota, 'P', NVL(gd.peso_venta, 0), 0)), 0, 0,      
+              ROUND(SUM(DECODE(n.flag_tipo_flota, 'P', NVL(gd.peso_venta, 0) * 
+		 	     USF_FL_CONV_MON(NVL(gd.precio_unitario, 0) + NVL(gd.precio_unitario_castigo,0) + 
+			     NVL(gd.precio_representacion, 0), gc.cod_moneda, 
+              (SELECT cod_dolares FROM logparam WHERE reckey = '1'), pdd.inicio_descarga))) / 
+              SUM(DECODE(n.flag_tipo_flota, 'P', NVL(gd.peso_venta, 0), 0)), 2)) AS Precio_p, 
+       
+       DECODE(SUM(DECODE(n.flag_tipo_flota, 'T', NVL(gd.peso_venta, 0), 0)), 0, 0,      
+              ROUND(SUM(DECODE(n.flag_tipo_flota, 'T', NVL(gd.peso_venta, 0) * 
+				  USF_FL_CONV_MON(NVL(gd.precio_unitario, 0) + NVL(gd.precio_unitario_castigo,0) + 
+			     NVL(gd.precio_representacion, 0), gc.cod_moneda, 
+              (SELECT cod_dolares FROM logparam WHERE reckey = '1'), pdd.inicio_descarga))) / 
+              SUM(DECODE(n.flag_tipo_flota, 'T', NVL(gd.peso_venta, 0), 0)), 2)) AS Precio_T, 
+      
+       DECODE(SUM(DECODE(n.flag_tipo_flota, NULL, NVL(gd.peso_venta, 0), 0)), 0, 0,      
+              ROUND(SUM(DECODE(n.flag_tipo_flota, NULL, NVL(gd.peso_venta, 0) * 
+				  USF_FL_CONV_MON(NVL(gd.precio_unitario, 0) + NVL(gd.precio_unitario_castigo,0) + 
+			     NVL(gd.precio_representacion, 0), gc.cod_moneda, 
+              (SELECT cod_dolares FROM logparam WHERE reckey = '1'), pdd.inicio_descarga))) / 
+              SUM(DECODE(n.flag_tipo_flota, NULL, NVL(gd.peso_venta, 0), 0)), 2)) AS Precio_O, 
+                          
+       SUM(USF_AP_CONV_UND(pdd.und,(SELECT UND_TM FROM AP_PARAM WHERE ORIGEN = 'XX'),
+            NVL(gd.peso_venta,0))) AS peso_Tot,           
+       
+       DECODE(SUM(NVL(gd.peso_venta,0)),0,0,
+             ROUND(SUM(NVL(gd.peso_venta,0) * USF_FL_CONV_MON(NVL(gd.precio_unitario,0) + 
+             NVL(gd.precio_unitario_castigo,0) + NVL(gd.precio_representacion,0), 
+             gc.cod_moneda,(SELECT cod_dolares FROM logparam WHERE reckey = '1'), 
+             pdd.inicio_descarga)) / SUM(NVL(gd.peso_venta,0)),2)) AS Precio_Tot      
+      
+FROM  ap_pd_descarga_det      pdd,				/* Detalle del parte diario */
+      ap_guia_recepcion_det   gd,				/* Detalle de Guia de Recepcion */
+      ap_guia_recepcion       gc,				/* Cabecera de Guia de Recepcion */
+      tg_naves                n,					/* Tabla de naves */
+      tg_especies             e           /* Tabla especies */
+
+WHERE  gd.nro_parte                          = pdd.nro_parte
+  AND  gd.item_parte                         = pdd.item
+  AND  pdd.proveedor                         = n.proveedor (+)
+  AND  gd.cod_guia_rec                       = gc.cod_guia_rec
+  AND  pdd.especie                           = e.especie
+  AND  To_char(pdd.inicio_descarga, 'yyyy')  = :as_year  
+  AND  To_char(pdd.inicio_descarga, 'MM')  = :as_mes
+  AND  pdd.especie                           LIKE :as_cod_especie  /*Para indicar la especies */
+  AND  INSTR(:as_cod_origen, gc.origen) > 0  	                   /*Para indicar el origen   */
+
+GROUP BY TO_CHAR(pdd.inicio_descarga, 'dd'),
+         e.descr_especie
+
+ORDER BY  TO_CHAR(pdd.inicio_descarga, 'dd')" arguments=(("as_year", string),("as_mes", string),("as_cod_especie", string),("as_cod_origen", string)) )
+bitmap(band=header filename="" x="27" y="24" height="252" width="535" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="   CAPTURA DE PESCA Y PRECIO PONDERADO POR TIPO DE FLOTA EN PLANTA" border="4" color="0" x="603" y="312" height="72" width="2226" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="text" border="4" color="0" x="1147" y="428" height="64" width="1015" html.valueishtml="0"  name=t_planta visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="4" color="0" x="2624" y="624" height="52" width="229" html.valueishtml="0"  name=t_mes visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Mes:" border="0" color="0" x="2450" y="624" height="52" width="142" html.valueishtml="0"  name=t_4 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="4" color="0" x="2158" y="624" height="52" width="229" html.valueishtml="0"  name=t_year visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Año :" border="0" color="0" x="1966" y="624" height="52" width="160" html.valueishtml="0"  name=t_3 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="2990" y="196" height="56" width="261" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="2734" y="116" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2834" y="36" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Dia" border="2" color="16777215" x="18" y="752" height="120" width="105" html.valueishtml="0"  name=fecha_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Especie" border="2" color="16777215" x="128" y="752" height="120" width="814" html.valueishtml="0"  name=t_2 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="FLOTA PROPIA" border="2" color="16777215" x="946" y="752" height="60" width="590" html.valueishtml="0"  name=t_6 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Peso" border="2" color="16777215" x="946" y="816" height="56" width="293" html.valueishtml="0"  name=peso_p_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Precio" border="2" color="16777215" x="1243" y="816" height="56" width="293" html.valueishtml="0"  name=precio_p_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="FLOTA TERCEROS" border="2" color="16777215" x="1541" y="752" height="60" width="590" html.valueishtml="0"  name=t_5 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Peso" border="2" color="16777215" x="1541" y="816" height="56" width="293" html.valueishtml="0"  name=peso_t_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Precio" border="2" color="16777215" x="1838" y="816" height="56" width="293" html.valueishtml="0"  name=precio_t_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="TOTALES" border="2" color="16777215" x="2729" y="752" height="60" width="590" html.valueishtml="0"  name=t_8 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Peso Tot" border="2" color="16777215" x="2729" y="816" height="56" width="293" html.valueishtml="0"  name=peso_tot_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Precio Tot" border="2" color="16777215" x="3026" y="816" height="56" width="293" html.valueishtml="0"  name=precio_tot_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="OTROS" border="2" color="16777215" x="2135" y="752" height="60" width="590" html.valueishtml="0"  name=t_9 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Peso Tot" border="2" color="16777215" x="2135" y="816" height="56" width="293" html.valueishtml="0"  name=peso_o_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Precio Tot" border="2" color="16777215" x="2432" y="816" height="56" width="293" html.valueishtml="0"  name=precio_o_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+compute(band=detail alignment="0" expression=" peso_p *  precio_p "border="0" color="33554432" x="3387" y="4" height="44" width="398" format="[GENERAL]" html.valueishtml="0"  name=pre_pro visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" peso_t * precio_t "border="0" color="33554432" x="3854" y="12" height="44" width="462" format="[GENERAL]" html.valueishtml="0"  name=pre_ter visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="18" y="4" height="64" width="105" format="[general]" html.valueishtml="0"  name=fecha visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="128" y="4" height="64" width="814" format="[general]" html.valueishtml="0"  name=descr_especie visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="946" y="4" height="64" width="293" format="#,##0.000" html.valueishtml="0"  name=peso_p visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="1243" y="4" height="64" width="293" format="#,##0.00" html.valueishtml="0"  name=precio_p visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="1541" y="4" height="64" width="293" format="#,##0.000" html.valueishtml="0"  name=peso_t visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="1838" y="4" height="64" width="293" format="#,##0.00" html.valueishtml="0"  name=precio_t visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="2729" y="4" height="64" width="293" format="#,##0.000" html.valueishtml="0"  name=peso_tot visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="3026" y="4" height="64" width="293" format="#,##0.00" html.valueishtml="0"  name=precio_tot visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2135" y="4" height="64" width="293" format="#,##0.000" html.valueishtml="0"  name=peso_o visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="2432" y="4" height="64" width="293" format="#,##0.00" html.valueishtml="0"  name=precio_o visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="TOTALES:" border="2" color="0" x="23" y="4" height="60" width="919" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(peso_p for all)"border="2" color="33554432" x="946" y="4" height="60" width="293" format="#,##0.000" html.valueishtml="0"  name=peso_pro visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression=" if( peso_pro = 0, 0, Round(sum( pre_pro )/ peso_pro ,2)) "border="2" color="33554432" x="1243" y="4" height="60" width="293" format="#,##0.00" html.valueishtml="0"  name=precio_pro visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(peso_t for all)"border="2" color="33554432" x="1541" y="4" height="60" width="293" format="#,##0.000" html.valueishtml="0"  name=peso_ter visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression=" if( peso_ter = 0, 0, Round(sum( pre_ter )/ peso_ter,2)  ) "border="2" color="33554432" x="1838" y="4" height="60" width="293" format="#,##0.00" html.valueishtml="0"  name=precio_ter visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(peso_tot for all)"border="2" color="33554432" x="2729" y="4" height="60" width="293" format="#,##0.000" html.valueishtml="0"  name=peso_total visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="if( peso_total = 0, 0, round((( peso_pro * precio_pro ) + ( peso_ter * precio_ter ) + (peso_otros * precio_otros)) /  peso_total ,2)) "border="2" color="33554432" x="3026" y="4" height="60" width="293" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(peso_o for all)"border="2" color="33554432" x="2135" y="4" height="60" width="293" format="#,##0.000" html.valueishtml="0"  name=peso_otros visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="if( peso_otros = 0, 0, Round(sum( pre_otros )/ peso_otros,2) ) "border="2" color="33554432" x="2432" y="4" height="60" width="293" format="#,##0.00" html.valueishtml="0"  name=precio_otros visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" peso_o  *  precio_o "border="0" color="33554432" x="4375" y="16" height="44" width="466" format="[GENERAL]" html.valueishtml="0"  name=pre_otros visible="0"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

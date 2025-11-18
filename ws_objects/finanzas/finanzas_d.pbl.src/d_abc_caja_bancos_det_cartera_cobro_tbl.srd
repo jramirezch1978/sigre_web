@@ -1,0 +1,70 @@
+﻿$PBExportHeader$d_abc_caja_bancos_det_cartera_cobro_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen dbname="caja_bancos_det.origen" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_registro dbname="caja_bancos_det.nro_registro" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="caja_bancos_det.item" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="caja_bancos_det.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="caja_bancos_det.nro_doc" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="caja_bancos_det.importe" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flab_tabor dbname="caja_bancos_det.flab_tabor" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_cxp dbname="caja_bancos_det.flag_cxp" )
+ column=(type=char(0) updatewhereclause=yes name=cod_moneda_cab dbname="cod_moneda_cab" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda_det dbname="vw_fin_doc_general_cb.cod_moneda_det" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen_doc dbname="caja_bancos_det.origen_doc" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_det dbname="caja_bancos_det.importe_det" )
+ column=(type=char(1) updatewhereclause=yes name=t_tipdoc dbname="t_tipdoc" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="caja_bancos_det.cod_relacion" )
+ column=(type=number updatewhereclause=yes name=tasa_cambio dbname="caja_bancos_det.tasa_cambio" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=impt_ret_igv dbname="caja_bancos_det.impt_ret_igv" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_ret_igv dbname="caja_bancos_det.flag_ret_igv" values="	1/	0" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_flujo_caja dbname="caja_bancos_det.flag_flujo_caja" values="	1/	0" )
+ retrieve="  SELECT ~"CAJA_BANCOS_DET~".~"ORIGEN~",   
+         ~"CAJA_BANCOS_DET~".~"NRO_REGISTRO~",   
+         ~"CAJA_BANCOS_DET~".~"ITEM~",   
+         ~"CAJA_BANCOS_DET~".~"TIPO_DOC~",   
+         ~"CAJA_BANCOS_DET~".~"NRO_DOC~",   
+         ~"CAJA_BANCOS_DET~".~"IMPORTE~",   
+         ~"CAJA_BANCOS_DET~".~"FLAB_TABOR~", 
+			~"CAJA_BANCOS_DET~".~"FLAG_CXP~", 
+         ''  AS COD_MONEDA_CAB,   
+         ~"VW_FIN_DOC_GENERAL_CB~".~"COD_MONEDA~"  AS COD_MONEDA_DET,   
+			~"CAJA_BANCOS_DET~".~"ORIGEN_DOC~" ,
+         ~"CAJA_BANCOS_DET~".~"IMPORTE~"   AS IMPORTE_DET,   
+			DECODE(~"CAJA_BANCOS_DET~".~"TIPO_DOC~",(SELECT doc_sol_giro FROM finparam WHERE reckey = '1'),NULL,'1') AS T_TIPDOC,
+			~"CAJA_BANCOS_DET~".~"COD_RELACION~",
+         0.000 AS TASA_CAMBIO,
+			~"CAJA_BANCOS_DET~".~"IMPT_RET_IGV~",
+			~"CAJA_BANCOS_DET~".~"FLAG_RET_IGV~",
+         ~"CAJA_BANCOS_DET~".~"FLAG_FLUJO_CAJA~"
+    FROM ~"CAJA_BANCOS_DET~" 	,   
+         ~"VW_FIN_DOC_GENERAL_CB~" 
+   WHERE ((~"CAJA_BANCOS_DET~".~"COD_RELACION~" = ~"VW_FIN_DOC_GENERAL_CB~".~"COD_RELACION~" ) and  
+         ( ~"CAJA_BANCOS_DET~".~"TIPO_DOC~"     = ~"VW_FIN_DOC_GENERAL_CB~".~"TIPO_DOC~"     ) and  
+         ( ~"CAJA_BANCOS_DET~".~"NRO_DOC~"      = ~"VW_FIN_DOC_GENERAL_CB~".~"NRO_DOC~"      )) and
+			( ~"CAJA_BANCOS_DET~".~"ORIGEN~"       = :as_origen									   ) and
+			( ~"CAJA_BANCOS_DET~".~"NRO_REGISTRO~" = :al_nro_registro							   ) 
+" update="CAJA_BANCOS_DET" updatewhere=1 updatekeyinplace=yes arguments=(("as_origen", string),("al_nro_registro", number)) )
+text(band=header alignment="2" text="Item" border="2" color="8388608" x="9" y="8" height="56" width="329" html.valueishtml="0"  name=item_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="2" color="8388608" x="1810" y="8" height="56" width="329" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="1376" y="8" height="56" width="430" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo de Documento" border="2" color="8388608" x="603" y="8" height="56" width="462" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro. Doc." border="2" color="8388608" x="1070" y="8" height="56" width="302" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="0" text="C. Relacion" border="2" color="8388608" x="343" y="8" height="56" width="256" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="9" y="0" height="56" width="329" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="603" y="0" height="56" width="462" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" dddw.name=d_dddw_tipo_doc_tbl dddw.displaycolumn=desc_tipo_doc dddw.datacolumn=tipo_doc dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=10 border="2" color="0" x="1810" y="0" height="56" width="329" format="[general]" html.valueishtml="0"  name=importe visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="255" x="3904" y="116" height="52" width="151" format="[general]" html.valueishtml="0"  name=flag_cxp visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="1070" y="0" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="0" x="1376" y="0" height="56" width="430" format="[general]" html.valueishtml="0"  name=cod_moneda_det visible="1" dddw.name=d_dddw_moneda_tbl dddw.displaycolumn=descripcion dddw.datacolumn=cod_moneda dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="2" color="0" x="343" y="0" height="56" width="256" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Importe x Conversión" border="2" color="8388608" x="2144" y="8" height="56" width="498" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Flujo de Caja" border="2" color="8388608" x="2647" y="8" height="56" width="315" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=detail alignment="1" expression=" f_convertir_monto_pagos( cod_moneda_det, importe , cod_moneda_cab ,tasa_cambio )   "border="2" color="0" x="2144" y="0" height="56" width="498" format="[General]" html.valueishtml="0"  name=monto_conv visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=18 alignment="2" tabsequence=20 border="2" color="0" x="2647" y="0" height="56" width="315" html.valueishtml="0"  name=flag_flujo_caja visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

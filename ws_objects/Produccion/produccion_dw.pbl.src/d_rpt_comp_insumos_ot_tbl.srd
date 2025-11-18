@@ -1,0 +1,46 @@
+﻿$PBExportHeader$d_rpt_comp_insumos_ot_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=468 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=articulo_mov_proy_cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=number updatewhereclause=yes name=cant_proy dbname="compute_0003" )
+ column=(type=number updatewhereclause=yes name=cant_consum dbname="compute_0004" )
+ retrieve="select distinct am.cod_art, 
+			ar.nom_articulo, 
+			usf_pr_art_cant_proy(:asi_nro_orden, am.cod_art),
+			usf_pr_art_cant_cons(:asi_nro_orden, am.cod_art)
+  from articulo_mov_proy am,
+       operaciones op,
+       articulo    ar
+  where op.oper_sec  = am.oper_sec
+    and ar.cod_art   = am.cod_art
+	 and op.nro_orden	= :asi_nro_orden
+	 and am.tipo_mov	= :asi_mov_sal
+" arguments=(("asi_nro_orden", string),("asi_mov_sal", string)) )
+bitmap(band=header filename="" x="55" y="44" height="260" width="370" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Comparativo de Insumos X O.T." border="0" color="0" x="686" y="36" height="92" width="1810" html.valueishtml="0"  name=cabecera_t visible="1"  font.face="Times New Roman" font.height="-14" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Nro de Orden: ' + asi_nro_orden"border="4" color="0" x="1074" y="176" height="64" width="1042" format="[general]" html.valueishtml="0"  name=page_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Código
+Artículo" border="2" color="16777215" x="485" y="344" height="112" width="357" html.valueishtml="0"  name=articulo_mov_proy_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Nombre del
+Artículo" border="2" color="16777215" x="846" y="344" height="112" width="1376" html.valueishtml="0"  name=articulo_nom_articulo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Cantidad
+Proyectada" border="2" color="16777215" x="2226" y="344" height="112" width="357" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Cantidad
+Consumida" border="2" color="16777215" x="2587" y="344" height="112" width="357" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="255" x="2226" y="0" height="56" width="357" format="###,##0.000" html.valueishtml="0"  name=cant_proy visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="255" x="2587" y="0" height="56" width="357" format="###,##0.000" html.valueishtml="0"  name=cant_consum visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="485" y="0" height="56" width="357" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="846" y="0" height="56" width="1376" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="20" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="100" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="180" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,35 @@
+﻿$PBExportHeader$f_importe_cambio.srf
+global type f_importe_cambio from function_object
+end type
+
+forward prototypes
+global function decimal f_importe_cambio (string as_mda_master, string as_mda_ref, decimal adc_imp_ref, decimal adc_tasa_cambio)
+end prototypes
+
+global function decimal f_importe_cambio (string as_mda_master, string as_mda_ref, decimal adc_imp_ref, decimal adc_tasa_cambio);string ls_soles
+
+SELECT cod_soles  
+INTO   :ls_soles 
+FROM   logparam   
+WHERE  reckey = '1';
+
+IF isnull(ls_soles) OR ls_soles ='' THEN
+	Messagebox('AVISO','Verifique la Tabla LOGPARAM')
+END IF	
+
+IF adc_tasa_cambio < 1 THEN RETURN 0 
+IF ls_soles = as_mda_master THEN //MASTER SOLES
+   IF as_mda_master = as_mda_ref THEN 
+      RETURN adc_imp_ref
+	ELSE 
+      RETURN adc_imp_ref*adc_tasa_cambio
+   END IF
+ELSE  //MASTER DOLARES
+	IF as_mda_master = as_mda_ref THEN 
+       RETURN adc_imp_ref	
+   ELSE 
+	    RETURN adc_imp_ref/adc_tasa_cambio
+   END IF 	
+END IF 
+end function
+

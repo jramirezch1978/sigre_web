@@ -1,0 +1,60 @@
+﻿$PBExportHeader$d_rpt_arribos_pendientes_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=468 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=fl_parte_de_pesca_parte_pesca dbname="fl_parte_de_pesca.parte_pesca" )
+ column=(type=datetime updatewhereclause=yes name=fl_parte_de_pesca_fecha_hora_zarpe dbname="fl_parte_de_pesca.fecha_hora_zarpe" )
+ column=(type=char(8) updatewhereclause=yes name=tg_naves_nave dbname="tg_naves.nave" )
+ column=(type=char(50) updatewhereclause=yes name=tg_naves_nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=char(8) updatewhereclause=yes name=tg_zonas_pesca_zona_pesca dbname="tg_zonas_pesca.zona_pesca" )
+ column=(type=char(50) updatewhereclause=yes name=tg_zonas_pesca_descr_zona dbname="tg_zonas_pesca.descr_zona" )
+ column=(type=char(8) updatewhereclause=yes name=fl_puertos_puerto dbname="fl_puertos.puerto" )
+ column=(type=char(50) updatewhereclause=yes name=fl_puertos_descr_puerto dbname="fl_puertos.descr_puerto" )
+ column=(type=datetime updatewhereclause=yes name=fl_parte_de_pesca_fecha_hora_est_arribo dbname="fl_parte_de_pesca.fecha_hora_est_arribo" )
+ retrieve="select flpp.parte_pesca, 
+		 flpp.fecha_hora_zarpe, 
+       tn.nave, 
+		 tn.nomb_nave, 
+       tzp.zona_pesca,
+       tzp.descr_zona,
+       flp.puerto,
+       flp.descr_puerto,
+       flpp.fecha_hora_est_arribo
+from 	fl_parte_de_pesca flpp,
+		tg_naves tn,
+      tg_zonas_pesca tzp,
+      fl_puertos flp
+where tn.nave = flpp.nave_real
+	and flpp.fecha_hora_arribo is null
+  and tn.flag_tipo_flota = 'P'
+  and flpp.zona_pesca_zarpe = tzp.zona_pesca
+  and flpp.puerto_zarpe = flp.puerto" )
+text(band=header alignment="2" text="Numero
+Parte Pesca" border="2" color="33554432" x="32" y="352" height="112" width="334" html.valueishtml="0"  name=fl_parte_de_pesca_parte_pesca_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha y Hora
+del Zarpe" border="2" color="33554432" x="370" y="352" height="112" width="411" html.valueishtml="0"  name=fl_parte_de_pesca_fecha_hora_zarpe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nombre
+Embarcación" border="2" color="33554432" x="786" y="352" height="112" width="631" html.valueishtml="0"  name=tg_naves_nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion
+Zona Pesca" border="2" color="33554432" x="1422" y="352" height="112" width="800" html.valueishtml="0"  name=tg_zonas_pesca_descr_zona_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion
+Puerto" border="2" color="33554432" x="2226" y="352" height="112" width="672" html.valueishtml="0"  name=fl_puertos_descr_puerto_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha y Hora
+Estim. de Arribo" border="2" color="33554432" x="2903" y="352" height="112" width="430" html.valueishtml="0"  name=fl_parte_de_pesca_fecha_hora_est_arribo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="32" y="0" height="68" width="334" format="[general]" html.valueishtml="0"  name=fl_parte_de_pesca_parte_pesca visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="370" y="0" height="68" width="411" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=fl_parte_de_pesca_fecha_hora_zarpe visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="786" y="0" height="68" width="631" format="[general]" html.valueishtml="0"  name=tg_naves_nomb_nave visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="1422" y="0" height="68" width="800" format="[general]" html.valueishtml="0"  name=tg_zonas_pesca_descr_zona visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="2226" y="0" height="68" width="672" format="[general]" html.valueishtml="0"  name=fl_puertos_descr_puerto visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="2903" y="0" height="68" width="430" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=fl_parte_de_pesca_fecha_hora_est_arribo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="55" y="44" height="204" width="270" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Naves Propias con 
+Arribos Pendientes" border="0" color="0" x="686" y="68" height="184" width="1810" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="68" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="148" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="228" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

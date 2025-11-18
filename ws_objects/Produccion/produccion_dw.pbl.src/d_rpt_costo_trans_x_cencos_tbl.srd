@@ -1,0 +1,62 @@
+﻿$PBExportHeader$d_rpt_costo_trans_x_cencos_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=556 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=prod_parte_transp_nro_parte dbname="prod_parte_transp.nro_parte" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="oper_sec" )
+ column=(type=char(10) updatewhereclause=yes name=prod_parte_transp_det_cencos dbname="prod_parte_transp_det.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(9) updatewhereclause=yes name=tipo dbname="tipo" )
+ column=(type=number updatewhereclause=yes name=total dbname="total" )
+ retrieve="SELECT a.nro_parte, NVL(b.oper_sec,null) as oper_sec,
+       b.cencos, c.desc_cencos, decode(a.flag_obr_empl, 'O', 'OBREROS', 'E', 'EMPLEADOS') AS TIPO,
+       Sum(b.importe) as total
+
+  FROM operaciones                 o,
+       prod_parte_transp           a,
+       prod_parte_transp_det       b,
+       com_zona_proceso            z,
+       centros_costo               c
+        
+ Where o.oper_sec(+)                 = b.oper_sec
+   And a.nro_parte                   = b.nro_parte
+   AND z.zona_proceso                = b.zona_proceso
+   AND c.cencos                      = b.cencos
+
+   And Trunc(a.fec_parte) between trunc(:ad_fecha1) and trunc(:ad_fecha2)
+   And substr(a.nro_parte, 1, 2)     = :as_origen
+   AND a.flag_estado                 = '1'
+ Group by a.nro_parte, b.oper_sec, b.cencos, c.desc_cencos, a.flag_obr_empl
+" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_origen", string)) )
+bitmap(band=header filename="" x="55" y="36" height="208" width="407" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="56" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="124" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="192" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Costo del Transporte" border="0" color="0" x="635" y="60" height="92" width="1783" html.valueishtml="0"  name=cabecera_t visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Al:" border="4" color="0" x="1669" y="200" height="56" width="87" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Del:" border="4" color="0" x="1134" y="200" height="56" width="128" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="1303" y="200" height="56" width="315" html.valueishtml="0"  name=t_fecha1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="1787" y="200" height="56" width="320" html.valueishtml="0"  name=t_fecha2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Del Origen de:" border="4" color="0" x="818" y="292" height="56" width="443" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="1303" y="296" height="56" width="315" html.valueishtml="0"  name=t_o visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="1632" y="296" height="56" width="475" html.valueishtml="0"  name=t_desc_o visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nro Parte" border="2" color="33554432" x="311" y="448" height="104" width="302" html.valueishtml="0"  name=prod_parte_transp_nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Oper Sec" border="2" color="33554432" x="617" y="448" height="104" width="302" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Centro de Costo" border="2" color="33554432" x="923" y="448" height="104" width="1413" html.valueishtml="0"  name=prod_parte_transp_det_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Tipo" border="2" color="33554432" x="2341" y="448" height="104" width="274" html.valueishtml="0"  name=tipo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Total" border="2" color="33554432" x="2619" y="448" height="104" width="329" html.valueishtml="0"  name=total_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="311" y="4" height="52" width="297" format="[general]" html.valueishtml="0"  name=prod_parte_transp_nro_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="613" y="4" height="52" width="306" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="923" y="4" height="52" width="283" format="[general]" html.valueishtml="0"  name=prod_parte_transp_det_cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1211" y="4" height="52" width="1125" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2341" y="4" height="52" width="274" format="[general]" html.valueishtml="0"  name=tipo visible="1" edit.limit=9 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2619" y="4" height="52" width="329" format="###,##0.00" html.valueishtml="0"  name=total visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(total for all)"border="2" color="33554432" x="2619" y="4" height="52" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

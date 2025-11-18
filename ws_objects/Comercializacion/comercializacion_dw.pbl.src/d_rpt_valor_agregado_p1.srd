@@ -1,0 +1,71 @@
+﻿$PBExportHeader$d_rpt_valor_agregado_p1.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=108 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=number updatewhereclause=yes name=ano dbname="ano" )
+ column=(type=number updatewhereclause=yes name=mes dbname="mes" values="Enero	1/Febrero	2/Marzo	3/Abril	4/Mayo	5/Junio	6/Julio	7/Agosto	8/Setiembre	9/Octubre	10/Noviembre	11/Diciembre	12/" )
+ column=(type=char(3) updatewhereclause=yes name=factura_exportacion_incoterm dbname="factura_exportacion.incoterm" )
+ column=(type=char(25) updatewhereclause=yes name=articulo_grupo_desc_grupo_art dbname="articulo_grupo.desc_grupo_art" )
+ column=(type=char(3) updatewhereclause=yes name=moneda dbname="moneda" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ column=(type=number updatewhereclause=yes name=monto dbname="monto" )
+ column=(type=number updatewhereclause=yes name=precio_real dbname="precio_real" )
+ column=(type=number updatewhereclause=yes name=precio_ref dbname="precio_ref" )
+ retrieve="select to_number(to_char(cc.fecha_documento, 'yyyy')) as ano,
+       to_number(to_char(cc.fecha_documento, 'mm')) as mes,
+       fe.incoterm, 
+       ag.desc_grupo_art,
+       (Select cod_dolares from logparam where reckey = '1') as moneda,
+       sum(ccd.cantidad) as cantidad,
+		 sum(ccd.cantidad * usf_fl_conv_mon(ccd.precio_unitario, cc.cod_moneda, (select cod_dolares from logparam where reckey = '1'), cc.fecha_documento)) as monto,
+       sum(ccd.cantidad * usf_fl_conv_mon(ccd.precio_unitario, cc.cod_moneda, (select cod_dolares from logparam where reckey = '1'), cc.fecha_documento)) / sum(ccd.cantidad) as precio_real,
+       sum(ccd.cantidad * usf_exp_precio_ref(cc.fecha_documento, fe.incoterm, ccd.cod_art, (select cod_dolares from logparam where reckey = '1'))) / sum(ccd.cantidad) as precio_ref
+from cntas_cobrar     cc,
+     cntas_cobrar_det ccd,
+     doc_referencias  df,
+     factura_exportacion fe,
+     rel_articulo_grupo  rag,
+	  articulo_grupo      ag,
+     tt_exp_grupo_art    tt2
+where cc.tipo_doc = ccd.tipo_doc
+  and cc.nro_doc = ccd.nro_doc
+  and df.tipo_doc = cc.tipo_doc
+  and df.nro_doc  = cc.nro_doc
+  and rag.cod_art = ccd.cod_Art
+  and rag.grupo_art = ag.grupo_art
+  and tt2.grupo_art = ag.grupo_art
+  and fe.tipo_doc (+) = cc.tipo_doc
+  and fe.nro_doc (+) = cc.nro_doc
+  and df.tipo_ref = (select doc_ov from logparam where reckey = '1')
+  and cc.flag_estado <> '0'
+  and to_number(to_char(cc.fecha_documento, 'yyyy')) = :ani_year
+group by to_number(to_char(cc.fecha_documento, 'yyyy')) ,
+       to_number(to_char(cc.fecha_documento, 'mm')) ,
+       ag.desc_grupo_art,
+       fe.incoterm" arguments=(("ani_year", number))  sort="articulo_grupo_desc_grupo_art A mes A " )
+group(level=1 header.height=88 trailer.height=0 by=("articulo_grupo_desc_grupo_art" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Incoterm" border="2" color="33554432" x="334" y="12" height="56" width="315" html.valueishtml="0"  name=factura_exportacion_incoterm_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Mes" border="2" color="33554432" x="0" y="12" height="56" width="329" html.valueishtml="0"  name=mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="33554432" x="654" y="12" height="56" width="325" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio Real" border="2" color="33554432" x="1472" y="12" height="56" width="329" html.valueishtml="0"  name=precio_real_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio Ref" border="2" color="33554432" x="1806" y="12" height="56" width="329" html.valueishtml="0"  name=precio_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Valor Agregado" border="2" color="33554432" x="2139" y="12" height="56" width="430" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Monto" border="2" color="33554432" x="983" y="12" height="56" width="485" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="50" y="12" height="56" width="1033" format="[general]" html.valueishtml="0"  name=articulo_grupo_desc_grupo_art visible="1" edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="334" y="4" height="56" width="315" format="[general]" html.valueishtml="0"  name=factura_exportacion_incoterm visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="0" y="4" height="56" width="329" format="[general]" html.valueishtml="0"  name=mes visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="1472" y="4" height="56" width="329" format="###,##0.00" html.valueishtml="0"  name=precio_real visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="1806" y="4" height="56" width="329" format="###,##0.00" html.valueishtml="0"  name=precio_ref visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="( precio_real - precio_ref )* cantidad "border="2" color="33554432" x="2139" y="4" height="56" width="430" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="654" y="4" height="56" width="325" format="###,##0.0000" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="983" y="4" height="56" width="485" format="###,##0.00" html.valueishtml="0"  name=monto visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total" border="0" color="0" x="1833" y="4" height="56" width="261" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(( precio_real - precio_ref )* cantidad  for all)"border="0" color="255" x="2139" y="4" height="56" width="430" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

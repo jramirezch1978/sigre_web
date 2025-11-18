@@ -1,0 +1,26 @@
+﻿$PBExportHeader$d_pol_pago_crosstab.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=132 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=fl_cargo_tripulantes_cargo dbname="fl_cargo_tripulantes_cargo" )
+ column=(type=number updatewhereclause=yes name=ratio dbname="fl_politica_pago_ratio" )
+ retrieve="SELECT FPP.RATIO as RATIO,   
+       FCT.DESCR_CARGO AS CARGO,   
+       FTPP.DESCR_POL_PAGO AS TIPO_POL  
+FROM FL_POLITICA_PAGO FPP,   
+     FL_CARGO_TRIPULANTES FCT,   
+     FL_TIPO_POLITICA_PAGO FTPP  
+WHERE FPP.CARGO_TRIPULANTE = FCT.CARGO_TRIPULANTE 
+  and FPP.TIPO_POL_PAGO = FTPP.TIPO_POL_PAGO"  sort="fl_cargo_tripulantes_cargo A " )
+text(band=header[2] alignment="2" text="Tipo Politica Pago" border="2" color="33554432" x="457" y="4" height="56" width="498" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="Cargo Tripulante" border="2" color="33554432" x="9" y="72" height="56" width="439" html.valueishtml="0"  name=fl_cargo_tripulantes_cargo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="0" text="@fl_tipo_politica_pago_tipo_pol" border="2" color="33554432" x="457" y="72" height="56" width="498" html.valueishtml="0"  name=fl_politica_pago_ratio_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="439" format="[general]" html.valueishtml="0"  name=fl_cargo_tripulantes_cargo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="462" y="4" height="64" width="494" format="###.00" html.valueishtml="0"  name=ratio visible="1" editmask.mask="###.00" editmask.imemode=0 editmask.focusrectangle=no crosstab.repeat=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "fl_tipo_politica_pago_tipo_pol" rows = "fl_cargo_tripulantes_cargo" values = "sum(fl_politica_pago_ratio for crosstab)" sourcenames = "fl_politica_pago_ratio, fl_cargo_tripulantes_cargo, fl_tipo_politica_pago_tipo_pol")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

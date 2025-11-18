@@ -1,0 +1,46 @@
+﻿$PBExportHeader$f_tiempo_servicios_fisholg.srf
+global type f_tiempo_servicios_fisholg from function_object
+end type
+
+forward prototypes
+global function string f_tiempo_servicios_fisholg (datetime adt_fec_ingreso, datetime adt_fec_cese, string as_cod_trab)
+end prototypes
+
+global function string f_tiempo_servicios_fisholg (datetime adt_fec_ingreso, datetime adt_fec_cese, string as_cod_trab);integer li_years, li_meses, li_dias_prod
+Decimal li_dias
+string ls_tip_trab
+
+select m.tipo_trabajador
+   into :ls_tip_trab
+ from maestro m
+where m.cod_trabajador = :as_cod_trab;
+
+IF ls_tip_trab = 'DES' then
+	select count(distinct a.fec_parte)
+		  into :li_dias_prod
+		from 	tg_pd_destajo 		a,
+				tg_pd_destajo_det b
+		where a.nro_parte = b.nro_parte
+		  and b.cod_trabajador = :as_cod_trab
+		  and trunc(a.fec_parte) between :adt_fec_ingreso and :adt_fec_cese
+		  and a.flag_estado <> '0';
+
+	li_years = truncate(li_dias_prod/360,0);
+	li_meses = truncate(li_dias_prod/30 - li_years*12,0)
+	li_dias	= truncate (li_dias_prod - li_years*360 - li_meses*30,0)
+		  
+ELSE
+
+	SELECT months_between(:adt_fec_cese+1,:adt_fec_ingreso) INTO :li_dias FROM dual; 
+
+	li_years = truncate(li_dias / 12,0)
+	
+	li_meses = li_dias - li_years * 12
+	
+	li_dias = round((li_dias - truncate(li_dias,0) )* 30,0)
+	
+END IF
+
+return string(li_years) + " Año(s), " + string(li_meses) + " Mes(es), " + string(li_dias) + " Día(s)"
+end function
+

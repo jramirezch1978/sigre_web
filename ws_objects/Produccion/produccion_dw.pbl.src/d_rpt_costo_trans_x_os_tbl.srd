@@ -1,0 +1,86 @@
+﻿$PBExportHeader$d_rpt_costo_trans_x_os_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=592 color="536870912" )
+summary(height=60 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=orden_trabajo_ot dbname="orden_trabajo.ot" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_ot_adm dbname="orden_trabajo.ot_adm" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="oper_sec" )
+ column=(type=char(29) updatewhereclause=yes name=cencos_bolsa dbname="cencos_bolsa" )
+ column=(type=char(10) updatewhereclause=yes name=prod_parte_transp_det_cencos_parte dbname="prod_parte_transp_det.cencos_parte" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(9) updatewhereclause=yes name=tipo dbname="tipo" )
+ column=(type=number updatewhereclause=yes name=total dbname="total" )
+ retrieve="SELECT DISTINCT ot.nro_orden AS OT, ot.ot_adm, NVL(b.oper_sec,null) as oper_sec, 
+       NVL(DECODE(Z.FLAG_GEN_OS_TRANS, '1', (SELECT P.CENCOS||'Y CUENTA'||' '||P.CNTA_PRSP FROM PROD_TRANS_PRSP_FONDO P), '2', b.cencos||'Y CUENTA'||' '||(SELECT A.CNTA_PRSP_EGRESO
+         FROM ARTICULO_SUB_CATEG A, SERVICIOS S
+        WHERE A.COD_SUB_CAT       = S.COD_SUB_CAT
+          AND S.SERVICIO          = (SELECT l.servicio_transp FROM costo_param l)), '3', o.cencos||'Y CUENTA'||' '||(SELECT A.CNTA_PRSP_EGRESO
+         FROM ARTICULO_SUB_CATEG A, SERVICIOS S
+        WHERE A.COD_SUB_CAT       = S.COD_SUB_CAT
+          AND S.SERVICIO          = (SELECT l.servicio_transp FROM costo_param l)), '4', z.cencos||'Y CUENTA'||' '||(SELECT A.CNTA_PRSP_EGRESO
+         FROM ARTICULO_SUB_CATEG A, SERVICIOS S
+        WHERE A.COD_SUB_CAT       = S.COD_SUB_CAT
+          AND S.SERVICIO          = (SELECT l.servicio_transp FROM costo_param l))), NULL) AS CENCOS_BOLSA,
+       B.CENCOS AS CENCOS_PARTE, c.desc_cencos, decode(aa.flag_obr_empl, 'O', 'OBREROS', 'E', 'EMPLEADOS') AS TIPO,
+       Sum(b.importe) as total
+
+  FROM operaciones                 o,
+       prod_parte_transp           aa,
+       prod_parte_transp_det       b,
+       com_zona_proceso            z,
+       centros_costo               c,
+       orden_trabajo               ot
+       
+ Where o.oper_sec(+)                 = b.oper_sec
+   And aa.nro_parte                   = b.nro_parte
+   AND z.zona_proceso                = b.zona_proceso
+   AND c.cencos                      = b.cencos
+   AND o.nro_orden                   = ot.nro_orden(+)
+
+   And Trunc(aa.fec_parte) between trunc(:ad_fecha1) and trunc(:ad_fecha2)
+   And substr(aa.nro_parte, 1, 2)     = :as_origen
+   And aa.proveedor                   = :as_proveedor
+   And aa.flag_obr_empl					 like :as_flag_obr_empl
+   AND aa.flag_estado                 = '1'
+ Group by ot.nro_orden, ot.ot_adm, b.oper_sec, Z.FLAG_GEN_OS_TRANS, B.CENCOS, O.CENCOS, Z.CENCOS, c.desc_cencos, aa.FLAG_OBR_EMPL, o.desc_operacion
+ ORDER BY ot.nro_orden" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_origen", string),("as_proveedor", string),("as_flag_obr_empl", string)) )
+bitmap(band=header filename="" x="55" y="36" height="208" width="407" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="56" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="124" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="192" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Resumen de la Os de Transporte" border="0" color="0" x="635" y="68" height="92" width="1783" html.valueishtml="0"  name=cabecera_t visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Al:" border="4" color="0" x="1669" y="200" height="56" width="87" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Del Proveedor:" border="4" color="0" x="823" y="272" height="56" width="434" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Del Origen de:" border="4" color="0" x="818" y="340" height="56" width="443" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Del:" border="4" color="0" x="1134" y="200" height="56" width="128" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="1303" y="200" height="56" width="315" html.valueishtml="0"  name=t_fecha1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="1303" y="344" height="56" width="315" html.valueishtml="0"  name=t_o visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="1303" y="276" height="56" width="315" html.valueishtml="0"  name=t_cod_proveedor visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="1787" y="200" height="56" width="320" html.valueishtml="0"  name=t_fecha2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="1632" y="276" height="56" width="1175" html.valueishtml="0"  name=t_nombre_proveedor visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="1632" y="344" height="56" width="475" html.valueishtml="0"  name=t_desc_o visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Orden Trabajo" border="2" color="33554432" x="9" y="484" height="104" width="302" html.valueishtml="0"  name=orden_trabajo_ot_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Orden Trabajo
+Ot Adm" border="2" color="33554432" x="315" y="484" height="104" width="370" html.valueishtml="0"  name=orden_trabajo_ot_adm_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Oper Sec" border="2" color="33554432" x="690" y="484" height="104" width="302" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cencos del Parte" border="2" color="33554432" x="2135" y="484" height="104" width="1413" html.valueishtml="0"  name=centros_costo_desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Tipo" border="2" color="33554432" x="3552" y="484" height="104" width="274" html.valueishtml="0"  name=tipo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Total" border="2" color="33554432" x="3831" y="484" height="104" width="329" html.valueishtml="0"  name=total_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cencos y Cnta. Presupuestal de la OS" border="2" color="33554432" x="997" y="484" height="104" width="1134" html.valueishtml="0"  name=cencos_bolsa_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="52" width="302" format="[general]" html.valueishtml="0"  name=orden_trabajo_ot visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="315" y="4" height="52" width="370" format="[general]" html.valueishtml="0"  name=orden_trabajo_ot_adm visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="690" y="4" height="52" width="302" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2423" y="4" height="52" width="1125" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="3552" y="4" height="52" width="274" format="[general]" html.valueishtml="0"  name=tipo visible="1" edit.limit=9 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="3831" y="4" height="52" width="329" format="###,##0.00" html.valueishtml="0"  name=total visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2135" y="4" height="52" width="283" format="[general]" html.valueishtml="0"  name=prod_parte_transp_det_cencos_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="997" y="4" height="52" width="1134" format="[general]" html.valueishtml="0"  name=cencos_bolsa visible="1" edit.limit=29 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(total for all)"border="2" color="33554432" x="3831" y="4" height="52" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,85 @@
+﻿$PBExportHeader$d_cns_saldo_ctacte_anual_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=440 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=48 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cntbl_asiento_det_cnta_ctbl dbname="cntbl_asiento_det.cnta_ctbl" )
+ column=(type=char(25) updatewhereclause=yes name=cntbl_cnta_abrev_cnta dbname="cntbl_cnta.abrev_cnta" )
+ column=(type=char(8) updatewhereclause=yes name=cntbl_asiento_det_cod_relacion dbname="cntbl_asiento_det.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=soldeb dbname="soldeb" )
+ column=(type=number updatewhereclause=yes name=solhab dbname="solhab" )
+ column=(type=number updatewhereclause=yes name=doldeb dbname="doldeb" )
+ column=(type=number updatewhereclause=yes name=dolhab dbname="dolhab" )
+ retrieve="  SELECT CD.CNTA_CTBL,   
+         C.ABREV_CNTA,   
+         CD.COD_RELACION,
+         P.NOM_PROVEEDOR,   
+         SUM( DECODE(CD.FLAG_DEBHAB,'D',
+              CD.IMP_MOVSOL,0 )) as soldeb,
+         SUM( DECODE(CD.FLAG_DEBHAB,'H',
+              CD.IMP_MOVSOL,0 )) as solhab, 
+         SUM( DECODE(CD.FLAG_DEBHAB,'D',
+              CD.IMP_MOVDOL,0 )) as doldeb,
+         SUM( DECODE(CD.FLAG_DEBHAB,'H',
+              CD.IMP_MOVDOL,0 )) as dolhab
+    FROM CNTBL_ASIENTO_DET cd,   
+         CNTBL_CNTA c,   
+         PROVEEDOR p
+   WHERE ( C.CNTA_CTBL = CD.CNTA_CTBL ) and  
+         ( P.PROVEEDOR = CD.COD_RELACION ) and  
+         ( ( CD.ANO = :an_ano ) AND  
+         ( CD.MES >= :an_mes_ini ) AND  
+         ( CD.MES <= :an_mes_fin ) AND  
+         ( C.FLAG_CODREL = '1' ) )   
+GROUP BY CD.CNTA_CTBL,   
+         C.ABREV_CNTA,   
+         CD.COD_RELACION,   
+         P.NOM_PROVEEDOR
+ORDER BY CD.CNTA_CTBL ASC,   
+         CD.COD_RELACION ASC   
+" arguments=(("an_ano", number),("an_mes_ini", number),("an_mes_fin", number)) )
+group(level=1 header.height=92 trailer.height=124 by=("cntbl_asiento_det_cnta_ctbl" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="RESUMEN DE CUENTA CORRIENTE" border="1" color="0" x="896" y="116" height="76" width="1541"  name=t_8  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="0" x="2894" y="80" height="56" width="402" format="[general]"  name=page_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="2894" y="156" height="56" width="402" format="[general]"  name=date_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="0" x="2894" y="232" height="56" width="402"  name=t_user  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Año" border="2" color="0" x="1033" y="236" height="56" width="137"  name=t_10  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="2" color="16711680" x="1175" y="236" height="56" width="206"  name=t_ano  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Mes Desde" border="2" color="0" x="1385" y="236" height="56" width="329"  name=t_11  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Mes Hasta" border="2" color="0" x="1847" y="236" height="56" width="329"  name=t_12  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="2" color="16711680" x="1719" y="236" height="56" width="123"  name=t_mesi  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="2" color="16711680" x="2181" y="236" height="56" width="123"  name=t_mesf  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="S   O   L   E   S" border="2" color="0" x="1381" y="328" height="40" width="955"  name=cntbl_asiento_det_imp_movsol_t  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Código de Relación" border="2" color="0" x="32" y="328" height="40" width="1344"  name=proveedor_nom_proveedor_t  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="D   O   L   A   R   E   S" border="2" color="0" x="2341" y="328" height="40" width="955"  name=t_7  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+bitmap(band=header filename="" x="32" y="52" height="184" width="375" border="0"  name=p_logo )
+text(band=header alignment="2" text="" border="0" color="0" x="32" y="252" height="56" width="375"  name=t_nombre  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="32" y="372" height="40" width="251"  name=cntbl_asiento_det_cod_relacion_t  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Razón Social / Nombre" border="2" color="0" x="288" y="372" height="40" width="1088"  name=t_1  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Debe" border="2" color="0" x="1381" y="372" height="40" width="315"  name=cntbl_asiento_det_imp_movdol_t  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Haber" border="2" color="0" x="1701" y="372" height="40" width="315"  name=t_2  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Saldo" border="2" color="0" x="2021" y="372" height="40" width="315"  name=t_3  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Debe" border="2" color="0" x="2341" y="372" height="40" width="315"  name=t_4  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Haber" border="2" color="0" x="2661" y="372" height="40" width="315"  name=t_5  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Saldo" border="2" color="0" x="2981" y="372" height="40" width="315"  name=t_6  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="0" x="32" y="24" height="40" width="251" format="[general]"  name=cntbl_asiento_det_cnta_ctbl edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="0" x="288" y="24" height="40" width="1088" format="[general]"  name=cntbl_cnta_abrev_cnta edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="32" y="4" height="40" width="251" format="[general]"  name=cntbl_asiento_det_cod_relacion edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="288" y="4" height="40" width="1088" format="[general]"  name=proveedor_nom_proveedor edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1381" y="4" height="40" width="315" format="[General]"  name=soldeb editmask.mask="##,###,###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="1701" y="4" height="40" width="315" format="[General]"  name=solhab editmask.mask="##,###,###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" soldeb - solhab "border="0" color="0" x="2021" y="4" height="40" width="315" format="##,###,###,###.00"  name=saldo_sol  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="2341" y="4" height="40" width="315" format="[General]"  name=doldeb editmask.mask="##,###,###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="2661" y="4" height="40" width="315" format="[General]"  name=dolhab editmask.mask="##,###,###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" doldeb - dolhab "border="0" color="0" x="2981" y="4" height="40" width="315" format="##,###,###,###.00"  name=compute_1  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(soldeb for group 1)"border="2" color="0" x="1381" y="40" height="40" width="315" format="##,###,###,###.00"  name=compute_2  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(solhab for group 1)"border="2" color="0" x="1701" y="40" height="40" width="315" format="##,###,###,###.00"  name=compute_3  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum( soldeb - solhab  for group 1)"border="2" color="0" x="2021" y="40" height="40" width="315" format="##,###,###,###.00"  name=compute_4  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(doldeb for group 1)"border="2" color="0" x="2341" y="40" height="40" width="315" format="##,###,###,###.00"  name=compute_5  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(dolhab for group 1)"border="2" color="0" x="2661" y="40" height="40" width="315" format="##,###,###,###.00"  name=compute_6  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum( doldeb - dolhab  for group 1)"border="2" color="0" x="2981" y="40" height="40" width="315" format="##,###,###,###.00"  name=compute_7  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

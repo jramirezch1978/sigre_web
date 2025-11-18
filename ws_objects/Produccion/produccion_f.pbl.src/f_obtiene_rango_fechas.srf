@@ -1,0 +1,30 @@
+﻿$PBExportHeader$f_obtiene_rango_fechas.srf
+global type f_obtiene_rango_fechas from function_object
+end type
+
+forward prototypes
+global function string f_obtiene_rango_fechas (date ad_fecha1, date ad_fecha2)
+end prototypes
+
+global function string f_obtiene_rango_fechas (date ad_fecha1, date ad_fecha2);integer 	dias, li_dia, li_mes
+string 	ls_duracion
+
+dias = DaysAfter(date(ad_fecha1),date(ad_fecha2))
+dias = dias + 1
+
+if dias < 30 then
+	li_mes 		= 0
+	li_dia 		= dias
+	ls_duracion = string(li_mes) + space(1) +  'mes(es) y' + space(1) + string(li_dia)+ space(1) +'días' 
+
+else 
+	
+	li_mes 		= truncate(dias/30,0)
+	li_dia 		= truncate(mod(dias,30),2)
+	ls_duracion = string(li_mes) + space(1) +  'mes(es) y' + space(1) + string(li_dia)+ space(1) +'días' 
+end if
+
+Return ls_duracion
+
+end function
+

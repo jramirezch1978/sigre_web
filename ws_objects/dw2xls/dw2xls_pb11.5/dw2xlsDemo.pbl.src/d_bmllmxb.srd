@@ -1,0 +1,69 @@
+﻿$PBExportHeader$d_bmllmxb.srd
+$PBExportComments$部门领料明细表
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4  print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=316 color="536870912" )
+header[2](height=88 color="536870912" )
+header[3](height=84 color="536870912" )
+summary(height=88 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=100 color="67108864" )
+table(column=(type=char(20) updatewhereclause=yes name=itemid dbname="itemid" )
+ column=(type=char(20) updatewhereclause=yes name=name dbname="name" )
+ column=(type=char(20) updatewhereclause=yes name=model dbname="model" )
+ column=(type=char(20) updatewhereclause=yes name=description dbname="description" )
+ column=(type=number updatewhereclause=yes name=qty dbname="qty" )
+ column=(type=number updatewhereclause=yes name=amount dbname="amount" )
+ retrieve="    SELECT cd_d.itemid, 
+         item.name,   
+         item.model,
+         item.unitid,  
+         isnull(department.description,'其它') department,  
+         Sum(cd_d.qty) qty,
+         sum(cd_d.Amount) amount 
+        
+  FROM   cd LEFT OUTER JOIN Department ON cd.DepartmentID=Department.ID,   
+         cd_d ,   
+         item 
+	
+	WHERE  ( cd.id = cd_d.id ) and  
+         ( cd.djlx=cd_d.djlx) and 
+         ( cd_d.itemid = item.id ) and  
+         ( cd.djlx in ('LL','TL') ) AND 
+         ( cd.djrq Between :ad_Begin AND :ad_End) AND 
+         ( cd.shbz='1') 
+      
+Group by  cd_d.itemid,
+             item.name,   
+             item.model, 
+             item.unitid , 
+             isnull(department.description,'其它')  " arguments=(("ad_begin", datetime),("ad_end", datetime),("as_siteid", string),("as_departmentid", string),("as_employeeID", string),("as_itemid", string),("as_classid", string),("as_brandid", string),("as_kindid", string))  sort="itemid A name A model A " )
+text(band=header[2] alignment="2" text="@department" border="0" color="0" x="1810" y="24" height="56" width="782"   name=t_2 visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="材料编码" border="0" color="0" x="9" y="16" height="56" width="389"   name=itemid_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="材料名称" border="0" color="0" x="407" y="16" height="56" width="667"   name=name_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="规格" border="0" color="0" x="1083" y="16" height="56" width="503"   name=model_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="单位" border="0" color="0" x="1595" y="16" height="56" width="206"   name=unitid_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="数量" border="0" color="0" x="1810" y="16" height="56" width="379"   name=qty_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="金额" border="0" color="0" x="2199" y="16" height="56" width="389"   name=amount_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="数量合计" border="0" color="0" x="2597" y="16" height="56" width="402"   name=t_1 visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="金额合计" border="0" color="0" x="3008" y="12" height="56" width="421"   name=t_3 visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="12" height="68" width="389" format="[general]"   name=itemid visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="407" y="12" height="68" width="667" format="[general]"   name=name visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1083" y="12" height="68" width="503" format="[general]"   name=model visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="1595" y="12" height="68" width="206" format="[general]"   name=unitid visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="0" color="33554432" x="2597" y="12" height="68" width="402" format="[General]"   name=hj_sl visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="1810" y="12" height="68" width="379" format="[General]"   name=qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="2199" y="12" height="68" width="389" format="#,##0.00"   name=amount visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(2)"border="0" color="33554432" x="3008" y="12" height="68" width="421" format="#,##0.00"   name=hj_je visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="合  计" border="0" color="0" x="407" y="16" height="56" width="667"   name=t_4 visible="1"  font.face="宋体" font.height="-9" font.weight="700"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(hj_sl for all )"border="0" color="33554432" x="2597" y="16" height="56" width="402" format="[General]"   name=zj_sl visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(qty for all )"border="0" color="33554432" x="1810" y="16" height="56" width="379" format="[General]"   name=xj_sl visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(amount for all )"border="0" color="33554432" x="2199" y="16" height="56" width="389" format="#,##0.00"   name=xj_je visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(hj_je for all )"border="0" color="33554432" x="3008" y="16" height="56" width="421" format="[General]"   name=zj_je visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="" border="4" color="33554432" x="0" y="0" height="312" width="3424"   name=sys_back visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="2" text="部门领用明细表" border="0" color="33554432" x="1102" y="32" height="132" width="1728"   name=report_title visible="1"  font.face="Arial" font.height="-26" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="查询范围： 2004-1-1 至 2004-12-31" border="0" color="33554432" x="5" y="224" height="56" width="1061"   name=t_5 visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="2" background.color="16777215" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "department" rows = "itemid, name, model, unitid" values = "sum(qty for crosstab), sum(amount for crosstab)" sourcenames = "itemid, name, model, unitid, department, qty, amount")
+sparse(names="itemid	name	model")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

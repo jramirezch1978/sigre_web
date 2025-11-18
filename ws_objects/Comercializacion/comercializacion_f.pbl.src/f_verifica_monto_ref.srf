@@ -1,0 +1,25 @@
+﻿$PBExportHeader$f_verifica_monto_ref.srf
+global type f_verifica_monto_ref from function_object
+end type
+
+forward prototypes
+global subroutine f_verifica_monto_ref (string as_cod_relacion, string as_tipo_doc, string as_nro_doc, string as_origen_ref, string as_tipo_ref, string as_nro_ref, string as_accion, decimal adc_importe, ref string as_flag_estado)
+end prototypes
+
+global subroutine f_verifica_monto_ref (string as_cod_relacion, string as_tipo_doc, string as_nro_doc, string as_origen_ref, string as_tipo_ref, string as_nro_ref, string as_accion, decimal adc_importe, ref string as_flag_estado);DECLARE PB_USP_FIN_VER_MONTO_REF PROCEDURE FOR USP_FIN_VER_MONTO_REF
+(:as_cod_relacion,:as_tipo_doc,:as_nro_doc,:adc_importe,:as_origen_ref,:as_tipo_ref,:as_nro_ref,:as_accion);
+EXECUTE PB_USP_FIN_VER_MONTO_REF;
+
+
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox("SQL error", SQLCA.SQLErrText)
+END IF
+
+FETCH PB_USP_FIN_VER_MONTO_REF INTO :as_flag_estado ;
+
+
+CLOSE PB_USP_FIN_VER_MONTO_REF ;       
+
+
+end subroutine
+

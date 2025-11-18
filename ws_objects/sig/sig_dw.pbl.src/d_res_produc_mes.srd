@@ -1,0 +1,58 @@
+﻿$PBExportHeader$d_res_produc_mes.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=444 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=number updatewhereclause=yes name=tonel_azuc dbname="tonel_azuc" )
+ column=(type=number updatewhereclause=yes name=tonel_proy dbname="tonel_proy" )
+ column=(type=number updatewhereclause=yes name=ratio dbname="ratio" )
+ retrieve="SELECT a.tonel_azuc, b.tonel_proy, (b.tonel_proy*(last_day(:ad_fec_ini)-:ad_fec_ini)/(:ad_fec_fin-:ad_fec_ini)) as ratio
+from 
+  (Select sum( nvl(am.cant_procesada,0) * nvl(a.peso_und,0) ) / 1000 as tonel_azuc
+    from vale_mov vm, articulo_mov am, articulo a
+   where vm.cod_origen = am.cod_origen and 
+         vm.nro_vale = am.nro_vale and
+         vm.tipo_mov = (select l.ingreso_pptt from labparam l where reckey='1') and 
+         vm.almacen = :as_almacen and 
+         vm.flag_estado <> '0' and
+         (vm.fec_registro between :ad_fec_ini and :ad_fec_fin) and
+         am.cod_art  = a.cod_art and
+         am.flag_estado <> '0' and
+         a.cod_clase=:as_clase) a, 
+   (select case 
+            when to_number(to_char(sysdate,'mm'))=1 then ppu.proy_ene 
+            when to_number(to_char(sysdate,'mm'))=2 then ppu.proy_feb
+            when to_number(to_char(sysdate,'mm'))=3 then ppu.proy_mar
+            when to_number(to_char(sysdate,'mm'))=4 then ppu.proy_abr
+            when to_number(to_char(sysdate,'mm'))=5 then ppu.proy_may
+            when to_number(to_char(sysdate,'mm'))=6 then ppu.proy_jun
+            when to_number(to_char(sysdate,'mm'))=7 then ppu.proy_jul
+            when to_number(to_char(sysdate,'mm'))=8 then ppu.proy_ago
+            when to_number(to_char(sysdate,'mm'))=9 then ppu.proy_set
+            when to_number(to_char(sysdate,'mm'))=10 then ppu.proy_oct
+            when to_number(to_char(sysdate,'mm'))=11 then ppu.proy_nov
+            when to_number(to_char(sysdate,'mm'))=12 then ppu.proy_dic
+           else 0 
+           end as tonel_proy
+ from presup_produccion_und ppu
+where ppu.ano=:an_ano and ppu.cod_art=:as_cod_art) b " arguments=(("ad_fec_ini", date),("ad_fec_fin", date),("as_clase", string),("as_almacen", string),("as_cod_art", string),("an_ano", number)) )
+bitmap(band=header filename="" x="18" y="12" height="212" width="379" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="18" y="236" height="48" width="379" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="1989" y="148" height="48" width="425" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="1989" y="80" height="48" width="425" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="1989" y="8" height="48" width="425" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Ton. proy. mes" border="2" color="33554432" x="969" y="376" height="64" width="471" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Ton. mes" border="2" color="33554432" x="485" y="376" height="64" width="471" html.valueishtml="0"  name=cant_procesada_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Ton. ratio" border="2" color="33554432" x="1458" y="376" height="64" width="485" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="1" text="RESUMEN DE PRODUCCION MENSUAL" border="0" color="33554432" x="517" y="40" height="76" width="1362" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="517" y="164" height="76" width="1362" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="1" tabsequence=0 border="0" color="0" x="485" y="4" height="64" width="471" format="#,##0.00" html.valueishtml="0"  name=tonel_azuc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="1" tabsequence=0 border="0" color="0" x="969" y="4" height="64" width="471" format="#,##0.00" html.valueishtml="0"  name=tonel_proy visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=0 border="0" color="0" x="1454" y="4" height="64" width="471" format="#,##0.00" html.valueishtml="0"  name=ratio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

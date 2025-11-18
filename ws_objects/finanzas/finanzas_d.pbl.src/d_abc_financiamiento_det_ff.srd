@@ -1,0 +1,76 @@
+﻿$PBExportHeader$d_abc_financiamiento_det_ff.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen dbname="financiamiento_det.origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=num_registro dbname="financiamiento_det.num_registro" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=num_cuota dbname="financiamiento_det.num_cuota" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=confin dbname="financiamiento_det.confin" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=imp_cuota_capital dbname="financiamiento_det.imp_cuota_capital" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=tasa_interes dbname="financiamiento_det.tasa_interes" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_tasa_interes dbname="financiamiento_det.flag_tasa_interes" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=imp_cuota_interes dbname="financiamiento_det.imp_cuota_interes" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_vcto dbname="financiamiento_det.fecha_vcto" )
+ column=(type=char(5) update=yes updatewhereclause=yes name=tipo_impuesto dbname="financiamiento_det.tipo_impuesto" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=imp_impuesto dbname="financiamiento_det.imp_impuesto" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="financiamiento_det.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="financiamiento_det.nro_doc" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_pago_int dbname="financiamiento_det.fecha_pago_int" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="financiamiento_det.flag_estado" values="Anulado	0/Generado	1/Cancelado	2/	/" )
+ column=(type=char(8) updatewhereclause=yes name=matriz_cntbl dbname="concepto_financiero.matriz_cntbl" )
+ column=(type=char(1) updatewhereclause=yes name=signo dbname="impuestos_tipo.signo" )
+ retrieve="  SELECT ~"FINANCIAMIENTO_DET~".~"ORIGEN~",   
+         ~"FINANCIAMIENTO_DET~".~"NUM_REGISTRO~",   
+         ~"FINANCIAMIENTO_DET~".~"NUM_CUOTA~",   
+         ~"FINANCIAMIENTO_DET~".~"CONFIN~",   
+         ~"FINANCIAMIENTO_DET~".~"IMP_CUOTA_CAPITAL~",   
+         ~"FINANCIAMIENTO_DET~".~"TASA_INTERES~",   
+         ~"FINANCIAMIENTO_DET~".~"FLAG_TASA_INTERES~",   
+         ~"FINANCIAMIENTO_DET~".~"IMP_CUOTA_INTERES~",   
+         ~"FINANCIAMIENTO_DET~".~"FECHA_VCTO~",   
+         ~"FINANCIAMIENTO_DET~".~"TIPO_IMPUESTO~",   
+         ~"FINANCIAMIENTO_DET~".~"IMP_IMPUESTO~",   
+			~"FINANCIAMIENTO_DET~".~"TIPO_DOC~",
+			~"FINANCIAMIENTO_DET~".~"NRO_DOC~",
+         ~"FINANCIAMIENTO_DET~".~"FECHA_PAGO_INT~",   
+         ~"FINANCIAMIENTO_DET~".~"FLAG_ESTADO~",   
+         ~"CONCEPTO_FINANCIERO~".~"MATRIZ_CNTBL~",
+         ~"IMPUESTOS_TIPO~".~"SIGNO~"  
+    FROM ~"FINANCIAMIENTO_DET~",   
+         ~"CONCEPTO_FINANCIERO~",   
+         ~"IMPUESTOS_TIPO~"  
+   WHERE ( financiamiento_det.tipo_impuesto 		= impuestos_tipo.tipo_impuesto (+)) AND
+         ( ~"FINANCIAMIENTO_DET~".~"CONFIN~" 			= ~"CONCEPTO_FINANCIERO~".~"CONFIN~"  ) AND   
+			((~"FINANCIAMIENTO_DET~".~"ORIGEN~" 			= :as_cod_origen					    ) AND
+			 (~"FINANCIAMIENTO_DET~".~"NUM_REGISTRO~"	= :as_num_registro					 ))" update="FINANCIAMIENTO_DET" updatewhere=1 updatekeyinplace=yes arguments=(("as_cod_origen", string),("as_num_registro", string)) )
+text(band=header alignment="2" text="Concepto Financiero" border="2" color="8388608" x="3561" y="8" height="56" width="466"  name=confin_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha Pago Int." border="2" color="8388608" x="4032" y="8" height="56" width="361"  name=fecha_pago_int_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Estado" border="2" color="8388608" x="4398" y="8" height="56" width="320"  name=flag_estado_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Imp.Impuesto" border="2" color="8388608" x="2903" y="8" height="56" width="315"  name=imp_igv_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Monto Cuota" border="2" color="8388608" x="3223" y="8" height="56" width="334"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cuota" border="2" color="8388608" x="14" y="8" height="56" width="192"  name=num_cuota_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo de Documento" border="2" color="8388608" x="210" y="8" height="56" width="603"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro. de Doc." border="2" color="8388608" x="818" y="8" height="56" width="297"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Imp. Capital" border="2" color="8388608" x="1120" y="8" height="56" width="471"  name=imp_cuota_capital_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Vencimiento" border="2" color="8388608" x="1595" y="8" height="56" width="274"  name=fecha_vcto_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tasa Interes" border="2" color="8388608" x="1874" y="8" height="56" width="329"  name=tasa_interes_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Impuesto" border="2" color="8388608" x="2528" y="8" height="56" width="370"  name=tipo_igv_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Imp. Interes" border="2" color="8388608" x="2208" y="8" height="56" width="315"  name=imp_cuota_interes_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="255" x="14" y="0" height="64" width="192" format="[general]"  name=num_cuota edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=4 alignment="0" tabsequence=70 border="2" color="0" x="3561" y="0" height="64" width="466" format="[general]"  name=confin edit.limit=8 edit.case=any edit.autoselect=yes edit.required=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=80 border="2" color="0" x="4032" y="0" height="64" width="361" format="[shortdate] [time]"  name=fecha_pago_int editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="8388608" x="2903" y="0" height="64" width="315" format="[general]"  name=imp_impuesto editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=detail alignment="1" expression="f_total_cuota(if ( Isnull(imp_cuota_capital),0, imp_cuota_capital ) , if (Isnull(imp_cuota_interes),0, imp_cuota_interes ) , If(Isnull(imp_impuesto),0,  imp_impuesto ) , signo )"border="2" color="255" x="3223" y="0" height="64" width="334" format="###,###.00"  name=monto_cuota  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=15 alignment="0" tabsequence=90 border="2" color="0" x="4398" y="0" height="64" width="320" format="[general]"  name=flag_estado ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.useasborder=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=10 border="2" color="0" x="210" y="0" height="64" width="603" format="[general]"  name=tipo_doc dddw.name=d_dddw_doc_x_pagar_grd dddw.displaycolumn=desc_tipo_doc dddw.datacolumn=doc_tipo_tipo_doc dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=20 border="2" color="0" x="818" y="0" height="64" width="297" format="[general]"  name=nro_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="1" tabsequence=30 border="2" color="0" x="1120" y="0" height="64" width="471" format="[general]"  name=imp_cuota_capital editmask.required=yes editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=40 border="2" color="0" x="1595" y="0" height="64" width="274" format="[shortdate] [time]"  name=fecha_vcto editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=50 border="2" color="0" x="1874" y="0" height="64" width="329" format="[general]"  name=tasa_interes editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=60 border="2" color="0" x="2528" y="0" height="64" width="370" format="[general]"  name=tipo_impuesto dddw.name=d_dddw_impuestos dddw.displaycolumn=desc_impuesto dddw.datacolumn=tipo_impuesto dddw.percentwidth=470 dddw.lines=3 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="8388608" x="2208" y="0" height="64" width="315" format="[general]"  name=imp_cuota_interes editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

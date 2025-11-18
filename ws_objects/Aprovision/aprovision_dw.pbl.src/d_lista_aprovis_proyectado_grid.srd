@@ -1,0 +1,77 @@
+﻿$PBExportHeader$d_lista_aprovis_proyectado_grid.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes name=origen dbname="ap_proyeccion.origen" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ano dbname="ap_proyeccion.ano" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=especie dbname="ap_proyeccion.especie" )
+ column=(type=char(50) updatewhereclause=yes name=descr_especie dbname="tg_especies.descr_especie" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_proveedor dbname="ap_proyeccion.flag_proveedor" values="Flota Propia	F/Terceros	T/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_zona_descarga dbname="ap_proyeccion.flag_zona_descarga" values="En Chata	C/En Planta	P/Playa	Y/" )
+ column=(type=number update=yes updatewhereclause=yes name=cantidad_estimada dbname="cantidad_estimada" )
+ column=(type=number updatewhereclause=yes name=cantidad_real dbname="cantidad_real" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=unidad_peso dbname="ap_proyeccion.unidad_peso" )
+ column=(type=char(25) updatewhereclause=yes name=desc_unidad dbname="unidad.desc_unidad" )
+ retrieve="  SELECT A.ORIGEN             ,   
+			   A.ANO                ,
+         A.ESPECIE            ,   
+         B.DESCR_ESPECIE      ,   
+			   A.FLAG_PROVEEDOR     ,
+         A.FLAG_ZONA_DESCARGA ,   
+         sum(A.CANTIDAD_ESTIMADA) AS cantidad_estimada  ,   
+         sum(A.CANTIDAD_REAL) AS cantidad_real      ,   
+         A.UNIDAD_PESO        ,
+         C.DESC_UNIDAD        
+    FROM AP_PROYECCION A,   
+         TG_ESPECIES B,   
+         UNIDAD C   
+   WHERE B.ESPECIE 	= A.ESPECIE
+	  and C.UND 		= A.UNIDAD_PESO 
+	  and a.ano 		= :ai_year
+GROUP BY A.ORIGEN             ,   
+			   A.ANO                ,
+         A.ESPECIE            ,   
+         B.DESCR_ESPECIE      ,   
+			   A.FLAG_PROVEEDOR     ,
+         A.FLAG_ZONA_DESCARGA ,   
+         A.UNIDAD_PESO        ,
+         C.DESC_UNIDAD        
+   ORDER BY a.origen, A.FLAG_PROVEEDOR 
+" arguments=(("ai_year", number)) )
+text(band=header alignment="2" text="Descripcion
+Especie" border="2" color="33554432" x="1019" y="8" height="112" width="987" html.valueishtml="0"  name=descr_especie_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Zona
+Descarga" border="2" color="33554432" x="2016" y="8" height="112" width="494" html.valueishtml="0"  name=flag_zona_descarga_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cantidad
+Estimada" border="2" color="33554432" x="2519" y="8" height="112" width="498" html.valueishtml="0"  name=cantidad_estimada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Unidad
+Peso" border="2" color="33554432" x="3419" y="8" height="112" width="311" html.valueishtml="0"  name=unidad_peso_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="0" text="Año" border="2" color="0" x="4462" y="4" height="56" width="183" html.valueishtml="0"  name=ano_t visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Codigo
+Especie" border="2" color="33554432" x="690" y="8" height="112" width="320" html.valueishtml="0"  name=especie_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cantidad
+Real" border="2" color="33554432" x="3026" y="8" height="112" width="384" html.valueishtml="0"  name=cantidad_real_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Proveedor
+Mat. Prima" border="2" color="0" x="229" y="8" height="112" width="453" html.valueishtml="0"  name=flag_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion
+Unidad" border="2" color="33554432" x="3739" y="8" height="112" width="713" html.valueishtml="0"  name=desc_unidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1019" y="4" height="64" width="987" format="[general]" html.valueishtml="0"  name=descr_especie visible="1" edit.limit=50 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="3026" y="4" height="64" width="384" format="[general]" html.valueishtml="0"  name=cantidad_real visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="2" color="33554432" x="690" y="4" height="64" width="320" format="[general]" html.valueishtml="0"  name=especie pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=30 border="2" color="33554432" x="2016" y="4" height="64" width="494" format="[general]" html.valueishtml="0"  name=flag_zona_descarga visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=40 border="2" color="33554432" x="2519" y="4" height="64" width="498" format="[general]" html.valueishtml="0"  name=cantidad_estimada visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=10 border="2" color="33554432" x="229" y="4" height="64" width="453" format="[general]" html.valueishtml="0"  name=flag_proveedor visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.nilisnull=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=50 border="2" color="33554432" x="3419" y="4" height="64" width="311" format="[general]" html.valueishtml="0"  name=unidad_peso pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=3 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="4462" y="4" height="64" width="183" format="[general]" html.valueishtml="0"  name=ano visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="3739" y="4" height="64" width="713" format="[general]" html.valueishtml="0"  name=desc_unidad visible="1" edit.limit=25 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="2" tabsequence=60 border="2" color="0" x="9" y="4" height="64" width="210" html.valueishtml="0"  name=origen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Origen
+" border="2" color="0" x="5" y="8" height="112" width="215" html.valueishtml="0"  name=origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

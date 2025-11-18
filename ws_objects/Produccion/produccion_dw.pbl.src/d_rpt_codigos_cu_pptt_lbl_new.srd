@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_rpt_codigos_cu_pptt_lbl_new.srd
+release 17;
+datawindow(units=3 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=2 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 0 print.margin.right = 0 print.margin.top = 0 print.margin.bottom = 62 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" label.name="Pin Fed Address 5.0 x 1.94 1-Across 4090" label.width=5000 label.height=2480 label.rows=1 label.rows.spacing=150 label.columns=2 label.columns.spacing=300 label.topdown=no label.sheet=yes label.shape=roundrectangle label.ellipse_height=176 label.ellipse_width=176 )
+detail(height=2487 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(20) updatewhereclause=yes name=codigo_cu dbname="tg_parte_empaque_und.codigo_cu" )
+ column=(type=char(3000) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=char(20) updatewhereclause=yes name=nro_trazabilidad dbname="tg_parte_empaque.nro_trazabilidad" )
+ column=(type=datetime updatewhereclause=yes name=fec_produccion dbname="tg_parte_empaque.fec_produccion" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_caja dbname="tg_parte_empaque_und.nro_caja" )
+ column=(type=datetime updatewhereclause=yes name=fec_cavalier dbname="tg_parte_empaque.fec_cavalier" )
+ column=(type=char(200) updatewhereclause=yes name=nom_cliente_final dbname="proveedor.nom_cliente_final" )
+ column=(type=char(20) updatewhereclause=yes name=nro_contenedor_mp dbname="tg_parte_empaque.nro_contenedor_mp" )
+ column=(type=char(20) updatewhereclause=yes name=der dbname="tg_parte_empaque.der" )
+ column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="tg_parte_empaque.nro_parte" )
+ column=(type=char(37) updatewhereclause=yes name=code_qr dbname="codigo_qr" )
+ retrieve="select teu.codigo_cu,
+       a.desc_art,
+       a.und,
+       te.nro_trazabilidad,
+       te.fec_produccion,
+       teu.nro_caja,
+       te.fec_cavalier,
+       p.nom_proveedor as nom_cliente_final,
+       te.nro_contenedor_mp,
+       te.der,
+		 te.nro_parte,
+		 'C:\SIGRE\resources\PNG\qr_example.png' as codigo_qr
+from tg_parte_empaque_und teu,
+     tg_parte_empaque     te,
+     articulo             a,
+     proveedor            p
+where te.nro_parte 		= teu.nro_parte
+  and te.cod_art_pptt 	= a.cod_art
+  and te.cliente_final  = p.proveedor (+)
+  and te.nro_parte		= :as_nro_parte
+order by teu.nro_caja" arguments=(("as_nro_parte", string)) )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="238" y="79" height="1931" width="2090" format="[general]" html.valueishtml="0"  name=code_qr visible="1" bitmapname=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="0" x="2354" y="79" height="423" width="2592" format="[general]" html.valueishtml="0"  name=codigo_cu visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="2354" y="502" height="1084" width="2592" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="0" x="2354" y="1613" height="396" width="2592" format="[general]" html.valueishtml="0"  name=nro_trazabilidad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

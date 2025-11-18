@@ -1,0 +1,50 @@
+﻿$PBExportHeader$d_abc_doc_x_cobrar_pendientes_x_letra_ff.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=origen dbname="cntas_cobrar.origen" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="cntas_cobrar.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="cntas_cobrar.nro_doc" )
+ column=(type=char(1) updatewhereclause=yes name=tipo_mov dbname="tipo_mov" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tabla dbname="doc_pendientes_cta_cte.flag_tabla" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="doc_pendientes_cta_cte.cod_moneda" )
+ column=(type=number updatewhereclause=yes name=saldos dbname="saldos" )
+ column=(type=char(1) updatewhereclause=yes name=flag_signo dbname="doc_tipo.flag_signo" )
+ column=(type=decimal(2) updatewhereclause=yes name=sldo_sol dbname="doc_pendientes_cta_cte.sldo_sol" )
+ column=(type=decimal(2) updatewhereclause=yes name=saldo_dol dbname="doc_pendientes_cta_cte.saldo_dol" )
+ retrieve="SELECT   cc.origen     ,   
+         cc.tipo_doc   ,   
+         cc.nro_doc    ,   
+			DECODE(dp.flag_tabla,'1','C','2','C','3','P','4','P','6','P') as tipo_mov,
+         dp.flag_tabla , 
+			dp.cod_moneda ,
+         DECODE(dp.cod_moneda,(SELECT cod_soles FROM logparam where reckey = '1'),dp.sldo_sol,dp.saldo_dol) AS SALDOS,
+			dt.flag_signo ,	
+         dp.sldo_sol   ,   
+         dp.saldo_dol  
+	
+    FROM doc_pendientes_cta_cte dp,
+			cntas_cobrar  			  cc,	
+			cntas_cobrar_det		  ccd,
+			doc_tipo					  dt	 
+	WHERE ((cc.tipo_doc 		= ccd.tipo_doc    )  AND
+			 (cc.nro_doc  		= ccd.nro_doc     )) AND 
+			((cc.cod_relacion = dp.cod_relacion )	AND
+ 			 (cc.tipo_doc		= dp.tipo_doc		)	AND
+			 (cc.nro_doc		= dp.nro_doc		))	AND
+			 (cc.tipo_doc		= dt.tipo_doc		)  AND
+			((ccd.tipo_ref		= :as_tipo_doc		)  AND
+			 (ccd.nro_ref		= :as_nro_doc		))	" arguments=(("as_tipo_doc", string),("as_nro_doc", string)) )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="9" y="12" height="56" width="421"  name=origen_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldos" border="2" color="8388608" x="1541" y="12" height="56" width="329"  name=saldos_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="8388608" x="434" y="12" height="56" width="663"  name=tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="1102" y="12" height="56" width="434"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="4" height="76" width="421" format="[general]"  name=origen dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="434" y="4" height="76" width="663" format="[general]"  name=tipo_doc dddw.name=d_dddw_tipo_doc_tbl dddw.displaycolumn=desc_tipo_doc dddw.datacolumn=tipo_doc dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="1102" y="4" height="76" width="434" format="[general]"  name=nro_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="0" x="1541" y="4" height="76" width="329" format="[general]"  name=saldos editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

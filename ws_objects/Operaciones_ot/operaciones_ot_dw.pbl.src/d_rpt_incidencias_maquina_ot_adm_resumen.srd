@@ -1,0 +1,58 @@
+﻿$PBExportHeader$d_rpt_incidencias_maquina_ot_adm_resumen.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=380 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="tt_ope_incidencias_maq_ot_adm.cod_maquina" )
+ column=(type=char(100) updatewhereclause=yes name=maquina_desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(10) updatewhereclause=yes name=ot_adm dbname="tt_ope_incidencias_maq_ot_adm.ot_adm" )
+ column=(type=char(40) updatewhereclause=yes name=ot_administracion_descripcion dbname="ot_administracion.descripcion" )
+ column=(type=char(8) updatewhereclause=yes name=cod_incidencia dbname="tt_ope_incidencias_maq_ot_adm.cod_incidencia" )
+ column=(type=char(100) updatewhereclause=yes name=incidencias_dma_desc_incidencia dbname="incidencias_dma.desc_incidencia" )
+ column=(type=number updatewhereclause=yes name=horas dbname="horas" )
+ retrieve="select tt.cod_maquina, m.desc_maq, 
+       tt.ot_adm, ota.descripcion, 
+       tt.cod_incidencia, i.desc_incidencia, 
+       sum(tt.nro_horas) as horas
+from tt_ope_incidencias_maq_ot_adm tt, maquina m, ot_administracion ota, incidencias_dma i
+where tt.cod_maquina=m.cod_maquina(+) and
+      tt.ot_adm=ota.ot_adm(+) and
+      tt.cod_incidencia=i.cod_incidencia(+)
+group by tt.cod_maquina, m.desc_maq, 
+      tt.ot_adm, ota.descripcion, 
+      tt.cod_incidencia, i.desc_incidencia
+order by tt.cod_maquina, tt.ot_adm, tt.cod_incidencia" )
+group(level=1 header.height=72 trailer.height=72 by=("cod_maquina" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=72 trailer.height=68 by=("ot_adm" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="14" y="12" height="180" width="270" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="9" y="216" height="40" width="274" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2414" y="32" height="40" width="261" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="2414" y="88" height="40" width="261" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="2414" y="144" height="40" width="261" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="INCIDENCIAS DE EQUIPOS Y/O MAQUINARIAS" border="0" color="0" x="672" y="56" height="64" width="1394" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="672" y="156" height="64" width="1394" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Maquina" border="2" color="0" x="69" y="320" height="56" width="283" html.valueishtml="0"  name=cod_maquina_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+text(band=header alignment="2" text="Ot Adm" border="2" color="0" x="366" y="320" height="56" width="302" html.valueishtml="0"  name=ot_adm_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+text(band=header alignment="2" text="Incidencia" border="2" color="0" x="681" y="320" height="56" width="229" html.valueishtml="0"  name=cod_incidencia_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+text(band=header alignment="2" text="Descripción de incidencias" border="2" color="0" x="923" y="320" height="56" width="1262" html.valueishtml="0"  name=nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+text(band=header alignment="2" text="Nro Horas" border="2" color="0" x="2199" y="320" height="56" width="402" html.valueishtml="0"  name=nro_horas_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="366" y="8" height="56" width="1490" format="[general]" html.valueishtml="0"  name=maquina_desc_maq visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="69" y="8" height="56" width="283" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="681" y="8" height="56" width="1083" format="[general]" html.valueishtml="0"  name=ot_administracion_descripcion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="366" y="8" height="56" width="302" format="[general]" html.valueishtml="0"  name=ot_adm visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="681" y="8" height="56" width="224" format="[general]" html.valueishtml="0"  name=cod_incidencia visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="923" y="8" height="56" width="1262" format="[general]" html.valueishtml="0"  name=incidencias_dma_desc_incidencia visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="2199" y="8" height="56" width="402" format="#,##0.00" html.valueishtml="0"  name=horas visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.2 alignment="0" text="Total x ot_adm:" border="0" color="0" x="1600" y="4" height="56" width="457" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.2 alignment="1" expression="sum(horas for group 2)"border="0" color="33554432" x="2199" y="4" height="56" width="402" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="0" text="Total x máquina:" border="0" color="8388608" x="1422" y="4" height="56" width="494" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(horas for group 1)"border="0" color="8388608" x="2194" y="8" height="56" width="402" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Total general:" border="0" color="0" x="1317" y="8" height="56" width="494" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(horas for all)"border="0" color="33554432" x="2199" y="8" height="56" width="402" format="#,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

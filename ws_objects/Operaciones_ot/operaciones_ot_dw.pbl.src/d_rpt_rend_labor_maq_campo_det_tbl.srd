@@ -1,0 +1,71 @@
+﻿$PBExportHeader$d_rpt_rend_labor_maq_campo_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=424 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes name=cod_maquina dbname="pd_ot_det.cod_maquina" )
+ column=(type=char(100) updatewhereclause=yes name=maquina_desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(10) updatewhereclause=yes name=pd_ot_det_nro_orden dbname="pd_ot_det.nro_orden" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_parte dbname="pd_ot_det.nro_parte" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_item dbname="pd_ot_det.nro_item" )
+ column=(type=char(8) updatewhereclause=yes name=pd_ot_det_cod_labor dbname="pd_ot_det.cod_labor" )
+ column=(type=char(4000) updatewhereclause=yes name=operador dbname="operador" )
+ column=(type=number updatewhereclause=yes name=cant dbname="cant" )
+ column=(type=number updatewhereclause=yes name=avance dbname="avance" )
+ retrieve="select pd.cod_maquina, m.desc_maq, pd.nro_orden, pd.nro_parte, pd.nro_item, pd.cod_labor, 
+       USF_OPE_OPERADOR_MAQUINA(pd.nro_parte, pd.nro_item) as operador, 
+		 sum(nvl(pd.cant_labor,0)-nvl(pd.horas_inciden,0)) as cant, 
+       sum(nvl(pd.cant_avance,0)) as avance
+ from orden_trabajo ot, operaciones o, 
+      pd_ot p, pd_ot_det pd, 
+      labor l, campo_ciclo cc, 
+      campo c, maquina m
+where (ot.nro_orden=o.nro_orden) and
+      (o.oper_sec=pd.oper_sec) and
+      (pd.nro_parte=p.nro_parte) and
+      (ot.nro_orden=cc.nro_orden) and
+      (cc.cod_campo=c.cod_campo) and 
+      pd.cod_labor=l.cod_labor and
+      pd.cod_maquina = m.cod_maquina and
+      pd.nro_orden = :as_nro_orden and
+      pd.cod_labor = :as_cod_labor  and
+      pd.cod_ejecutor = :as_ejecutor  and
+      p.fecha between :ad_fec_ini and :ad_fec_fin
+group by pd.cod_maquina, m.desc_maq, pd.nro_orden, pd.nro_parte, pd.nro_item, pd.cod_labor, 
+			USF_OPE_OPERADOR_MAQUINA(pd.nro_parte, pd.nro_item)
+order by pd.cod_maquina, pd.nro_orden, pd.nro_parte, pd.nro_item" arguments=(("as_cod_labor", string),("as_ejecutor", string),("as_nro_orden", string),("ad_fec_ini", date),("ad_fec_fin", date)) )
+group(level=1 header.height=92 trailer.height=124 by=("cod_maquina" ) header.color="536870912" trailer.color="536870912" )
+column(band=header.1 id=1 alignment="0" tabsequence=30 border="0" color="33554432" x="46" y="16" height="64" width="325" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="613" y="60" height="64" width="1947" html.valueishtml="0"  name=t_titulo visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="613" y="164" height="64" width="1938" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="2830" y="140" height="40" width="315" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="2830" y="76" height="40" width="315" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="0" x="2830" y="16" height="40" width="315" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=2 alignment="0" tabsequence=40 border="0" color="33554432" x="389" y="16" height="64" width="2048" format="[general]" html.valueishtml="0"  name=maquina_desc_maq visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="0" text="Total :" border="0" color="0" x="1632" y="36" height="64" width="320" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(cant for group 1)"border="0" color="0" x="2034" y="36" height="64" width="384" format="#,##0.00" html.valueishtml="0"  name=cant_total visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="14" y="20" height="196" width="283" border="0"  name=p_logo visible="1" )
+text(band=header alignment="1" text="" border="0" color="0" x="14" y="244" height="40" width="283" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nro Parte" border="2" color="33554432" x="133" y="336" height="64" width="370" html.valueishtml="0"  name=nro_parte_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=4 alignment="0" tabsequence=10 border="0" color="33554432" x="133" y="8" height="64" width="370" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Item" border="2" color="33554432" x="517" y="336" height="64" width="178" html.valueishtml="0"  name=nro_item_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=5 alignment="1" tabsequence=20 border="0" color="33554432" x="517" y="8" height="64" width="178" format="[general]" html.valueishtml="0"  name=nro_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Operador" border="2" color="33554432" x="713" y="336" height="64" width="978" html.valueishtml="0"  name=operador_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=7 alignment="0" tabsequence=90 border="0" color="33554432" x="713" y="8" height="64" width="978" format="[general]" html.valueishtml="0"  name=operador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ord.Trabajo" border="2" color="33554432" x="1705" y="336" height="64" width="315" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=3 alignment="0" tabsequence=50 border="0" color="33554432" x="1705" y="8" height="64" width="315" format="[general]" html.valueishtml="0"  name=pd_ot_det_nro_orden visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cantidad" border="2" color="33554432" x="2034" y="336" height="64" width="384" html.valueishtml="0"  name=cant_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=8 alignment="1" tabsequence=70 border="0" color="33554432" x="2034" y="8" height="64" width="384" format="#,##0.00" html.valueishtml="0"  name=cant visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(avance for group 1)"border="0" color="0" x="2432" y="36" height="64" width="215" format="#,##0.00" html.valueishtml="0"  name=avance_total visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="1" tabsequence=80 border="0" color="33554432" x="2432" y="8" height="64" width="215" format="#,##0.00" html.valueishtml="0"  name=avance visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Has av." border="2" color="33554432" x="2432" y="336" height="64" width="215" html.valueishtml="0"  name=avance_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+compute(band=trailer.1 alignment="0" expression="if(  avance_total >0,  cant_total / avance_total , 0 )"border="0" color="0" x="2661" y="36" height="64" width="256" format="[GENERAL]" html.valueishtml="0"  name=ratio_total visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="if(  avance >0,  cant / avance , 0 )"border="0" color="0" x="2661" y="8" height="64" width="256" format="[GENERAL]" html.valueishtml="0"  name=ratio visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Ratio" border="2" color="33554432" x="2661" y="336" height="64" width="256" html.valueishtml="0"  name=ratio_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

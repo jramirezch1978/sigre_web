@@ -1,0 +1,65 @@
+﻿$PBExportHeader$d_rpt_prod_costo_cong_cab3.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=168 color="536870912" )
+summary(height=56 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=52 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=number updatewhereclause=yes name=cant_procesada dbname="cant_procesada" )
+ column=(type=number updatewhereclause=yes name=consumo_dia dbname="consumo_dia" )
+ retrieve="  SELECT a.cod_art,
+			a.nom_articulo,
+			a.und,
+			NVL(SUM(am.cant_procesada), 0) as cant_procesada, 
+			NVL(tt.TOTAL_MP,0) as consumo_dia
+    FROM vale_mov              vm,
+         articulo_mov          am,
+         articulo_mov_proy     amp,
+         orden_trabajo         ot,
+         centro_benef_subprod  ca,
+			tt_prod_costo_hp_cab  tt,
+			plantilla_costo		 pc,
+			articulo					 a
+   WHERE vm.nro_vale = am.nro_vale
+     AND am.origen_mov_proy = amp.cod_origen
+     AND am.nro_mov_proy    = amp.nro_mov
+     AND ot.nro_orden       = amp.nro_doc
+     AND amp.tipo_doc       = (select doc_ot from logparam where reckey = '1')
+     AND ca.cod_art         = am.cod_art
+     and am.cod_art			 = a.cod_art
+     AND vm.flag_estado     <> '0'
+     AND am.flag_estado     <> '0'
+     AND trunc(vm.fec_registro) BETWEEN trunc(:ad_fecha1) AND trunc(:ad_fecha2)
+     AND ot.centro_benef        = ca.centro_benef
+     AND ca.centro_benef        = pc.centro_benef
+     and pc.cod_plantilla		  = :as_plantilla
+     AND vm.tipo_mov            = (select oper_ing_prod from logparam where reckey = '1')
+group by a.cod_art,
+			a.nom_articulo,
+			a.und, NVL(tt.TOTAL_MP,0)" arguments=(("as_plantilla", string),("ad_fecha1", date),("ad_fecha2", date)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="0" height="48" width="288" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="1403" y="0" height="48" width="256" format="###,##0.00" html.valueishtml="0"  name=cant_procesada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1289" y="0" height="48" width="110" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="297" y="0" height="48" width="987" format="[general]" html.valueishtml="0"  name=nom_articulo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" cant_procesada / consumo_dia * 100"border="2" color="33554432" x="1664" y="0" height="48" width="256" format="###,##0.000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(cant_procesada for all)"border="2" color="33554432" x="1403" y="4" height="48" width="256" format="###,##0.00" html.valueishtml="0"  name=total visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total" border="0" color="33554432" x="1074" y="8" height="44" width="297" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="total /  consumo_dia * 100"border="2" color="33554432" x="1664" y="4" height="48" width="256" format="###,##0.000" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sub Productos" border="0" color="0" x="480" y="4" height="64" width="928" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Código
+Artículo" border="2" color="33554432" x="5" y="76" height="88" width="288" html.valueishtml="0"  name=articulo_cod_art_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="1289" y="76" height="88" width="110" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad
+Producida" border="2" color="33554432" x="1403" y="76" height="88" width="256" html.valueishtml="0"  name=cant_procesada_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Rend 
+%" border="2" color="33554432" x="1664" y="76" height="88" width="256" html.valueishtml="0"  name=consumo_dia_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción
+Artículo" border="2" color="33554432" x="297" y="76" height="88" width="987" html.valueishtml="0"  name=articulo_desc_art_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

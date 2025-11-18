@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_cns_proveedor_art_devueltos_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=140 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="art_devol_prestamo.cod_art" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="art_devol_prestamo.proveedor" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_salida dbname="art_devol_prestamo.cant_salida" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_ingreso dbname="art_devol_prestamo.cant_ingreso" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="art_devol_prestamo.fec_registro" )
+ column=(type=char(6) updatewhereclause=yes name=almacen dbname="art_devol_prestamo.almacen" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen dbname="almacen.desc_almacen" )
+ retrieve="SELECT  A.COD_ART ,
+        A.PROVEEDOR ,
+        A.CANT_SALIDA ,
+		  A.CANT_INGRESO,
+        A.FEC_REGISTRO ,
+        A.ALMACEN ,
+        ARTICULO.DESC_ART ,
+        ARTICULO.UND,
+		  ALMACEN.DESC_ALMACEN
+   FROM art_devol_prestamo A ,
+        ARTICULO,
+		  ALMACEN     
+  WHERE A.COD_ART = ARTICULO.COD_ART 
+    AND A.ALMACEN = ALMACEN.ALMACEN
+    AND A.PROVEEDOR = :as_proveedor 
+	 AND A.FLAG_DEV_PRES = 'D'" arguments=(("as_proveedor", string)) )
+text(band=header alignment="0" text="Devolucion de Articulos" border="0" color="0" x="9" y="8" height="64" width="699" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" font.underline="1" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Articulo" border="2" color="0" x="9" y="84" height="52" width="270" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="283" y="84" height="52" width="1170" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Und" border="2" color="0" x="1458" y="84" height="52" width="101" html.valueishtml="0"  name=und_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cant Salida" border="2" color="0" x="1563" y="84" height="52" width="338" html.valueishtml="0"  name=cant_salida_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Fec. Registro" border="2" color="0" x="2249" y="84" height="52" width="608" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Almacen" border="2" color="0" x="2862" y="84" height="52" width="681" html.valueishtml="0"  name=desc_almacen_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cant Ingreso" border="2" color="0" x="1906" y="84" height="52" width="338" html.valueishtml="0"  name=cant_ingreso_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="4" height="52" width="270" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="0" x="283" y="4" height="52" width="1170" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="0" x="1458" y="4" height="52" width="101" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="1563" y="4" height="52" width="338" format="[general]" html.valueishtml="0"  name=cant_salida visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="1906" y="4" height="52" width="338" format="[general]" html.valueishtml="0"  name=cant_ingreso visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="0" x="2249" y="4" height="52" width="608" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="0" x="2862" y="4" height="52" width="681" format="[general]" html.valueishtml="0"  name=desc_almacen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

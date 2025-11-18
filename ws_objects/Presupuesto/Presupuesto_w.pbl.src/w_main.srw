@@ -1,0 +1,30 @@
+﻿$PBExportHeader$w_main.srw
+forward
+global type w_main from w_main_ancst
+end type
+end forward
+
+global type w_main from w_main_ancst
+string title = "Sistema de Presupuesto"
+string menuname = "m_master"
+long backcolor = 12632256
+end type
+global w_main w_main
+
+on w_main.create
+call super::create
+if IsValid(this.MenuID) then destroy(this.MenuID)
+if this.MenuName = "m_master" then this.MenuID = create m_master
+end on
+
+on w_main.destroy
+call super::destroy
+if IsValid(MenuID) then destroy(MenuID)
+end on
+
+event timer;call super::timer;this.title=mid(this.title,2)+LEFT(this.title,1)
+end event
+
+event open;call super::open;mdi_1.backcolor = RGB(128,128,128)
+end event
+

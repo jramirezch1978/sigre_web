@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_fecha_entrega.srf
+global type f_fecha_entrega from function_object
+end type
+
+forward prototypes
+global function date of_fecha_entrega ()
+global function date f_fecha_entrega (datetime ad_fecha_reg, string as_cod_art, string as_flag_import)
+end prototypes
+
+global function date of_fecha_entrega ();return date(now())
+end function
+
+global function date f_fecha_entrega (datetime ad_fecha_reg, string as_cod_art, string as_flag_import);Integer 	li_dias_rep, li_dias_rep_imp
+Date 		ld_fecha
+
+Select NVL(dias_reposicion,0), NVL(dias_rep_import,0)
+	into :li_dias_rep, :li_dias_rep_imp
+from articulo 
+Where cod_art = :as_cod_art;
+
+if as_flag_import = '1' then
+	ld_fecha = RELATIVEDATE( DATE(ad_fecha_reg), li_dias_rep_imp)		
+else
+	ld_Fecha = RELATIVEDATE( DATE(ad_fecha_reg), li_dias_rep)		
+end if
+
+return ld_fecha
+end function
+

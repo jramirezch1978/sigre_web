@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_dominical_revierte_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=292 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_trabajador dbname="gan_desct_variable.cod_trabajador" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="codigo_relacion.nombre" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=concep dbname="gan_desct_variable.concep" )
+ column=(type=char(60) updatewhereclause=yes name=desc_concep dbname="concepto.desc_concep" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=imp_var dbname="gan_desct_variable.imp_var" )
+ column=(type=char(3) updatewhereclause=yes name=tipo_trabajador dbname="maestro.tipo_trabajador" )
+ column=(type=char(30) updatewhereclause=yes name=desc_tipo_tra dbname="tipo_trabajador.desc_tipo_tra" )
+ column=(type=datetime updatewhereclause=yes key=yes name=fec_movim dbname="gan_desct_variable.fec_movim" )
+ column=(type=char(2) updatewhereclause=yes name=maestro_cod_origen dbname="maestro.cod_origen" )
+ retrieve="  SELECT ~"GAN_DESCT_VARIABLE~".~"COD_TRABAJADOR~",   
+         ~"CODIGO_RELACION~".~"NOMBRE~",   
+         ~"GAN_DESCT_VARIABLE~".~"CONCEP~",   
+         ~"CONCEPTO~".~"DESC_CONCEP~",   
+         ~"GAN_DESCT_VARIABLE~".~"IMP_VAR~",   
+         ~"MAESTRO~".~"TIPO_TRABAJADOR~",   
+         ~"TIPO_TRABAJADOR~".~"DESC_TIPO_TRA~",   
+         ~"GAN_DESCT_VARIABLE~".~"FEC_MOVIM~",
+         ~"MAESTRO~".~"COD_ORIGEN~"
+    FROM ~"GAN_DESCT_VARIABLE~",   
+         ~"CODIGO_RELACION~",   
+         ~"CONCEPTO~",   
+         ~"MAESTRO~",   
+         ~"TIPO_TRABAJADOR~"  
+   WHERE gan_desct_variable.cod_trabajador = codigo_relacion.cod_relacion (+)
+     and concepto.concep (+) = gan_desct_variable.concep
+     and gan_desct_variable.cod_trabajador = maestro.cod_trabajador (+)
+     and tipo_trabajador.tipo_trabajador (+) = maestro.tipo_trabajador
+	  AND trunc(~"GAN_DESCT_VARIABLE~".~"FEC_MOVIM~") = trunc(:ld_proceso) 
+	  AND ~"GAN_DESCT_VARIABLE~".~"CONCEP~" in ( :ls_concep ) 
+	  AND ~"GAN_DESCT_VARIABLE~".~"TIPO_DOC~" = :ls_tipo_doc 
+	  AND ~"MAESTRO~".~"TIPO_TRABAJADOR~" = :ls_tipo_trabajador 
+	  AND ~"MAESTRO~".~"COD_ORIGEN~" = :ls_origen
+" update="GAN_DESCT_VARIABLE" updatewhere=0 updatekeyinplace=yes arguments=(("ld_proceso", date),("ls_concep", stringlist),("ls_tipo_doc", string),("ls_tipo_trabajador", string),("ls_origen", string)) )
+group(level=1 header.height=228 trailer.height=64 by=("concep" , "tipo_trabajador" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="REVISIÓN DE CÁLCULO DE DOMINICAL (DESCANSO SEMANAL OBLIGATORIO - D.S.O.)" border="0" color="0" x="699" y="92" height="148" width="1417" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="14" y="12" height="160" width="334" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="14" y="180" height="40" width="334" html.valueishtml="0"  name=st_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="0" x="2149" y="12" height="40" width="873" html.valueishtml="0"  name=st_usuario visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="0" x="2149" y="60" height="40" width="873" html.valueishtml="0"  name=st_fecha visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="0" x="2149" y="108" height="40" width="873" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="CÓDIGO" border="2" color="33554432" x="192" y="168" height="56" width="247" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="2" text="NOMBRE" border="2" color="33554432" x="443" y="168" height="56" width="1673" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="2" text="IMPORTE" border="2" color="33554432" x="2121" y="168" height="56" width="329" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="0" text="CONCEPTO:" border="0" color="16711680" x="14" y="8" height="56" width="293" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="2" tabsequence=32766 border="0" color="16711680" x="311" y="8" height="52" width="187" format="[general]" html.valueishtml="0"  name=concep visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="16711680" x="503" y="8" height="52" width="1673" format="[general]" html.valueishtml="0"  name=desc_concep visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="TIPO DE TRABAJADOR: " border="0" color="128" x="14" y="84" height="56" width="562" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=6 alignment="2" tabsequence=32766 border="0" color="128" x="585" y="84" height="56" width="114" format="[general]" html.valueishtml="0"  name=tipo_trabajador visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="0" color="128" x="709" y="84" height="56" width="1467" format="[general]" html.valueishtml="0"  name=desc_tipo_tra visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="443" y="4" height="52" width="1673" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2121" y="4" height="52" width="329" format="[general]" html.valueishtml="0"  name=imp_var visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="192" y="4" height="52" width="247" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(imp_var for group 1)"border="2" color="16711680" x="2121" y="4" height="52" width="329" format="#,###,###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="0" expression="~"TOTAL DE ~" + TRIM( desc_concep )"border="2" color="16711680" x="192" y="4" height="52" width="1925" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

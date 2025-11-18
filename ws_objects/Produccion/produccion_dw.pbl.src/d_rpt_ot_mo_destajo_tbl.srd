@@ -1,0 +1,51 @@
+﻿$PBExportHeader$d_rpt_ot_mo_destajo_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=92 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(5) updatewhereclause=yes name=linea_destajo dbname="vw_pr_trab_destajo_x_ot.linea_destajo" )
+ column=(type=char(50) updatewhereclause=yes name=descr_linea dbname="vw_pr_trab_destajo_x_ot.descr_linea" )
+ column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="vw_pr_trab_destajo_x_ot.cod_trabajador" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="vw_pr_trab_destajo_x_ot.nombre" )
+ column=(type=number updatewhereclause=yes name=cant_destajada dbname="cant_destajada" )
+ column=(type=number updatewhereclause=yes name=costo_unit dbname="costo_unit" )
+ column=(type=number updatewhereclause=yes name=total_costo dbname="total_costo" )
+ retrieve="  SELECT A.LINEA_DESTAJO,   
+         A.DESCR_LINEA,   
+		   A.COD_TRABAJADOR,   
+         A.NOMBRE,   
+         SUM(A.CANT_DESTAJADA) AS CANT_DESTAJADA,   
+         SUM(A.TOTAL_COSTO) / SUM(A.CANT_DESTAJADA)  AS COSTO_UNIT,   
+         SUM(A.TOTAL_COSTO) AS TOTAL_COSTO  
+    FROM VW_PR_TRAB_DESTAJO_X_OT A  
+   WHERE A.NRO_ORDEN = :as_orden   
+  GROUP BY A.LINEA_DESTAJO, A.DESCR_LINEA, A.COD_TRABAJADOR, A.NOMBRE
+" arguments=(("as_orden", string)) )
+group(level=1 header.height=228 trailer.height=0 by=("linea_destajo" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="0" text="MANO DE OBRA DESTAJO(JORNAL)" border="4" color="0" x="37" y="24" height="56" width="901" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="14" y="4" height="60" width="283" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="1691" y="4" height="60" width="329" format="###,##0.0000" html.valueishtml="0"  name=cant_destajada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2025" y="4" height="60" width="329" format="###,##0.0000" html.valueishtml="0"  name=costo_unit visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2359" y="4" height="60" width="379" format="###,##0.00" html.valueishtml="0"  name=total_costo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="302" y="4" height="60" width="1385" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(total_costo for all)"border="2" color="255" x="2359" y="4" height="60" width="379" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="Total " border="2" color="33554432" x="1975" y="4" height="60" width="379" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header.1 alignment="2" text="Código" border="2" color="16777215" x="14" y="168" height="56" width="283" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header.1 alignment="2" text="Cantidad
+Destajada" border="2" color="16777215" x="1691" y="108" height="116" width="329" html.valueishtml="0"  name=cant_destajada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header.1 alignment="2" text="Costo
+Unit" border="2" color="16777215" x="2025" y="108" height="116" width="329" html.valueishtml="0"  name=costo_unit_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header.1 alignment="2" text="Total 
+Costo" border="2" color="16777215" x="2359" y="108" height="116" width="379" html.valueishtml="0"  name=total_costo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header.1 alignment="2" text="Trabajador" border="2" color="16777215" x="14" y="108" height="56" width="1673" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header.1 alignment="2" text="Nombre" border="2" color="16777215" x="302" y="168" height="56" width="1385" html.valueishtml="0"  name=nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="745" y="40" height="48" width="1609" format="[general]" html.valueishtml="0"  name=descr_linea visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217731" )
+column(band=header.1 id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="462" y="40" height="48" width="279" format="[general]" html.valueishtml="0"  name=linea_destajo visible="1" edit.limit=5 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217731" )
+text(band=header.1 alignment="2" text="Linea Destajo" border="2" color="33554432" x="14" y="40" height="48" width="443" html.valueishtml="0"  name=linea_destajo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217731" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

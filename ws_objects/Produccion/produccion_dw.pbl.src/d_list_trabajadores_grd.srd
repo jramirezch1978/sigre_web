@@ -1,0 +1,37 @@
+﻿$PBExportHeader$d_list_trabajadores_grd.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="maestro.cod_trabajador" )
+ column=(type=char(96) updatewhereclause=yes name=nom_trabajador dbname="nom_trabajador" )
+ column=(type=char(1) updatewhereclause=yes name=cod_area dbname="area.cod_area" )
+ column=(type=char(30) updatewhereclause=yes name=desc_area dbname="area.desc_area" )
+ column=(type=char(3) updatewhereclause=yes name=cod_seccion dbname="seccion.cod_seccion" )
+ column=(type=char(30) updatewhereclause=yes name=seccion_desc_seccion dbname="seccion.desc_seccion" )
+ retrieve="select m.cod_trabajador,
+       trim(m.apel_paterno || ' ' || m.apel_materno || ', ' || m.nombre1 || ' ' || 
+       decode(length(m.nombre2), 0, '', substr(m.nombre2,1,1) || '.')) as nom_trabajador,
+		 a.cod_area, a.desc_area,
+		 s.cod_seccion, s.desc_seccion
+from 	maestro 	m,
+		area		a,
+		seccion	s
+where a.cod_area = s.cod_area
+  and s.cod_seccion = m.cod_seccion
+  and a.cod_area	  = m.cod_area
+  and m.cod_area like :as_area
+  and m.cod_seccion like :as_seccion
+  and m.flag_estado = '1'
+order by m.cod_trabajador" arguments=(("as_area", string),("as_seccion", string)) )
+text(band=header alignment="2" text="Código" border="2" color="33554432" x="9" y="8" height="56" width="265" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="Nom Trabajador" border="2" color="33554432" x="283" y="8" height="56" width="1367" html.valueishtml="0"  name=nom_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="60" width="265" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="283" y="4" height="60" width="1367" format="[general]" html.valueishtml="0"  name=nom_trabajador visible="1" edit.limit=96 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

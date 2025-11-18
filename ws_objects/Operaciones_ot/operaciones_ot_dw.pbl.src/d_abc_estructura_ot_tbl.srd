@@ -1,0 +1,22 @@
+﻿$PBExportHeader$d_abc_estructura_ot_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=124 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(4000) updatewhereclause=yes name=estructura_orden_trabajo dbname="estructura_orden_trabajo" )
+ retrieve="select lpad('*',6 * LEVEL)||' '|| ots.ot_padre  ||' - '|| ots.ot_hijo ||' '|| ot.titulo AS Estructura_Orden_Trabajo
+  from ot_estructura ots,orden_trabajo ot
+ where ots.ot_hijo = ot.nro_orden
+ connect by prior ots.ot_hijo = ots.ot_padre
+ start with ots.ot_padre = :as_nro_orden
+ " arguments=(("as_nro_orden", string)) )
+text(band=header alignment="2" text="Estructura Orden Trabajo" border="2" color="8388608" x="9" y="8" height="56" width="2071" html.valueishtml="0"  name=estructura_orden_trabajo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="72" width="2071" format="[general]" html.valueishtml="0"  name=estructura_orden_trabajo visible="1" edit.limit=4000 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+button(band=summary text="" defaultpicture=yes enabled=yes action="15" border="1" color="0" x="869" y="0" height="124" width="151" vtextalign="0" htextalign="0"  name=b_1 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

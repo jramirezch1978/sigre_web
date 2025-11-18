@@ -1,0 +1,72 @@
+﻿$PBExportHeader$d_articulo_saldos_men_valorizado.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=416 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=decimal(0) updatewhereclause=yes name=ano dbname="articulo_saldo_mensual.ano" )
+ column=(type=decimal(0) updatewhereclause=yes name=mes dbname="articulo_saldo_mensual.mes" )
+ column=(type=char(8) updatewhereclause=yes name=cod_clase dbname="articulo_clase.cod_clase" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_clase_desc_clase dbname="articulo_clase.desc_clase" )
+ column=(type=number updatewhereclause=yes name=stock_valor dbname="stock_valor" )
+ column=(type=number updatewhereclause=yes name=compra_valor dbname="compra_valor" )
+ column=(type=number updatewhereclause=yes name=consumo_valor dbname="consumo_valor" )
+ retrieve="SELECT   ASM.ANO,   
+         ASM.MES,
+         ACL.COD_CLASE,
+         ACL.DESC_CLASE,         
+         SUM(ASM.VALOR_SALDO_TOTAL) as stock_valor, 
+         SUM(ASM.VALOR_COMP_TOTAL) as compra_valor,
+         SUM(ASM.VALOR_CONS_TOTAL) as consumo_valor
+    FROM ARTICULO A,   
+         ARTICULO_CLASE ACL,   
+         ARTICULO_SALDO_MENSUAL ASM  
+   WHERE ( ACL.COD_CLASE = A.COD_CLASE ) and  
+         ( ASM.COD_ART = A.COD_ART ) and  
+         ( ASM.ANO >= :an_ano_inicio ) AND  
+         ( ASM.MES >= :an_mes_inicio ) AND  
+         ( ASM.ANO <= :an_ano_fin ) AND  
+         ( ASM.MES <= :an_mes_fin ) AND  
+         ( A.COD_CLASE <> :as_categoria_pt) AND
+         ( A.COD_CLASE <> :as_sub_prod)
+GROUP BY ACL.COD_CLASE,
+         ACL.DESC_CLASE,   
+         ASM.ANO,   
+         ASM.MES         
+ORDER BY ASM.ANO ASC,   
+         ASM.MES ASC,   
+         ACL.COD_CLASE ASC " arguments=(("an_ano_inicio", number),("an_mes_inicio", number),("an_ano_fin", number),("an_mes_fin", number),("as_categoria_pt", string),("as_sub_prod", string)) )
+group(level=1 header.height=0 trailer.height=108 by=("ano" , "mes" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="gs_logo" x="18" y="12" height="172" width="389" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Inventario Mensual Valorizado" border="1" color="0" x="654" y="36" height="80" width="1381" html.valueishtml="0"  name=t_2 visible="1"  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="gs_empresa" border="0" color="0" x="14" y="200" height="44" width="389" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="SIG755" border="0" color="0" x="32" y="272" height="44" width="183" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Clase" border="2" color="33554432" x="18" y="348" height="56" width="1230" html.valueishtml="0"  name=clase_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Año" border="2" color="33554432" x="1248" y="348" height="56" width="187" html.valueishtml="0"  name=ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Mes" border="2" color="33554432" x="1440" y="348" height="56" width="187" html.valueishtml="0"  name=mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Saldo USD" border="2" color="33554432" x="1632" y="348" height="56" width="407" html.valueishtml="0"  name=saldo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Compras USD" border="2" color="33554432" x="2043" y="348" height="56" width="407" html.valueishtml="0"  name=compras_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Consumos USD" border="2" color="33554432" x="2455" y="348" height="56" width="407" html.valueishtml="0"  name=consumos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="0" x="2405" y="20" height="56" width="443" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="gs_user" border="0" color="0" x="2405" y="96" height="44" width="443" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="2405" y="160" height="56" width="443" format="dd/mm/yyyy   hh:mm:ss" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="18" y="0" height="56" width="133" format="[general]" html.valueishtml="0"  name=cod_clase visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="1253" y="0" height="56" width="187" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="1449" y="0" height="56" width="187" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="160" y="0" height="56" width="1074" format="[general]" html.valueishtml="0"  name=articulo_clase_desc_clase visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="1632" y="0" height="56" width="407" format="#,##0.00" html.valueishtml="0"  name=stock_valor pointer="\Source\Cur\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="2043" y="0" height="56" width="407" format="#,##0.00" html.valueishtml="0"  name=compra_valor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="2455" y="0" height="56" width="407" format="#,##0.00" html.valueishtml="0"  name=consumo_valor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="1" text="Total:" border="0" color="0" x="1239" y="8" height="56" width="178" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=trailer.1 x1="2043" y1="0" x2="2450" y2="0"  name=l_2 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=trailer.1 x1="2455" y1="0" x2="2862" y2="0"  name=l_3 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=trailer.1 x1="1632" y1="0" x2="2039" y2="0"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(stock_valor for group 1)"border="0" color="33554432" x="1632" y="12" height="56" width="407" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(compra_valor for group 1)"border="0" color="33554432" x="2043" y="12" height="56" width="407" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(consumo_valor for group 1) "border="0" color="33554432" x="2455" y="12" height="56" width="407" format="#,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

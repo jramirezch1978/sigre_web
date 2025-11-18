@@ -1,0 +1,47 @@
+﻿$PBExportHeader$f_verifica_flag_cntas_liquidacion.srf
+global type f_verifica_flag_cntas_liquidacion from function_object
+end type
+
+forward prototypes
+global function boolean f_verifica_flag_cntas_liquidacion (ref datawindow adw_1, long al_row, string as_cta_cntbl, string as_cencos, string as_tipo_doc, string as_nro_doc, string as_cod_relacion)
+end prototypes
+
+global function boolean f_verifica_flag_cntas_liquidacion (ref datawindow adw_1, long al_row, string as_cta_cntbl, string as_cencos, string as_tipo_doc, string as_nro_doc, string as_cod_relacion);String  ls_flag_ctabco,ls_flag_cencos,ls_flag_doc_ref,ls_flag_cod_rel,ls_flag_cebef
+Boolean lb_retorno = TRUE
+
+
+IF f_cntbl_cnta(as_cta_cntbl,as_cta_cntbl,ls_flag_cencos,ls_flag_doc_ref, &
+					 ls_flag_cod_rel,ls_flag_cebef)  THEN
+
+	IF ls_flag_cencos = '1' THEN
+		adw_1.object.cencos [al_row] = as_cencos
+	ELSE
+		SetNull(as_cencos)
+		adw_1.object.cencos [al_row] = as_cencos		
+	END IF
+
+	IF ls_flag_doc_ref = '1' THEN
+		adw_1.object.tipo_docref1 [al_row] = as_tipo_doc
+		adw_1.object.nro_docref1  [al_row] = as_nro_doc
+	ELSE
+		SetNull(as_tipo_doc)
+		SetNull(as_nro_doc)
+		adw_1.object.tipo_docref1 [al_row] = as_tipo_doc
+		adw_1.object.nro_docref1  [al_row] = as_nro_doc
+	END IF
+
+	IF ls_flag_cod_rel = '1' THEN
+		adw_1.object.cod_relacion [al_row] = as_cod_relacion
+	ELSE
+		SetNull(as_cod_relacion)
+		adw_1.object.cod_relacion [al_row] = as_cod_relacion
+	END IF	
+
+ELSE
+   lb_retorno = FALSE
+END IF
+
+/**/
+Return lb_retorno
+end function
+

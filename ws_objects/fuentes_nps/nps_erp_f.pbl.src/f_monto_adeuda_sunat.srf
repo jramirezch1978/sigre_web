@@ -1,0 +1,30 @@
+﻿$PBExportHeader$f_monto_adeuda_sunat.srf
+global type f_monto_adeuda_sunat from function_object
+end type
+
+forward prototypes
+global function decimal f_monto_adeuda_sunat (string as_cod_proveedor)
+end prototypes
+
+global function decimal f_monto_adeuda_sunat (string as_cod_proveedor);Decimal {2} ldc_monto_adeuda_sunat = 0.00
+String      ls_flag_sunat = '0'
+
+
+
+SELECT Nvl(p.flag_adeuda_sunat,0),nVL(p.monto_adeuda_sunat,0)
+  INTO :ls_flag_sunat,:ldc_monto_adeuda_sunat
+  FROM proveedor p
+ WHERE (p.proveedor   = :as_cod_proveedor) and
+ 		 (p.flag_estado = '1'				  ) ;
+		  
+		  
+IF ls_flag_sunat = '0' THEN
+	ldc_monto_adeuda_sunat = 0.00
+END IF
+
+
+
+
+Return ldc_monto_adeuda_sunat
+end function
+

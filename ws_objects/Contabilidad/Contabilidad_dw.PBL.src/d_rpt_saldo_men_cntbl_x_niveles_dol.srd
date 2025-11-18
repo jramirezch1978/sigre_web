@@ -1,0 +1,98 @@
+﻿$PBExportHeader$d_rpt_saldo_men_cntbl_x_niveles_dol.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=396 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cntbl_cnta_sdo_cnta_ctbl dbname="cntbl_cnta_sdo.cnta_ctbl" )
+ column=(type=char(25) updatewhereclause=yes name=cntbl_cnta_abrev_cnta dbname="cntbl_cnta.abrev_cnta" )
+ column=(type=number updatewhereclause=yes name=sol_ape dbname="sol_ape" )
+ column=(type=number updatewhereclause=yes name=sol_ene dbname="sol_ene" )
+ column=(type=number updatewhereclause=yes name=sol_feb dbname="sol_feb" )
+ column=(type=number updatewhereclause=yes name=sol_mar dbname="sol_mar" )
+ column=(type=number updatewhereclause=yes name=sol_abr dbname="sol_abr" )
+ column=(type=number updatewhereclause=yes name=sol_may dbname="sol_may" )
+ column=(type=number updatewhereclause=yes name=sol_jun dbname="sol_jun" )
+ column=(type=number updatewhereclause=yes name=sol_jul dbname="sol_jul" )
+ column=(type=number updatewhereclause=yes name=sol_ago dbname="sol_ago" )
+ column=(type=number updatewhereclause=yes name=sol_set dbname="sol_set" )
+ column=(type=number updatewhereclause=yes name=sol_oct dbname="sol_oct" )
+ column=(type=number updatewhereclause=yes name=sol_nov dbname="sol_nov" )
+ column=(type=number updatewhereclause=yes name=sol_dic dbname="sol_dic" )
+ retrieve="select cs.cnta_ctbl, c.abrev_cnta, 
+       sum(decode(cs.mes,0,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_ape, 
+       sum(decode(cs.mes,1,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_ene, 
+       sum(decode(cs.mes,2,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_feb, 
+       sum(decode(cs.mes,3,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_mar, 
+       sum(decode(cs.mes,4,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_abr, 
+       sum(decode(cs.mes,5,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_may, 
+       sum(decode(cs.mes,6,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_jun, 
+       sum(decode(cs.mes,7,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_jul, 
+       sum(decode(cs.mes,8,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_ago, 
+       sum(decode(cs.mes,9,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_set, 
+       sum(decode(cs.mes,10,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_oct, 
+       sum(decode(cs.mes,11,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_nov, 
+       sum(decode(cs.mes,12,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) as sol_dic
+  from cntbl_cnta_sdo cs, cntbl_cnta c
+ where cs.cnta_ctbl = c.cnta_ctbl 
+   And cs.ano = :an_ano
+   And c.niv_cnta = :an_nivel
+	and cs.cnta_ctbl in (select cnta_ctbl from tt_cnt_cnta_ctbl)
+ Group By cs.cnta_ctbl, c.abrev_cnta 
+Having sum(decode(cs.mes,0,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,1,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,2,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,3,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,4,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,5,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,6,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,7,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,8,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,9,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,10,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,11,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0 Or
+       sum(decode(cs.mes,12,(nvl(cs.sldo_doldeb,0) - nvl(cs.sldo_dolhab,0)),0)) <> 0
+ Order by cs.cnta_ctbl" arguments=(("an_ano", number),("an_nivel", number),("as_empresa", string),("as_user", string)) )
+text(band=header alignment="2" text="Movimiento Mensual por Nivel de Cuenta (Dolares)" border="1" color="33554432" x="1518" y="76" height="64" width="1527" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="today()"border="0" color="0" x="4123" y="100" height="56" width="453" format="[SHORTDATE] [TIME]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Pagina ' + page() + ' de ' + pageCount()"border="0" color="0" x="4123" y="24" height="64" width="453" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="4128" y="168" height="56" width="215" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression=" as_user "border="0" color="0" x="4357" y="168" height="56" width="219" format="[GENERAL]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cnta Ctbl" border="2" color="33554432" x="27" y="344" height="48" width="270" html.valueishtml="0"  name=cntbl_cnta_sdo_cnta_ctbl_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Descripcion" border="2" color="33554432" x="302" y="344" height="48" width="713" html.valueishtml="0"  name=cntbl_cnta_abrev_cnta_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Apertura" border="2" color="33554432" x="1019" y="344" height="48" width="270" html.valueishtml="0"  name=sol_ape_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Enero" border="2" color="33554432" x="1294" y="344" height="48" width="270" html.valueishtml="0"  name=sol_ene_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Febrero" border="2" color="33554432" x="1568" y="344" height="48" width="270" html.valueishtml="0"  name=sol_feb_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Marzo" border="2" color="33554432" x="1842" y="344" height="48" width="265" html.valueishtml="0"  name=sol_mar_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Abril" border="2" color="33554432" x="2112" y="344" height="48" width="270" html.valueishtml="0"  name=sol_abr_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Mayo" border="2" color="33554432" x="2386" y="344" height="48" width="270" html.valueishtml="0"  name=sol_may_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Junio" border="2" color="33554432" x="2661" y="344" height="48" width="270" html.valueishtml="0"  name=sol_jun_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Julio" border="2" color="33554432" x="2935" y="344" height="48" width="270" html.valueishtml="0"  name=sol_jul_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Agosto" border="2" color="33554432" x="3209" y="344" height="48" width="270" html.valueishtml="0"  name=sol_ago_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Setiembre" border="2" color="33554432" x="3483" y="344" height="48" width="270" html.valueishtml="0"  name=sol_set_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Octubre" border="2" color="33554432" x="3758" y="344" height="48" width="270" html.valueishtml="0"  name=sol_oct_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Noviembre" border="2" color="33554432" x="4032" y="344" height="48" width="270" html.valueishtml="0"  name=sol_nov_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Diciembre" border="2" color="33554432" x="4306" y="344" height="48" width="270" html.valueishtml="0"  name=sol_dic_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+bitmap(band=header filename="" x="41" y="32" height="156" width="384" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="2" expression=" as_empresa "border="0" color="0" x="41" y="200" height="60" width="384" format="[GENERAL]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="27" y="0" height="52" width="270" format="[general]" html.valueishtml="0"  name=cntbl_cnta_sdo_cnta_ctbl visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="302" y="0" height="52" width="713" format="[general]" html.valueishtml="0"  name=cntbl_cnta_abrev_cnta visible="1" edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1019" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_ape visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="1294" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_ene visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="1568" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_feb visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="1842" y="0" height="52" width="265" format="###,###,##0.00" html.valueishtml="0"  name=sol_mar visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2112" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_abr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="2386" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_may visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="2661" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_jun visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="2935" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_jul visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="3209" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_ago visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="2" color="33554432" x="3483" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_set visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="2" color="33554432" x="3758" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_oct visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="4032" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_nov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="33554432" x="4306" y="0" height="52" width="270" format="###,###,##0.00" html.valueishtml="0"  name=sol_dic visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

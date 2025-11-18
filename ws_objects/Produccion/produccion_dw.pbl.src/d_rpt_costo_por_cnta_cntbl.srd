@@ -1,0 +1,67 @@
+﻿$PBExportHeader$d_rpt_costo_por_cnta_cntbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=512 color="536870912" )
+summary(height=60 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=prod_parte_transp_det_nro_parte dbname="prod_parte_transp_det.nro_parte" )
+ column=(type=char(8) updatewhereclause=yes name=prod_parte_transp_det_confin dbname="prod_parte_transp_det.confin" )
+ column=(type=char(8) updatewhereclause=yes name=matriz_cntbl_finan_det_matriz dbname="matriz_cntbl_finan_det.matriz" )
+ column=(type=char(40) updatewhereclause=yes name=concepto_financiero_descripcion dbname="concepto_financiero.descripcion" )
+ column=(type=char(1) updatewhereclause=yes name=matriz_cntbl_finan_det_flag_debhab dbname="matriz_cntbl_finan_det.flag_debhab" )
+ column=(type=char(10) updatewhereclause=yes name=matriz_cntbl_finan_det_cnta_ctbl dbname="matriz_cntbl_finan_det.cnta_ctbl" )
+ column=(type=number updatewhereclause=yes name=compute_0007 dbname="compute_0007" )
+ retrieve="SELECT b.nro_parte, b.confin, 
+		 m.matriz, 
+		 c.descripcion, 
+       flag_debhab, 
+       m.cnta_ctbl, 
+       round(sum(b.importe),4)
+
+  FROM prod_parte_transp      a,
+       prod_parte_transp_det  b,
+       concepto_financiero    c,
+       matriz_cntbl_finan_det m
+
+ WHERE a.nro_parte            = b.nro_parte
+   AND c.confin               = b.confin
+   AND m.matriz               = c.matriz_cntbl
+   AND m.cnta_ctbl            = :as_cnta_desde
+   AND substr(a.nro_parte,1,2) = :as_origen
+   AND trunc(A.FEC_PARTE) BETWEEN trunc(:ad_fecha1) AND trunc(:ad_fecha2)
+GROUP BY  b.nro_parte, b.confin, m.matriz, c.descripcion, m.flag_debhab, m.cnta_ctbl
+
+ORDER BY b.nro_parte" arguments=(("as_cnta_desde", string),("as_origen", string),("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Nro Parte" border="2" color="33554432" x="393" y="404" height="104" width="306" html.valueishtml="0"  name=prod_parte_transp_det_nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Confin" border="2" color="33554432" x="704" y="404" height="104" width="197" html.valueishtml="0"  name=prod_parte_transp_det_confin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Matriz" border="2" color="33554432" x="905" y="404" height="104" width="197" html.valueishtml="0"  name=matriz_cntbl_finan_det_matriz_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Concepto Financiero
+Descripcion" border="2" color="33554432" x="1106" y="404" height="104" width="1033" html.valueishtml="0"  name=concepto_financiero_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Flag Debhab" border="2" color="33554432" x="2144" y="404" height="104" width="215" html.valueishtml="0"  name=matriz_cntbl_finan_det_flag_debhab_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cnta Ctbl" border="2" color="33554432" x="2363" y="404" height="104" width="306" html.valueishtml="0"  name=matriz_cntbl_finan_det_cnta_ctbl_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="2" color="33554432" x="2674" y="404" height="104" width="389" html.valueishtml="0"  name=compute_0007_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+bitmap(band=header filename="" x="55" y="36" height="208" width="407" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="56" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="124" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="192" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Costo del Transporte por Cuenta Contable" border="0" color="0" x="631" y="68" height="92" width="1797" html.valueishtml="0"  name=cabecera_t visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="4" color="0" x="631" y="184" height="56" width="475" html.valueishtml="0"  name=t_origen visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="393" y="4" height="52" width="306" format="[general]" html.valueishtml="0"  name=prod_parte_transp_det_nro_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="704" y="4" height="52" width="197" format="[general]" html.valueishtml="0"  name=prod_parte_transp_det_confin visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="905" y="4" height="52" width="192" format="[general]" html.valueishtml="0"  name=matriz_cntbl_finan_det_matriz visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1102" y="4" height="52" width="1033" format="[general]" html.valueishtml="0"  name=concepto_financiero_descripcion visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="2139" y="4" height="52" width="219" format="[general]" html.valueishtml="0"  name=matriz_cntbl_finan_det_flag_debhab visible="1" edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2363" y="4" height="52" width="302" format="[general]" html.valueishtml="0"  name=matriz_cntbl_finan_det_cnta_ctbl visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2670" y="4" height="52" width="393" format="#,###,##0.000" html.valueishtml="0"  name=compute_0007 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="TOTAL" border="2" color="33554432" x="2363" y="4" height="52" width="302" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=summary alignment="1" expression="sum(compute_0007 for all)"border="2" color="33554432" x="2670" y="4" height="52" width="393" format="#,###,##0.000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Al:" border="4" color="0" x="1810" y="256" height="56" width="87" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Del:" border="4" color="0" x="1275" y="256" height="56" width="128" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="4" color="0" x="1445" y="256" height="56" width="315" html.valueishtml="0"  name=t_fecha1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="4" color="0" x="1929" y="256" height="56" width="320" html.valueishtml="0"  name=t_fecha2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,59 @@
+﻿$PBExportHeader$d_rpt_listado_servicios_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=448 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912"  height.autosize=yes)
+table(column=(type=char(6) updatewhereclause=yes name=cat_art dbname="articulo_categ.cat_art" )
+ column=(type=char(60) updatewhereclause=yes name=desc_categoria dbname="articulo_categ.desc_categoria" )
+ column=(type=char(6) updatewhereclause=yes name=cod_sub_cat dbname="articulo_sub_categ.cod_sub_cat" )
+ column=(type=char(60) updatewhereclause=yes name=desc_sub_cat dbname="articulo_sub_categ.desc_sub_cat" )
+ column=(type=char(6) updatewhereclause=yes name=servicio dbname="servicios.servicio" )
+ column=(type=char(60) updatewhereclause=yes name=desc_servicio dbname="servicios.descripcion" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="presupuesto_cuenta.cnta_prsp" )
+ column=(type=char(50) updatewhereclause=yes name=desc_cnta_prsp dbname="presupuesto_cuenta.descripcion" )
+ retrieve="SELECT a1.cat_art, a1.desc_categoria,
+       a2.cod_sub_cat, a2.desc_sub_cat,
+       s.servicio, s.descripcion,
+		 pc.cnta_prsp, pc.descripcion
+FROM articulo_categ a1,
+     articulo_sub_categ a2,
+     servicios          s,
+	  presupuesto_cuenta	pc
+WHERE a1.cat_art = a2.cat_art
+  AND a2.cod_sub_cat = s.cod_sub_cat
+  and pc.cnta_prsp = a2.cnta_prsp_egreso
+  AND s.flag_estado = '1'     
+ORDER BY a1.cat_art, a2.cod_sub_cat, s.servicio  
+" )
+group(level=1 header.height=84 trailer.height=0 by=("cat_art" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=72 trailer.height=0 by=("cod_sub_cat" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="9" y="4" height="160" width="302" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Listado de Servicios" border="0" color="0" x="1253" y="40" height="80" width="1225" html.valueishtml="0"  name=t_titulo visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="18" y="180" height="48" width="402" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="18" y="244" height="48" width="402" html.valueishtml="0"  name=t_codigo visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2793" y="36" height="68" width="347" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2789" y="208" height="64" width="485" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="2793" y="128" height="56" width="329" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Codigo
+Servicio" border="2" color="0" x="9" y="328" height="112" width="233" html.valueishtml="0"  name=servicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="0" x="347" y="4" height="56" width="1147" format="[general]" html.valueishtml="0"  name=desc_categoria visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="0" x="37" y="4" height="56" width="261" format="[general]" html.valueishtml="0"  name=cat_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.2 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="453" y="8" height="56" width="1147" format="[general]" html.valueishtml="0"  name=desc_sub_cat visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.2 id=3 alignment="0" tabsequence=32766 border="0" color="0" x="101" y="8" height="56" width="261" format="[general]" html.valueishtml="0"  name=cod_sub_cat visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="4" height="56" width="233" format="[general]" html.valueishtml="0"  name=servicio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Descripción 
+Servicio" border="2" color="0" x="247" y="328" height="112" width="1454" html.valueishtml="0"  name=desc_servicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="247" y="4" height="56" width="1454" format="[general]" html.valueishtml="0"  name=desc_servicio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=0 border="2" color="0" x="1705" y="4" height="56" width="334" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cnta
+Prsp" border="2" color="0" x="1705" y="328" height="112" width="334" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=8 alignment="0" tabsequence=0 border="2" color="0" x="2043" y="4" height="56" width="1152" html.valueishtml="0"  name=desc_cnta_prsp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Descripcion
+Cuenta Presupuestal" border="2" color="0" x="2043" y="328" height="112" width="1152" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

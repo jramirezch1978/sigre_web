@@ -1,0 +1,42 @@
+﻿$PBExportHeader$f_pre_asiento.srf
+global type f_pre_asiento from function_object
+end type
+
+forward prototypes
+global function boolean f_pre_asiento (ref long al_nro_libro, ref long al_numerador)
+end prototypes
+
+global function boolean f_pre_asiento (ref long al_nro_libro, ref long al_numerador);Boolean lb_retorno =TRUE
+
+
+SELECT num_provisional
+  INTO :al_numerador
+  FROM cntbl_libro
+ WHERE nro_libro = :al_nro_libro  
+FOR UPDATE ;
+
+IF Isnull(al_numerador) OR al_numerador = 0 THEN
+	Messagebox('Aviso','Numero Provisional de Libro No Existe , Verifique Tabla cntbl_libro')
+	lb_retorno = FALSE
+
+END IF
+
+
+
+UPDATE cntbl_libro
+SET   num_provisional = :al_numerador + 1
+WHERE nro_libro = :al_nro_libro   ;
+
+
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox("SQL error", SQLCA.SQLErrText)
+	lb_retorno = FALSE
+END IF	
+ 
+
+
+Return lb_retorno
+
+
+end function
+

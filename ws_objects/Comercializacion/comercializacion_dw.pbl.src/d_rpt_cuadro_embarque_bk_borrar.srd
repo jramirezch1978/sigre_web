@@ -1,0 +1,198 @@
+﻿$PBExportHeader$d_rpt_cuadro_embarque_bk_borrar.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=520 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_ov dbname="orden_venta.nro_ov" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="orden_venta.fec_registro" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="orden_venta.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="orden_venta.nro_doc" )
+ column=(type=datetime updatewhereclause=yes name=fecha_doc dbname="orden_venta.fecha_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=datetime updatewhereclause=yes name=fec_inicio dbname="orden_trabajo.fec_inicio" )
+ column=(type=char(8) updatewhereclause=yes name=cliente dbname="orden_venta.cliente" )
+ column=(type=char(50) updatewhereclause=yes name=nom_cliente dbname="proveedor.nom_cliente" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_proyect dbname="articulo_mov_proy.cant_proyect" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_procesada dbname="articulo_mov_proy.cant_procesada" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_facturada dbname="articulo_mov_proy.cant_facturada" )
+ column=(type=decimal(6) updatewhereclause=yes name=precio_unit dbname="articulo_mov_proy.precio_unit" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_fap dbname="vw_vta_ov_cnta_cobrar.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_fap dbname="vw_vta_ov_cnta_cobrar.nro_doc" )
+ column=(type=datetime updatewhereclause=yes name=fecha_documento dbname="vw_vta_ov_cnta_cobrar.fecha_documento" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantidad dbname="vw_vta_ov_cnta_cobrar.cantidad" )
+ column=(type=decimal(6) updatewhereclause=yes name=precio_venta dbname="vw_vta_ov_cnta_cobrar.precio_unitario" )
+ column=(type=char(4) updatewhereclause=yes name=doc_cobranza dbname="vw_vta_ov_cnta_cobrar.doc_cobranza" )
+ column=(type=char(20) updatewhereclause=yes name=nro_cobranza dbname="vw_vta_ov_cnta_cobrar.nro_cobranza" )
+ column=(type=char(3) updatewhereclause=yes name=vw_vta_ov_cnta_cobrar_banco_cobranza dbname="vw_vta_ov_cnta_cobrar.banco_cobranza" )
+ column=(type=char(40) updatewhereclause=yes name=banco dbname="vw_vta_ov_cnta_cobrar.nom_banco" )
+ column=(type=char(150) updatewhereclause=yes name=nombre_nave dbname="vw_vta_ov_cnta_cobrar.nombre_nave" )
+ column=(type=char(30) updatewhereclause=yes name=descripcion dbname="vw_vta_ov_cnta_cobrar.descripcion" )
+ column=(type=char(50) updatewhereclause=yes name=desc_puerto_origen dbname="vw_vta_ov_cnta_cobrar.desc_puerto_origen" )
+ column=(type=char(50) updatewhereclause=yes name=desc_puerto_destino dbname="vw_vta_ov_cnta_cobrar.desc_puerto_destino" )
+ column=(type=datetime updatewhereclause=yes name=fec_embarque dbname="vw_vta_ov_cnta_cobrar.fec_embarque" )
+ column=(type=char(10) updatewhereclause=yes name=nro_embarque dbname="vw_vta_ov_embarque.nro_embarque" )
+ column=(type=char(10) updatewhereclause=yes name=nro_lote dbname="vw_vta_ov_embarque.nro_lote" )
+ column=(type=char(50) updatewhereclause=yes name=desc_naviera dbname="vw_vta_ov_embarque.desc_naviera" )
+ column=(type=char(1) updatewhereclause=yes name=flag_medio_tranp dbname="vw_vta_ov_embarque.flag_medio_tranp" values="Terrestre	T/Maritima	M/Aerea	A/Multimodal	U/Otros	O/" )
+ column=(type=datetime updatewhereclause=yes name=vw_vta_ov_embarque_fec_arribo_dst dbname="vw_vta_ov_embarque.fec_arribo_dst" )
+ column=(type=datetime updatewhereclause=yes name=fec_entreg_doc dbname="vw_vta_ov_embarque.fec_entreg_doc" )
+ column=(type=datetime updatewhereclause=yes name=fec_pago dbname="vw_vta_ov_cnta_cobrar.fec_pago" )
+ column=(type=number updatewhereclause=yes name=dias_negoc dbname="dias_negoc" )
+ column=(type=number updatewhereclause=yes name=dias_pago dbname="dias_pago" )
+ retrieve="select distinct ov.nro_ov, ov.fec_registro, 
+       ov.tipo_doc, ov.nro_doc, ov.fecha_doc,
+       ot.nro_orden, ot.fec_inicio,
+       ov.cliente, p.nom_proveedor as nom_cliente,
+       amp.cod_art, a.desc_art, a.und,
+       amp.cant_proyect,
+       amp.cant_procesada,
+       amp.cant_facturada,
+       amp.precio_unit,
+
+       vw1.tipo_doc			,
+       vw1.nro_doc			,
+       vw1.fecha_documento ,
+       vw1.cantidad		   ,
+       vw1.precio_unitario ,
+       vw1.doc_cobranza    ,
+       vw1.nro_cobranza    ,
+       vw1.banco_cobranza  ,
+       vw1.nom_banco	      ,
+		 vw1.nombre_nave		,
+		 vw1.descripcion		,
+		 vw1.desc_puerto_origen , 
+		 vw1.desc_puerto_destino,
+		 vw1.fec_embarque			,	
+
+       vw2.nro_embarque,
+       vw2.nro_lote,
+       vw2.desc_naviera,
+       vw2.flag_medio_tranp,
+
+       vw2.fec_arribo_dst,
+       vw2.fec_entreg_doc,
+       vw1.fec_pago,
+	    vw2.fec_entreg_doc - vw1.fec_embarque as dias_negoc,
+       vw1.fec_pago - vw1.fec_embarque as dias_pago
+from orden_venta       ov,
+     orden_Trabajo     ot,
+     articulo_mov_proy amp,
+     proveedor         p,
+     articulo          a,
+     vw_vta_ov_cnta_cobrar vw1,
+     vw_vta_ov_embarque    vw2
+where p.proveedor = ov.cliente
+  and amp.nro_doc = ov.nro_ov
+  and amp.tipo_doc = (select doc_ov from logparam where reckey = '1')
+  and a.cod_Art    = amp.cod_Art
+  and ov.ot_gastos = ot.nro_orden (+)
+  and amp.nro_doc    = vw1.nro_ref (+)
+  and amp.cod_art    = vw1.cod_art (+)
+  and amp.nro_doc    = vw2.nro_ov (+)
+  and amp.cod_art    = vw2.cod_art (+)
+  and ov.flag_estado <> '0'
+  and amp.cod_Art <> '0'
+  and trunc(ov.fec_registro) between trunc(:ad_Fecha1) and trunc(:ad_fecha2)
+  and ov.cod_origen like :as_origen
+  and amp.cod_Art   like :as_articulo
+order by p.nom_proveedor, amp.cod_art, ov.nro_ov" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_origen", string),("as_articulo", string)) )
+group(level=1 header.height=112 trailer.height=0 by=("nom_cliente" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=120 trailer.height=0 by=("cod_art" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Orden de Venta" border="2" color="16777215" x="14" y="424" height="44" width="1385" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro Ov" border="2" color="16777215" x="14" y="472" height="44" width="279" html.valueishtml="0"  name=nro_ov_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fec Registro" border="2" color="16777215" x="297" y="472" height="44" width="279" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cant Proyect" border="2" color="16777215" x="581" y="472" height="44" width="270" html.valueishtml="0"  name=cant_proyect_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cant Proces." border="2" color="16777215" x="855" y="472" height="44" width="270" html.valueishtml="0"  name=cant_procesada_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cant Factur." border="2" color="16777215" x="1129" y="472" height="44" width="270" html.valueishtml="0"  name=cant_facturada_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="T.Doc" border="2" color="16777215" x="1403" y="472" height="44" width="137" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro Contrato" border="2" color="16777215" x="1545" y="472" height="44" width="334" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fecha Doc" border="2" color="16777215" x="1883" y="472" height="44" width="334" html.valueishtml="0"  name=fecha_doc_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Contrato" border="2" color="16777215" x="1403" y="424" height="44" width="814" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fec Inicio" border="2" color="16777215" x="2597" y="472" height="44" width="334" html.valueishtml="0"  name=fec_inicio_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="16777215" x="2222" y="472" height="44" width="370" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Orden Trabajo" border="2" color="16777215" x="2222" y="424" height="44" width="709" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cantidad" border="2" color="16777215" x="3785" y="472" height="44" width="329" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Precio Venta" border="2" color="16777215" x="4119" y="472" height="44" width="329" html.valueishtml="0"  name=precio_venta_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="T.Doc" border="2" color="16777215" x="4453" y="472" height="44" width="137" html.valueishtml="0"  name=doc_cobranza_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro Cobranza" border="2" color="16777215" x="4594" y="472" height="44" width="366" html.valueishtml="0"  name=nro_cobranza_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro Comprob." border="2" color="16777215" x="3077" y="472" height="44" width="366" html.valueishtml="0"  name=nro_fap_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fecha" border="2" color="16777215" x="3447" y="472" height="44" width="334" html.valueishtml="0"  name=fecha_documento_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="T.Doc" border="2" color="16777215" x="2935" y="472" height="44" width="137" html.valueishtml="0"  name=tipo_fap_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Comprobante de Pago" border="2" color="16777215" x="2935" y="424" height="44" width="1513" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cobranza" border="2" color="16777215" x="4453" y="424" height="44" width="1175" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Banco" border="2" color="16777215" x="4965" y="472" height="44" width="663" html.valueishtml="0"  name=banco_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro Lote" border="2" color="16777215" x="5632" y="472" height="44" width="325" html.valueishtml="0"  name=nro_lote_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro Embarque" border="2" color="16777215" x="5943" y="472" height="44" width="357" html.valueishtml="0"  name=nro_embarque_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Naviera" border="2" color="16777215" x="7081" y="472" height="44" width="786" html.valueishtml="0"  name=vw_vdesc_naviera_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Medio Transp" border="2" color="16777215" x="7872" y="472" height="44" width="379" html.valueishtml="0"  name=flag_medio_tranp_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Embarque" border="2" color="16777215" x="5632" y="424" height="44" width="5595" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="3040" y="96" height="56" width="361" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="41" y="20" height="172" width="389" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Pag.:" border="0" color="0" x="2917" y="96" height="56" width="110" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Usuario:" border="0" color="0" x="2843" y="164" height="56" width="183" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="3040" y="164" height="56" width="357" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cuadro de Embarque" border="0" color="0" x="704" y="32" height="92" width="1874" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="41" y="204" height="56" width="389" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="41" y="272" height="48" width="576" html.valueishtml="0"  name=t_ventana visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="704" y="140" height="56" width="1874" html.valueishtml="0"  name=t_stitulo1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="704" y="212" height="56" width="1874" html.valueishtml="0"  name=t_stitulo2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="704" y="284" height="56" width="1874" html.valueishtml="0"  name=t_stitulo3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Fecha:" border="0" color="0" x="2875" y="28" height="56" width="151" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3040" y="28" height="56" width="270" format="dd/mm/yyyy" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nave" border="2" color="16777215" x="6290" y="472" height="44" width="786" html.valueishtml="0"  name=nave_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fec Negoc." border="2" color="16777215" x="10478" y="472" height="44" width="370" html.valueishtml="0"  name=fec_entreg_doc_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fec Pago" border="2" color="16777215" x="10853" y="472" height="44" width="375" html.valueishtml="0"  name=fec_carga_barco_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Dias
+Negoc" border="2" color="16777215" x="11232" y="424" height="92" width="197" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Dias
+Pago" border="2" color="16777215" x="11433" y="424" height="92" width="197" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Puerto Origen" border="2" color="16777215" x="8741" y="472" height="44" width="677" html.valueishtml="0"  name=descr_puerto_origen_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Puerto Destino" border="2" color="16777215" x="9422" y="472" height="44" width="677" html.valueishtml="0"  name=descr_puerto_destino_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fec Embarque" border="2" color="16777215" x="10103" y="472" height="44" width="370" html.valueishtml="0"  name=fec_zarpe_org_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Incoterm" border="2" color="16777215" x="8256" y="472" height="44" width="480" html.valueishtml="0"  name=desc_incoterm_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=header.1 id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="439" y="20" height="76" width="1495" format="[general]" html.valueishtml="0"  name=nom_cliente visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="87" y="20" height="76" width="334" format="[general]" html.valueishtml="0"  name=cliente visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=10 alignment="0" tabsequence=32766 border="0" color="33554432" x="229" y="16" height="76" width="398" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="3086" y="16" height="76" width="110" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="649" y="16" height="76" width="2418" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="14" y="4" height="56" width="279" format="[general]" html.valueishtml="0"  name=nro_ov visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="297" y="4" height="56" width="279" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="2" color="33554432" x="581" y="4" height="56" width="270" format="###,##0.0000" html.valueishtml="0"  name=cant_proyect visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="855" y="4" height="56" width="270" format="###,##0.0000" html.valueishtml="0"  name=cant_procesada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="33554432" x="1129" y="4" height="56" width="270" format="###,##0.0000" html.valueishtml="0"  name=cant_facturada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1403" y="4" height="56" width="137" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1545" y="4" height="56" width="334" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1883" y="4" height="56" width="334" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2222" y="4" height="56" width="370" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="2597" y="4" height="56" width="334" format="[shortdate] [time]" html.valueishtml="0"  name=fec_inicio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="2" color="33554432" x="3447" y="4" height="56" width="334" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_documento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="1" tabsequence=32766 border="2" color="33554432" x="3785" y="4" height="56" width="329" format="###,##0.0000" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="1" tabsequence=32766 border="2" color="33554432" x="4119" y="4" height="56" width="329" format="###,##0.0000" html.valueishtml="0"  name=precio_venta visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=22 alignment="0" tabsequence=32766 border="2" color="33554432" x="4453" y="4" height="56" width="137" format="[general]" html.valueishtml="0"  name=doc_cobranza visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="2" color="33554432" x="3077" y="4" height="56" width="366" format="[general]" html.valueishtml="0"  name=nro_fap visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=23 alignment="0" tabsequence=32766 border="2" color="33554432" x="4594" y="4" height="56" width="366" format="[general]" html.valueishtml="0"  name=nro_cobranza visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="2" color="33554432" x="2935" y="4" height="56" width="137" format="[general]" html.valueishtml="0"  name=tipo_fap visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=25 alignment="0" tabsequence=32766 border="2" color="33554432" x="4965" y="4" height="56" width="663" format="[general]" html.valueishtml="0"  name=banco visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=32 alignment="0" tabsequence=32766 border="2" color="33554432" x="5632" y="4" height="56" width="325" format="[general]" html.valueishtml="0"  name=nro_lote visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=33 alignment="0" tabsequence=32766 border="2" color="33554432" x="7081" y="4" height="56" width="786" format="[general]" html.valueishtml="0"  name=desc_naviera visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=31 alignment="0" tabsequence=32766 border="2" color="33554432" x="5961" y="4" height="56" width="325" format="[general]" html.valueishtml="0"  name=nro_embarque visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=26 alignment="0" tabsequence=32766 border="2" color="33554432" x="6290" y="4" height="56" width="786" format="[general]" html.valueishtml="0"  name=nombre_nave visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=34 alignment="0" tabsequence=32766 border="2" color="33554432" x="7872" y="4" height="56" width="379" format="[general]" html.valueishtml="0"  name=flag_medio_tranp visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=36 alignment="2" tabsequence=32766 border="2" color="33554432" x="10478" y="4" height="56" width="370" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_entreg_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=37 alignment="2" tabsequence=32766 border="2" color="33554432" x="10853" y="4" height="56" width="375" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_pago visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=38 alignment="1" tabsequence=32766 border="2" color="33554432" x="11232" y="4" height="56" width="197" format="[general]" html.valueishtml="0"  name=dias_negoc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=39 alignment="1" tabsequence=32766 border="2" color="33554432" x="11433" y="4" height="56" width="197" format="[general]" html.valueishtml="0"  name=dias_pago visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=28 alignment="0" tabsequence=32766 border="2" color="33554432" x="8741" y="4" height="56" width="677" format="[general]" html.valueishtml="0"  name=desc_puerto_origen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=29 alignment="0" tabsequence=32766 border="2" color="33554432" x="9422" y="4" height="56" width="677" format="[general]" html.valueishtml="0"  name=desc_puerto_destino visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=30 alignment="0" tabsequence=32766 border="2" color="33554432" x="10103" y="4" height="56" width="370" format="[shortdate] [time]" html.valueishtml="0"  name=fec_embarque visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=27 alignment="0" tabsequence=32766 border="2" color="33554432" x="8256" y="4" height="56" width="480" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

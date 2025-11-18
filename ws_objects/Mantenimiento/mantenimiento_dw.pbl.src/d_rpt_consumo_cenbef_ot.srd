@@ -1,0 +1,92 @@
+﻿$PBExportHeader$d_rpt_consumo_cenbef_ot.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=436 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_procesada dbname="articulo_mov.cant_procesada" )
+ column=(type=number updatewhereclause=yes name=precio_unit dbname="precio_unit" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ column=(type=char(4) updatewhereclause=yes name=ot_tipo dbname="orden_trabajo.ot_tipo" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(10) updatewhereclause=yes name=ot_adm dbname="orden_trabajo.ot_adm" )
+ column=(type=char(12) updatewhereclause=yes name=centro_benef dbname="orden_trabajo.centro_benef" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="articulo_mov.cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="articulo_mov.cnta_prsp" )
+ retrieve="SELECT a.cod_art, a.desc_art, a.und,
+       am.cant_procesada,
+       usf_fl_conv_mon(am.precio_unit, am.cod_moneda, (select cod_dolares from logparam where reckey = '1'), vm.fec_registro) as precio_unit,
+       usf_fl_conv_mon(am.cant_procesada * am.precio_unit, am.cod_moneda, (select cod_dolares from logparam where reckey = '1'), vm.fec_registro) AS importe,
+       ot.ot_tipo,
+       ot.nro_orden,
+		 ot.ot_adm,
+		 ot.centro_benef,
+		 am.cencos,
+		 am.cnta_prsp
+FROM orden_trabajo ot,
+     articulo_mov_proy amp,
+     vale_mov          vm,
+     articulo_mov      am,
+     articulo          a
+WHERE ot.nro_orden = amp.nro_doc
+  AND amp.tipo_doc = (select doc_ot from logparam where reckey = '1')
+  AND vm.nro_vale  = am.nro_vale
+  AND am.origen_mov_proy = amp.cod_origen
+  AND am.nro_mov_proy    = amp.nro_mov
+  AND am.cod_art         = a.cod_art
+  AND vm.flag_estado     <> '0'
+  AND am.flag_estado     <> '0'
+  AND ot.ot_adm          like :as_ot_adm
+  AND ot.centro_benef    like :as_cenbef
+  and ot.ot_tipo		    like :as_tipo_ot
+  and ot.flag_estado in (:as_estado)
+  and ( (:as_maquina = '1' and ot.cod_maquina is not null) or (:as_maquina = '0') )
+  AND trunc(vm.fec_registro) BETWEEN trunc(:ad_fecha1) and trunc(:ad_fecha2)  " arguments=(("ad_fecha1", date),("ad_Fecha2", date),("as_tipo_ot", string),("as_ot_adm", string),("as_cenbef", string),("as_estado", stringlist),("as_maquina", string)) )
+text(band=header alignment="1" text="Usuario :" border="0" color="33554432" x="2843" y="112" height="56" width="197" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Fecha :" border="0" color="33554432" x="2843" y="180" height="64" width="197" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Pag :" border="0" color="33554432" x="2843" y="40" height="56" width="197" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="3058" y="112" height="56" width="270" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3058" y="180" height="64" width="270" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="33554432" x="3058" y="40" height="56" width="270" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="32" y="24" height="164" width="480" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="32" y="208" height="56" width="480" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Consumo de Materiales por Centro de Beneficio" border="0" color="33554432" x="987" y="40" height="80" width="1664" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1083" y="140" height="56" width="1477" html.valueishtml="0"  name=titulo_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1083" y="216" height="56" width="1477" html.valueishtml="0"  name=titulo_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1083" y="292" height="56" width="1477" html.valueishtml="0"  name=titulo_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Descripcion Artículo" border="2" color="33554432" x="325" y="376" height="56" width="1513" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="1842" y="376" height="56" width="151" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cant Proces." border="2" color="33554432" x="1998" y="376" height="56" width="334" html.valueishtml="0"  name=cant_procesada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio Unit" border="2" color="33554432" x="2336" y="376" height="56" width="334" html.valueishtml="0"  name=precio_unit_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="2" color="33554432" x="2674" y="376" height="56" width="334" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cencos" border="2" color="33554432" x="4160" y="376" height="56" width="302" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cnta Prsp" border="2" color="33554432" x="4466" y="376" height="56" width="302" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cod Art" border="2" color="33554432" x="18" y="376" height="56" width="302" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="325" y="4" height="60" width="1513" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1842" y="4" height="60" width="151" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="1998" y="4" height="60" width="334" format="###,##0.0000" html.valueishtml="0"  name=cant_procesada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2336" y="4" height="60" width="334" format="###,##0.0000" html.valueishtml="0"  name=precio_unit visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2674" y="4" height="60" width="334" format="###,##0.0000" html.valueishtml="0"  name=importe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="33554432" x="4160" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="4466" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="18" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total:" border="0" color="33554432" x="2354" y="4" height="56" width="315" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(importe for all)"border="2" color="255" x="2674" y="4" height="60" width="334" format="###,##0.0000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="String(count(  cod_art for all ) ) + ' Artículos consumidos'"border="0" color="33554432" x="18" y="4" height="56" width="1646" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Tipo OT" border="2" color="33554432" x="3013" y="376" height="56" width="224" html.valueishtml="0"  name=ot_tipo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="33554432" x="3013" y="4" height="60" width="224" format="[general]" html.valueishtml="0"  name=ot_tipo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Centro Bef" border="2" color="33554432" x="3547" y="376" height="56" width="302" html.valueishtml="0"  name=cenbef_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="OT ADM" border="2" color="33554432" x="3854" y="376" height="56" width="302" html.valueishtml="0"  name=ot_adm_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="2" color="33554432" x="3547" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=centro_benef visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="3854" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=ot_adm visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="33554432" x="3241" y="376" height="56" width="302" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="3241" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

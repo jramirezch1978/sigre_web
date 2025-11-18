@@ -1,0 +1,38 @@
+﻿$PBExportHeader$d_cns_cobranza_cnta_cob_grd.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_registro dbname="caja_bancos.nro_registro" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_emision dbname="caja_bancos.fecha_emision" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=cod_ctabco dbname="caja_bancos.cod_ctabco" )
+ column=(type=char(20) updatewhereclause=yes name=voucher dbname="voucher" )
+ column=(type=char(3) updatewhereclause=yes name=caja_bancos_det_cod_moneda dbname="caja_bancos_det.cod_moneda" )
+ column=(type=decimal(2) updatewhereclause=yes name=caja_bancos_det_importe dbname="caja_bancos_det.importe" )
+ retrieve="select cb.nro_registro, cb.fecha_emision, cb.cod_ctabco, 
+       cb.origen||to_char(cb.ano,'0000')||to_char(cb.mes,'00')||to_char(cb.nro_libro,'00')||to_char(cb.nro_asiento, '000000') as voucher, 
+       cbd.cod_moneda, cbd.importe
+from caja_bancos cb, caja_bancos_det cbd 
+where cb.origen = cbd.origen and 
+      cb.nro_registro = cbd.nro_registro and 
+      cbd.tipo_doc = :as_tipo_doc and 
+      cbd.nro_doc = :as_nro_doc" arguments=(("as_tipo_doc", string),("as_nro_doc", string)) )
+column(band=detail id=1 alignment="2" tabsequence=20 border="0" color="33554432" x="9" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=nro_registro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=50 border="0" color="33554432" x="741" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=cod_ctabco visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=60 border="0" color="33554432" x="1330" y="8" height="76" width="549" html.valueishtml="0"  name=voucher visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=70 border="0" color="33554432" x="1893" y="8" height="76" width="155" html.valueishtml="0"  name=caja_bancos_det_cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Registro" border="2" color="33554432" x="9" y="8" height="56" width="329" html.valueishtml="0"  name=nro_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cod Ctabco" border="2" color="33554432" x="741" y="8" height="56" width="576" html.valueishtml="0"  name=cod_ctabco_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Voucher" border="2" color="33554432" x="1326" y="8" height="56" width="553" html.valueishtml="0"  name=voucher_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Mon" border="2" color="33554432" x="1888" y="8" height="56" width="160" html.valueishtml="0"  name=caja_bancos_det_cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=6 alignment="1" tabsequence=80 border="0" color="33554432" x="2062" y="8" height="76" width="416" format="###,###.00" html.valueishtml="0"  name=caja_bancos_det_importe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Importe" border="2" color="33554432" x="2057" y="8" height="56" width="421" html.valueishtml="0"  name=caja_bancos_det_importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=2 alignment="2" tabsequence=30 border="0" color="33554432" x="347" y="8" height="76" width="379" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_emision visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fecha Emision" border="2" color="33554432" x="347" y="8" height="56" width="379" html.valueishtml="0"  name=fecha_emision_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

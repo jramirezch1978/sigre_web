@@ -1,0 +1,405 @@
+﻿$PBExportHeader$f_generacion_ctas_x_ret.srf
+global type f_generacion_ctas_x_ret from function_object
+end type
+
+forward prototypes
+global function boolean f_generacion_ctas_x_ret (datawindow adw_origen, ref datawindow adw_destino, datawindow adw_referencias, datastore ads_matriz_det, datastore ads_pendientes_cta_cte, datastore ads_doc_pendientes, string as_moneda, decimal adc_tasa_cambio, tab at_tab1, string as_accion, string as_tmov, string as_nro_ret)
+end prototypes
+
+global function boolean f_generacion_ctas_x_ret (datawindow adw_origen, ref datawindow adw_destino, datawindow adw_referencias, datastore ads_matriz_det, datastore ads_pendientes_cta_cte, datastore ads_doc_pendientes, string as_moneda, decimal adc_tasa_cambio, tab at_tab1, string as_accion, string as_tmov, string as_nro_ret);Long 		   ll_inicio,ll_imatriz,ll_row_ins,ll_found,ll_iref,ll_ano,&
+				ll_mes,ll_nro_libro,ll_nro_asiento,ll_ins_det,ll_count
+String      ls_c_fin,ls_matriz,ls_formula,ls_soles,ls_dolares,ls_cnta_ctbl,&
+			   ls_flag_debhab,ls_expresion,ls_cod_relacion,ls_tipo_doc,ls_nro_doc,&
+			   ls_cod_moneda,ls_glosa_texto, ls_glosa_campo,ls_desc_glosa,ls_glosa_dp,&
+				ls_cencos_dp,ls_codctabco_dp,ls_nro_docref2,ls_cta_ctbl_gan,ls_cta_ctbl_per,&
+				ls_origen,ls_det_glosa,ls_cnta_ctbl_dif,ls_flag_debhab_dif,ls_flag_debhab_dif_x_doc,&
+				ls_flag_ret_igv,ls_flag_debhab_ret,ls_cnta_ctbl_ret_igv,ls_doc_ret,ls_desc_cnta_ret,&
+				ls_flag_doc_ref_ret,ls_flag_codrel_ret,ls_flag_ret_cab
+Double      ldb_monto
+Boolean     lb_retorno = TRUE
+Decimal {2} ldc_monto_total,ldc_monto_sol,ldc_saldo_dol,ldc_saldo_sol,ldc_imp_sol,ldc_imp_dol,&
+				ldc_monto_soles,ldc_imp_retencion
+
+n_cst_asiento_glosa lnv_asiento_glosa
+
+
+lnv_asiento_glosa    = CREATE n_cst_asiento_glosa
+
+f_monedas(ls_soles,ls_dolares)
+
+/*Cuentas Contables para Diferencia de Cambio*/
+SELECT cnta_ctbl_dc_ganancia,cnta_ctbl_dc_perdida,cnta_cntbl_ret_igv,doc_ret_igv_crt
+  INTO :ls_cta_ctbl_gan,:ls_cta_ctbl_per,:ls_cnta_ctbl_ret_igv,:ls_doc_ret
+  FROM finparam
+ WHERE (reckey = '1') ;
+
+/*Recupero Descripcion de Cuenta Contable de Retenciones*/
+SELECT Substr(desc_cnta,1,60),flag_doc_ref,flag_codrel
+  INTO :ls_desc_cnta_ret,:ls_flag_doc_ref_ret,:ls_flag_codrel_ret
+  FROM cntbl_cnta 
+ WHERE (cnta_ctbl = :ls_cnta_ctbl_ret_igv) ;
+ 
+
+adw_origen.Accepttext()
+adw_referencias.Accepttext()
+adw_destino.Accepttext()
+
+
+ 
+
+
+DO WHILE adw_destino.Rowcount() > 0
+	adw_destino.deleterow(0)
+LOOP
+
+
+FOR ll_inicio = 1 TO adw_origen.Rowcount()  //Recorro dw Origen de los items A generar Cuenta Contable
+	 
+	 ls_c_fin  = adw_origen.object.confin [ll_inicio]	
+	 ls_origen       = adw_origen.object.origen      	 [ll_inicio]	
+	 ll_ano	        = adw_origen.object.ano         	 [ll_inicio]	
+	 ll_mes	        = adw_origen.object.mes         	 [ll_inicio]		
+	 ll_nro_libro    = adw_origen.object.nro_libro   	 [ll_inicio]		
+	 ll_nro_asiento  = adw_origen.object.nro_asiento 	 [ll_inicio]		
+	 ls_flag_ret_cab = adw_origen.object.flag_retencion [ll_inicio]
+	 
+	 
+    IF Isnull(ls_c_fin) OR Trim(ls_c_fin) = '' THEN
+		 Messagebox('Item Nº '+String(ll_inicio) ,'Item No se Ha ingresado Concepto Financiero')
+		 adw_destino.Reset()
+ 		 lb_retorno = FALSE
+		 at_tab1.SelectedTab = 1
+		 EXIT
+
+	 ELSE
+		 //Insercion de Cuentas dependiendo de la Matriz Contable
+		  ls_matriz = adw_origen.object.matriz_cntbl[ll_inicio]
+		  IF Isnull(ls_matriz) OR Trim(ls_matriz) = ''  THEN
+			  Messagebox('Aviso','Concepto Financiero Nº '+ls_c_fin+' No se ha Vinculado Matriz')
+		     adw_destino.Reset()
+ 		 	  lb_retorno = FALSE
+		 	  at_tab1.SelectedTab = 1
+			  GOTO SALIDA
+		  END IF
+		  
+
+		  ads_matriz_det.Retrieve(ls_matriz)					// Recuperación de Información de Matriz Detalle
+		
+		  FOR ll_imatriz = 1 TO ads_matriz_det.Rowcount()
+
+				ls_cnta_ctbl 	=	ads_matriz_det.Object.cnta_ctbl  [ll_imatriz]
+				ls_flag_debhab =	ads_matriz_det.Object.flag_debhab[ll_imatriz]
+				ls_expresion 	= 'cnta_ctbl =	'+"'"+ls_cnta_ctbl+"'"+' AND flag_debhab	= '+"'"+ls_flag_debhab+"'"
+				ll_found       = adw_destino.find(ls_expresion,1,adw_destino.rowcount())
+				ls_formula     = ads_matriz_det.Object.formula 		[ll_imatriz]
+				ls_glosa_texto	= ads_matriz_det.Object.glosa_texto [ll_imatriz]
+				ls_glosa_campo	= ads_matriz_det.Object.glosa_campo [ll_imatriz]
+				
+				ldb_monto = adw_origen.Getitemnumber(ll_inicio,ls_formula)
+				
+				IF ll_found = 0 THEN
+					ll_row_ins    = adw_destino.Insertrow(0)		
+					/*Extraer Glosa*/
+					ls_desc_glosa = lnv_asiento_glosa.of_set_glosa(adw_origen,ll_inicio,ls_glosa_texto,ls_glosa_campo)
+
+					adw_destino.Object.item		    [ll_row_ins] = ll_row_ins
+					adw_destino.Object.cnta_ctbl   [ll_row_ins] = ads_matriz_det.Object.cnta_ctbl  [ll_imatriz]
+					adw_destino.Object.flag_debhab [ll_row_ins] = ads_matriz_det.Object.flag_debhab[ll_imatriz]
+					
+					adw_destino.Object.det_glosa  [ll_row_ins]  = ls_desc_glosa
+					
+					IF as_moneda = ls_soles THEN
+						adw_destino.Object.imp_movsol [ll_row_ins] = ldb_monto					
+						adw_destino.Object.imp_movdol [ll_row_ins] = Round(ldb_monto / adc_tasa_cambio,2)
+					ELSEIF as_moneda = ls_dolares THEN
+						adw_destino.Object.imp_movdol [ll_row_ins] = ldb_monto
+						adw_destino.Object.imp_movsol [ll_row_ins] = Round(ldb_monto * adc_tasa_cambio,2)					
+					END IF
+					
+				ELSE
+					IF as_moneda = ls_soles THEN
+						adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + ldb_monto					
+						adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + Round(ldb_monto / adc_tasa_cambio,2)
+					ELSEIF as_moneda = ls_dolares THEN
+						adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + ldb_monto
+						adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + Round(ldb_monto * adc_tasa_cambio,2)					
+					END IF
+				END IF
+		  NEXT
+		  
+		  FOR ll_iref = 1 TO adw_referencias.Rowcount() // Recuperación de Informacion de Acuerdo a Doc. de Referencias
+				
+				ls_cod_relacion   = adw_referencias.Object.cod_relacion  [ll_iref]
+				ls_tipo_doc		   = adw_referencias.Object.tipo_ref 		[ll_iref]
+				ls_nro_doc		   = adw_referencias.Object.nro_ref	      [ll_iref]
+				ls_cod_moneda	   = adw_referencias.Object.cod_moneda_det[ll_iref]
+				ls_flag_ret_igv   = adw_referencias.Object.flag_ret_igv  [ll_iref]
+				ldc_imp_retencion = adw_referencias.Object.imp_ret_igv   [ll_iref]
+				
+				
+				//**Se Genera Asientos de Acuerdo A al Mismo Documento **//
+			 	ldc_monto_total = adw_referencias.object.importe [ll_iref]
+
+			 	ads_doc_pendientes.Retrieve(ls_cod_relacion,ls_tipo_doc,ls_nro_doc)
+			 
+			 	IF ads_doc_pendientes.Rowcount() > 0   THEN
+				 	ls_cnta_ctbl   = ads_doc_pendientes.object.cnta_ctbl   [1]
+				 	ls_flag_debhab = ads_doc_pendientes.object.flag_debhab [1]
+				 	ldc_saldo_sol  = ads_doc_pendientes.object.sldo_sol	 [1]
+				 	ldc_saldo_dol	= ads_doc_pendientes.object.saldo_dol   [1]
+					 
+			 	ELSE
+				 	/*adelantos o cancelaciones totales*/
+				 	SELECT cnta_ctbl    ,flag_debhab 
+		           INTO :ls_cnta_ctbl,:ls_flag_debhab
+			        FROM cntbl_asiento_det
+		          WHERE ((origen       = :ls_origen      )  AND
+		  		           (ano          = :ll_ano         )  AND
+					        (mes          = :ll_mes         )  AND
+					        (nro_libro    = :ll_nro_libro   )  AND
+					        (nro_asiento  = :ll_nro_asiento )) AND
+					       ((cod_relacion = :ls_cod_relacion)  AND
+						     (tipo_docref1 = :ls_tipo_doc	  )  AND
+						     (nro_docref1  = :ls_nro_doc	  )) ;
+			   END IF	
+
+				//Recupera Datos Complementarios
+		      ads_pendientes_cta_cte.Retrieve(ls_cod_relacion,ls_tipo_doc,ls_nro_doc)	 
+			 
+            IF ads_pendientes_cta_cte.Rowcount() > 0 THEN
+		  	      ls_glosa_dp     = ads_pendientes_cta_cte.object.det_glosa   [1]
+				   ls_cencos_dp    = ads_pendientes_cta_cte.object.cencos      [1]
+				   ls_codctabco_dp = ads_pendientes_cta_cte.object.cod_ctabco  [1]
+				   ls_nro_docref2  = ads_pendientes_cta_cte.object.nro_docref2 [1]
+			   ELSE
+				   SetNull(ls_glosa_dp)
+				   SetNull(ls_cencos_dp)
+				   SetNull(ls_codctabco_dp)
+				   SetNull(ls_nro_docref2)
+			   END IF
+				
+				
+				IF Not(Isnull(ls_cnta_ctbl) OR Trim(ls_cnta_ctbl) = '') THEN
+               
+					
+					/*DIFERENCIA DE TASA DE CAMBIO*/
+
+					IF ls_cod_moneda = ls_dolares THEN /*SE REVISARA DIFERENCIA EN CAMBIO*/				 
+					
+				 	   IF as_accion = 'new' THEN
+					 	   ldc_saldo_sol = Round(ldc_saldo_dol * adc_tasa_cambio,2) - ldc_saldo_sol
+					 
+				      ELSEIF as_accion = 'fileopen' THEN
+					
+					      SELECT imp_movsol,imp_movdol
+					        INTO :ldc_imp_sol,:ldc_imp_dol
+					        FROM cntbl_asiento_det
+		                WHERE ((origen       = :ls_origen      )  AND
+		  		                 (ano          = :ll_ano         )  AND
+					              (mes          = :ll_mes         )  AND
+					              (nro_libro    = :ll_nro_libro   )  AND
+					              (nro_asiento  = :ll_nro_asiento )) AND
+					             ((cod_relacion = :ls_cod_relacion)  AND
+						           (tipo_docref1 = :ls_tipo_doc	 )  AND
+						           (nro_docref1  = :ls_nro_doc	    )) ;
+					
+					      /*Buscar si existe algun saldo en doc_pendientes_cta_cte*/			
+					      SELECT Count(*)
+					        INTO :ll_count
+					        FROM doc_pendientes_cta_cte
+					       WHERE ((cod_relacion = :ls_cod_relacion ) AND
+					 	 	        (tipo_doc     = :ls_tipo_doc     ) AND
+						           (nro_doc      = :ls_nro_doc      )) ;
+							  
+					      IF ll_count > 0 THEN
+						      SELECT sldo_sol,saldo_dol
+						        INTO :ldc_saldo_sol,:ldc_saldo_dol
+					           FROM doc_pendientes_cta_cte
+					          WHERE ((cod_relacion = :ls_cod_relacion ) AND
+					 		           (tipo_doc     = :ls_tipo_doc     ) AND
+						              (nro_doc      = :ls_nro_doc      )) ;
+	                   
+							 
+							   IF Isnull(ldc_imp_sol) THEN ldc_imp_sol = 0.00
+							   IF Isnull(ldc_imp_dol) THEN ldc_imp_dol = 0.00
+							 
+						      ldc_imp_sol = ldc_imp_sol + ldc_saldo_sol
+				            ldc_imp_dol = ldc_imp_dol + ldc_saldo_dol
+					      END IF
+							
+						   ldc_saldo_sol = Round(ldc_imp_dol * adc_tasa_cambio,2) - ldc_imp_sol
+							
+				      END IF	/*CIERRA X MOVIMIENTO*/	
+						
+						
+						IF ldc_saldo_sol > 0 THEN     /*Dolar Subio*/
+						   IF as_tmov = 'P' THEN
+							   ls_cnta_ctbl_dif  = ls_cta_ctbl_per								
+							ELSEIF as_tmov = 'C' THEN
+							   ls_cnta_ctbl_dif  = ls_cta_ctbl_gan								
+							END IF
+							
+							ls_flag_debhab_dif 		 = ls_flag_debhab
+							
+							/*CONVERSION DE FLAG DEBHAB PARA DOCUMENTO*/
+							IF ls_flag_debhab = 'D' THEN
+								ls_flag_debhab_dif_x_doc = 'H' 	
+							ELSE
+								ls_flag_debhab_dif_x_doc = 'D'
+							END IF
+							
+						   ldc_saldo_dol = 0.00
+						   ls_det_glosa  = 'Diferencia en Cambio Dolar se Incremento'
+							 
+							//ldc_saldo_sol
+
+							 
+					   ELSEIF ldc_saldo_sol < 0 THEN /*Dolar Bajo*/		
+						   IF as_tmov = 'P' THEN
+								ls_cnta_ctbl_dif = ls_cta_ctbl_gan								
+							ELSEIF as_tmov = 'C' THEN							
+								ls_cnta_ctbl_dif = ls_cta_ctbl_per
+							END IF
+
+						   ldc_saldo_dol = 0.00
+						   ldc_saldo_sol = ldc_saldo_sol * -1
+						   ls_det_glosa  = 'Diferencia en Cambio Dolar Disminuyo'
+
+							ls_flag_debhab_dif_x_doc = ls_flag_debhab
+							
+							/*CONVERSION DE FLAG DEBHAB PARA DIF. CAMBIO*/
+							IF ls_flag_debhab = 'D' THEN
+								ls_flag_debhab_dif = 'H' 	
+							ELSE
+								ls_flag_debhab_dif = 'D'
+							END IF
+						 
+							//ldc_saldo_sol
+							
+						  
+					   ELSEIF ldc_saldo_sol = 0 THEN /*No Genera Diferencia en Cambio*/
+						   GOTO SAL_ASIENTO					
+					   END IF
+						
+						/*Insertar Nuevo Registro*/						 
+						ls_expresion = 'cnta_ctbl = '+"'"+ls_cnta_ctbl_dif+"'"+' AND flag_debhab = '+"'"+ls_flag_debhab_dif+"'"			 			 
+							
+						ll_found     = adw_destino.Find(ls_expresion,1,adw_destino.Rowcount())
+						IF ll_found > 0 THEN
+						   ldc_monto_soles = adw_destino.object.imp_movsol  [ll_found]
+ 				    	   adw_destino.object.imp_movsol  [ll_found] = ldc_monto_soles + ldc_saldo_sol
+						ELSE
+						 	ll_ins_det = adw_destino.InsertRow(0)	//Inserta Registro 
+			    		 	adw_destino.Object.item	       [ll_ins_det] = ll_ins_det
+		       		 	adw_destino.Object.cnta_ctbl   [ll_ins_det] = ls_cnta_ctbl_dif
+			    		 	adw_destino.Object.det_glosa   [ll_ins_det] = ls_det_glosa
+		       		 	adw_destino.Object.flag_debhab [ll_ins_det] = ls_flag_debhab_dif  							 
+				    	   adw_destino.object.imp_movsol  [ll_ins_det] = ldc_saldo_sol
+					 	 	adw_destino.object.imp_movdol  [ll_ins_det] = 0.00
+						END IF
+						
+						/*Insercion de Documento por diferencia en cambio*/		
+					  ll_ins_det = adw_destino.InsertRow(0)	//Inserta Registro 
+				     adw_destino.Object.item	       [ll_ins_det] = ll_ins_det
+		   	     adw_destino.Object.cnta_ctbl    [ll_ins_det] = ls_cnta_ctbl
+			   	  adw_destino.Object.det_glosa    [ll_ins_det] = ls_glosa_dp
+				     adw_destino.Object.tipo_docref1 [ll_ins_det] = ls_tipo_doc     
+				     adw_destino.Object.nro_docref1  [ll_ins_det] = ls_nro_doc     
+				     adw_destino.Object.cod_relacion [ll_ins_det] = ls_cod_relacion 
+				     adw_destino.Object.cencos 		 [ll_ins_det] = ls_cencos_dp		
+					  adw_destino.Object.cod_ctabco   [ll_ins_det] = ls_codctabco_dp
+				  	  adw_destino.Object.nro_docref2  [ll_ins_det] = ls_nro_docref2  
+		        	  adw_destino.Object.flag_debhab  [ll_ins_det] = ls_flag_debhab_dif_x_doc  
+				     adw_destino.object.imp_movsol   [ll_ins_det] = ldc_saldo_sol
+				     adw_destino.object.imp_movdol   [ll_ins_det] = 0.00
+						 
+					END IF /*POR TIPO DE MONEDA*/
+					
+					
+				  SAL_ASIENTO:					
+				  /*insercion de asiento x documento */
+				  ll_ins_det = adw_destino.InsertRow(0)	//Inserta Registro 
+			     adw_destino.Object.item	        [ll_ins_det] = ll_ins_det
+		        adw_destino.Object.cnta_ctbl    [ll_ins_det] = ls_cnta_ctbl
+			     adw_destino.Object.det_glosa    [ll_ins_det] = ls_glosa_dp
+			     adw_destino.Object.tipo_docref1 [ll_ins_det] = ls_tipo_doc     
+			     adw_destino.Object.nro_docref1  [ll_ins_det] = ls_nro_doc     
+			     adw_destino.Object.cod_relacion [ll_ins_det] = ls_cod_relacion 
+			     adw_destino.Object.cencos 		 [ll_ins_det] = ls_cencos_dp		
+				  adw_destino.Object.cod_ctabco   [ll_ins_det] = ls_codctabco_dp
+				  adw_destino.Object.nro_docref2  [ll_ins_det] = ls_nro_docref2  
+		        adw_destino.Object.flag_debhab  [ll_ins_det] = ls_flag_debhab  
+					  
+				  IF ls_cod_moneda = ls_soles THEN
+					  adw_destino.object.imp_movsol [ll_ins_det] = ldc_monto_total
+					  adw_destino.object.imp_movdol [ll_ins_det] = Round(ldc_monto_total / adc_tasa_cambio,2)						  
+				  ELSE
+				     adw_destino.object.imp_movsol [ll_ins_det] = Round(ldc_monto_total * adc_tasa_cambio,2)						  
+					  adw_destino.object.imp_movdol [ll_ins_det] = ldc_monto_total
+				  END IF
+				  
+				  /*asiento de flag de retencion*/
+				  IF ls_flag_ret_igv = '1' AND ls_flag_ret_cab = '1' THEN
+  					  /*invertir flag debhab de doc*/	
+					  IF ls_flag_debhab = 'D' THEN
+						  ls_flag_debhab_ret = 'H'
+					  ELSE
+						  ls_flag_debhab_ret = 'D'
+					  END IF
+					 
+					  ls_expresion = "cnta_ctbl = '"+ls_cnta_ctbl_ret_igv+"' AND flag_debhab = '"+ls_flag_debhab_ret+"'"
+					  ll_found = adw_destino.find(ls_expresion,1,adw_destino.rowcount())
+					  
+					  IF ll_found = 0 THEN
+						  /*Asiento Retencion*/	
+		          	  ll_ins_det = adw_destino.InsertRow(0)	//Inserta Registro 					 
+						  adw_destino.object.item 		   [ll_ins_det] = ll_ins_det
+						  adw_destino.object.cnta_ctbl	[ll_ins_det] = ls_cnta_ctbl_ret_igv
+						  adw_destino.object.det_glosa	[ll_ins_det] = ls_desc_cnta_ret
+						  adw_destino.object.flag_debhab [ll_ins_det] = ls_flag_debhab_ret
+			       	  adw_destino.object.imp_movsol  [ll_ins_det] = ldc_imp_retencion
+			 	    	  adw_destino.object.imp_movdol  [ll_ins_det] = Round(ldc_imp_retencion / adc_tasa_cambio,2)						  
+							
+							
+						  /*Indicadores de Cnta Cntbl*/
+						  IF ls_flag_doc_ref_ret = '1' THEN
+							  adw_destino.object.tipo_docref1 [ll_ins_det] = ls_doc_ret
+							  adw_destino.object.nro_docref1  [ll_ins_det] = as_nro_ret
+						  END IF
+					 
+						  IF ls_flag_codrel_ret = '1' THEN
+							  adw_destino.object.cod_relacion [ll_ins_det]	= ls_cod_relacion
+						  END IF
+							
+					  ELSE
+						  adw_destino.object.imp_movsol  [ll_found] = adw_destino.object.imp_movsol  [ll_found] + ldc_imp_retencion
+			 	    	  adw_destino.object.imp_movdol  [ll_found] = adw_destino.object.imp_movdol  [ll_found] + Round(ldc_imp_retencion / adc_tasa_cambio,2)						  						 
+					  END IF
+	
+				  END IF
+				  
+				  
+				  
+				ELSE
+		 	     Messagebox('Aviso','Documento de Referencias '+Trim(ls_tipo_doc)+' '+Trim(ls_nro_doc) +' Tiene Problemas , Verifique!')
+				  lb_retorno = FALSE
+				  adw_destino.Reset()
+				  at_tab1.SelectedTab = 1
+				  GOTO SALIDA
+				END IF
+				
+ 			   
+								 
+
+				
+		  NEXT
+			  
+		  
+	 END IF
+NEXT
+
+SALIDA:
+
+Return lb_retorno 
+end function
+

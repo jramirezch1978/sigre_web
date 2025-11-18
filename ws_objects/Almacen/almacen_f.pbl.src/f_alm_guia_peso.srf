@@ -1,0 +1,44 @@
+﻿$PBExportHeader$f_alm_guia_peso.srf
+global type f_alm_guia_peso from function_object
+end type
+
+forward prototypes
+global function long f_alm_guia_peso (string as_cod_origen, string as_nro_guia, string as_cod_art)
+end prototypes
+
+global function long f_alm_guia_peso (string as_cod_origen, string as_nro_guia, string as_cod_art);Long ll_ret
+decimal{2} ldc_peso_neto
+
+Select round(Sum(nvl(am.peso_neto_tm,0)),2)
+  into :ldc_peso_neto
+  From guia g, guia_vale gv, vale_mov vm, articulo_mov am
+ Where g.cod_origen   = gv.origen_guia
+   And g.nro_guia     = gv.nro_guia
+   And gv.origen_vale = vm.cod_origen
+   And gv.nro_vale    = vm.nro_vale
+   And vm.cod_origen  = am.cod_origen
+   And vm.nro_vale    = am.nro_vale
+   And g.cod_origen   = :as_cod_origen
+   And g.nro_guia     = :as_nro_guia
+   And am.cod_art     = :as_cod_art;
+	
+if ldc_peso_neto = 0 or isnull(ldc_peso_neto) then
+	
+	Select sa.pesada - sa.tara into :ll_ret
+	  From Salida_Pesada Sa
+	 Where sa.cod_origen = :as_cod_origen and
+      	 sa.nro_guia = :as_nro_guia and
+      	 sa.cod_art = :as_cod_art;
+			 
+	 RETURN ll_ret
+	 
+else
+	
+	RETURN ldc_peso_neto
+
+end if
+
+
+
+end function
+

@@ -1,0 +1,40 @@
+﻿$PBExportHeader$d_lista_guias_generadas_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_guia dbname="guia.nro_guia" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="guia.cod_origen" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="guia.fec_registro" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="guia.cod_usr" )
+ retrieve="SELECT DISTINCT  ~"GUIA~".~"NRO_GUIA~" ,
+       ~"GUIA~".~"COD_ORIGEN~"   ,
+       ~"GUIA~".~"FEC_REGISTRO~" ,
+       ~"GUIA~".~"COD_USR~"      
+  FROM ~"VALE_MOV~"  ,
+       ~"GUIA_VALE~" ,
+       ~"GUIA~"      ,
+		 ~"MOTIVO_TRASLADO~",
+       ~"LOGPARAM~"  
+ WHERE (~"GUIA_VALE~".~"ORIGEN_VALE~"             = ~"VALE_MOV~".~"COD_ORIGEN~"            ) and
+       ( ~"GUIA_VALE~".~"NRO_VALE~"               = ~"VALE_MOV~".~"NRO_VALE~"              ) and
+       ( ~"GUIA_VALE~".~"ORIGEN_GUIA~"            = ~"GUIA~".~"COD_ORIGEN~"                ) and
+       ( ~"GUIA_VALE~".~"NRO_GUIA~"               = ~"GUIA~".~"NRO_GUIA~"                  ) and
+		 ( ~"GUIA~".~"MOTIVO_TRASLADO~"             = ~"MOTIVO_TRASLADO~".~"MOTIVO_TRASLADO~") and
+       ( ~"VALE_MOV~".~"TIPO_REFER~"              = ~"LOGPARAM~".~"DOC_OV~"                ) and
+		 ( ~"MOTIVO_TRASLADO~".~"FLAG_FACTURACION~" = '1'                                ) and
+      (( ~"VALE_MOV~".~"ORIGEN_REFER~"            = :as_origen                         ) and
+       ( ~"VALE_MOV~".~"NRO_REFER~"               = :as_orden_venta                    ) and
+       ( ~"GUIA~".~"FLAG_ESTADO~"                 = '1'                                ))  " arguments=(("as_origen", string),("as_orden_venta", string)) )
+text(band=header alignment="2" text="Nro Guia" border="2" color="8388608" x="443" y="4" height="56" width="302" html.valueishtml="0"  name=nro_guia_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="F. Registro" border="2" color="8388608" x="750" y="4" height="56" width="256" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Usuario" border="2" color="8388608" x="1010" y="4" height="56" width="261" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="9" y="4" height="56" width="430" html.valueishtml="0"  name=cod_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="9" y="0" height="60" width="430" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="0" x="443" y="0" height="60" width="302" format="[general]" html.valueishtml="0"  name=nro_guia visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="0" x="750" y="0" height="60" width="256" format="[shortdate] [time]" html.valueishtml="0"  name=fec_registro visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="0" x="1010" y="0" height="60" width="261" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

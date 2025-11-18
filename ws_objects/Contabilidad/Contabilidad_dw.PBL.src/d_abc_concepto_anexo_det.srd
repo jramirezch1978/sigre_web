@@ -1,0 +1,63 @@
+﻿$PBExportHeader$d_abc_concepto_anexo_det.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=128 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=ano dbname="cnt_concepto_anexo_det.ano" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=mes dbname="cnt_concepto_anexo_det.mes" )
+ column=(type=char(9) updatewhereclause=yes name=desc_mes dbname="desc_mes" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cnta_ctbl dbname="cnt_concepto_anexo_det.cnta_ctbl" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=concepto_cnt dbname="cnt_concepto_anexo_det.concepto_cnt" )
+ column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen dbname="cnt_concepto_anexo_det.origen" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_libro dbname="cnt_concepto_anexo_det.nro_libro" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_asiento dbname="cnt_concepto_anexo_det.nro_asiento" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="cnt_concepto_anexo_det.item" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="cnt_concepto_anexo_det.flag_replicacion" initial="1" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_item dbname="cnt_concepto_anexo_det.nro_item" )
+ retrieve="  SELECT ~"CNT_CONCEPTO_ANEXO_DET~".~"ANO~",   
+         ~"CNT_CONCEPTO_ANEXO_DET~".~"MES~",
+       decode(~"CNT_CONCEPTO_ANEXO_DET~".~"MES~",0,'Cero',   1,'Enero',     2,'Febrero',  3,'Marzo',
+                     4,'Abril',  5,'Mayo',      6,'Junio',    7,'Julio',
+                     8,'Agosto', 9,'Setiembre', 10,'Octubre', 11,'Noviembre',
+                     12,'Diciembre') As desc_mes,   
+         ~"CNT_CONCEPTO_ANEXO_DET~".~"CNTA_CTBL~",   
+         ~"CNT_CONCEPTO_ANEXO_DET~".~"CONCEPTO_CNT~",   
+         ~"CNT_CONCEPTO_ANEXO_DET~".~"ORIGEN~",   
+         ~"CNT_CONCEPTO_ANEXO_DET~".~"NRO_LIBRO~",   
+         ~"CNT_CONCEPTO_ANEXO_DET~".~"NRO_ASIENTO~",   
+         ~"CNT_CONCEPTO_ANEXO_DET~".~"ITEM~",   
+         ~"CNT_CONCEPTO_ANEXO_DET~".~"FLAG_REPLICACION~",   
+         ~"CNT_CONCEPTO_ANEXO_DET~".~"NRO_ITEM~"  
+    FROM ~"CNT_CONCEPTO_ANEXO_DET~"  
+   WHERE ( ~"CNT_CONCEPTO_ANEXO_DET~".~"ANO~" = :an_ano ) AND  
+         ( trim(~"CNT_CONCEPTO_ANEXO_DET~".~"CNTA_CTBL~") = :as_cnta ) AND
+			   ( trim(~"CNT_CONCEPTO_ANEXO_DET~".~"CONCEPTO_CNT~") = :as_CONCEP )
+" update="CNT_CONCEPTO_ANEXO_DET" updatewhere=1 updatekeyinplace=no arguments=(("an_ano", number),("as_cnta", string),("as_concep", string))  sort="ano A mes A cnta_ctbl A concepto_cnt A " )
+group(level=1 header.height=64 trailer.height=0 by=("mes" , "desc_mes" ) header.color="536870912" trailer.color="536870912" )
+compute(band=header.1 alignment="0" expression="string( mes ) + '-' +  desc_mes "border="0" color="8388608" x="14" y="0" height="60" width="1687" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=70 border="2" color="33554432" x="5" y="0" height="60" width="238" format="[general]" html.valueishtml="0"  name=nro_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="2" tabsequence=10 border="2" color="33554432" x="247" y="0" height="60" width="329" format="[general]" html.valueishtml="0"  name=cnta_ctbl visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="2" tabsequence=20 border="2" color="33554432" x="581" y="0" height="60" width="311" format="[general]" html.valueishtml="0"  name=concepto_cnt visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="2" tabsequence=30 border="2" color="33554432" x="896" y="0" height="60" width="174" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="1" tabsequence=80 border="2" color="0" x="1074" y="0" height="60" width="174" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="1" tabsequence=90 border="2" color="0" x="1253" y="0" height="60" width="174" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="1" tabsequence=40 border="2" color="33554432" x="1431" y="0" height="60" width="329" format="[general]" html.valueishtml="0"  name=nro_libro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=50 border="2" color="33554432" x="1765" y="0" height="60" width="329" format="[general]" html.valueishtml="0"  name=nro_asiento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="1" tabsequence=60 border="2" color="33554432" x="2098" y="0" height="60" width="329" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nro Item" border="2" color="33554432" x="5" y="68" height="56" width="238" html.valueishtml="0"  name=nro_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cnta Ctbl" border="2" color="33554432" x="247" y="68" height="56" width="329" html.valueishtml="0"  name=cnta_ctbl_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Concepto" border="2" color="33554432" x="581" y="68" height="56" width="311" html.valueishtml="0"  name=concepto_cnt_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Origen" border="2" color="33554432" x="896" y="68" height="56" width="174" html.valueishtml="0"  name=origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Año" border="2" color="33554432" x="1074" y="68" height="56" width="174" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Mes" border="2" color="33554432" x="1253" y="68" height="56" width="174" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nro Libro" border="2" color="33554432" x="1431" y="68" height="56" width="329" html.valueishtml="0"  name=nro_libro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nro Asiento" border="2" color="33554432" x="1765" y="68" height="56" width="329" html.valueishtml="0"  name=nro_asiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Item" border="2" color="33554432" x="2098" y="68" height="56" width="329" html.valueishtml="0"  name=item_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Asientos Contables por Cuentas Contables y Conceptos" border="2" color="33554432" x="5" y="4" height="60" width="2423" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

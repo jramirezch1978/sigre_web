@@ -1,0 +1,34 @@
+﻿$PBExportHeader$f_verifica_flag_cntbl_cnta.srf
+global type f_verifica_flag_cntbl_cnta from function_object
+end type
+
+forward prototypes
+global function boolean f_verifica_flag_cntbl_cnta (string as_cnta_ctbl)
+end prototypes
+
+global function boolean f_verifica_flag_cntbl_cnta (string as_cnta_ctbl);Boolean lb_retorno = FALSE
+String  ls_flag_ctabco,ls_flag_cencos,ls_flag_cod_rel,ls_flag_doc_ref,ls_flag_cebef
+
+SELECT Nvl(flag_ctabco,'0')      ,
+       Nvl(flag_cencos ,'0')     ,
+       Nvl(flag_doc_ref,'0')     ,
+       Nvl(flag_codrel,'0')      ,
+		 Nvl(flag_centro_benef,'0')
+ INTO  :ls_flag_ctabco ,
+ 		 :ls_flag_cencos ,
+		 :ls_flag_doc_ref,
+ 		 :ls_flag_cod_rel,
+		 :ls_flag_cebef
+ FROM  cntbl_cnta
+WHERE cnta_ctbl = :as_cnta_ctbl ;
+
+
+IF Integer(ls_flag_ctabco)+Integer(ls_flag_cencos)+Integer(ls_flag_cod_rel)+Integer(ls_flag_doc_ref)+Integer(ls_flag_cebef) > 0 THEN
+	lb_retorno = TRUE
+END IF
+
+			
+
+Return lb_retorno
+end function
+

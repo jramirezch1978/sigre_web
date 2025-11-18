@@ -1,0 +1,37 @@
+﻿$PBExportHeader$d_priueba.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=136 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=articulo_mov_proy_cencos dbname="articulo_mov_proy.cencos" )
+ column=(type=char(10) updatewhereclause=yes name=articulo_mov_proy_cnta_prsp dbname="articulo_mov_proy.cnta_prsp" )
+ column=(type=datetime updatewhereclause=yes name=articulo_mov_proy_fec_proyect dbname="articulo_mov_proy.fec_proyect" )
+ column=(type=number updatewhereclause=yes name=ano dbname="ano" )
+ column=(type=number updatewhereclause=yes name=mes dbname="mes" )
+ column=(type=number updatewhereclause=yes name=monto_aprobado dbname="monto_aprobado" )
+ retrieve="select amp.cencos ,amp.cnta_prsp ,amp.fec_proyect,
+       to_number(to_char(amp.fec_proyect,'yyyy')) as ano,
+       to_number(to_char(amp.fec_proyect,'mm'))   as mes,
+       sum( (Nvl(amp.cant_proyect,0) - Nvl(amp.cant_procesada,0)) * Nvl(amp.precio_unit,0) ) as monto_aprobado
+  from tt_ope_aprobacion_material_ot tt,
+       articulo_mov_proy             amp
+ where (tt.cod_art 	  = amp.cod_art   ) and
+		   (tt.cod_origen = amp.cod_origen) and
+		   (tt.nro_mov	  = amp.nro_mov	  ) 
+  
+group by amp.cencos,amp.cnta_prsp,amp.fec_proyect " )
+text(band=header alignment="2" text="Oper Sec" border="0" color="8388608" x="14" y="48" height="56" width="261" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cod Art" border="0" color="8388608" x="357" y="52" height="56" width="306" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=0 border="0" color="0" x="663" y="0" height="76" width="320" html.valueishtml="0"  name=articulo_mov_proy_cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=0 border="0" color="0" x="983" y="0" height="76" width="320" html.valueishtml="0"  name=articulo_mov_proy_cnta_prsp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=0 border="0" color="0" x="1303" y="0" height="76" width="352" html.valueishtml="0"  name=articulo_mov_proy_fec_proyect visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=0 border="0" color="0" x="1655" y="0" height="76" width="1376" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=0 border="0" color="0" x="3031" y="0" height="76" width="1376" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=0 border="0" color="0" x="4407" y="0" height="76" width="1376" html.valueishtml="0"  name=monto_aprobado visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

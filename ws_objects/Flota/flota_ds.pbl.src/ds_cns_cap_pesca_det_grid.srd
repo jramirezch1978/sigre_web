@@ -1,0 +1,68 @@
+﻿$PBExportHeader$ds_cns_cap_pesca_det_grid.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 selected.mouse=no )
+header(height=128 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cliente dbname="fl_venta.cliente" )
+ column=(type=char(50) updatewhereclause=yes name=nomb_cliente dbname="proveedor.nomb_cliente" )
+ column=(type=decimal(2) updatewhereclause=yes name=cantidad_real dbname="fl_venta.cantidad_real" )
+ column=(type=decimal(2) updatewhereclause=yes name=cantidad_castigada dbname="fl_venta.cantidad_castigada" )
+ column=(type=number updatewhereclause=yes name=cantidad_vendida dbname="cantidad_vendida" )
+ column=(type=datetime updatewhereclause=yes name=fecha_hora_arribo dbname="fl_parte_de_pesca.fecha_hora_arribo" )
+ column=(type=char(50) updatewhereclause=yes name=puerto dbname="fl_puertos.puerto" )
+ column=(type=number updatewhereclause=yes name=precio dbname="precio" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ retrieve="select  flv.cliente,
+		  p.nom_proveedor as nomb_cliente,
+		  flv.cantidad_real, 
+		  flv.cantidad_castigada, 
+        flv.cantidad_real - flv.cantidad_castigada as cantidad_vendida,
+        flpp.fecha_hora_arribo, 
+	     flp.descr_puerto as puerto,
+        usf_fl_conv_mon(flv.precio_unitario, flv.cod_moneda, 'US$', 
+				trunc(flpp.fecha_hora_arribo) ) as precio,
+        (flv.cantidad_real - flv.cantidad_castigada) *  
+        usf_fl_conv_mon(flv.precio_unitario, flv.cod_moneda, 'US$', 
+				trunc(flpp.fecha_hora_arribo) ) as importe
+from 	fl_venta flv,
+		fl_parte_de_pesca flpp,
+      fl_puertos flp,
+      proveedor p
+where flv.parte_pesca = flpp.parte_pesca
+  and flp.puerto = flpp.puerto_arribo      
+  and p.proveedor = flv.cliente
+  and flpp.nave_real = :ls_nave
+  and to_char(flpp.fecha_hora_arribo, 'yyyymmdd') >= :ls_fecha1
+  and to_char(flpp.fecha_hora_arribo, 'yyyymmdd') <= :ls_fecha2
+order by flpp.fecha_hora_arribo " arguments=(("ls_nave", string),("ls_fecha1", string),("ls_fecha2", string)) )
+text(band=header alignment="2" text="Codigo
+Cliente" border="2" color="33554432" x="489" y="8" height="112" width="270" html.valueishtml="0"  name=cliente_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nombre del
+Cliente" border="2" color="33554432" x="768" y="8" height="112" width="1189" html.valueishtml="0"  name=nomb_cliente_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cantida
+Capturada" border="2" color="33554432" x="1966" y="8" height="112" width="370" html.valueishtml="0"  name=cantidad_real_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cantidad
+Castigada" border="2" color="33554432" x="2345" y="8" height="112" width="407" html.valueishtml="0"  name=cantidad_castigada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cantidad
+Vendida" border="2" color="33554432" x="2761" y="8" height="112" width="466" html.valueishtml="0"  name=cantidad_vendida_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha y Hora
+del Arribo" border="2" color="33554432" x="9" y="8" height="112" width="471" html.valueishtml="0"  name=fecha_hora_arribo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion
+del Puerto" border="2" color="33554432" x="3237" y="8" height="112" width="722" html.valueishtml="0"  name=puerto_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Precio de
+Venta (US$)" border="2" color="0" x="3968" y="8" height="112" width="475" html.valueishtml="0"  name=precio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Importe
+Total Venta (US$)" border="2" color="0" x="4453" y="8" height="112" width="567" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="489" y="4" height="68" width="270" format="[general]" html.valueishtml="0"  name=cliente visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="768" y="4" height="68" width="1189" format="[general]" html.valueishtml="0"  name=nomb_cliente visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="68" width="471" format="dd/mm/yyyy h:mm am/pm" html.valueishtml="0"  name=fecha_hora_arribo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1966" y="4" height="68" width="370" format="###,##0.00" html.valueishtml="0"  name=cantidad_real visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="2345" y="4" height="68" width="407" format="###,##0.00" html.valueishtml="0"  name=cantidad_castigada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2761" y="4" height="68" width="466" format="###,##0.00" html.valueishtml="0"  name=cantidad_vendida visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="3237" y="4" height="68" width="722" format="[general]" html.valueishtml="0"  name=puerto visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="3968" y="4" height="68" width="475" format="###,##0.00" html.valueishtml="0"  name=precio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="4453" y="4" height="68" width="567" format="###,##0.00" html.valueishtml="0"  name=importe visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

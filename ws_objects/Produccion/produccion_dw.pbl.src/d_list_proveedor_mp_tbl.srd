@@ -1,0 +1,41 @@
+﻿$PBExportHeader$d_list_proveedor_mp_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=proveedor dbname="proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=peso_venta dbname="peso_venta" )
+ column=(type=char(3) updatewhereclause=yes name=und_peso dbname="und_peso" )
+ retrieve="SELECT p.proveedor, p.nom_proveedor, 
+       SUM(usf_ap_conv_und(a.und, 
+                    (SELECT t.und_tm FROM ap_param t WHERE origen = 'XX'), a.peso_bruto + a.peso_variacion * DECODE(a.flag_variacion, 'C', -1, 1))) AS peso_venta,
+       (SELECT t.und_tm FROM ap_param t WHERE origen = 'XX') AS und_peso      
+  FROM AP_PD_DESCARGA_DET A,
+       (SELECT T.NRO_PARTE, T.ITEM
+          FROM AP_PD_DESCARGA_DET T
+        MINUS
+        SELECT M.AP_NRO_PARTE, M.AP_NRO_ITEM 
+          FROM PROD_PARTE_PROD_RECEP_MP M) B,
+       proveedor p
+ WHERE A.NRO_PARTE = B.NRO_PARTE
+   AND a.proveedor = p.proveedor
+   AND A.ITEM = B.ITEM
+   and trunc(a.inicio_descarga) between :ad_Fecha1 and :ad_fecha2
+GROUP BY p.proveedor, p.nom_proveedor
+" arguments=(("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Nom Proveedor" border="2" color="33554432" x="306" y="4" height="56" width="1399" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Peso Venta" border="2" color="33554432" x="1710" y="4" height="56" width="329" html.valueishtml="0"  name=peso_venta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Proveedor" border="2" color="33554432" x="5" y="4" height="56" width="297" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Und Peso" border="2" color="33554432" x="2043" y="4" height="56" width="265" html.valueishtml="0"  name=und_peso_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="306" y="4" height="68" width="1399" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1710" y="4" height="68" width="329" format="[general]" html.valueishtml="0"  name=peso_venta visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="68" width="297" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="2043" y="4" height="68" width="265" format="[general]" html.valueishtml="0"  name=und_peso visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,133 @@
+﻿$PBExportHeader$d_abc_consignacion.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=1340 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="articulo_consignacion.cod_origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_mov dbname="articulo_consignacion.nro_mov" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="articulo_consignacion.flag_estado" values="Anulado	0/Generado	1/Cerrado	2/Liquidado	3/" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=almacen dbname="articulo_consignacion.almacen" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=proveedor dbname="articulo_consignacion.proveedor" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=tipo_mov dbname="articulo_consignacion.tipo_mov" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="articulo_consignacion.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="articulo_consignacion.nro_doc" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_registro dbname="articulo_consignacion.fecha_registro" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_ref dbname="articulo_consignacion.tipo_ref" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=referencia dbname="articulo_consignacion.referencia" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=char(60) updatewhereclause=yes name=desc_tipo_mov dbname="articulo_mov_tipo.desc_tipo_mov" )
+ column=(type=char(12) update=yes updatewhereclause=yes name=cod_art dbname="articulo_consignacion.cod_art" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cantidad dbname="articulo_consignacion.cantidad" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cantidad_liq dbname="articulo_consignacion.cantidad_liquidada" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=precio_unitario dbname="articulo_consignacion.precio_unitario" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="articulo_consignacion.cod_moneda" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen_vale_ing dbname="articulo_consignacion.origen_vale_ing" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_vale_ing dbname="articulo_consignacion.nro_vale_ing" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen_vale_sal dbname="articulo_consignacion.origen_vale_sal" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_vale_sal dbname="articulo_consignacion.val_nro_vale" )
+ column=(type=char(40) updatewhereclause=yes name=desc_moneda dbname="moneda.desc_moneda" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="articulo_consignacion.flag_replicacion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_venta dbname="articulo_consignacion.flag_venta" values="Si	1/No	0/" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_cliente dbname="articulo_consignacion.cod_cliente" )
+ column=(type=char(50) updatewhereclause=yes name=nom_cliente dbname="proveedor.nom_proveedor" )
+ retrieve="SELECT  AC.COD_ORIGEN ,
+        AC.NRO_MOV ,
+        AC.FLAG_ESTADO ,
+        AC.ALMACEN ,
+        AC.PROVEEDOR ,
+        AC.TIPO_MOV ,
+        AC.TIPO_DOC ,
+        AC.NRO_DOC ,
+        AC.FECHA_REGISTRO ,
+        AC.TIPO_REF ,
+        AC.REFERENCIA ,
+        AL.DESC_ALMACEN ,
+        AMP.DESC_TIPO_MOV ,
+        AC.COD_ART ,
+        AC.CANTIDAD ,
+        AC.CANTIDAD_LIQUIDADA ,
+        AC.PRECIO_UNITARIO ,
+        P.NOM_PROVEEDOR ,
+        A.UND ,
+        A.DESC_ART ,
+        AC.COD_MONEDA,
+		  AC.ORIGEN_VALE_ING,
+		  AC.NRO_VALE_ING,
+		  AC.ORIGEN_VALE_SAL,
+		  AC.VAL_NRO_VALE,
+		  M.DESCRIPCION AS DESC_MONEDA,
+		  AC.FLAG_REPLICACION,
+		  AC.FLAG_VENTA,
+		  AC.COD_CLIENTE,
+        P2.NOM_PROVEEDOR
+      FROM ARTICULO_CONSIGNACION 	AC ,
+           ALMACEN 						AL ,
+           ARTICULO_MOV_TIPO 			AMP ,
+           PROVEEDOR 					P ,
+			  PROVEEDOR 					P2 ,
+           ARTICULO 						A ,
+			  MONEDA   						M    
+WHERE AC.ALMACEN 		= AL.ALMACEN 
+  and AC.TIPO_MOV 	= AMP.TIPO_MOV 
+  and AC.PROVEEDOR 	= P.PROVEEDOR  (+)
+  and AC.COD_CLIENTE	= P2.PROVEEDOR (+)
+  and AC.COD_ART 		= A.COD_ART 
+  and M.COD_MONEDA	= AC.COD_MONEDA
+  and AC.COD_ORIGEN 	= :as_origen 
+  and AC.NRO_MOV 		= :as_nro   " update="ARTICULO_CONSIGNACION" updatewhere=0 updatekeyinplace=yes arguments=(("as_origen", string),("as_nro", string)) )
+text(band=detail alignment="2" text="CONSIGNACIONES" border="0" color="0" x="713" y="28" height="92" width="1024" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+roundrectangle(band=detail ellipseheight="36" ellipsewidth="41"x="1952" y="12" height="288" width="562"  name=rr_1 visible="1" brush.hatch="6" brush.color="10789024" pen.style="5" pen.width="5" pen.color="553648127"  background.mode="2" background.color="0" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="5" color="0" x="1975" y="168" height="68" width="507" format="[general]" html.valueishtml="0"  name=nro_mov visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Fec Registro:" border="0" color="0" x="745" y="164" height="56" width="471" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="5" color="0" x="1239" y="164" height="60" width="599" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=fec_registro visible="1" editmask.mask="dd/mm/yyyy hh:mm:ss" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Almacen:" border="0" color="0" x="46" y="364" height="60" width="315" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Tipo Mov:" border="0" color="0" x="46" y="456" height="60" width="315" html.valueishtml="0"  name=tipo_mov_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Proveedor:" border="0" color="0" x="46" y="548" height="60" width="315" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="5" color="0" x="695" y="364" height="60" width="1193" format="[general]" html.valueishtml="0"  name=desc_almacen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+bitmap(band=detail filename="" x="50" y="12" height="312" width="521" border="1"  name=p_logo visible="1" )
+groupbox(band=detail text="Liquidación"border="5" color="0" x="1463" y="1028" height="300" width="992"  name=gb_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Referencia:" border="0" color="0" x="1522" y="1128" height="60" width="329" html.valueishtml="0"  name=tipo_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="5" color="0" x="1879" y="1128" height="60" width="137" format="[general]" html.valueishtml="0"  name=tipo_ref pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="5" color="0" x="2039" y="1128" height="60" width="379" format="[general]" html.valueishtml="0"  name=referencia visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Cantidad Liq.:" border="0" color="0" x="1522" y="1240" height="60" width="329" html.valueishtml="0"  name=cantidad_liq_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="1" tabsequence=32766 border="5" color="0" x="1879" y="1240" height="60" width="430" format="###,##0.0000" html.valueishtml="0"  name=cantidad_liq visible="1" editmask.mask="###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+groupbox(band=detail text="Movimiento de Almacen"border="5" color="0" x="73" y="1028" height="300" width="1061"  name=gb_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Vale de Ingreso:" border="0" color="0" x="123" y="1128" height="60" width="402" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=22 alignment="0" tabsequence=32766 border="5" color="0" x="558" y="1128" height="60" width="114" format="[general]" html.valueishtml="0"  name=origen_vale_ing visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=23 alignment="0" tabsequence=32766 border="5" color="0" x="699" y="1128" height="60" width="343" format="[general]" html.valueishtml="0"  name=nro_vale_ing visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Vale de Salida:" border="0" color="0" x="123" y="1240" height="60" width="402" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=24 alignment="0" tabsequence=32766 border="5" color="0" x="558" y="1240" height="60" width="114" format="[general]" html.valueishtml="0"  name=origen_vale_sal visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=25 alignment="0" tabsequence=32766 border="5" color="0" x="699" y="1240" height="60" width="343" format="[general]" html.valueishtml="0"  name=nro_vale_sal visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=6 alignment="0" tabsequence=30 border="5" color="0" x="393" y="456" height="60" width="270" format="[general]" html.valueishtml="0"  name=tipo_mov pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=40 border="5" color="0" x="393" y="548" height="60" width="270" format="[general]" html.valueishtml="0"  name=proveedor pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=60 border="5" color="0" x="393" y="732" height="60" width="137" format="[general]" html.valueishtml="0"  name=tipo_doc pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=4 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Documento:" border="0" color="0" x="46" y="732" height="60" width="315" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=70 border="5" color="0" x="571" y="732" height="60" width="329" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="255" x="1801" y="732" height="60" width="503" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=14 alignment="0" tabsequence=80 border="5" color="0" x="393" y="824" height="60" width="430" format="[general]" html.valueishtml="0"  name=cod_art pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=12 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Codigo:" border="0" color="0" x="46" y="824" height="60" width="315" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=32766 border="5" color="0" x="864" y="824" height="60" width="1435" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=15 alignment="1" tabsequence=90 border="5" color="0" x="393" y="916" height="60" width="430" format="###,##0.0000" html.valueishtml="0"  name=cantidad visible="1" editmask.required=yes editmask.mask="###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Cantidad:" border="0" color="0" x="46" y="916" height="60" width="315" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="5" color="0" x="859" y="916" height="60" width="165" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Precio Unitario:" border="0" color="0" x="1042" y="916" height="60" width="343" html.valueishtml="0"  name=precio_unitario_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="1" tabsequence=100 border="5" color="0" x="1403" y="916" height="60" width="329" format="###,##0.0000" html.valueishtml="0"  name=precio_unitario visible="1" editmask.mask="###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=21 alignment="0" tabsequence=110 border="5" color="0" x="1760" y="916" height="60" width="137" format="[general]" html.valueishtml="0"  name=cod_moneda pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=3 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.required=yes edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=26 alignment="0" tabsequence=32766 border="5" color="0" x="1920" y="916" height="60" width="379" format="[general]" html.valueishtml="0"  name=desc_moneda visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Cliente:" border="0" color="0" x="46" y="640" height="56" width="315" html.valueishtml="0"  name=cod_cliente_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="5" color="0" x="695" y="548" height="60" width="1605" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=29 alignment="0" tabsequence=50 border="5" color="0" x="393" y="640" height="60" width="270" format="[general]" html.valueishtml="0"  name=cod_cliente pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=30 alignment="0" tabsequence=32766 border="5" color="0" x="695" y="640" height="60" width="1605" format="[general]" html.valueishtml="0"  name=nom_cliente visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="0" tabsequence=10 border="5" color="0" x="393" y="364" height="60" width="270" format="[general]" html.valueishtml="0"  name=almacen pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Venta:" border="0" color="0" x="1925" y="368" height="56" width="165" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="5" color="0" x="695" y="456" height="60" width="1605" format="[general]" html.valueishtml="0"  name=desc_tipo_mov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=28 alignment="0" tabsequence=20 border="5" color="0" x="2117" y="364" height="60" width="183" format="[general]" html.valueishtml="0"  name=flag_venta visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.nilisnull=yes ddlb.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

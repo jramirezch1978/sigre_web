@@ -1,0 +1,11 @@
+﻿$PBExportHeader$dp_eps.srp
+PIPELINE(source_connect=oemlm1_work5,destination_connect=oemlm1_work5,type=append,commit=100,errors=100,keyname="rrhh_eps_rtps")
+SOURCE(name="eps",COLUMN(type=varchar,name="codigo",dbtype="VARCHAR2(11)",nulls_allowed=yes)
+ COLUMN(type=double,name="ruc",dbtype="FLOAT",nulls_allowed=yes)
+ COLUMN(type=varchar,name="descripció",dbtype="VARCHAR2(58)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="flag_estado",dbtype="VARCHAR2(254)",nulls_allowed=yes))
+RETRIEVE(statement="SELECT eps.codigo,              eps.ruc,              eps.descripció  ,  			'1' as flag_estado      FROM eps     ")
+DESTINATION(name="rrhh_eps_rtps",COLUMN(type=char,name="cod_eps",dbtype="CHAR(2)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=char,name="ruc",dbtype="CHAR(11)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="descripcion",dbtype="VARCHAR2(100)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_estado",dbtype="CHAR(1)",nulls_allowed=yes))

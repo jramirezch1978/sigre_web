@@ -1,0 +1,93 @@
+﻿$PBExportHeader$d_rpt_arribos_emb_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=324 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=fl_parte_de_pesca_parte_pesca dbname="fl_parte_de_pesca.parte_pesca" )
+ column=(type=datetime updatewhereclause=yes name=fl_parte_de_pesca_fecha_hora_arribo dbname="fl_parte_de_pesca.fecha_hora_arribo" )
+ column=(type=char(50) updatewhereclause=yes name=tg_naves_nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=char(50) updatewhereclause=yes name=fl_puertos_descr_puerto dbname="fl_puertos.descr_puerto" )
+ column=(type=char(8) updatewhereclause=yes name=inicio_descarga dbname="inicio_descarga" )
+ column=(type=char(8) updatewhereclause=yes name=fin_descarga dbname="fin_descarga" )
+ column=(type=decimal(2) updatewhereclause=yes name=fl_venta_cantidad_estimada dbname="fl_venta.cantidad_estimada" )
+ column=(type=decimal(2) updatewhereclause=yes name=fl_venta_cantidad_real dbname="fl_venta.cantidad_real" )
+ column=(type=decimal(2) updatewhereclause=yes name=fl_venta_cantidad_castigada dbname="fl_venta.cantidad_castigada" )
+ column=(type=char(3) updatewhereclause=yes name=fl_venta_cod_moneda dbname="fl_venta.cod_moneda" )
+ column=(type=decimal(2) updatewhereclause=yes name=fl_venta_precio_unitario dbname="fl_venta.precio_unitario" )
+ column=(type=char(200) updatewhereclause=yes name=fl_parte_de_pesca_observaciones_arribo dbname="fl_parte_de_pesca.observaciones_arribo" )
+ column=(type=char(50) updatewhereclause=yes name=fl_motivo_movimiento_descr_situacion dbname="fl_motivo_movimiento.descr_situacion" )
+ retrieve="select 	flpp.parte_pesca, 
+			flpp.fecha_hora_arribo,
+         tn.nomb_nave,
+         flp.descr_puerto,
+         to_char(flv.hora_inicio_descarga, 'hh:mm am') as inicio_descarga,
+         to_char(flv.hora_fin_descarga, 'hh:mm am') as fin_descarga,
+         flv.cantidad_estimada,
+         flv.cantidad_real,
+         flv.cantidad_castigada,
+         flv.cod_moneda,
+         flv.precio_unitario,
+         flpp.observaciones_arribo,
+         flmm.descr_situacion
+from 	fl_parte_de_pesca flpp,
+		fl_venta flv,
+      tg_naves tn,
+      fl_puertos flp,
+		fl_motivo_movimiento flmm
+where flv.parte_pesca (+) = flpp.parte_pesca      	
+  and tn.nave = flpp.nave_real
+  and flpp.puerto_arribo = flp.puerto
+  and flmm.motivo_movimiento = flpp.situac_arribo
+  and tn.flag_tipo_flota = 'P'
+  and to_char(flpp.fecha_hora_arribo, 'yyyymmdd') >= to_char(:ld_fecha1, 'yyyymmdd')
+  and to_char(flpp.fecha_hora_arribo, 'yyyymmdd') <= to_char(:ld_fecha2, 'yyyymmdd')
+order by flpp.fecha_hora_arribo" arguments=(("ld_fecha1", date),("ld_fecha2", date)) )
+group(level=1 header.height=372 trailer.height=120 by=("fl_parte_de_pesca_parte_pesca" ) header.color="536870912" trailer.color="536870912" )
+text(band=header.1 alignment="2" text="Numero
+Parte Pesca" border="2" color="33554432" x="32" y="4" height="112" width="334" html.valueishtml="0"  name=fl_parte_de_pesca_parte_pesca_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="2" text="Fecha y Hora
+de Arribo" border="2" color="33554432" x="370" y="4" height="112" width="475" html.valueishtml="0"  name=fl_parte_de_pesca_fecha_hora_zarpe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="2" text="Nombre
+Embarcación" border="2" color="33554432" x="850" y="4" height="112" width="553" html.valueishtml="0"  name=tg_naves_nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="2" text="Puerto 
+Arribo" border="2" color="33554432" x="1408" y="4" height="112" width="654" html.valueishtml="0"  name=tg_zonas_pesca_descr_zona_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="2" text="Inicio
+Descarga" border="2" color="33554432" x="114" y="256" height="112" width="357" html.valueishtml="0"  name=fl_puertos_descr_puerto_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="33554431" )
+text(band=header.1 alignment="2" text="Fin
+Descarga" border="2" color="33554432" x="475" y="256" height="112" width="357" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="33554431" )
+text(band=header.1 alignment="2" text="Cantidad
+Estimada" border="2" color="33554432" x="837" y="256" height="112" width="357" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="33554431" )
+text(band=header.1 alignment="2" text="Cantidad
+Capturada" border="2" color="33554432" x="1198" y="256" height="112" width="357" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="33554431" )
+text(band=header.1 alignment="2" text="Cantidad
+Castigada" border="2" color="33554432" x="1559" y="256" height="112" width="357" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="33554431" )
+text(band=header.1 alignment="2" text="Tipo
+Moneda" border="2" color="33554432" x="1920" y="256" height="112" width="247" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="33554431" )
+text(band=header.1 alignment="2" text="Precio
+Unitario" border="2" color="33554432" x="2171" y="256" height="112" width="352" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="33554431" )
+text(band=header.1 alignment="2" text="Motivo
+Arribo" border="2" color="33554432" x="2066" y="4" height="112" width="681" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=header.1 id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="32" y="120" height="68" width="334" format="[general]" html.valueishtml="0"  name=fl_parte_de_pesca_parte_pesca visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="370" y="120" height="68" width="475" format="dd/mm/yyyy hh:mm am/pm" html.valueishtml="0"  name=fl_parte_de_pesca_fecha_hora_arribo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="850" y="120" height="68" width="553" format="[general]" html.valueishtml="0"  name=tg_naves_nomb_nave visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="1408" y="120" height="68" width="654" format="[general]" html.valueishtml="0"  name=fl_puertos_descr_puerto visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=13 alignment="0" tabsequence=32766 border="2" color="33554432" x="2066" y="120" height="68" width="681" format="[general]" html.valueishtml="0"  name=fl_motivo_movimiento_descr_situacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="114" y="0" height="68" width="357" format="[general]" html.valueishtml="0"  name=inicio_descarga visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="475" y="0" height="68" width="357" format="[general]" html.valueishtml="0"  name=fin_descarga visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="2" color="33554432" x="1920" y="0" height="68" width="247" format="[general]" html.valueishtml="0"  name=fl_venta_cod_moneda visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="2171" y="0" height="68" width="352" format="###,##0.00" html.valueishtml="0"  name=fl_venta_precio_unitario visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="837" y="0" height="68" width="357" format="###,##0.000" html.valueishtml="0"  name=fl_venta_cantidad_estimada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="1198" y="0" height="68" width="357" format="###,##0.000" html.valueishtml="0"  name=fl_venta_cantidad_real visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="1559" y="0" height="68" width="357" format="###,##0.000" html.valueishtml="0"  name=fl_venta_cantidad_castigada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="Observaciones:" border="0" color="33554432" x="37" y="32" height="56" width="919" html.valueishtml="0"  name=fl_parte_de_pesca_fecha_hora_est_arribo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="33554431" )
+column(band=trailer.1 id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="969" y="32" height="56" width="1531" format="[general]" html.valueishtml="0"  name=fl_parte_de_pesca_observaciones_arribo visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="50" y="40" height="228" width="434" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Registro de Arribos 
+de Embarcaciones (Flota Propia)" border="0" color="0" x="686" y="68" height="184" width="1810" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="68" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="148" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="228" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

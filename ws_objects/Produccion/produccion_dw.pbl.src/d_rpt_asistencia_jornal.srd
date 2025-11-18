@@ -1,0 +1,48 @@
+﻿$PBExportHeader$d_rpt_asistencia_jornal.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=580 color="536870912" )
+summary(height=64 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=pd_ot_asistencia_cod_trabajador dbname="pd_ot_asistencia.cod_trabajador" )
+ column=(type=char(60) updatewhereclause=yes name=codigo_relacion_nombre dbname="codigo_relacion.nombre" )
+ column=(type=number updatewhereclause=yes name=nro_horas dbname="nro_horas" )
+ column=(type=number updatewhereclause=yes name=total_costo dbname="total_costo" )
+ retrieve="select 	pda.cod_trabajador, 
+			cr.nombre, 
+			Sum(pda.nro_horas) as nro_horas, 
+       	Sum(pda.nro_horas * pda.costo_horas * pda.factor) as total_costo
+from pd_ot_asistencia pda,
+     codigo_relacion cr,
+     pd_ot           pd
+where cr.cod_relacion = pda.cod_trabajador     
+  and pd.nro_parte    = pda.no_parte
+  and to_char(pd.FECHA, 'yyyymmdd') >= to_char(:ad_fecha1, 'yyyymmdd')
+  AND to_char(pd.FECHA, 'yyyymmdd') <= to_char(:ad_fecha2, 'yyyymmdd')
+  AND pd.ot_adm = :as_ot_adm
+  AND SUBSTR(pd.NRO_PARTE,1,2) LIKE :as_origen
+  AND pd.TURNO LIKE :as_turno
+GROUP BY pda.cod_trabajador, cr.nombre
+" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_ot_adm", string),("as_origen", string),("as_turno", string)) )
+bitmap(band=header filename="" x="55" y="44" height="204" width="270" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="68" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="148" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="228" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Asistencia de Personal (Jornal)" border="0" color="0" x="686" y="36" height="92" width="1810" html.valueishtml="0"  name=cabecera_t visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Desde: ' + string(ad_fecha1) + ' Hasta: ' + string(ad_fecha2)"border="0" color="0" x="686" y="132" height="80" width="1810" format="[general]" html.valueishtml="0"  name=page_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'OT ADM: ' + as_ot_adm"border="0" color="0" x="686" y="216" height="80" width="1810" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="if(as_origen <> '%%', 'ORIGEN: ' + as_origen + ' - ' , '') + if(as_turno <> '%%', 'TURNO: ' + as_turno, '')"border="0" color="0" x="686" y="300" height="80" width="1810" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nro 
+Horas" border="2" color="33554432" x="1998" y="464" height="112" width="329" html.valueishtml="0"  name=nro_horas_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Codigo
+Trabajador" border="2" color="33554432" x="155" y="464" height="112" width="329" html.valueishtml="0"  name=pd_ot_asistencia_cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="255" x="1998" y="4" height="60" width="329" format="###,##0.000" html.valueishtml="0"  name=nro_horas visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="155" y="4" height="60" width="329" format="[general]" html.valueishtml="0"  name=pd_ot_asistencia_cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(nro_horas for all)"border="2" color="255" x="1998" y="4" height="56" width="329" format="###,##0.000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nombre
+Trabajador" border="2" color="33554432" x="489" y="464" height="112" width="1504" html.valueishtml="0"  name=codigo_relacion_nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="489" y="4" height="60" width="1504" format="[general]" html.valueishtml="0"  name=codigo_relacion_nombre visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Total" border="2" color="33554432" x="494" y="4" height="56" width="1504" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

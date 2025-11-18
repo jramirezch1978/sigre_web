@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_crosstab.srd
+$PBExportComments$Crosstab Datawindow used in the enchanced crosstab examples.
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=4 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 0 print.margin.right = 0 print.margin.top = 0 print.margin.bottom = 0 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=100 color="536870912" )
+header[2](height=76 color="536870912" )
+header[3](height=84 color="536870912" )
+summary(height=72 color="553648127" )
+footer(height=0 color="536870912" )
+detail(height=76 color="16777215" )
+table(column=(type=char(20) updatewhereclause=yes name=name dbname="name" )
+ column=(type=char(20) updatewhereclause=yes name=color dbname="color" )
+ column=(type=number updatewhereclause=yes name=sales dbname="sales" )
+ retrieve="  SELECT product.name,   
+         product.prod_size,   
+         product.color,   
+         sales_order.region,   
+         sales_order_items.quantity * product.unit_price as sales,   
+         year(sales_order.order_date) as order_year  
+    FROM product,   
+         sales_order,   
+         sales_order_items  
+   WHERE ( sales_order.id = sales_order_items.id ) and  
+         ( product.id = sales_order_items.prod_id )    
+"  sort="name A color A " )
+group(level=1 header.height=0 trailer.height=100 by=("name" ) header.color="536870912" trailer.color="553648127" )
+text(band=header[2] alignment="2" text="@order_year" border="0" color="0" x="1006" y="8" height="52" width="343" html.valueishtml="0"  name=t_4 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header[2] alignment="2" text="@order_year Sum Of Sales" border="0" color="0" x="1358" y="8" height="52" width="475" html.valueishtml="0"  name=t_5 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header[2] alignment="2" text="Grand Total" border="0" color="0" x="1842" y="8" height="52" width="498" html.valueishtml="0"  name=t_6 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header[3] alignment="0" text="Name" border="0" color="0" x="9" y="4" height="52" width="521" html.valueishtml="0"  name=name_t visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="553648127" )
+text(band=header[3] alignment="0" text="Color" border="0" color="0" x="539" y="4" height="52" width="457" html.valueishtml="0"  name=color_t visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="553648127" )
+text(band=header[3] alignment="2" text="@region" border="0" color="0" x="1006" y="0" height="52" width="343" html.valueishtml="0"  name=sales_t visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="1006" y="4" height="64" width="343" format="#,##0.00" html.valueishtml="0"  name=sales visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Microsoft Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="539" y="4" height="64" width="457" format="[general]" html.valueishtml="0"  name=color visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Microsoft Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="64" width="521" format="[general]" html.valueishtml="0"  name=name visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Microsoft Sans Serif" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=detail alignment="1" expression="crosstabsum(1, 2, ~"@order_year~")"border="0" color="0" x="1358" y="8" height="68" width="475" format="#,##0.00" html.valueishtml="0"  name=sum_sales visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="1000"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" crosstab.repeat=yes )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="0" color="0" x="1842" y="8" height="68" width="498" format="#,##0.00" html.valueishtml="0"  name=grand_sum_sales visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="1000"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(sales for group 1)"border="0" color="0" x="1006" y="4" height="64" width="343" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="1000"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(grand_sum_sales for group 1)"border="0" color="0" x="1842" y="4" height="64" width="498" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="1000"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(sum_sales for group 1)"border="0" color="0" x="1358" y="4" height="64" width="475" format="#,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="1000"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="name + ~" Total~""border="0" color="0" x="9" y="4" height="64" width="521" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="1000"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=summary alignment="1" expression="~"Grand Total~""border="0" color="0" x="9" y="4" height="64" width="521" format="[general]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="1000"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=summary alignment="1" expression="sum(sales for all )"border="0" color="0" x="1006" y="4" height="64" width="343" format="#,##0.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="1000"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=summary alignment="1" expression="sum(sum_sales for all )"border="0" color="0" x="1358" y="4" height="64" width="475" format="#,##0.00" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="1000"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=summary alignment="1" expression="sum(grand_sum_sales for all )"border="0" color="0" x="1842" y="4" height="64" width="498" format="#,##0.00" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="1000"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header[1] alignment="2" text="Sum Of Sales" border="0" color="0" x="9" y="12" height="88" width="521" html.valueishtml="0"  name=t_3 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header[1] alignment="0" text="Order Year" border="0" color="0" x="539" y="12" height="88" width="457" html.valueishtml="0"  name=t_1 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="553648127" )
+text(band=header[1] alignment="0" text="Region" border="0" color="0" x="1006" y="12" height="88" width="343" html.valueishtml="0"  name=t_2 visible="1"  font.face="Microsoft Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="553648127" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "order_year, region" rows = "name, color" values = "sum(sales for crosstab)" sourcenames = "name, prod_size, color, region, sales, order_year")
+sparse(names="name")htmltable(border="0" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

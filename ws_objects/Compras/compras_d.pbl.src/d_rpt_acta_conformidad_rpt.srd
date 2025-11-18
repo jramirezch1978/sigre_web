@@ -1,0 +1,88 @@
+﻿$PBExportHeader$d_rpt_acta_conformidad_rpt.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=724 color="536870912" )
+summary(height=4 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_conformidad dbname="conformidad_servicio.nro_conformidad" )
+ column=(type=char(6) updatewhereclause=yes name=usr_aprobador dbname="conformidad_servicio.usr_aprobador" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="conformidad_servicio.fec_registro" )
+ column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="conformidad_servicio.cod_maquina" )
+ column=(type=char(100) updatewhereclause=yes name=maquina_desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(2) updatewhereclause=yes name=orden_servicio_cod_origen dbname="orden_servicio.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=orden_servicio_nro_os dbname="orden_servicio.nro_os" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="orden_servicio.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=datetime updatewhereclause=yes name=fec_aprobacion dbname="conformidad_servicio.fec_aprobacion" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="operaciones.nro_orden" )
+ column=(type=char(10) updatewhereclause=yes name=operaciones_oper_sec dbname="operaciones.oper_sec" )
+ column=(type=decimal(0) updatewhereclause=yes name=item_os dbname="conformidad_servicio_det.item_os" )
+ column=(type=char(800) updatewhereclause=yes name=conformidad_servicio_det_glosa dbname="conformidad_servicio_det.glosa" )
+ column=(type=char(10) updatewhereclause=yes name=nro_os dbname="conformidad_servicio.nro_os" )
+ retrieve="SELECT  ~"CONFORMIDAD_SERVICIO~".~"NRO_CONFORMIDAD~",
+        ~"CONFORMIDAD_SERVICIO~".~"USR_APROBADOR~",
+        ~"CONFORMIDAD_SERVICIO~".~"FEC_REGISTRO~",
+        ~"CONFORMIDAD_SERVICIO~".~"COD_MAQUINA~", ~"MAQUINA~".~"DESC_MAQ~",
+        ~"ORDEN_SERVICIO~".~"COD_ORIGEN~",
+        ~"ORDEN_SERVICIO~".~"NRO_OS~",
+        ~"ORDEN_SERVICIO~".~"PROVEEDOR~",~"PROVEEDOR~".~"NOM_PROVEEDOR~",
+        ~"CONFORMIDAD_SERVICIO~".~"FEC_APROBACION~",
+        ~"OPERACIONES~".~"NRO_ORDEN~",
+        ~"OPERACIONES~".~"OPER_SEC~",
+        ~"CONFORMIDAD_SERVICIO_DET~".~"ITEM_OS~",
+		  ~"CONFORMIDAD_SERVICIO_DET~".~"GLOSA~",
+		  ~"CONFORMIDAD_SERVICIO~".~"NRO_OS~"
+   FROM ~"ORDEN_SERVICIO~" ,
+        ~"ORDEN_SERVICIO_DET~" ,
+        ~"USUARIO~" ,
+        ~"PROVEEDOR~" ,
+        ~"OPERACIONES~",
+        ~"CONFORMIDAD_SERVICIO~",
+        ~"CONFORMIDAD_SERVICIO_DET~",
+        ~"MAQUINA~"
+   WHERE ~"ORDEN_SERVICIO~".~"COD_ORIGEN~" = ~"ORDEN_SERVICIO_DET~".~"COD_ORIGEN~" 
+     and ~"ORDEN_SERVICIO~".~"NRO_OS~" 	  	= ~"ORDEN_SERVICIO_DET~".~"NRO_OS~" 
+	  and ~"ORDEN_SERVICIO~".~"PROVEEDOR~"  = ~"PROVEEDOR~".~"PROVEEDOR~" 
+	  and ~"ORDEN_SERVICIO~".~"COD_USR~" 	  	= ~"USUARIO~".~"COD_USR~" 
+     and ~"ORDEN_SERVICIO_DET~".~"OPER_SEC~" 	= ~"OPERACIONES~".~"OPER_SEC~"(+)
+     AND ~"CONFORMIDAD_SERVICIO~".~"NRO_OS~"      = ~"ORDEN_SERVICIO~".~"NRO_OS~"
+     AND ~"CONFORMIDAD_SERVICIO~".~"ORIGEN_OS~"   = ~"ORDEN_SERVICIO~".~"COD_ORIGEN~"
+     AND ~"CONFORMIDAD_SERVICIO~".~"COD_MAQUINA~" = ~"MAQUINA~".~"COD_MAQUINA~"(+)
+     AND ~"CONFORMIDAD_SERVICIO_DET~".~"NRO_CONFORMIDAD~" = ~"CONFORMIDAD_SERVICIO~".~"NRO_CONFORMIDAD~"
+     AND ~"ORDEN_SERVICIO_DET~".~"COD_ORIGEN~" = ~"CONFORMIDAD_SERVICIO_DET~".~"ORIGEN_OS~"
+     AND ~"ORDEN_SERVICIO_DET~".~"NRO_OS~" = ~"CONFORMIDAD_SERVICIO_DET~".~"NRO_OS~"
+     AND ~"ORDEN_SERVICIO_DET~".~"NRO_ITEM~"   = ~"CONFORMIDAD_SERVICIO_DET~".~"ITEM_OS~"
+     AND ~"CONFORMIDAD_SERVICIO~".~"NRO_CONFORMIDAD~" = :as_nro_conformidad" arguments=(("as_nro_conformidad", string)) )
+bitmap(band=header filename="gs_logo" x="23" y="20" height="316" width="320" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="ACTA DE CONFORMIDAD DE TERCEROS N°" border="0" color="0" x="677" y="24" height="72" width="1467" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="2171" y="16" height="76" width="517" format="[general]" html.valueishtml="0"  name=nro_conformidad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2830" y="20" height="64" width="366" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2830" y="104" height="64" width="393" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Item OS." border="2" color="0" x="562" y="664" height="56" width="219" html.valueishtml="0"  name=orden_servicio_det_nro_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="0" text="Descripción" border="2" color="0" x="795" y="664" height="56" width="1408" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ord Trabajo" border="2" color="0" x="2217" y="664" height="56" width="315" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="OperSec" border="2" color="0" x="2546" y="664" height="56" width="338" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="0" text="Maquina:" border="0" color="0" x="521" y="284" height="56" width="224" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Fecha:" border="0" color="0" x="507" y="216" height="56" width="238" html.valueishtml="0"  name=orden_servicio_fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Proveedor:" border="0" color="0" x="366" y="140" height="56" width="384" html.valueishtml="0"  name=orden_servicio_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="0" color="0" x="562" y="8" height="56" width="219" format="[general]" html.valueishtml="0"  name=item_os visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="795" y="8" height="56" width="1408" format="[general]" html.valueishtml="0"  name=conformidad_servicio_det_glosa visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="0" x="2217" y="8" height="56" width="315" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="2546" y="8" height="56" width="357" format="[general]" html.valueishtml="0"  name=operaciones_oper_sec visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="4" color="0" x="763" y="284" height="56" width="306" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="4" color="0" x="763" y="216" height="56" width="306" format="[shortdate]" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=8 alignment="0" tabsequence=32766 border="4" color="0" x="763" y="140" height="56" width="306" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="4" color="0" x="1088" y="284" height="56" width="1161" format="[general]" html.valueishtml="0"  name=maquina_desc_maq visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=9 alignment="0" tabsequence=32766 border="4" color="0" x="1088" y="140" height="56" width="1161" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Orden Servicio:" border="0" color="0" x="352" y="364" height="56" width="384" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=15 alignment="0" tabsequence=32766 border="4" color="0" x="763" y="364" height="56" width="306" format="[general]" html.valueishtml="0"  name=nro_os visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Usuario Aprobador:" border="0" color="0" x="247" y="440" height="56" width="489" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="4" color="0" x="763" y="440" height="56" width="306" format="[general]" html.valueishtml="0"  name=usr_aprobador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Fecha Aprobacion:" border="0" color="0" x="274" y="508" height="56" width="462" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=10 alignment="0" tabsequence=32766 border="4" color="0" x="763" y="508" height="56" width="306" format="[shortdate] [time]" html.valueishtml="0"  name=fec_aprobacion visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

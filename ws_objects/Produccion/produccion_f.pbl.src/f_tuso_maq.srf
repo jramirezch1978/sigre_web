@@ -1,0 +1,62 @@
+﻿$PBExportHeader$f_tuso_maq.srf
+global type f_tuso_maq from function_object
+end type
+
+forward prototypes
+global function decimal f_tuso_maq (u_dw_abc adw_master, u_dw_abc adw_detail)
+end prototypes
+
+global function decimal f_tuso_maq (u_dw_abc adw_master, u_dw_abc adw_detail);long 			ll_row
+DateTime 	ldt_fecha1, ldt_fecha2
+Date			ld_fecha1, ld_fecha2
+Time			lt_time1, lt_time2
+decimal{3}	ln_run, ln_stop
+
+ll_row = adw_master.GetRow()
+
+if ll_row <= 0 then
+	return 0
+end if
+
+if ldt_fecha2 < ldt_fecha1 then
+	return 0
+end if
+
+ldt_fecha1 = DateTime(adw_master.object.hora_encendido[ll_row])
+ldt_fecha2 = DateTime(adw_master.object.hora_apagado[ll_row])
+
+ld_fecha1  = Date(ldt_fecha1)
+lt_time1	  = Time(ldt_fecha1)
+ld_fecha2  = Date(ldt_fecha2)
+lt_time2	  = Time(ldt_fecha2)
+
+if ld_fecha1 = ld_fecha2 then
+	ln_run = SecondsAfter(lt_time1, lt_time2)/3600  //Horas de funcionamiento del Equipo
+else
+	ln_run = (DaysAfter(ld_fecha1, ld_fecha2) - 1) * 24
+	ln_run = ln_run + ( SecondsAfter(lt_time1, Time("23:59:59") ) + 1 + SecondsAfter(Time("00:00:00"), lt_time2) ) / 3600
+end if
+
+ln_stop = 0
+
+for ll_row = 1 to adw_detail.RowCount()
+	ldt_fecha1 = DateTime(adw_detail.object.hora_inicio[ll_row])
+	ldt_fecha2 = DateTime(adw_detail.object.hora_fin[ll_row])
+	
+	ld_fecha1  = Date(ldt_fecha1)
+	lt_time1	  = Time(ldt_fecha1)
+	ld_fecha2  = Date(ldt_fecha2)
+	lt_time2	  = Time(ldt_fecha2)
+
+	if ld_fecha1 = ld_fecha2 then
+		ln_stop = ln_stop + SecondsAfter(lt_time1, lt_time2)/3600  //Horas de parada del Equipo
+	else
+		ln_stop = ln_stop + (DaysAfter(ld_fecha1, ld_fecha2) - 1) * 24
+		ln_stop = ln_stop + ( SecondsAfter(lt_time1, Time("23:59:59") ) + 1 + SecondsAfter(Time("00:00:00"), lt_time2) ) / 3600
+	end if
+	
+next
+
+return (ln_run - ln_stop)
+end function
+

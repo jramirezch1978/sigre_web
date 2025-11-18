@@ -1,0 +1,83 @@
+﻿$PBExportHeader$d_rpt_part_presp_req_art_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=424 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cencos dbname="tt_presup_art_aprob.cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="tt_presup_art_aprob.cnta_prsp" )
+ column=(type=number updatewhereclause=yes name=ano dbname="tt_presup_art_aprob.ano" )
+ column=(type=number updatewhereclause=yes name=mes dbname="mes" values="Enero	1/Febrero	2/Marzo	3/Abril	4/Mayo	5/Junio	6/Julio	7/Agosto	8/Setiembre	9/Octubre	10/Noviembre	11/Diciembre	12/" )
+ column=(type=char(20) updatewhereclause=yes name=control dbname="control" )
+ column=(type=number updatewhereclause=yes name=monto_real dbname="tt_presup_art_aprob.monto_real" )
+ column=(type=number updatewhereclause=yes name=total_proy dbname="total_proy" )
+ column=(type=char(1) updatewhereclause=yes name=flag_control dbname="tt_presup_art_aprob.flag_control" )
+ column=(type=char(1) updatewhereclause=yes name=flag_trim dbname="tt_presup_art_aprob.flag_trim" )
+ column=(type=number updatewhereclause=yes name=saldo_proy_o dbname="saldo_proy_o" )
+ retrieve="select cencos,cnta_prsp,ano,0 as mes,
+       Decode(flag_control,'1','Acumulado Anual') as control,
+       monto_real,sum(monto_proyectado)  as total_proy,
+		 flag_control,flag_trim,
+		 Round(monto_real - sum(monto_proyectado),2) as saldo_proy_o
+  from tt_presup_art_aprob 
+ where flag_control in ('1')
+ group by cencos,cnta_prsp,ano,flag_control,monto_real,flag_trim
+union
+select cencos,cnta_prsp,ano,mes,
+       Decode(flag_control,'3','Mensual','0','No Existe','') ,
+       monto_real,sum(monto_proyectado) ,
+		 flag_control,flag_trim,
+		 Round(monto_real - sum(monto_proyectado),2) as saldo_proy_o
+  from tt_presup_art_aprob 
+ where flag_control IN ('3','0')
+ group by cencos,cnta_prsp,ano,mes,flag_control,monto_real,flag_trim
+union
+select cencos,cnta_prsp,ano,Max(mes) as mes,
+       Decode(flag_control,'2','Acumulado a la Fecha','4','Trimestre Fijo',''),
+       monto_real,sum(monto_proyectado) ,
+		 flag_control,flag_trim,
+		 Round(monto_real - sum(monto_proyectado),2) as saldo_proy_o
+  from tt_presup_art_aprob 
+ where flag_control in ('2','4')  
+ group by cencos,cnta_prsp,ano,flag_control,monto_real,flag_trim
+order by cencos,cnta_prsp,ano,mes
+
+
+"  sort="cencos A cnta_prsp A ano A mes A " )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="23" y="12" height="148" width="297" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Prueba de Disponibilidad Presupuestal" border="1" color="8388608" x="667" y="36" height="64" width="1659" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="2789" y="12" height="64" width="302" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="8388608" x="2789" y="96" height="56" width="302" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="2789" y="168" height="64" width="302" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Pag :" border="0" color="8388608" x="2510" y="12" height="64" width="256" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="8388608" x="2510" y="96" height="56" width="256" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Fecha :" border="0" color="8388608" x="2510" y="168" height="64" width="256" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Requerimiento de Articulos" border="1" color="8388608" x="969" y="140" height="64" width="1111" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="0" height="76" width="302" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="315" y="0" height="76" width="398" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="992" y="0" height="76" width="370" format="[general]" html.valueishtml="0"  name=mes visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432~tif ( saldo_proy <0 ,rgb(255,0,0),rgb(0,0,0) )" x="1367" y="0" height="76" width="539" format="[general]" html.valueishtml="0"  name=control pointer="" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif ( saldo_proy  > 0 ,rgb(255,255,255),rgb(255,255,220))" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="718" y="0" height="76" width="270" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="33554432" x="2245" y="0" height="76" width="366" format="[general]" html.valueishtml="0"  name=total_proy visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if (isnull( monto_real ),0, monto_real ) - if (isnull( total_proy ),0,total_proy)"border="2" color="0~tif ( saldo_proy <0 ,rgb(255,0,0),rgb(0,0,0) )" x="2615" y="0" height="76" width="503" format="###,###.00" html.valueishtml="0"  name=saldo_proy pointer="H:\Source\Cur\taladro.cur" visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif ( saldo_proy  > 0 ,rgb(255,255,255),rgb(255,255,220))" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="1911" y="0" height="76" width="329" format="[general]" html.valueishtml="0"  name=monto_real visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="8388608" x="23" y="176" height="44" width="471" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="(OPE746)" border="0" color="0" x="23" y="236" height="44" width="471" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cencos" border="2" color="33554432" x="9" y="300" height="112" width="302" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Cnta Prsp" border="2" color="33554432" x="315" y="300" height="112" width="398" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Mes" border="2" color="33554432" x="992" y="300" height="112" width="370" html.valueishtml="0"  name=mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Año" border="2" color="33554432" x="718" y="300" height="112" width="270" html.valueishtml="0"  name=ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Control" border="2" color="33554432" x="1367" y="300" height="112" width="539" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Monto 
+ Pendiente US$" border="2" color="33554432" x="2245" y="300" height="112" width="366" html.valueishtml="0"  name=total_proy_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Saldo 
+ Proyectado US$" border="2" color="33554432" x="2615" y="300" height="112" width="503" html.valueishtml="0"  name=saldo_proy_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Monto
+Disponible US$" border="2" color="33554432" x="1911" y="300" height="112" width="329" html.valueishtml="0"  name=monto_real_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+
+sparse(names="cencos	cnta_prsp")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

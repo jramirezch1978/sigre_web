@@ -1,0 +1,11 @@
+﻿$PBExportHeader$d_pipe_pais.srp
+PIPELINE(source_connect=CN_DB_DB1_PROD5,destination_connect=CN_DB_DB1_PROD8,type=update,commit=100,errors=100,keyname="pais")
+SOURCE(name="PAIS",COLUMN(type=char,name="COD_PAIS",dbtype="CHAR(4)",key=yes,nulls_allowed=no)
+ COLUMN(type=varchar,name="NOM_PAIS",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="NACIONALIDAD",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="FLAG_REPLICACION",dbtype="CHAR(1)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"pais~" ) COLUMN(NAME=~"pais.cod_pais~") COLUMN(NAME=~"pais.nom_pais~") COLUMN(NAME=~"pais.nacionalidad~") COLUMN(NAME=~"pais.flag_replicacion~")) ")
+DESTINATION(name="pais",COLUMN(type=char,name="cod_pais",dbtype="CHAR(4)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="nom_pais",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="nacionalidad",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1' "))

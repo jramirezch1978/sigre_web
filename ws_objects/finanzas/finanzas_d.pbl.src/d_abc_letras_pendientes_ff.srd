@@ -1,0 +1,53 @@
+﻿$PBExportHeader$d_abc_letras_pendientes_ff.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=origen dbname="letras_x_cobrar.origen" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="doc_pendientes_cta_cte.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="doc_pendientes_cta_cte.nro_doc" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tabla dbname="doc_pendientes_cta_cte.flag_tabla" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="doc_pendientes_cta_cte.cod_moneda" )
+ column=(type=number updatewhereclause=yes name=saldo dbname="saldo" )
+ column=(type=decimal(2) updatewhereclause=yes name=sldo_sol dbname="doc_pendientes_cta_cte.sldo_sol" )
+ column=(type=decimal(2) updatewhereclause=yes name=saldo_dol dbname="doc_pendientes_cta_cte.saldo_dol" )
+ column=(type=char(1) updatewhereclause=yes name=flag_signo dbname="doc_tipo.flag_signo" )
+ column=(type=char(8) updatewhereclause=yes name=confin dbname="letras_x_cobrar.confin" )
+ column=(type=char(8) updatewhereclause=yes name=matriz_cntbl dbname="concepto_financiero.matriz_cntbl" )
+ column=(type=char(40) updatewhereclause=yes name=descripcion dbname="concepto_financiero.descripcion" )
+ retrieve="  SELECT ~"LETRAS_X_COBRAR~".~"ORIGEN~"           ,
+			~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~"  ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"NRO_DOC~"   ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FLAG_TABLA~",   
+			~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~",
+         DECODE(~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~",(SELECT cod_soles FROM logparam where reckey = '1'),~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~",~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~"   ) AS SALDO,
+         ~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~"  ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~" ,
+			~"DOC_TIPO~".~"FLAG_SIGNO~"              , 
+			~"LETRAS_X_COBRAR~".~"CONFIN~"				 ,
+			~"CONCEPTO_FINANCIERO~".~"MATRIZ_CNTBL~" ,
+			~"CONCEPTO_FINANCIERO~".~"DESCRIPCION~"
+    FROM ~"DOC_PENDIENTES_CTA_CTE~",
+			~"LETRAS_X_COBRAR~"       ,
+			~"DOC_TIPO~"					,
+			~"CONCEPTO_FINANCIERO~"
+   WHERE ( ~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = :as_cod_relacion ) AND  
+         ( ~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~" 		= (SELECT doc_letra_cobrar FROM finparam WHERE reckey = '1') )  AND  
+			((~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = ~"LETRAS_X_COBRAR~".~"COD_RELACION~" )  AND
+			 (~"DOC_PENDIENTES_CTA_CTE~".~"NRO_DOC~"		= ~"LETRAS_X_COBRAR~".~"NRO_LETRA~"    )) AND
+			 (~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~"		= ~"DOC_TIPO~".~"TIPO_DOC~"            )  AND
+			 (~"LETRAS_X_COBRAR~".~"CONFIN~"					= ~"CONCEPTO_FINANCIERO~".~"CONFIN~"   )" arguments=(("as_cod_relacion", string)) )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="9" y="4" height="56" width="379"  name=origen_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="8388608" x="393" y="4" height="56" width="448"  name=tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="846" y="4" height="56" width="302"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="1152" y="4" height="56" width="379"  name=cod_moneda_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo" border="2" color="8388608" x="1536" y="4" height="56" width="293"  name=saldo_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="64" width="379" format="[general]"  name=origen dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="393" y="0" height="64" width="448" format="[general]"  name=tipo_doc dddw.name=d_dddw_tipo_doc_tbl dddw.displaycolumn=desc_tipo_doc dddw.datacolumn=tipo_doc dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="846" y="0" height="64" width="302" format="[general]"  name=nro_doc edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="1152" y="0" height="64" width="379" format="[general]"  name=cod_moneda dddw.name=d_dddw_tipo_moneda_tbl dddw.displaycolumn=descripcion dddw.datacolumn=cod_moneda dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="1536" y="0" height="64" width="293" format="[general]"  name=saldo editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

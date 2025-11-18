@@ -1,0 +1,54 @@
+﻿$PBExportHeader$d_av_eval_trabajador.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=240 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="rrhh_traba_usr_evaluador.cod_usr" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_trabajador dbname="rrhh_traba_usr_evaluador.cod_trabajador" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="rrhh_traba_usr_evaluador.flag_estado" initial="1" values="Activo	1/Inactivo	0/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="rrhh_traba_usr_evaluador.flag_replicacion" )
+ column=(type=char(30) updatewhereclause=yes name=apel_paterno dbname="maestro.apel_paterno" )
+ column=(type=char(30) updatewhereclause=yes name=apel_materno dbname="maestro.apel_materno" )
+ column=(type=char(61) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=char(4000) updatewhereclause=yes name=status dbname="status" )
+ column=(type=number updatewhereclause=yes name=eval dbname="eval" )
+ retrieve="  SELECT ~"RRHH_TRABA_USR_EVALUADOR~".~"COD_USR~",   
+         ~"RRHH_TRABA_USR_EVALUADOR~".~"COD_TRABAJADOR~",   
+         ~"RRHH_TRABA_USR_EVALUADOR~".~"FLAG_ESTADO~",   
+         ~"RRHH_TRABA_USR_EVALUADOR~".~"FLAG_REPLICACION~",   
+         ~"MAESTRO~".~"APEL_PATERNO~",   
+         ~"MAESTRO~".~"APEL_MATERNO~",   
+         Nvl(MAESTRO.NOMBRE1,'')||' '||Nvl(MAESTRO.NOMBRE2,'') as nombres,
+			usf_rh_status_eval_trabajador(:an_ano, :an_mes, rrhh_traba_usr_evaluador.cod_trabajador) as status,
+			usf_rh_result_eval_trabajador(:an_ano, :an_mes, rrhh_traba_usr_evaluador.cod_trabajador) as eval
+    FROM ~"RRHH_TRABA_USR_EVALUADOR~",   
+         ~"MAESTRO~"  
+   WHERE ( ~"MAESTRO~".~"COD_TRABAJADOR~" = ~"RRHH_TRABA_USR_EVALUADOR~".~"COD_TRABAJADOR~" ) and 
+			(rrhh_traba_usr_evaluador.flag_estado = '1') and
+         ( ( ~"RRHH_TRABA_USR_EVALUADOR~".~"COD_USR~" = :as_usuario ) )    
+    order by 7" arguments=(("an_ano", number),("an_mes", number),("as_usuario", string))  sort="apel_paterno A " )
+text(band=header alignment="2" text="Trabajador" border="2" color="33554432" x="5" y="4" height="56" width="1801" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65280" )
+text(band=header alignment="2" text="Valor" border="2" color="33554432" x="1810" y="4" height="56" width="347" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65280" )
+text(band=header alignment="2" text="Código" border="2" color="33554432" x="5" y="64" height="56" width="329" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65280" )
+text(band=header alignment="2" text="Apellidos y Nombres" border="2" color="33554432" x="338" y="64" height="56" width="1467" html.valueishtml="0"  name=nomb_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65280" )
+text(band=header alignment="2" text="Calificación" border="2" color="33554432" x="1810" y="64" height="56" width="347" html.valueishtml="0"  name=status_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65280" )
+column(band=detail id=2 alignment="2" tabsequence=10 border="0" color="33554432" x="5" y="4" height="56" width="329" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="trim( apel_paterno ) + '  ' + trim( apel_materno ) + '  ' + trim( nombres ) "border="0" color="0" x="338" y="4" height="56" width="1467" format="[GENERAL]" html.valueishtml="0"  name=nomb visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="Bitmap(If(status = ~"0~", ~"H:\source\Bmp\bola_roja.bmp~", if(status = ~"1~",~"H:\source\Bmp\bola_azul.bmp~",if(status = ~"2~",~"H:\source\Bmp\bola_amarilla.bmp~",~"H:\source\Bmp\bola_verde.bmp~")))             )"border="0" color="0" x="1833" y="4" height="56" width="59" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="'('+ eval +')'"border="0" color="0" x="1920" y="4" height="56" width="187" format="[GENERAL]" html.valueishtml="0"  name=eval visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="0" expression="'Total  ('+String(rowcount())+')'"border="0" color="0" x="55" y="52" height="56" width="434" format="[GENERAL]" html.valueishtml="0"  name=compute_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="0" expression="Bitmap(~"H:\source\Bmp\bola_verde.bmp~")"border="0" color="0" x="526" y="52" height="56" width="59" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="0" expression="Bitmap(~"H:\source\Bmp\bola_azul.bmp~")"border="0" color="0" x="526" y="136" height="56" width="59" format="[GENERAL]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="0" expression="'Evaluado Parcial ('+ String(sum(if( status ='1',1,0)))+')'"border="0" color="0" x="599" y="136" height="56" width="709" format="[GENERAL]" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="0" expression="Bitmap(~"H:\source\Bmp\bola_amarilla.bmp~")"border="0" color="0" x="1344" y="52" height="56" width="59" format="[GENERAL]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="0" expression="'Evaluados sin Aprobar ('+ String(sum(if( status ='2',1,0)))+')'"border="0" color="0" x="1422" y="52" height="56" width="709" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="0" expression="Bitmap(~"H:\source\Bmp\bola_roja.bmp~")"border="0" color="0" x="1344" y="136" height="56" width="59" format="[GENERAL]" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="0" expression="'Sin Evaluar ('+ String(sum(if( status ='0',1,0)))+')'"border="0" color="0" x="1422" y="136" height="56" width="709" format="[GENERAL]" html.valueishtml="0"  name=compute_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="0" expression="'Aprobados ('+ String(sum(if( status ='3',1,0)))+')'"border="0" color="0" x="599" y="52" height="56" width="709" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,62 @@
+﻿$PBExportHeader$d_abc_rrhh_vacaciones_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=134217728 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=308 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes name=cod_trabajador dbname="rrhh_vacaciones_trabaj.cod_trabajador" )
+ column=(type=char(124) updatewhereclause=yes name=nombre_trabaj dbname="nombre_trabaj" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=periodo_inicio dbname="rrhh_vacaciones_trabaj.periodo_inicio" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=periodo_fin dbname="rrhh_vacaciones_trabaj.periodo_fin" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=dias_totales dbname="rrhh_vacaciones_trabaj.dias_totales" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=dias_gozados dbname="rrhh_vacaciones_trabaj.dias_gozados" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="rrhh_vacaciones_trabaj.flag_estado" )
+ column=(type=char(2) updatewhereclause=yes name=maestro_cod_origen dbname="maestro.cod_origen" )
+ column=(type=char(50) updatewhereclause=yes name=origen_nombre dbname="origen.nombre" )
+ column=(type=char(1) updatewhereclause=yes name=maestro_estado_trab dbname="maestro.estado_trab" )
+ retrieve="SELECT v.cod_trabajador, 
+       trim(m.apel_paterno)||' '||trim(m.apel_materno)||', '||trim(m.nombre1)||' '||trim(nvl(m.nombre2,' ')) as nombre_trabaj, 
+       v.periodo_inicio, v.periodo_fin, v.dias_totales, v.dias_gozados, v.flag_estado, 
+       m.cod_origen, o.nombre, m.flag_estado as estado_trab
+  FROM rrhh_vacaciones_trabaj v, 
+       maestro m, 
+       origen o 
+ WHERE v.cod_trabajador = m.cod_trabajador and 
+       m.cod_origen = o.cod_origen and 
+       m.cod_origen like :as_origen and 
+       v.periodo_inicio > = :al_periodo_min and 
+       v.periodo_fin <= :al_periodo_max and 
+       m.cod_origen in (select oao.cod_origen 
+								  from ot_adm_origen oao, ot_adm_usuario oau 
+								 where oao.ot_adm = oau.ot_adm and oau.cod_usr = :as_cod_usr) 
+ORDER BY m.cod_origen, v.periodo_inicio, v.cod_trabajador" arguments=(("as_origen", string),("al_periodo_min", number),("al_periodo_max", number),("as_cod_usr", string))  sort="origen_nombre A periodo_inicio A " )
+group(level=1 header.height=84 trailer.height=0 by=("maestro_cod_origen" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=0 trailer.height=0 by=("periodo_inicio" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Periodos Vacacionales " border="0" color="8388608" x="1024" y="28" height="80" width="1701" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="46" y="12" height="212" width="416" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Periodo Inicial" border="2" color="8388608" x="1545" y="248" height="56" width="347" html.valueishtml="0"  name=periodo_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Periodo Final" border="2" color="8388608" x="1897" y="248" height="56" width="347" html.valueishtml="0"  name=periodo_fin_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header.1 alignment="0" text="Origen :" border="0" color="8388608" x="23" y="12" height="56" width="197" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="C.Trabajador" border="2" color="8388608" x="9" y="248" height="56" width="498" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Nombres" border="2" color="8388608" x="512" y="248" height="56" width="1029" html.valueishtml="0"  name=nombres_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="1897" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=periodo_fin visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="1545" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=periodo_inicio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="56" width="498" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=2 alignment="0" tabsequence=50 border="2" color="33554432" x="512" y="4" height="56" width="1029" html.valueishtml="0"  name=nombre_trabaj visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Estado Trab" border="2" color="8388608" x="3259" y="248" height="56" width="302" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=10 alignment="0" tabsequence=40 border="2" color="33554432" x="3259" y="4" height="56" width="302" html.valueishtml="0"  name=maestro_estado_trab visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Dias Gozados" border="2" color="8388608" x="2601" y="248" height="56" width="347" html.valueishtml="0"  name=rrhh_vacaciones_trabaj_dias_gozados_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=6 alignment="1" tabsequence=10 border="2" color="33554432" x="2601" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=dias_gozados visible="1" editmask.mask="##" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Dias Totales" border="2" color="8388608" x="2249" y="248" height="56" width="347" html.valueishtml="0"  name=rrhh_vacaciones_trabaj_dias_totales_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="2249" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=dias_totales visible="1" editmask.mask="##" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=header.1 id=8 alignment="0" tabsequence=30 border="0" color="33554432" x="242" y="12" height="56" width="137" html.valueishtml="0"  name=maestro_cod_origen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=9 alignment="0" tabsequence=60 border="0" color="33554432" x="398" y="12" height="56" width="1152" html.valueishtml="0"  name=origen_nombre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Estado Vac" border="2" color="8388608" x="2953" y="248" height="56" width="302" html.valueishtml="0"  name=rrhh_vacaciones_trabaj_estado_vacac_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=7 alignment="0" tabsequence=60 border="2" color="33554432" x="2953" y="4" height="56" width="302" html.valueishtml="0"  name=flag_estado visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+
+sparse(names="cod_trabajador")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

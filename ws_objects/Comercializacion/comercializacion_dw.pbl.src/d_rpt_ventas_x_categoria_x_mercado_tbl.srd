@@ -1,0 +1,106 @@
+﻿$PBExportHeader$d_rpt_ventas_x_categoria_x_mercado_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=160 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=272 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="cntas_cobrar.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="cntas_cobrar.nro_doc" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntas_cobrar.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=datetime updatewhereclause=yes name=fecha_documento dbname="cntas_cobrar.fecha_documento" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="cntas_cobrar.origen" )
+ column=(type=decimal(0) updatewhereclause=yes name=ano dbname="cntas_cobrar.ano" )
+ column=(type=decimal(0) updatewhereclause=yes name=mes dbname="cntas_cobrar.mes" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_libro dbname="cntas_cobrar.nro_libro" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_asiento dbname="cntas_cobrar.nro_asiento" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_cobrar.cod_moneda" )
+ column=(type=char(40) updatewhereclause=yes name=observacion dbname="cntas_cobrar.observacion" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_doc dbname="cntas_cobrar.importe_doc" )
+ column=(type=char(6) updatewhereclause=yes name=sub_cat_art dbname="articulo.sub_cat_art" )
+ column=(type=char(60) updatewhereclause=yes name=desc_sub_cat dbname="articulo_sub_categ.desc_sub_cat" )
+ column=(type=number updatewhereclause=yes name=precio_unitario dbname="precio_unitario" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ retrieve="  SELECT ~"CNTAS_COBRAR~".~"TIPO_DOC~",   
+         ~"CNTAS_COBRAR~".~"NRO_DOC~",   
+         ~"CNTAS_COBRAR~".~"COD_RELACION~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~",   
+         ~"CNTAS_COBRAR~".~"ORIGEN~",   
+         ~"CNTAS_COBRAR~".~"ANO~",   
+         ~"CNTAS_COBRAR~".~"MES~",   
+         ~"CNTAS_COBRAR~".~"NRO_LIBRO~",   
+         ~"CNTAS_COBRAR~".~"NRO_ASIENTO~",   
+         ~"CNTAS_COBRAR~".~"COD_MONEDA~",   
+         ~"CNTAS_COBRAR~".~"OBSERVACION~",   
+         ~"CNTAS_COBRAR~".~"IMPORTE_DOC~",   
+         ~"ARTICULO~".~"SUB_CAT_ART~",   
+         ~"ARTICULO_SUB_CATEG~".~"DESC_SUB_CAT~",   
+         Sum(~"CNTAS_COBRAR_DET~".~"PRECIO_UNITARIO~") as precio_unitario,   
+         Sum(~"CNTAS_COBRAR_DET~".~"CANTIDAD~") as cantidad  
+    FROM ~"CNTAS_COBRAR_DET~",   
+         ~"ORDEN_VENTA~",   
+         ~"CNTAS_COBRAR~",   
+         ~"PROVEEDOR~",   
+         ~"ARTICULO~",   
+         ~"ARTICULO_SUB_CATEG~"  
+   WHERE ( ~"CNTAS_COBRAR~".~"TIPO_DOC~" = ~"CNTAS_COBRAR_DET~".~"TIPO_DOC~" ) and  
+         ( ~"CNTAS_COBRAR~".~"NRO_DOC~" = ~"CNTAS_COBRAR_DET~".~"NRO_DOC~" ) and  
+         ( ~"PROVEEDOR~".~"PROVEEDOR~" = ~"CNTAS_COBRAR~".~"COD_RELACION~" ) and  
+         ( ~"CNTAS_COBRAR_DET~".~"NRO_REF~" = ~"ORDEN_VENTA~".~"NRO_OV~" ) and  
+         ( ~"ARTICULO~".~"COD_ART~" = ~"CNTAS_COBRAR_DET~".~"COD_ART~" ) and  
+         ( ~"ARTICULO_SUB_CATEG~".~"COD_SUB_CAT~" = ~"ARTICULO~".~"SUB_CAT_ART~" ) and  
+         ( ( ~"CNTAS_COBRAR_DET~".~"TIPO_REF~" = (select doc_ov from logparam where reckey = '1') ) AND  
+         ( ~"ORDEN_VENTA~".~"FLAG_MERCADO~" = 'E' ) )    and
+			( cntas_cobrar.flag_estado <> '0' )
+group by ~"CNTAS_COBRAR~".~"TIPO_DOC~",   
+         ~"CNTAS_COBRAR~".~"NRO_DOC~",   
+         ~"CNTAS_COBRAR~".~"COD_RELACION~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~",   
+         ~"CNTAS_COBRAR~".~"ORIGEN~",   
+         ~"CNTAS_COBRAR~".~"ANO~",   
+         ~"CNTAS_COBRAR~".~"MES~",   
+         ~"CNTAS_COBRAR~".~"NRO_LIBRO~",   
+         ~"CNTAS_COBRAR~".~"NRO_ASIENTO~",   
+         ~"CNTAS_COBRAR~".~"COD_MONEDA~",   
+         ~"CNTAS_COBRAR~".~"OBSERVACION~",   
+         ~"CNTAS_COBRAR~".~"IMPORTE_DOC~",   
+         ~"ARTICULO~".~"SUB_CAT_ART~",   
+         ~"ARTICULO_SUB_CATEG~".~"DESC_SUB_CAT~"   
+" filter=" nro_doc = '842-001711'" sort="sub_cat_art A fecha_documento A nro_doc A " )
+group(level=1 header.height=84 trailer.height=0 by=("sub_cat_art" ) header.color="536870912" trailer.color="536870912" )
+column(band=header.1 id=15 alignment="0" tabsequence=32766 border="0" color="8388608" x="261" y="8" height="64" width="1623" format="[general]" html.valueishtml="0"  name=desc_sub_cat visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=14 alignment="0" tabsequence=32766 border="0" color="8388608" x="14" y="8" height="64" width="229" format="[general]" html.valueishtml="0"  name=sub_cat_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="8388608" x="14" y="96" height="56" width="233" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="251" y="96" height="56" width="347" html.valueishtml="0"  name=cntas_cobrar_nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="C. Relacion" border="2" color="8388608" x="603" y="96" height="56" width="352" html.valueishtml="0"  name=cntas_cobrar_cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nombres" border="2" color="8388608" x="960" y="96" height="56" width="1399" html.valueishtml="0"  name=proveedor_nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="F. Doc" border="2" color="8388608" x="2363" y="96" height="56" width="329" html.valueishtml="0"  name=cntas_cobrar_fecha_documento_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Mon" border="2" color="8388608" x="2697" y="96" height="56" width="114" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Total x Categoria" border="2" color="8388608" x="2816" y="96" height="56" width="407" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="3227" y="96" height="56" width="192" html.valueishtml="0"  name=cntas_cobrar_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Año" border="2" color="8388608" x="3424" y="96" height="56" width="169" html.valueishtml="0"  name=ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Mes" border="2" color="8388608" x="3598" y="96" height="56" width="105" html.valueishtml="0"  name=mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nro Libro" border="2" color="8388608" x="3707" y="96" height="56" width="233" html.valueishtml="0"  name=nro_libro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nro Asiento" border="2" color="8388608" x="3945" y="96" height="56" width="293" html.valueishtml="0"  name=nro_asiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="251" y="4" height="76" width="347" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="603" y="4" height="76" width="352" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="960" y="4" height="76" width="1399" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="2363" y="4" height="76" width="329" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_documento visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="4" height="76" width="233" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="33554432" x="2697" y="4" height="76" width="114" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="Round( precio_unitario *  cantidad ,2)"border="0" color="8388608" x="2816" y="4" height="76" width="407" format="###,###.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="33554432" x="3227" y="4" height="76" width="192" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="33554432" x="3424" y="4" height="76" width="169" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="3598" y="4" height="76" width="105" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="0" color="33554432" x="3707" y="4" height="76" width="233" format="[general]" html.valueishtml="0"  name=nro_libro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="3945" y="4" height="76" width="293" format="[general]" html.valueishtml="0"  name=nro_asiento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=0 border="2" color="8388608" x="2514" y="140" height="56" width="334" html.valueishtml="0"  name=precio_unitario visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=0 border="2" color="8388608" x="2944" y="152" height="56" width="256" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

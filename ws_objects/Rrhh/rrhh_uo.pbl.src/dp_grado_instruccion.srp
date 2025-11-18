@@ -1,0 +1,10 @@
+﻿$PBExportHeader$dp_grado_instruccion.srp
+PIPELINE(source_connect=RTPS,destination_connect=oemlm1_work5,type=refresh,commit=100,errors=100,keyname="grado_instruccion")
+SOURCE(name="n_educat",COLUMN(type=varchar,name="codigo",dbtype="Char(8)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="descripcio",dbtype="Char(60)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"n_educat~" ) COLUMN(NAME=~"n_educat.codigo~") COLUMN(NAME=~"n_educat.descripcio~")) ")
+DESTINATION(name="grado_instruccion",COLUMN(type=char,name="cod_grado_inst",dbtype="CHAR(2)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="desc_instruc",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1'
+
+"))

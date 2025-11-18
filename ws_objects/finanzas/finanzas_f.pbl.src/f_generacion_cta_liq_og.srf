@@ -1,0 +1,829 @@
+﻿$PBExportHeader$f_generacion_cta_liq_og.srf
+global type f_generacion_cta_liq_og from function_object
+end type
+
+forward prototypes
+global function boolean f_generacion_cta_liq_og (u_dw_abc adw_origen_cab, u_dw_abc adw_origen, ref u_dw_abc adw_destino, datastore ads_matriz_det, datastore ads_glosa, string as_campo_formula, long al_nro_libro, long al_nro_asiento, tab at_tab1, long al_ano, long al_mes)
+end prototypes
+
+global function boolean f_generacion_cta_liq_og (u_dw_abc adw_origen_cab, u_dw_abc adw_origen, ref u_dw_abc adw_destino, datastore ads_matriz_det, datastore ads_glosa, string as_campo_formula, long al_nro_libro, long al_nro_asiento, tab at_tab1, long al_ano, long al_mes);String ls_cnta_ctbl_ref   ,ls_det_glosa_ref   ,ls_flag_debhab_ref ,ls_cencos_ref        ,&
+		 ls_cod_ctabco_ref  ,ls_soles			    ,ls_dolares			,ls_cta_ctbl_liq_hab  ,&
+		 ls_cta_ctbl_liq_deb,ls_cnta_ctbl_gan   ,ls_cnta_ctbl_per   ,ls_tipo_doc_sg	    ,&
+		 ls_cod_relacion_sg ,ls_nro_doc_sg	    ,ls_moneda_sg		   ,ls_c_fin			    ,&
+		 ls_moneda			  ,ls_cod_relacion    ,ls_tipo_doc			,ls_nro_doc			    ,&
+		 ls_cencos			  ,ls_matriz		    ,ls_desc_cnta		   ,ls_flag_debhab	    ,&
+		 ls_expresion		  ,ls_formula		    ,ls_glosa_campo	   ,ls_glosa_texto	    ,&
+	 	 ls_campo			  ,ls_expresion_form  ,ls_signo				,ls_desc_glosa		    ,&
+		 ls_cnta_ctbl_sg    ,ls_moneda_det	    ,ls_det_glosa_sg	   ,ls_flag_debhab_sg    ,&
+		 ls_cencos_sg		  ,ls_cnta_ctbl_dif   ,ls_flag_debhab_dif ,ls_flag_debhab_og_dif,&
+		 ls_doc_cegreso	  ,ls_flag_tipo_gasto ,ls_flag_retec		,ls_flag_ret			 ,&
+		 ls_cta_ctbl_ret_igv,ls_nro_retencion   ,ls_tipo_cri			,ls_flag_cencos		 ,&
+		 ls_flag_doc_ref	  ,ls_flag_cod_rel	 ,ls_flag_cebef		,ls_flag_ctabco		 ,&
+		 ls_flab_tabor		  ,ls_msj_err			 ,ls_cebef
+		 
+String ls_armado[] ,ls_inicio[],ls_cnta_ctbl,ls_cod_ctabco_sg
+Long   ll_inicio    ,ll_count,ll_row_ins,ll_imatriz,ll_found,ll_inicio_for,ll_found_imp,&
+		 ll_nro_reg_cb,ll_item ,ll_inicio_imp,ll_inicio_cebef
+Integer li_item,li_pos,li_pos_ini,li_pos_fin,li_cont
+Boolean lb_flag,lb_gen_dif = FALSE,lb_ajust_x_conv = FALSE
+Datetime ldt_fecha_cierre_og
+Decimal {3} ldc_tasa_cambio_x_dia,ldc_tasa_cambio,ldc_tasa_cambio_sg,ldc_tasa_cambio_det
+Decimal {2} ldc_monto               ,ldc_importe_ref        ,ldc_ref_sol             ,ldc_ref_dol               ,ldc_monto_imp       ,ldc_importe_imp         ,&
+				ldc_saldo_sol           ,ldc_saldo_dol          ,ldc_imp_docs            ,ldc_monto_soles           ,ldc_monto_dolares   ,ldc_total_monto_soles   ,&
+				ldc_dif_x_cambio        ,ldc_total_monto_dolares,ldc_total_monto_soles_og,ldc_total_monto_dolares_og,ldc_monto_diferencia,ldc_monto_diferencia_sol,&
+				ldc_monto_diferencia_dol,ldc_total_imp_sol_hab  ,ldc_total_imp_sol_deb	 ,ldc_imp_movsol_hab		    ,ldc_imp_movsol_deb  ,ldc_imp_ret_sol			  ,&	
+				ldc_imp_ret_dol			,ldc_imp_ret 
+				
+//Declarar DataStore
+u_ds_base 	lds_cbenef
+
+try 
+	/*Datastore de Centro de Beneficio*/
+	lds_cbenef 			   = Create u_ds_base
+	lds_cbenef.DataObject = 'd_abc_montos_x_cbenef_tbl'
+	lds_cbenef.SettransObject(sqlca)
+				
+				
+	n_cst_asiento_glosa lnv_asiento_glosa
+
+	lnv_asiento_glosa    = CREATE n_cst_asiento_glosa
+
+	adw_origen.Accepttext()
+	adw_destino.Accepttext()
+
+	DO WHILE adw_destino.Rowcount() > 0
+		adw_destino.deleterow(0)
+	LOOP
+
+	/*tipos de monedas*/
+	f_monedas(ls_soles,ls_dolares)
+
+
+	/*Cuenta para generar Asiento en debe y haber*/
+	SELECT cnta_ctbl_liq_haber,cnta_ctbl_liq_debe,cnta_ctbl_dc_ganancia,cnta_ctbl_dc_perdida,cnta_cntbl_ret_igv
+  		INTO :ls_cta_ctbl_liq_hab,:ls_cta_ctbl_liq_deb,:ls_cnta_ctbl_gan,:ls_cnta_ctbl_per,:ls_cta_ctbl_ret_igv
+  		FROM finparam
+ 	WHERE (reckey = '1') ;
+	/**/
+	
+	IF IsNull(ls_cta_ctbl_liq_hab) OR Trim(ls_cta_ctbl_liq_hab) = '' THEN
+		f_mensaje('Debe Ingresar Cuenta Contable de Liquidación Excesos de PAGOS'&
+								+'en Archivo de Parametros (finparam.cnta_ctbl_liq_hab) , Verifique!', '' )
+		at_tab1.SelectedTab = 1
+		return false
+	END IF
+
+	IF IsNull(ls_cta_ctbl_liq_deb) OR Trim(ls_cta_ctbl_liq_deb) = '' THEN
+		f_mensaje('Debe Ingresar Cuenta Contable de Liquidación Excesos de PAGOS'&
+							+'en Archivo de Parametros (finparam.cnta_ctbl_liq_deb) , Verifique!', '' )
+		at_tab1.SelectedTab = 1
+		return false
+	END IF
+
+
+	IF IsNull(ls_cnta_ctbl_gan) OR Trim(ls_cnta_ctbl_gan) = '' THEN
+		Messagebox('Aviso','Debe Ingresar Cuenta Contable de Diferencia de Tasa de Cambio'&
+								+'en Archivo de Parametros (finparam.cnta_ctbl_dc_ganancia , Verifique!')
+		at_tab1.SelectedTab = 1
+		return false
+	END IF
+
+	IF IsNull(ls_cnta_ctbl_per) OR Trim(ls_cnta_ctbl_per) = '' THEN
+		Messagebox('Aviso','Debe Ingresar Cuenta Contable de Diferencia de Tasa de Cambio'&
+								+'en Archivo de Parametros (finparam.cnta_ctbl_dc_perdida , Verifique!')
+		at_tab1.SelectedTab = 1
+		return false
+	END IF
+	
+	IF IsNull(ls_cta_ctbl_ret_igv) OR Trim(ls_cta_ctbl_ret_igv) = '' THEN
+		Messagebox('Aviso','Debe Ingresar Cuenta Contable de Retencion IGV'&
+								+'en Archivo de Parametros (finparam.cnta_cntbl_ret_igv , Verifique!')
+		at_tab1.SelectedTab = 1
+		return false
+	END IF
+
+
+	/*Busco Tipo de Documento Solicitud de Giro*/
+	SELECT doc_sol_giro,comprobante_egr,doc_ret_igv_crt
+	  INTO :ls_tipo_doc_sg,:ls_doc_cegreso,:ls_tipo_cri
+	  FROM finparam
+	 WHERE (reckey = '1' ) ;
+ 
+
+	/*datos de cabecera de orden de giro*/
+	ls_cod_relacion_sg	= adw_origen_cab.object.cod_relacion     [1]
+	ls_nro_doc_sg			= adw_origen_cab.object.nro_solicitud    [1]
+	ls_moneda_sg			= adw_origen_cab.object.cod_moneda	     [1]
+	ldt_fecha_cierre_og  = adw_origen_cab.object.fecha_aprobacion [1]
+
+	/*TASA CAMBIO DEL DIA DE CIERRE DE LIQUIDACION*/
+	ldc_tasa_cambio_x_dia =	gnvo_app.of_tasa_cambio(date(ldt_fecha_cierre_og))
+	/**/ 
+
+
+	FOR ll_inicio = 1 TO adw_origen.Rowcount()  //Recorro dw Origen de los items A generar Cuenta Contable
+		/*Inicialización de Variables*/
+		ls_c_fin  		  		= adw_origen.object.confin 	      [ll_inicio]	
+		li_item	  		  		= adw_origen.object.item   	      [ll_inicio]	
+		ls_moneda       		= adw_origen.object.cod_moneda      [ll_inicio]	
+		ldc_tasa_cambio 		= adw_origen.object.tasa_cambio     [ll_inicio]	
+		ls_cod_relacion 		= adw_origen.object.proveedor	      [ll_inicio]	
+		ls_tipo_doc	  	 		= adw_origen.object.tipo_doc	      [ll_inicio]	
+		ls_nro_doc		    	= adw_origen.object.nro_doc	      [ll_inicio]		
+		ls_cencos				= adw_origen.object.cencos		      [ll_inicio]
+		ldc_importe_ref		= adw_origen.object.importe	      [ll_inicio]
+		ls_flag_retec			= adw_origen.object.flag_ret_igv	   [ll_inicio]
+		ldc_imp_ret 			= adw_origen.object.importe_ret_igv [ll_inicio]	 
+		ls_nro_Retencion		= adw_origen.object.nro_retencion   [ll_inicio]	 
+	 
+		if ls_tipo_doc <> ls_tipo_doc_sg then
+			ls_flab_tabor = '3'	 
+		end if
+
+	 
+		IF Isnull(ls_c_fin) OR Trim(ls_c_fin) = '' THEN
+			Messagebox('Item Nº '+String(li_item) ,'Item No se Ha ingresado Concepto Financiero')
+			at_tab1.SelectedTab = 1
+			return false
+		end if
+		
+		/*documento de provision*/
+		SELECT Count(*)
+		INTO :ll_count
+		FROM cntas_pagar cp,cntbl_asiento_det cd
+		WHERE cp.cod_relacion = :ls_cod_relacion 
+		  AND cp.tipo_doc	    = :ls_tipo_doc		
+		  AND cp.nro_doc		 = :ls_nro_doc		
+		  AND cp.origen       = cd.origen        
+		  AND cp.ano          = cd.ano           
+		  AND cp.mes          = cd.mes           
+		  AND cp.nro_libro    = cd.nro_libro     
+		  AND cp.nro_asiento  = cd.nro_asiento   
+		  AND cp.cod_relacion = cd.cod_relacion  
+		  AND cp.tipo_doc     = cd.tipo_docref1  
+		  AND cp.nro_doc      = cd.nro_docref1;
+
+	 
+		/**/
+
+		IF ll_count > 0 THEN
+			/*cta corriente*/
+			SELECT cd.cnta_ctbl,cd.det_glosa ,cd.flag_debhab ,
+				  cd.cencos   ,cd.cod_ctabco
+			INTO :ls_cnta_ctbl_ref,:ls_det_glosa_ref ,:ls_flag_debhab_ref,
+				  :ls_cencos_ref	 ,:ls_cod_ctabco_ref
+			FROM cntas_pagar cp,cntbl_asiento_det cd
+			WHERE cp.cod_relacion = :ls_cod_relacion 
+			  AND cp.tipo_doc	  	 = :ls_tipo_doc		
+			  AND cp.nro_doc		 = :ls_nro_doc		
+			  AND cp.origen       = cd.origen        
+			  AND cp.ano          = cd.ano           
+			  AND cp.mes          = cd.mes           
+			  AND cp.nro_libro    = cd.nro_libro     
+			  AND cp.nro_asiento  = cd.nro_asiento   
+			  AND cp.cod_relacion = cd.cod_relacion  
+			  AND cp.tipo_doc     = cd.tipo_docref1  
+			  AND cp.nro_doc      = cd.nro_docref1;
+
+			/**/
+			IF ls_flag_debhab_ref = 'D' THEN
+				ls_flag_debhab_ref = 'H'
+			ELSE
+				ls_flag_debhab_ref = 'D'				 
+			END IF
+			/**/
+			 
+			IF ls_moneda = ls_soles THEN
+				ldc_ref_sol = ldc_importe_ref
+				ldc_ref_dol = Round(ldc_importe_ref / ldc_tasa_cambio_x_dia,2)
+			ELSEIF ls_moneda = ls_dolares THEN	 
+				ldc_ref_dol = ldc_importe_ref
+				ldc_ref_sol = Round(ldc_importe_ref * ldc_tasa_cambio_x_dia,2)					 
+			END IF
+
+			ll_row_ins = adw_destino.event ue_insert()
+			if ll_row_ins > 0 then
+				adw_destino.Object.origen 			[ll_row_ins] = gs_origen
+				adw_destino.Object.ano		 		[ll_row_ins] = al_ano
+				adw_destino.Object.mes 				[ll_row_ins] = al_mes
+				adw_destino.Object.nro_libro 		[ll_row_ins] = al_nro_libro
+				adw_destino.Object.nro_asiento  	[ll_row_ins] = al_nro_asiento
+				adw_destino.Object.item				[ll_row_ins] = ll_row_ins
+				adw_destino.Object.cnta_ctbl		[ll_row_ins] = ls_cnta_ctbl_ref
+				adw_destino.Object.fec_cntbl 		[ll_row_ins] = ldt_fecha_cierre_og
+				adw_destino.Object.det_glosa		[ll_row_ins] = ls_det_glosa_ref
+				adw_destino.Object.flag_debhab	[ll_row_ins] = ls_flag_debhab_ref
+				adw_destino.Object.cencos 			[ll_row_ins] = ls_cencos_ref
+				adw_destino.Object.cod_ctabco		[ll_row_ins] = ls_cod_ctabco_ref
+				adw_destino.Object.tipo_docref1	[ll_row_ins] = ls_tipo_doc
+				adw_destino.Object.nro_docref1 	[ll_row_ins] = ls_nro_doc
+				adw_destino.Object.cod_relacion	[ll_row_ins] = ls_cod_relacion
+				adw_destino.Object.imp_movsol  	[ll_row_ins] = ldc_ref_sol
+				adw_destino.Object.imp_movdol  	[ll_row_ins] = ldc_ref_dol
+				adw_destino.Object.flag		  		[ll_row_ins] = 'S'
+				adw_destino.Object.flag_edit  	[ll_row_ins] = 'E'
+			end if
+		END IF
+
+		//Insercion de Cuentas dependiendo de la Matriz Contable
+		SELECT matriz_cntbl
+			INTO :ls_matriz
+			FROM concepto_financiero
+		WHERE (confin = :ls_c_fin);
+		
+		IF Isnull(ls_matriz) OR Trim(ls_matriz) = ''  THEN
+			f_mensaje('Concepto Financiero Nº '+ls_c_fin+' No se ha Vinculado Matriz', '')
+			at_tab1.SelectedTab = 1
+			return false
+		END IF
+		
+		ads_matriz_det.Retrieve(ls_matriz)					// Recuperación de Información de Matriz Detalle
+		  
+		FOR ll_imatriz = 1 TO ads_matriz_det.Rowcount()
+				
+			/**Inicializacion de Variables**/
+			lb_flag	 = FALSE
+			ls_armado = ls_inicio
+			
+			ldc_monto   	= 0.00
+			ldc_monto_imp  = 0.00
+			li_pos 	   	= 1
+			li_pos_ini  	= 0
+			li_pos_fin  	= 0
+			li_cont   		= 0
+			/**/
+			ls_cnta_ctbl 	= ads_matriz_det.Object.cnta_ctbl   [ll_imatriz]
+			ls_desc_cnta	= ads_matriz_det.Object.desc_cnta   [ll_imatriz]
+				
+			/*Verifica Flag de Cnta Contable*/
+			lb_flag = f_verifica_flag_cntbl_cnta(ls_cnta_ctbl)
+			/**/
+				
+			ls_flag_debhab = ads_matriz_det.Object.flag_debhab [ll_imatriz]
+			ls_formula     = ads_matriz_det.Object.formula 		[ll_imatriz]
+			ls_glosa_campo = ads_matriz_det.Object.glosa_campo [ll_imatriz]
+			ls_glosa_texto	= ads_matriz_det.Object.glosa_texto [ll_imatriz]
+				
+				
+			/*funcion de llenado de datastore*/
+			f_generacion_glosa_liquidacion(adw_origen_cab,adw_origen,ads_glosa,ll_inicio,ls_cnta_ctbl,ls_desc_cnta)
+			/**/
+				
+			/***********************/
+			li_pos_ini     = Pos(ls_formula,'[',li_pos) 
+				
+			IF li_pos_ini = 1 THEN       /*Formula Pura */
+				ldc_monto  = 0.00
+			ELSEIF li_pos_ini > 1 THEN	  /*Campo + Formula*/
+				ls_campo = Mid(ls_formula,1,li_pos_ini - 2)
+				
+				//Si tiene una coma la saco tambien
+				if Pos(ls_campo, ',', 1) > 0 then
+					ls_campo = lower(Mid(ls_campo,1,Pos(ls_campo, ',', 1) - 1))
+				end if
+				
+				if adw_origen.of_ExisteCampo(ls_Campo) then
+					ldc_monto  = adw_origen.Getitemnumber(ll_inicio,ls_campo)
+				else
+					f_mensaje('Error, no existe el campo ' + ls_campo + ' en el datawindow, por favor revise la formula de la matriz', '')
+					return false
+				end if
+			ELSEIF li_pos_ini = 0 THEN	  /*Campo*/
+				ls_formula = lower(trim(ls_formula))
+				
+				if adw_origen.of_ExisteCampo(ls_formula) then
+					ldc_monto  = adw_origen.Getitemnumber(ll_inicio, ls_formula)
+				else
+					f_mensaje('Error, no existe el campo ' + ls_formula + ' en el datawindow, por favor revise la formula de la matriz', '')
+					return false
+				end if
+			END IF
+				
+			/****/				
+			ls_expresion 	= "cnta_ctbl =	'" + ls_cnta_ctbl + "' AND flag_debhab	= '" + ls_flag_debhab + "' AND flag <> 'S'"
+			ll_found       = adw_destino.find(ls_expresion,1,adw_destino.rowcount())
+			IF ll_found = 0 OR lb_flag THEN
+				/*Extraer Glosa*/
+				ls_desc_glosa = lnv_asiento_glosa.of_set_glosa(ads_glosa,1,ls_glosa_texto,ls_glosa_campo)
+					
+				/*Verifica indicadores de Cuenta Contable*/
+				IF f_cntbl_cnta(ls_cnta_ctbl,ls_flag_cencos,ls_flag_ctabco,ls_flag_doc_ref,ls_flag_cod_rel,ls_flag_cebef) =  false THEN
+					return false
+				END IF	
+
+				/*centro de beneficio*/
+				if ls_flag_cebef = '1' then
+					//INSERTA DISTRIBUCION DE ACUERDO 
+					DECLARE USP_FIN_DISTRIB_X_CBENEFICIO PROCEDURE FOR 
+						USP_FIN_DISTRIB_X_CBENEFICIO(	:ls_cod_relacion,
+																:ls_tipo_doc,
+																:ls_nro_doc,
+																:ls_flab_tabor,
+																:ldc_monto);
+					EXECUTE USP_FIN_DISTRIB_X_CBENEFICIO ;
+						
+					IF SQLCA.SQLCode = -1 THEN 
+						ls_msj_err = SQLCA.SQLErrText 	
+						Rollback ;	
+						f_mensaje('SQL error en procedure USP_FIN_DISTRIB_X_CBENEFICIO: ' + ls_msj_err, '')
+						return false
+					END IF
+						  
+					CLOSE USP_FIN_DISTRIB_X_CBENEFICIO ;
+						
+					//recupera dw
+					lds_cbenef.Retrieve()
+						
+					For ll_inicio_cebef = 1 to lds_cbenef.Rowcount()
+						ls_cebef  = lds_cbenef.object.centro_benef [ll_inicio_cebef]
+						ldc_monto = lds_cbenef.object.monto		  [ll_inicio_cebef]
+							 
+						//inserta registro
+						ll_row_ins    = adw_destino.event ue_insert()
+						if ll_row_ins > 0 then
+							 adw_destino.Object.item		    [ll_row_ins] = ll_row_ins
+							 adw_destino.Object.cnta_ctbl     [ll_row_ins] = ads_matriz_det.Object.cnta_ctbl  [ll_imatriz]
+							 adw_destino.Object.flag_debhab   [ll_row_ins] = ads_matriz_det.Object.flag_debhab[ll_imatriz]
+							 adw_destino.Object.det_glosa     [ll_row_ins] = Mid(ls_desc_glosa,1,60)
+							 adw_destino.Object.fec_cntbl		 [ll_row_ins] = ldt_fecha_cierre_og
+							 adw_destino.Object.origen	       [ll_row_ins] = gs_origen
+							 adw_destino.Object.ano		       [ll_row_ins] = al_ano
+							 adw_destino.Object.mes		       [ll_row_ins] = al_mes
+							 adw_destino.Object.nro_libro     [ll_row_ins] = al_nro_libro
+							 adw_destino.Object.nro_asiento	 [ll_row_ins] = al_nro_asiento
+							 adw_destino.Object.flag		  	 [ll_row_ins] = 'N'					
+							 adw_destino.Object.flag_edit  	 [ll_row_ins] = 'E'
+							 
+							 /**/
+							 f_verifica_flag_cntas_liquidacion(adw_destino,ll_row_ins,ls_cnta_ctbl,ls_cencos,ls_tipo_doc,ls_nro_doc,ls_cod_relacion)
+							 /**/
+
+							 if ls_flag_cebef = '1' then
+								 adw_destino.Object.centro_benef [ll_row_ins] = ls_cebef
+							 end if 	
+							 
+							 IF ls_moneda = ls_soles THEN
+								 adw_destino.Object.imp_movsol [ll_row_ins] = ldc_monto					
+								 adw_destino.Object.imp_movdol [ll_row_ins] = Round(ldc_monto / ldc_tasa_cambio,2)
+							 ELSEIF ls_moneda = ls_dolares THEN
+								 adw_destino.Object.imp_movdol [ll_row_ins] = ldc_monto
+								 adw_destino.Object.imp_movsol [ll_row_ins] = Round(ldc_monto * ldc_tasa_cambio,2)					
+							 END IF
+						end if
+							 
+					Next
+				else
+					ll_row_ins    = adw_destino.event ue_insert()
+					if ll_row_ins > 0 then
+						adw_destino.Object.item		        [ll_row_ins] = ll_row_ins
+						adw_destino.Object.cnta_ctbl       [ll_row_ins] = ads_matriz_det.Object.cnta_ctbl  [ll_imatriz]
+						adw_destino.Object.flag_debhab     [ll_row_ins] = ads_matriz_det.Object.flag_debhab[ll_imatriz]
+						adw_destino.Object.det_glosa       [ll_row_ins] = Mid(ls_desc_glosa,1,60)
+						adw_destino.Object.fec_cntbl		  [ll_row_ins] = ldt_fecha_cierre_og
+						adw_destino.Object.origen	        [ll_row_ins] = gs_origen
+						adw_destino.Object.ano		        [ll_row_ins] = al_ano
+						adw_destino.Object.mes		        [ll_row_ins] = al_mes
+						adw_destino.Object.nro_libro       [ll_row_ins] = al_nro_libro
+						adw_destino.Object.nro_asiento	  [ll_row_ins] = al_nro_asiento
+						adw_destino.Object.flag		  		  [ll_row_ins] = 'N'					
+						adw_destino.Object.flag_edit  	  [ll_row_ins] = 'E'
+						
+
+						/**/
+						f_verifica_flag_cntas_liquidacion(adw_destino,ll_row_ins,ls_cnta_ctbl,ls_cencos,ls_tipo_doc,ls_nro_doc,ls_cod_relacion)
+						/**/
+					
+						IF ls_moneda = ls_soles THEN
+							adw_destino.Object.imp_movsol [ll_row_ins] = ldc_monto					
+							adw_destino.Object.imp_movdol [ll_row_ins] = Round(ldc_monto / ldc_tasa_cambio,2)
+						ELSEIF ls_moneda = ls_dolares THEN
+							adw_destino.Object.imp_movdol [ll_row_ins] = ldc_monto
+							adw_destino.Object.imp_movsol [ll_row_ins] = Round(ldc_monto * ldc_tasa_cambio,2)					
+						END IF
+					end if
+						
+				end if
+			/**/
+			ELSE
+				IF ls_moneda = ls_soles THEN
+					adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + ldc_monto					
+					adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + Round(ldc_monto / ldc_tasa_cambio,2)
+				ELSEIF ls_moneda = ls_dolares THEN
+					adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + ldc_monto
+					adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + Round(ldc_monto * ldc_tasa_cambio,2)					
+				END IF
+			END IF
+		NEXT
+	 
+		//generacion de asientos detraccion
+		IF ls_flag_retec = '1' THEN //genera asiento de retencion	 
+		 
+			if Isnull(ldc_imp_ret) then ldc_imp_ret = 0.00
+			 
+			if ldc_imp_ret > 0 then
+				ldc_imp_ret_sol = ldc_imp_ret 
+				ldc_imp_ret_dol = Round(ldc_imp_ret / ldc_tasa_cambio,2)
+			end if	 
+		 
+			ls_cod_relacion 	= adw_origen.object.proveedor	   [ll_inicio]	
+			ls_tipo_doc	  	 	= adw_origen.object.tipo_doc	   [ll_inicio]	
+			ls_nro_doc		    = adw_origen.object.nro_doc	   [ll_inicio]		
+			 
+			ll_row_ins    = adw_destino.event ue_insert()
+			if ll_row_ins > 0 then
+				adw_destino.Object.item		   	[ll_row_ins] = ll_row_ins
+				adw_destino.Object.cnta_ctbl    	[ll_row_ins] = ls_cta_ctbl_ret_igv
+				adw_destino.Object.flag_debhab  	[ll_row_ins] = 'H' 
+				adw_destino.Object.det_glosa    	[ll_row_ins] = 'RETENCION - '+ls_cod_relacion+' - '+ls_tipo_doc+' - '+ls_nro_doc
+				adw_destino.Object.fec_cntbl		[ll_row_ins] = ldt_fecha_cierre_og
+				adw_destino.Object.origen	      [ll_row_ins] = gs_origen
+				adw_destino.Object.ano		      [ll_row_ins] = al_ano
+				adw_destino.Object.mes		      [ll_row_ins] = al_mes
+				adw_destino.Object.nro_libro    [ll_row_ins] = al_nro_libro
+				adw_destino.Object.nro_asiento	[ll_row_ins] = al_nro_asiento
+				adw_destino.Object.flag		  	[ll_row_ins] = 'N'					
+				adw_destino.Object.flag_edit  	[ll_row_ins] = 'E'
+				adw_destino.Object.imp_movsol  	[ll_row_ins] = ldc_imp_ret_sol
+				adw_destino.Object.imp_movdol  	[ll_row_ins] = ldc_imp_ret_dol
+				adw_destino.Object.cod_relacion	[ll_row_ins] = ls_cod_relacion
+				adw_destino.Object.tipo_docref1	[ll_row_ins] = ls_tipo_cri
+				adw_destino.Object.nro_docref1 	[ll_row_ins] = ls_nro_retencion
+			end if
+		END IF
+	NEXT
+
+	/*Generacion de Asiento de Orden de Giro*/
+
+	/* Datos de Cabecera de Solicitud de Giro */
+	ll_nro_reg_cb = adw_origen_cab.object.nro_reg_caja_banco [1]
+
+
+	/******************************************/
+	/* Recupera datos de  Solicitud de Giro   */	
+	/******************************************/
+	IF f_recupera_asiento_og(ll_nro_reg_cb   ,ls_tipo_doc_sg ,ls_nro_doc_sg    ,ls_cod_relacion_sg,&
+									 ls_cnta_ctbl_sg ,ls_det_glosa_sg,ls_flag_debhab_sg,ls_cencos_sg		 ,&
+									 ls_cod_ctabco_sg,ldc_saldo_sol  ,ldc_saldo_dol,ldc_tasa_cambio_sg) = FALSE THEN
+									 
+		at_tab1.SelectedTab = 1
+		return false
+	END IF								
+
+	ldc_imp_ret_sol = 0.00 
+	ldc_imp_ret_dol = 0.00 
+	
+	/*Acumula Monto Detalle*/
+	FOR ll_inicio = 1 TO adw_origen.Rowcount()
+		 ls_moneda_det 		= adw_origen.Object.cod_moneda   [ll_inicio]
+		 ldc_tasa_cambio_det = adw_origen.Object.tasa_cambio  [ll_inicio]
+		 ll_item					= adw_origen.Object.item		   [ll_inicio]
+		 ls_flag_ret		   = adw_origen.Object.flag_ret_igv [ll_inicio]
+		 
+		 
+		 IF Isnull(adw_origen.object.importe [ll_inicio]) THEN 
+			 ldc_imp_docs = 0.00
+		 ELSE
+			 ldc_imp_docs = adw_origen.object.importe[ll_inicio]
+		 END IF
+	
+		 
+		 /*rojas*/
+		 IF ls_moneda_det = ls_soles THEN
+			 ldc_monto_soles   = ldc_imp_docs
+			 ldc_monto_dolares = Round(ldc_imp_docs / ldc_tasa_cambio_det,2)
+		 ELSE
+			 ldc_monto_soles   = Round(ldc_imp_docs * ldc_tasa_cambio_det,2)
+			 ldc_monto_dolares = ldc_imp_docs
+		 END IF
+		 
+		 //retencion
+		 if ls_flag_ret = '1' then
+			 ldc_imp_ret = adw_origen.object.importe_ret_igv [ll_inicio]
+			  
+			 if Isnull(ldc_imp_ret) then ldc_imp_ret = 0.00
+			 
+			 if ldc_imp_ret > 0 then
+				 ldc_imp_ret_sol = ldc_imp_ret_sol + ldc_imp_ret 
+				 ldc_imp_ret_dol = ldc_imp_ret_dol + Round(ldc_imp_ret / ldc_tasa_cambio_det,2)
+				 
+				 //totalizar retenciones
+			 end if
+			 
+		 end if
+		 
+		 /**Acumula Totales para diferencia**/	 
+		 ldc_total_monto_soles   = (ldc_total_monto_soles   + ldc_monto_soles)   
+		 //- ldc_imp_ret_sol
+		 ldc_total_monto_dolares = (ldc_total_monto_dolares + ldc_monto_dolares) 
+		 //- ldc_imp_ret_dol
+		 
+	NEXT
+
+	/*Diferencia en tasa de cambio en orden de giro*/
+	IF ls_moneda_sg = ls_dolares THEN
+		ldc_dif_x_cambio = Round(ldc_saldo_dol * ldc_tasa_cambio_x_dia,2) - ldc_saldo_sol
+		
+		IF ldc_dif_x_cambio > 0 THEN  /*DOLAR SE INCREMENTO*/
+			lb_gen_dif = TRUE
+			ls_cnta_ctbl_dif	    = ls_cnta_ctbl_gan
+			ls_flag_debhab_dif    = ls_flag_debhab_sg
+			//FLAG DEBE / HABER DE ITEM DE OG 
+			IF ls_flag_debhab_sg = 'D' THEN
+				ls_flag_debhab_og_dif = 'H'
+			ELSE
+				ls_flag_debhab_og_dif = 'D'
+			END IF
+			
+		ELSEIF ldc_dif_x_cambio < 0 THEN /*DOLAR DISMINUYO*/
+			ldc_dif_x_cambio = ldc_dif_x_cambio * -1 /*Convertir a Valor Positivo*/
+			ls_cnta_ctbl_dif	    = ls_cnta_ctbl_per
+			/*FLAG DEBE / HABER DE ITEM DE DIF. CAMBIO*/
+			IF ls_flag_debhab_sg = 'D' THEN
+				ls_flag_debhab_dif    = 'H'
+			ELSE
+				ls_flag_debhab_dif    = 'D'
+			END IF
+			/**/
+			ls_flag_debhab_og_dif = ls_flag_debhab_sg 
+			lb_gen_dif = TRUE
+		
+		ELSEIF ldc_dif_x_cambio = 0 THEN	
+			lb_gen_dif = FALSE
+		END IF
+		
+	
+		IF lb_gen_dif THEN 
+			/*Inserción de registro en caso exista diferencia en cambio*/
+			ll_row_ins = adw_destino.event ue_insert()
+			if ll_row_ins > 0 then
+				adw_destino.Object.origen 		  [ll_row_ins] = gs_origen
+				adw_destino.Object.ano		 	  [ll_row_ins] = al_ano
+				adw_destino.Object.mes 			  [ll_row_ins] = al_mes
+				adw_destino.Object.nro_libro 	  [ll_row_ins] = al_nro_libro
+				adw_destino.Object.nro_asiento  [ll_row_ins] = al_nro_asiento
+				adw_destino.Object.item			  [ll_row_ins] = ll_row_ins
+				adw_destino.Object.cnta_ctbl	  [ll_row_ins] = ls_cnta_ctbl_dif
+				adw_destino.Object.fec_cntbl	  [ll_row_ins] = ldt_fecha_cierre_og		
+				adw_destino.Object.det_glosa	  [ll_row_ins] = 'DIFERENCIA EN CAMBIO DE SOL_GIRO'
+				adw_destino.Object.flag_debhab  [ll_row_ins] = ls_flag_debhab_dif
+				adw_destino.Object.imp_movsol   [ll_row_ins] = ldc_dif_x_cambio
+				adw_destino.Object.imp_movdol   [ll_row_ins] = 0.00
+				adw_destino.Object.flag		  	  [ll_row_ins] = 'S'
+				adw_destino.Object.flag_edit    [ll_row_ins] = 'E'
+			end if
+		
+		
+			/*****************************************************************/
+			/*Inserción de registro de OG en caso exista diferencia en cambio*/
+			/*****************************************************************/
+			ll_row_ins = adw_destino.event ue_insert()
+			if ll_row_ins > 0 then
+				adw_destino.Object.origen 		  [ll_row_ins] = gs_origen
+				adw_destino.Object.ano		 	  [ll_row_ins] = al_ano
+				adw_destino.Object.mes 			  [ll_row_ins] = al_mes
+				adw_destino.Object.nro_libro 	  [ll_row_ins] = al_nro_libro
+				adw_destino.Object.nro_asiento  [ll_row_ins] = al_nro_asiento
+				adw_destino.Object.item			  [ll_row_ins] = ll_row_ins
+				adw_destino.Object.cnta_ctbl	  [ll_row_ins] = ls_cnta_ctbl_sg
+				adw_destino.Object.fec_cntbl	  [ll_row_ins] = ldt_fecha_cierre_og				
+				adw_destino.Object.cencos 		  [ll_row_ins] = ls_cencos_sg
+				adw_destino.Object.cod_ctabco	  [ll_row_ins] = ls_cod_ctabco_sg
+				adw_destino.Object.tipo_docref1 [ll_row_ins] = ls_tipo_doc_sg
+				adw_destino.Object.nro_docref1  [ll_row_ins] = ls_nro_doc_sg
+				adw_destino.Object.cod_relacion [ll_row_ins] = ls_cod_relacion_sg
+				adw_destino.Object.det_glosa	  [ll_row_ins] = 'DIFERENCIA EN CAMBIO DE SOL_GIRO'
+				adw_destino.Object.flag_debhab  [ll_row_ins] = ls_flag_debhab_og_dif
+				adw_destino.Object.imp_movsol   [ll_row_ins] = ldc_dif_x_cambio
+				adw_destino.Object.imp_movdol   [ll_row_ins] = 0.00
+				adw_destino.Object.flag		  	  [ll_row_ins] = 'S'
+				adw_destino.Object.flag_edit    [ll_row_ins] = 'E'		
+			end if
+		END IF
+	
+	END IF
+
+
+
+	/**Acumula Totales para asiento de og**/	 
+	IF ls_moneda_sg = ls_dolares THEN
+		ldc_total_monto_soles_og   = Round(ldc_saldo_dol * ldc_tasa_cambio_x_dia,2) 
+		//- ldc_imp_ret_sol
+		ldc_total_monto_dolares_og = ldc_saldo_dol 
+		//- ldc_imp_ret_dol
+	ELSEIF ls_moneda_sg = ls_soles  THEN	
+		ldc_total_monto_soles_og   = ldc_saldo_sol 
+		//- ldc_imp_ret_sol
+		ldc_total_monto_dolares_og = Round(ldc_saldo_sol /  ldc_tasa_cambio_x_dia,2) 
+		//- ldc_imp_ret_dol
+	END IF
+
+
+	/*Inserción de contra partida de orden de giro*/
+	ll_row_ins = adw_destino.event ue_insert()
+	if ll_row_ins > 0 then
+		adw_destino.Object.origen 		  [ll_row_ins] = gs_origen
+		adw_destino.Object.ano		 	  [ll_row_ins] = al_ano
+		adw_destino.Object.mes 			  [ll_row_ins] = al_mes
+		adw_destino.Object.nro_libro 	  [ll_row_ins] = al_nro_libro
+		adw_destino.Object.nro_asiento  [ll_row_ins] = al_nro_asiento
+		adw_destino.Object.item			  [ll_row_ins] = ll_row_ins
+		adw_destino.Object.cnta_ctbl	  [ll_row_ins] = ls_cnta_ctbl_sg
+		adw_destino.Object.fec_cntbl	  [ll_row_ins] = ldt_fecha_cierre_og		
+		adw_destino.Object.det_glosa	  [ll_row_ins] = ls_det_glosa_sg
+		adw_destino.Object.flag_debhab  [ll_row_ins] = ls_flag_debhab_sg
+		adw_destino.Object.cencos 		  [ll_row_ins] = ls_cencos_sg
+		adw_destino.Object.cod_ctabco	  [ll_row_ins] = ls_cod_ctabco_sg
+		adw_destino.Object.tipo_docref1 [ll_row_ins] = ls_tipo_doc_sg
+		adw_destino.Object.nro_docref1  [ll_row_ins] = ls_nro_doc_sg
+		adw_destino.Object.cod_relacion [ll_row_ins] = ls_cod_relacion_sg
+		adw_destino.Object.imp_movsol   [ll_row_ins] = ldc_total_monto_soles_og
+		adw_destino.Object.imp_movdol   [ll_row_ins] = ldc_total_monto_dolares_og
+		adw_destino.Object.flag		  	  [ll_row_ins] = 'S'
+		adw_destino.Object.flag_edit    [ll_row_ins] = 'E'
+		/**/
+	end if
+
+	/*Diferencia de Pago sea mayor o menor*/
+	IF ls_moneda_sg = ls_soles THEN
+		ldc_monto_diferencia = (ldc_saldo_sol - ldc_total_monto_soles)
+		
+		if ldc_monto_diferencia < 0 then
+			if ldc_imp_ret_sol <> 0 then
+				ldc_monto_diferencia = (Abs(ldc_monto_diferencia) - ldc_imp_ret_sol) * - 1
+			end if	
+		elseif ldc_imp_ret_sol > 0 then
+				ldc_monto_diferencia = (ldc_monto_diferencia + ldc_imp_ret_sol) 
+		end if
+		
+	ELSE
+		ldc_monto_diferencia = (ldc_saldo_dol - ldc_total_monto_dolares)
+		
+		if ldc_monto_diferencia < 0 then
+			if ldc_imp_ret_dol <> 0 then
+				ldc_monto_diferencia = (Abs(ldc_monto_diferencia) - ldc_imp_ret_dol) * - 1
+			end if	
+		elseif ldc_imp_ret_dol > 0 then
+				ldc_monto_diferencia = (ldc_monto_diferencia + ldc_imp_ret_dol) 
+		end if
+	END IF
+
+	IF ldc_monto_diferencia < 0 THEN /*Generación de Asientos en Liquidacion*/
+												/*de Monto Mayor                       */	
+		ldc_monto_diferencia = ldc_monto_diferencia * -1
+		
+		IF ls_moneda_sg = ls_soles THEN
+			ldc_monto_diferencia_sol = ldc_monto_diferencia 
+			ldc_monto_diferencia_dol = Round(ldc_monto_diferencia / ldc_tasa_cambio_x_dia,2)
+		ELSE
+			ldc_monto_diferencia_dol = ldc_monto_diferencia 
+			ldc_monto_diferencia_sol = Round(ldc_monto_diferencia * ldc_tasa_cambio_x_dia,2)
+		END IF
+		
+		//*ASIENTO PARA DEVOLVER DINERO CUANDO SOBREPASAS*//
+		ll_row_ins = adw_destino.event ue_insert()
+		if ll_Row_ins > 0 then
+			adw_destino.Object.origen 		  [ll_row_ins] = gs_origen
+			adw_destino.Object.ano		 	  [ll_row_ins] = al_ano
+			adw_destino.Object.mes 			  [ll_row_ins] = al_mes
+			adw_destino.Object.nro_libro 	  [ll_row_ins] = al_nro_libro
+			adw_destino.Object.nro_asiento  [ll_row_ins] = al_nro_asiento
+			adw_destino.Object.item			  [ll_row_ins] = ll_row_ins
+			adw_destino.Object.tipo_docref1 [ll_row_ins] = ls_tipo_doc_sg
+			adw_destino.Object.nro_docref1  [ll_row_ins] = ls_nro_doc_sg
+			adw_destino.Object.cod_relacion [ll_row_ins] = ls_cod_relacion_sg	
+			adw_destino.Object.cnta_ctbl	  [ll_row_ins] = ls_cta_ctbl_liq_hab
+			adw_destino.Object.fec_cntbl	  [ll_row_ins] = ldt_fecha_cierre_og			
+			adw_destino.Object.det_glosa	  [ll_row_ins] ='DEVOLUCION (REINTEGRO)  '
+			adw_destino.Object.flag_debhab  [ll_row_ins] = 'H'
+			adw_destino.Object.imp_movsol   [ll_row_ins] = ldc_monto_diferencia_sol
+			adw_destino.Object.imp_movdol   [ll_row_ins] = ldc_monto_diferencia_dol
+			adw_destino.Object.flag		  	  [ll_row_ins] = 'S'
+			adw_destino.Object.flag_edit    [ll_row_ins] = 'E'	
+		end if
+		
+	ELSEIF ldc_monto_diferencia > 0 THEN /*Generación de Asientos en Liquidacion*/
+													 /*de Monto Menor                       */	
+		ldc_monto_diferencia = ldc_monto_diferencia 
+		
+		IF ls_moneda_sg = ls_soles THEN
+			ldc_monto_diferencia_sol = ldc_monto_diferencia 
+			ldc_monto_diferencia_dol = Round(ldc_monto_diferencia / ldc_tasa_cambio_x_dia,2)
+		ELSE
+			ldc_monto_diferencia_dol = ldc_monto_diferencia 
+			ldc_monto_diferencia_sol = Round(ldc_monto_diferencia * ldc_tasa_cambio_x_dia,2)
+		END IF
+		
+		//*ASIENTO PARA DEVOLVER DINERO CUANDO SOBREPASAS*//
+		ll_row_ins = adw_destino.event ue_insert()
+		if ll_Row_ins > 0 then
+			adw_destino.Object.origen 		  [ll_row_ins] = gs_origen
+			adw_destino.Object.ano		 	  [ll_row_ins] = al_ano
+			adw_destino.Object.mes 			  [ll_row_ins] = al_mes
+			adw_destino.Object.nro_libro 	  [ll_row_ins] = al_nro_libro
+			adw_destino.Object.nro_asiento  [ll_row_ins] = al_nro_asiento
+			adw_destino.Object.item			  [ll_row_ins] = ll_row_ins
+			adw_destino.Object.tipo_docref1 [ll_row_ins] = ls_tipo_doc_sg
+			adw_destino.Object.nro_docref1  [ll_row_ins] = ls_nro_doc_sg
+			adw_destino.Object.cod_relacion [ll_row_ins] = ls_cod_relacion_sg
+			adw_destino.Object.cnta_ctbl	  [ll_row_ins] = ls_cta_ctbl_liq_deb
+			adw_destino.Object.fec_cntbl	  [ll_row_ins] = ldt_fecha_cierre_og			
+			adw_destino.Object.det_glosa	  [ll_row_ins] ='DEVOLVER '
+			adw_destino.Object.flag_debhab  [ll_row_ins] = 'D'
+			adw_destino.Object.imp_movsol   [ll_row_ins] = ldc_monto_diferencia_sol
+			adw_destino.Object.imp_movdol   [ll_row_ins] = ldc_monto_diferencia_dol
+			adw_destino.Object.flag		  	  [ll_row_ins] = 'S'
+			adw_destino.Object.flag_edit    [ll_row_ins] = 'E'	
+		end if
+	END IF
+	
+	FOR ll_inicio = 1 TO adw_origen.Rowcount()
+		 ls_moneda = adw_origen.object.cod_moneda [ll_inicio]
+		 
+		 IF ls_moneda_sg 	<> ls_moneda THEN
+			 lb_ajust_x_conv = TRUE
+			 exit
+		END IF
+	NEXT	
+
+
+	/*DIFERENCIA DE DOCUMENTOS A LIQUIDAR*/ /*VERIFICACION*/
+	IF lb_ajust_x_conv THEN
+		ldc_total_imp_sol_hab = 0.00
+		ldc_total_imp_sol_deb = 0.00
+	
+		adw_destino.accepttext()
+	
+		FOR ll_inicio = 1 TO adw_destino.Rowcount() 
+			 ldc_imp_movsol_hab 	 = 0.00
+			 ldc_imp_movsol_deb 	 = 0.00
+	
+			 ls_flag_debhab = adw_destino.Object.flag_debhab  [ll_inicio]
+		 
+			 IF ls_flag_debhab = 'H' THEN
+				 ldc_imp_movsol_hab = adw_destino.object.imp_movsol [ll_inicio]
+			 ELSEIF ls_flag_debhab = 'D' THEN	
+				 ldc_imp_movsol_deb = adw_destino.object.imp_movsol [ll_inicio]
+			 END IF
+		 
+			IF Isnull(ldc_imp_movsol_hab)	 THEN ldc_imp_movsol_hab = 0.00
+			IF Isnull(ldc_imp_movsol_deb)	 THEN ldc_imp_movsol_deb = 0.00
+		
+			ldc_total_imp_sol_hab = ldc_total_imp_sol_hab + ldc_imp_movsol_hab
+			ldc_total_imp_sol_deb = ldc_total_imp_sol_deb + ldc_imp_movsol_deb
+		NEXT
+	
+		IF ldc_total_imp_sol_deb > ldc_total_imp_sol_hab THEN
+			/*GANANCIA*/
+			ls_cnta_ctbl_dif   = ls_cnta_ctbl_per
+			ls_flag_debhab_dif = 'H'
+			ldc_monto_diferencia_sol = Round(ldc_total_imp_sol_deb - ldc_total_imp_sol_hab,2)
+		ELSEIF ldc_total_imp_sol_deb < ldc_total_imp_sol_hab THEN	
+			/*PERDIDA*/
+			ls_cnta_ctbl_dif   = ls_cnta_ctbl_gan
+			ls_flag_debhab_dif = 'D'
+			ldc_monto_diferencia_sol = Round(ldc_total_imp_sol_hab - ldc_total_imp_sol_deb ,2)
+		ELSE
+			return true
+		END IF	
+	
+		/**/
+		//*ASIENTO PARA DEVOLVER DINERO CUANDO SOBREPASAS*//
+		ll_row_ins = adw_destino.event ue_insert()
+		if ll_row_ins > 0 then
+			adw_destino.Object.origen 		  [ll_row_ins] = gs_origen
+			adw_destino.Object.ano		 	  [ll_row_ins] = al_ano
+			adw_destino.Object.mes 			  [ll_row_ins] = al_mes
+			adw_destino.Object.nro_libro 	  [ll_row_ins] = al_nro_libro
+			adw_destino.Object.nro_asiento  [ll_row_ins] = al_nro_asiento
+			adw_destino.Object.item			  [ll_row_ins] = ll_row_ins
+			adw_destino.Object.cnta_ctbl	  [ll_row_ins] = ls_cnta_ctbl_dif
+			adw_destino.Object.fec_cntbl	  [ll_row_ins] = ldt_fecha_cierre_og			
+			adw_destino.Object.det_glosa	  [ll_row_ins] ='Diferencia de documento liquidados'
+			adw_destino.Object.flag_debhab  [ll_row_ins] = ls_flag_debhab_dif
+			adw_destino.Object.imp_movsol   [ll_row_ins] = ldc_monto_diferencia_sol
+			adw_destino.Object.imp_movdol   [ll_row_ins] = 0.00
+			adw_destino.Object.flag		  	  [ll_row_ins] = 'S'
+			adw_destino.Object.flag_edit    [ll_row_ins] = 'E'	
+		end if
+	
+	
+	END IF
+
+	Return true
+	
+catch ( Exception ex )
+	f_mensaje("Ha ocurrido una exception: " + ex.getMessage() + ", por favor verifique", '')
+	
+	return false
+	
+finally
+	destroy lds_cbenef
+	destroy n_cst_asiento_glosa
+	
+
+end try
+
+
+
+end function
+

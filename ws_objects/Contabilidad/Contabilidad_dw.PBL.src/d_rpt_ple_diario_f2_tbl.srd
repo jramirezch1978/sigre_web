@@ -1,0 +1,48 @@
+﻿$PBExportHeader$d_rpt_ple_diario_f2_tbl.srd
+release 11.5;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=72 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(154) updatewhereclause=yes name=texto dbname="texto" )
+ retrieve="select distinct
+       replace(
+		 trim(to_char(ca.ano, '0000')) || trim(to_char(ca.mes, '00')) || '01' ||       -- 01. Periodo
+       '|' || trim(REPLACE(cc.cnta_ctbl, '/', '-'))   ||                                                            -- 02. Cuenta Contable
+       '|' || trim(substr(trim(REPLACE(cc.desc_cnta, '/', '-')), 1, 100))                                  ||       -- 03. Descripción de la cuenta contable
+       '|' || '01'                                                                                         ||       -- 04. Código del plan de cuenta
+       '|' || 'PLAN EMPRESARIAL ACTUAL'                                                                    ||       -- 05. Descripcion del plan utilizado
+       '|' || ''                                                                                           ||       -- 06. Codigo de la cuenta contable corporativa
+       '|' || ''                                                                                           ||       -- 07. Descripcion de la cuenta contable corporativa
+       '|' || '1'                                                                                          ||       -- 08. Indica el estado de la operacion
+       '|' , '~"', '')as texto
+from cntbl_cnta cc,
+     cntbl_asiento ca,
+     cntbl_Asiento_det cad
+where ca.origen = cad.origen
+  and ca.ano    = cad.ano
+  and ca.mes    = cad.mes
+  and ca.nro_libro = cad.nro_libro
+  and ca.nro_asiento = cad.nro_asiento
+  and ca.flag_estado <> '0'
+  and cad.cnta_ctbl = cc.cnta_ctbl     
+  and ca.ano = :ani_year
+  and ca.mes = :ani_mes
+order by 1
+
+
+" arguments=(("ani_year", number),("ani_mes", number)) )
+text(band=header alignment="2" text="Exp Row" border="2" color="33554432" x="9" y="8" height="56" width="6098" html.valueishtml="0"  name=exp_row_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="60" width="6098" format="[general]" html.valueishtml="0"  name=texto visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

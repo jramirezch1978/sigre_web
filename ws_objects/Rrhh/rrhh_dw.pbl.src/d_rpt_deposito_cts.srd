@@ -1,0 +1,64 @@
+﻿$PBExportHeader$d_rpt_deposito_cts.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=436 color="536870912" )
+summary(height=104 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(3) updatewhereclause=yes name=maestro_cod_seccion dbname="maestro.cod_seccion" )
+ column=(type=char(30) updatewhereclause=yes name=seccion_desc_seccion dbname="seccion.desc_seccion" )
+ column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="hist_prov_cts_gratif.cod_trabajador" )
+ column=(type=char(124) updatewhereclause=yes name=nombre dbname="nombre" )
+ column=(type=decimal(1) updatewhereclause=yes name=dias_asist dbname="hist_prov_cts_gratif.dias_asist" )
+ column=(type=char(3) updatewhereclause=yes name=moneda_cts dbname="hist_prov_cts_gratif.moneda_cts" )
+ column=(type=char(10) updatewhereclause=yes name=maestro_cencos dbname="maestro.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=number updatewhereclause=yes name=monto dbname="monto" )
+ retrieve="SELECT m.cod_seccion, s.desc_seccion, h.cod_trabajador, 
+       trim(m.apel_paterno)||' '||trim(m.apel_materno)||' , '||m.nombre1||trim(nvl(m.nombre2,' ')) nombre, 
+       h.dias_asist, h.moneda_cts, m.cencos, c.desc_cencos, sum(pd.monto) monto 
+  FROM hist_prov_cts_det pd, hist_prov_cts_gratif h, maestro m, centros_costo c, seccion s 
+ WHERE (pd.fecha_proceso = h.fecha_proceso and 
+        pd.cod_trabajador = h.cod_trabajador) and 
+       (h.cod_trabajador = m.cod_trabajador) and 
+       (m.cencos = c.cencos) and 
+       (m.cod_area = s.cod_area and m.cod_seccion = s.cod_seccion) and 
+       h.fecha_proceso = :ad_fecha_proc and 
+       h.cod_origen like :as_origen and 
+       h.tipo_trabajador like :as_tipo_trabaj 
+GROUP BY m.cod_seccion, s.desc_seccion, h.cod_trabajador, 
+       trim(m.apel_paterno)||' '||trim(m.apel_materno)||' , '||m.nombre1||trim(nvl(m.nombre2,' ')), 
+       h.dias_asist, h.moneda_cts, m.cencos, c.desc_cencos 
+ORDER BY m.cod_seccion, trim(m.apel_paterno)||' '||trim(m.apel_materno)||' , '||m.nombre1||trim(nvl(m.nombre2,' '))
+" arguments=(("ad_fecha_proc", date),("as_origen", string),("as_tipo_trabaj", string)) )
+group(level=1 header.height=84 trailer.height=92 by=("maestro_cod_seccion" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="73" y="24" height="204" width="306" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="78" y="260" height="40" width="293" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Codigo" border="2" color="33554432" x="91" y="372" height="56" width="247" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Apellidos y nombres" border="2" color="33554432" x="352" y="372" height="56" width="951" html.valueishtml="0"  name=nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Días" border="2" color="33554432" x="1317" y="372" height="56" width="142" html.valueishtml="0"  name=dias_asist_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cencos" border="2" color="33554432" x="1472" y="372" height="56" width="338" html.valueishtml="0"  name=maestro_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Descripción Cencos" border="2" color="33554432" x="1824" y="372" height="56" width="951" html.valueishtml="0"  name=centros_costo_desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Importe" border="2" color="33554432" x="2789" y="372" height="56" width="338" html.valueishtml="0"  name=cts_soles_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="DEPOSITO DE COMPENSACION DE TIEMPO DE SERVICIO" border="1" color="0" x="549" y="96" height="64" width="2048" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="553" y="212" height="64" width="2057" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="247" y="8" height="64" width="1207" format="[general]" html.valueishtml="0"  name=seccion_desc_seccion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="87" y="8" height="64" width="137" format="[general]" html.valueishtml="0"  name=maestro_cod_seccion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="91" y="12" height="64" width="247" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="352" y="12" height="64" width="951" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="1317" y="12" height="64" width="142" format="[general]" html.valueishtml="0"  name=dias_asist visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="1472" y="12" height="64" width="338" format="[general]" html.valueishtml="0"  name=maestro_cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=10 border="0" color="33554432" x="3141" y="12" height="64" width="110" format="[general]" html.valueishtml="0"  name=moneda_cts visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="1824" y="12" height="64" width="951" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="round( (monto / 360)* dias_asist, 2 ) "border="0" color="33554432" x="2789" y="12" height="64" width="338" format="###,###.00" html.valueishtml="0"  name=cts_soles visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(round( (monto / 360)* dias_asist, 2 )  for group 1)"border="0" color="33554432" x="2752" y="16" height="64" width="375" format="###,###.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(round( (monto / 360)* dias_asist, 2 )  for all)"border="0" color="33554432" x="2752" y="16" height="64" width="375" format="###,###.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total general : " border="0" color="0" x="2135" y="16" height="56" width="549" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2894" y="80" height="40" width="288" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2894" y="24" height="40" width="283" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="2898" y="144" height="40" width="288" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

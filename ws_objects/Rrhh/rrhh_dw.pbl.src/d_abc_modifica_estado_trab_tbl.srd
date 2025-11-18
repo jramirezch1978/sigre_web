@@ -1,0 +1,32 @@
+﻿$PBExportHeader$d_abc_modifica_estado_trab_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=codigo dbname="maestro.cod_trabajador" )
+ column=(type=char(123) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="maestro.cod_origen" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="maestro.flag_estado" values="Activo	1/Inactivo	0/" )
+ retrieve="  SELECT M.COD_TRABAJADOR,   
+          Nvl(m.apel_paterno,' ') || ' ' ||Nvl( m.apel_materno,' ') || ' ' || Nvl(m.nombre1,' ') 
+          || ' ' || Nvl(m.nombre2,' ') as Nombres,   
+         M.COD_ORIGEN,   
+         M.FLAG_ESTADO
+ 
+   FROM  MAESTRO    M
+   
+   WHERE M.cod_origen  = :as_cod_origen 
+" update="MAESTRO" updatewhere=0 updatekeyinplace=yes arguments=(("as_cod_origen", string))  sort="cod_origen A nombres A " )
+text(band=header alignment="2" text="Codigo" border="2" color="8388608" x="9" y="4" height="56" width="201" html.valueishtml="0"  name=codigo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nombres" border="2" color="8388608" x="215" y="4" height="56" width="960" html.valueishtml="0"  name=nombres_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Estado" border="2" color="8388608" x="1179" y="4" height="56" width="274" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="76" width="201" format="[general]" html.valueishtml="0"  name=codigo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(  flag_estado <> '1', rgb(212,208,200), rgb(255,255,255 ) ) " )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="215" y="0" height="76" width="960" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=123 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(  flag_estado <> '1', rgb(212,208,200), rgb(255,255,255 ) ) " )
+column(band=detail id=4 alignment="2" tabsequence=10 border="2" color="0" x="1179" y="0" height="76" width="274" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif(  flag_estado <> '1', rgb(212,208,200), rgb(255,255,255 ) ) " )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

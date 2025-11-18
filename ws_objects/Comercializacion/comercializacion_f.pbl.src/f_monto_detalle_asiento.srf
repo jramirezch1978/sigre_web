@@ -1,0 +1,68 @@
+﻿$PBExportHeader$f_monto_detalle_asiento.srf
+global type f_monto_detalle_asiento from function_object
+end type
+
+forward prototypes
+global subroutine f_monto_detalle_asiento (string as_origen, long al_ano, long al_mes, long al_nro_libro, long al_nro_asiento, string as_cod_relacion, string as_tipo_doc, string as_nro_doc, ref decimal adc_monto_sol, ref decimal adc_monto_dol)
+end prototypes
+
+global subroutine f_monto_detalle_asiento (string as_origen, long al_ano, long al_mes, long al_nro_libro, long al_nro_asiento, string as_cod_relacion, string as_tipo_doc, string as_nro_doc, ref decimal adc_monto_sol, ref decimal adc_monto_dol);
+String ls_flag_debhab
+Decimal {2} ldc_monto_sol = 0.00,ldc_monto_dol = 0.00
+
+
+adc_monto_sol = 0.00
+adc_monto_dol = 0.00
+
+/*Declaración de Cursor*/
+DECLARE c_detalle CURSOR FOR
+  SELECT imp_movsol,
+         imp_movdol,
+			flag_debhab
+    FROM cntbl_asiento_det
+   WHERE ((origen       = :as_origen      )  AND
+          (ano          = :al_ano         )  AND
+          (mes          = :al_mes         )  AND
+          (nro_libro    = :al_nro_libro   )  AND
+          (nro_asiento  = :al_nro_asiento )) AND
+         ((cod_relacion = :as_cod_relacion)  AND
+          (tipo_docref1 = :as_tipo_doc	   )  AND
+          (nro_docref1  = :as_nro_doc	   )) ;
+								
+
+/*Abrir Cursor*/		  	
+OPEN c_detalle ;
+	
+	DO 				/*Recorro Cursor*/	
+	 FETCH c_detalle INTO :ldc_monto_sol,:ldc_monto_dol,:ls_flag_debhab;
+	 IF sqlca.sqlcode = 100 THEN EXIT
+	 
+	 IF Isnull(ldc_monto_sol) then ldc_monto_sol = 0.00
+	 IF Isnull(ldc_monto_dol) then ldc_monto_dol = 0.00
+	 
+	 //soles
+	 IF ls_flag_debhab = 'D' then
+		 adc_monto_sol = adc_monto_sol - ldc_monto_sol
+	 ELSE	 
+		 adc_monto_sol = adc_monto_sol + ldc_monto_sol
+	 END IF
+    //dolares
+ 	 IF ls_flag_debhab = 'D' then
+		 adc_monto_dol = adc_monto_dol - ldc_monto_dol
+	 ELSE	 
+		 adc_monto_dol = adc_monto_dol + ldc_monto_dol
+	 END IF
+	 
+	 
+	 
+	 
+	LOOP WHILE TRUE
+	
+CLOSE c_detalle ; /*Cierra Cursor*/								
+
+adc_monto_sol = abs(adc_monto_sol)
+adc_monto_dol = abs(adc_monto_dol)
+
+
+end subroutine
+

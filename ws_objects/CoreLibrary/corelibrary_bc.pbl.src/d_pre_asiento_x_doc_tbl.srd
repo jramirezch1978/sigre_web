@@ -1,0 +1,62 @@
+﻿$PBExportHeader$d_pre_asiento_x_doc_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cnta_ctbl dbname="cntbl_asiento_det.cnta_ctbl" )
+ column=(type=char(1) updatewhereclause=yes name=flag_debhab dbname="flag_debhab" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="vw_fin_doc_general.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="vw_fin_doc_general.nro_doc" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="vw_fin_doc_general.cod_relacion" )
+ column=(type=number updatewhereclause=yes name=tasa_cambio dbname="vw_fin_doc_general.tasa_cambio" )
+ column=(type=char(1) updatewhereclause=yes name=flab_tabor dbname="vw_fin_doc_general.flab_tabor" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="cntbl_asiento_det.cencos" )
+ column=(type=char(20) updatewhereclause=yes name=cod_ctabco dbname="cntbl_asiento_det.cod_ctabco" )
+ column=(type=char(15) updatewhereclause=yes name=nro_docref2 dbname="cntbl_asiento_det.nro_docref2" )
+ column=(type=char(60) updatewhereclause=yes name=det_glosa dbname="cntbl_asiento_det.det_glosa" )
+ retrieve="  SELECT ~"CNTBL_ASIENTO_DET~".~"CNTA_CTBL~"	 ,   
+         DECODE(~"CNTBL_ASIENTO_DET~".~"FLAG_DEBHAB~",'D','H','D') AS FLAG_DEBHAB,
+			~"VW_FIN_DOC_GENERAL~".~"TIPO_DOC~"		 ,
+			~"VW_FIN_DOC_GENERAL~".~"NRO_DOC~" 		 , 
+			~"VW_FIN_DOC_GENERAL~".~"COD_RELACION~"  , 
+			~"VW_FIN_DOC_GENERAL~".~"TASA_CAMBIO~"	 ,
+         ~"VW_FIN_DOC_GENERAL~".~"FLAB_TABOR~"	 ,
+			~"CNTBL_ASIENTO_DET~".~"CENCOS~"		 ,
+			~"CNTBL_ASIENTO_DET~".~"COD_CTABCO~" ,
+			~"CNTBL_ASIENTO_DET~".~"NRO_DOCREF2~",
+			~"CNTBL_ASIENTO_DET~".~"DET_GLOSA~"
+    FROM ~"CNTBL_ASIENTO_DET~",   
+         ~"VW_FIN_DOC_GENERAL~"  
+   WHERE ( ~"VW_FIN_DOC_GENERAL~".~"ORIGEN~"          = ~"CNTBL_ASIENTO_DET~".~"ORIGEN~"        ) AND  
+			( ~"VW_FIN_DOC_GENERAL~".~"ANO~"             = ~"CNTBL_ASIENTO_DET~".~"ANO~"           ) AND  
+			( ~"VW_FIN_DOC_GENERAL~".~"MES~"	           = ~"CNTBL_ASIENTO_DET~".~"MES~"	          ) AND  
+         ( ~"VW_FIN_DOC_GENERAL~".~"NRO_LIBRO~" 		  = ~"CNTBL_ASIENTO_DET~".~"NRO_LIBRO~"     ) AND  
+         ( ~"VW_FIN_DOC_GENERAL~".~"NRO_ASIENTO~"     = ~"CNTBL_ASIENTO_DET~".~"NRO_ASIENTO~"   ) AND  
+         ( ~"VW_FIN_DOC_GENERAL~".~"TIPO_DOC~" 		  = ~"CNTBL_ASIENTO_DET~".~"TIPO_DOCREF1~"  ) AND  
+         ( ~"VW_FIN_DOC_GENERAL~".~"NRO_DOC~" 		  = ~"CNTBL_ASIENTO_DET~".~"NRO_DOCREF1~"   ) AND  
+         ( ~"VW_FIN_DOC_GENERAL~".~"COD_RELACION~" 	  = ~"CNTBL_ASIENTO_DET~".~"COD_RELACION~"  ) AND  
+         ( ( ~"VW_FIN_DOC_GENERAL~".~"COD_RELACION~"  = :as_cod_relacion                    ) AND  
+         ( ~"VW_FIN_DOC_GENERAL~".~"TIPO_DOC~"        = :as_tipo_doc                        ) AND  
+         ( ~"VW_FIN_DOC_GENERAL~".~"NRO_DOC~"         = :as_nro_doc                         ))    
+" arguments=(("as_cod_relacion", string),("as_tipo_doc", string),("as_nro_doc", string)) )
+text(band=header alignment="2" text="Cnta Ctbl" border="0" color="0" x="14" y="12" height="56" width="302"  name=cnta_ctbl_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Flag Debhab" border="0" color="0" x="338" y="12" height="56" width="576"  name=flag_debhab_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="tipo doc" border="0" color="0" x="933" y="12" height="56" width="197"  name=tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="nro doc" border="0" color="0" x="1143" y="12" height="56" width="270"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="det glosa" border="0" color="0" x="1426" y="12" height="56" width="768"  name=det_glosa_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="cod relacion" border="0" color="0" x="2222" y="12" height="56" width="768"  name=cod_relacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="338" y="4" height="76" width="576" format="[general]"  name=flag_debhab edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="933" y="4" height="76" width="197" format="[general]"  name=tipo_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1143" y="4" height="76" width="270" format="[general]"  name=nro_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2222" y="16" height="56" width="768" format="[general]"  name=cod_relacion edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="4288" y="16" height="56" width="992" format="[general]"  name=tasa_cambio edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="5294" y="16" height="56" width="969" format="[general]"  name=flab_tabor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=0 border="0" color="0" x="6263" y="0" height="56" width="233"  name=cnta_ctbl  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=0 border="0" color="0" x="6496" y="0" height="56" width="233"  name=cencos  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=0 border="0" color="0" x="6729" y="0" height="56" width="462"  name=cod_ctabco  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=0 border="0" color="0" x="7191" y="0" height="56" width="347"  name=nro_docref2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=0 border="0" color="0" x="7538" y="0" height="56" width="1381"  name=det_glosa  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

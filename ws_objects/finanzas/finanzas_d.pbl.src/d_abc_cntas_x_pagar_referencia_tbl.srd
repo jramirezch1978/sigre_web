@@ -1,0 +1,78 @@
+﻿$PBExportHeader$d_abc_cntas_x_pagar_referencia_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_relacion dbname="doc_referencias.cod_relacion" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_doc dbname="doc_referencias.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_doc dbname="doc_referencias.nro_doc" )
+ column=(type=char(1) update=yes updatewhereclause=yes key=yes name=tipo_mov dbname="doc_referencias.tipo_mov" )
+ column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen_ref dbname="doc_referencias.origen_ref" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_ref dbname="doc_referencias.tipo_ref" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_ref dbname="doc_referencias.nro_ref" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="doc_referencias.importe" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flab_tabor dbname="doc_referencias.flab_tabor" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_ret_igv dbname="doc_referencias.flag_ret_igv" values="	1/	0" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=imp_ret_igv dbname="doc_referencias.imp_ret_igv" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_ctbl dbname="cntbl_asiento_det.cnta_ctbl" )
+ column=(type=char(1) updatewhereclause=yes name=flag_debhab dbname="cntbl_asiento_det.flag_debhab" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="letras_x_pagar.cod_moneda" )
+ column=(type=char(0) updatewhereclause=yes name=flag_impuesto dbname="doc_referencias.flag_impuesto" )
+ retrieve="SELECT ~"DOC_REFERENCIAS~".~"COD_RELACION~" ,
+       ~"DOC_REFERENCIAS~".~"TIPO_DOC~" ,
+       ~"DOC_REFERENCIAS~".~"NRO_DOC~" ,
+       ~"DOC_REFERENCIAS~".~"TIPO_MOV~" ,
+       ~"DOC_REFERENCIAS~".~"ORIGEN_REF~" ,
+       ~"DOC_REFERENCIAS~".~"TIPO_REF~" ,
+       ~"DOC_REFERENCIAS~".~"NRO_REF~" ,
+       ~"DOC_REFERENCIAS~".~"IMPORTE~" ,
+       ~"DOC_REFERENCIAS~".~"FLAB_TABOR~" ,
+ 		 ~"DOC_REFERENCIAS~".~"FLAG_RET_IGV~" ,
+		 ~"DOC_REFERENCIAS~".~"IMP_RET_IGV~" ,
+       ~"CNTBL_ASIENTO_DET~".~"CNTA_CTBL~" ,
+       ~"CNTBL_ASIENTO_DET~".~"FLAG_DEBHAB~" ,
+       ~"LETRAS_X_PAGAR~".~"COD_MONEDA~"     ,
+		 NULL AS FLAG_IMPUESTO
+  FROM ~"DOC_REFERENCIAS~" ,
+       ~"LETRAS_X_PAGAR~" ,
+       ~"CNTBL_ASIENTO_DET~"     
+ WHERE (~"DOC_REFERENCIAS~".~"COD_RELACION~" = ~"LETRAS_X_PAGAR~".~"COD_RELACION~"    ) and
+       (~"DOC_REFERENCIAS~".~"NRO_REF~"      = ~"LETRAS_X_PAGAR~".~"NRO_LETRA~"       ) and
+       (~"LETRAS_X_PAGAR~".~"ORIGEN~"        = ~"CNTBL_ASIENTO_DET~".~"ORIGEN~"       ) and
+		 (~"LETRAS_X_PAGAR~".~"ANO~"           = ~"CNTBL_ASIENTO_DET~".~"ANO~"          ) and
+		 (~"LETRAS_X_PAGAR~".~"MES~"           = ~"CNTBL_ASIENTO_DET~".~"MES~"          ) and	 
+       (~"LETRAS_X_PAGAR~".~"NRO_LIBRO~"     = ~"CNTBL_ASIENTO_DET~".~"NRO_LIBRO~"    ) and
+       (~"LETRAS_X_PAGAR~".~"NRO_ASIENTO~"   = ~"CNTBL_ASIENTO_DET~".~"NRO_ASIENTO~"  ) and
+       (~"DOC_REFERENCIAS~".~"COD_RELACION~" = ~"CNTBL_ASIENTO_DET~".~"COD_RELACION~" ) and
+       (~"DOC_REFERENCIAS~".~"TIPO_REF~"     = ~"CNTBL_ASIENTO_DET~".~"TIPO_DOCREF1~" ) and
+       (~"DOC_REFERENCIAS~".~"NRO_REF~"      = ~"CNTBL_ASIENTO_DET~".~"NRO_DOCREF1~"  ) and
+       ((~"DOC_REFERENCIAS~".~"COD_RELACION~"= :as_relacion ) and  
+        (~"DOC_REFERENCIAS~".~"TIPO_DOC~"    = :as_tipo_doc ) and      
+        (~"DOC_REFERENCIAS~".~"NRO_DOC~"     = :as_nro_doc  ) and     
+        (~"DOC_REFERENCIAS~".~"TIPO_MOV~"    = :as_tipo_mov ))  
+" update="DOC_REFERENCIAS" updatewhere=1 updatekeyinplace=yes arguments=(("as_relacion", string),("as_tipo_doc", string),("as_nro_doc", string),("as_tipo_mov", string)) )
+text(band=header alignment="2" text="Tipo Mov" border="6" color="0" x="18" y="8" height="56" width="233"  name=tipo_mov_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Origen Ref" border="6" color="0" x="270" y="8" height="56" width="283"  name=origen_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tipo Ref" border="6" color="0" x="571" y="8" height="56" width="215"  name=tipo_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Ref" border="6" color="0" x="805" y="8" height="56" width="302"  name=nro_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Moneda Ref" border="6" color="0" x="1125" y="8" height="56" width="274"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="6" color="0" x="1417" y="8" height="56" width="439"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tabla" border="6" color="0" x="1874" y="8" height="56" width="155"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cnta Ctbl" border="6" color="0" x="2048" y="8" height="56" width="311"  name=t_7  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="D/H" border="6" color="0" x="2377" y="8" height="56" width="119"  name=t_6  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="total" border="6" color="0" x="2519" y="8" height="56" width="219"  name=total_t visible="1~t0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="5" color="0" x="23" y="4" height="56" width="233" format="[general]"  name=tipo_mov edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="5" color="0" x="270" y="4" height="56" width="283" format="[general]"  name=origen_ref dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="5" color="0" x="571" y="4" height="56" width="215" format="[general]"  name=tipo_ref edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="0" x="805" y="4" height="56" width="302" format="[general]"  name=nro_ref edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="5" color="0" x="1125" y="4" height="56" width="274" format="[general]"  name=cod_moneda edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="5" color="0" x="1417" y="4" height="56" width="439" format="###,###.00"  name=importe editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="5" color="0" x="1874" y="4" height="56" width="155" format="[general]"  name=flab_tabor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="5" color="0" x="2048" y="4" height="56" width="311" format="[general]"  name=cnta_ctbl edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="5" color="0" x="2377" y="4" height="56" width="119" format="[general]"  name=flag_debhab edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="0" expression=" importe "border="5" color="0" x="2519" y="4" height="56" width="219" format="[GENERAL]"  name=total visible="1~t0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="255" x="32" y="88" height="56" width="187" format="[general]"  name=flag_impuesto edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

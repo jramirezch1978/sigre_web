@@ -1,0 +1,80 @@
+﻿$PBExportHeader$f_afecta_presupuesto_sg.srf
+global type f_afecta_presupuesto_sg from function_object
+end type
+
+forward prototypes
+global function integer f_afecta_presupuesto_sg (string as_origen, string as_nro_sg, string as_cencos)
+end prototypes
+
+global function integer f_afecta_presupuesto_sg (string as_origen, string as_nro_sg, string as_cencos);String ls_cencos,ls_cnta_presup,ls_cod_moneda,ls_descripcion,ls_flag_control
+Long   ll_ano,ll_mes
+Date       ld_fecha_actual
+Datetime   ldt_fecha_registro
+Decimal {2} ldc_importe_dol
+Integer     li_return = 1
+
+
+
+SELECT cencos,cnta_prsp,cod_moneda,saldo_dol,fecha_emision,substr(descripcion,1,100)
+  INTO :ls_cencos,:ls_cnta_presup,:ls_cod_moneda,:ldc_importe_dol,:ldt_fecha_registro,:ls_descripcion
+  FROM solicitud_giro
+ WHERE ((origen        = :as_origen  ) AND
+ 		  (nro_solicitud = :as_nro_sg )) ;
+
+
+if ls_cencos <> as_cencos then 
+	MessageBox('SQL error', 'Centro de Costo Ha sido Modificado...Registro esta Siendo Auditado y Procesado')
+	GOTO SALIDA
+end if	
+
+ld_fecha_actual = Date(ldt_fecha_registro)
+ll_ano = Long(String(ld_fecha_actual,'yyyy'))
+ll_mes = Long(String(ld_fecha_actual,'mm'))
+
+
+
+/*Validar x Flag Control*/
+DECLARE PB_USP_FIN_VERIF_PRESUP_PARTIDA PROCEDURE FOR USP_FIN_VERIF_PRESUP_PART_PB
+(:ll_ano,:ls_cencos,:ls_cnta_presup);
+EXECUTE PB_USP_FIN_VERIF_PRESUP_PARTIDA ;
+
+
+IF SQLCA.SQLCode = -20001 THEN 
+	MessageBox('SQL error', 'No Existe Flag Control de Partida')
+	GOTO SALIDA
+ELSEIF SQLCA.SQLCode = -20000 THEN 
+	MessageBox('SQL error', 'No Existe Partida Presupuestal ')
+	GOTO SALIDA
+
+END IF
+
+
+
+
+FETCH PB_USP_FIN_VERIF_PRESUP_PARTIDA INTO :ls_flag_control;
+CLOSE PB_USP_FIN_VERIF_PRESUP_PARTIDA ;
+
+
+
+IF Trim(ls_flag_control) <> '0' THEN
+
+	
+	li_return = f_afecta_presup (ll_mes,ll_ano,ls_cencos,ls_cnta_presup,ldc_importe_dol)
+END IF	
+
+
+IF li_return = 0 THEN
+	GOTO SALIDA
+END IF
+
+			
+
+Return 1
+
+
+SALIDA:
+
+RETURN 0
+
+end function
+

@@ -1,0 +1,29 @@
+﻿$PBExportHeader$d_dddw_doc_retencion_x_serie_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=doc_ret_igv_crt dbname="finparam.doc_ret_igv_crt" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_serie dbname="doc_tipo_usuario.nro_serie" )
+ column=(type=char(25) updatewhereclause=yes name=desc_tipo_doc dbname="doc_tipo.desc_tipo_doc" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="doc_tipo_usuario.cod_usr" )
+ column=(type=char(4000) updatewhereclause=yes name=tipser dbname="tipser" )
+ retrieve="  SELECT ~"FINPARAM~".~"DOC_RET_IGV_CRT~",   
+         ~"DOC_TIPO_USUARIO~".~"NRO_SERIE~",   
+         ~"DOC_TIPO~".~"DESC_TIPO_DOC~",   
+         ~"DOC_TIPO_USUARIO~".~"COD_USR~",   
+         ~"FINPARAM~".~"DOC_RET_IGV_CRT~"||lpad(to_char(~"DOC_TIPO_USUARIO~".~"NRO_SERIE~") ,(select digitos_serie from finparam where reckey = '1'),'0') as tipser
+    FROM ~"DOC_TIPO~",   
+         ~"DOC_TIPO_USUARIO~",   
+         ~"FINPARAM~"  
+   WHERE ( ~"DOC_TIPO~".~"TIPO_DOC~" = ~"DOC_TIPO_USUARIO~".~"TIPO_DOC~" ) and  
+         ( ~"FINPARAM~".~"DOC_RET_IGV_CRT~" = ~"DOC_TIPO~".~"TIPO_DOC~" )    
+" )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="8388608" x="9" y="8" height="52" width="197"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="8388608" x="210" y="8" height="52" width="713"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="56" width="197" format="[general]"  name=tipser edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="210" y="0" height="56" width="713" format="[general]"  name=desc_tipo_doc edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

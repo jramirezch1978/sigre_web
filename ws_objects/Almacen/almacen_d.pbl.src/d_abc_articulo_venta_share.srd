@@ -1,0 +1,77 @@
+﻿$PBExportHeader$d_abc_articulo_venta_share.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(12) update=yes updatewhereclause=yes key=yes name=cod_art dbname="articulo_venta.cod_art" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_envase dbname="articulo_venta.tipo_envase" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=und_caja dbname="articulo_venta.und_caja" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=lote_minimo dbname="articulo_venta.lote_minimo" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=dias_despacho dbname="articulo_venta.dias_despacho" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=precio_mayorista dbname="articulo_venta.precio_mayorista" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=precio_minorista dbname="articulo_venta.precio_minorista" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=precio_supermercado dbname="articulo_venta.precio_supermercado" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=precio_distribuidor dbname="articulo_venta.precio_distribuidor" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_cntbl_export dbname="articulo_venta.cnta_cntbl_export" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=confin dbname="articulo_venta.confin" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="articulo_venta.cod_moneda" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_dl27400 dbname="articulo_venta.flag_dl27400" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=costo_produccion dbname="articulo_venta.costo_produccion" )
+ column=(type=char(40) updatewhereclause=yes name=desc_confin dbname="concepto_financiero.descripcion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_solicita_lote dbname="articulo_venta.flag_solicita_lote" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp_vale_sal dbname="articulo_venta.cnta_prsp_vale_sal" )
+ column=(type=char(50) updatewhereclause=yes name=presupuesto_cuenta_descripcion dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="articulo_venta.flag_replicacion" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=confin_export dbname="articulo_venta.confin_export" )
+ column=(type=char(40) updatewhereclause=yes name=concepto_financiero_descripcion dbname="concepto_financiero.descripcion" )
+ retrieve="  SELECT ~"ARTICULO_VENTA~".~"COD_ART~",   
+         ~"ARTICULO_VENTA~".~"TIPO_ENVASE~",   
+         ~"ARTICULO_VENTA~".~"UND_CAJA~",   
+         ~"ARTICULO_VENTA~".~"LOTE_MINIMO~",   
+         ~"ARTICULO_VENTA~".~"DIAS_DESPACHO~",   
+         ~"ARTICULO_VENTA~".~"PRECIO_MAYORISTA~",   
+         ~"ARTICULO_VENTA~".~"PRECIO_MINORISTA~",   
+         ~"ARTICULO_VENTA~".~"PRECIO_SUPERMERCADO~",   
+         ~"ARTICULO_VENTA~".~"PRECIO_DISTRIBUIDOR~",   
+         ~"ARTICULO_VENTA~".~"CNTA_CNTBL_EXPORT~",   
+         ~"ARTICULO~".~"DESC_ART~",   
+         ~"ARTICULO~".~"UND~",   
+         ~"ARTICULO_VENTA~".~"CONFIN~",   
+         ~"ARTICULO_VENTA~".~"COD_MONEDA~",   
+         ~"ARTICULO_VENTA~".~"FLAG_DL27400~",   
+         ~"ARTICULO_VENTA~".~"COSTO_PRODUCCION~",   
+         ~"CONCEPTO_FINANCIERO_A~".~"DESCRIPCION~",   
+         ~"ARTICULO_VENTA~".~"FLAG_SOLICITA_LOTE~",   
+         ~"ARTICULO_VENTA~".~"CNTA_PRSP_VALE_SAL~",   
+         ~"PRESUPUESTO_CUENTA~".~"DESCRIPCION~",   
+         ~"ARTICULO_VENTA~".~"FLAG_REPLICACION~",   
+         ~"ARTICULO_VENTA~".~"CONFIN_EXPORT~",   
+         ~"CONCEPTO_FINANCIERO_B~".~"DESCRIPCION~"  
+    FROM ~"ARTICULO_VENTA~",   
+         ~"ARTICULO~",   
+         ~"CONCEPTO_FINANCIERO~" ~"CONCEPTO_FINANCIERO_A~",   
+         ~"PRESUPUESTO_CUENTA~",   
+         ~"CONCEPTO_FINANCIERO~" ~"CONCEPTO_FINANCIERO_B~"  
+   WHERE ( concepto_financiero_a.confin (+) = articulo_venta.confin) and  
+         ( articulo_venta.cnta_prsp_vale_sal = presupuesto_cuenta.cnta_prsp (+)) and  
+         ( articulo_venta.confin_export = concepto_financiero_b.confin (+)) and  
+         ( ~"ARTICULO_VENTA~".~"COD_ART~" = ~"ARTICULO~".~"COD_ART~" )   
+ORDER BY ~"ARTICULO_VENTA~".~"COD_ART~" ASC   
+" update="ARTICULO_VENTA" updatewhere=0 updatekeyinplace=yes )
+text(band=header alignment="2" text="CODIGO" border="2" color="0" x="5" y="4" height="56" width="315" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="325" y="4" height="56" width="1426" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Unidad" border="2" color="0" x="1755" y="4" height="56" width="210" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Tipo Envase" border="2" color="0" x="1970" y="4" height="56" width="366" html.valueishtml="0"  name=tipo_envase_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="5" y="4" height="52" width="315" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(isrownew(),RGB(255,255,255),RGB(192,192,192))" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="0" x="325" y="4" height="52" width="1426" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="0" x="1755" y="4" height="52" width="210" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="1970" y="4" height="52" width="366" format="[general]" html.valueishtml="0"  name=tipo_envase visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

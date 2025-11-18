@@ -1,0 +1,50 @@
+﻿$PBExportHeader$f_num_lt_cobrar.srf
+global type f_num_lt_cobrar from function_object
+end type
+
+forward prototypes
+global function string f_num_lt_cobrar (long al_len_num)
+end prototypes
+
+global function string f_num_lt_cobrar (long al_len_num);Long ll_nro
+String ls_num_lt_cob,ls_lock_table
+
+//************RETORNA EL NRO LETRA E INCREMENTA EN UNO************//
+
+ls_lock_table = 'LOCK TABLE NUM_LET_COB IN EXCLUSIVE MODE'
+EXECUTE IMMEDIATE :ls_lock_table ;
+
+SELECT ult_nro 
+INTO   :ll_nro 
+FROM   num_let_cob  
+WHERE  (origen = :gs_origen);
+
+
+ls_num_lt_cob = string(ll_nro)
+
+IF isnull(ll_nro) or ll_nro = 0 THEN
+	MessageBox('TABLA NUM_LET_COB','Ingrese un Numero de Letra Adecuada')
+	RETURN '0'
+END IF
+
+DO WHILE len(ls_num_lt_cob) < al_len_num - 2
+    ls_num_lt_cob = '0'+ls_num_lt_cob
+LOOP
+
+ls_num_lt_cob = gs_origen+ls_num_lt_cob + '00'
+
+UPDATE  num_let_cob  
+SET     ult_nro = :ll_nro  + 1
+WHERE  (origen = :gs_origen);
+
+If sqlca.sqlcode = -1 Then
+	Messagebox('ERROR FUNCION DEL PRE SIENTO',sqlca.sqlerrtext)
+	ROLLBACK;
+ELSE
+	COMMIT;
+End If	
+
+RETURN ls_num_lt_cob
+
+end function
+

@@ -1,0 +1,50 @@
+﻿$PBExportHeader$f_articulo_inventariable.srf
+global type f_articulo_inventariable from function_object
+end type
+
+forward prototypes
+global function integer f_articulo_inventariable (string as_cod_art)
+end prototypes
+
+global function integer f_articulo_inventariable (string as_cod_art);/*
+   Evalua si articulo es inventariable o no
+	
+	Parametro: codigo de articulo
+	retorna:  0 = no inventariable
+				 1 = inventariable
+				-1 = articulo no existe
+*/
+
+Long ll_count
+string ls_flag, ls_activo, ls_cod_art
+
+// Valida que articulo exista
+Select count( *) into :ll_count from articulo
+  where cod_art = :as_cod_art
+     or codigo_serie = :as_cod_art;
+  
+if ll_count = 0 then
+	Messagebox("Aviso", "Codigo de articulo " + as_cod_art + " no existe, por favor verifique")
+	return -1
+end if
+
+// Valida si es inventariable o no
+Select flag_inventariable, flag_estado, cod_art
+  into :ls_flag, :ls_activo, :ls_cod_art
+from articulo
+  where cod_art = :as_cod_art
+    or codigo_serie = :as_cod_art;
+	 
+if ls_flag = '0' then
+	Messagebox("Aviso", "Codigo " + as_cod_art + " no es inventariable, por favor verifique")
+	return 0
+end if  
+
+if ls_activo = '0' then
+	Messagebox("Aviso", "Codigo " + as_cod_art + " no esta activo, por favor verique")
+	return 0
+end if  
+
+return 1
+end function
+

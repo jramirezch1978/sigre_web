@@ -1,0 +1,25 @@
+﻿$PBExportHeader$of_existe_cuenta.srf
+global type of_existe_cuenta from function_object
+end type
+
+forward prototypes
+global function boolean of_existe_cuenta (string as_cuenta)
+end prototypes
+
+global function boolean of_existe_cuenta (string as_cuenta);Integer li_len, li_reg
+   If IsNull( as_cuenta ) Then
+		MessageBox("of_validar_cuenta","Argumento ingresado es Nulo",Exclamation!)
+		Return False
+	End if	
+   //Seleccionamos
+   Select count(*)
+	  Into :li_reg
+	  from cntbl_cnta
+     where cnta_ctbl = :as_cuenta;
+	IF li_reg >= 1 Then
+      Return TRUE
+	Else
+	   Return FALSE
+	End if  
+end function
+

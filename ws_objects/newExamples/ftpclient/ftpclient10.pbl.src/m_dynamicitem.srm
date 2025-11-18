@@ -1,0 +1,53 @@
+﻿$PBExportHeader$m_dynamicitem.srm
+forward
+global type m_dynamicitem from menu
+end type
+type m_dynamic_item from menu within m_dynamicitem
+end type
+global type m_dynamicitem from menu
+m_dynamic_item m_dynamic_item
+end type
+end forward
+
+global type m_dynamicitem from menu
+m_dynamic_item m_dynamic_item
+end type
+global m_dynamicitem m_dynamicitem
+
+type variables
+Window iw_parent
+Integer ii_index
+
+end variables
+
+on m_dynamicitem.create
+m_dynamicitem=this
+call super::create
+this.m_dynamic_item=create m_dynamic_item
+this.Item[UpperBound(this.Item)+1]=this.m_dynamic_item
+end on
+
+on m_dynamicitem.destroy
+call super::destroy
+destroy(this.m_dynamic_item)
+end on
+
+type m_dynamic_item from menu within m_dynamicitem
+end type
+
+on m_dynamic_item.create
+call super::create
+this.text = "Dynamic Item"
+this.toolbaritemvisible = false
+this.toolbaritemname = "Custom080!"
+end on
+
+on m_dynamic_item.destroy
+call super::destroy
+end on
+
+event clicked;// call window function to perform action
+iw_parent.Dynamic wf_DynamicMenus(ii_index)
+
+end event
+

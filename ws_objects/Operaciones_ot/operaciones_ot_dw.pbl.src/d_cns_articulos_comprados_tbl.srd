@@ -1,0 +1,68 @@
+﻿$PBExportHeader$d_cns_articulos_comprados_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=300 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912"  height.autosize=yes)
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="cod_art" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="nro_doc" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="tipo_doc" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="fec_registro" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cod_moneda" )
+ column=(type=decimal(6) updatewhereclause=yes name=precio_unit dbname="precio_unit" )
+ column=(type=number updatewhereclause=yes name=decuento dbname="decuento" )
+ column=(type=char(6) updatewhereclause=yes name=almacen dbname="almacen" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="nom_proveedor" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_proyect dbname="cant_proyect" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_procesada dbname="cant_procesada" )
+ column=(type=datetime updatewhereclause=yes name=fec_proyect dbname="fec_proyect" )
+ column=(type=number updatewhereclause=yes name=impuesto dbname="impuesto" )
+ column=(type=char(6) updatewhereclause=yes name=forma_pago dbname="forma_pago" )
+ retrieve="SELECT COD_ART, nro_doc, tipo_doc, fec_registro, cod_moneda, precio_unit,
+        decuento, almacen, proveedor, nom_proveedor, cant_proyect, cant_procesada,
+        fec_proyect, impuesto, forma_pago
+    FROM ( select amp.COD_ART, amp.nro_doc, amp.tipo_doc, amp.fec_registro,
+                  amp.cod_moneda, amp.precio_unit, NVL(amp.decuento,0) as decuento,
+                  amp.almacen, oc.proveedor, p.nom_proveedor, amp.cant_proyect, 
+						amp.cant_procesada, amp.fec_proyect, NVL(amp.impuesto,0) as impuesto, 
+						oc.forma_pago
+             from articulo_mov_proy amp,
+                  articulo          a,
+                  orden_compra      oc, 
+						proveedor			p
+             WHERE a.cod_art = amp.cod_art
+               and amp.nro_doc = oc.nro_oc
+               and amp.tipo_doc = (Select doc_oc from logparam where reckey = '1')
+               and amp.flag_estado <> '0'
+               and amp.cod_art = :as_cod_art
+					and (oc.proveedor = p.proveedor)
+           ORDER BY amp.fec_registro desc)
+    where rownum <= :an_registros" arguments=(("as_cod_art", string),("an_registros", number)) )
+text(band=header alignment="2" text="Nro OC" border="6" color="33554432" x="18" y="232" height="56" width="302" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Fecha" border="6" color="33554432" x="334" y="232" height="56" width="256" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="CodRel" border="6" color="33554432" x="603" y="232" height="56" width="238" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Razón social o nombre proveedor" border="6" color="33554432" x="855" y="232" height="56" width="1006" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="F. pago" border="6" color="33554432" x="1874" y="232" height="56" width="165" html.valueishtml="0"  name=forma_pago_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Mon" border="6" color="33554432" x="2053" y="232" height="56" width="123" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cantidad" border="6" color="33554432" x="2190" y="232" height="56" width="274" html.valueishtml="0"  name=cant_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Valor Compra" border="6" color="33554432" x="2478" y="232" height="56" width="302" html.valueishtml="0"  name=valor_compra_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Prec.compra" border="6" color="33554432" x="2793" y="232" height="56" width="302" html.valueishtml="0"  name=precio_compra_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cant.atend." border="6" color="33554432" x="3109" y="232" height="56" width="302" html.valueishtml="0"  name=cant_procesada_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Ultímas compras del artículo" border="3" color="0" x="370" y="44" height="64" width="2491" html.valueishtml="0"  name=t_1 visible="1"  resizeable=1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="1" color="33554432" x="18" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="1" color="33554432" x="334" y="4" height="56" width="256" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="1" color="33554432" x="603" y="4" height="56" width="238" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="1" color="33554432" x="855" y="4" height="56" width="1006" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="1" color="33554432" x="1874" y="4" height="56" width="165" format="[general]" html.valueishtml="0"  name=forma_pago visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="1" color="33554432" x="2053" y="4" height="56" width="123" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="1" color="33554432" x="2190" y="4" height="56" width="274" format="#,##0.00" html.valueishtml="0"  name=cant_proyect visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if(  cant_proyect >0,  (cant_proyect * precio_unit - decuento )/ cant_proyect , 0 )"border="1" color="33554432" x="2478" y="4" height="56" width="302" format="#,##0.00" html.valueishtml="0"  name=valor_compra visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" valor_compra * (100+ impuesto ) / 100"border="1" color="33554432" x="2793" y="4" height="56" width="302" format="#,##0.00" html.valueishtml="0"  name=precio_compra visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="1" color="33554432" x="3109" y="4" height="56" width="302" format="#,##0.00" html.valueishtml="0"  name=cant_procesada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

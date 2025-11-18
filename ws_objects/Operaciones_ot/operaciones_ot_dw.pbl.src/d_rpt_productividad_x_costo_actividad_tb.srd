@@ -1,0 +1,78 @@
+﻿$PBExportHeader$d_rpt_productividad_x_costo_actividad_tb.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=552 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="tt_ope_tefectivo_x_trab.cod_trabajador" )
+ column=(type=char(14) updatewhereclause=yes name=cod_tjt dbname="tt_ope_tefectivo_x_trab.cod_tjt" )
+ column=(type=char(20) updatewhereclause=yes name=codprd dbname="tt_ope_tefectivo_x_trab.codprd" )
+ column=(type=char(50) updatewhereclause=yes name=descripcion dbname="producto_pesaje.descripcion" )
+ column=(type=char(123) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=decimal(4) updatewhereclause=yes name=tarifa dbname="tt_ope_tefectivo_x_trab.tarifa" )
+ column=(type=number updatewhereclause=yes name=peso dbname="peso" )
+ column=(type=number updatewhereclause=yes name=total_ganado dbname="total_ganado" )
+ retrieve="  SELECT ~"TT_OPE_TEFECTIVO_X_TRAB~".~"COD_TRABAJADOR~",  
+         ~"TT_OPE_TEFECTIVO_X_TRAB~".~"COD_TJT~",  
+         ~"TT_OPE_TEFECTIVO_X_TRAB~".~"CODPRD~",   
+         ~"PRODUCTO_PESAJE~".~"DESCRIPCION~",   
+         Nvl(maestro.apel_paterno,' ') ||' '|| Nvl(maestro.apel_materno,' ') ||' '|| Nvl(maestro.nombre1,' ') ||' '|| Nvl(maestro.nombre2,' ') as nombres  ,
+         ~"TT_OPE_TEFECTIVO_X_TRAB~".~"TARIFA~",
+			Sum(tt_ope_tefectivo_x_trab.peso) as peso,
+			Round(Sum(tt_ope_tefectivo_x_trab.peso) * ~"TT_OPE_TEFECTIVO_X_TRAB~".~"TARIFA~" ,3) as total_ganado
+	
+
+    FROM ~"TT_OPE_TEFECTIVO_X_TRAB~",   
+         ~"MAESTRO~",   
+         ~"PRODUCTO_PESAJE~"  
+   WHERE ( ~"TT_OPE_TEFECTIVO_X_TRAB~".~"COD_TRABAJADOR~" = ~"MAESTRO~".~"COD_TRABAJADOR~" ) and  
+         ( ~"TT_OPE_TEFECTIVO_X_TRAB~".~"CODPRD~" = ~"PRODUCTO_PESAJE~".~"CODPRD~" )   and
+			( ~"TT_OPE_TEFECTIVO_X_TRAB~".~"CODPRD~" like :as_producto					)
+GROUP BY ~"TT_OPE_TEFECTIVO_X_TRAB~".~"COD_TRABAJADOR~", 
+   ~"TT_OPE_TEFECTIVO_X_TRAB~".~"COD_TJT~",    
+         ~"TT_OPE_TEFECTIVO_X_TRAB~".~"CODPRD~",   
+         ~"PRODUCTO_PESAJE~".~"DESCRIPCION~",   
+         Nvl(maestro.apel_paterno,' ') ||' '|| Nvl(maestro.apel_materno,' ') ||' '|| Nvl(maestro.nombre1,' ') ||' '|| Nvl(maestro.nombre2,' ') ,
+                  ~"TT_OPE_TEFECTIVO_X_TRAB~".~"TARIFA~"" arguments=(("ad_fecha", date),("an_tasa_cambio", number),("as_producto", string))  sort="codprd A peso D " )
+group(level=1 header.height=80 trailer.height=80 by=("codprd" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Reporte de la Productividad y Costo por Actividad " border="0" color="8388608" x="882" y="40" height="80" width="1755" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="8388608" x="2903" y="44" height="56" width="293" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Fecha :" border="0" color="8388608" x="2903" y="112" height="56" width="293" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag. :" border="0" color="8388608" x="2903" y="180" height="56" width="293" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="8388608" x="3214" y="44" height="56" width="251" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3214" y="112" height="56" width="251" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="33554432" x="3214" y="180" height="56" width="251" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="50" y="36" height="160" width="338" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="8388608" x="50" y="212" height="56" width="338" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Tarjeta" border="2" color="8388608" x="311" y="380" height="168" width="411" html.valueishtml="0"  name=tt_ope_tefectivo_x_trab_cod_tjt_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+text(band=header alignment="2" text="Nombres" border="2" color="8388608" x="727" y="380" height="168" width="795" html.valueishtml="0"  name=nombres_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+text(band=header alignment="2" text="Peso Total
+Kg." border="2" color="8388608" x="1527" y="380" height="168" width="329" html.valueishtml="0"  name=peso_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+text(band=header alignment="2" text="Pago por
+Actividad
+S/. x Kilo" border="2" color="8388608" x="1861" y="380" height="168" width="347" html.valueishtml="0"  name=tt_ope_tefectivo_x_trab_tarifa_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+text(band=header alignment="2" text="Total
+Ganado S/." border="2" color="8388608" x="2213" y="380" height="168" width="347" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+text(band=header alignment="2" text="Total
+Ganado US$" border="2" color="8388608" x="2565" y="380" height="168" width="347" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+text(band=header alignment="0" text="Dia :" border="0" color="8388608" x="338" y="288" height="56" width="151" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression=" ad_fecha "border="0" color="0" x="507" y="288" height="56" width="279" format="dd/mm/yyyy" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="0" text="Actividad :" border="0" color="8388608" x="311" y="4" height="56" width="256" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="599" y="4" height="56" width="334" format="[general]" html.valueishtml="0"  name=codprd visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1029" y="4" height="56" width="1120" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="311" y="0" height="76" width="411" format="[general]" html.valueishtml="0"  name=cod_tjt visible="1" edit.limit=14 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="727" y="0" height="76" width="795" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=123 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="1861" y="0" height="76" width="347" format="[general]" html.valueishtml="0"  name=tarifa visible="1" editmask.mask="###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="1527" y="0" height="76" width="329" format="[general]" html.valueishtml="0"  name=peso visible="1" editmask.mask="###,###.000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="2213" y="0" height="76" width="347" format="[general]" html.valueishtml="0"  name=total_ganado visible="1" editmask.mask="###,###.000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="round ( total_ganado /  an_tasa_cambio ,3)"border="2" color="33554432" x="2565" y="0" height="76" width="347" format="###,###.000" html.valueishtml="0"  name=total_ganado_us visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(  peso  for group 1 )"border="2" color="33554432" x="1527" y="0" height="60" width="329" format="###,###.000" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="1" text="Total por Actividad :" border="2" color="8388608" x="823" y="0" height="60" width="699" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+compute(band=trailer.1 alignment="1" expression="sum(  total_ganado  for group 1 )"border="2" color="33554432" x="2213" y="0" height="60" width="347" format="###,###.000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(   total_ganado_us  for group 1 )"border="2" color="33554432" x="2565" y="0" height="60" width="347" format="###,###.000" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

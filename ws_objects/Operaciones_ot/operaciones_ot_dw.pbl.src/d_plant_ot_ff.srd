@@ -1,0 +1,106 @@
+﻿$PBExportHeader$d_plant_ot_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=1088 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_plantilla dbname="plant_ot.cod_plantilla" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="plant_ot.flag_estado" values="Inactivo	0/Activo	1/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_programado dbname="plant_ot.flag_programado" initial="1" values="Total	1/Parcial	0/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estructura dbname="plant_ot.flag_estructura" initial="0" values="Si	1/No	0/" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=dias_estim_ini dbname="plant_ot.dias_estim_ini" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=dias_estim_fin dbname="plant_ot.dias_estim_fin" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos_rsp dbname="plant_ot.cencos_rsp" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos_rsp dbname="centros_costo.desc_cencos_rsp" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos_slc dbname="plant_ot.cencos_slc" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos_slc dbname="centros_costo.desc_cencos_slc" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_maquina dbname="plant_ot.cod_maquina" )
+ column=(type=char(100) updatewhereclause=yes name=desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=ot_adm dbname="plant_ot.ot_adm" )
+ column=(type=char(40) updatewhereclause=yes name=desc_ot_adm dbname="ot_administracion.desc_ot_adm" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=ot_tipo dbname="plant_ot.ot_tipo" )
+ column=(type=char(60) updatewhereclause=yes name=desc_ot_tipo dbname="ot_tipo.desc_ot_tipo" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=titulo dbname="plant_ot.titulo" )
+ column=(type=char(800) update=yes updatewhereclause=yes name=descripcion dbname="plant_ot.descripcion" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=costo_estimado dbname="plant_ot.costo_estimado" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=plant_prod dbname="plant_ot.plant_prod" )
+ column=(type=char(40) updatewhereclause=yes name=desc_plant_prod dbname="plant_prod.desc_plant_prod" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=plant_ratio dbname="plant_ot.plant_ratio" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="plant_ot.flag_replicacion" )
+ retrieve="  SELECT ~"PLANT_OT~".~"COD_PLANTILLA~",   
+         ~"PLANT_OT~".~"FLAG_ESTADO~",   
+         ~"PLANT_OT~".~"FLAG_PROGRAMADO~",   
+         ~"PLANT_OT~".~"FLAG_ESTRUCTURA~",   
+         ~"PLANT_OT~".~"DIAS_ESTIM_INI~",   
+         ~"PLANT_OT~".~"DIAS_ESTIM_FIN~",   
+         ~"PLANT_OT~".~"CENCOS_RSP~",
+			CCR.DESC_CENCOS AS DESC_CENCOS_RSP,   
+         ~"PLANT_OT~".~"CENCOS_SLC~",   
+			CCS.DESC_CENCOS AS DESC_CENCOS_SLC,
+         ~"PLANT_OT~".~"COD_MAQUINA~",
+			m.desc_maq,   
+         ~"PLANT_OT~".~"OT_ADM~",
+   		ota.descripcion desc_ot_adm,
+         ~"PLANT_OT~".~"OT_TIPO~",
+			ott.descripcion as desc_ot_tipo,   
+         ~"PLANT_OT~".~"TITULO~",   
+         ~"PLANT_OT~".~"DESCRIPCION~",   
+         ~"PLANT_OT~".~"COSTO_ESTIMADO~",   
+         ~"PLANT_OT~".~"PLANT_PROD~",
+			pp.desc_plantilla as desc_plant_prod,   
+         ~"PLANT_OT~".~"PLANT_RATIO~",   
+         ~"PLANT_OT~".~"FLAG_REPLICACION~"
+    FROM ~"PLANT_OT~", CENTROS_COSTO CCS, CENTROS_COSTO CCR, ot_administracion ota, maquina m,
+			ot_tipo ott, plant_prod pp
+   WHERE ~"PLANT_OT~".~"COD_PLANTILLA~" = :as_plantilla    AND
+         PLANT_OT.CENCOS_SLC = CCS.CENCOS(+) AND
+			PLANT_OT.CENCOS_RSP = CCR.CENCOS(+) and
+			plant_ot.ot_adm = ota.ot_adm(+) and
+			plant_ot.cod_maquina = m.cod_maquina(+) and
+			plant_ot.ot_tipo = ott.ot_tipo(+) and
+			plant_ot.plant_prod = pp.cod_plantilla(+)
+" update="PLANT_OT" updatewhere=0 updatekeyinplace=yes arguments=(("as_plantilla", string)) )
+groupbox(band=detail text="Datos OT"border="5" color="33554432" x="32" y="92" height="980" width="2592"  name=gb_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Programado?:" border="0" color="33554432" x="1829" y="408" height="60" width="315" html.valueishtml="0"  name=flag_programado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Estructura?:" border="0" color="33554432" x="1838" y="500" height="60" width="306" html.valueishtml="0"  name=flag_estructura_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=150 border="5" color="33554432" x="2162" y="500" height="60" width="169" format="[general]" html.valueishtml="0"  name=flag_estructura visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.useasborder=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=140 border="5" color="33554432" x="2162" y="408" height="60" width="329" format="[general]" html.valueishtml="0"  name=flag_programado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.useasborder=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Dias Estim. Ini:" border="0" color="33554432" x="59" y="248" height="60" width="375" html.valueishtml="0"  name=dias_estim_ini_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Cencos Rsp:" border="0" color="33554432" x="59" y="340" height="60" width="375" html.valueishtml="0"  name=cencos_rsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Cencos Slc:" border="0" color="33554432" x="59" y="432" height="60" width="375" html.valueishtml="0"  name=cencos_slc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Ot Adm:" border="0" color="33554432" x="59" y="524" height="60" width="375" html.valueishtml="0"  name=ot_adm_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Ot Tipo:" border="0" color="33554432" x="59" y="616" height="60" width="375" html.valueishtml="0"  name=ot_tipo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Cod Maquina:" border="0" color="33554432" x="59" y="708" height="60" width="375" html.valueishtml="0"  name=cod_maquina_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Descripcion:" border="0" color="33554432" x="59" y="800" height="60" width="375" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Dias Estim Fin:" border="0" color="33554432" x="965" y="248" height="60" width="471" html.valueishtml="0"  name=dias_estim_fin_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=50 border="5" color="33554432" x="1454" y="248" height="60" width="329" format="[general]" html.valueishtml="0"  name=dias_estim_fin visible="1" editmask.mask="###,###" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Costo Estimado:" border="0" color="33554432" x="59" y="892" height="60" width="375" html.valueishtml="0"  name=costo_estimado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="1" tabsequence=120 border="5" color="33554432" x="453" y="892" height="60" width="302" format="[general]" html.valueishtml="0"  name=costo_estimado visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="1" tabsequence=40 border="5" color="33554432" x="453" y="248" height="60" width="302" format="[general]" html.valueishtml="0"  name=dias_estim_ini visible="1" editmask.mask="###,###" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=18 alignment="0" tabsequence=110 border="5" color="33554432" x="453" y="800" height="60" width="2062" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=800 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=60 border="5" color="33554432" x="453" y="340" height="60" width="302" format="[general]" html.valueishtml="0"  name=cencos_rsp pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=70 border="5" color="33554432" x="453" y="432" height="60" width="302" format="[general]" html.valueishtml="0"  name=cencos_slc pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=80 border="5" color="33554432" x="453" y="524" height="60" width="302" format="[general]" html.valueishtml="0"  name=ot_adm pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="5" color="33554432" x="786" y="524" height="60" width="1001" format="[general]" html.valueishtml="0"  name=desc_ot_adm visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=15 alignment="0" tabsequence=90 border="5" color="33554432" x="453" y="616" height="60" width="302" format="[general]" html.valueishtml="0"  name=ot_tipo pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="5" color="33554432" x="786" y="616" height="60" width="1001" format="[general]" html.valueishtml="0"  name=desc_ot_tipo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=11 alignment="0" tabsequence=100 border="5" color="33554432" x="453" y="708" height="60" width="302" format="[general]" html.valueishtml="0"  name=cod_maquina pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="5" color="33554432" x="786" y="708" height="60" width="1001" format="[general]" html.valueishtml="0"  name=desc_maq visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Plantilla Ratio:" border="0" color="33554432" x="59" y="1336" height="56" width="375" html.valueishtml="0"  name=plant_ratio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=22 alignment="0" tabsequence=32766 border="5" color="33554432" x="453" y="1336" height="60" width="302" format="[general]" html.valueishtml="0"  name=plant_ratio visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Titulo:" border="0" color="33554432" x="59" y="156" height="60" width="375" html.valueishtml="0"  name=titulo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=30 border="5" color="33554432" x="453" y="156" height="60" width="2062" format="[general]" html.valueishtml="0"  name=titulo visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Plantilla OT:" border="0" color="33554432" x="59" y="28" height="56" width="375" html.valueishtml="0"  name=cod_plantilla_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="33554432" x="453" y="28" height="56" width="302" format="[general]" html.valueishtml="0"  name=cod_plantilla visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="5" color="33554432" x="786" y="432" height="56" width="1001" format="[general]" html.valueishtml="0"  name=desc_cencos_slc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="5" color="33554432" x="786" y="340" height="56" width="1001" format="[general]" html.valueishtml="0"  name=desc_cencos_rsp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 edit.displayonly=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Estado:" border="0" color="33554432" x="827" y="24" height="60" width="201" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=130 border="5" color="33554432" x="1047" y="24" height="60" width="439" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.vscrollbar=yes ddlb.useasborder=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Plantilla Prod:" border="0" color="33554432" x="59" y="984" height="56" width="375" html.valueishtml="0"  name=plant_prod_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=20 border="5" color="33554432" x="453" y="984" height="56" width="302" format="[general]" html.valueishtml="0"  name=plant_prod pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=21 alignment="0" tabsequence=32766 border="5" color="33554432" x="782" y="984" height="56" width="1001" format="[general]" html.valueishtml="0"  name=desc_plant_prod visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

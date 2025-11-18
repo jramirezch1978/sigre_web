@@ -1,0 +1,97 @@
+﻿$PBExportHeader$d_rpt_formato_sem_cts.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=244 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=248 color="536870912" )
+table(column=(type=datetime update=yes updatewhereclause=yes key=yes name=fecha_proceso dbname="hist_prov_cts_gratif.fecha_proceso" )
+ column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_trabajador dbname="hist_prov_cts_gratif.cod_trabajador" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="hist_prov_cts_gratif.cod_origen" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=tipo_trabajador dbname="hist_prov_cts_gratif.tipo_trabajador" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=cts_mes01 dbname="hist_prov_cts_gratif.cts_mes01" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=cts_mes02 dbname="hist_prov_cts_gratif.cts_mes02" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=cts_mes03 dbname="hist_prov_cts_gratif.cts_mes03" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=cts_mes04 dbname="hist_prov_cts_gratif.cts_mes04" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=cts_mes05 dbname="hist_prov_cts_gratif.cts_mes05" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=cts_mes06 dbname="hist_prov_cts_gratif.cts_mes06" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=ingresos_fijos dbname="hist_prov_cts_gratif.ingresos_fijos" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=ingresos_variables dbname="hist_prov_cts_gratif.ingresos_variables" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=ingresos_h_extras dbname="hist_prov_cts_gratif.ingresos_h_extras" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=ingresos_gratif dbname="hist_prov_cts_gratif.ingresos_gratif" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=ingresos_otros dbname="hist_prov_cts_gratif.ingresos_otros" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_calculo dbname="hist_prov_cts_gratif.fecha_calculo" )
+ column=(type=decimal(1) update=yes updatewhereclause=yes name=dias_asist dbname="hist_prov_cts_gratif.dias_asist" )
+ column=(type=char(124) updatewhereclause=yes name=nombre dbname="nombre" )
+ retrieve="  SELECT H.FECHA_PROCESO, 
+         H.COD_TRABAJADOR,
+         H.COD_ORIGEN,
+         H.TIPO_TRABAJADOR,
+         H.CTS_MES01,
+         H.CTS_MES02,
+         H.CTS_MES03,
+         H.CTS_MES04,
+         H.CTS_MES05,
+         H.CTS_MES06,
+         H.INGRESOS_FIJOS,
+         H.INGRESOS_VARIABLES,
+         H.INGRESOS_H_EXTRAS, 
+         H.INGRESOS_GRATIF,
+         H.INGRESOS_OTROS,
+         H.FECHA_CALCULO,
+         H.DIAS_ASIST,
+         TRIM(M.APEL_PATERNO) ||' '||TRIM(M.APEL_MATERNO)||', '||TRIM(M.NOMBRE1)||' '||TRIM(NVL(M.NOMBRE2,' ')) AS Nombre
+    FROM HIST_PROV_CTS_GRATIF H,   
+         MAESTRO M
+   WHERE ( M.COD_TRABAJADOR = H.COD_TRABAJADOR ) and  
+         ( ( trunc( H.FECHA_PROCESO) = :ad_fec_proceso ) AND  
+         ( H.COD_ORIGEN like :as_origen ) AND  
+         ( H.TIPO_TRABAJADOR like :as_tipo_trabajador ) ) 
+ORDER BY TRIM(M.APEL_PATERNO) ||' '||TRIM(M.APEL_MATERNO)||', '||TRIM(M.NOMBRE1)||' '||TRIM(NVL(M.NOMBRE2,' '))
+" update="HIST_PROV_CTS_GRATIF" updatewhere=0 updatekeyinplace=no arguments=(("ad_fec_proceso", date),("as_origen", string),("as_tipo_trabajador", string)) )
+text(band=header alignment="2" text="Cts Mes06" border="2" color="33554432" x="1541" y="76" height="56" width="293" html.valueishtml="0"  name=cts_mes06_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cts Mes02" border="2" color="33554432" x="315" y="76" height="56" width="293" html.valueishtml="0"  name=cts_mes02_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Fec. Proceso" border="2" color="33554432" x="5" y="8" height="56" width="297" html.valueishtml="0"  name=fecha_proceso_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Origen" border="2" color="33554432" x="1847" y="8" height="56" width="151" html.valueishtml="0"  name=cod_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="T.Trab" border="2" color="33554432" x="2011" y="8" height="56" width="146" html.valueishtml="0"  name=tipo_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nombre" border="2" color="33554432" x="622" y="8" height="56" width="1211" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Trabajador" border="2" color="33554432" x="315" y="8" height="56" width="293" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Ing. Variabl" border="2" color="33554432" x="315" y="148" height="56" width="293" html.valueishtml="0"  name=ingresos_variables_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cts Mes01" border="2" color="33554432" x="9" y="76" height="56" width="293" html.valueishtml="0"  name=cts_mes01_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Ingr. Fijos" border="2" color="33554432" x="9" y="148" height="56" width="293" html.valueishtml="0"  name=ingresos_fijos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cts Mes05" border="2" color="33554432" x="1234" y="76" height="56" width="293" html.valueishtml="0"  name=cts_mes05_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Ingr. Destajo" border="2" color="33554432" x="1234" y="148" height="56" width="293" html.valueishtml="0"  name=ingresos_otros_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cts Mes04" border="2" color="33554432" x="928" y="76" height="56" width="293" html.valueishtml="0"  name=cts_mes04_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Ingr. Gratif" border="2" color="33554432" x="928" y="148" height="56" width="293" html.valueishtml="0"  name=ingresos_gratif_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Cts Mes03" border="2" color="33554432" x="622" y="76" height="56" width="293" html.valueishtml="0"  name=cts_mes03_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Ingr. H Extras" border="2" color="33554432" x="622" y="148" height="56" width="293" html.valueishtml="0"  name=ingresos_h_extras_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Dias Asist" border="2" color="33554432" x="2473" y="8" height="56" width="283" html.valueishtml="0"  name=dias_asist_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Provisión" border="2" color="33554432" x="2473" y="76" height="56" width="283" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Pago CTS" border="2" color="33554432" x="2473" y="144" height="56" width="283" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Fec. Pago" border="2" color="33554432" x="2171" y="8" height="56" width="288" html.valueishtml="0"  name=fecha_calculo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=7 alignment="1" tabsequence=60 border="2" color="33554432" x="622" y="76" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=cts_mes03 visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=10 alignment="1" tabsequence=90 border="2" color="33554432" x="1541" y="76" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=cts_mes06 visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=6 alignment="1" tabsequence=50 border="2" color="33554432" x="315" y="76" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=cts_mes02 visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=5 alignment="1" tabsequence=40 border="2" color="33554432" x="9" y="76" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=cts_mes01 visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=8 alignment="1" tabsequence=70 border="2" color="33554432" x="928" y="76" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=cts_mes04 visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=9 alignment="1" tabsequence=80 border="2" color="33554432" x="1234" y="76" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=cts_mes05 visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="56" width="297" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_proceso visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="2" color="33554432" x="622" y="4" height="56" width="1211" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="1847" y="4" height="56" width="151" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="2011" y="4" height="56" width="146" format="[general]" html.valueishtml="0"  name=tipo_trabajador visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="315" y="4" height="56" width="293" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=12 alignment="1" tabsequence=110 border="2" color="33554432" x="315" y="144" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=ingresos_variables visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=13 alignment="1" tabsequence=20 border="2" color="33554432" x="622" y="144" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=ingresos_h_extras visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=11 alignment="1" tabsequence=100 border="2" color="33554432" x="9" y="144" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=ingresos_fijos visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=14 alignment="1" tabsequence=120 border="2" color="33554432" x="928" y="144" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=ingresos_gratif visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=15 alignment="1" tabsequence=130 border="2" color="33554432" x="1234" y="144" height="56" width="293" format="###,###.00" html.valueishtml="0"  name=ingresos_otros visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+line(band=detail x1="5" y1="220" x2="2743" y2="220"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="1" tabsequence=30 border="2" color="33554432" x="2473" y="4" height="56" width="283" format="[general]" html.valueishtml="0"  name=dias_asist visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=16 alignment="2" tabsequence=10 border="2" color="33554432" x="2171" y="4" height="56" width="288" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_calculo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=detail alignment="1" expression=" cts_mes01 + cts_mes02 + cts_mes03 + cts_mes04 + cts_mes05 + cts_mes06 "border="2" color="33554432" x="2473" y="72" height="56" width="283" format="###,###.00" html.valueishtml="0"  name=suma_cts visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+compute(band=detail alignment="1" expression="round(( ingresos_fijos + ingresos_variables + ingresos_h_extras + ingresos_gratif + ingresos_otros ) / 360 *  dias_asist ,2)"border="2" color="33554432" x="2473" y="144" height="56" width="283" format="###,###.00" html.valueishtml="0"  name=sum_ingresos visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

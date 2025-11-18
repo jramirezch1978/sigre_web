@@ -1,0 +1,102 @@
+﻿$PBExportHeader$d_ple_detalle_cnta_20_21_37_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(198) updatewhereclause=yes name=texto dbname="texto" )
+ retrieve="select  to_char(ca.fecha_cntbl, 'yyyymm') || '31' || '|'                             -- 01. Periodo
+        || '9'                                    || '|'                             -- 02. Codigo del catalogo utilizado
+        || ac.cod_sunat                           || '|'                             -- 03. Tipo de Exitencia
+        || replace(a.cod_art, '.', '')            || '|'                             -- 04. Código del articulo
+        || ''                                     || '|'                             -- 05. codigo del catalogo utilizado
+        || a.cod_cubso                            || '|'                             -- 06. Código del articulo segun el CUBSO
+        || case
+           when a.desc_art is not null then
+             trim(substr(PKG_UTILITY.of_trim_SUNAT(a.desc_art), 1, 80))
+          else
+             trim(substr(PKG_UTILITY.of_trim_SUNAT(cad.det_glosa), 1, 80))
+        end   || '|'                                                      					-- 07. Descripcion del articulo
+        || case
+           when u.cod_sunat is not null then
+             u.cod_sunat 
+          else
+             'D97'
+        end                     || '|'                                    					 -- 08. Código de la unidad
+        || '1'                                || '|'                                    -- 09. Código del método de valuación utilizado
+        || trim(to_char(abs(sum(am.cant_procesada * amt.factor_sldo_total)) , '999999999990.00000000'))   || '|'          -- 10. Cantidad de la existencia
+        || case
+			     when abs(sum(am.cant_procesada * amt.factor_sldo_total * am.precio_unit)) = 0.00 then
+				     '0.00'
+				  when abs(sum(am.cant_procesada * amt.factor_sldo_total)) = 0.00 then
+				     '0.00'
+				  else
+				     trim(to_char(abs(sum(am.cant_procesada * amt.factor_sldo_total * am.precio_unit)) / abs(sum(am.cant_procesada * amt.factor_sldo_total)), '999999999990.00000000'))
+			  end   						|| '|'             												-- 11. Costo unitario de la existencia
+        || case
+			     when abs(sum(am.cant_procesada * amt.factor_sldo_total * am.precio_unit)) = 0.00 then
+				     '0.00'
+				  else
+				     trim(to_char(abs(sum(am.cant_procesada * amt.factor_sldo_total * am.precio_unit)), '999999999990.00'))
+			 end  || '|'  																						-- 12. Costo total
+        || '1'                                                   || '|'               	-- 13. Indica el estado de la operación
+        as texto     
+
+   from cntbl_asiento     ca,
+        cntbl_asiento_Det cad,
+        articulo_mov      am,
+        articulo          a,
+        articulo_clase    ac,
+        unidad            u,
+        vale_mov          vm,
+        articulo_mov_tipo amt
+  where ca.origen       = cad.origen
+    and ca.ano          = cad.ano
+    and ca.mes          = cad.mes
+    and ca.nro_libro    = cad.nro_libro
+    and ca.nro_asiento  = cad.nro_asiento     
+    and cad.org_am      = am.cod_origen     (+)
+    and cad.nro_am      = am.nro_mov        (+)
+    and am.nro_vale     = vm.nro_vale       (+)
+    and vm.tipo_mov     = amt.tipo_mov      (+)
+    and am.cod_art      = a.cod_art         (+)
+    and a.cod_clase     = ac.cod_clase      (+)
+    and a.und           = u.und             (+)
+    and ca.ano      = :an_year
+    and ca.mes      = :an_mes
+    and ca.flag_estado <> '0'
+    and substr(cad.cnta_ctbl, 1, 2) in ('20', '21')
+group by  to_char(ca.fecha_cntbl, 'yyyymm'),
+          ac.cod_sunat,
+           replace(a.cod_art, '.', ''),
+           a.cod_cubso,
+           case
+           when a.desc_art is not null then
+             trim(substr(PKG_UTILITY.of_trim_SUNAT(a.desc_art), 1, 80))
+          else
+             trim(substr(PKG_UTILITY.of_trim_SUNAT(cad.det_glosa), 1, 80))
+       end,
+          case
+           when u.cod_sunat is not null then
+             u.cod_sunat 
+          else
+             'D97'
+       end
+having abs(sum(am.cant_procesada * amt.factor_sldo_total)) > 0
+order by 1
+
+
+" arguments=(("an_year", number),("an_mes", number)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="5" y="0" height="64" width="8718" format="[general]" html.valueishtml="0"  name=texto visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="400"  font.family="3" font.pitch="1" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

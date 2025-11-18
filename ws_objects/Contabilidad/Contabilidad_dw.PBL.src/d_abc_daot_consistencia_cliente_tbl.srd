@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_abc_daot_consistencia_cliente_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=552 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=proveedor_proveedor dbname="proveedor.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(20) updatewhereclause=yes name=nro_doc dbname="nro_doc" )
+ column=(type=char(1) updatewhereclause=yes name=proveedor_tipo_doc dbname="proveedor.tipo_doc" values="Libreta Electoral // DNI	1/Carnet de Fuerzas Policiales	2/Carnet de Fuerzas Armadas	3/Carnet de Extranjeria	4/Registro Unico de Contribuyentes	6/Pasaporte	7/-	Sin documento/" )
+ retrieve="  select p.proveedor,p.nom_proveedor,
+			decode(p.tipo_doc_ident,'6',p.ruc,p.nro_doc_ident) as nro_doc,p.tipo_doc_ident as tipo_doc
+  from cntas_cobrar cc, cntas_cobrar_det ccd, proveedor p, doc_tipo dt
+  where ((cc.tipo_doc     = ccd.tipo_doc     )  and
+         (cc.nro_doc      = ccd.nro_doc      )) and
+         (nvl(cc.flag_estado,'0') <> '0'     )  and
+         (cc.ano          = :an_ano       )  and
+         (cc.nro_libro    = :an_libro     )  and
+         (cc.tipo_doc     = dt.tipo_doc      )  and
+         (cc.cod_relacion = p.proveedor      )  and
+         (p.flag_nac_ext  = 'N'              )  and
+         (p.proveedor     not in (select cra.cod_relacion from cod_rel_agrupamiento cra where cra.grupo = 'VARIOS')) and
+         (cc.forma_pago   not in (select forma_pago from forma_pago where flag_no_cobrable = '1' )) and
+           (nvl(length(trim(decode(p.tipo_doc_ident,'6',p.ruc,p.nro_doc_ident))),0) = 0 or 
+           decode(p.tipo_doc_ident,'6',p.ruc,p.nro_doc_ident) is null )
+       
+  
+  group by p.proveedor,p.nom_proveedor,p.tipo_doc_ident,decode(p.tipo_doc_ident,'6',p.ruc,p.nro_doc_ident) 
+  order by decode(p.tipo_doc_ident,'6',p.ruc,p.nro_doc_ident) " arguments=(("an_ano", number),("an_libro", number)) )
+text(band=header alignment="2" text="Inconsistencia en Maestro de Clientes" border="0" color="0" x="864" y="24" height="76" width="1682" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nombre" border="2" color="8388608" x="270" y="492" height="56" width="1399" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T.Doc" border="2" color="8388608" x="1673" y="492" height="56" width="782" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="2459" y="492" height="56" width="539" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+bitmap(band=header filename="H:\source\Bmp\blanco.bmp" x="32" y="12" height="188" width="411" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="32" y="228" height="56" width="411" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="3122" y="12" height="64" width="242" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="2907" y="12" height="64" width="197" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="3122" y="92" height="56" width="242" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="2907" y="92" height="56" width="197" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3122" y="164" height="56" width="242" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="2907" y="164" height="56" width="197" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="C.Relacion" border="2" color="8388608" x="9" y="492" height="56" width="256" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="1673" y="0" height="68" width="782" format="[general]" html.valueishtml="0"  name=proveedor_tipo_doc visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="2459" y="0" height="68" width="539" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="270" y="0" height="68" width="1399" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="68" width="256" format="[general]" html.valueishtml="0"  name=proveedor_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

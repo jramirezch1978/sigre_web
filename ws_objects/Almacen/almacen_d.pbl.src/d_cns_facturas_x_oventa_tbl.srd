@@ -1,0 +1,51 @@
+﻿$PBExportHeader$d_cns_facturas_x_oventa_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=440 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912"  height.autosize=yes)
+table(column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="cntas_cobrar.nro_doc" )
+ column=(type=datetime updatewhereclause=yes name=fecha_documento dbname="cntas_cobrar.fecha_documento" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="cntas_cobrar.cod_moneda" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe_doc dbname="cntas_cobrar.importe_doc" )
+ column=(type=number updatewhereclause=yes name=saldo dbname="saldo" )
+ column=(type=char(4000) updatewhereclause=yes name=referencias dbname="referencias" )
+ column=(type=char(10) updatewhereclause=yes name=pln_cobranza_det_nro_planilla dbname="pln_cobranza_det.nro_planilla" )
+ retrieve="SELECT distinct(cc.tipo_doc) as tipo_doc, cc.nro_doc, 
+		 cc.fecha_documento, cc.cod_moneda, 
+		 cc.importe_doc, decode(cc.cod_moneda,(select cod_dolares from logparam l where reckey='1'), 
+		 NVL(cc.saldo_dol,0), NVL(cc.saldo_sol,0)) as saldo, 
+		 USF_FIN_REFER_FACTURAS(cc.cod_relacion, cc.tipo_doc, cc.nro_doc) as referencias,
+       pln.nro_planilla
+FROM   cntas_cobrar cc, cntas_cobrar_det ccd, pln_cobranza_det pln
+WHERE  cc.tipo_doc = ccd.tipo_doc and
+       cc.nro_doc = ccd.nro_doc and
+       cc.tipo_doc = pln.doc_cxc (+) and
+       cc.nro_doc = pln.nro_doc_cxc (+) and
+       cc.flag_estado <>'0' and
+       ccd.tipo_ref=(select l.doc_ov from logparam l where reckey='1') and
+       ccd.nro_ref = :as_nro_ov" arguments=(("as_nro_ov", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="5" color="33554432" x="18" y="4" height="56" width="137" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="5" color="33554432" x="169" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="5" color="33554432" x="489" y="4" height="56" width="297" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_documento visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="5" color="33554432" x="805" y="4" height="56" width="110" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="5" color="33554432" x="933" y="4" height="56" width="384" format="#,##0.00" html.valueishtml="0"  name=importe_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="5" color="33554432" x="1339" y="4" height="56" width="384" format="#,##0.00" html.valueishtml="0"  name=saldo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="33554432" x="1746" y="4" height="56" width="1088" format="[general]" html.valueishtml="0"  name=referencias visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="FACTURAS REFERENCIADAS A ORDEN DE VENTA" border="3" color="0" x="667" y="188" height="64" width="2002" html.valueishtml="0"  name=t_2 visible="1"  resizeable=1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Nro Doc" border="6" color="33554432" x="169" y="368" height="56" width="302" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="TD" border="6" color="33554432" x="18" y="368" height="56" width="137" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Fec.Docum" border="6" color="33554432" x="489" y="368" height="56" width="297" html.valueishtml="0"  name=fecha_documento_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Mon" border="6" color="33554432" x="805" y="368" height="56" width="110" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Precio Venta" border="6" color="33554432" x="933" y="368" height="56" width="384" html.valueishtml="0"  name=importe_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Saldo" border="6" color="33554432" x="1339" y="368" height="56" width="384" html.valueishtml="0"  name=saldo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Referencias" border="6" color="33554432" x="1746" y="368" height="56" width="1088" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+column(band=detail id=8 alignment="0" tabsequence=0 border="5" color="33554432" x="2857" y="4" height="56" width="338" html.valueishtml="0"  name=pln_cobranza_det_nro_planilla visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Planilla" border="6" color="33554432" x="2853" y="368" height="56" width="334" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

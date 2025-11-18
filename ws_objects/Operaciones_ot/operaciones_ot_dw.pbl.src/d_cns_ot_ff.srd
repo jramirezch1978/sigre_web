@@ -1,0 +1,59 @@
+﻿$PBExportHeader$d_cns_ot_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=4 color="536870912" )
+detail(height=552 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="orden_trabajo.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="orden_trabajo.flag_estado" values="Anulado	0/Activo	1/Cerrado	2/Proyectado	3/" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_inicio dbname="orden_trabajo.fec_inicio" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="orden_trabajo.cod_usr" )
+ column=(type=char(800) update=yes updatewhereclause=yes name=descripcion dbname="orden_trabajo.descripcion" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=ot_adm dbname="orden_trabajo.ot_adm" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=ot_tipo dbname="orden_trabajo.ot_tipo" )
+ column=(type=char(60) updatewhereclause=yes name=desc_ot_tipo dbname="ot_tipo.descripcion" )
+ column=(type=char(40) updatewhereclause=yes name=desc_ot_adm dbname="ot_administracion.descripcion" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_registro dbname="orden_trabajo.fec_registro" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estructura dbname="orden_trabajo.flag_estructura" values="Si	1/No	0/" )
+ retrieve="SELECT     OT.COD_ORIGEN ,
+			  OT.NRO_ORDEN ,
+           OT.FLAG_ESTADO ,
+           OT.FEC_INICIO ,
+           OT.COD_USR ,
+           OT.DESCRIPCION ,
+           OT.OT_ADM ,
+           OT.OT_TIPO ,
+           OTT.DESCRIPCION ,
+           OTA.DESCRIPCION ,
+           OT.FEC_REGISTRO , 
+           OT.FLAG_ESTRUCTURA 
+      FROM ORDEN_TRABAJO 		OT ,
+           OT_ADMINISTRACION 	OTA,
+           OT_TIPO 				OTT, 
+			  OPERACIONES			OPE
+     WHERE OT.OT_ADM 			= OTA.OT_ADM 
+		 And OT.OT_TIPO 			= OTT.OT_TIPO 
+		 AND OT.NRO_ORDEN			= OPE.NRO_ORDEN 
+		 and OPE.OPER_SEC 		= :as_oper_sec" arguments=(("as_oper_sec", string)) )
+groupbox(band=detail text="Datos generales"border="2" color="0" x="9" y="0" height="540" width="1490"  name=gb_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=50 border="5" color="8388608" x="581" y="72" height="56" width="338" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="5" color="8388608" x="462" y="72" height="56" width="96" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="5" color="255" x="462" y="144" height="56" width="343" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="5" color="8388608" x="462" y="216" height="56" width="306" format="[shortdate] [time]" html.valueishtml="0"  name=fec_registro visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=12 alignment="0" tabsequence=40 border="0" color="8388608" x="462" y="288" height="56" width="315" format="[general]" html.valueishtml="0"  name=flag_estructura visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=7 alignment="0" tabsequence=10 border="5" color="8388608" x="462" y="360" height="56" width="329" format="[general]" html.valueishtml="0"  name=ot_adm visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.required=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=30 border="5" color="8388608" x="462" y="440" height="56" width="329" format="[general]" html.valueishtml="0"  name=ot_tipo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.required=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="Orden Trabajo :" border="0" color="0" x="27" y="72" height="56" width="411" html.valueishtml="0"  name=orden_trabajo_nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="0" text="Estado :" border="0" color="0" x="27" y="144" height="56" width="411" html.valueishtml="0"  name=orden_trabajo_flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="0" text="Fecha Registro :" border="0" color="0" x="27" y="216" height="56" width="411" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="0" text="Estructura?:" border="0" color="0" x="27" y="288" height="56" width="411" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="0" text="Adm. de OT :" border="0" color="0" x="27" y="360" height="56" width="411" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="0" text="Tipo de OT :" border="0" color="0" x="27" y="440" height="56" width="411" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=10 alignment="0" tabsequence=20 border="5" color="8388608" x="823" y="360" height="56" width="649" format="[general]" html.valueishtml="0"  name=desc_ot_adm visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="5" color="8388608" x="823" y="440" height="56" width="649" format="[general]" html.valueishtml="0"  name=desc_ot_tipo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

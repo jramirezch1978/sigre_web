@@ -1,0 +1,31 @@
+﻿$PBExportHeader$f_email_empresa.srf
+global type f_email_empresa from function_object
+end type
+
+forward prototypes
+global function string f_email_empresa (string as_origen, string as_user)
+end prototypes
+
+global function string f_email_empresa (string as_origen, string as_user);String ls_email
+/*
+	Cambio Solicitado por PEZEX, 
+	25/10/2012, Que tome el email del usuario, si no existe entonces se toma el email de la empresa
+*/
+
+Select email 
+	into :ls_email 
+from usuario
+where cod_usr = :as_user;
+
+if SQLCA.SQLCode = 100 or IsNull(ls_email) or ls_email = '' then
+	Select email 
+		into :ls_email 
+	from origen
+	where cod_origen = :as_origen;
+end if
+
+if Not IsNull(ls_email) then ls_email = 'Email: ' + ls_email
+
+Return ls_email
+end function
+

@@ -1,0 +1,69 @@
+﻿$PBExportHeader$d_rpt_formato_x_art_x_fecha_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=124 color="536870912" )
+summary(height=92 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912"  height.autosize=yes)
+table(column=(type=char(12) updatewhereclause=yes name=articulo_mov_proy_cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=datetime updatewhereclause=yes name=articulo_mov_proy_fec_registro dbname="articulo_mov_proy.fec_registro" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_proy_cant_proyect dbname="articulo_mov_proy.cant_proyect" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_proy_cant_procesada dbname="articulo_mov_proy.cant_procesada" )
+ column=(type=char(10) updatewhereclause=yes name=articulo_mov_proy_oper_sec dbname="articulo_mov_proy.oper_sec" )
+ column=(type=char(10) updatewhereclause=yes name=articulo_mov_proy_cnta_prsp dbname="articulo_mov_proy.cnta_prsp" )
+ column=(type=char(1) updatewhereclause=yes name=articulo_flag_reposicion dbname="articulo.flag_reposicion" )
+ column=(type=number updatewhereclause=yes name=precio_unit dbname="precio_unit" )
+ column=(type=char(400) updatewhereclause=yes name=articulo_desc_art dbname="articulo.desc_art" )
+ column=(type=decimal(0) updatewhereclause=yes name=articulo_mov_proy_nro_mov dbname="articulo_mov_proy.nro_mov" )
+ retrieve="  SELECT ~"ARTICULO_MOV_PROY~".~"COD_ART~",   
+         ~"ARTICULO~".~"UND~",   
+         ~"ARTICULO_MOV_PROY~".~"FEC_REGISTRO~",   
+         ~"ARTICULO_MOV_PROY~".~"CANT_PROYECT~",   
+         ~"ARTICULO_MOV_PROY~".~"CANT_PROCESADA~",   
+         ~"ARTICULO_MOV_PROY~".~"OPER_SEC~",   
+         ~"ARTICULO_MOV_PROY~".~"CNTA_PRSP~",   
+         ~"ARTICULO~".~"FLAG_REPOSICION~",
+			 DECODE(NVL(ARTICULO_MOV_PROY.PRECIO_UNIT,0),0, NVL(ARTICULO.COSTO_ULT_COMPRA,0),ARTICULO_MOV_PROY.PRECIO_UNIT) AS PRECIO_UNIT,   
+         ~"ARTICULO~".~"DESC_ART~",
+			~"ARTICULO_MOV_PROY~".~"NRO_MOV~"
+    FROM ~"ORDEN_TRABAJO~",   
+         ~"ARTICULO_MOV_PROY~",   
+         ~"ARTICULO~",   
+         ~"OPERACIONES~"  
+   WHERE ( ~"ORDEN_TRABAJO~".~"NRO_ORDEN~" = ~"ARTICULO_MOV_PROY~".~"NRO_DOC~" ) and  
+         ( ~"ARTICULO~".~"COD_ART~" = ~"ARTICULO_MOV_PROY~".~"COD_ART~" ) and  
+         ( ~"ARTICULO_MOV_PROY~".~"OPER_SEC~" = ~"OPERACIONES~".~"OPER_SEC~" ) and  
+         ( ( ~"ARTICULO_MOV_PROY~".~"TIPO_DOC~" = (SELECT doc_ot FROM prod_param WHERE reckey = '1') ) AND  
+         ( ~"ORDEN_TRABAJO~".~"NRO_ORDEN~" = :as_nro_orden ) AND  
+         ( to_char(~"OPERACIONES~".~"FEC_INICIO~",'yyyYmmdd') >= :as_fecha_inicio ) AND  
+         ( to_char(~"OPERACIONES~".~"FEC_INICIO~",'Yyyymmdd') <= :as_fecha_final ) )    
+" arguments=(("as_nro_orden", string),("as_fecha_inicio", string),("as_fecha_final", string))  sort="articulo_mov_proy_oper_sec A " )
+text(band=header alignment="2" text="ARTICULOS REQUERIDOS" border="2" color="0" x="119" y="8" height="56" width="3127" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="0" x="3259" y="4" height="60" width="14" format="[general]" html.valueishtml="0"  name=precio_unit visible="0" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( articulo_mov_proy_cant_proyect *  precio_unit  for all)"border="0" color="0" x="2898" y="20" height="60" width="347" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Total US$ :" border="0" color="0" x="2135" y="16" height="48" width="238" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression=" articulo_mov_proy_cant_proyect *  precio_unit "border="2" color="0" x="2985" y="4" height="60" width="261" format="#,##0.00" html.valueishtml="0"  name=total_dolar visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="0" x="2720" y="4" height="60" width="261" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cant_procesada visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="2446" y="4" height="60" width="270" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cant_proyect visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="0" x="2171" y="4" height="60" width="270" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cnta_prsp visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="2071" y="4" height="60" width="96" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="0" x="1019" y="4" height="60" width="1047" format="[general]" html.valueishtml="0"  name=articulo_desc_art visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="0" x="960" y="4" height="60" width="55" format="[general]" html.valueishtml="0"  name=articulo_flag_reposicion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="663" y="4" height="60" width="293" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="119" y="4" height="60" width="283" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_oper_sec visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=0 border="2" color="0" x="407" y="4" height="60" width="251" html.valueishtml="0"  name=articulo_mov_proy_nro_mov visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="TOTAL US$" border="2" color="0" x="2985" y="68" height="48" width="261" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="C. PROCES." border="2" color="0" x="2720" y="68" height="48" width="261" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="C. PROYECT" border="2" color="0" x="2446" y="68" height="48" width="270" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="CNTA:PRSP" border="2" color="0" x="2171" y="68" height="48" width="270" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="UND" border="2" color="0" x="2071" y="68" height="48" width="96" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="DESCRIPCION" border="2" color="0" x="960" y="68" height="48" width="1106" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="ARTICULO" border="2" color="0" x="663" y="68" height="48" width="293" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="SEC." border="2" color="0" x="119" y="68" height="48" width="283" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="N° MOV" border="2" color="0" x="407" y="68" height="48" width="251" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,151 @@
+﻿$PBExportHeader$d_rpt_flujo_efectivo_semanal_crt.srd
+release 11.5;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=yes showbackcoloronxp=no picture.file=""  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+header[2](height=96 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=116 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=60 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" height.autosize=yes )
+table(column=(type=char(20) updatewhereclause=yes name=desc_actividad dbname="fin_actividad_flujo_desc_actividad" )
+ column=(type=char(20) updatewhereclause=yes name=flag_ingr_egr dbname="flag_ingr_egr" )
+ column=(type=char(20) updatewhereclause=yes name=desc_grupo_flujo dbname="grupo_cod_flujo_caja_desc_grupo_flujo" )
+ column=(type=char(20) updatewhereclause=yes name=desc_flujo_caja dbname="codigo_flujo_caja_desc_flujo_caja" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ retrieve="select 	af.orden as orden1,
+		 	af.desc_actividad,	
+		 	gc.orden as orden2,
+		 	fc.orden as orden3,
+			case 
+				when gc.factor = 'I' then 
+					'01.Ingresos' 
+			  else 
+					'02.Egresos'
+			end as flag_ingr_egr,
+			trim(to_char(cb.fecha_emision, 'yyyy')) || PKG_UTILITY.of_semana(cb.fecha_emision) as semana,
+			gc.descripcion as desc_grupo_flujo,
+			fc.descripcion as desc_flujo_caja,
+			sum((
+				case 
+					when cbd.cod_moneda = :as_moneda then 
+						cbd.importe
+					when cbd.cod_moneda = PKG_LOGISTICA.of_soles(null) then 
+						cbd.importe / cb.tasa_cambio
+					else
+						cbd.importe * cb.tasa_cambio
+			  	end - 
+				-- Disminuyo la retención del IGV
+				case
+					when :as_moneda = PKG_LOGISTICA.of_soles(null) then
+						nvl(cbd.impt_ret_igv, 0)
+					else
+						nvl(cbd.impt_ret_igv, 0) / cb.tasa_cambio
+				end
+			) * decode(gc.factor, 'E', -1, 1) * cbd.factor) as importe
+from caja_bancos 				cb,
+     caja_bancos_det 		cbd,
+     codigo_flujo_caja 		fc,
+     grupo_cod_flujo_caja 	gc,
+	  fin_actividad_flujo	af,
+	  banco_cnta				bc
+where cb.origen 				= cbd.origen  
+  and cb.nro_registro 		= cbd.nro_registro
+  and cbd.cod_flujo_caja 	= fc.cod_flujo_caja 
+  and fc.grp_flujo_caja  	= gc.grp_flujo_caja 
+  and gc.cod_actividad	 	= af.cod_actividad
+  and cb.cod_ctabco			= bc.cod_ctabco
+  and cb.flag_estado  		<> '0'
+  and bc.flag_flujo_caja	= '1'
+  and trunc(cb.fecha_emision) between :ad_fecha1 and :ad_fecha2
+  and cb.origen					like :as_origen
+group by af.orden,
+		 	af.desc_actividad,	
+		 	gc.orden,
+		 	fc.orden,
+			case 
+				when gc.factor = 'I' then 
+					'01.Ingresos' 
+			  else 
+					'02.Egresos'
+			end,
+			trim(to_char(cb.fecha_emision, 'yyyy')) || PKG_UTILITY.of_semana(cb.fecha_emision),
+			gc.descripcion,
+			fc.descripcion
+/*
+union 
+select	af.orden as orden1,
+		 	af.desc_actividad,
+		 	0 as orden2,
+		 	0 as orden3,
+		 	'01.Ingresos' as flag_ingr_egr,
+       	to_char(:ad_fecha1, 'yyyy/mm/dd') as fecha_emision,
+       	to_number(to_char(:ad_fecha1 - 1, 'yyyy')) as ano,
+       	null as semana,
+       	null  as nro_registro,
+       	'SALDO ANTERIOR' as desc_grupo_flujo,
+       	'SALDO ANTERIOR' as desc_flujo_caja,
+       	null as cod_moneda,
+       	'SALDO ANTERIOR' as obs,
+       	sum(
+				case 
+         		when cbd.cod_moneda = :as_moneda then 
+						cbd.importe
+					when cbd.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+						cbd.importe / cb.tasa_cambio
+					else
+						cbd.importe * cb.tasa_cambio
+				end * decode(gc.factor, 'E', -1, 1)) as importe
+from caja_bancos 				cb,
+     caja_bancos_det 		cbd,
+     codigo_flujo_caja 		fc,
+     grupo_cod_flujo_caja 	gc,
+	  fin_actividad_flujo	af,
+	  banco_cnta				bc
+where cb.origen 				= cbd.origen  
+  and cb.nro_registro 		= cbd.nro_registro
+  and cbd.cod_flujo_caja 	= fc.cod_flujo_caja 
+  and fc.grp_flujo_caja  	= gc.grp_flujo_caja 
+  and cb.cod_ctabco			= bc.cod_ctabco
+  and gc.cod_actividad	   = af.cod_actividad
+  and cb.flag_estado  		<> '0'
+  and bc.flag_flujo_caja	= '1'
+  and trunc(cb.fecha_emision) < :ad_fecha1
+  and cb.origen          like :as_origen
+group by af.orden, af.desc_actividad
+*/
+order by 1  " arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_origen", string),("as_moneda", string))  sort="desc_actividad A flag_ingr_egr A " )
+group(level=1 header.height=0 trailer.height=116 by=("desc_actividad" ) header.color="536870912" header.transparency="0" header.gradient.color="8421504" header.gradient.transparency="0" header.gradient.angle="0" header.brushmode="0" header.gradient.repetition.mode="0" header.gradient.repetition.count="0" header.gradient.repetition.length="100" header.gradient.focus="0" header.gradient.scale="100" header.gradient.spread="100" trailer.color="536870912" trailer.transparency="0" trailer.gradient.color="8421504" trailer.gradient.transparency="0" trailer.gradient.angle="0" trailer.brushmode="0" trailer.gradient.repetition.mode="0" trailer.gradient.repetition.count="0" trailer.gradient.repetition.length="100" trailer.gradient.focus="0" trailer.gradient.scale="100" trailer.gradient.spread="100" )
+group(level=2 header.height=0 trailer.height=92 by=("flag_ingr_egr" ) header.color="536870912" header.transparency="0" header.gradient.color="8421504" header.gradient.transparency="0" header.gradient.angle="0" header.brushmode="0" header.gradient.repetition.mode="0" header.gradient.repetition.count="0" header.gradient.repetition.length="100" header.gradient.focus="0" header.gradient.scale="100" header.gradient.spread="100" trailer.color="536870912" trailer.transparency="0" trailer.gradient.color="8421504" trailer.gradient.transparency="0" trailer.gradient.angle="0" trailer.brushmode="0" trailer.gradient.repetition.mode="0" trailer.gradient.repetition.count="0" trailer.gradient.repetition.length="100" trailer.gradient.focus="0" trailer.gradient.scale="100" trailer.gradient.spread="100" )
+text(band=header[2] alignment="2" text="Ingreso o
+Egreso" border="2" color="0" x="750" y="4" height="88" width="457" html.valueishtml="0"  name=flag_ingr_egr_t visible="1"  font.face="Tahoma" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header[2] alignment="2" text="Grupo de Flujo
+de Caja" border="2" color="0" x="1216" y="4" height="88" width="850" html.valueishtml="0"  name=grupo_cod_flujo_caja_desc_grupo_flujo_t visible="1"  font.face="Tahoma" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header[2] alignment="2" text="Código de Flujo
+de Caja" border="2" color="0" x="2075" y="4" height="88" width="736" html.valueishtml="0"  name=desc_flujo_caja_t visible="1"  font.face="Tahoma" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header[2] alignment="2" text="@semana
+" border="2" color="0" x="2821" y="4" height="88" width="293" html.valueishtml="0"  name=importe_t visible="1"  font.face="Tahoma" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header[2] alignment="2" text="Descripcion
+Actividad" border="2" color="0" x="9" y="4" height="88" width="731" html.valueishtml="0"  name=desc_actividad_t visible="1"  font.face="Tahoma" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="52" width="731" format="[general]" html.valueishtml="0"  name=desc_actividad visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="750" y="4" height="52" width="457" format="[general]" html.valueishtml="0"  name=flag_ingr_egr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1216" y="4" height="52" width="850" format="[general]" html.valueishtml="0"  name=desc_grupo_flujo visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="2075" y="4" height="52" width="736" format="[general]" html.valueishtml="0"  name=desc_flujo_caja visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="2821" y="4" height="52" width="293" format="###,##0.00" html.valueishtml="0"  name=importe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=trailer.2 alignment="0" expression="~" Total ~" + flag_ingr_egr + ~" :~""border="0" color="8388608" x="750" y="4" height="76" width="457" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=trailer.2 alignment="1" expression="sum(importe for group 2)"border="0" color="8388608" x="2821" y="4" height="76" width="293" format="###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=trailer.1 alignment="1" expression="~" Total ~" + desc_actividad + ~" :~""border="0" color="255" x="9" y="4" height="76" width="731" format="[general]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=trailer.1 alignment="1" expression="sum(importe for group 1)"border="0" color="255" x="2821" y="4" height="76" width="293" format="###,##0.00" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="~"Total General :~""border="0" color="16711680" x="9" y="4" height="76" width="731" format="[general]" html.valueishtml="0"  name=compute_10 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(importe for all )"border="0" color="16711680" x="2821" y="4" height="76" width="293" format="###,##0.00" html.valueishtml="0"  name=compute_11 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "semana" rows = "fin_actividad_flujo_desc_actividad, flag_ingr_egr, grupo_cod_flujo_caja_desc_grupo_flujo, codigo_flujo_caja_desc_flujo_caja" values = "sum(importe for crosstab)" sourcenames = "fin_actividad_flujo_orden1, fin_actividad_flujo_desc_actividad, grupo_cod_flujo_caja_orden2, codigo_flujo_caja_orden3, flag_ingr_egr, semana, grupo_cod_flujo_caja_desc_grupo_flujo, codigo_flujo_caja_desc_flujo_caja, importe")
+sparse(names="desc_actividad	flag_ingr_egr	desc_grupo_flujo")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

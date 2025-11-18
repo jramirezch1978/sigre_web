@@ -1,0 +1,112 @@
+﻿$PBExportHeader$d_rpt_acntbl_detalle_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=580 color="536870912" )
+summary(height=64 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=decimal(0) updatewhereclause=yes name=nro_asiento dbname="cntbl_asiento.nro_asiento" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="cntbl_asiento.origen" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_ctbl dbname="cntbl_asiento_det.cnta_ctbl" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="cntbl_asiento_det.cencos" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntbl_asiento_det.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(60) updatewhereclause=yes name=det_glosa dbname="cntbl_asiento_det.det_glosa" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_docref1 dbname="cntbl_asiento_det.tipo_docref1" )
+ column=(type=char(15) updatewhereclause=yes name=nro_docref1 dbname="cntbl_asiento_det.nro_docref1" )
+ column=(type=number updatewhereclause=yes name=movsol_d dbname="movsol_d" )
+ column=(type=number updatewhereclause=yes name=movsol_h dbname="movsol_h" )
+ column=(type=number updatewhereclause=yes name=movdol_d dbname="movdol_d" )
+ column=(type=number updatewhereclause=yes name=movdol_h dbname="movdol_h" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_libro dbname="cntbl_asiento.nro_libro" )
+ column=(type=char(40) updatewhereclause=yes name=desc_libro dbname="cntbl_libro.desc_libro" )
+ retrieve="  SELECT ~"CNTBL_ASIENTO~".~"NRO_ASIENTO~",   
+			~"CNTBL_ASIENTO~".~"ORIGEN~",   
+         ~"CNTBL_ASIENTO_DET~".~"CNTA_CTBL~",   
+         ~"CNTBL_ASIENTO_DET~".~"CENCOS~",   
+         ~"CNTBL_ASIENTO_DET~".~"COD_RELACION~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"CNTBL_ASIENTO_DET~".~"DET_GLOSA~",   
+         ~"CNTBL_ASIENTO_DET~".~"TIPO_DOCREF1~",   
+         ~"CNTBL_ASIENTO_DET~".~"NRO_DOCREF1~",   
+         decode(~"CNTBL_ASIENTO_DET~".~"FLAG_DEBHAB~",'D',~"CNTBL_ASIENTO_DET~".~"IMP_MOVSOL~",0) as MOVSOL_D,   
+         decode(~"CNTBL_ASIENTO_DET~".~"FLAG_DEBHAB~",'H',~"CNTBL_ASIENTO_DET~".~"IMP_MOVSOL~",0) as MOVSOL_H,   
+         decode(~"CNTBL_ASIENTO_DET~".~"FLAG_DEBHAB~",'D',~"CNTBL_ASIENTO_DET~".~"IMP_MOVDOL~",0) as MOVDOL_D,   
+         decode(~"CNTBL_ASIENTO_DET~".~"FLAG_DEBHAB~",'H',~"CNTBL_ASIENTO_DET~".~"IMP_MOVDOL~",0) as MOVDOL_H,   
+         ~"CNTBL_ASIENTO~".~"NRO_LIBRO~",   
+         ~"CNTBL_LIBRO~".~"DESC_LIBRO~"  
+    FROM ~"CNTBL_ASIENTO~",   
+         ~"CNTBL_ASIENTO_DET~",   
+         ~"PROVEEDOR~",   
+         ~"CNTBL_LIBRO~"  
+   WHERE ( ~"CNTBL_ASIENTO_DET~".~"ORIGEN~" = ~"CNTBL_ASIENTO~".~"ORIGEN~" ) and  
+			( ~"CNTBL_ASIENTO_DET~".~"ANO~" = ~"CNTBL_ASIENTO~".~"ANO~" ) and  
+			( ~"CNTBL_ASIENTO_DET~".~"MES~" = ~"CNTBL_ASIENTO~".~"MES~" ) and  
+         ( ~"CNTBL_ASIENTO_DET~".~"NRO_LIBRO~" = ~"CNTBL_ASIENTO~".~"NRO_LIBRO~" ) and  
+         ( ~"CNTBL_ASIENTO_DET~".~"NRO_ASIENTO~" = ~"CNTBL_ASIENTO~".~"NRO_ASIENTO~" ) and  
+         ( CNTBL_ASIENTO_det.cod_relacion = proveedor.proveedor (+) ) and  
+         ( ~"CNTBL_ASIENTO~".~"NRO_LIBRO~" = ~"CNTBL_LIBRO~".~"NRO_LIBRO~" ) and  
+         ( ( ~"CNTBL_ASIENTO~".~"NRO_LIBRO~" in ( :al_nro_libro ) ) AND  
+         ( ~"CNTBL_ASIENTO~".~"ANO~" = :as_ano ) AND  
+         ( ~"CNTBL_ASIENTO~".~"MES~" = :as_mes ) )    
+" arguments=(("al_nro_libro", numberlist),("as_ano", string),("as_mes", string))  sort="origen A nro_libro A desc_libro A nro_asiento A " )
+group(level=1 header.height=64 trailer.height=68 by=("origen" , "nro_libro" , "desc_libro" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="gs_logo" x="32" y="24" height="192" width="672" border="0"  name=p_logo )
+text(band=header alignment="0" text="gs_empresa" border="0" color="0" x="32" y="232" height="56" width="672"  name=t_nombre  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Reporte de Asientos Contables" border="0" color="0" x="2263" y="28" height="80" width="1321"  name=t_9  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Mes :" border="0" color="0" x="2866" y="120" height="64" width="155"  name=t_19  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+text(band=header alignment="0" text="00" border="0" color="0" x="3035" y="120" height="64" width="398"  name=t_mes  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Año :" border="0" color="0" x="2469" y="120" height="64" width="160"  name=t_18  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+text(band=header alignment="0" text="0000" border="0" color="0" x="2647" y="120" height="64" width="133"  name=t_ano  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Reporte Detallado" border="0" color="0" x="2624" y="196" height="56" width="626"  name=t_5  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=15 alignment="0" tabsequence=32766 border="0" color="16711680" x="320" y="4" height="56" width="1079" format="[general]"  name=desc_libro visible="1~tif( desc_libro = desc_libro [-1] , 0,1)" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=14 alignment="2" tabsequence=32766 border="0" color="16711680" x="110" y="4" height="56" width="197" format="[general]"  name=nro_libro visible="1~tIf (nro_libro = nro_libro [-1],0,1)" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="16711680" x="14" y="4" height="56" width="82" format="[general]"  name=origen edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="0" color="0" x="14" y="4" height="56" width="192" format="[general]"  name=nro_asiento edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="210" y="4" height="56" width="320" format="[general]"  name=cnta_ctbl edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Asiento" border="2" color="0" x="14" y="444" height="128" width="192"  name=t_7  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cuenta
+Contable" border="2" color="0" x="210" y="444" height="128" width="320"  name=t_8  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Centro
+Costo" border="2" color="0" x="535" y="444" height="128" width="206"  name=t_13  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="535" y="4" height="56" width="206" format="[general]"  name=cencos edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Codigo" border="2" color="0" x="745" y="516" height="56" width="265"  name=t_14  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nombre" border="2" color="0" x="1015" y="516" height="56" width="1029"  name=t_15  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="RAZON SOCIAL / NOMBRE" border="2" color="0" x="745" y="444" height="68" width="1298"  name=t_16  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="745" y="4" height="56" width="265" format="[general]"  name=cod_relacion edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1015" y="4" height="56" width="1029" format="[general]"  name=nom_proveedor edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="GLOSA" border="2" color="0" x="2048" y="444" height="128" width="1093"  name=t_17  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2048" y="4" height="56" width="1093" format="[general]"  name=det_glosa edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="4434" y="20" height="56" width="165"  name=t_11  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="4489" y="88" height="56" width="110"  name=t_12  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="4402" y="156" height="56" width="197"  name=t_10  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="4613" y="88" height="56" width="270" format="[general]"  name=page_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="4613" y="20" height="56" width="270" format="dd/mm/yyyy"  name=date_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="gs_user" border="0" color="0" x="4613" y="156" height="56" width="270"  name=t_user  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Tipo" border="2" color="0" x="3145" y="516" height="56" width="151"  name=t_20  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Numero" border="2" color="0" x="3301" y="516" height="56" width="329"  name=t_21  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="DOCUMENTO" border="2" color="0" x="3145" y="444" height="68" width="485"  name=t_22  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="NUEVOS SOLES" border="2" color="0" x="3634" y="444" height="68" width="626"  name=t_23  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="3145" y="4" height="56" width="151" format="[general]"  name=tipo_docref1 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="3301" y="4" height="56" width="329" format="[general]"  name=nro_docref1 edit.limit=15 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="0" expression="'Sub - Total (Libro Nro :'+string(nro_libro )+')'"border="0" color="16711680" x="2880" y="4" height="56" width="709" format="[GENERAL]"  name=cf_texto_sub  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="TOTAL:" border="0" color="0" x="3406" y="4" height="56" width="183"  name=t_6  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Movsol D" border="2" color="0" x="3634" y="516" height="56" width="311"  name=t_24  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="3634" y="4" height="56" width="311" format="###,##0.00"  name=movsol_d editmask.mask="###,##0.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(  movsol_d  for group 1 )"border="0" color="16711680" x="3634" y="4" height="56" width="311" format="#,##0.00"  name=cf_sol_d  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  movsol_d  for all )"border="0" color="0" x="3634" y="4" height="56" width="311" format="#,##0.00"  name=cf_t_sol_d  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(  movsol_h  for all )"border="0" color="0" x="3950" y="4" height="56" width="311" format="#,##0.00"  name=cf_t_sol_h  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(  movsol_h  for group 1 )"border="0" color="16711680" x="3950" y="4" height="56" width="311" format="#,##0.00"  name=cf_sol_h  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="3950" y="4" height="56" width="311" format="###,##0.00"  name=movsol_h editmask.mask="###,##0.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Movsol H" border="2" color="0" x="3950" y="516" height="56" width="311"  name=t_25  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="DOLARES" border="2" color="0" x="4265" y="444" height="68" width="626"  name=t_26  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Movdol D" border="2" color="0" x="4265" y="516" height="56" width="311"  name=t_27  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="0" x="4265" y="4" height="56" width="311" format="###,##0.00"  name=movdol_d editmask.mask="###,##0.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(  movdol_d  for group 1 )"border="0" color="16711680" x="4265" y="4" height="56" width="311" format="#,##0.00"  name=cf_dol_d  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  movdol_d  for all )"border="0" color="0" x="4265" y="4" height="56" width="311" format="#,##0.00"  name=cf_t_dol_d  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(  movdol_h  for all )"border="0" color="0" x="4581" y="4" height="56" width="311" format="#,##0.00"  name=cf_t_dol_h  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(  movdol_h  for group 1 )"border="0" color="16711680" x="4581" y="4" height="56" width="311" format="#,##0.00"  name=cf_dol_h  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="0" x="4581" y="4" height="56" width="311" format="###,##0.00"  name=movdol_h editmask.mask="###,##0.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Movdol H" border="2" color="0" x="4581" y="516" height="56" width="311"  name=t_28  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

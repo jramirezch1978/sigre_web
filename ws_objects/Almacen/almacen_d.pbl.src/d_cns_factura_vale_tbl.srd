@@ -1,0 +1,40 @@
+﻿$PBExportHeader$d_cns_factura_vale_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=doc_referencias_cod_relacion dbname="doc_referencias.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(4) updatewhereclause=yes name=doc_referencias_tipo_doc dbname="doc_referencias.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=doc_referencias_nro_doc dbname="doc_referencias.nro_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_guia dbname="guia_vale.nro_guia" )
+ column=(type=char(10) updatewhereclause=yes name=guia_vale_nro_vale dbname="guia_vale.nro_vale" )
+ retrieve="select dr.cod_relacion, p.nom_proveedor, dr.tipo_doc, dr.nro_doc, gv.nro_guia, gv.nro_vale
+from guia_vale gv, guia g, doc_referencias dr, proveedor p 
+where (gv.origen_guia=g.cod_origen and 
+       gv.nro_guia=g.nro_guia) and 
+      (dr.cod_relacion=p.proveedor) and        
+      (g.cod_origen = dr.origen_ref and 
+       dr.tipo_ref = (select l.doc_gr from logparam l where l.reckey='1') and 
+       g.nro_guia = dr.nro_ref) and 
+      (gv.origen_vale = :as_cod_origen and 
+       gv.nro_vale = :as_nro_vale ) " arguments=(("as_cod_origen", string),("as_nro_vale", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="56" width="279" format="[general]" html.valueishtml="0"  name=doc_referencias_cod_relacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="293" y="4" height="56" width="1349" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="1646" y="4" height="56" width="119" format="[general]" html.valueishtml="0"  name=doc_referencias_tipo_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="1769" y="4" height="56" width="279" format="[general]" html.valueishtml="0"  name=doc_referencias_nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="2053" y="4" height="56" width="306" format="[general]" html.valueishtml="0"  name=nro_guia visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="2363" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=guia_vale_nro_vale visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cod.Rel" border="2" color="33554432" x="9" y="8" height="56" width="279" html.valueishtml="0"  name=doc_referencias_cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Razon Social" border="2" color="33554432" x="293" y="8" height="56" width="1349" html.valueishtml="0"  name=proveedor_nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="TD" border="2" color="33554432" x="1646" y="8" height="56" width="119" html.valueishtml="0"  name=doc_referencias_tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Número" border="2" color="33554432" x="1769" y="8" height="56" width="279" html.valueishtml="0"  name=doc_referencias_nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Guia Rem." border="2" color="33554432" x="2053" y="8" height="56" width="306" html.valueishtml="0"  name=nro_guia_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Vale Almac." border="2" color="33554432" x="2363" y="8" height="56" width="302" html.valueishtml="0"  name=guia_vale_nro_vale_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

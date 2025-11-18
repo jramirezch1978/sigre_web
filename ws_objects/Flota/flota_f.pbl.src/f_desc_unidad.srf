@@ -1,0 +1,51 @@
+﻿$PBExportHeader$f_desc_unidad.srf
+global type f_desc_unidad from function_object
+end type
+
+forward prototypes
+global function string f_get_desc_unidad (string as_unidad)
+global function string f_desc_unidad (string as_unidad)
+end prototypes
+
+global function string f_get_desc_unidad (string as_unidad);string ls_desc_unidad
+
+SetNull(ls_desc_unidad)
+
+DECLARE pb_usf_fl_unidad PROCEDURE FOR
+	USF_FL_UNIDAD( :as_unidad );
+
+EXECUTE pb_usf_fl_unidad;
+
+IF SQLCA.sqlcode = -1 THEN
+	MessageBox('SQL error', SQLCA.SQLErrText)	
+	Rollback ;
+	Return ls_desc_unidad
+END IF
+
+FETCH pb_usf_fl_unidad INTO :ls_desc_unidad;
+CLOSE pb_usf_fl_unidad;
+
+return ls_desc_unidad
+end function
+
+global function string f_desc_unidad (string as_unidad);string ls_desc_unidad
+
+SetNull(ls_desc_unidad)
+
+DECLARE pb_usf_fl_unidad PROCEDURE FOR
+	USF_FL_UNIDAD( :as_unidad );
+
+EXECUTE pb_usf_fl_unidad;
+
+IF SQLCA.sqlcode = -1 THEN
+	MessageBox('SQL error', SQLCA.SQLErrText)	
+	Rollback ;
+	Return ls_desc_unidad
+END IF
+
+FETCH pb_usf_fl_unidad INTO :ls_desc_unidad;
+CLOSE pb_usf_fl_unidad;
+
+return ls_desc_unidad
+end function
+

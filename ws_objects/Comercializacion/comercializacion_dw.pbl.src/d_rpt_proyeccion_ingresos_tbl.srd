@@ -1,0 +1,480 @@
+﻿$PBExportHeader$d_rpt_proyeccion_ingresos_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=16777215 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=yes showbackcoloronxp=no picture.file="" )
+header(height=432 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(32767) updatewhereclause=yes name=dia dbname="dia" )
+ column=(type=number updatewhereclause=yes name=ene dbname="ene" )
+ column=(type=number updatewhereclause=yes name=feb dbname="feb" )
+ column=(type=number updatewhereclause=yes name=mar dbname="mar" )
+ column=(type=number updatewhereclause=yes name=abr dbname="abr" )
+ column=(type=number updatewhereclause=yes name=may dbname="may" )
+ column=(type=number updatewhereclause=yes name=jun dbname="jun" )
+ column=(type=number updatewhereclause=yes name=jul dbname="jul" )
+ column=(type=number updatewhereclause=yes name=ago dbname="ago" )
+ column=(type=number updatewhereclause=yes name=sep dbname="sep" )
+ column=(type=number updatewhereclause=yes name=oct dbname="oct" )
+ column=(type=number updatewhereclause=yes name=nov dbname="nov" )
+ column=(type=number updatewhereclause=yes name=dic dbname="dic" )
+ retrieve="select to_char(cc.fecha_documento, 'dd') as dia,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '01' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as ene,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '02' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as feb,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '03' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as mar,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '04' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as abr,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '05' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as may,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '06' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as jun,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '07' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as jul,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '08' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as ago,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '09' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as sep,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '10' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as oct,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '11' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as nov,
+       sum(
+          case
+             when to_char(cc.fecha_documento, 'mm') = '12' then
+				        case 
+                   when :as_flag = '0' then
+                      cc.importe_doc
+                   else
+                      cc.importe_doc -
+                        (select nvl(sum(cbd.importe * decode(dt.flag_signo, '+', 1, -1)),0)
+                           from cntas_cobrar cc1,
+                                cntas_cobrar_det ccd1,
+                                doc_tipo         dt,
+                                caja_bancos      cb,
+                                caja_bancos_det  cbd
+                          where cc1.tipo_doc = ccd1.tipo_doc
+                            and cc1.nro_doc  = ccd1.nro_doc
+                            and cc1.tipo_doc = dt.tipo_doc
+                            and cb.origen    = cbd.origen
+                            and cb.nro_registro = cbd.nro_registro
+                            and cbd.tipo_doc    = cc1.tipo_doc
+                            and cbd.nro_doc     = cc1.nro_doc
+                            and cc1.flag_estado <> '0'
+                            and ccd1.tipo_ref   = cc.tipo_doc
+                            and ccd1.nro_ref    = cc.nro_doc)
+                end            
+             else
+                0
+          end
+       )as dic
+       
+       
+from cntas_cobrar cc,
+     cntas_cobrar_det ccd,
+     centro_beneficio cb
+where cc.tipo_doc = ccd.tipo_doc
+  and cc.nro_doc  = ccd.nro_doc
+  and ccd.centro_benef = cb.centro_benef
+  and cc.flag_estado <> '0'
+  and cc.tipo_doc = 'LTC'
+  and to_number(to_char(cc.fecha_documento, 'yyyy')) = :an_year
+  and ccd.centro_benef like :as_centro_benef
+group by to_char(cc.fecha_documento, 'dd')
+union 
+select distinct
+		 column_value,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  from  table(split('01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30', ',')) s1,
+        centro_beneficio cb
+  where cb.centro_benef in ('1001', '1002', '1003')      
+    and cb.centro_benef like :as_centro_benef
+  minus
+  select to_char(cc.fecha_documento, 'dd'),
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  from cntas_cobrar cc,
+       cntas_cobrar_det ccd,
+       centro_beneficio cb
+  where cc.tipo_doc = ccd.tipo_doc
+    and cc.nro_doc  = ccd.nro_doc
+    and ccd.centro_benef = cb.centro_benef
+    and cc.flag_estado <> '0'
+    and cc.tipo_doc = 'LTC'
+    and to_number(to_char(cc.fecha_documento, 'yyyy')) = :an_year
+order by 1  " arguments=(("an_year", number),("as_centro_benef", string),("as_flag", string))  sort="dia A " )
+bitmap(band=header filename="gs_logo" x="50" y="24" height="192" width="485" border="0" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0"  name=p_logo visible="1" transparency="0" )
+text(band=header alignment="0" text="" border="0" color="0" x="50" y="232" height="56" width="672" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="4480" y="108" height="56" width="270" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="4480" y="40" height="56" width="270" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="0" text="" border="0" color="0" x="4480" y="176" height="56" width="270" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="4247" y="176" height="56" width="219" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="4247" y="108" height="56" width="219" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="4247" y="40" height="56" width="219" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="PROYECCION DE INGRESOS ANUAL" border="0" color="0" x="777" y="32" height="80" width="3410" html.valueishtml="0"  name=t_titulo1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="DIA
+" border="2" color="8388608" x="18" y="316" height="112" width="183" html.valueishtml="0"  name=desc_centro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="ENERO
+" border="2" color="8388608" x="206" y="316" height="112" width="347" html.valueishtml="0"  name=ene_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="FEBRERO
+" border="2" color="8388608" x="558" y="316" height="112" width="347" html.valueishtml="0"  name=feb_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="MARZO
+" border="2" color="8388608" x="910" y="316" height="112" width="347" html.valueishtml="0"  name=mar_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="ABRIL
+" border="2" color="8388608" x="1262" y="316" height="112" width="347" html.valueishtml="0"  name=abr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="MAYO
+" border="2" color="8388608" x="1614" y="316" height="112" width="347" html.valueishtml="0"  name=may_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="JUNIO
+" border="2" color="8388608" x="1966" y="316" height="112" width="347" html.valueishtml="0"  name=jun_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="JULIO
+" border="2" color="8388608" x="2318" y="316" height="112" width="347" html.valueishtml="0"  name=jul_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="AGOSTO
+" border="2" color="8388608" x="2670" y="316" height="112" width="347" html.valueishtml="0"  name=ago_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="SETIEMBRE
+" border="2" color="8388608" x="3022" y="316" height="112" width="347" html.valueishtml="0"  name=sep_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="OCTUBRE
+" border="2" color="8388608" x="3374" y="316" height="112" width="347" html.valueishtml="0"  name=oct_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="NOVIEMBRE
+" border="2" color="8388608" x="3726" y="316" height="112" width="347" html.valueishtml="0"  name=nov_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="DICIEMBRE
+" border="2" color="8388608" x="4078" y="316" height="112" width="347" html.valueishtml="0"  name=dic_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="TOTAL
+INGRESOS" border="2" color="8388608" x="4430" y="316" height="112" width="347" html.valueishtml="0"  name=total_ingresos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=header alignment="2" expression="'PERIODO : ' + string( an_year )"border="0" color="8388608" x="777" y="200" height="56" width="3410" format="[GENERAL]" html.valueishtml="0"  name=compute_16 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="" border="0" color="0" x="777" y="124" height="64" width="3410" html.valueishtml="0"  name=t_titulo2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="0" x="18" y="0" height="60" width="183" format="[general]" html.valueishtml="0"  name=dia visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="0" x="206" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=ene visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="558" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=feb visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="910" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=mar visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1262" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=abr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="1614" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=may visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="1966" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=jun visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="2318" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=jul visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="2670" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=ago visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="3022" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=sep visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="3374" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=oct visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="0" x="3726" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=nov visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="0" x="4078" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=dic visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=detail alignment="1" expression=" ene + feb + mar + abr + may + jun + jul + ago + sep + oct + nov + dic "border="0" color="0" x="4430" y="0" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=total_ingresos visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(ene for all)"enabled="0" border="0" color="8388608" x="206" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(feb for all)"enabled="0" border="0" color="8388608" x="558" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(mar for all)"enabled="0" border="0" color="8388608" x="910" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(abr for all)"enabled="0" border="0" color="8388608" x="1262" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(may for all)"enabled="0" border="0" color="8388608" x="1614" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(jun for all)"enabled="0" border="0" color="8388608" x="1966" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(jul for all)"enabled="0" border="0" color="8388608" x="2318" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(ago for all)"enabled="0" border="0" color="8388608" x="2670" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(sep for all)"enabled="0" border="0" color="8388608" x="3022" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(oct for all)"enabled="0" border="0" color="8388608" x="3374" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(nov for all)"enabled="0" border="0" color="8388608" x="3726" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(dic for all)"enabled="0" border="0" color="8388608" x="4078" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum( ene + feb + mar + abr + may + jun + jul + ago + sep + oct + nov + dic  for all)"enabled="0" border="0" color="8388608" x="4430" y="4" height="60" width="347" format="###,##0.00" html.valueishtml="0"  name=compute_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 )
+export.xhtml()
+ 

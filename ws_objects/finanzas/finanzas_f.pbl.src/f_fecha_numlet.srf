@@ -1,0 +1,51 @@
+﻿$PBExportHeader$f_fecha_numlet.srf
+global type f_fecha_numlet from function_object
+end type
+
+forward prototypes
+global function string f_fecha_numlet (datetime ad_fecha)
+end prototypes
+
+global function string f_fecha_numlet (datetime ad_fecha);String	ls_fecha, ls_mes
+Integer	li_mes, li_dia, li_ano
+
+li_mes = Month(date(ad_fecha))
+li_dia = DAY(date(ad_fecha))
+li_ano = Year(date(ad_fecha))
+
+CHOOSE CASE li_mes
+	CASE 1
+		ls_mes = 'Enero'
+	CASE 2
+		ls_mes = 'Febrero'
+	CASE 3
+		ls_mes = 'Marzo'
+	CASE 4
+		ls_mes = 'Abril'
+	CASE 5
+		ls_mes = 'Mayo'
+	CASE 6
+		ls_mes = 'Junio'
+	CASE 7
+		ls_mes = 'Julio'
+	CASE 8
+		ls_mes = 'Agosto'
+	CASE 9
+		ls_mes = 'Septiembre'
+	CASE 10
+		ls_mes = 'Octubre'
+	CASE 11
+		ls_mes = 'Noviembre'
+	CASE 12
+		ls_mes = 'Diciembre'
+	CASE ELSE
+		ls_fecha = 'Error'
+		GOTO SALIDA
+END CHOOSE
+	
+ls_fecha = String(li_dia) + ' de ' + ls_mes + ' de ' + String(li_ano)
+	
+SALIDA:
+RETURN ls_fecha
+end function
+

@@ -1,0 +1,70 @@
+﻿$PBExportHeader$d_rpt_recep_mp_especie_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=516 color="536870912" )
+summary(height=96 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=especie dbname="ap_pd_descarga_det.especie" )
+ column=(type=char(50) updatewhereclause=yes name=descr_especie dbname="tg_especies.descr_especie" )
+ column=(type=datetime updatewhereclause=yes name=ap_pd_descarga_det_inicio_descarga dbname="ap_pd_descarga_det.inicio_descarga" )
+ column=(type=datetime updatewhereclause=yes name=ap_pd_descarga_det_fin_descarga dbname="ap_pd_descarga_det.fin_descarga" )
+ column=(type=char(8) updatewhereclause=yes name=ap_pd_descarga_det_proveedor dbname="ap_pd_descarga_det.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.proveedor" )
+ column=(type=char(8) updatewhereclause=yes name=prov_transporte dbname="ap_pd_descarga_det.prov_transporte" )
+ column=(type=char(50) updatewhereclause=yes name=nom_transportista dbname="proveedor.transportista" )
+ column=(type=char(8) updatewhereclause=yes name=nro_placa dbname="ap_pd_descarga_det.nro_placa" )
+ column=(type=number updatewhereclause=yes name=toneladas dbname="toneladas" )
+ retrieve="Select apd.especie, te.descr_especie, apd.inicio_descarga, apd.fin_descarga, 
+       apd.proveedor, 
+		 p1.nom_proveedor as proveedor, 
+		 apd.prov_Transporte, 
+       p2.nom_proveedor as transportista, 
+       apd.nro_placa,
+		 Nvl(apd.peso_estimado,0) as Toneladas
+  From ap_pd_descarga_det apd, tg_especies te, proveedor p1, proveedor p2  
+ Where apd.especie = te.especie
+   and apd.proveedor = p1.proveedor (+)
+   and apd.prov_Transporte = p2.proveedor (+)
+   and trunc(apd.inicio_descarga) = :ad_fecha
+	and apd.especie = :as_especie
+ Order by apd.especie, apd.inicio_descarga" arguments=(("ad_fecha", date),("as_especie", string))  sort="especie A ap_pd_descarga_det_inicio_descarga A " )
+group(level=1 header.height=88 trailer.height=8 by=("especie" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="gs_logo" x="165" y="108" height="192" width="334" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="23" y="320" height="40" width="626" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Proveedor de Materia Prima" border="2" color="16777215" x="1033" y="396" height="56" width="1371" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Inicio
+Descarga" border="2" color="16777215" x="18" y="396" height="116" width="503" html.valueishtml="0"  name=inicio_descarga_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fin
+Descarga" border="2" color="16777215" x="526" y="396" height="116" width="503" html.valueishtml="0"  name=fin_descarga_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Código" border="2" color="16777215" x="1033" y="456" height="56" width="261" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Razón Social" border="2" color="16777215" x="1298" y="456" height="56" width="1106" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Proveedor de Transporte" border="2" color="16777215" x="2409" y="396" height="56" width="1513" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Código" border="2" color="16777215" x="2409" y="456" height="56" width="261" html.valueishtml="0"  name=transportista_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=header.1 id=1 alignment="2" tabsequence=32766 border="0" color="8388608" x="9" y="8" height="60" width="320" format="[general]" html.valueishtml="0"  name=especie visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="8388608" x="334" y="8" height="60" width="1399" format="[general]" html.valueishtml="0"  name=descr_especie visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="18" y="4" height="76" width="503" format="[shortdate] [time]" html.valueishtml="0"  name=ap_pd_descarga_det_inicio_descarga visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="526" y="4" height="76" width="503" format="[shortdate] [time]" html.valueishtml="0"  name=ap_pd_descarga_det_fin_descarga visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1298" y="4" height="76" width="1106" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="1033" y="4" height="76" width="261" format="[general]" html.valueishtml="0"  name=ap_pd_descarga_det_proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2409" y="4" height="76" width="261" format="[general]" html.valueishtml="0"  name=prov_transporte visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total" border="0" color="255" x="3561" y="12" height="76" width="357" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="'Página ' + page() + ' / ' + pageCount()"border="0" color="0" x="3511" y="132" height="56" width="521" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="Usuario:" border="0" color="0" x="3511" y="208" height="44" width="242" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="" border="0" color="0" x="3767" y="208" height="44" width="274" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="today()"border="0" color="0" x="3511" y="272" height="56" width="526" format="dd/mm/yyyy  hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="2" text="Recepción de Materia Prima - Detalle" border="1" color="0" x="1129" y="116" height="92" width="1893" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="2674" y="4" height="76" width="933" format="[general]" html.valueishtml="0"  name=nom_transportista visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Razón Social" border="2" color="16777215" x="2674" y="456" height="56" width="933" html.valueishtml="0"  name=nom_transportista_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=9 alignment="0" tabsequence=0 border="0" color="8388608" x="3611" y="4" height="76" width="311" html.valueishtml="0"  name=nro_placa visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Placa" border="2" color="16777215" x="3611" y="456" height="56" width="311" html.valueishtml="0"  name=nro_placa_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Toneladas
+" border="2" color="16777215" x="3927" y="396" height="116" width="320" html.valueishtml="0"  name=toneladas_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+compute(band=header.1 alignment="1" expression="sum(toneladas for group 1)"border="0" color="8388608" x="3927" y="8" height="60" width="320" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="3927" y="4" height="76" width="320" format="###,##0.00" html.valueishtml="0"  name=toneladas visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(toneladas for all)"border="0" color="255" x="3931" y="12" height="76" width="320" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

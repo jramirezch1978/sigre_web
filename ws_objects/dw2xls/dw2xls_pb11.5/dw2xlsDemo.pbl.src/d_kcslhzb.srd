@@ -1,0 +1,97 @@
+﻿$PBExportHeader$d_kcslhzb.srd
+$PBExportComments$库存数量汇总表
+release 8;
+datawindow(units=1 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 24 print.margin.right = 24 print.margin.top = 24 print.margin.bottom = 24 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=103 color="536870912" )
+summary(height=23 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=23 color="536870912" )
+table(column=(type=char(25) updatewhereclause=yes name=stock_hzb_itemid dbname="stock_hzb.itemid" )
+ column=(type=char(60) updatewhereclause=yes name=item_name dbname="item.name" )
+ column=(type=char(50) updatewhereclause=yes name=item_model dbname="item.model" )
+ column=(type=char(6) updatewhereclause=yes name=item_unitid dbname="item.unitid" )
+ column=(type=decimal(4) updatewhereclause=yes name=sl_qc dbname="stock_hzb.sl_qc" )
+ column=(type=decimal(4) updatewhereclause=yes name=stock_hzb_je_qc dbname="stock_hzb.je_qc" )
+ column=(type=decimal(4) updatewhereclause=yes name=sl_in dbname="stock_hzb.sl_in" )
+ column=(type=decimal(4) updatewhereclause=yes name=stock_hzb_je_in dbname="stock_hzb.je_in" )
+ column=(type=decimal(4) updatewhereclause=yes name=sl_out dbname="stock_hzb.sl_out" )
+ column=(type=decimal(4) updatewhereclause=yes name=stock_hzb_je_out dbname="stock_hzb.je_out" )
+ column=(type=decimal(4) updatewhereclause=yes name=sl_qm dbname="stock_hzb.sl_qm" )
+ column=(type=decimal(4) updatewhereclause=yes name=stock_hzb_je_qm dbname="stock_hzb.je_qm" )
+ retrieve="SELECT   stock_hzb.itemid,   
+         item.name, 
+			item.model,   
+         item.unitid  ,
+         stock_hzb.sl_qc,   
+         stock_hzb.je_qc,   
+         stock_hzb.sl_in,   
+         stock_hzb.je_in,   
+         stock_hzb.sl_out,   
+         stock_hzb.je_out,   
+         stock_hzb.sl_qm,   
+         stock_hzb.je_qm  
+  FROM   stock_hzb,
+         item   
+           
+  WHERE  stock_hzb.itemid = item.id AND
+         Stock_hzb.nf=:as_nf AND
+         Stock_hzb.yf=:as_yf and 
+         Stock_hzb.SiteID Like :as_siteid  AND
+         Item.ClassID Like :as_ItemClassID AND 
+         ITEM.KINDID  Like :as_ItemKindID 
+        
+        
+          " arguments=(("as_nf", string),("as_yf", string),("as_siteid", string),("as_ItemClassID", string),("as_ItemKindID", string))  sort="stock_hzb_itemid A " )
+data("001","材料一",null "套", 100.0000, 3423.0000, 34.0000, 24.0000, 234.0000, 234.0000, 234.0000, 234.0000,"002","材料二",null "个", 200.0000, 324.0000, 24.0000, 324.0000, 234.0000, 34.0000, 234.0000, 234.0000,) 
+text(band=header alignment="2" text="库 存 数 量 汇 总 表" border="4" color="0" x="152" y="16" height="27" width="384" html.valueishtml="0"  name=report_title visible="1"  font.face="楷体_GB2312" font.height="-18" font.weight="700"  font.family="1" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+line(band=header x1="4" y1="77" x2="4" y2="102"  name=vline_1 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="材料编码" border="0" color="33554432" x="7" y="83" height="14" width="89" html.valueishtml="0"  name=stock_hzb_itemid_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="报表说明：数据是随便输入的" border="0" color="33554432" x="8" y="59" height="14" width="338" html.valueishtml="0"  name=st_tj visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="2" background.color="1073741824" )
+line(band=header x1="106" y1="78" x2="106" y2="103"  name=vline_2 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="材料名称规格" border="0" color="33554432" x="112" y="83" height="14" width="187" html.valueishtml="0"  name=itemname_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="~"打印日期：~"+String(Today(),~"yyyy-mm-dd~")+~"  第~"+String(Page())+~"/~"+String(PageCount())+~"页~""border="0" color="33554432" x="445" y="58" height="15" width="275" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+line(band=header x1="305" y1="78" x2="305" y2="103"  name=vline_3 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="单位" border="0" color="33554432" x="310" y="83" height="14" width="33" html.valueishtml="0"  name=item_unitid_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+line(band=header x1="347" y1="78" x2="347" y2="103"  name=vline_4 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=header x1="441" y1="78" x2="441" y2="103"  name=vline_6 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=header x1="537" y1="78" x2="537" y2="103"  name=vline_8 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="本期出仓数量" border="0" color="33554432" x="545" y="84" height="14" width="83" html.valueishtml="0"  name=b visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+line(band=header x1="630" y1="77" x2="630" y2="102"  name=vline_10 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="期末结存数量" border="0" color="33554432" x="634" y="82" height="14" width="85" html.valueishtml="0"  name=c visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+line(band=header x1="724" y1="78" x2="724" y2="103"  name=vline_12 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=header x1="4" y1="102" x2="725" y2="102"  name=l_15 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=header x1="4" y1="77" x2="725" y2="77"  name=l_1 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="上期结存数量" border="0" color="33554432" x="334" y="83" height="14" width="120" html.valueishtml="0"  name=sl_qc_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="本期进仓数量" border="0" color="33554432" x="447" y="83" height="14" width="85" html.valueishtml="0"  name=a visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+line(band=detail x1="4" y1="0" x2="4" y2="22"  name=l_14 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=detail x1="106" y1="0" x2="106" y2="22"  name=l_13 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=detail x1="305" y1="0" x2="305" y2="22"  name=l_12 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="309" y="3" height="17" width="33" format="[general]" html.valueishtml="0"  name=item_unitid visible="1" dddw.name=dddw_unit dddw.displaycolumn=description dddw.datacolumn=id dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+line(band=detail x1="347" y1="0" x2="347" y2="22"  name=l_11 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=detail x1="441" y1="0" x2="441" y2="22"  name=l_4 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=detail x1="537" y1="0" x2="537" y2="22"  name=l_5 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=detail x1="630" y1="0" x2="630" y2="22"  name=l_8 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=detail x1="724" y1="0" x2="724" y2="21"  name=l_10 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=detail x1="4" y1="22" x2="725" y2="22"  name=l_16 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="3" height="17" width="94" format="[general]" html.valueishtml="0"  name=stock_hzb_itemid visible="1" edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" item_name + IF(IsNull(item_model) ,'','/'+ item_model )"border="0" color="33554432" x="111" y="3" height="17" width="193" format="[GENERAL]" html.valueishtml="0"  name=itemname visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="351" y="3" height="17" width="86" format="#,##0.00" html.valueishtml="0"  name=sl_qc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="446" y="3" height="17" width="86" format="#,##0.00" html.valueishtml="0"  name=sl_in visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="545" y="3" height="17" width="83" format="#,##0.00" html.valueishtml="0"  name=sl_out visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="33554432" x="635" y="3" height="17" width="85" format="#,##0.00" html.valueishtml="0"  name=sl_qm visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="合   计" border="0" color="33554432" x="16" y="5" height="14" width="71" html.valueishtml="0"  name=t_7 visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+line(band=summary x1="4" y1="0" x2="4" y2="22"  name=l_18 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=summary x1="106" y1="0" x2="106" y2="22"  name=l_19 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=summary x1="305" y1="0" x2="305" y2="22"  name=l_20 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=summary x1="347" y1="0" x2="347" y2="22"  name=l_21 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=summary x1="441" y1="0" x2="441" y2="22"  name=l_23 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=summary x1="537" y1="0" x2="537" y2="22"  name=l_25 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=summary x1="630" y1="0" x2="630" y2="22"  name=l_27 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=summary x1="724" y1="0" x2="724" y2="22"  name=l_29 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+line(band=summary x1="4" y1="22" x2="725" y2="22"  name=l19 visible="1" pen.style="0" pen.width="1" pen.color="33554432"  background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(sl_qm for all) "border="0" color="33554432" x="635" y="3" height="17" width="85" format="#,##0.00" html.valueishtml="0"  name=hj_sl_qm visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(sl_out for all) "border="0" color="33554432" x="545" y="3" height="17" width="83" format="#,##0.00" html.valueishtml="0"  name=hj_sl_out visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(sl_in for all) "border="0" color="33554432" x="446" y="3" height="17" width="86" format="#,##0.00" html.valueishtml="0"  name=hj_sl_in visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(sl_qc for all) "border="0" color="33554432" x="352" y="3" height="17" width="86" format="#,##0.00" html.valueishtml="0"  name=hj_sl_qc visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

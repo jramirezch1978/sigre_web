@@ -1,0 +1,102 @@
+﻿$PBExportHeader$d_cns_bienes.srd
+$PBExportComments$Consulta que muestra todo el circulo en la adquisicion de bienes por un rango de fechas.
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=360 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=orden_compra_cod_origen dbname="orden_compra.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=orden_compra_nro_oc dbname="orden_compra.nro_oc" )
+ column=(type=char(1) updatewhereclause=yes name=orden_compra_flag_estado dbname="orden_compra.flag_estado" values="Anulado	0/Generado	1/" )
+ column=(type=char(1) updatewhereclause=yes name=orden_compra_flag_importacion dbname="orden_compra.flag_importacion" values="No	0/Si	1/" )
+ column=(type=char(8) updatewhereclause=yes name=orden_compra_proveedor dbname="orden_compra.proveedor" )
+ column=(type=datetime updatewhereclause=yes name=orden_compra_fec_registro dbname="orden_compra.fec_registro" )
+ column=(type=char(6) updatewhereclause=yes name=orden_compra_forma_pago dbname="orden_compra.forma_pago" )
+ column=(type=char(3) updatewhereclause=yes name=orden_compra_cod_moneda dbname="orden_compra.cod_moneda" )
+ column=(type=char(12) updatewhereclause=yes name=articulo_mov_proy_cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=datetime updatewhereclause=yes name=articulo_mov_proy_fec_proyect dbname="articulo_mov_proy.fec_proyect" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_proy_cant_proyect dbname="articulo_mov_proy.cant_proyect" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_proy_cant_procesada dbname="articulo_mov_proy.cant_procesada" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_mov_proy_cant_facturada dbname="articulo_mov_proy.cant_facturada" )
+ column=(type=char(10) updatewhereclause=yes name=articulo_mov_proy_cencos dbname="articulo_mov_proy.cencos" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(25) updatewhereclause=yes name=forma_pago_desc_forma_pago dbname="forma_pago.desc_forma_pago" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ retrieve="  SELECT oc.COD_ORIGEN,   
+         oc.NRO_OC,   
+         oc.FLAG_ESTADO,   
+         oc.FLAG_IMPORTACION,   
+         oc.PROVEEDOR,   
+         oc.FEC_REGISTRO,   
+         oc.FORMA_PAGO,   
+         oc.COD_MONEDA,   
+         am.COD_ART,   
+         am.FEC_PROYECT,   
+         am.CANT_PROYECT,   
+         am.CANT_PROCESADA,   
+         am.CANT_FACTURADA,   
+         am.CENCOS,   
+         p.NOM_PROVEEDOR,   
+         fp.DESC_FORMA_PAGO,   
+         a.NOM_ARTICULO,   
+         a.UND  
+    FROM ARTICULO_MOV_PROY am,   
+         ORDEN_COMPRA oc,   
+         PROVEEDOR p,   
+         FORMA_PAGO fp,   
+         ARTICULO a  
+   WHERE ( oc.COD_ORIGEN = am.COD_ORIGEN ) and  
+         ( oc.NRO_OC = am.NRO_DOC ) and  
+         ( oc.PROVEEDOR = p.PROVEEDOR ) and  
+         ( oc.FORMA_PAGO = fp.FORMA_PAGO ) and  
+         ( am.COD_ART = a.COD_ART ) and  
+         ( ( am.TIPO_DOC = (  SELECT l.DOC_OC  
+                                                   FROM LOGPARAM l  
+                                                  WHERE l.RECKEY = '1'  )) AND  
+         ( TRUNC(oc.FEC_REGISTRO) >= :ad_desde ) AND  
+         ( TRUNC(oc.FEC_REGISTRO) <= :ad_hasta ) )    
+" arguments=(("ad_desde", date),("ad_hasta", date)) )
+bitmap(band=header filename="H:\Source\Bmp\agro.bmp" x="18" y="12" height="232" width="393" border="0"  name=p_logo )
+text(band=header alignment="1" text="Al:" border="0" color="0" x="1897" y="140" height="64" width="91"  name=t_2  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="2002" y="140" height="64" width="398"  name=t_hasta  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Del:" border="0" color="0" x="1349" y="140" height="64" width="119"  name=t_3  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="1481" y="140" height="64" width="398"  name=t_desde  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Orig." border="2" color="0" x="5" y="300" height="56" width="119"  name=orden_compra_cod_origen_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Oc" border="2" color="0" x="128" y="300" height="56" width="329"  name=orden_compra_nro_oc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fec Registro" border="2" color="0" x="462" y="300" height="56" width="315"  name=orden_compra_fec_registro_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Flag Estado" border="2" color="0" x="782" y="300" height="56" width="384"  name=orden_compra_flag_estado_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Import." border="2" color="0" x="1170" y="300" height="56" width="178"  name=orden_compra_flag_importacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Proveedor" border="2" color="0" x="1353" y="300" height="56" width="247"  name=orden_compra_proveedor_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Razon Social" border="2" color="0" x="1605" y="300" height="56" width="1349"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="0" x="3643" y="300" height="56" width="192"  name=orden_compra_cod_moneda_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Forma Pago" border="2" color="0" x="2958" y="300" height="56" width="681"  name=orden_compra_forma_pago_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cod Art" border="2" color="0" x="3840" y="300" height="56" width="302"  name=articulo_mov_proy_cod_art_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fec Proyect" border="2" color="0" x="5746" y="300" height="56" width="603"  name=articulo_mov_proy_fec_proyect_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cant Proyect" border="2" color="0" x="6354" y="300" height="56" width="466"  name=articulo_mov_proy_cant_proyect_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cant Procesada" border="2" color="0" x="6825" y="300" height="56" width="466"  name=articulo_mov_proy_cant_procesada_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cant Facturada" border="2" color="0" x="7296" y="300" height="56" width="466"  name=articulo_mov_proy_cant_facturada_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cencos" border="2" color="0" x="7767" y="300" height="56" width="466"  name=articulo_mov_proy_cencos_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="0" x="5458" y="300" height="56" width="123"  name=t_5  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="4146" y="300" height="56" width="1307"  name=t_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="5" y="4" height="60" width="119" format="[general]"  name=orden_compra_cod_origen edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="128" y="4" height="60" width="329" format="[general]"  name=orden_compra_nro_oc edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="462" y="4" height="60" width="315" format="dd/mm/yyyy"  name=orden_compra_fec_registro edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="782" y="4" height="60" width="384" format="[general]"  name=orden_compra_flag_estado ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1170" y="4" height="60" width="178" format="[general]"  name=orden_compra_flag_importacion ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1353" y="4" height="60" width="247" format="[general]"  name=orden_compra_proveedor edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="1605" y="4" height="60" width="1349" format="[general]"  name=proveedor_nom_proveedor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="0" x="3643" y="4" height="60" width="192" format="[general]"  name=orden_compra_cod_moneda edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="2958" y="4" height="60" width="681" format="[general]"  name=forma_pago_desc_forma_pago edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="3840" y="4" height="60" width="302" format="[general]"  name=articulo_mov_proy_cod_art edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="5742" y="4" height="60" width="603" format="[shortdate] [time]"  name=articulo_mov_proy_fec_proyect edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="6350" y="4" height="60" width="329" format="[general]"  name=articulo_mov_proy_cant_proyect edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="0" x="6821" y="4" height="60" width="329" format="[general]"  name=articulo_mov_proy_cant_procesada edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="0" x="7291" y="4" height="60" width="329" format="[general]"  name=articulo_mov_proy_cant_facturada edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="7762" y="4" height="60" width="302" format="[general]"  name=articulo_mov_proy_cencos edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="0" x="5458" y="4" height="60" width="123" format="[general]"  name=articulo_und edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="4146" y="4" height="60" width="1307" format="[general]"  name=articulo_nom_articulo edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="orden_compra_fec_registro	orden_compra_nro_oc	orden_compra_cod_origen	orden_compra_flag_estado	orden_compra_flag_importacion	orden_compra_proveedor	orden_compra_cod_moneda	forma_pago_desc_forma_pago	proveedor_nom_proveedor")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

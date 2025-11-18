@@ -1,0 +1,50 @@
+﻿$PBExportHeader$d_proc_liberacion_amp.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_reservacion dbname="reservacion_det.nro_reservacion" )
+ column=(type=char(2) update=yes updatewhereclause=yes key=yes name=org_amp_ref dbname="reservacion_det.org_amp_ref" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_amp_ref dbname="reservacion_det.nro_amp_ref" )
+ column=(type=datetime update=yes updatewhereclause=yes key=yes name=fec_registro dbname="reservacion_det.fec_registro" )
+ column=(type=char(12) updatewhereclause=yes name=articulo_mov_proy_cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(6) updatewhereclause=yes name=articulo_mov_proy_almacen dbname="articulo_mov_proy.almacen" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cantidad dbname="reservacion_det.cantidad" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_almacen_sldo_total dbname="articulo_almacen.sldo_total" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_almacen_sldo_reservado dbname="articulo_almacen.sldo_reservado" )
+ retrieve="SELECT r.nro_reservacion, r.org_amp_ref, r.nro_amp_ref, r.fec_registro, 
+       amp.cod_art, amp.almacen, r.cantidad, aa.sldo_total, aa.sldo_reservado
+  FROM reservacion_det r, articulo_mov_proy amp, articulo_almacen aa
+ WHERE r.org_amp_ref = amp.cod_origen AND 
+       r.nro_amp_ref = amp.nro_mov AND 
+       amp.tipo_doc  = :as_doc_ot AND 
+       amp.cod_art = aa.cod_art AND 
+       amp.almacen = aa.almacen AND 
+       r.org_amp_ref like :as_cod_origen and 
+       r.nro_amp_ref like :as_nro_mov 
+" update="reservacion_det" updatewhere=0 updatekeyinplace=no arguments=(("as_cod_origen", string),("as_nro_mov", string),("as_doc_ot", string)) )
+text(band=header alignment="2" text="Cantidad" border="5" color="33554432" x="1847" y="8" height="56" width="293" html.valueishtml="0"  name=reservacion_det_cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Almacen" border="5" color="0" x="1646" y="8" height="56" width="192" html.valueishtml="0"  name=articulo_mov_proy_almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Sldo Total" border="5" color="0" x="2149" y="8" height="56" width="311" html.valueishtml="0"  name=articulo_almacen_sldo_total_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="0" text="Sldo Reserv" border="5" color="0" x="2469" y="8" height="56" width="334" html.valueishtml="0"  name=articulo_almacen_sldo_reservado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Articulo" border="5" color="0" x="1371" y="8" height="56" width="265" html.valueishtml="0"  name=articulo_mov_proy_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fec Registro" border="5" color="0" x="987" y="8" height="56" width="375" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Num_Movimiento" border="5" color="33554432" x="549" y="8" height="56" width="430" html.valueishtml="0"  name=reservacion_det_nro_amp_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Origen" border="5" color="33554432" x="338" y="8" height="56" width="201" html.valueishtml="0"  name=reservacion_det_org_amp_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Reservacion" border="5" color="0" x="9" y="8" height="56" width="320" html.valueishtml="0"  name=nro_reservacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="5" color="0" x="1646" y="8" height="64" width="192" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_almacen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="5" color="0" x="1371" y="8" height="64" width="265" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="5" color="0" x="987" y="8" height="64" width="375" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="5" color="33554432" x="549" y="8" height="64" width="430" format="[general]" html.valueishtml="0"  name=nro_amp_ref visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="5" color="33554432" x="338" y="8" height="64" width="201" format="[general]" html.valueishtml="0"  name=org_amp_ref visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="5" color="0" x="9" y="8" height="64" width="320" format="[general]" html.valueishtml="0"  name=nro_reservacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=7 alignment="1" tabsequence=10 border="5" color="33554432" x="1851" y="8" height="64" width="288" format="###,###.00" html.valueishtml="0"  name=cantidad visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="5" color="0" x="2153" y="8" height="64" width="306" format="###,###.00" html.valueishtml="0"  name=articulo_almacen_sldo_total visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="5" color="0" x="2469" y="8" height="64" width="334" format="###,###.00" html.valueishtml="0"  name=articulo_almacen_sldo_reservado visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,30 @@
+﻿$PBExportHeader$f_verificacion_items_x_retencion_lqc.srf
+global type f_verificacion_items_x_retencion_lqc from function_object
+end type
+
+forward prototypes
+global subroutine f_verificacion_items_x_retencion_lqc (ref datawindow adw_master, ref datawindow adw_detail)
+end prototypes
+
+global subroutine f_verificacion_items_x_retencion_lqc (ref datawindow adw_master, ref datawindow adw_detail);String ls_expresion,ls_flag_retencion
+Long   ll_found,ll_row_master
+
+ll_row_master = adw_master.getrow()
+
+Setnull(ls_flag_retencion)
+
+
+adw_detail.Accepttext()
+
+ls_expresion = "flag_retencion = '1'"
+ll_found     = adw_detail.find(ls_expresion,1,adw_detail.rowcount())
+
+IF ll_found > 0 THEN
+   adw_master.object.flag_retencion [ll_row_master] = '1'
+ELSE
+   adw_master.object.flag_retencion [ll_row_master] = ls_flag_retencion
+END IF
+
+
+end subroutine
+

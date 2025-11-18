@@ -1,0 +1,112 @@
+﻿$PBExportHeader$f_asigna_matriz.srf
+global type f_asigna_matriz from function_object
+end type
+
+forward prototypes
+global function string f_asigna_matriz (string as_tipo_mov, string as_cencos, string as_cnta_prsp)
+end prototypes
+
+global function string f_asigna_matriz (string as_tipo_mov, string as_cencos, string as_cnta_prsp);/*
+   Segun datos registrados, asigna matriz, la asigna es opcional
+*/
+string 	ls_grp_cntbl, ls_matriz, ls_null, ls_contab
+Long 		ln_count, il_Factor_prsp
+
+SetNull(ls_null)
+
+if IsNull(as_tipo_mov) then 
+	MessageBox('Aviso', 'tipo de movimiento es nulo')
+	return ls_null
+end if
+
+select NVL(flag_contabiliza, '0'), NVL(FACTOR_PRESUP, 0)
+	into :ls_contab, :il_factor_prsp
+from articulo_mov_tipo
+where tipo_mov = :as_tipo_mov;
+
+if SQLCA.SQLCode = 100 then
+	MessageBox('Error', 'No existe tipo de movimiento ' + as_tipo_mov)
+	return ls_null
+end if
+
+if ls_contab = '0' then return ls_null
+
+// Para ingresos, solo con el tipo de movimiento
+if il_factor_prsp = 0 then
+	// Verifica que codigo exista
+	Select matriz 
+		into :ls_matriz 
+	from tipo_mov_matriz
+  	Where tipo_mov = :as_tipo_mov; 	
+	  
+	if sqlca.sqlcode = 100 then
+		Messagebox( "Atencion", "tipo de operacion " + as_tipo_mov + "no tiene matriz", StopSign!)
+		return ls_null
+	end if
+	
+else	
+	if IsNull(as_cencos) or trim(as_cencos) = '' then
+		MessageBox('Error', 'Tipo de Movimiento afecta presupuesto y no ha ' &
+					+ 'definido Centro de Costo')
+		return ls_null
+	end if
+	
+	// Busca grp_cntbl segun centro de costo
+	Select grp_cntbl 
+		into :ls_grp_cntbl 
+	from centros_costo
+	where cencos = :as_cencos;	
+
+	if sqlca.sqlcode = 100 then
+		Messagebox( "Atencion", "Centro de Costos: " + as_cencos + " no existe", StopSign!)
+		return ls_null
+	end if
+	
+	if trim(ls_grp_cntbl) = '' or IsNull(ls_grp_cntbl) then
+		Messagebox( "Atencion", "Centro de Costos: " + as_cencos + " no tiene asignado " &
+			+"un grupo contable", StopSign!)
+		return ls_null
+	end if
+
+	as_tipo_mov 	= TRIM(as_tipo_mov)
+	as_cnta_prsp 	= TRIM(as_cnta_prsp)
+	
+	// Verifica que codigo exista	
+	select count(*)
+		into :ln_count
+	from tipo_mov_matriz
+  	Where TRIM(tipo_mov)  = :as_tipo_mov
+	  and TRIM(grp_cntbl) = :ls_grp_cntbl
+	  and TRIM(cnta_prsp) = :as_cnta_prsp;  	
+	
+	if ln_count = 1 then
+		Select matriz  
+			into :ls_matriz 
+		from tipo_mov_matriz
+		Where TRIM(tipo_mov)  = :as_tipo_mov 
+		  and TRIM(grp_cntbl) = :ls_grp_cntbl 
+		  and TRIM(cnta_prsp) = :as_cnta_prsp;
+		
+	elseif ln_count = 0 then		  
+		Messagebox( "Atencion", "tipo de operacion no tiene matriz " &
+			+ '~r~n Tipo de Mov: ' + as_tipo_mov &
+			+ '~r~n Grupo Contable: ' + ls_grp_cntbl &
+			+ '~r~n Centro de Costo: ' + as_cencos &
+			+ '~r~n Cnta Prsp: ' + as_cnta_prsp, StopSign!)
+		return ls_null
+	
+	else
+		
+		w_main.SetMicroHelp ("Se han asignado mas de una matriz en este Tipo de Mov...")
+		
+		Select DISTINCT( MIN(matriz) )
+			into :ls_matriz 
+		from tipo_mov_matriz
+		Where TRIM(tipo_mov) = :as_tipo_mov 
+		  and TRIM(grp_cntbl) = :ls_grp_cntbl 
+		  and TRIM(cnta_prsp) = :as_cnta_prsp;
+	end if
+end if
+return ls_matriz
+end function
+

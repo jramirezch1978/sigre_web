@@ -1,0 +1,77 @@
+﻿$PBExportHeader$d_abc_oper_prod_destajo_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=124 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=decimal(0) updatewhereclause=yes name=nro_operacion dbname="operaciones.nro_operacion" )
+ column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="operaciones.cod_labor" )
+ column=(type=char(4) updatewhereclause=yes name=cod_ejecutor dbname="operaciones.cod_ejecutor" )
+ column=(type=char(40) updatewhereclause=yes name=desc_labor dbname="labor.desc_labor" )
+ column=(type=decimal(2) updatewhereclause=yes name=cant_proyect dbname="operaciones.cant_proyect" )
+ column=(type=decimal(2) updatewhereclause=yes name=cant_real dbname="operaciones.cant_real" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="operaciones.nro_orden" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="operaciones.oper_sec" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="operaciones.cencos" )
+ column=(type=number updatewhereclause=yes name=porc dbname="porc" )
+ column=(type=char(1) updatewhereclause=yes name=flag_cierre dbname="flag_cierre" values="Activo	0/Cerrado	1/" )
+ retrieve="  SELECT ~"OPERACIONES~".~"NRO_OPERACION~",   
+         ~"OPERACIONES~".~"COD_LABOR~",   
+         ~"OPERACIONES~".~"COD_EJECUTOR~",   
+         ~"LABOR~".~"DESC_LABOR~",   
+         ~"OPERACIONES~".~"CANT_PROYECT~",   
+         ~"OPERACIONES~".~"CANT_REAL~",   
+         ~"OPERACIONES~".~"NRO_ORDEN~",   
+         ~"OPERACIONES~".~"OPER_SEC~",   
+			~"OPERACIONES~".~"CENCOS~",   
+         0 as porc  ,
+			'0' as flag_cierre
+    FROM ~"OPERACIONES~",   
+
+         ~"LABOR~"  			 ,
+			~"ARTICULO_MOV_PROY~"
+   WHERE  
+          ( ~"OPERACIONES~".~"COD_LABOR~"      = ~"LABOR~".~"COD_LABOR~"                )  and  
+			(( ~"OPERACIONES~".~"TIPO_ORDEN~"	    = ~"ARTICULO_MOV_PROY~".~"TIPO_DOC~"	  )  and
+			 ( ~"OPERACIONES~".~"NRO_ORDEN~"	    = ~"ARTICULO_MOV_PROY~".~"NRO_DOC~"		  )) and
+         (( ~"OPERACIONES~".~"FLAG_ESTADO~" in ('1')                            )) and
+			 ( ~"OPERACIONES~".~"COD_LABOR~"      = :as_cod_labor							  )  and
+          ( ~"OPERACIONES~".~"COD_EJECUTOR~"   = :as_cod_ejecutor						  )  and
+			 ( ~"ARTICULO_MOV_PROY~".~"TIPO_MOV~" =	:as_tipo_mov							  )  and
+			 ( ~"ARTICULO_MOV_PROY~".~"COD_ART~"  like	:as_cod_art							  )  
+
+
+group by ~"OPERACIONES~".~"NRO_OPERACION~",   
+         ~"OPERACIONES~".~"COD_LABOR~",   
+         ~"OPERACIONES~".~"COD_EJECUTOR~",   
+         ~"LABOR~".~"DESC_LABOR~",   
+         ~"OPERACIONES~".~"CANT_PROYECT~",   
+         ~"OPERACIONES~".~"CANT_REAL~",   
+         ~"OPERACIONES~".~"NRO_ORDEN~",   
+         ~"OPERACIONES~".~"OPER_SEC~", 
+         ~"OPERACIONES~".~"CENCOS~"   " arguments=(("as_cod_labor", string),("as_cod_ejecutor", string),("as_tipo_mov", string),("as_cod_art", string)) )
+text(band=header alignment="2" text="Oper Sec" border="2" color="8388608" x="571" y="8" height="112" width="361" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Labor" border="2" color="8388608" x="937" y="8" height="112" width="334" html.valueishtml="0"  name=operaciones_cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Descripcion" border="2" color="8388608" x="1275" y="8" height="112" width="1125" html.valueishtml="0"  name=labor_desc_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Ejecutor" border="2" color="8388608" x="2405" y="8" height="112" width="215" html.valueishtml="0"  name=operaciones_cod_ejecutor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Cant Proyect" border="2" color="8388608" x="2624" y="8" height="112" width="343" html.valueishtml="0"  name=cant_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="8388608" x="265" y="8" height="112" width="302" html.valueishtml="0"  name=operaciones_nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="%" border="2" color="8388608" x="14" y="8" height="112" width="247" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Cant Real" border="2" color="8388608" x="2971" y="8" height="112" width="329" html.valueishtml="0"  name=cant_real_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Cierre" border="2" color="8388608" x="3305" y="8" height="112" width="293" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="571" y="0" height="68" width="361" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="937" y="0" height="68" width="334" format="[general]" html.valueishtml="0"  name=cod_labor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1275" y="0" height="68" width="1125" format="[general]" html.valueishtml="0"  name=desc_labor visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="2405" y="0" height="68" width="215" format="[general]" html.valueishtml="0"  name=cod_ejecutor visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2624" y="0" height="68" width="343" format="[general]" html.valueishtml="0"  name=cant_proyect visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="265" y="0" height="68" width="302" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=10 border="2" color="33554432" x="14" y="0" height="68" width="247" format="[general]" html.valueishtml="0"  name=porc visible="1" editmask.mask="###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2971" y="0" height="68" width="329" format="[general]" html.valueishtml="0"  name=cant_real visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=20 border="2" color="33554432" x="3305" y="0" height="68" width="293" format="[general]" html.valueishtml="0"  name=flag_cierre visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  porc  for all )"border="2" color="255" x="14" y="4" height="68" width="247" format="###.00" html.valueishtml="0"  name=total_porc visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

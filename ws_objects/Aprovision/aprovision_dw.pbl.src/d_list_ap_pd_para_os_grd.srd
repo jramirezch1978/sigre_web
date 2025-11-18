@@ -1,0 +1,69 @@
+﻿$PBExportHeader$d_list_ap_pd_para_os_grd.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=4 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=seleccion dbname="seleccion" values="	1/	0" )
+ column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="ap_pd_descarga_det.nro_parte" )
+ column=(type=decimal(0) updatewhereclause=yes name=item dbname="ap_pd_descarga_det.item" )
+ column=(type=datetime updatewhereclause=yes name=inicio_descarga dbname="ap_pd_descarga_det.inicio_descarga" )
+ column=(type=char(20) updatewhereclause=yes name=nro_ticket dbname="ap_pd_descarga_det.nro_ticket" )
+ column=(type=number updatewhereclause=yes name=peso_neto dbname="peso_neto" )
+ column=(type=char(200) updatewhereclause=yes name=desc_ruta dbname="ap_rutas_mp.desc_ruta" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cod_moneda" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tipo_fact dbname="ap_pd_descarga_det.flag_tipo_fact" values="Viaje	V/Peso	T/" )
+ column=(type=char(1) updatewhereclause=yes name=flag_incluye_igv_flete dbname="ap_pd_descarga_det.flag_incluye_igv_flete" values="Si	1/No 	0/" )
+ column=(type=number updatewhereclause=yes name=precio_flete dbname="precio_flete" )
+ retrieve="    SELECT '1' as seleccion,
+			  b.nro_parte,
+           b.item,
+			  b.inicio_descarga,
+			  b.nro_ticket,
+			  b.peso_bruto + b.peso_variacion * DECODE(b.flag_variacion, 'C', -1, 1) as peso_neto,
+			  r.desc_ruta,
+			  (select cod_moneda from moneda where cod_moneda = :as_moneda) as cod_moneda,
+			  b.flag_tipo_fact,
+			  b.FLAG_INCLUYE_IGV_FLETE,
+			  usf_fl_conv_mon(DECODE(b.flag_tipo_fact, 'V', b.precio_flete, 'T', 
+											 b.precio_flete * (b.peso_bruto + b.peso_variacion * DECODE(b.FLAG_VARIACION, 'C', -1, 1))),
+									b.cod_mon_vta, :as_moneda, b.inicio_descarga) as precio_flete
+      FROM ap_pd_descarga			a,
+			  ap_pd_descarga_det    b,
+           proveedor             p,
+           ap_rutas_mp        	r
+      WHERE a.nro_parte			= b.nro_parte
+		  and b.prov_transporte = p.proveedor
+ 		  and r.cod_ruta			= b.cod_ruta
+        and b.prov_transporte	= :as_proveedor
+        and trunc(b.inicio_descarga) between :ad_fecha1 and :ad_fecha2
+        AND b.nro_os is null and b.item_os is null
+        and a.cod_origen = :as_origen
+order by b.inicio_descarga, b.nro_parte, b.item" arguments=(("as_proveedor", string),("as_origen", string),("ad_fecha1", date),("ad_fecha2", date),("as_moneda", string)) )
+text(band=header alignment="2" text="fecha" border="2" color="33554432" x="119" y="4" height="60" width="485" html.valueishtml="0"  name=inicio_descarga_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Ticket" border="2" color="0" x="608" y="4" height="60" width="229" html.valueishtml="0"  name=nro_ticket_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nro Parte" border="2" color="33554432" x="841" y="4" height="60" width="315" html.valueishtml="0"  name=nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Item" border="2" color="33554432" x="1161" y="4" height="60" width="133" html.valueishtml="0"  name=item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Desc Ruta" border="2" color="0" x="1298" y="4" height="60" width="713" html.valueishtml="0"  name=desc_ruta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Peso Neto" border="2" color="0" x="2016" y="4" height="60" width="311" html.valueishtml="0"  name=peso_neto_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Mon." border="2" color="0" x="2331" y="4" height="60" width="133" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Precio Flete" border="2" color="0" x="2469" y="4" height="60" width="338" html.valueishtml="0"  name=precio_flete_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Tipo Fact" border="2" color="0" x="2811" y="4" height="60" width="247" html.valueishtml="0"  name=flag_tipo_fact_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Inc IGV?" border="2" color="0" x="3063" y="4" height="60" width="247" html.valueishtml="0"  name=flag_incluye_igv_flete_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="2" tabsequence=10 border="2" color="33554432" x="9" y="4" height="64" width="105" format="[general]" html.valueishtml="0"  name=seleccion visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="119" y="4" height="64" width="485" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=inicio_descarga visible="1" editmask.mask="dd/mm/yyyy hh:mm:ss" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="608" y="4" height="64" width="229" format="[general]" html.valueishtml="0"  name=nro_ticket visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="841" y="4" height="64" width="315" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1161" y="4" height="64" width="133" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="1298" y="4" height="64" width="713" format="[general]" html.valueishtml="0"  name=desc_ruta visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2016" y="4" height="64" width="311" format="[general]" html.valueishtml="0"  name=peso_neto visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="2331" y="4" height="64" width="133" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="2469" y="4" height="64" width="338" format="[general]" html.valueishtml="0"  name=precio_flete visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="2811" y="4" height="64" width="247" format="[general]" html.valueishtml="0"  name=flag_tipo_fact visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="2" color="33554432" x="3063" y="4" height="64" width="247" format="[general]" html.valueishtml="0"  name=flag_incluye_igv_flete visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

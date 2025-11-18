@@ -1,0 +1,39 @@
+﻿$PBExportHeader$f_monto_deduciones_quinta.srf
+global type f_monto_deduciones_quinta from function_object
+end type
+
+forward prototypes
+global function decimal f_monto_deduciones_quinta (integer ai_year, decimal adc_total_ing, decimal adc_imp_minimo)
+end prototypes
+
+global function decimal f_monto_deduciones_quinta (integer ai_year, decimal adc_total_ing, decimal adc_imp_minimo);Date ldt_fecha
+Decimal {2} ldc_tope_minimo,ldc_tasa,ldc_tope_ini,ldc_tope_fin
+
+ldt_fecha = Date(ai_year, 1, 1)
+
+	
+select min(ri.tope_fin) 
+  into :ldc_tope_minimo 
+  from rrhh_impuesto_renta ri 
+ where :ldt_fecha between ri.fecha_vig_ini and ri.fecha_vig_fin ;
+/**/
+	
+select tasa,tope_ini,tope_fin 
+  into :ldc_tasa,:ldc_tope_ini,:ldc_tope_fin
+  from rrhh_impuesto_renta ri 
+ where :ldt_fecha between ri.fecha_vig_ini and ri.fecha_vig_fin and
+	    :adc_total_ing between ri.tope_ini and ri.tope_fin ;
+	
+	
+//verificar que es importe minimo
+if adc_total_ing < ldc_tope_minimo then
+	ldc_tope_ini = Round(Dec(adc_imp_minimo) * 7,2)
+end if
+	
+	
+	
+	
+Return ldc_tope_ini	
+	
+end function
+

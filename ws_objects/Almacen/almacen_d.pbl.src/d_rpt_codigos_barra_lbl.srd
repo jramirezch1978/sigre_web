@@ -1,0 +1,97 @@
+﻿$PBExportHeader$d_rpt_codigos_barra_lbl.srd
+release 17;
+datawindow(units=3 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=2 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 100 print.margin.right = 100 print.margin.top = 100 print.margin.bottom = 100 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" label.name="Pin Fed Address 5.0 x 1.94 1-Across 4090" label.width=5000 label.height=2500 label.rows=1 label.rows.spacing=100 label.columns=2 label.columns.spacing=200 label.topdown=no label.sheet=no label.shape=roundrectangle label.ellipse_height=176 label.ellipse_width=176 )
+detail(height=2513 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(3000) updatewhereclause=yes name=desc_art dbname="desc_art" )
+ column=(type=char(22) updatewhereclause=yes name=code_bar dbname="code_bar" )
+ column=(type=char(20) updatewhereclause=yes name=cod_sku dbname="cod_sku" )
+ column=(type=char(1) updatewhereclause=yes name=flag_print_precio dbname="flag_print_precio" )
+ column=(type=char(4000) updatewhereclause=yes name=moneda dbname="moneda" )
+ column=(type=number updatewhereclause=yes name=precio_vta_unidad dbname="precio_vta_unidad" )
+ column=(type=datetime updatewhereclause=yes name=fec_ingreso dbname="fec_ingreso" )
+ column=(type=char(6) updatewhereclause=yes name=sub_cat_art dbname="sub_cat_art" )
+ column=(type=char(8) updatewhereclause=yes name=cod_marca dbname="cod_marca" )
+ column=(type=char(6) updatewhereclause=yes name=cod_sub_linea dbname="cod_sub_linea" )
+ column=(type=char(20) updatewhereclause=yes name=estilo dbname="estilo" )
+ column=(type=char(3) updatewhereclause=yes name=cod_suela dbname="cod_suela" )
+ column=(type=char(3) updatewhereclause=yes name=cod_acabado dbname="cod_acabado" )
+ column=(type=char(4) updatewhereclause=yes name=color1 dbname="color1" )
+ column=(type=decimal(4) updatewhereclause=yes name=talla dbname="talla" )
+ column=(type=char(0) updatewhereclause=yes name=siglas dbname="siglas" )
+ column=(type=char(0) updatewhereclause=yes name=linea1 dbname="linea1" )
+ column=(type=char(0) updatewhereclause=yes name=linea2 dbname="linea2" )
+ column=(type=char(4) updatewhereclause=yes name=color2 dbname="color2" )
+ column=(type=char(2) updatewhereclause=yes name=cod_taco dbname="cod_taco" )
+ retrieve="select a.desc_art, 
+		 '*' || a.cod_sku || '*' as code_bar, 
+		 a.cod_sku,
+		 zl.flag_print_precio, 
+       case
+		 	when zl.flag_print_precio = '1' then
+		 		PKG_LOGISTICA.of_soles(null)
+			else
+				null
+		 end as moneda,
+       case
+		 	when zl.flag_print_precio = '1' then
+		 		a.precio_vta_unidad
+			else
+				null
+		 end as precio_vta_unidad,
+		 (select max(vm.fec_registro)
+  			 from vale_mov vm,
+					articulo_mov am
+			where vm.nro_Vale = am.nro_vale
+ 			  and am.origen_mov_proy = amp.cod_origen
+        	  and am.nro_mov_proy    = amp.nro_mov
+        	  and vm.flag_estado <> '0'
+        	  and am.flag_estado <> '0'
+        	  and vm.tipo_mov    like 'I%') as fec_ingreso,
+		 a.sub_cat_art, 
+		 a.cod_marca, 
+		 a.cod_sub_linea, 
+		 a.estilo, 
+		 a.cod_suela, 
+		 a.cod_acabado, 
+		 a.color1, 
+		 a.talla,
+		 '' as siglas,
+		 '' as linea1,
+		 '' as linea2,
+		 a.color2,
+		 a.cod_taco
+from articulo a,
+     zc_linea zl,
+     zc_sub_linea zs,
+     articulo_mov_proy amp,
+	  (select 1 from dual
+		union
+      select 2 from dual
+	   union
+		select 3 from dual) s
+where amp.cod_art     = a.cod_art
+  and a.cod_sub_linea = zs.cod_sub_linea (+)
+  and zs.cod_linea    = zl.cod_linea     (+)
+  and amp.nro_doc     = :as_nro_doc
+  and amp.tipo_doc    = (select doc_oc from logparam where reckey = '1')
+order by a.sub_cat_art, a.cod_marca, a.cod_sub_linea, a.estilo, a.cod_suela, a.cod_acabado, a.color1, a.talla
+  " arguments=(("as_nro_doc", string),("as_empresa", string))  sort="linea1 A linea2 A talla A " )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="52" y="1878" height="264" width="1666" format="[general]" html.valueishtml="0"  name=cod_sku visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="33554432" x="52" y="370" height="635" width="4868" format="[general]" html.valueishtml="0"  name=linea2 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="33554432" x="52" y="26" height="317" width="3413" format="[general]" html.valueishtml="0"  name=linea1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="26" y="1058" height="793" width="4974" format="[general]" html.valueishtml="0"  name=code_bar visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="IDAutomationHC39M" font.height="-9" font.weight="400"  font.family="3" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="3492" y="52" height="291" width="1428" format="mmyy" html.valueishtml="0"  name=fec_ingreso visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="33554432" x="2407" y="1878" height="264" width="926" format="[general]" html.valueishtml="0"  name=siglas visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="3545" y="1878" height="291" width="502" format="[general]" html.valueishtml="0"  name=moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="4048" y="1878" height="291" width="873" format="###,##0.00" html.valueishtml="0"  name=precio_vta_unidad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

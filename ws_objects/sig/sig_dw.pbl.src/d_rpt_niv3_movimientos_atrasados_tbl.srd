@@ -1,0 +1,42 @@
+﻿$PBExportHeader$d_rpt_niv3_movimientos_atrasados_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=440 color="536870912" )
+summary(height=128 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=cod_n3 dbname="centros_costo.cod_n3" )
+ column=(type=char(30) updatewhereclause=yes name=descrippcion dbname="cencos_niv3.descrippcion" )
+ column=(type=number updatewhereclause=yes name=dias_atras dbname="dias_atras" )
+ retrieve="select c.cod_n3, cn3.descrippcion, round(avg(sysdate-amp.fec_proyect),2) as dias_atras
+from articulo_mov_proy amp, centros_costo c, cencos_niv3 cn3
+where amp.cencos = c.cencos and
+      amp.cant_proyect > amp.cant_procesada and
+      (c.cod_n1 = cn3.cod_n1 and
+       c.cod_n2 = cn3.cod_n2 and
+       c.cod_n3 = cn3.cod_n3) and
+      amp.flag_estado='1' and
+      c.cod_n1 = :as_nivel1 and
+      c.cod_n2 = :as_nivel2 and
+      (sysdate - fec_proyect) > 1
+group by c.cod_n3, cn3.descrippcion" arguments=(("as_nivel1", string),("as_nivel2", string)) )
+bitmap(band=header filename="" x="23" y="16" height="188" width="343" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="23" y="220" height="48" width="338" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2199" y="12" height="48" width="288" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2199" y="80" height="48" width="288" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="2199" y="148" height="48" width="288" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Días atrasad." border="2" color="33554432" x="1774" y="368" height="64" width="398" html.valueishtml="0"  name=dias_atras_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="REQUERMIENTOS ATRASADOS" border="0" color="33554432" x="622" y="56" height="64" width="1435" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="622" y="176" height="64" width="1435" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="C.C. n3" border="2" color="33554432" x="357" y="368" height="64" width="201" html.valueishtml="0"  name=cod_n3_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="576" y="368" height="64" width="1184" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+compute(band=summary alignment="1" expression="avg(  dias_atras  for all )"border="0" color="0" x="1787" y="24" height="64" width="393" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="0"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Promedio de días :" border="0" color="33554432" x="1134" y="28" height="64" width="549" html.valueishtml="0"  name=t_1 visible="0"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="1774" y="4" height="64" width="398" format="#,##0.00" html.valueishtml="0"  name=dias_atras pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="357" y="4" height="64" width="201" format="[general]" html.valueishtml="0"  name=cod_n3 pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="576" y="4" height="64" width="1184" format="[general]" html.valueishtml="0"  name=descrippcion pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_rpt_ingresos_x_meses_quinta_cta_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=134217750 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=328 color="536870912" )
+summary(height=244 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_trabajador dbname="rrhh_formato_quinta_cat.cod_trabajador" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="rrhh_formato_quinta_cat.item" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=ano dbname="rrhh_formato_quinta_cat.ano" )
+ column=(type=char(123) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=char(80) update=yes updatewhereclause=yes name=columnas dbname="rrhh_formato_quinta_cat.columnas" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=valor dbname="rrhh_formato_quinta_cat.valor" )
+ column=(type=char(1) update=yes updatewhereclause=yes key=yes name=flag_grupo dbname="rrhh_formato_quinta_cat.flag_grupo" values="Ingresos Planillas	1/Otros Ingresos	2/(-) Retenciones Planillas	3/(-) Otras Retenciones	4/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=tipo_concepto dbname="rrhh_formato_quinta_cat.tipo_concepto" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=factor dbname="rrhh_formato_quinta_cat.factor" )
+ retrieve="SELECT  A.COD_TRABAJADOR ,
+        A.ITEM ,
+        A.ANO ,
+        Nvl(m.apel_paterno,' ') ||' '|| Nvl(m.apel_materno,' ') 
+		  ||' '|| Nvl(m.nombre1,' ') ||' '|| Nvl(m.nombre2,' ') as nombres,
+        A.COLUMNAS ,
+        A.VALOR ,
+        A.FLAG_GRUPO ,
+	     A.TIPO_CONCEPTO ,
+        A.FACTOR     
+   FROM RRHH_FORMATO_QUINTA_CAT A,
+        MAESTRO     				  M
+  WHERE M.COD_TRABAJADOR = A.COD_TRABAJADOR 
+	 and A.COD_TRABAJADOR = :as_cod_trabajador 
+	 and A.ANO 				 = :an_year" update="RRHH_FORMATO_QUINTA_CAT" updatewhere=1 updatekeyinplace=yes arguments=(("as_cod_trabajador", string),("an_year", number))  sort="flag_grupo A item A " )
+group(level=1 header.height=68 trailer.height=80 by=("flag_grupo" ) header.color="536870912" trailer.color="536870912" )
+column(band=header id=1 alignment="2" tabsequence=20 border="2" color="8388608" x="992" y="152" height="56" width="631" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="2" tabsequence=30 border="2" color="8388608" x="992" y="212" height="112" width="631" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Meses" border="2" color="8388608" x="165" y="152" height="172" width="823" html.valueishtml="0"  name=columas_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'CUADRO DE RETECION DE 5TA. CATEGORIA ' +  ano "border="0" color="8388608" x="32" y="24" height="64" width="1687" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+column(band=header.1 id=7 alignment="0" tabsequence=80 border="0" color="8388608" x="165" y="4" height="56" width="823" format="[general]" html.valueishtml="0"  name=flag_grupo visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Totales Generales :" border="0" color="8388608" x="27" y="12" height="56" width="489" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=summary alignment="1" text="Total Ingresos :" border="0" color="8388608" x="137" y="92" height="56" width="480" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=summary alignment="1" text="Total Retenciones :" border="0" color="8388608" x="137" y="176" height="56" width="480" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+compute(band=summary alignment="1" expression="sum( IF (factor = 1 , valor ,0)   for all ) "border="0" color="8388608" x="649" y="88" height="76" width="334" format="###,###.00" html.valueishtml="0"  name=total_ing visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+compute(band=summary alignment="1" expression=" sum( IF (factor = -1 ,valor ,0)   for all ) "border="0" color="8388608" x="649" y="172" height="76" width="334" format="###,###.00" html.valueishtml="0"  name=tot_ret visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="255" x="14" y="0" height="64" width="146" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=20 border="2" color="33554432" x="992" y="0" height="64" width="631" format="[general]" html.valueishtml="0"  name=valor visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=10 border="2" color="33554432" x="165" y="0" height="64" width="823" format="[general]" html.valueishtml="0"  name=columnas visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression=" sum(   valor for group 1 )"border="2" color="0" x="992" y="4" height="72" width="631" format="###,###.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="'Total :'"border="2" color="8388608" x="165" y="4" height="72" width="823" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

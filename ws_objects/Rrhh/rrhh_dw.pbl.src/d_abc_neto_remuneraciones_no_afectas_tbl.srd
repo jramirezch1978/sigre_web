@@ -1,0 +1,58 @@
+﻿$PBExportHeader$d_abc_neto_remuneraciones_no_afectas_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=480 color="536870912" )
+header[2](height=0 color="536870912" )
+header[3](height=68 color="536870912" )
+summary(height=92 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=number updatewhereclause=yes name=monto_mes dbname="monto_mes" )
+ retrieve="select hc.cod_trabajador,m.apel_paterno||' '||m.apel_materno||' '||m.nombre1 as nombres,
+       Decode(to_char(hc.fec_calc_plan,'mm'),'01','Enero','02','Febrero','03','Marzo','04','Abril','05','Mayo','06','Junio','07','Julio','08','Agosto','09','Setiembre','10','Octubre','11','Noviembre','12','Diciembre' ) as mes,
+		 to_char(hc.fec_calc_plan,'mm') as nro_mes,  Sum(hc.imp_soles) as monto_mes
+  from historico_calculo hc ,maestro m
+ where (hc.cod_trabajador                = m.cod_trabajador   ) and
+       (to_char(hc.fec_calc_plan,'yyyy') = :as_ano            ) and
+       (hc.concep                        = :as_concep_remunera) and
+       (m.cod_origen							LIKE :as_origen	  	  ) and
+       (m.tipo_trabajador					LIKE :as_ttrab		  )	 and
+       (m.cod_trabajador                NOT in ( select hc.cod_trabajador
+                                                from historico_calculo hc ,maestro m
+                                               where (hc.cod_trabajador                = m.cod_trabajador  ) and
+                                                     (to_char(hc.fec_calc_plan,'yyyy') = :as_ano           ) and
+                                                     (hc.concep                        = :as_concep_quinta ) and
+                                                     (m.cod_origen							LIKE :as_origen	  ) and
+                                                     (m.tipo_trabajador					   LIKE :as_ttrab		  )
+                                              group by hc.cod_trabajador ))
+
+group by hc.cod_trabajador,m.apel_paterno||' '||m.apel_materno||' '||m.nombre1,to_char(hc.fec_calc_plan,'mm')
+
+
+order by hc.cod_trabajador,to_char(hc.fec_calc_plan,'mm')" filter="grand_sum_monto_mes >  adc_monto "arguments=(("as_ano", string),("as_concep_remunera", string),("as_concep_quinta", string),("as_origen", string),("as_ttrab", string),("adc_monto", number))  sort="nombres A " )
+text(band=header[3] alignment="0" text="Nombres" border="0" color="33554432" x="9" y="4" height="56" width="695" html.valueishtml="0"  name=nombres_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="0" text="@mes" border="0" color="33554432" x="713" y="4" height="56" width="261" html.valueishtml="0"  name=monto_mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[3] alignment="2" text="T. Persona" border="0" color="8388608" x="983" y="4" height="56" width="457" html.valueishtml="0"  name=grand_sum_monto_mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="76" width="695" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=92 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="33554432" x="713" y="4" height="76" width="261" format="[general]" html.valueishtml="0"  name=monto_mes visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no crosstab.repeat=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="0" color="8388608" x="983" y="4" height="76" width="457" format="###,###.00" html.valueishtml="0"  name=grand_sum_monto_mes visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="~"Total Por Persona : ~""border="0" color="8388608" x="9" y="4" height="80" width="695" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(monto_mes for all )"border="0" color="8388608" x="713" y="4" height="80" width="261" format="###,###.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_monto_mes for all )"border="0" color="8388608" x="983" y="4" height="80" width="457" format="###,###.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="TOTAL REMUNERACIONES NO AFECTAS - AÑO" border="0" color="8388608" x="9" y="392" height="80" width="1728" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=foreground alignment="0" expression=" as_ano "border="0" color="8388608" x="1728" y="392" height="80" width="306" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="1" text="" border="0" color="0" x="3287" y="212" height="64" width="265" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=foreground alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="3287" y="132" height="56" width="631" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="today()"border="0" color="0" x="3291" y="52" height="56" width="160" format="DD/MM/YYYY" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="1" text="Fecha :" border="0" color="0" x="3045" y="52" height="64" width="229" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="1" text="Pag. :" border="0" color="0" x="3040" y="136" height="56" width="229" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="1" text="Usuario. :" border="0" color="0" x="3040" y="216" height="56" width="229" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="" border="0" color="8388608" x="32" y="256" height="56" width="562" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=foreground filename="H:\Source\BMP\blanco.bmp" x="105" y="20" height="208" width="411" border="0"  name=p_logo visible="1" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "nro_mes, mes" rows = "nombres" values = "sum(monto_mes for crosstab)" sourcenames = "historico_calculo_cod_trabajador, nombres, mes, nro_mes, monto_mes")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

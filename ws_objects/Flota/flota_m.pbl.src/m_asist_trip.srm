@@ -1,0 +1,109 @@
+﻿$PBExportHeader$m_asist_trip.srm
+forward
+global type m_asist_trip from menu
+end type
+type m_asistencia from menu within m_asist_trip
+end type
+type m_tr from menu within m_asist_trip
+end type
+type m_vistacompleta from menu within m_asist_trip
+end type
+type m_eliminarunaasistencia from menu within m_asist_trip
+end type
+global type m_asist_trip from menu
+m_asistencia m_asistencia
+m_tr m_tr
+m_vistacompleta m_vistacompleta
+m_eliminarunaasistencia m_eliminarunaasistencia
+end type
+end forward
+
+global type m_asist_trip from menu
+m_asistencia m_asistencia
+m_tr m_tr
+m_vistacompleta m_vistacompleta
+m_eliminarunaasistencia m_eliminarunaasistencia
+end type
+global m_asist_trip m_asist_trip
+
+on m_asist_trip.create
+m_asist_trip=this
+call super::create
+this.m_asistencia=create m_asistencia
+this.m_tr=create m_tr
+this.m_vistacompleta=create m_vistacompleta
+this.m_eliminarunaasistencia=create m_eliminarunaasistencia
+this.Item[UpperBound(this.Item)+1]=this.m_asistencia
+this.Item[UpperBound(this.Item)+1]=this.m_tr
+this.Item[UpperBound(this.Item)+1]=this.m_vistacompleta
+this.Item[UpperBound(this.Item)+1]=this.m_eliminarunaasistencia
+end on
+
+on m_asist_trip.destroy
+call super::destroy
+destroy(this.m_asistencia)
+destroy(this.m_tr)
+destroy(this.m_vistacompleta)
+destroy(this.m_eliminarunaasistencia)
+end on
+
+type m_asistencia from menu within m_asist_trip
+end type
+
+on m_asistencia.create
+call super::create
+this.text = "Asistencias Anteriores"
+end on
+
+on m_asistencia.destroy
+call super::destroy
+end on
+
+event clicked;ParentWindow.Post Dynamic of_asist_anterior()
+end event
+
+type m_tr from menu within m_asist_trip
+end type
+
+on m_tr.create
+call super::create
+this.text = "Tripulantes del Zarpe"
+end on
+
+on m_tr.destroy
+call super::destroy
+end on
+
+event clicked;ParentWindow.Post Dynamic of_trip_zarpe()
+end event
+
+type m_vistacompleta from menu within m_asist_trip
+end type
+
+event clicked;ParentWindow.Post Dynamic of_vista_completa()
+end event
+
+on m_vistacompleta.create
+call super::create
+this.text = "Vista Completa"
+end on
+
+on m_vistacompleta.destroy
+call super::destroy
+end on
+
+type m_eliminarunaasistencia from menu within m_asist_trip
+end type
+
+on m_eliminarunaasistencia.create
+call super::create
+this.text = "Eliminar una asistencia"
+end on
+
+on m_eliminarunaasistencia.destroy
+call super::destroy
+end on
+
+event clicked;ParentWindow.Post Dynamic of_eliminar_asistencia()
+end event
+

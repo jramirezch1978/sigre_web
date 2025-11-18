@@ -1,0 +1,94 @@
+﻿$PBExportHeader$d_prod_consumo_energia.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=760 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_consumo dbname="prod_consumo_ener.nro_consumo" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_planta dbname="prod_consumo_ener.cod_planta" )
+ column=(type=char(40) updatewhereclause=yes name=desc_planta dbname="tg_plantas.desc_planta" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ano dbname="prod_consumo_ener.ano" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=mes dbname="prod_consumo_ener.mes" values="01 - Enero	1/02 - Febrero	2/03 - Marzo	3/04 - Abril	4/05 - Mayo	5/06 - Junio	6/07 - Julio	7/08 - Agosto	8/09 - Septiembre	9/10 - Octubre	10/11 - Noviembre	11/12 - Diciembre	12/" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="prod_consumo_ener.cod_origen" )
+ column=(type=char(50) updatewhereclause=yes name=nombre dbname="origen.nombre" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_registro dbname="prod_consumo_ener.fecha_registro" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="prod_consumo_ener.cod_usr" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=factor_hp dbname="prod_consumo_ener.factor_hp" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=factor_fhp dbname="prod_consumo_ener.factor_fhp" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=factor_cliente dbname="prod_consumo_ener.factor_cliente" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=imp_total_aprox dbname="prod_consumo_ener.imp_total_aprox" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=total_ajuste dbname="prod_consumo_ener.total_ajuste" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_dias_habiles dbname="prod_consumo_ener.nro_dias_habiles" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="prod_consumo_ener.cod_moneda" )
+ column=(type=char(40) updatewhereclause=yes name=desc_moneda dbname="moneda.descripcion" )
+ retrieve="  SELECT ~"PROD_CONSUMO_ENER~".~"NRO_CONSUMO~",   
+         ~"PROD_CONSUMO_ENER~".~"COD_PLANTA~",   
+         ~"TG_PLANTAS~".~"DESC_PLANTA~",   
+         ~"PROD_CONSUMO_ENER~".~"ANO~",   
+         ~"PROD_CONSUMO_ENER~".~"MES~",   
+         ~"PROD_CONSUMO_ENER~".~"COD_ORIGEN~",   
+         ~"ORIGEN~".~"NOMBRE~",   
+         ~"PROD_CONSUMO_ENER~".~"FECHA_REGISTRO~",   
+         ~"PROD_CONSUMO_ENER~".~"COD_USR~",   
+         ~"PROD_CONSUMO_ENER~".~"FACTOR_HP~",   
+         ~"PROD_CONSUMO_ENER~".~"FACTOR_FHP~",   
+         ~"PROD_CONSUMO_ENER~".~"FACTOR_CLIENTE~",   
+         ~"PROD_CONSUMO_ENER~".~"IMP_TOTAL_APROX~",   
+         ~"PROD_CONSUMO_ENER~".~"TOTAL_AJUSTE~",   
+         ~"PROD_CONSUMO_ENER~".~"NRO_DIAS_HABILES~",
+			 ~"PROD_CONSUMO_ENER~".~"COD_MONEDA~",
+			m.descripcion
+ 
+    FROM ~"ORIGEN~",   
+         ~"PROD_CONSUMO_ENER~",   
+         ~"TG_PLANTAS~",
+			 MONEDA M
+ 
+   WHERE ( prod_consumo_ener.cod_origen (+) = origen.cod_origen) and  
+         ( tg_plantas.cod_planta (+) = prod_consumo_ener.cod_planta) and  
+         ( ~"PROD_CONSUMO_ENER~".~"NRO_CONSUMO~" = :as_nro_consumo ) AND
+         ( M.COD_MONEDA(+) = ~"PROD_CONSUMO_ENER~".~"COD_MONEDA~")
+   
+" update="PROD_CONSUMO_ENER" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_consumo", string)) )
+roundrectangle(band=background ellipseheight="36" ellipsewidth="41"x="2478" y="96" height="248" width="649"  name=rr_1 visible="1" brush.hatch="6" brush.color="10789024" pen.style="5" pen.width="5" pen.color="553648127"  background.mode="2" background.color="10789024" )
+bitmap(band=detail filename="gs_logo" x="23" y="68" height="248" width="430" border="6"  name=p_logo visible="1" )
+text(band=detail alignment="2" text="Registro de Consumo de Energía" border="4" color="0" x="754" y="32" height="92" width="1495" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+groupbox(band=detail text=""border="2" color="16777215" x="955" y="220" height="168" width="1102"  name=gb_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=5 alignment="1" tabsequence=30 border="5" color="33554432" x="1637" y="320" height="56" width="398" format="[general]" html.valueishtml="0"  name=mes visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.useasborder=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="1" tabsequence=10 border="5" color="33554432" x="1189" y="316" height="56" width="224" format="[general]" html.valueishtml="0"  name=ano visible="1" editmask.required=yes editmask.spin=yes editmask.mask="#####" editmask.imemode=0 editmask.spinincr=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Fecha Registro:" border="2" color="16777215" x="978" y="240" height="56" width="434" html.valueishtml="0"  name=prod_consumo_ener_fecha_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="5" color="33554432" x="1431" y="244" height="52" width="603" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_registro visible="1" editmask.mask="dd/mm/yyyy hh:mm:ss" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=detail alignment="1" text="Año:" border="2" color="16777215" x="978" y="312" height="56" width="192" html.valueishtml="0"  name=prod_consumo_ener_ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Mes:" border="2" color="16777215" x="1426" y="316" height="56" width="192" html.valueishtml="0"  name=prod_consumo_ener_mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="5" color="33554432" x="2793" y="116" height="56" width="192" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="5" color="33554432" x="2793" y="224" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_consumo visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=detail alignment="2" text="Nro Consumo" border="2" color="16777215" x="2505" y="188" height="136" width="270" html.valueishtml="0"  name=prod_consumo_ener_nro_consumo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="2" text="Usuario" border="2" color="16777215" x="2505" y="116" height="56" width="270" html.valueishtml="0"  name=prod_consumo_ener_cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+groupbox(band=detail text="Factor y Precio"border="2" color="0" x="18" y="412" height="280" width="1861"  name=gb_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Tarifa de Fhp:" border="2" color="16777215" x="41" y="548" height="56" width="411" html.valueishtml="0"  name=prod_consumo_ener_factor_fhp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Factor Cliente:" border="2" color="16777215" x="41" y="624" height="56" width="411" html.valueishtml="0"  name=prod_consumo_ener_factor_cliente_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Tarifa de Hp:" border="2" color="16777215" x="41" y="472" height="56" width="411" html.valueishtml="0"  name=prod_consumo_ener_factor_hp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Total Ajuste:" border="2" color="16777215" x="823" y="476" height="56" width="411" html.valueishtml="0"  name=prod_consumo_ener_total_ajuste_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Días Habiles:" border="2" color="16777215" x="823" y="552" height="56" width="411" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Imp Total Aprox:" border="2" color="16777215" x="823" y="624" height="56" width="411" html.valueishtml="0"  name=prod_consumo_ener_imp_total_aprox_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="5" color="0" x="1253" y="628" height="56" width="608" format="###,###,###.0000" html.valueishtml="0"  name=imp_total_aprox visible="1" editmask.mask="###,###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=10 alignment="1" tabsequence=40 border="5" color="33554432" x="471" y="476" height="52" width="329" format="#,###,###.00" html.valueishtml="0"  name=factor_hp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="1" tabsequence=50 border="5" color="33554432" x="471" y="552" height="56" width="329" format="#,###,###.00" html.valueishtml="0"  name=factor_fhp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="5" color="33554432~tif(   factor_cliente  < 0.5 , rgb(255,0,0), rgb(0,0,0 ) ) " x="471" y="628" height="52" width="329" format="#.000000" html.valueishtml="0"  name=factor_cliente visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=14 alignment="1" tabsequence=20 border="5" color="33554432" x="1253" y="480" height="52" width="329" format="#,###,###.00" html.valueishtml="0"  name=total_ajuste visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=60 border="5" color="33554432" x="1253" y="552" height="52" width="329" format="#,###,###.00" html.valueishtml="0"  name=nro_dias_habiles visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+groupbox(band=detail text=""border="2" color="16777215" x="1893" y="440" height="252" width="1504"  name=gb_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="33554432" x="2373" y="464" height="56" width="997" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=detail alignment="0" text="Planta:" border="2" color="16777215" x="1911" y="544" height="60" width="210" html.valueishtml="0"  name=prod_consumo_ener_cod_planta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="0" text="Origen:" border="2" color="16777215" x="1911" y="460" height="64" width="210" html.valueishtml="0"  name=prod_consumo_ener_cod_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="0" text="Moneda:" border="2" color="16777215" x="1911" y="620" height="56" width="210" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="5" color="33554432" x="2373" y="548" height="56" width="997" format="[general]" html.valueishtml="0"  name=desc_planta visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="5" color="33554432" x="2377" y="628" height="56" width="997" format="[general]" html.valueishtml="0"  name=desc_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=6 alignment="0" tabsequence=70 border="5" color="33554432" x="2153" y="464" height="56" width="192" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=80 border="5" color="33554432" x="2153" y="552" height="56" width="192" format="[general]" html.valueishtml="0"  name=cod_planta visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="0" tabsequence=90 border="5" color="33554432" x="2153" y="628" height="56" width="192" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

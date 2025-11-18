@@ -1,0 +1,20 @@
+﻿$PBExportHeader$f_prsp_cmp_directa.srf
+global type f_prsp_cmp_directa from function_object
+end type
+
+forward prototypes
+global function string f_prsp_cmp_directa (string as_cencos, string as_cnta_prsp, integer ai_ano)
+end prototypes
+
+global function string f_prsp_cmp_directa (string as_cencos, string as_cnta_prsp, integer ai_ano);string ls_flag_cmp_directa
+
+select NVL(flag_cmp_directa, '')
+	into :ls_flag_cmp_directa
+from presupuesto_partida pp
+where cencos 	 = :as_cencos
+  and cnta_prsp = :as_cnta_prsp
+  and ano		 = :ai_ano;
+
+return ls_flag_cmp_directa
+end function
+

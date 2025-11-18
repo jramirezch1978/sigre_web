@@ -1,0 +1,93 @@
+﻿$PBExportHeader$d_rpt_estructura_costos_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=304 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(6) updatewhereclause=yes name=canal dbname="canal" )
+ column=(type=char(30) updatewhereclause=yes name=desc_canal dbname="desc_canal" )
+ column=(type=char(6) updatewhereclause=yes name=sub_canal dbname="sub_canal" )
+ column=(type=char(50) updatewhereclause=yes name=desc_sub_canal dbname="desc_sub_canal" )
+ column=(type=char(8) updatewhereclause=yes name=comprador_final dbname="orden_venta.comprador_final" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(10) updatewhereclause=yes name=ov_costo_teorico_nro_ov dbname="ov_costo_teorico.nro_ov" )
+ column=(type=datetime updatewhereclause=yes name=orden_venta_fec_registro dbname="orden_venta.fec_registro" )
+ column=(type=char(12) updatewhereclause=yes name=articulo_mov_proy_cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=decimal(4) updatewhereclause=yes name=cant_proyect dbname="articulo_mov_proy.cant_proyect" )
+ column=(type=decimal(6) updatewhereclause=yes name=precio_unit dbname="articulo_mov_proy.precio_unit" )
+ column=(type=char(6) updatewhereclause=yes name=ov_costo_teorico_servicio dbname="ov_costo_teorico.servicio" )
+ column=(type=char(60) updatewhereclause=yes name=servicios_descripcion dbname="servicios.descripcion" )
+ column=(type=number updatewhereclause=yes name=costo_unitario dbname="costo_unitario" )
+ retrieve="Select nvl(c.canal,'S/Cnl') as canal, nvl(cd.descripcion,'S/Desc Canal') as desc_canal, 
+       nvl(cdt.sub_canal,'S/SCnl') as sub_canal, nvl(cdt.descripcion,'S/Desc Sub - Canal') as desc_sub_canal, 
+       ov.comprador_final, p.nom_proveedor, oct.nro_ov,  ov.fec_registro, 
+       amp.cod_art, a.nom_articulo, amp.cant_proyect, amp.precio_unit, 
+       oct.servicio, s.descripcion, sum( oct.costo_unitario ) As costo_unitario
+  From ov_costo_teorico oct, Orden_Venta ov, articulo_mov_proy amp, 
+       servicios s, articulo a, proveedor p, cliente c, 
+       canal_distribucion cd, canal_distribucion_det cdt
+ Where oct.Org_Amp     = ov.cod_origen
+   And oct.nro_ov      = ov.nro_ov
+   And ov.cod_origen   = amp.cod_origen
+   And ov.nro_ov       = amp.nro_doc
+   And amp.tipo_doc    = ( Select doc_ov From logparam Where reckey = '1' )
+   And ov.comprador_final = p.proveedor
+   And ov.comprador_final = c.cliente (+)
+   And c.canal         = cdt.canal (+) 
+   And c.sub_canal     = cdt.sub_canal (+)
+   And cdt.canal       = cd.canal (+)
+   And oct.servicio    = s.servicio
+   And amp.cod_art     = a.cod_art
+   And trunc(ov.fec_registro) >= :ad_fec_ini
+   And trunc(ov.fec_registro) <= :ad_fec_fin
+	And ov.flag_estado  in (:as_estados)
+ Group By nvl(c.canal,'S/Cnl'), nvl(cd.descripcion,'S/Desc Canal'), 
+       nvl(cdt.sub_canal,'S/SCnl'), nvl(cdt.descripcion,'S/Desc Sub - Canal'),
+       ov.comprador_final, p.nom_proveedor, oct.nro_ov,  ov.fec_registro, 
+       amp.cod_art, a.nom_articulo, amp.cant_proyect, amp.precio_unit, 
+       oct.servicio, s.descripcion
+ Order By nvl(c.canal,'S/Cnl'), nvl(cdt.sub_canal,'S/SCnl'), p.nom_proveedor, oct.nro_ov, amp.cod_art" arguments=(("ad_fec_ini", date),("ad_fec_fin", date),("as_empresa", string),("as_user", string),("as_estados", stringlist))  sort="canal A sub_canal A nom_proveedor A ov_costo_teorico_nro_ov A articulo_mov_proy_cod_art A " )
+group(level=1 header.height=84 trailer.height=0 by=("canal" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=84 trailer.height=0 by=("sub_canal" ) header.color="536870912" trailer.color="536870912" )
+group(level=3 header.height=80 trailer.height=0 by=("comprador_final" , "nom_proveedor" ) header.color="536870912" trailer.color="536870912" )
+group(level=4 header.height=80 trailer.height=0 by=("ov_costo_teorico_nro_ov" ) header.color="536870912" trailer.color="536870912" )
+group(level=5 header.height=56 trailer.height=56 by=("articulo_mov_proy_cod_art" ) header.color="536870912" trailer.color="536870912" )
+compute(band=header alignment="2" expression="today()"border="0" color="0" x="3013" y="144" height="56" width="453" format="[SHORTDATE] [TIME]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Pagina ' + page() + ' de ' + pageCount()"border="0" color="0" x="3013" y="68" height="64" width="453" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="3017" y="212" height="56" width="215" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression=" as_user "border="0" color="0" x="3246" y="212" height="56" width="219" format="[GENERAL]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="32" y="56" height="156" width="384" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="2" expression=" as_empresa "border="0" color="0" x="32" y="224" height="60" width="384" format="[GENERAL]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Estructura de Costos" border="1" color="33554432" x="969" y="48" height="80" width="1527" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="'Del : ' + string( ad_fec_ini , 'dd/mm/yyyy') + ' Al : ' + string( ad_fec_fin , 'dd/mm/yyyy')"border="0" color="33554432" x="969" y="176" height="64" width="1527" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="8388608" x="311" y="8" height="68" width="1170" format="[general]" html.valueishtml="0"  name=desc_canal visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=4 alignment="0" tabsequence=32766 border="0" color="8388608" x="471" y="8" height="68" width="1518" format="[general]" html.valueishtml="0"  name=desc_sub_canal visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.3 alignment="1" text="Cliente:" border="0" color="0" x="334" y="8" height="64" width="201" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=header.3 id=6 alignment="0" tabsequence=32766 border="0" color="8388608" x="800" y="8" height="64" width="1353" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.3 id=5 alignment="2" tabsequence=32766 border="0" color="8388608" x="549" y="8" height="64" width="238" format="[general]" html.valueishtml="0"  name=comprador_final visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.4 alignment="1" text="Nro OV:" border="0" color="0" x="448" y="8" height="64" width="206" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=header.4 id=8 alignment="0" tabsequence=32766 border="0" color="8388608" x="1600" y="8" height="64" width="786" format="[shortdate] [time]" html.valueishtml="0"  name=orden_venta_fec_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.4 alignment="1" text="Fecha Registro:" border="0" color="0" x="1070" y="8" height="64" width="517" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=header.4 id=7 alignment="0" tabsequence=32766 border="0" color="8388608" x="667" y="8" height="64" width="375" format="[general]" html.valueishtml="0"  name=ov_costo_teorico_nro_ov visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.5 alignment="1" text="Precio:" border="0" color="0" x="2629" y="0" height="52" width="187" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=header.5 id=12 alignment="1" tabsequence=32766 border="0" color="33554432" x="2830" y="0" height="52" width="128" format="###,##0.00" html.valueishtml="0"  name=precio_unit visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.5 alignment="1" text="Precio Calc:" border="0" color="0" x="2994" y="0" height="52" width="265" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header.5 alignment="1" expression=" precio_unit + suma_costo_unitario "border="0" color="255" x="3273" y="0" height="52" width="128" format="###,##0.00" html.valueishtml="0"  name=precio_unit_calc visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.5 id=11 alignment="1" tabsequence=32766 border="0" color="33554432" x="2395" y="0" height="52" width="210" format="[general]" html.valueishtml="0"  name=cant_proyect visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.5 alignment="1" text="Cantidad:" border="0" color="0" x="2117" y="0" height="52" width="265" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header.5 alignment="1" text="Articulo:" border="0" color="0" x="453" y="0" height="52" width="183" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=header.5 id=9 alignment="2" tabsequence=32766 border="0" color="33554432" x="654" y="0" height="52" width="274" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.5 id=10 alignment="0" tabsequence=32766 border="0" color="0" x="937" y="0" height="52" width="1161" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="2" color="33554432" x="1358" y="0" height="52" width="251" format="[general]" html.valueishtml="0"  name=ov_costo_teorico_servicio visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="2" color="33554432" x="1614" y="0" height="52" width="1458" format="[general]" html.valueishtml="0"  name=servicios_descripcion visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="0" x="3077" y="0" height="52" width="329" format="###,##0.00000000" html.valueishtml="0"  name=costo_unitario visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.5 alignment="1" expression="sum(  costo_unitario  for group 5 ) "border="2" color="8388608" x="3077" y="0" height="52" width="329" format="[General]" html.valueishtml="0"  name=suma_costo_unitario visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=1 alignment="2" tabsequence=32766 border="0" color="8388608" x="27" y="4" height="68" width="265" format="[general]" html.valueishtml="0"  name=canal visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=3 alignment="2" tabsequence=32766 border="0" color="8388608" x="187" y="8" height="68" width="265" format="[general]" html.valueishtml="0"  name=sub_canal visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

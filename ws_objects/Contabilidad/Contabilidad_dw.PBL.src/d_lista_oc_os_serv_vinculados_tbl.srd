@@ -1,0 +1,269 @@
+﻿$PBExportHeader$d_lista_oc_os_serv_vinculados_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=120 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=80 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=68 color="536870912~tif(checked = '1' and tipo_docref1 = 'OC', RGB(255,255,0), 
+if( checked = '1' and tipo_docref1 = 'OS' and imp_vinc_soles < abs(saldo_sol), RGB(0,255,255),
+if(checked = '1' and tipo_docref1 = 'OS' and imp_vinc_soles >= abs(saldo_sol),RGB(255,0,255),RGB(255, 255, 255))))" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(1) updatewhereclause=yes name=checked dbname="checked" values="	1/	0" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_ctbl dbname="cnta_ctbl" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cod_relacion" )
+ column=(type=char(200) updatewhereclause=yes name=nom_proveedor dbname="nom_proveedor" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_docref1 dbname="tipo_docref1" )
+ column=(type=char(15) updatewhereclause=yes name=nro_docref1 dbname="nro_docref1" )
+ column=(type=number updatewhereclause=yes name=saldo_deb_sol dbname="saldo_deb_sol" )
+ column=(type=number updatewhereclause=yes name=saldo_hab_sol dbname="saldo_hab_sol" )
+ column=(type=number updatewhereclause=yes name=saldo_deb_dol dbname="saldo_deb_dol" )
+ column=(type=number updatewhereclause=yes name=saldo_hab_dol dbname="saldo_hab_dol" )
+ column=(type=number updatewhereclause=yes name=saldo_sol dbname="saldo_sol" )
+ column=(type=number updatewhereclause=yes name=saldo_dol dbname="saldo_dol" )
+ column=(type=number updatewhereclause=yes name=imp_vinc_soles dbname="imp_vinc_soles" )
+ column=(type=number updatewhereclause=yes name=soles_deb dbname="soles_deb" )
+ column=(type=number updatewhereclause=yes name=soles_hab dbname="soles_hab" )
+ retrieve="select '0' as checked,
+       cad.cnta_ctbl,
+       cad.cod_relacion,
+       p.nom_proveedor,
+       cad.tipo_docref1,
+       cad.nro_docref1,
+       case
+          when sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) > sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) then
+            sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) - sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0))
+          else
+            0
+       end as saldo_deb_sol,
+       case
+          when sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) > sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) then
+            sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) - sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0))
+          else
+            0
+       end as saldo_hab_sol,
+		 case
+          when sum(decode(cad.flag_debhab, 'D', cad.imp_movdol, 0)) > sum(decode(cad.flag_debhab, 'H', cad.imp_movdol, 0)) then
+            sum(decode(cad.flag_debhab, 'D', cad.imp_movdol, 0)) - sum(decode(cad.flag_debhab, 'H', cad.imp_movdol, 0))
+          else
+            0
+       end as saldo_deb_dol,
+       case
+          when sum(decode(cad.flag_debhab, 'H', cad.imp_movdol, 0)) > sum(decode(cad.flag_debhab, 'D', cad.imp_movdol, 0)) then
+            sum(decode(cad.flag_debhab, 'H', cad.imp_movdol, 0)) - sum(decode(cad.flag_debhab, 'D', cad.imp_movdol, 0))
+          else
+            0
+       end as saldo_hab_dol,
+       sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) - sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) as saldo_sol,
+		 sum(decode(cad.flag_debhab, 'D', cad.imp_movdol, 0)) - sum(decode(cad.flag_debhab, 'H', cad.imp_movdol, 0)) as saldo_dol,
+		 ((select nvl(sum(usf_fl_conv_mon(t.importe, os.cod_moneda, pkg_logistica.of_soles(null), osd.fec_proyect)),0)
+			from oc_det_os_det      t,
+				  articulo_mov_proy  amp,
+				  orden_servicio_det osd,
+				  orden_Servicio     os
+			where amp.cod_origen = t.org_amp
+			  and amp.nro_mov    = t.nro_amp
+			  and osd.cod_origen = t.org_os
+			  and osd.nro_os     = t.nro_os
+			  and osd.nro_item   = t.item_os
+			  and osd.nro_os     = os.nro_os
+ 			  and amp.tipo_Doc	= cad.tipo_docref1
+			  and amp.nro_doc		= cad.nro_docref1) - 
+		  (select abs(nvl(
+							sum(decode(cad1.flag_debhab, 'D', cad1.imp_movsol, 0)) - sum(decode(cad1.flag_debhab, 'H', cad1.imp_movsol, 0))
+						  ,0))
+			  from cntbl_asiento ca1,
+			  	    cntbl_asiento_det cad1
+			 where ca1.origen = cad1.origen
+			   and ca1.ano    = cad1.ano
+			   and ca1.mes    = cad1.mes
+			   and ca1.nro_libro = cad1.nro_libro
+			   and ca1.nro_asiento = cad1.nro_Asiento
+			   and ca1.flag_estado <> '0'
+			   and ca1.ano         = :ani_year
+			   and ca1.mes         <= :ani_mes
+			   and cad1.cnta_ctbl  = '42111101'
+			   and cad1.nro_docref2 = cad.nro_docref1)) as imp_vinc_soles,
+		 0 as soles_deb,
+		 0 as soles_hab
+from cntbl_asiento ca,
+     cntbl_asiento_det cad,
+     proveedor         p,
+     (select distinct doc_oc, nro_oc from vw_oc_serv_vinculados) vw
+where ca.origen = cad.origen
+  and ca.ano    = cad.ano
+  and ca.mes    = cad.mes
+  and ca.nro_libro = cad.nro_libro
+  and ca.nro_asiento = cad.nro_Asiento
+  and cad.cod_relacion = p.proveedor
+  and cad.tipo_docref1 = vw.doc_oc
+  and cad.nro_docref1 = vw.nro_oc
+  and ca.flag_estado <> '0'
+  and ca.ano         = :ani_year
+  and ca.mes         <= :ani_mes
+  and cad.cnta_ctbl  = '42111101'
+  and ((select nvl(sum(usf_fl_conv_mon(t.importe, os.cod_moneda, pkg_logistica.of_soles(null), osd.fec_proyect)),0)
+			from oc_det_os_det      t,
+				  articulo_mov_proy  amp,
+				  orden_servicio_det osd,
+				  orden_Servicio     os
+			where amp.cod_origen = t.org_amp
+			  and amp.nro_mov    = t.nro_amp
+			  and osd.cod_origen = t.org_os
+			  and osd.nro_os     = t.nro_os
+			  and osd.nro_item   = t.item_os
+			  and osd.nro_os     = os.nro_os
+ 			  and amp.tipo_Doc	= cad.tipo_docref1
+			  and amp.nro_doc		= cad.nro_docref1) - 
+		  (select abs(nvl(
+							sum(decode(cad1.flag_debhab, 'D', cad1.imp_movsol, 0)) - sum(decode(cad1.flag_debhab, 'H', cad1.imp_movsol, 0))
+						  ,0))
+			  from cntbl_asiento ca1,
+			  	    cntbl_asiento_det cad1
+			 where ca1.origen = cad1.origen
+			   and ca1.ano    = cad1.ano
+			   and ca1.mes    = cad1.mes
+			   and ca1.nro_libro = cad1.nro_libro
+			   and ca1.nro_asiento = cad1.nro_Asiento
+			   and ca1.flag_estado <> '0'
+			   and ca1.ano         = :ani_year
+			   and ca1.mes         <= :ani_mes
+			   and cad1.cnta_ctbl  = '42111101'
+			   and cad1.nro_docref2 = cad.nro_docref1)) > 0
+group by cad.cnta_ctbl,
+         cad.cod_relacion,
+         p.nom_proveedor,
+         cad.tipo_docref1,
+         cad.nro_docref1
+having case
+          when sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) > sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) then
+            sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) - sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0))
+          else
+            0
+       end > 0
+union all
+select '0' as checked,
+       cad.cnta_ctbl,
+       cad.cod_relacion,
+       p.nom_proveedor,
+       cad.tipo_docref1,
+       cad.nro_docref1,
+       case
+          when sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) > sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) then
+            sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) - sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0))
+          else
+            0
+       end as saldo_deb_sol,
+       case
+          when sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) > sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) then
+            sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) - sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0))
+          else
+            0
+       end as saldo_hab_sol,
+		 case
+          when sum(decode(cad.flag_debhab, 'D', cad.imp_movdol, 0)) > sum(decode(cad.flag_debhab, 'H', cad.imp_movdol, 0)) then
+            sum(decode(cad.flag_debhab, 'D', cad.imp_movdol, 0)) - sum(decode(cad.flag_debhab, 'H', cad.imp_movdol, 0))
+          else
+            0
+       end as saldo_deb_dol,
+       case
+          when sum(decode(cad.flag_debhab, 'H', cad.imp_movdol, 0)) > sum(decode(cad.flag_debhab, 'D', cad.imp_movdol, 0)) then
+            sum(decode(cad.flag_debhab, 'H', cad.imp_movdol, 0)) - sum(decode(cad.flag_debhab, 'D', cad.imp_movdol, 0))
+          else
+            0
+       end as saldo_hab_dol,
+       sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) - sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) as saldo_sol,
+		 sum(decode(cad.flag_debhab, 'D', cad.imp_movdol, 0)) - sum(decode(cad.flag_debhab, 'H', cad.imp_movdol, 0)) as saldo_dol,
+		 0 as imp_vinc_soles,
+		 0 as soles_deb,
+		 0 as soles_hab
+from cntbl_asiento ca,
+     cntbl_asiento_det cad,
+     proveedor         p,
+     (select distinct doc_os, nro_os from vw_oc_serv_vinculados) vw
+where ca.origen = cad.origen
+  and ca.ano    = cad.ano
+  and ca.mes    = cad.mes
+  and ca.nro_libro = cad.nro_libro
+  and ca.nro_asiento = cad.nro_Asiento
+  and cad.cod_relacion = p.proveedor
+  and cad.tipo_docref1 = vw.doc_os
+  and cad.nro_docref1 = vw.nro_os
+  and ca.flag_estado <> '0'
+  and ca.ano         = :ani_year
+  and ca.mes         <= :ani_mes
+  and cad.cnta_ctbl  = '42111101'
+group by cad.cnta_ctbl,
+         cad.cod_relacion,
+         p.nom_proveedor,
+         cad.tipo_docref1,
+         cad.nro_docref1
+having case
+          when sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) > sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0)) then
+            sum(decode(cad.flag_debhab, 'D', cad.imp_movsol, 0)) - sum(decode(cad.flag_debhab, 'H', cad.imp_movsol, 0))
+          else
+            0
+       end > 0       
+order by cnta_ctbl, cod_relacion, tipo_docref1, nro_docref1       
+" arguments=(("ani_year", number),("ani_mes", number))  sort="tipo_docref1 A nom_proveedor A " )
+text(band=header alignment="2" text="Cuenta
+Contable" border="2" color="33554432" x="151" y="4" height="112" width="297" html.valueishtml="0"  name=cnta_ctbl_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Codigo
+Relacion" border="2" color="33554432" x="453" y="4" height="112" width="320" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Razon Social o
+Nombre Comercial" border="2" color="33554432" x="777" y="4" height="112" width="1595" html.valueishtml="0"  name=proveedor_nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Tipo
+Doc" border="2" color="33554432" x="2377" y="4" height="112" width="165" html.valueishtml="0"  name=tipo_docref1_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Numero
+Documento" border="2" color="33554432" x="2546" y="4" height="112" width="398" html.valueishtml="0"  name=nro_docref1_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Saldo Soles
+Deudor" border="2" color="33554432" x="2949" y="4" height="112" width="375" html.valueishtml="0"  name=saldo_deb_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Saldo Soles
+Acreedor" border="2" color="33554432" x="3328" y="4" height="112" width="375" html.valueishtml="0"  name=saldo_hab_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Saldo Dolar
+Deudor" border="2" color="33554432" x="3707" y="4" height="112" width="375" html.valueishtml="0"  name=saldo_deb_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Saldo Dolar
+Acreedor" border="2" color="33554432" x="4087" y="4" height="112" width="375" html.valueishtml="0"  name=saldo_hab_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Saldo
+Soles" border="2" color="33554432" x="4466" y="4" height="112" width="375" html.valueishtml="0"  name=saldo_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Saldo
+Dolares" border="2" color="33554432" x="4846" y="4" height="112" width="375" html.valueishtml="0"  name=saldo_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Imp. Vincul.
+Soles" border="2" color="33554432" x="5225" y="4" height="112" width="375" html.valueishtml="0"  name=imp_vinc_soles_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Ajuste Debe
+Soles" border="2" color="33554432" x="5605" y="4" height="112" width="375" html.valueishtml="0"  name=soles_deb_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Ajuste Haber
+Soles" border="2" color="33554432" x="5984" y="4" height="112" width="375" html.valueishtml="0"  name=soles_hab_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="2" tabsequence=10 border="0" color="33554432" x="5" y="8" height="52" width="142" format="[general]" html.valueishtml="0"  name=checked visible="1~tif(trim(tipo_docref1) = 'OC', 1, 0)" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="453" y="0" height="64" width="320" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="777" y="0" height="64" width="1595" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=200 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="2377" y="0" height="64" width="165" format="[general]" html.valueishtml="0"  name=tipo_docref1 visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="2546" y="0" height="64" width="398" format="[general]" html.valueishtml="0"  name=nro_docref1 visible="1" edit.limit=15 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2949" y="0" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=saldo_deb_sol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="3328" y="0" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=saldo_hab_sol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="3707" y="0" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=saldo_deb_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="4087" y="0" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=saldo_hab_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="4466" y="0" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=saldo_sol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="151" y="0" height="64" width="297" format="[general]" html.valueishtml="0"  name=cnta_ctbl visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="2" color="33554432" x="4846" y="0" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=saldo_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="2" color="33554432" x="5225" y="0" height="64" width="375" format="###,##0.00" html.valueishtml="0"  name=imp_vinc_soles visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="5605" y="0" height="64" width="375" format="###,##0.00" html.valueishtml="0"  name=soles_deb visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="33554432" x="5984" y="0" height="64" width="375" format="###,##0.00" html.valueishtml="0"  name=soles_hab visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(saldo_deb_sol for all)"enabled="0" border="2" color="33554432" x="2949" y="4" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(saldo_hab_sol for all)"enabled="0" border="2" color="33554432" x="3328" y="4" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(saldo_deb_dol for all)"enabled="0" border="2" color="33554432" x="3707" y="4" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(saldo_hab_dol for all)"enabled="0" border="2" color="33554432" x="4087" y="4" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(saldo_sol for all)"enabled="0" border="2" color="33554432" x="4466" y="4" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(saldo_dol for all)"enabled="0" border="2" color="33554432" x="4846" y="4" height="64" width="375" format="###,##0.0000" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(imp_vinc_soles for all)"enabled="0" border="2" color="33554432" x="5225" y="4" height="64" width="375" format="###,##0.00" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(soles_deb for all)"enabled="0" border="2" color="33554432" x="5605" y="4" height="64" width="375" format="###,##0.00" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(soles_hab for all)"enabled="0" border="2" color="33554432" x="5984" y="4" height="64" width="375" format="###,##0.00" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

@@ -1,0 +1,53 @@
+﻿$PBExportHeader$d_rpt_saldo_trabajador_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=432 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="cnta_crrte.cod_trabajador" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cnta_crrte.cod_moneda" )
+ column=(type=number updatewhereclause=yes name=monto_original dbname="monto_original" )
+ column=(type=number updatewhereclause=yes name=saldo dbname="saldo" )
+ retrieve="SELECT C.COD_TRABAJADOR,
+        P.NOM_PROVEEDOR,
+         C.COD_MONEDA,
+         SUM(C.MONT_ORIGINAL) as monto_original,
+         SUM(C.SLDO_PRESTAMO) as saldo
+    FROM CNTA_CRRTE C,   
+         PROVEEDOR P,   
+         MAESTRO M  
+   WHERE ( C.COD_TRABAJADOR = P.PROVEEDOR ) and  
+         ( C.COD_TRABAJADOR = M.COD_TRABAJADOR ) and  
+         ( M.COD_TRABAJADOR = P.PROVEEDOR ) and  
+         (m.flag_estado = '1' AND  
+          m.flag_cal_plnlla = '1' ) AND  
+          c.sldo_prestamo > 0   
+GROUP BY C.COD_TRABAJADOR, P.NOM_PROVEEDOR, C.COD_MONEDA
+ORDER BY SUM(C.SLDO_PRESTAMO) DESC" )
+text(band=header alignment="2" text="Código" border="2" color="33554432" x="5" y="360" height="64" width="329" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+bitmap(band=header filename="" x="23" y="12" height="212" width="366" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="18" y="240" height="48" width="370" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="2341" y="144" height="48" width="379" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="33554432" x="2341" y="76" height="48" width="379" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2341" y="8" height="48" width="379" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="517" y="156" height="64" width="1646" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="SALDO DE CUENTA CORRIENTE DE PERSONAL" border="0" color="33554432" x="480" y="44" height="80" width="1719" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nombre" border="2" color="33554432" x="352" y="360" height="64" width="1353" html.valueishtml="0"  name=proveedor_nom_proveedor_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Mon" border="2" color="33554432" x="1723" y="360" height="64" width="133" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Prestamo" border="2" color="33554432" x="1874" y="360" height="64" width="402" html.valueishtml="0"  name=monto_original_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Saldo S/." border="2" color="33554432" x="2295" y="360" height="64" width="402" html.valueishtml="0"  name=saldo_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=summary alignment="1" text="Total :" border="0" color="0" x="1307" y="4" height="64" width="407" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(monto_original for all)"border="0" color="0" x="1874" y="4" height="64" width="402" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(saldo for all)"border="0" color="0" x="2295" y="4" height="64" width="402" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="76" width="329" format="[general]" html.valueishtml="0"  name=cod_trabajador pointer="C:\Source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="352" y="0" height="64" width="1353" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor pointer="C:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1723" y="0" height="64" width="133" format="[general]" html.valueishtml="0"  name=cod_moneda pointer="C:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="1874" y="0" height="64" width="402" format="#,##0.00" html.valueishtml="0"  name=monto_original pointer="C:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="2295" y="0" height="64" width="402" format="#,##0.00" html.valueishtml="0"  name=saldo pointer="C:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

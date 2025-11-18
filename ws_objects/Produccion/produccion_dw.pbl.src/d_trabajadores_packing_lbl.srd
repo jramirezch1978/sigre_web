@@ -1,0 +1,32 @@
+﻿$PBExportHeader$d_trabajadores_packing_lbl.srd
+release 9;
+datawindow(units=3 timer_interval=0 color=1073741824 processing=2 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 180 print.margin.right = 180 print.margin.top = 0 print.margin.bottom = 300 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no label.name="Pin Fed Address 2.5 x 0.94 1-Across 4104" label.width=5080 label.height=2500 label.rows=1 label.rows.spacing=0 label.columns=2 label.columns.spacing=380 label.topdown=no label.sheet=no label.shape=roundrectangle label.ellipse_height=0 label.ellipse_width=0 )
+detail(height=2513 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes name=cod_trabajador dbname="maestro.cod_trabajador" )
+ column=(type=char(96) update=yes updatewhereclause=yes name=nom_trabajador dbname="nom_trabajador" )
+ column=(type=char(10) updatewhereclause=yes name=cod_barra dbname="cod_barra" )
+ retrieve="select m.cod_trabajador,
+       trim(m.apel_paterno || ' ' || m.apel_materno || ', ' || m.nombre1 || ' ' || 
+      decode(length(m.nombre2), 0, '', substr(m.nombre2,1,1) || '.')) as nom_trabajador,
+     '*' || m.cod_trabajador || '*' as cod_barra
+from 	maestro m,
+		tt_telecredito,
+		tt_proveedor tt1
+where tt1.proveedor = m.cod_trabajador
+  and m.cod_area like :as_area
+  and m.cod_seccion like :as_seccion
+  and m.cod_trabajador between :as_desde and :as_hasta
+  and m.flag_estado = '1'
+order by nom_trabajador" arguments=(("as_area", string),("as_seccion", string),("as_desde", string),("as_hasta", string)) )
+bitmap(band=detail filename="I:\Pb_exe\logos\Agrilap_logo.bmp" x="158" y="238" height="899" width="1137" border="0"  name=p_logo visible="1" )
+rectangle(band=detail x="3254" y="211" height="899" width="1428"  name=r_lote visible="1" brush.hatch="7" brush.color="536870912" pen.style="0" pen.width="79" pen.color="0"  background.mode="2" background.color="0" )
+text(band=detail alignment="0" text="Lote / Cuartel" border="0" color="0" x="1957" y="291" height="767" width="1190" html.valueishtml="0"  name=lote_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="343" y="1164" height="370" width="4445" format="[general]" html.valueishtml="0"  name=nom_trabajador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="158" y="1508" height="449" width="4603" format="[general]" html.valueishtml="0"  name=cod_barra visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="IDAutomationHC39M" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="132" y="1984" height="370" width="4603" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="2" text="" border="0" color="0" x="3386" y="317" height="661" width="1164" html.valueishtml="0"  name=nro_lote_t visible="1"  font.face="Arial" font.height="-16" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

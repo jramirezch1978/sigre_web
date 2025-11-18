@@ -1,0 +1,93 @@
+﻿$PBExportHeader$d_os_pend_conf_ot_adm_usr_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=208 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912"  height.autosize=yes)
+table(column=(type=char(10) updatewhereclause=yes name=orden_trabajo_ot_adm dbname="orden_trabajo.ot_adm" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(40) updatewhereclause=yes name=orden_trabajo_titulo dbname="orden_trabajo.titulo" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="operaciones.oper_sec" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="orden_servicio_det.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=nro_os dbname="orden_servicio_det.nro_os" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_item dbname="orden_servicio_det.nro_item" )
+ column=(type=datetime updatewhereclause=yes name=orden_servicio_det_fec_registro dbname="orden_servicio_det.fec_registro" )
+ column=(type=decimal(2) updatewhereclause=yes name=orden_servicio_det_importe dbname="orden_servicio_det.importe" )
+ column=(type=char(200) updatewhereclause=yes name=orden_servicio_det_descripcion dbname="orden_servicio_det.descripcion" )
+ column=(type=datetime updatewhereclause=yes name=orden_servicio_det_conformidad_fecha dbname="orden_servicio_det.conformidad_fecha" )
+ column=(type=char(6) updatewhereclause=yes name=orden_servicio_det_conformidad_usr dbname="orden_servicio_det.conformidad_usr" )
+ column=(type=number updatewhereclause=yes name=provision dbname="provision" )
+ column=(type=char(40) updatewhereclause=yes name=ot_administracion_descripcion dbname="ot_administracion.descripcion" )
+ column=(type=char(1) updatewhereclause=yes name=flag dbname="flag" values="	1/	0" )
+ retrieve="  SELECT ~"ORDEN_TRABAJO~".~"OT_ADM~",   
+         ~"ORDEN_TRABAJO~".~"NRO_ORDEN~",
+   		~"ORDEN_TRABAJO~".~"TITULO~",
+         ~"OPERACIONES~".~"OPER_SEC~",
+			~"PROVEEDOR~".~"NOM_PROVEEDOR~",
+   		~"ORDEN_SERVICIO_DET~".~"COD_ORIGEN~",
+         ~"ORDEN_SERVICIO_DET~".~"NRO_OS~",
+   		~"ORDEN_SERVICIO_DET~".~"NRO_ITEM~",
+         ~"ORDEN_SERVICIO_DET~".~"FEC_REGISTRO~",   
+         ~"ORDEN_SERVICIO_DET~".~"IMPORTE~",   
+         ~"ORDEN_SERVICIO_DET~".~"DESCRIPCION~",   
+         ~"ORDEN_SERVICIO_DET~".~"CONFORMIDAD_FECHA~",   
+         ~"ORDEN_SERVICIO_DET~".~"CONFORMIDAD_USR~",
+         NVL(~"ORDEN_SERVICIO_DET~".~"IMP_PROVISIONADO~",0) as provision,   
+         ~"OT_ADMINISTRACION~".~"DESCRIPCION~",   
+         '0' as flag  
+    FROM ~"OPERACIONES~",   
+         ~"ORDEN_SERVICIO_DET~",   
+         ~"ORDEN_TRABAJO~",   
+         ~"OT_ADMINISTRACION~",   
+         ~"OT_ADM_USUARIO~",   
+         ~"USUARIO~",   
+         ~"ORDEN_SERVICIO~",   
+         ~"PROVEEDOR~"  
+   WHERE ( ~"ORDEN_SERVICIO_DET~".~"OPER_SEC~" = ~"OPERACIONES~".~"OPER_SEC~" ) and  
+         ( ~"ORDEN_TRABAJO~".~"NRO_ORDEN~" = ~"OPERACIONES~".~"NRO_ORDEN~" ) and  
+         ( ~"OT_ADMINISTRACION~".~"OT_ADM~" = ~"ORDEN_TRABAJO~".~"OT_ADM~" ) and  
+         ( ~"OT_ADM_USUARIO~".~"OT_ADM~" = ~"OT_ADMINISTRACION~".~"OT_ADM~" ) and  
+         ( ~"USUARIO~".~"COD_USR~" = ~"OT_ADM_USUARIO~".~"COD_USR~" ) and  
+         ( ~"ORDEN_SERVICIO~".~"COD_ORIGEN~" = ~"ORDEN_SERVICIO_DET~".~"COD_ORIGEN~" ) and  
+         ( ~"ORDEN_SERVICIO~".~"NRO_OS~" = ~"ORDEN_SERVICIO_DET~".~"NRO_OS~" ) and  
+         ( ~"PROVEEDOR~".~"PROVEEDOR~" = ~"ORDEN_SERVICIO~".~"PROVEEDOR~" ) and  
+         ( ( ~"OPERACIONES~".~"FLAG_ESTADO~" = '1' ) AND  
+         ( ~"USUARIO~".~"COD_USR~" = :as_usuario ) AND  
+         ( ~"OT_ADM_USUARIO~".~"FLAG_CONFORMIDAD_OS~" = '1' ) )   
+ORDER BY ~"ORDEN_TRABAJO~".~"OT_ADM~" ASC,   
+         ~"OPERACIONES~".~"NRO_ORDEN~" ASC,   
+         ~"OPERACIONES~".~"OPER_SEC~" ASC   
+" arguments=(("as_usuario", string)) )
+group(level=1 header.height=64 trailer.height=0 by=("orden_trabajo_ot_adm" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=68 trailer.height=0 by=("orden_trabajo_nro_orden" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Titulo" border="2" color="33554432" x="553" y="88" height="56" width="1243" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="2" color="33554432" x="1449" y="28" height="56" width="3406" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="OT_ADM" border="2" color="33554432" x="0" y="28" height="56" width="1445" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="2" color="33554432" x="0" y="148" height="56" width="507" html.valueishtml="0"  name=operaciones_cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="2" color="33554432" x="0" y="88" height="56" width="242" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="33554432" x="247" y="88" height="56" width="302" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="OperSec" border="2" color="33554432" x="512" y="148" height="56" width="334" html.valueishtml="0"  name=operaciones_cod_ejecutor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="OS" border="2" color="33554432" x="850" y="148" height="56" width="325" html.valueishtml="0"  name=desc_operacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fecha" border="2" color="33554432" x="1179" y="148" height="56" width="265" html.valueishtml="0"  name=operaciones_dias_duracion_proy_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Proveedor" border="2" color="33554432" x="1449" y="148" height="56" width="1047" html.valueishtml="0"  name=fec_inicio_est_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Importe sin IGV" border="2" color="33554432" x="2501" y="148" height="56" width="416" html.valueishtml="0"  name=fec_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripcion" border="2" color="33554432" x="2921" y="148" height="56" width="1842" html.valueishtml="0"  name=operaciones_cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="2" color="33554432" x="4768" y="148" height="56" width="91" html.valueishtml="0"  name=obs_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="0" y="0" height="56" width="219" format="[general]" html.valueishtml="0"  name=orden_trabajo_ot_adm visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=15 alignment="0" tabsequence=32766 border="0" color="33554432" x="247" y="4" height="56" width="1166" format="[general]" html.valueishtml="0"  name=ot_administracion_descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="571" y="4" height="56" width="1207" format="[general]" html.valueishtml="0"  name=orden_trabajo_titulo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+column(band=header.2 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="247" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=orden_trabajo_nro_orden visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="512" y="4" height="56" width="320" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="855" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_os visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="1179" y="4" height="56" width="256" format="[shortdate] [time]" html.valueishtml="0"  name=orden_servicio_det_fec_registro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="1449" y="4" height="56" width="1029" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="2501" y="4" height="56" width="375" format="#,##0.00" html.valueishtml="0"  name=orden_servicio_det_importe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="2921" y="4" height="56" width="1838" format="[general]" html.valueishtml="0"  name=orden_servicio_det_descripcion visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="33554432" x="4791" y="4" height="56" width="69" format="[general]" html.valueishtml="0"  name=flag visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

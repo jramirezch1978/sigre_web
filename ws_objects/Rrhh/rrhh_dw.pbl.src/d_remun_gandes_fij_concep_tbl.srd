@@ -1,0 +1,92 @@
+﻿$PBExportHeader$d_remun_gandes_fij_concep_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=236 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=concep dbname="calculo.concep" )
+ column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="calculo.cod_trabajador" )
+ column=(type=number updatewhereclause=yes name=imp_soles dbname="calculo.imp_soles" )
+ column=(type=datetime updatewhereclause=yes name=fec_proceso dbname="calculo.fec_proceso" )
+ column=(type=char(30) updatewhereclause=yes name=apel_paterno dbname="maestro.apel_paterno" )
+ column=(type=char(30) updatewhereclause=yes name=apel_materno dbname="maestro.apel_materno" )
+ column=(type=char(30) updatewhereclause=yes name=nombre1 dbname="maestro.nombre1" )
+ column=(type=char(30) updatewhereclause=yes name=nombre2 dbname="maestro.nombre2" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="maestro.cod_origen" )
+ column=(type=char(50) updatewhereclause=yes name=desc_origen dbname="desc_origen" )
+ column=(type=char(3) updatewhereclause=yes name=tipo_trabajador dbname="maestro.tipo_trabajador" )
+ column=(type=char(30) updatewhereclause=yes name=desc_tipo_trab dbname="desc_tipo_trab" )
+ column=(type=char(30) updatewhereclause=yes name=seccion_desc_seccion dbname="seccion.desc_seccion" )
+ column=(type=char(3) updatewhereclause=yes name=seccion dbname="maestro.seccion" )
+ column=(type=char(60) updatewhereclause=yes name=desc_concep dbname="concepto.desc_concep" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="maestro.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ retrieve="select c.concep, c.cod_trabajador, c.imp_soles, c.fec_proceso, m.apel_paterno, m.apel_materno, m.nombre1, m.nombre2, m.cod_origen, initcap(o.nombre) as desc_origen, m.tipo_trabajador, initcap(tt.desc_tipo_tra) as desc_tipo_trab, s.desc_seccion, m.cod_seccion  as seccion, cpt.desc_concep, m.cencos, cc.desc_cencos
+      from calculo c
+         left outer join concepto cpt on c.concep = cpt.concep
+         left outer join maestro m on c.cod_trabajador = m.cod_trabajador
+         left outer join origen o on m.cod_origen = o. cod_origen
+         left outer join tipo_trabajador tt on m.tipo_trabajador = tt.tipo_trabajador
+         left outer join area a on m.cod_area = a.cod_area
+         left outer join seccion s on m.cod_area = s.cod_area and m.cod_seccion = s.cod_seccion
+         left outer join centros_costo cc on m.cencos = cc.cencos
+      where m.cod_origen in (select oao.cod_origen from ot_adm_origen oao inner join ot_adm_usuario oau on oao.ot_adm = oau.ot_adm where oau.cod_usr = 'mmcsn')
+union all
+
+   select hc.concep, hc.cod_trabajador, hc.imp_soles, hc.fec_calc_plan, m.apel_paterno, m.apel_materno, m.nombre1, m.nombre2, m.cod_origen, initcap(o.nombre) as desc_origen, m.tipo_trabajador, initcap(tt.desc_tipo_tra) as desc_tipo_trab, s.desc_seccion, m.cod_seccion as seccion, cpt.desc_concep, m.cencos, cc.desc_cencos
+      from historico_calculo hc
+         left outer join calculo c on hc.concep = c.concep and hc.cod_trabajador = c.cod_trabajador and hc.fec_calc_plan = c.fec_proceso
+         left outer join concepto cpt on hc.concep = cpt.concep
+         left outer join maestro m on hc.cod_trabajador = m.cod_trabajador
+         left outer join origen o on m.cod_origen = o. cod_origen
+         left outer join tipo_trabajador tt on m.tipo_trabajador = tt.tipo_trabajador
+         left outer join area a on m.cod_area = a.cod_area
+         left outer join seccion s on m.cod_area = s.cod_area and m.cod_seccion = s.cod_seccion
+         left outer join centros_costo cc on m.cencos = cc.cencos
+      where c.concep is null
+         and m.cod_origen in (select oao.cod_origen from ot_adm_origen oao inner join ot_adm_usuario oau on oao.ot_adm = oau.ot_adm where oau.cod_usr = 'mmcsn')
+
+order by cod_origen, tipo_trabajador, fec_proceso, concep, seccion, apel_paterno, apel_materno, nombre1, nombre2" )
+group(level=1 header.height=616 trailer.height=196 by=("cod_origen" , "tipo_trabajador" , "fec_proceso" ) newpage=yes header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=128 trailer.height=116 by=("concep" ) header.color="536870912" trailer.color="536870912" )
+group(level=3 header.height=132 trailer.height=120 by=("seccion" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header.1 filename="" x="64" y="48" height="200" width="375" border="0"  name=p_logo visible="1" )
+text(band=header.1 alignment="2" text="" border="0" color="0" x="64" y="264" height="56" width="375" html.valueishtml="0"  name=st_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="" border="0" color="0" x="2551" y="272" height="56" width="613" html.valueishtml="0"  name=st_fecha visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header.1 alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2551" y="72" height="56" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="" border="0" color="0" x="2907" y="176" height="56" width="256" html.valueishtml="0"  name=st_usuario visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Centros de Costo" border="2" color="0" x="1673" y="444" height="56" width="1193" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Trabajador" border="2" color="0" x="64" y="444" height="56" width="1605" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Importe
+Total" border="2" color="0" x="2871" y="444" height="116" width="293" html.valueishtml="0"  name=calculo_imp_soles_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="2871" y="4" height="52" width="293" format="[general]" html.valueishtml="0"  name=imp_soles visible="1" editmask.mask="##,###,###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.3 alignment="1" expression="sum(imp_soles for group 3)"border="0" color="0" x="2871" y="32" height="56" width="293" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(imp_soles for group 2)"border="2" color="16711680" x="2871" y="28" height="56" width="293" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Descripción" border="2" color="0" x="1952" y="504" height="56" width="914" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="1952" y="4" height="56" width="914" format="[general]" html.valueishtml="0"  name=desc_cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Código" border="2" color="0" x="1673" y="504" height="56" width="274" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=16 alignment="2" tabsequence=32766 border="0" color="0" x="1673" y="4" height="56" width="274" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Apellidos y Nombres" border="2" color="0" x="384" y="504" height="56" width="1285" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+compute(band=detail alignment="0" expression="if(isNull( apel_paterno ), ' ',  trim(apel_paterno) ) + ' ' +  if(isNull(  apel_materno  ), ' ',  trim( apel_materno ) ) + ' ' + if(isNull(  nombre1 ), ' ',  trim( nombre1 ) ) + ' ' + if(isNull(  nombre2  ), ' ',  trim( nombre2 ) )"border="0" color="0" x="384" y="4" height="56" width="1285" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Código" border="2" color="0" x="64" y="504" height="56" width="320" html.valueishtml="0"  name=calculo_cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="64" y="4" height="52" width="320" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+rectangle(band=trailer.1 x="82" y="44" height="100" width="3127"  name=r_1 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+compute(band=trailer.1 alignment="1" expression="sum(imp_soles for group 1)"border="0" color="16711680" x="2871" y="64" height="56" width="293" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="2" expression="~"TOTAL  ~" + TRIM( desc_origen ) + ~"  -  ~" + TRIM( desc_tipo_trab ) + ~"  -  ~" + TRIM( string ( fec_proceso ) ) "border="0" color="16711680" x="297" y="64" height="56" width="1746" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+rectangle(band=summary x="82" y="64" height="104" width="3127"  name=r_2 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="0" )
+compute(band=summary alignment="1" expression="sum(imp_soles for group 1)"border="0" color="0" x="2871" y="84" height="56" width="293" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="TOTAL GENERAL" border="0" color="0" x="297" y="84" height="56" width="1746" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.2 id=15 alignment="0" tabsequence=32766 border="0" color="16711680" x="238" y="36" height="56" width="1381" format="[general]" html.valueishtml="0"  name=desc_concep visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.2 id=1 alignment="0" tabsequence=32766 border="0" color="16711680" x="64" y="36" height="52" width="151" format="[general]" html.valueishtml="0"  name=concep visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.3 id=13 alignment="0" tabsequence=32766 border="0" color="0" x="187" y="36" height="56" width="1147" format="[general]" html.valueishtml="0"  name=seccion_desc_seccion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.3 id=14 alignment="0" tabsequence=32766 border="0" color="0" x="64" y="36" height="52" width="105" format="[general]" html.valueishtml="0"  name=seccion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="F. Proceso" border="2" color="0" x="1266" y="272" height="56" width="311" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=4 alignment="2" tabsequence=32766 border="2" color="134217856" x="1582" y="272" height="56" width="370" format="[shortdate] [time]" html.valueishtml="0"  name=fec_proceso visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="GANANCIAS Y DESCTOS. FIJOS - PLANILLA CALCULADA" border="1" color="0" x="576" y="160" height="76" width="2071" html.valueishtml="0"  name=st_titulo visible="1"  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215"  height.autosize=yes)
+text(band=header.1 alignment="2" text="" border="0" color="0" x="535" y="56" height="56" width="114" html.valueishtml="0"  name=st_rango_fecha visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Origen" border="2" color="0" x="722" y="356" height="56" width="210" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=10 alignment="2" tabsequence=32766 border="2" color="134217856" x="937" y="356" height="56" width="617" format="[general]" html.valueishtml="0"  name=desc_origen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Trabajador" border="2" color="0" x="1559" y="356" height="56" width="320" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=12 alignment="2" tabsequence=32766 border="2" color="134217856" x="1883" y="356" height="56" width="617" format="[general]" html.valueishtml="0"  name=desc_tipo_trab visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

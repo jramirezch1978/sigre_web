@@ -1,0 +1,34 @@
+﻿$PBExportHeader$d_vist_completa_asist_trip_cross.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=60 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=tripulante dbname="tripulante" )
+ column=(type=char(20) updatewhereclause=yes name=cargo dbname="cargo" )
+ retrieve="SELECT DISTINCT VW_TRIPULANTES.NOMB_TRIP  || ' (' || FLA.TRIPULANTE || ')' AS TRIPULANTE,
+         to_char(FLA.FECHA, 'dd/mm/yyyy') as fecha,   
+         FLA.CARGO_TRIPULANTE || '-' || FLCT.DESCR_CARGO AS CARGO   
+    FROM FL_ASISTENCIA FLA,   
+         FL_CARGO_TRIPULANTES FLCT,   
+         VW_TRIPULANTES  
+   WHERE FLA.CARGO_TRIPULANTE = FLCT.CARGO_TRIPULANTE  
+     and FLA.TRIPULANTE = VW_TRIPULANTES.CODIGO_TRIPULANTE  
+     and (  FLA.NAVE = :as_nave 
+         AND to_char(FLA.FECHA, 'yyyymmdd') >= to_char(:ad_fecha1, 'yyyymmdd')  
+         AND to_char(FLA.FECHA, 'yyyymmdd') <= to_char(:ad_fecha2, 'yyyymmdd') ) 
+
+ " arguments=(("as_nave", string),("ad_fecha1", date),("ad_fecha2", date))  sort="tripulante A " )
+text(band=header[1] alignment="0" text=" " border="0" color="0" x="9" y="4" height="68" width="1147" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[1] alignment="0" text="Fecha" border="0" color="0" x="1166" y="4" height="68" width="421" html.valueishtml="0"  name=t_2 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="68" width="1147" format="[general]" html.valueishtml="0"  name=tripulante visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="1166" y="4" height="68" width="421" format="[general]" html.valueishtml="0"  name=cargo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="2" text="Tripulante" border="2" color="0" x="9" y="4" height="52" width="1147" html.valueishtml="0"  name=tripulante_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="@fecha" border="2" color="0" x="1166" y="4" height="52" width="421" html.valueishtml="0"  name=cargo_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=summary alignment="2" expression="count(cargo)"border="2" color="0" x="1166" y="4" height="68" width="421" format="[General]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=summary alignment="2" expression="~"TOTAL~""border="2" color="0" x="5" y="4" height="68" width="1152" format="[general]" html.valueishtml="0"  name=page_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "fecha" rows = "tripulante" values = "cargo" sourcenames = "tripulante, fecha, cargo")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

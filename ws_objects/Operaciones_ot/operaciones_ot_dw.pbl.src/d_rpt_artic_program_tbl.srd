@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_rpt_artic_program_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=376 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=articulo_mov_proy_cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_costo_ult_compra dbname="articulo.costo_ult_compra" )
+ column=(type=decimal(4) updatewhereclause=yes name=articulo_sldo_total dbname="articulo.sldo_total" )
+ column=(type=number updatewhereclause=yes name=total_cant_proy dbname="total_cant_proy" )
+ retrieve="SELECT am.cod_art, a.nom_articulo, a.und, a.costo_ult_compra, 
+		 a.sldo_total, sum(am.cant_proyect) as total_cant_proy
+FROM programa_trabajo_det_rh pr, operaciones o, 
+     orden_trabajo ot, articulo_mov_proy am,
+     centros_costo cc, articulo a
+WHERE pr.oper_sec = o.oper_sec and
+      o.nro_orden = ot.nro_orden and
+      o.oper_sec = am.oper_sec and
+      ot.cencos_rsp = cc.cencos and
+      am.cod_art = a.cod_art and
+      am.flag_estado <> '0' and
+      pr.fecha_ini_estimada between trunc(:ad_fecha_ini) and
+                           trunc(:ad_fecha_fin) + 0.999 
+GROUP BY am.cod_art, a.nom_articulo, a.und, a.costo_ult_compra, a.sldo_total
+ORDER BY am.cod_art
+" arguments=(("ad_fecha_ini", date),("ad_fecha_fin", date)) )
+column(band=detail id=1 alignment="0" tabsequence=0 border="0" color="0" x="27" y="12" height="56" width="293" html.valueishtml="0"  name=articulo_mov_proy_cod_art visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=0 border="0" color="0" x="334" y="12" height="56" width="1280" html.valueishtml="0"  name=articulo_nom_articulo visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="14" y="8" height="172" width="302" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="PROGRAMACION DE MATERIALES " border="0" color="33554432" x="718" y="40" height="64" width="1893" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="text" border="0" color="33554432" x="718" y="128" height="56" width="1893" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="1" tabsequence=0 border="0" color="0" x="2085" y="12" height="56" width="315" format="#,##0.00" html.valueishtml="0"  name=articulo_costo_ult_compra visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="/*  total_cant_proy * articulo_costo_ult_compra  */"border="0" color="0" x="2414" y="12" height="56" width="315" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="1" tabsequence=0 border="0" color="0" x="2743" y="12" height="56" width="315" format="#,##0.00" html.valueishtml="0"  name=articulo_sldo_total visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="articulo_sldo_total - total_cant_proy "border="0" color="0" x="3077" y="16" height="56" width="315" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="3003" y="32" height="56" width="361" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3003" y="104" height="56" width="361" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Artículo" border="2" color="33554432" x="27" y="312" height="56" width="293" html.valueishtml="0"  name=programa_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Descripción de artículo" border="2" color="33554432" x="334" y="312" height="56" width="1280" html.valueishtml="0"  name=fecha_ini_estim_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="1627" y="312" height="56" width="114" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Precio US$" border="2" color="33554432" x="2085" y="312" height="56" width="315" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Costo. US$" border="2" color="33554432" x="2414" y="312" height="56" width="315" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Stock" border="2" color="33554432" x="2743" y="312" height="56" width="315" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Stk - Requer." border="2" color="33554432" x="3072" y="312" height="56" width="315" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cantidad req." border="2" color="33554432" x="1755" y="312" height="56" width="315" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=3 alignment="2" tabsequence=0 border="0" color="0" x="1627" y="12" height="56" width="114" html.valueishtml="0"  name=articulo_und visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=0 border="0" color="0" x="1755" y="12" height="56" width="315" format="#,##0.00" html.valueishtml="0"  name=total_cant_proy visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

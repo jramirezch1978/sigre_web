@@ -1,0 +1,98 @@
+﻿$PBExportHeader$d_cns_articulo_consignacion.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="ARTICULOS EN CONSIGNACION" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=476 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="articulo_consignacion.flag_estado" )
+ column=(type=char(12) update=yes updatewhereclause=yes name=cod_art dbname="articulo_consignacion.cod_art" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=almacen dbname="articulo_consignacion.almacen" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=proveedor dbname="articulo_consignacion.proveedor" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=tipo_mov dbname="articulo_consignacion.tipo_mov" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="articulo_consignacion.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="articulo_consignacion.nro_doc" )
+ column=(type=datetime updatewhereclause=yes name=fecha_registro dbname="articulo_consignacion.fecha_registro" )
+ column=(type=number updatewhereclause=yes name=saldo dbname="saldo" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=referencia dbname="articulo_consignacion.referencia" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=precio_unitario dbname="articulo_consignacion.precio_unitario" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(40) updatewhereclause=yes name=nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=char(60) updatewhereclause=yes name=desc_tipo_mov dbname="articulo_mov_tipo.desc_tipo_mov" )
+ column=(type=char(10) updatewhereclause=yes name=nro_mov dbname="articulo_consignacion.nro_mov" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantidad dbname="articulo_consignacion.cantidad" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantidad_liquidada dbname="articulo_consignacion.cantidad_liquidada" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_consignacion_cod_moneda dbname="articulo_consignacion.cod_moneda" )
+ retrieve="SELECT  AC.FLAG_ESTADO ,
+        AC.COD_ART ,
+        AC.ALMACEN ,
+        AC.PROVEEDOR ,
+        AC.TIPO_MOV ,
+        AC.TIPO_DOC ,
+        AC.NRO_DOC ,
+        AC.FECha_REGISTRO ,
+        NVL(AC.CANTIDAD,0) - NVL(AC.CANTIDAD_LIQUIDADA,0) as SAldo,
+        AC.REFERENCIA ,
+        AC.PRECIO_UNITARIO ,
+        PROVEEDOR.NOM_PROVEEDOR ,
+        ARTICULO.NOM_ARTICULO ,
+        ARTICULO.UND, 
+		  AMT.DESC_TIPO_MOV,
+		  AC.NRO_MOV,
+		  AC.CANTIDAD,
+		  AC.CANTIDAD_LIQUIDADA,
+		  AC.Cod_moneda
+  FROM ARTICULO_CONSIGNACION AC ,
+		 ARTICULO_MOV_TIPO     AMT,
+       PROVEEDOR ,
+       ARTICULO 
+ WHERE AMT.TIPO_MOV = AC.TIPO_MOV
+   AND AC.PROVEEDOR = PROVEEDOR.PROVEEDOR 
+   And AC.COD_ART = ARTICULO.COD_ART 
+   and AC.FLAG_ESTADO = '1' 
+   AND AMT.FACTOR_SLDO_CONSIG = 1
+   and AC.almacen = :as_almacen
+   and NVL(AC.CANTIDAD,0) > NVL(AC.CANTIDAD_LIQUIDADA,0)
+ ORDER BY AC.PROVEEDOR          ASC,
+          AC.COD_ART          ASC  " arguments=(("as_almacen", string)) )
+group(level=1 header.height=72 trailer.height=64 by=("cod_art" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="gs_logo" x="23" y="12" height="252" width="517" border="0"  name=p_logo visible="1" )
+compute(band=trailer.1 alignment="1" expression="sum(saldo for group 1)"border="0" color="255" x="1847" y="4" height="56" width="247" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="empresa" border="0" color="0" x="14" y="276" height="56" width="398" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="objeto" border="0" color="0" x="14" y="348" height="56" width="544" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Tipo Mov" border="2" color="0" x="571" y="420" height="48" width="768" html.valueishtml="0"  name=tipo_mov_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Nro Reg." border="2" color="0" x="5" y="420" height="48" width="320" html.valueishtml="0"  name=nro_mov_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Fec Reg." border="2" color="0" x="329" y="420" height="48" width="238" html.valueishtml="0"  name=fec_registro_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Consumo" border="2" color="0" x="1595" y="420" height="48" width="247" html.valueishtml="0"  name=cantidad_liquidada_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Ingreso" border="2" color="0" x="1344" y="420" height="48" width="247" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Saldo" border="2" color="0" x="1847" y="420" height="48" width="247" html.valueishtml="0"  name=saldo_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Precio Unitario" border="2" color="0" x="2098" y="420" height="48" width="366" html.valueishtml="0"  name=precio_unitario_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Proveedor" border="2" color="0" x="2469" y="420" height="48" width="1102" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Documento" border="2" color="0" x="3575" y="420" height="48" width="343" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=5 alignment="0" tabsequence=70 border="0" color="0" x="571" y="4" height="56" width="78" format="[general]" html.valueishtml="0"  name=tipo_mov visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="654" y="4" height="56" width="686" format="[general]" html.valueishtml="0"  name=desc_tipo_mov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="5" y="4" height="56" width="320" format="[general]" html.valueishtml="0"  name=nro_mov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="329" y="4" height="56" width="238" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=170 border="0" color="0" x="2098" y="4" height="56" width="270" format="#,##0.00" html.valueishtml="0"  name=precio_unitario visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="1" tabsequence=32766 border="0" color="0" x="1595" y="4" height="56" width="247" format="###,##0.0000" html.valueishtml="0"  name=cantidad_liquidada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="1" tabsequence=32766 border="0" color="0" x="1344" y="4" height="56" width="247" format="###,##0.0000" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="1847" y="4" height="56" width="247" format="###,##0.0000" html.valueishtml="0"  name=saldo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="2" tabsequence=32766 border="0" color="0" x="2373" y="4" height="56" width="91" format="[general]" html.valueishtml="0"  name=articulo_consignacion_cod_moneda visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=60 border="0" color="0" x="2469" y="4" height="56" width="201" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=80 border="0" color="0" x="3575" y="4" height="56" width="78" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=90 border="0" color="0" x="3657" y="4" height="56" width="261" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="2674" y="4" height="56" width="896" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=40 border="0" color="0" x="5" y="8" height="56" width="320" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=header.1 id=13 alignment="0" tabsequence=32766 border="0" color="0" x="379" y="8" height="56" width="1330" format="[general]" html.valueishtml="0"  name=nom_articulo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=header.1 id=14 alignment="0" tabsequence=32766 border="0" color="0" x="1911" y="8" height="56" width="91" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Page ' + page() + ' / ' + pageCount()"border="0" color="0" x="3515" y="28" height="68" width="393" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3515" y="200" height="68" width="384" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="text" border="0" color="0" x="3515" y="120" height="56" width="389" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="ARTICULOS EN CONSIGNACION" border="0" color="0" x="1230" y="60" height="92" width="1358" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="text" border="0" color="0" x="1390" y="188" height="60" width="1042" html.valueishtml="0"  name=t_titulo visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

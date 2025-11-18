@@ -1,0 +1,27 @@
+﻿$PBExportHeader$f_set_error_log.srf
+$PBExportComments$Grabar en el Log de errores.
+global type f_set_error_log from function_object
+end type
+
+forward prototypes
+global function integer f_set_error_log (integer ai_error, string as_program, string as_obs)
+end prototypes
+
+global function integer f_set_error_log (integer ai_error, string as_program, string as_obs);Integer	li_rc = 1
+Datetime	ld_today
+
+ld_today = Datetime(Today(), now())
+
+INSERT INTO "ERROR_LOG"  
+            ( "FECHA", "COD_USR", "COD_ERROR", "PROGAMA", "OBSERVACION" )  
+     VALUES ( ld_today,:gs_user,    ai_error, 'as_program', 'as_obs' )  ;
+
+IF SQLCA.SQLCODE = -1 THEN
+	MessageBox("Error Base Datos", "SQLErrText")
+	li_rc = -1
+END IF
+
+
+RETURN li_rc
+end function
+

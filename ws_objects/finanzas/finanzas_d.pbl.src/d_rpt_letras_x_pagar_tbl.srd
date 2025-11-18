@@ -1,0 +1,99 @@
+﻿$PBExportHeader$d_rpt_letras_x_pagar_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=444 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntas_pagar.cod_relacion" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="cntas_pagar.nro_doc" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="cntas_pagar.flag_estado" values="Anulado	0/Activo	1/Provisionado	2/" )
+ column=(type=datetime updatewhereclause=yes name=vencimiento dbname="cntas_pagar.vencimiento" )
+ column=(type=datetime updatewhereclause=yes name=fecha_emision dbname="cntas_pagar.fecha_emision" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=decimal(4) updatewhereclause=yes name=tasa_cambio dbname="cntas_pagar.tasa_cambio" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_doc dbname="cntas_pagar.importe_doc" )
+ column=(type=decimal(2) updatewhereclause=yes name=saldo_sol dbname="cntas_pagar.saldo_sol" )
+ column=(type=decimal(2) updatewhereclause=yes name=saldo_dol dbname="cntas_pagar.saldo_dol" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="cntas_pagar.cod_usr" )
+ column=(type=char(166) updatewhereclause=yes name=voucher dbname="voucher" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ retrieve="SELECT  cp.cod_relacion,  
+        cp.nro_doc, 
+        cp.flag_estado, 
+        cp.vencimiento, 
+        cp.fecha_emision, 
+        cp.cod_moneda, 
+        cp.tasa_cambio, 
+        cp.importe_doc, 
+        cp.saldo_sol, 
+        cp.saldo_dol, 
+        cp.cod_usr, 
+        ( cp.origen ||'-'|| to_char(cp.ano) ||'-'|| to_char(cp.mes)||'-'|| trim(to_char(cp.nro_libro)) ||'-'|| trim(to_char(cp.nro_asiento)) ) as voucher ,
+        p.nom_proveedor 
+   FROM cntas_pagar cp, 
+        proveedor p
+  WHERE ( cp.cod_relacion = p.proveedor ) and 
+		  ( cp.tipo_doc = (select f.doc_letra_pagar from finparam f where f.reckey='1')) and 
+        ( cp.origen like :as_origen ) and 
+        ( cp.ano = :an_ano ) and 
+        ( cp.mes >= :an_mes_ini and cp.mes <= :an_mes_fin )  
+ORDER BY cp.cod_relacion, cp.ano, cp.mes, cp.nro_libro, cp.nro_asiento " arguments=(("as_origen", string),("an_ano", number),("an_mes_ini", number),("an_mes_fin", number)) )
+text(band=header alignment="2" text="LETRAS POR PAGAR" border="0" color="0" x="1614" y="48" height="80" width="960" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="4005" y="20" height="60" width="256" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="3817" y="20" height="56" width="174" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="4005" y="92" height="56" width="256" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="3817" y="88" height="60" width="174" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Usuario :" border="0" color="0" x="3794" y="164" height="56" width="197" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="0" x="4005" y="164" height="56" width="256" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="46" y="24" height="192" width="402" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="46" y="228" height="52" width="402" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cliente" border="2" color="0" x="590" y="324" height="56" width="1189" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Total Letra" border="2" color="0" x="2295" y="324" height="56" width="498" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo por pagar" border="2" color="0" x="2798" y="324" height="56" width="498" html.valueishtml="0"  name=t_20 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Flag
+Estado" border="2" color="0" x="3950" y="324" height="116" width="338" html.valueishtml="0"  name=t_27 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Asiento Contable" border="2" color="0" x="3301" y="324" height="116" width="462" html.valueishtml="0"  name=t_26 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cod
+User" border="2" color="0" x="3767" y="324" height="116" width="178" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Soles" border="2" color="0" x="2798" y="380" height="60" width="247" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Dolares" border="2" color="0" x="3049" y="380" height="60" width="247" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro
+Letra" border="2" color="0" x="18" y="324" height="116" width="306" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha
+Emisión" border="2" color="0" x="329" y="324" height="116" width="256" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="590" y="384" height="56" width="229" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="823" y="384" height="56" width="955" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha
+Vencim." border="2" color="0" x="1783" y="324" height="116" width="261" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T.
+Cam" border="2" color="0" x="2048" y="324" height="116" width="137" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T.
+Mon" border="2" color="0" x="2190" y="324" height="116" width="101" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Soles" border="2" color="0" x="2295" y="380" height="60" width="247" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Dolares" border="2" color="0" x="2546" y="380" height="60" width="247" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="4297" y="8" height="56" width="18" format="[general]" html.valueishtml="0"  name=importe_doc visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="3954" y="4" height="60" width="338" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="3301" y="4" height="60" width="462" format="[general]" html.valueishtml="0"  name=voucher visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="2" color="33554432" x="3767" y="4" height="60" width="178" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="18" y="4" height="60" width="306" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="329" y="4" height="60" width="256" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_emision visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="590" y="4" height="60" width="229" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="33554432" x="823" y="4" height="60" width="955" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1783" y="4" height="60" width="261" format="dd/mm/yyyy" html.valueishtml="0"  name=vencimiento visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="2048" y="4" height="60" width="137" format="[general]" html.valueishtml="0"  name=tasa_cambio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2190" y="4" height="60" width="101" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total General:" border="2" color="0" x="1934" y="8" height="56" width="347" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="2798" y="4" height="60" width="247" format="[general]" html.valueishtml="0"  name=saldo_sol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="3049" y="4" height="60" width="247" format="[general]" html.valueishtml="0"  name=saldo_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if( cod_moneda ='S/.', if(isnull(importe_doc),0,importe_doc),0 )"border="2" color="33554432" x="2295" y="4" height="60" width="247" format="#,##0.00" html.valueishtml="0"  name=total_sol visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if( cod_moneda ='US$', if(isnull(importe_doc),0,importe_doc),0 ) "border="2" color="33554432" x="2546" y="4" height="60" width="247" format="#,##0.00" html.valueishtml="0"  name=total_dol visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="SUM( total_sol)"border="2" color="33554432" x="2295" y="4" height="60" width="247" format="[General]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="SUM( total_dol)"border="2" color="33554432" x="2546" y="4" height="60" width="247" format="[General]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="SUM( saldo_sol)"border="2" color="33554432" x="2798" y="4" height="60" width="247" format="[General]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="SUM( saldo_dol )"border="2" color="33554432" x="3049" y="4" height="60" width="247" format="[General]" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

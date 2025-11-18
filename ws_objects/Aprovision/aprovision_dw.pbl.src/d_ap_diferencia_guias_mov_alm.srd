@@ -1,0 +1,87 @@
+﻿$PBExportHeader$d_ap_diferencia_guias_mov_alm.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=696 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=4 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=number updatewhereclause=yes name=rownum dbname="rownum" )
+ column=(type=char(10) updatewhereclause=yes name=cod_guia_rec dbname="cod_guia_rec" )
+ column=(type=number updatewhereclause=yes name=pre_uni_guia dbname="pre_uni_guia" )
+ column=(type=number updatewhereclause=yes name=pre_uni_mov dbname="pre_uni_mov" )
+ column=(type=decimal(4) updatewhereclause=yes name=peso_guia dbname="peso_guia" )
+ column=(type=number updatewhereclause=yes name=peso_mov dbname="peso_mov" )
+ column=(type=datetime updatewhereclause=yes name=fecha_guia dbname="fecha_guia" )
+ column=(type=datetime updatewhereclause=yes name=fecha_mov dbname="fecha_mov" )
+ column=(type=char(6) updatewhereclause=yes name=alm_dest_guia dbname="alm_dest_guia" )
+ column=(type=char(6) updatewhereclause=yes name=alm_dest_mov dbname="alm_dest_mov" )
+ retrieve="SELECT  rownum,
+        gd.cod_guia_rec, 
+        round(USF_FL_CONV_MON(gd.precio_unitario + gd.precio_unitario_castigo + gd.precio_representacion,
+        gc.cod_moneda, am.cod_moneda, pdd.inicio_descarga),4)  as pre_uni_guia,
+        usf_ap_conv_precio(a.und, pdd.und, am.precio_unit) 		as pre_uni_mov,
+        gd.peso_venta   	 as peso_guia,
+        usf_ap_conv_und(a.und, pdd.und, am.cant_procesada)     as peso_mov,
+        pdd.inicio_descarga as fecha_guia,
+        vm.fec_registro		 as fecha_mov,
+        gd.almacen_dst      as Alm_dest_guia,
+        vm.almacen          as Alm_dest_mov
+FROM   ap_guia_recepcion_det gd,				     /* Detalle de la Guia de Recepcion */
+       ap_pd_descarga_det 	 pdd,				     /* Detalle del Parte diario de descarga */
+       ap_guia_recepcion 		 gc,				  /* Cabecera de la Guia de Recepcion */
+       vale_mov 					   vm,			  /* Cabecera del movimiento */
+       articulo_mov 			   am,				  /* Detalle del movimiento */
+       articulo              a                 /* Articulos  */
+WHERE  pdd.nro_parte 	 = gd.nro_parte
+  AND  pdd.item 			 = gd.item_parte 
+  AND  gc.cod_guia_rec = gd.cod_guia_rec
+  AND  gd.nro_mov 		 = am.nro_mov
+  AND  gd.origen_mov	 = am.cod_origen
+  AND  vm.nro_vale 	   = am.nro_vale
+  AND  am.cod_art      = a.cod_art
+  AND  (vm.fec_registro <> pdd.inicio_descarga or 
+        USF_AP_CONV_UND(a.und, pdd.und,am.cant_procesada) <> gd.peso_venta or 
+        USF_AP_CONV_PRECIO(pdd.und, a.und, round(USF_FL_CONV_MON(gd.precio_unitario + gd.precio_unitario_castigo + gd.precio_representacion,
+        gc.cod_moneda, am.cod_moneda, pdd.inicio_descarga),4)) <> am.precio_unit or
+        gd.almacen_dst <> vm.almacen)
+ AND  Trunc(pdd.inicio_descarga) BETWEEN trunc(:ad_fecha_ini) AND trunc(:ad_fecha_fin)" arguments=(("ad_fecha_ini", date),("ad_fecha_fin", date)) )
+text(band=header alignment="2" text="Reporte de Diferencia entre Guias y Movimientos de Almacen" border="4" color="0" x="384" y="380" height="80" width="2432" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="27" y="24" height="268" width="549" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2953" y="44" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="2953" y="200" height="56" width="416" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="2853" y="120" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Peso 
+Mov Alm" border="2" color="16777215" x="1339" y="588" height="104" width="293" html.valueishtml="0"  name=peso_mov_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fecha 
+Guia" border="2" color="16777215" x="1637" y="588" height="104" width="553" html.valueishtml="0"  name=fecha_guia_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Fecha 
+Mov Alm" border="2" color="16777215" x="2194" y="588" height="104" width="553" html.valueishtml="0"  name=fecha_mov_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Peso 
+Guia" border="2" color="16777215" x="1042" y="588" height="104" width="293" html.valueishtml="0"  name=peso_guia_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="P.U
+Guia" border="2" color="16777215" x="494" y="588" height="104" width="270" html.valueishtml="0"  name=pre_uni_guia_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="P. U
+Mov Alm" border="2" color="16777215" x="768" y="588" height="104" width="270" html.valueishtml="0"  name=pre_uni_mov_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Codigo
+Guia Rec" border="2" color="16777215" x="174" y="588" height="104" width="315" html.valueishtml="0"  name=cod_guia_rec_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nº
+" border="2" color="16777215" x="73" y="588" height="104" width="96" html.valueishtml="0"  name=t_2 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Almacen
+Guia" border="2" color="16777215" x="2752" y="588" height="104" width="251" html.valueishtml="0"  name=articulo_mov_cod_art_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Almacen
+Mov" border="2" color="16777215" x="3008" y="588" height="104" width="251" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="1339" y="4" height="76" width="293" format="#,##0.000" html.valueishtml="0"  name=peso_mov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(   peso_guia   <>  peso_mov  , RGB(192,192,192), RGB(255,255,255) )" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="33554432" x="1637" y="4" height="76" width="553" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_guia visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(   fecha_guia    <>   fecha_mov   , RGB(192,192,192), RGB(255,255,255) )" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="1042" y="4" height="76" width="293" format="#,##0.000" html.valueishtml="0"  name=peso_guia visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(   peso_guia   <>  peso_mov  , RGB(192,192,192), RGB(255,255,255) )" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="494" y="4" height="76" width="270" format="#,##0.000" html.valueishtml="0"  name=pre_uni_guia visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif(  pre_uni_guia  <>  pre_uni_mov , RGB(192,192,192), RGB(255,255,255) )" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="768" y="4" height="76" width="270" format="#,##0.000" html.valueishtml="0"  name=pre_uni_mov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(  pre_uni_guia  <>  pre_uni_mov , RGB(192,192,192), RGB(255,255,255) )" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="174" y="4" height="76" width="315" format="[general]" html.valueishtml="0"  name=cod_guia_rec visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="73" y="4" height="76" width="96" format="[general]" html.valueishtml="0"  name=rownum visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="2194" y="4" height="76" width="553" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_mov visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif(   fecha_guia    <>   fecha_mov   , RGB(192,192,192), RGB(255,255,255) )" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="2752" y="4" height="76" width="251" format="[general]" html.valueishtml="0"  name=alm_dest_guia visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(   alm_dest_guia     <>   alm_dest_mov    , RGB(192,192,192), RGB(255,255,255) )" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="2" color="33554432" x="3008" y="4" height="76" width="251" format="[general]" html.valueishtml="0"  name=alm_dest_mov visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(   alm_dest_guia     <>   alm_dest_mov    , RGB(192,192,192), RGB(255,255,255) )" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

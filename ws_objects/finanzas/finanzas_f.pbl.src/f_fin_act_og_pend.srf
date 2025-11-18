@@ -1,0 +1,34 @@
+﻿$PBExportHeader$f_fin_act_og_pend.srf
+global type f_fin_act_og_pend from function_object
+end type
+
+forward prototypes
+global function boolean f_fin_act_og_pend (string as_cod_relacion)
+end prototypes
+
+global function boolean f_fin_act_og_pend (string as_cod_relacion);Long    ll_count
+String  ls_msj_err
+Boolean lb_ret = TRUE
+
+//encuentra ordenes de giro pendientes
+select Count(*) into :ll_count
+  from solicitud_giro sg
+ where (sg.cod_relacion = :as_cod_relacion ) and
+       (sg.flag_estado  in ('3','4')       );
+		 
+//actualiza orden de giro pendientes
+update maestro_param_autoriz mpa
+   set mpa.nro_solicitudes_pend = :ll_count
+ where (mpa.cod_relacion = :as_cod_relacion) ;
+ 
+ 
+IF SQLCA.SQLCode = -1 THEN 
+	ls_msj_err = SQLCA.SQLErrText	
+   MessageBox("SQL error", SQLCA.SQLErrText)
+	lb_ret = FALSE
+END IF 
+
+
+RETURN lb_ret
+end function
+

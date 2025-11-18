@@ -1,0 +1,104 @@
+﻿$PBExportHeader$d_rpt_factura_exportacion_tbl.srd
+release 11.5;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 1 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=1636 color="536870912" )
+summary(height=4 color="536870912" )
+footer(height=816 color="536870912" )
+detail(height=228 color="536870912"  height.autosize=yes)
+table(column=(type=char(50) updatewhereclause=yes name=proveedor_cliente dbname="proveedor.cliente" )
+ column=(type=char(100) updatewhereclause=yes name=embarque_nave dbname="embarque.nave" )
+ column=(type=char(50) updatewhereclause=yes name=des_puerto_origen dbname="fl_puertos.des_puerto_origen" )
+ column=(type=char(50) updatewhereclause=yes name=desc_puerto_destino dbname="fl_puertos.desc_puerto_destino" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_asegurador dbname="proveedor.asegurador" )
+ column=(type=char(3) updatewhereclause=yes name=incoterm dbname="embarque.incoterm" )
+ column=(type=char(40) updatewhereclause=yes name=banco_nom_banco dbname="banco.nom_banco" )
+ column=(type=datetime updatewhereclause=yes name=cntas_cobrar_fecha_documento dbname="cntas_cobrar.fecha_documento" )
+ column=(type=char(12) updatewhereclause=yes name=cntas_cobrar_det_cod_art dbname="cntas_cobrar_det.cod_art" )
+ column=(type=decimal(0) updatewhereclause=yes name=item dbname="cntas_cobrar_det.item" )
+ column=(type=char(150) updatewhereclause=yes name=cntas_cobrar_det_marcas dbname="cntas_cobrar_det.marcas" )
+ column=(type=char(800) updatewhereclause=yes name=cntas_cobrar_det_descripcion dbname="cntas_cobrar_det.descripcion" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantidad dbname="cntas_cobrar_det.cantidad" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=decimal(6) updatewhereclause=yes name=precio_unitario dbname="cntas_cobrar_det.precio_unitario" )
+ column=(type=decimal(2) updatewhereclause=yes name=descuento dbname="cntas_cobrar_det.descuento" )
+ column=(type=char(800) updatewhereclause=yes name=factura_exportacion_glosa_detalle dbname="factura_exportacion.glosa_detalle" )
+ column=(type=decimal(2) updatewhereclause=yes name=cntas_cobrar_importe_doc dbname="cntas_cobrar.importe_doc" )
+ column=(type=char(3) updatewhereclause=yes name=cntas_cobrar_cod_moneda dbname="cntas_cobrar.cod_moneda" )
+ column=(type=char(40) updatewhereclause=yes name=moneda_descripcion dbname="moneda.descripcion" )
+ column=(type=char(4000) updatewhereclause=yes name=direccion dbname="direccion" )
+ column=(type=char(60) updatewhereclause=yes name=desc_forma_pago dbname="forma_pago.desc_forma_pago" )
+ retrieve="  SELECT ~"PROVEEDOR_A~".~"NOM_PROVEEDOR~" as cliente,   
+         ~"EMBARQUE~".~"NAVE~"					,   
+         ~"FL_PUERTOS_A~".~"DESCR_PUERTO~" as des_puerto_origen  ,   
+         ~"FL_PUERTOS_B~".~"DESCR_PUERTO~" as desc_puerto_destino,   
+         ~"PROVEEDOR_B~".~"NOM_PROVEEDOR~" as asegurador			 ,   
+         ~"EMBARQUE~".~"INCOTERM~",   
+         ~"BANCO~".~"NOM_BANCO~",   
+         ~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~" ,
+			~"CNTAS_COBRAR_DET~".~"COD_ART~" ,
+			~"CNTAS_COBRAR_DET~".~"ITEM~" ,
+			~"CNTAS_COBRAR_DET~".~"MARCAS~" ,
+			~"CNTAS_COBRAR_DET~".~"DESCRIPCION~",
+			~"CNTAS_COBRAR_DET~".~"CANTIDAD~" ,  
+			~"ARTICULO~".~"UND~",
+			~"CNTAS_COBRAR_DET~".~"PRECIO_UNITARIO~"   ,
+			~"CNTAS_COBRAR_DET~".~"DESCUENTO~"   		,
+			~"FACTURA_EXPORTACION~".~"GLOSA_DETALLE~"  ,
+			~"CNTAS_COBRAR~".~"IMPORTE_DOC~",
+			~"CNTAS_COBRAR~".~"COD_MONEDA~",
+			~"MONEDA~".~"DESCRIPCION~",
+			USF_CMP_DIRECCION_CODREL(~"CNTAS_COBRAR~".~"COD_RELACION~",'1') AS DIRECCION,
+			~"FORMA_PAGO~".~"DESC_FORMA_PAGO~"
+    FROM ~"CNTAS_COBRAR~",   
+			~"CNTAS_COBRAR_DET~",   
+			~"ARTICULO~",
+         ~"PROVEEDOR~" ~"PROVEEDOR_A~",   
+         ~"EMBARQUE~",   
+         ~"FACTURA_EXPORTACION~",   
+         ~"FL_PUERTOS~" ~"FL_PUERTOS_A~",   
+         ~"FL_PUERTOS~" ~"FL_PUERTOS_B~",   
+         ~"PROVEEDOR~" ~"PROVEEDOR_B~",   
+         ~"BANCO~"  ,
+			~"MONEDA~" ,
+			~"FORMA_PAGO~"
+	
+   WHERE ( ~"CNTAS_COBRAR~".~"TIPO_DOC~"            = ~"CNTAS_COBRAR_DET~".~"TIPO_DOC~" 		) AND
+			( ~"CNTAS_COBRAR~".~"NRO_DOC~" 				= ~"CNTAS_COBRAR_DET~".~"NRO_DOC~" 		) AND
+			( ~"CNTAS_COBRAR_DET~".~"COD_ART~"			= ~"ARTICULO~".~"COD_ART~"					) AND
+			( ~"FACTURA_EXPORTACION~".~"TIPO_DOC~" 		= ~"CNTAS_COBRAR~".~"TIPO_DOC~" 			) AND  
+         ( ~"FACTURA_EXPORTACION~".~"NRO_DOC~" 		= ~"CNTAS_COBRAR~".~"NRO_DOC~" 			) AND
+			
+			( ~"FACTURA_EXPORTACION~".~"NRO_EMBARQUE~" = ~"EMBARQUE~".~"NRO_EMBARQUE~"         ) AND
+			( ~"CNTAS_COBRAR~".~"COD_MONEDA~" 			= ~"MONEDA~".~"COD_MONEDA~"			 		) AND
+			( ~"PROVEEDOR_A~".~"PROVEEDOR~"            = ~"CNTAS_COBRAR~".~"COD_RELACION~" (+) ) AND           
+         ( ~"EMBARQUE~".~"PUERTO_ORIGEN~"           = ~"FL_PUERTOS_A~".~"PUERTO~" 		  (+)	) AND
+         ( ~"EMBARQUE~".~"PUERTO_DESTINO~"          = ~"FL_PUERTOS_B~".~"PUERTO~" 		  (+)	) AND
+         ( ~"EMBARQUE~".~"ASEGURADOR~" 		         = ~"PROVEEDOR_B~".~"PROVEEDOR~" 	  (+)	) AND
+         ( ~"EMBARQUE~".~"DOC_COBR_BANCO~" 			= ~"BANCO~".~"COD_BANCO~" 		 	  (+)	) AND
+			( ~"CNTAS_COBRAR~".~"FORMA_PAGO~"				= ~"FORMA_PAGO~".~"FORMA_PAGO~"	  (+)	) AND	
+			( ~"CNTAS_COBRAR~".~"TIPO_DOC~"					= :as_tipo_doc   							) AND
+			( ~"CNTAS_COBRAR~".~"NRO_DOC~"					= :as_nro_doc   							)
+" arguments=(("as_tipo_doc", string),("as_nro_doc", string)) )
+column(band=footer id=18 alignment="1" tabsequence=32766 border="0" color="33554432" x="2711" y="12" height="56" width="398" format="[general]" html.valueishtml="0"  name=cntas_cobrar_importe_doc visible="0" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="0" expression="'Son : ' + f_conv_numlet_f(string(  cntas_cobrar_importe_doc  )) + ' '+UPPER( moneda_descripcion ) "border="0" color="33554432" x="809" y="116" height="56" width="1403" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+compute(band=footer alignment="0" expression="'Son : ' + f_s_numero_a_letras4( cntas_cobrar_importe_doc ) + ' '+UPPER( moneda_descripcion ) "border="0" color="33554432" x="809" y="12" height="56" width="1403" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+column(band=header id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="2313" y="756" height="56" width="434" format="[shortdate] [time]" html.valueishtml="0"  name=cntas_cobrar_fecha_documento visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1358" y="1180" height="56" width="494" format="[general]" html.valueishtml="0"  name=desc_puerto_destino visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="2286" y="1392" height="56" width="384" format="[general]" html.valueishtml="0"  name=incoterm visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="613" y="1004" height="56" width="1266" format="[general]" html.valueishtml="0"  name=embarque_nave visible="1" edit.limit=100 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="603" y="1384" height="56" width="1152" format="[general]" html.valueishtml="0"  name=proveedor_asegurador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="613" y="1180" height="56" width="443" format="[general]" html.valueishtml="0"  name=des_puerto_origen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="603" y="764" height="56" width="910" format="[general]" html.valueishtml="0"  name=proveedor_cliente visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=21 alignment="0" tabsequence=32766 border="0" color="33554432" x="603" y="832" height="56" width="1563" format="[general]" html.valueishtml="0"  name=direccion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=0 border="0" color="33554432" x="229" y="12" height="56" width="133" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=0 border="0" color="33554432" x="407" y="12" height="56" width="325" html.valueishtml="0"  name=cntas_cobrar_det_marcas visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=0 border="0" color="33554432" x="823" y="8" height="56" width="1399" html.valueishtml="0"  name=cntas_cobrar_det_descripcion visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="33554432" x="2290" y="108" height="56" width="352" format="[general]" html.valueishtml="0"  name=precio_unitario visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=0 border="0" color="33554432" x="2405" y="8" height="56" width="155" html.valueishtml="0"  name=cntas_cobrar_cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="((( (if (isnull(cantidad),0,cantidad)) * (if (isnull(PRECIO_UNITARIO),0,PRECIO_UNITARIO))) - ((( (if (isnull(cantidad),0,cantidad)) * (if (isnull(PRECIO_UNITARIO),0,PRECIO_UNITARIO))) *   (if (isnull(descuento),0,descuento / 100)) ) ))  )"border="0" color="33554432" x="2711" y="108" height="56" width="398" format="###,###.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=0 border="0" color="33554432" x="2825" y="8" height="56" width="155" html.valueishtml="0"  name=cntas_cobrar_cod_moneda_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

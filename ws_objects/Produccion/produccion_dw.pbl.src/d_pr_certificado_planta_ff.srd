@@ -1,0 +1,88 @@
+﻿$PBExportHeader$d_pr_certificado_planta_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=924 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cod_certificado dbname="certificado_planta.cod_certificado" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=proveedor dbname="certificado_planta.proveedor" )
+ column=(type=char(25) updatewhereclause=yes name=desc_unidad dbname="unidad.desc_unidad" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(40) updatewhereclause=yes name=desc_planta dbname="tg_plantas.desc_planta" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=direcction_item dbname="certificado_planta.direcction_item" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=nro_certif_prov dbname="certificado_planta.nro_certif_prov" )
+ column=(type=char(6) update=yes updatewhereclause=yes key=yes name=cod_certificado dbname="certificado_planta.cod_planta" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_registro dbname="certificado_planta.fec_registro" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_inicio dbname="certificado_planta.fec_inicio" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=area_tratada dbname="certificado_planta.area_tratada" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=und dbname="certificado_planta.und" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="certificado_planta.cod_usr" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="certificado_planta.flag_estado" values="	1/	0" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=certificado_planta_flag_replicacion dbname="certificado_planta.flag_replicacion" initial="1" )
+ column=(type=char(122) updatewhereclause=yes name=direccion dbname="direccion" )
+ retrieve="  SELECT ~"CERTIFICADO_PLANTA~".~"COD_CERTIFICADO~",   
+         ~"CERTIFICADO_PLANTA~".~"PROVEEDOR~",   
+         ~"UNIDAD~".~"DESC_UNIDAD~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"TG_PLANTAS~".~"DESC_PLANTA~",   
+         ~"CERTIFICADO_PLANTA~".~"DIRECCTION_ITEM~",   
+         ~"CERTIFICADO_PLANTA~".~"NRO_CERTIF_PROV~",   
+         ~"CERTIFICADO_PLANTA~".~"COD_PLANTA~",   
+         ~"CERTIFICADO_PLANTA~".~"FEC_REGISTRO~",   
+         ~"CERTIFICADO_PLANTA~".~"FEC_INICIO~",   
+         ~"CERTIFICADO_PLANTA~".~"AREA_TRATADA~",   
+         ~"CERTIFICADO_PLANTA~".~"UND~",   
+         ~"CERTIFICADO_PLANTA~".~"COD_USR~",   
+         ~"CERTIFICADO_PLANTA~".~"FLAG_ESTADO~",   
+         ~"CERTIFICADO_PLANTA~".~"FLAG_REPLICACION~",
+			TRIM(DIR_DIRECCION) || ' ' || TRIM(DIR_DEP_ESTADO) || ' ' || TRIM(DIR_DISTRITO) AS DIRECCION
+    FROM ~"CERTIFICADO_PLANTA~",   
+         ~"PROVEEDOR~",   
+         ~"TG_PLANTAS~",   
+         ~"UNIDAD~",   
+         ~"USUARIO~",   
+         ~"DIRECCIONES~"  
+   WHERE ( ~"PROVEEDOR~".~"PROVEEDOR~"(+) = ~"CERTIFICADO_PLANTA~".~"PROVEEDOR~" ) and  
+         ( ~"TG_PLANTAS~".~"COD_PLANTA~"(+) = ~"CERTIFICADO_PLANTA~".~"COD_PLANTA~" ) and
+			( CERTIFICADO_PLANTA.proveedor = direcciones.codigo (+)) and  
+         ( CERTIFICADO_PLANTA.direcction_item = direcciones.item (+)) and  
+         ( ~"UNIDAD~".~"UND~"(+) = ~"CERTIFICADO_PLANTA~".~"UND~" ) and  
+         ( ~"USUARIO~".~"COD_USR~"(+) = ~"CERTIFICADO_PLANTA~".~"COD_USR~" ) and  
+         	CERTIFICADO_PLANTA.COD_CERTIFICADO = :as_nro_certificado
+ 
+" update="CERTIFICADO_PLANTA" updatewhere=1 updatekeyinplace=yes arguments=(("as_nro_certificado", string)) )
+roundrectangle(band=background ellipseheight="36" ellipsewidth="41"x="2313" y="64" height="236" width="864"  name=rr_1 visible="1" brush.hatch="6" brush.color="10789024" pen.style="5" pen.width="5" pen.color="553648127"  background.mode="2" background.color="10789024" )
+bitmap(band=detail filename="gs_logo" x="37" y="8" height="248" width="507" border="6"  name=p_logo visible="1" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="2" color="33554432" x="293" y="396" height="56" width="55" format="[general]" html.valueishtml="0"  name=certificado_planta_flag_replicacion visible="0" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Flag Replicacion:" border="2" color="16777215" x="14" y="540" height="56" width="507" html.valueishtml="0"  name=certificado_planta_flag_replicacion_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="2" text="CERTIFICADOS DE PLANTA" border="4" color="0" x="754" y="64" height="92" width="1353" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="2" text="Usuario:" border="2" color="16777215" x="1719" y="316" height="56" width="242" html.valueishtml="0"  name=certificado_planta_cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="0" text="Certificado Nº" border="0" color="0" x="2427" y="84" height="80" width="480" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="4" color="33554432" x="2939" y="84" height="56" width="146" format="[general]" html.valueishtml="0"  name=nro_certif_prov visible="0" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Fec Registro:" border="2" color="16777215" x="530" y="316" height="56" width="407" html.valueishtml="0"  name=certificado_planta_fec_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1504" y="520" height="56" width="823" format="[general]" html.valueishtml="0"  name=desc_unidad visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="951" y="316" height="56" width="754" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=fec_registro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="2" color="33554432" x="1975" y="316" height="56" width="347" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=detail alignment="1" text="Proveedor:" border="2" color="16777215" x="530" y="384" height="56" width="407" html.valueishtml="0"  name=certificado_planta_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="2" color="33554432" x="951" y="384" height="56" width="251" format="[general]" html.valueishtml="0"  name=proveedor pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="1216" y="384" height="56" width="1106" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=detail alignment="1" text="Cod Planta:" border="2" color="16777215" x="530" y="452" height="56" width="407" html.valueishtml="0"  name=certificado_planta_cod_planta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=8 alignment="0" tabsequence=10 border="2" color="33554432" x="951" y="452" height="56" width="251" format="[general]" html.valueishtml="0"  name=cod_planta pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1216" y="452" height="56" width="1106" format="[general]" html.valueishtml="0"  name=desc_planta visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="4" color="33554432" x="2551" y="188" height="56" width="375" format="[general]" html.valueishtml="0"  name=cod_certificado visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="2" text="Estado" border="2" color="16777215" x="2537" y="316" height="56" width="462" html.valueishtml="0"  name=certificado_planta_flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="2" color="33554432" x="2706" y="388" height="60" width="119" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Direcction Item:" border="2" color="16777215" x="507" y="768" height="56" width="407" html.valueishtml="0"  name=certificado_planta_direcction_item_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="2" color="33554432" x="1193" y="768" height="56" width="1106" format="[general]" html.valueishtml="0"  name=direccion visible="0" edit.limit=122 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=6 alignment="1" tabsequence=30 border="2" color="33554432" x="928" y="768" height="56" width="251" format="[general]" html.valueishtml="0"  name=direcction_item pointer="H:\source\CUR\taladro.cur" visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Area Tratada:" border="2" color="16777215" x="530" y="520" height="56" width="407" html.valueishtml="0"  name=certificado_planta_area_tratada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Fec Inicio:" border="2" color="16777215" x="530" y="588" height="56" width="407" html.valueishtml="0"  name=certificado_planta_fec_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="2" text="Und:" border="2" color="16777215" x="1216" y="520" height="56" width="119" html.valueishtml="0"  name=certificado_planta_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=10 alignment="0" tabsequence=60 border="2" color="33554432" x="951" y="588" height="56" width="261" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=fec_inicio visible="1" editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=40 border="2" color="33554432" x="951" y="520" height="56" width="251" format="[general]" html.valueishtml="0"  name=area_tratada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=50 border="2" color="33554432" x="1349" y="520" height="56" width="142" format="[general]" html.valueishtml="0"  name=und pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="r" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><untitled><untitled_row __pbband=~"detail~"><certificado_planta_cod_certificado/><certificado_planta_proveedor>proveedor</certificado_planta_proveedor><unidad_desc_unidad>desc_unidad</unidad_desc_unidad><proveedor_nom_proveedor>nom_proveedor</proveedor_nom_proveedor><tg_plantas_desc_planta>desc_planta</tg_plantas_desc_planta><certificado_planta_direcction_item>direcction_item</certificado_planta_direcction_item><certificado_planta_nro_certif_prov>certificado_planta_nro_certif_prov</certificado_planta_nro_certif_prov><certificado_planta_cod_planta>cod_planta</certificado_planta_cod_planta><certificado_planta_fec_registro>fec_registro</certificado_planta_fec_registro><certificado_planta_fec_inicio>fec_inicio</certificado_planta_fec_inicio><certificado_planta_area_tratada>area_tratada</certificado_planta_area_tratada><certificado_planta_und>und</certificado_planta_und><certificado_planta_cod_usr>cod_usr</certificado_planta_cod_usr><certificado_planta_flag_estado>flag_estado</certificado_planta_flag_estado><certificado_planta_flag_replicacion>certificado_planta_flag_replicacion</certificado_planta_flag_replicacion><direccion>direccion</direccion></untitled_row></untitled>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

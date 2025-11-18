@@ -1,0 +1,45 @@
+﻿$PBExportHeader$d_rpt_resumen_partes_raciones_cst.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=60 color="536870912" )
+summary(height=60 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=parte_racion dbname="parte_racion" )
+ column=(type=datetime updatewhereclause=yes name=fecha_parte dbname="fecha_parte" )
+ column=(type=number updatewhereclause=yes name=nro_raciones dbname="nro_raciones" )
+ retrieve="select t.parte_racion, 
+       t.fecha_parte,
+       t.desc_tipo_racion,
+       t.nro_raciones
+from vw_com_solo_raciones t
+where trunc(t.fecha_parte) >= :ad_fecha1
+  and trunc(t.fecha_parte) <= :ad_fecha2
+  and substr(parte_Racion,1,2) = :as_origen
+
+" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_origen", string))  sort="parte_racion A fecha_parte A " )
+group(level=1 header.height=0 trailer.height=0 by=("parte_racion" ) header.color="536870912" trailer.color="536870912" )
+text(band=header[1] alignment="0" text="Sum Of Nro Raciones" border="0" color="0" x="9" y="4" height="52" width="407" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[1] alignment="0" text="Desc Tipo Racion" border="0" color="0" x="425" y="4" height="52" width="375" html.valueishtml="0"  name=t_2 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="parte_racion + ~" Total~""border="0" color="33554432" x="9" y="4" height="64" width="407" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(nro_raciones for group 1)"border="2" color="33554432" x="809" y="4" height="64" width="352" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(grand_sum_nro_raciones for group 1)"border="2" color="33554432" x="1170" y="4" height="64" width="466" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="2" expression="~"Total~""border="0" color="0" x="9" y="4" height="64" width="407" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="2" text="Total " border="2" color="0" x="1170" y="4" height="52" width="466" html.valueishtml="0"  name=grand_sum_nro_raciones_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="@TIPO" border="2" color="0" x="809" y="4" height="56" width="352" html.valueishtml="0"  name=nro_raciones_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="Fecha Parte" border="2" color="0" x="425" y="4" height="52" width="375" html.valueishtml="0"  name=fecha_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="Parte Racion" border="2" color="0" x="9" y="4" height="52" width="407" html.valueishtml="0"  name=parte_racion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="48" width="407" format="[general]" html.valueishtml="0"  name=parte_racion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="425" y="4" height="48" width="375" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_parte visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="809" y="4" height="48" width="352" format="[general]" html.valueishtml="0"  name=nro_raciones visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="2" color="33554432" x="1170" y="4" height="48" width="466" format="###,##0.00" html.valueishtml="0"  name=grand_sum_nro_raciones visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(nro_raciones for all )"border="2" color="33554432" x="809" y="4" height="52" width="352" format="###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_nro_raciones for all )"border="2" color="0" x="1170" y="4" height="52" width="466" format="###,##0.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="2" background.color="12639424" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "desc_tipo_racion" rows = "parte_racion, fecha_parte" values = "sum(nro_raciones for crosstab)" sourcenames = "parte_racion, fecha_parte, desc_tipo_racion, nro_raciones")
+sparse(names="parte_racion")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

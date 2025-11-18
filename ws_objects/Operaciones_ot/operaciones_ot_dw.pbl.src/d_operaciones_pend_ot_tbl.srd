@@ -1,0 +1,91 @@
+﻿$PBExportHeader$d_operaciones_pend_ot_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=460 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes name=oper_sec dbname="operaciones.oper_sec" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_operacion dbname="operaciones.nro_operacion" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_labor dbname="operaciones.cod_labor" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=cod_ejecutor dbname="operaciones.cod_ejecutor" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=proveedor dbname="operaciones.proveedor" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=cant_proyect dbname="operaciones.cant_proyect" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_inicio dbname="operaciones.fec_inicio" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=avance_esperado dbname="operaciones.avance_esperado" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=avance_und dbname="operaciones.avance_und" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="operaciones.flag_estado" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_personas dbname="operaciones.nro_personas" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="operaciones.nro_orden" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="labor.cnta_prsp" )
+ column=(type=char(10) updatewhereclause=yes name=cencos_slc dbname="orden_trabajo.cencos_slc" )
+ column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="orden_trabajo.cod_maquina" )
+ retrieve="  SELECT ~"OPERACIONES~".~"OPER_SEC~",   
+         ~"OPERACIONES~".~"NRO_OPERACION~",   
+         ~"OPERACIONES~".~"COD_LABOR~",   
+         ~"OPERACIONES~".~"COD_EJECUTOR~",   
+         ~"OPERACIONES~".~"PROVEEDOR~",   
+         ~"OPERACIONES~".~"CANT_PROYECT~",   
+         ~"OPERACIONES~".~"FEC_INICIO~",   
+         ~"OPERACIONES~".~"AVANCE_ESPERADO~",   
+         ~"OPERACIONES~".~"AVANCE_UND~",   
+         ~"OPERACIONES~".~"FLAG_ESTADO~",   
+         ~"OPERACIONES~".~"NRO_PERSONAS~",   
+         ~"OPERACIONES~".~"NRO_ORDEN~",   
+         ~"LABOR~".~"CNTA_PRSP~",   
+         ~"ORDEN_TRABAJO~".~"CENCOS_SLC~"  ,
+		   ~"ORDEN_TRABAJO~".~"COD_MAQUINA~"  
+    FROM ~"OPERACIONES~"      ,    
+         ~"LABOR~"            ,   
+         ~"ORDEN_TRABAJO~"    ,
+			~"TT_OPE_CENCOS_SLC~",
+		   ~"TT_OPE_CENCOS_RSP~",
+			~"TT_OPE_OT_ADM~"
+   WHERE ( ~"OPERACIONES~".~"COD_LABOR~"    = ~"LABOR~".~"COD_LABOR~"          ) and  
+         ( ~"OPERACIONES~".~"NRO_ORDEN~"    = ~"ORDEN_TRABAJO~".~"NRO_ORDEN~"  ) and  
+         ( ( to_char(~"OPERACIONES~".~"FEC_INICIO~",'yyyymmdd') between :as_fecha_inicio and :as_fecha_final))    and
+			( ~"ORDEN_TRABAJO~".~"CENCOS_SLC~" = ~"TT_OPE_CENCOS_SLC~".~"CENCOS~" ) and
+			( ~"ORDEN_TRABAJO~".~"CENCOS_RSP~" = ~"TT_OPE_CENCOS_RSP~".~"CENCOS~" ) and
+			( ~"ORDEN_TRABAJO~".~"OT_ADM~"     = ~"TT_OPE_OT_ADM~".~"OT_ADM~"	  ) and
+			( ~"ORDEN_TRABAJO~".~"FLAG_ESTADO~" = '3' ) 
+
+			
+" arguments=(("as_fecha_inicio", string),("as_fecha_final", string),("gs_empresa", string),("gs_user", string))  sort="nro_orden A fec_inicio A " )
+group(level=1 header.height=68 trailer.height=0 by=("nro_orden" ) header.color="536870912" trailer.color="536870912" )
+compute(band=header alignment="2" expression="'Desde '+ as_fecha_inicio +' Hasta '+ as_fecha_final "border="0" color="33554432" x="1106" y="116" height="56" width="1458" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Operaciones Pendientes x Orden de Trabajo" border="0" color="0" x="1106" y="20" height="76" width="1458" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="27" y="16" height="192" width="585" border="0"  name=p_1 visible="1" )
+compute(band=header alignment="2" expression="Trim(gs_empresa)"border="0" color="0" x="27" y="224" height="56" width="585" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Oper Sec" border="2" color="8388608" x="9" y="400" height="56" width="302" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro Oper" border="2" color="8388608" x="315" y="400" height="56" width="293" html.valueishtml="0"  name=nro_operacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Labor" border="2" color="8388608" x="613" y="400" height="56" width="288" html.valueishtml="0"  name=cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Ejecutor" border="2" color="8388608" x="905" y="400" height="56" width="201" html.valueishtml="0"  name=cod_ejecutor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cant Proyect" border="2" color="8388608" x="1111" y="400" height="56" width="302" html.valueishtml="0"  name=cant_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fec Inicio" border="2" color="8388608" x="1417" y="400" height="56" width="279" html.valueishtml="0"  name=fec_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Av. Esperado" border="2" color="8388608" x="1701" y="400" height="56" width="343" html.valueishtml="0"  name=avance_esperado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Und Av." border="2" color="8388608" x="2048" y="400" height="56" width="197" html.valueishtml="0"  name=avance_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cencos" border="2" color="8388608" x="2496" y="400" height="56" width="251" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cnta Prsp" border="2" color="8388608" x="2752" y="400" height="56" width="357" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro Pers." border="2" color="8388608" x="2249" y="400" height="56" width="242" html.valueishtml="0"  name=nro_personas_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="3077" y="16" height="64" width="283" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3077" y="96" height="64" width="283" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="trim( gs_user )"border="0" color="0" x="3077" y="176" height="56" width="283" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="2866" y="16" height="64" width="197" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="2866" y="96" height="64" width="197" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="2866" y="176" height="56" width="197" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=12 alignment="0" tabsequence=32766 border="0" color="8388608" x="14" y="4" height="56" width="361" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Maquina :" border="0" color="0" x="453" y="4" height="56" width="238" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=15 alignment="0" tabsequence=32766 border="0" color="8388608" x="741" y="4" height="56" width="279" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="68" width="302" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="315" y="0" height="68" width="293" format="[general]" html.valueishtml="0"  name=nro_operacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="613" y="0" height="68" width="288" format="[general]" html.valueishtml="0"  name=cod_labor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="905" y="0" height="68" width="201" format="[general]" html.valueishtml="0"  name=cod_ejecutor visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="1111" y="0" height="68" width="302" format="[general]" html.valueishtml="0"  name=cant_proyect visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="33554432" x="1417" y="0" height="68" width="279" format="[shortdate] [time]" html.valueishtml="0"  name=fec_inicio visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="1701" y="0" height="68" width="343" format="[general]" html.valueishtml="0"  name=avance_esperado visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="2048" y="0" height="68" width="197" format="[general]" html.valueishtml="0"  name=avance_und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="2" color="33554432" x="2496" y="0" height="68" width="251" format="[general]" html.valueishtml="0"  name=cencos_slc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="2" color="33554432" x="2752" y="0" height="68" width="357" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="2" color="33554432" x="2249" y="0" height="68" width="242" format="[general]" html.valueishtml="0"  name=nro_personas visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

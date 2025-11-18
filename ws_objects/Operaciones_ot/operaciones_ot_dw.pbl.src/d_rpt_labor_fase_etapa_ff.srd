@@ -1,0 +1,40 @@
+﻿$PBExportHeader$d_rpt_labor_fase_etapa_ff.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=456 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(6) updatewhereclause=yes name=labor_fase_cod_fase dbname="labor_fase.cod_fase" )
+ column=(type=char(25) updatewhereclause=yes name=labor_fase_desc_fase dbname="labor_fase.desc_fase" )
+ column=(type=decimal(0) updatewhereclause=yes name=labor_fase_orden dbname="labor_fase.orden" )
+ column=(type=char(6) updatewhereclause=yes name=labor_etapa_cod_etapa dbname="labor_etapa.cod_etapa" )
+ column=(type=char(25) updatewhereclause=yes name=labor_etapa_desc_etapa dbname="labor_etapa.desc_etapa" )
+ column=(type=decimal(0) updatewhereclause=yes name=labor_etapa_orden dbname="labor_etapa.orden" )
+ column=(type=decimal(5) updatewhereclause=yes name=compute_0007 dbname="compute_0007" )
+ retrieve="  SELECT ~"LABOR_FASE~".~"COD_FASE~",   
+         ~"LABOR_FASE~".~"DESC_FASE~",   
+         ~"LABOR_FASE~".~"ORDEN~",   
+         ~"LABOR_ETAPA~".~"COD_ETAPA~",   
+         ~"LABOR_ETAPA~".~"DESC_ETAPA~",   
+         ~"LABOR_ETAPA~".~"ORDEN~"  ,
+			DECODE(~"LABOR_ETAPA~".~"ORDEN~",NULL,0,~"LABOR_ETAPA~".~"ORDEN~")
+    FROM ~"LABOR_ETAPA~",   
+         ~"LABOR_FASE~"  
+   WHERE ( labor_etapa.cod_fase (+) = labor_fase.cod_fase) and  
+         ( ( ~"LABOR_FASE~".~"COD_FASE~" = :as_cod_fase ) )    
+" arguments=(("as_cod_fase", string),("as_empresa", string),("as_usuario", string))  sort="labor_etapa_orden A compute_0007 A " )
+compute(band=header alignment="2" expression="'Fase :  '+ labor_fase_desc_fase "border="0" color="0" x="590" y="92" height="64" width="905" format="[general]"  name=compute_1  font.face="MS Sans Serif" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="H:\Source\Bmp\blanco.bmp" x="27" y="32" height="172" width="466" border="0"  name=p_logo )
+compute(band=header alignment="2" expression=" as_empresa "border="0" color="0" x="23" y="228" height="108" width="471" format="[general]"  name=compute_2  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Pag :' + page() + ' de ' + pageCount()"border="0" color="0" x="1701" y="16" height="60" width="288" format="[general]"  name=compute_3  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression=" as_usuario "border="0" color="0" x="1701" y="92" height="52" width="283" format="[general]"  name=compute_4  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="1701" y="156" height="48" width="283" format="dd/mm/yyyy"  name=compute_5  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Etapa" border="2" color="0" x="229" y="400" height="52" width="329"  name=labor_etapa_cod_etapa_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="562" y="400" height="52" width="1042"  name=labor_etapa_desc_etapa_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Orden" border="2" color="0" x="1609" y="400" height="52" width="178"  name=labor_etapa_orden_t  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="229" y="0" height="52" width="329" format="[general]"  name=labor_etapa_cod_etapa edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="562" y="0" height="52" width="1042" format="[general]"  name=labor_etapa_desc_etapa edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="1609" y="0" height="52" width="178" format="[general]"  name=labor_etapa_orden edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

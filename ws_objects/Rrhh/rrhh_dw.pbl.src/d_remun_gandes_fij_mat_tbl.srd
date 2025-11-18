@@ -1,0 +1,60 @@
+﻿$PBExportHeader$d_remun_gandes_fij_mat_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=56 color="536870912" )
+summary(height=56 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=cod_trabajador dbname="cod_trabajador" )
+ column=(type=char(20) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=char(20) updatewhereclause=yes name=tipo_trabajador dbname="tipo_trabajador" )
+ column=(type=char(20) updatewhereclause=yes name=cod_origen dbname="cod_origen" )
+ column=(type=char(20) updatewhereclause=yes name=cencos dbname="cencos" )
+ column=(type=char(20) updatewhereclause=yes name=cod_seccion dbname="cod_seccion" )
+ column=(type=datetime updatewhereclause=yes name=fec_proceso dbname="fec_proceso" )
+ column=(type=number updatewhereclause=yes name=imp_soles dbname="imp_soles" )
+ retrieve="select c.cod_trabajador, initcap(m.apel_paterno) || ' ' || initcap(m.apel_materno) || ' ' || initcap(m.nombre1) || ' ' || initcap(m.nombre2) as nombres, m.tipo_trabajador, m.cod_origen, trim(m.cencos) as cencos, m.cod_seccion, c.concep, c.imp_soles, c.fec_proceso
+   from calculo c
+      inner join maestro m on c.cod_trabajador = m.cod_trabajador
+union all
+
+select hc.cod_trabajador, initcap(m.apel_paterno) || ' ' || initcap(m.apel_materno) || ' ' || initcap(m.nombre1) || ' ' || initcap(m.nombre2) as nombres, m.tipo_trabajador, m.cod_origen, trim(m.cencos) as cencos, m.cod_seccion, hc.concep, hc.imp_soles, hc.fec_calc_plan
+   from historico_calculo hc
+      left outer join calculo c on hc.cod_trabajador = c.cod_trabajador and hc.concep = c.concep and trunc(hc.fec_calc_plan) = trunc(c.fec_proceso)
+      inner join maestro m on hc.cod_trabajador = m.cod_trabajador
+   where c.concep is null"  sort="cod_trabajador A nombres A tipo_trabajador A cod_origen A cencos A cod_seccion A fec_proceso A " )
+group(level=1 header.height=0 trailer.height=0 by=("cod_trabajador" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=0 trailer.height=0 by=("nombres" ) header.color="536870912" trailer.color="536870912" )
+group(level=3 header.height=0 trailer.height=0 by=("tipo_trabajador" ) header.color="536870912" trailer.color="536870912" )
+group(level=4 header.height=0 trailer.height=0 by=("cod_origen" ) header.color="536870912" trailer.color="536870912" )
+group(level=5 header.height=0 trailer.height=0 by=("cencos" ) header.color="536870912" trailer.color="536870912" )
+group(level=6 header.height=0 trailer.height=0 by=("cod_seccion" ) header.color="536870912" trailer.color="536870912" )
+text(band=header[1] alignment="0" text="st_empresa" border="0" color="0" x="9" y="88" height="76" width="219" html.valueishtml="0"  name=st_empresa visible="0"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header[1] alignment="0" text="st_usuario" border="0" color="0" x="9" y="204" height="76" width="219" html.valueishtml="0"  name=st_usuario visible="0"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header[1] alignment="0" text="st_fecha" border="0" color="0" x="9" y="328" height="76" width="219" html.valueishtml="0"  name=st_fecha visible="0"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header[1] alignment="0" text="st_titulo" border="0" color="0" x="233" y="152" height="76" width="846" html.valueishtml="0"  name=st_titulo visible="0"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header[1] alignment="0" text="st_rango_fecha" border="0" color="0" x="233" y="312" height="76" width="846" html.valueishtml="0"  name=st_rango_fecha visible="0"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header[1] filename="" x="1106" y="116" height="120" width="18" border="0"  name=p_logo visible="0" )
+text(band=header[2] alignment="2" text="Código" border="6" color="0" x="9" y="4" height="48" width="215" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header[2] alignment="2" text="Nombres" border="6" color="0" x="233" y="4" height="48" width="846" html.valueishtml="0"  name=nombres_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header[2] alignment="2" text="Trab." border="6" color="0" x="1088" y="4" height="48" width="133" html.valueishtml="0"  name=tipo_trabajador_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header[2] alignment="2" text="Orig." border="6" color="0" x="1230" y="4" height="48" width="119" html.valueishtml="0"  name=cod_origen_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header[2] alignment="2" text="Cencos" border="6" color="0" x="1358" y="4" height="48" width="169" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header[2] alignment="2" text="Secc." border="6" color="0" x="1536" y="4" height="48" width="128" html.valueishtml="0"  name=cod_seccion_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header[2] alignment="2" text="Fecha" border="6" color="0" x="1673" y="4" height="48" width="224" html.valueishtml="0"  name=fec_proceso_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header[2] alignment="2" text="@concep" border="6" color="0" x="1906" y="4" height="48" width="261" html.valueishtml="0"  name=imp_soles_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="5" color="33554432" x="9" y="4" height="44" width="215" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="5" color="33554432" x="233" y="4" height="44" width="846" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="5" color="33554432" x="1906" y="4" height="44" width="261" format="[general]" html.valueishtml="0"  name=imp_soles visible="1" editmask.mask="#,###,###,##0.00" editmask.imemode=0 editmask.focusrectangle=no crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="5" color="33554432" x="1673" y="4" height="44" width="224" format="[shortdate] [time]" html.valueishtml="0"  name=fec_proceso visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="5" color="33554432" x="1536" y="4" height="44" width="128" format="[general]" html.valueishtml="0"  name=cod_seccion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="5" color="33554432" x="1358" y="4" height="44" width="169" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="5" color="33554432" x="1230" y="4" height="44" width="119" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="5" color="33554432" x="1088" y="4" height="44" width="133" format="[general]" html.valueishtml="0"  name=tipo_trabajador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(imp_soles for all )"border="6" color="33554432" x="1906" y="4" height="48" width="261" format="[general]" html.valueishtml="0"  name=compute_20 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=summary alignment="1" text="Total:" border="6" color="0" x="1673" y="4" height="44" width="224" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "concep" rows = "cod_trabajador, nombres, tipo_trabajador, cod_origen, cencos, cod_seccion, fec_proceso" values = "sum(imp_soles for crosstab)" sourcenames = "cod_trabajador, nombres, tipo_trabajador, cod_origen, cencos, cod_seccion, concep, imp_soles, fec_proceso")
+sparse(names="cod_trabajador	nombres	tipo_trabajador	cod_origen	cencos	cod_seccion")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

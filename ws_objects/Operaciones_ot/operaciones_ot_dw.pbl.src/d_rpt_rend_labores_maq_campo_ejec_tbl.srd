@@ -1,0 +1,65 @@
+﻿$PBExportHeader$d_rpt_rend_labores_maq_campo_ejec_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=472 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=88 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="pd_ot_det.cod_labor" )
+ column=(type=char(40) updatewhereclause=yes name=labor_desc_labor dbname="labor.desc_labor" )
+ column=(type=char(3) updatewhereclause=yes name=labor_und dbname="labor.und" )
+ column=(type=char(4) updatewhereclause=yes name=cod_ejecutor dbname="pd_ot_det.cod_ejecutor" )
+ column=(type=char(11) updatewhereclause=yes name=campo_ciclo_corr_corte dbname="campo_ciclo.corr_corte" )
+ column=(type=char(25) updatewhereclause=yes name=campo_desc_campo dbname="campo.desc_campo" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="pd_ot_det.nro_orden" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cant" )
+ column=(type=number updatewhereclause=yes name=avance dbname="avance" )
+ retrieve="select pd.cod_labor, l.desc_labor, l.und, pd.cod_ejecutor, 
+       cc.corr_corte, c.desc_campo, pd.nro_orden, 
+		 sum(nvl(pd.cant_labor,0)-nvl(pd.horas_inciden,0)) as cant, 
+		 sum(nvl(pd.cant_avance,0)) as avance
+from orden_trabajo ot, operaciones o, pd_ot p, pd_ot_det pd, labor l, campo_ciclo cc, campo c
+where ot.nro_orden=o.nro_orden and
+      o.oper_sec=pd.oper_sec and
+      pd.nro_parte=p.nro_parte and
+      ot.nro_orden=cc.nro_orden and
+      cc.cod_campo=c.cod_campo and 
+      pd.cod_labor=l.cod_labor and
+      pd.cod_maquina is not null and
+		pd.cod_ejecutor = :as_ejecutor and
+      trunc(p.fecha) between :ad_fec_ini and :ad_fec_fin 
+group by pd.cod_labor, l.desc_labor, l.und, pd.cod_ejecutor, cc.corr_corte, c.desc_campo, pd.nro_orden
+order by pd.cod_labor, pd.cod_ejecutor, cc.corr_corte" arguments=(("as_ejecutor", string),("ad_fec_ini", date),("ad_fec_fin", date)) )
+group(level=1 header.height=108 trailer.height=92 by=("cod_labor" , "cod_ejecutor" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="23" y="24" height="196" width="302" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2757" y="16" height="40" width="302" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="2757" y="148" height="40" width="302" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="2757" y="80" height="40" width="302" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="27" y="252" height="40" width="302" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Corr_Corte" border="2" color="33554432" x="105" y="392" height="64" width="357" html.valueishtml="0"  name=campo_ciclo_corr_corte_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Descripción de campo" border="2" color="33554432" x="475" y="392" height="64" width="1211" html.valueishtml="0"  name=campo_desc_campo_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cantidad Efect." border="2" color="33554432" x="1701" y="392" height="64" width="416" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Rendimiento de labores de maquinarias de campo" border="0" color="33554432" x="654" y="44" height="80" width="1819" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="649" y="168" height="64" width="1829" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Avance Has" border="2" color="33554432" x="2130" y="392" height="64" width="338" html.valueishtml="0"  name=avance_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Ratio (Und/Ha)" border="2" color="33554432" x="2482" y="392" height="64" width="389" html.valueishtml="0"  name=ratio_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="32" y="20" height="64" width="247" format="[general]" html.valueishtml="0"  name=cod_labor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="293" y="20" height="64" width="1221" format="[general]" html.valueishtml="0"  name=labor_desc_labor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1536" y="20" height="64" width="155" format="[general]" html.valueishtml="0"  name=labor_und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="2075" y="20" height="64" width="247" format="[general]" html.valueishtml="0"  name=cod_ejecutor visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Ejecutor:" border="0" color="0" x="1801" y="20" height="64" width="256" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="105" y="12" height="64" width="357" format="[general]" html.valueishtml="0"  name=campo_ciclo_corr_corte visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="475" y="12" height="64" width="1211" format="[general]" html.valueishtml="0"  name=campo_desc_campo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="1701" y="12" height="64" width="416" format="#,##0.00" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="2130" y="12" height="64" width="338" format="#,##0.00" html.valueishtml="0"  name=avance visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if(  avance>0 ,  cantidad / avance , 0 )"border="0" color="33554432" x="2482" y="12" height="64" width="389" format="#,##0.00" html.valueishtml="0"  name=ratio visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="1" text="Total x labor y ejecutor :" border="0" color="8388608" x="942" y="12" height="64" width="640" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(cantidad for group 1)"border="0" color="33554432" x="1701" y="12" height="64" width="416" format="#,##0.00" html.valueishtml="0"  name=cantidad_grupo1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(avance for group 1)"border="0" color="33554432" x="2130" y="12" height="64" width="338" format="#,##0.00" html.valueishtml="0"  name=avance_grupo1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="if(  avance_grupo1>0 ,  cantidad_grupo1/ avance_grupo1  , 0 )"border="0" color="33554432" x="2482" y="12" height="64" width="389" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=0 border="0" color="33554432" x="2889" y="16" height="64" width="41" html.valueishtml="0"  name=nro_orden visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

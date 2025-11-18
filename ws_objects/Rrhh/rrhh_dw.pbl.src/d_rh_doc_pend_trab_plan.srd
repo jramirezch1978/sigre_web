@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_rh_doc_pend_trab_plan.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=134217739 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=272 color="536870912" )
+summary(height=108 color="536870912" )
+footer(height=8 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes name=cod_trabajador dbname="cnta_crrte.cod_trabajador" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="cnta_crrte.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="cnta_crrte.nro_doc" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_prestamo dbname="cnta_crrte.fec_prestamo" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=concep dbname="cnta_crrte.concep" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=mont_original dbname="cnta_crrte.mont_original" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=mont_cuota dbname="cnta_crrte.mont_cuota" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=sldo_prestamo dbname="cnta_crrte.sldo_prestamo" )
+ column=(type=char(60) updatewhereclause=yes name=concepto_desc_concep dbname="concepto.desc_concep" )
+ column=(type=char(1) updatewhereclause=yes name=cnta_crrte_flag_estado dbname="cnta_crrte.flag_estado" values="Inactivo	0/Activo	1/" )
+ retrieve="  SELECT ~"CNTA_CRRTE~".~"COD_TRABAJADOR~",   
+         ~"CNTA_CRRTE~".~"TIPO_DOC~",   
+         ~"CNTA_CRRTE~".~"NRO_DOC~",   
+         ~"CNTA_CRRTE~".~"FEC_PRESTAMO~",   
+         ~"CNTA_CRRTE~".~"CONCEP~",   
+         ~"CNTA_CRRTE~".~"MONT_ORIGINAL~",   
+         ~"CNTA_CRRTE~".~"MONT_CUOTA~",   
+         ~"CNTA_CRRTE~".~"SLDO_PRESTAMO~",   
+         ~"CONCEPTO~".~"DESC_CONCEP~",   
+         ~"CNTA_CRRTE~".~"FLAG_ESTADO~"  
+    FROM ~"CNTA_CRRTE~",   
+         ~"CONCEPTO~"  
+   WHERE ( ~"CONCEPTO~".~"CONCEP~" = ~"CNTA_CRRTE~".~"CONCEP~" ) and  
+         ( ( ~"CNTA_CRRTE~".~"COD_TRABAJADOR~" = :as_codigo ) AND  
+         ( ~"CNTA_CRRTE~".~"SLDO_PRESTAMO~" >= 0 ) )    And
+         ( ~"CNTA_CRRTE~".~"NRO_DOC~" not in ( select nro_doc  from doc_pendientes_cta_cte where 
+                                            cod_relacion = :as_codigo ))
+" arguments=(("as_codigo", string)) )
+groupbox(band=header text=" Cuenta Corriente de Planillas "border="1" color="33554432" x="64" y="12" height="232" width="3035"  name=gb_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo" border="2" color="33554432" x="114" y="84" height="56" width="128" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Doc." border="2" color="33554432" x="114" y="144" height="56" width="128" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Estado" border="2" color="33554432" x="247" y="84" height="56" width="256" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Registro" border="2" color="33554432" x="247" y="144" height="56" width="256" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Documento" border="2" color="33554432" x="507" y="144" height="56" width="325" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Número" border="2" color="33554432" x="507" y="84" height="56" width="325" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Fecha" border="2" color="33554432" x="837" y="84" height="56" width="297" html.valueishtml="0"  name=fec_prestamo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Préstamo" border="2" color="33554432" x="837" y="144" height="56" width="297" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Concepto" border="2" color="33554432" x="1138" y="144" height="56" width="878" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="1138" y="84" height="56" width="878" html.valueishtml="0"  name=concep_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Cuenta Corriente" border="2" color="33554432" x="2021" y="84" height="56" width="1024" html.valueishtml="0"  name=mont_original_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Total" border="2" color="33554432" x="2021" y="144" height="56" width="338" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Cuota" border="2" color="33554432" x="2363" y="144" height="56" width="338" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+text(band=header alignment="2" text="Saldo" border="2" color="33554432" x="2706" y="144" height="56" width="338" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16776960" )
+compute(band=detail alignment="1" expression="if( cnta_crrte_flag_estado = '1' ,sldo_prestamo, 0 )"border="0" color="33554432" x="1646" y="144" height="56" width="206" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="33554431" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="1303" y="4" height="56" width="713" format="[general]" html.valueishtml="0"  name=concepto_desc_concep visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="114" y="4" height="56" width="128" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="0" color="33554432" x="247" y="4" height="56" width="256" format="[general]" html.valueishtml="0"  name=cnta_crrte_flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="507" y="4" height="56" width="325" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="1138" y="4" height="56" width="160" format="[general]" html.valueishtml="0"  name=concep visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="837" y="4" height="56" width="297" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_prestamo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="2021" y="4" height="56" width="338" format="#,##0.00" html.valueishtml="0"  name=mont_original visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="2363" y="4" height="56" width="338" format="#,##0.00" html.valueishtml="0"  name=mont_cuota visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="2706" y="4" height="56" width="338" format="#,##0.00" html.valueishtml="0"  name=sldo_prestamo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=summary alignment="1" expression="sum(compute_2  for all)"border="0" color="33554432" x="2706" y="24" height="56" width="338" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

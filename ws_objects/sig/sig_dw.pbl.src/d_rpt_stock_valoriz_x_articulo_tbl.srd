@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_rpt_stock_valoriz_x_articulo_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=504 color="536870912" )
+summary(height=100 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(6) update=yes updatewhereclause=yes name=almacen dbname="articulo_almacen.almacen" )
+ column=(type=char(12) update=yes updatewhereclause=yes name=cod_art dbname="articulo_almacen.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=sldo_total dbname="articulo_almacen.sldo_total" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=costo_prom_sol dbname="articulo_almacen.costo_prom_sol" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=costo_prom_dol dbname="articulo_almacen.costo_prom_dol" )
+ retrieve="select aa.almacen, aa.cod_art, ar.nom_articulo, 
+		 ar.und, aa.sldo_total, aa.costo_prom_sol, 
+		 aa.costo_prom_dol
+from articulo_almacen aa, almacen a, articulo ar, articulo_clase acl
+where aa.almacen = a.almacen and
+      a.flag_tipo_almacen='M' and      
+      aa.sldo_total >0 and
+      aa.cod_art=ar.cod_art and
+      ar.cod_clase = acl.cod_clase and
+		  ar.cod_clase = :as_cod_clase and
+      aa.almacen=:as_almacen
+order by sldo_total*costo_prom_dol desc" arguments=(("as_cod_clase", string),("as_almacen", string)) )
+bitmap(band=header filename="" x="14" y="8" height="216" width="357" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="14" y="240" height="48" width="357" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=20 border="0" color="33554432" x="581" y="120" height="76" width="192" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Total valorización US$ :" border="0" color="0" x="1170" y="16" height="60" width="663" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=10 border="0" color="33554432" x="18" y="4" height="64" width="357" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Artículo" border="2" color="33554432" x="18" y="440" height="60" width="357" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+column(band=detail id=3 alignment="0" tabsequence=60 border="0" color="33554432" x="389" y="4" height="64" width="1289" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Artículo" border="2" color="33554432" x="389" y="440" height="60" width="1289" html.valueishtml="0"  name=articulo_nom_articulo_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+column(band=detail id=4 alignment="0" tabsequence=70 border="0" color="33554432" x="1691" y="4" height="64" width="133" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="1691" y="440" height="60" width="133" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+column(band=detail id=5 alignment="1" tabsequence=30 border="0" color="33554432" x="1838" y="4" height="64" width="320" format="#,##0.00" html.valueishtml="0"  name=sldo_total visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Stock" border="2" color="33554432" x="1838" y="440" height="60" width="320" html.valueishtml="0"  name=sldo_total_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+text(band=header alignment="2" text="Precio S/." border="2" color="33554432" x="2171" y="440" height="60" width="366" html.valueishtml="0"  name=costo_prom_sol_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+column(band=detail id=6 alignment="1" tabsequence=40 border="0" color="33554432" x="2171" y="4" height="64" width="366" format="#,##0.00" html.valueishtml="0"  name=costo_prom_sol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Precio US$" border="2" color="33554432" x="2551" y="440" height="60" width="366" html.valueishtml="0"  name=costo_prom_dol_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+column(band=detail id=7 alignment="1" tabsequence=50 border="0" color="33554432" x="2551" y="4" height="64" width="366" format="#,##0.00" html.valueishtml="0"  name=costo_prom_dol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total US$" border="2" color="33554432" x="2930" y="440" height="60" width="366" html.valueishtml="0"  name=compute_1_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="28044540" )
+compute(band=detail alignment="1" expression=" sldo_total * costo_prom_dol "border="0" color="33554432" x="2930" y="4" height="64" width="366" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( sldo_total * costo_prom_dol  for all)"border="0" color="33554432" x="2930" y="16" height="64" width="366" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2921" y="20" height="48" width="384" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="today()"border="0" color="33554432" x="2921" y="92" height="56" width="384" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="2921" y="176" height="48" width="384" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Stock valorizado por articulo, almacen y clase de material" border="0" color="33554432" x="585" y="40" height="80" width="2149" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="585" y="188" height="60" width="2149" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,118 @@
+﻿$PBExportHeader$d_reprogra_ope_tiempos_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=680 color="536870912" )
+table(column=(type=decimal(2) update=yes updatewhereclause=yes name=operaciones_cant_proyect dbname="operaciones.cant_proyect" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=operaciones_cod_labor dbname="operaciones.cod_labor" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=operaciones_dias_para_inicio dbname="operaciones.dias_para_inicio" )
+ column=(type=datetime update=yes updatewhereclause=yes name=operaciones_fec_inicio dbname="operaciones.fec_inicio" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=operaciones_dias_duracion_proy dbname="operaciones.dias_duracion_proy" )
+ column=(type=datetime update=yes updatewhereclause=yes name=operaciones_fec_fin dbname="operaciones.fec_fin" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=operaciones_desc_operacion dbname="operaciones.desc_operacion" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=operaciones_nro_oper_preced dbname="operaciones.nro_oper_preced" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=operaciones_flag_estado dbname="operaciones.flag_estado" values="Anulado	0/Activo	1/Terminado	2/Planeado	3/" )
+ column=(type=char(40) updatewhereclause=yes name=labor_desc_labor dbname="labor.desc_labor" )
+ column=(type=char(3) updatewhereclause=yes name=labor_und dbname="labor.und" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=operaciones_nro_operacion dbname="operaciones.nro_operacion" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=operaciones_oper_sec dbname="operaciones.oper_sec" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=operaciones_flag_pre dbname="operaciones.flag_pre" values="F.Inicio	I/F.Fin	F/" )
+ column=(type=datetime updatewhereclause=yes name=fec_nac_plnt dbname="campo_ciclo.fec_nac_plnt" )
+ column=(type=char(1) updatewhereclause=yes name=campo_ciclo_flag_estado dbname="campo_ciclo.flag_estado" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=operaciones_cod_ejecutor dbname="operaciones.cod_ejecutor" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=operaciones_obs dbname="operaciones.obs" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=operaciones_dias_holgura dbname="operaciones.dias_holgura" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=operaciones_flag_marcador dbname="operaciones.flag_marcador" )
+ column=(type=number updatewhereclause=yes name=mes_q dbname="mes_q" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=operaciones_nro_orden dbname="operaciones.nro_orden" )
+ column=(type=decimal(3) update=yes updatewhereclause=yes name=operaciones_avance_esperado dbname="operaciones.avance_esperado" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=operaciones_avance_und dbname="operaciones.avance_und" )
+ column=(type=decimal(3) updatewhereclause=yes name=operaciones_avance_actual dbname="operaciones.avance_actual" )
+ column=(type=char(3) updatewhereclause=yes name=labor_und dbname="labor.und" )
+ retrieve="  SELECT ~"OPERACIONES~".~"CANT_PROYECT~"      ,   
+         ~"OPERACIONES~".~"COD_LABOR~"         ,   
+         ~"OPERACIONES~".~"DIAS_PARA_INICIO~"  ,    
+         ~"OPERACIONES~".~"FEC_INICIO~"        ,   
+         ~"OPERACIONES~".~"DIAS_DURACION_PROY~",   
+         ~"OPERACIONES~".~"FEC_FIN~"           ,   
+         ~"OPERACIONES~".~"DESC_OPERACION~"    ,   
+         ~"OPERACIONES~".~"NRO_OPER_PRECED~"   ,   
+         ~"OPERACIONES~".~"FLAG_ESTADO~"       ,   
+         ~"LABOR~".~"DESC_LABOR~"              ,   
+         ~"LABOR~".~"UND~"                     ,   
+
+         ~"OPERACIONES~".~"NRO_OPERACION~"     ,   
+          ~"OPERACIONES~".~"OPER_SEC~"         ,  
+         ~"OPERACIONES~".~"FLAG_PRE~"          ,   
+         ~"CAMPO_CICLO~".~"FEC_NAC_PLNT~"      ,   
+         ~"CAMPO_CICLO~".~"FLAG_ESTADO~"       ,   
+         ~"OPERACIONES~".~"COD_EJECUTOR~"      ,   
+         ~"OPERACIONES~".~"OBS~"               ,   
+         ~"OPERACIONES~".~"DIAS_HOLGURA~"      ,   
+         ~"OPERACIONES~".~"FLAG_MARCADOR~"     ,
+			USF_CAM_MES_COSECH(~"OPERACIONES~".~"NRO_ORDEN~") as mes_q,
+			~"OPERACIONES~".~"NRO_ORDEN~"         ,
+			~"OPERACIONES~".~"AVANCE_ESPERADO~"   ,
+			~"OPERACIONES~".~"AVANCE_UND~"        ,
+			~"OPERACIONES~".~"AVANCE_ACTUAL~"     ,
+			labor.und
+    FROM ~"OPERACIONES~",   
+         ~"LABOR~",   
+         ~"CAMPO_CICLO~"  
+   WHERE ( operaciones.cod_labor = labor.cod_labor (+)) and  
+         ( operaciones.nro_orden = campo_ciclo.nro_orden (+)) and  
+         ( ( ~"OPERACIONES~".~"NRO_ORDEN~"   = :as_nro_orden ) AND  
+         ( ~"OPERACIONES~".~"NRO_OPERACION~" = :ai_nro_operacion ) )    
+" update="OPERACIONES" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_orden", string),("ai_nro_operacion", number)) )
+column(band=detail id=22 alignment="0" tabsequence=32766 border="0" color="0" x="270" y="1096" height="56" width="229" format="[general]" html.valueishtml="0"  name=operaciones_nro_orden visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="32" y="1008" height="60" width="782" format="[general]" html.valueishtml="0"  name=operaciones_cod_labor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="869" y="1008" height="60" width="553" format="[general]" html.valueishtml="0"  name=campo_ciclo_flag_estado visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="1065" y="1088" height="60" width="590" format="[general]" html.valueishtml="0"  name=operaciones_cod_ejecutor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="0" x="46" y="1168" height="60" width="2299" format="[general]" html.valueishtml="0"  name=operaciones_obs visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="0" color="0" x="823" y="1244" height="60" width="992" format="[general]" html.valueishtml="0"  name=operaciones_dias_holgura visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=20 alignment="0" tabsequence=32766 border="0" color="0" x="1467" y="1008" height="60" width="704" format="[general]" html.valueishtml="0"  name=operaciones_flag_marcador visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=26 alignment="0" tabsequence=32766 border="5" color="0" x="2437" y="336" height="56" width="105" format="[general]" html.valueishtml="0"  name=labor_und_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="5" color="255" x="1614" y="4" height="60" width="759" format="[general]" html.valueishtml="0"  name=operaciones_flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="F. inicio :" border="2" color="0" x="32" y="244" height="56" width="361" html.valueishtml="0"  name=operaciones_fec_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Operacion :" border="2" color="0" x="32" y="88" height="56" width="361" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Labor:" border="2" color="0" x="32" y="4" height="60" width="361" html.valueishtml="0"  name=labor_desc_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="5" color="0" x="411" y="4" height="60" width="768" format="[general]" html.valueishtml="0"  name=labor_desc_labor visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=12 alignment="0" tabsequence=10 border="5" color="0" x="411" y="88" height="56" width="160" format="[general]" html.valueishtml="0"  name=operaciones_nro_operacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=60 border="5" color="0" x="411" y="244" height="56" width="375" format="dd/mm/yyyy" html.valueishtml="0"  name=operaciones_fec_inicio visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="5" color="0" x="1202" y="4" height="60" width="110" format="" html.valueishtml="0"  name=labor_und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Avance Esp. :" border="2" color="0" x="32" y="324" height="56" width="361" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=24 alignment="0" tabsequence=110 border="5" color="0" x="718" y="324" height="56" width="197" format="[general]" html.valueishtml="0"  name=operaciones_avance_und visible="1" dddw.name=d_dddw_unidad_tbl dddw.displaycolumn=und dddw.datacolumn=und dddw.percentwidth=455 dddw.lines=3 dddw.limit=0 dddw.allowedit=no dddw.useasborder=yes dddw.case=any dddw.imemode=0 dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Precedente :" border="2" color="0" x="937" y="88" height="56" width="311" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Fecha Fin :" border="2" color="0" x="937" y="244" height="56" width="311" html.valueishtml="0"  name=operaciones_fec_fin_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=8 alignment="0" tabsequence=20 border="5" color="0" x="1271" y="88" height="56" width="178" format="[general]" html.valueishtml="0"  name=operaciones_nro_oper_preced visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="2" tabsequence=70 border="5" color="0" x="1271" y="244" height="56" width="306" format="dd/mm/yyyy" html.valueishtml="0"  name=operaciones_fec_fin visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Secuencia :" border="2" color="0" x="1641" y="88" height="56" width="379" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="5" color="0" x="2039" y="88" height="56" width="366" format="[general]" html.valueishtml="0"  name=operaciones_oper_sec visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Avance Act. :" border="2" color="0" x="937" y="324" height="56" width="311" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Cant Proyect :" border="2" color="0" x="1641" y="324" height="56" width="379" html.valueishtml="0"  name=operaciones_cant_proyect_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=1 alignment="1" tabsequence=50 border="5" color="0" x="2039" y="324" height="56" width="366" format="[general]" html.valueishtml="0"  name=operaciones_cant_proyect visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=23 alignment="1" tabsequence=90 border="5" color="0" x="416" y="324" height="56" width="270" format="[general]" html.valueishtml="0"  name=operaciones_avance_esperado visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=25 alignment="1" tabsequence=32766 border="5" color="0" x="1271" y="324" height="56" width="270" format="[general]" html.valueishtml="0"  name=operaciones_avance_actual visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Dias Para Inicio :" border="2" color="0" x="32" y="168" height="56" width="361" html.valueishtml="0"  name=operaciones_dias_para_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=3 alignment="1" tabsequence=30 border="5" color="0" x="411" y="168" height="56" width="160" format="[general]" html.valueishtml="0"  name=operaciones_dias_para_inicio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="D. Dur. Proy :" border="2" color="0" x="937" y="168" height="56" width="311" html.valueishtml="0"  name=operaciones_dias_duracion_proy_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=5 alignment="1" tabsequence=40 border="5" color="0" x="1271" y="168" height="56" width="178" format="[general]" html.valueishtml="0"  name=operaciones_dias_duracion_proy visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Precedencia :" border="2" color="0" x="1641" y="168" height="56" width="379" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=14 alignment="0" tabsequence=80 border="5" color="0" x="2039" y="168" height="56" width="366" format="[general]" html.valueishtml="0"  name=operaciones_flag_pre visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.useasborder=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Descripción :" border="2" color="0" x="32" y="400" height="56" width="361" html.valueishtml="0"  name=operaciones_desc_operacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=7 alignment="0" tabsequence=100 border="5" color="0" x="411" y="400" height="56" width="1175" format="[general]" html.valueishtml="0"  name=operaciones_desc_operacion visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+groupbox(band=detail text="Datos del Campo"border="2" color="0" x="14" y="464" height="204" width="2386"  name=gb_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="F.Inic.Cultivo :" border="2" color="0" x="32" y="524" height="56" width="361" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="5" color="0" x="411" y="524" height="56" width="270" format="dd/mm/yy" html.valueishtml="0"  name=fec_nac_plnt visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Edad cultivo :" border="2" color="0" x="910" y="524" height="56" width="311" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=detail alignment="0" expression="daysafter(   fec_nac_plnt, operaciones_fec_inicio ) / 30.416666"border="5" color="0" x="1243" y="524" height="56" width="178" format="#,##0.00" html.valueishtml="0"  name=edad_cana visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Dias cultivo :" border="2" color="0" x="1614" y="524" height="56" width="379" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=detail alignment="0" expression="daysafter( fec_nac_plnt, operaciones_fec_inicio )"border="5" color="0" x="2011" y="524" height="56" width="366" format="#,##0" html.valueishtml="0"  name=dia_cultivo visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Mes cosecha :" border="2" color="0" x="1614" y="596" height="56" width="379" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=21 alignment="0" tabsequence=32766 border="5" color="0" x="2011" y="596" height="56" width="370" format="[general]" html.valueishtml="0"  name=mes_q visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

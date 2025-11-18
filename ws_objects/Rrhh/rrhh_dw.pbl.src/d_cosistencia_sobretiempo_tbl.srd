@@ -1,0 +1,87 @@
+﻿$PBExportHeader$d_cosistencia_sobretiempo_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=520 color="536870912" )
+summary(height=276 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="sobretiempo_turno.cod_trabajador" )
+ column=(type=char(30) updatewhereclause=yes name=apel_paterno dbname="maestro.apel_paterno" )
+ column=(type=char(30) updatewhereclause=yes name=apel_materno dbname="maestro.apel_materno" )
+ column=(type=char(30) updatewhereclause=yes name=nombre1 dbname="maestro.nombre1" )
+ column=(type=char(30) updatewhereclause=yes name=nombre2 dbname="maestro.nombre2" )
+ column=(type=datetime updatewhereclause=yes name=fec_movim dbname="sobretiempo_turno.fec_movim" )
+ column=(type=char(4) updatewhereclause=yes name=concep dbname="sobretiempo_turno.concep" )
+ column=(type=char(25) updatewhereclause=yes name=desc_breve dbname="concepto.desc_breve" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="sobretiempo_turno.nro_doc" )
+ column=(type=number updatewhereclause=yes name=horas_sobret dbname="sobretiempo_turno.horas_sobret" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="sobretiempo_turno.cod_usr" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="maestro.cod_origen" )
+ column=(type=char(50) updatewhereclause=yes name=desc_origen dbname="desc_origen" )
+ column=(type=char(3) updatewhereclause=yes name=tipo_trabajador dbname="maestro.tipo_trabajador" )
+ column=(type=char(30) updatewhereclause=yes name=desc_tipo_trab dbname="desc_tipo_trab" )
+ column=(type=char(6) updatewhereclause=yes name=semana dbname="semana" )
+ retrieve="select s.cod_trabajador, m.apel_paterno, m.apel_materno, m.nombre1, m.nombre2, s.fec_movim, s.concep, cpt.desc_breve, s.nro_doc, s.horas_sobret, s.cod_usr, m.cod_origen, initcap(o.nombre) as desc_origen, m.tipo_trabajador, initcap(tt.desc_tipo_tra) as desc_tipo_trab, lpad(trim(to_char(c.ano_calc)),4,'0') || lpad(trim(to_char(c.semana_calc)),2,'0') as semana
+   from sobretiempo_turno s
+   left outer join maestro m on s.cod_trabajador = m.cod_trabajador
+   left outer join tipo_trabajador tt on m.tipo_trabajador = tt.tipo_trabajador
+   left outer join origen o on m.cod_origen = o.cod_origen
+   left outer join calendario c on trunc(s.fec_movim) = trunc(c.fecha)
+   left outer join concepto cpt on s.concep = cpt.concep
+   where m.cod_origen in (select oao.cod_origen from ot_adm_origen oao inner join ot_adm_usuario oau on oao.ot_adm = oau.ot_adm where oau.cod_usr = 'mmcsn')
+
+union all
+   
+select hs.cod_trabajador, m.apel_paterno, m.apel_materno, m.nombre1, m.nombre2, hs.fec_movim, hs.concep, cpt.desc_breve, hs.nro_doc, hs.horas_sobret, hs.cod_usr, m.cod_origen, initcap(o.nombre) as desc_origen, m.tipo_trabajador, initcap(tt.desc_tipo_tra) as desc_tipo_trab, lpad(trim(to_char(c.ano_calc)),4,'0') || lpad(trim(to_char(c.semana_calc)),2,'0') as semana
+   from historico_sobretiempo hs
+   left outer join sobretiempo_turno s on s.cod_trabajador = hs.cod_trabajador and s.concep = hs.concep and trunc(s.fec_movim) = trunc(hs.fec_movim)
+   left outer join maestro m on hs.cod_trabajador = m.cod_trabajador
+   left outer join tipo_trabajador tt on m.tipo_trabajador = tt.tipo_trabajador
+   left outer join origen o on m.cod_origen = o.cod_origen
+   left outer join calendario c on trunc(hs.fec_movim) = trunc(c.fecha)
+   left outer join concepto cpt on hs.concep = cpt.concep
+   where s.concep is null
+      and m.cod_origen in (select oao.cod_origen from ot_adm_origen oao inner join ot_adm_usuario oau on oao.ot_adm = oau.ot_adm where oau.cod_usr = 'mmcsn')
+" )
+group(level=1 header.height=0 trailer.height=204 by=("cod_origen" , "tipo_trabajador" , "semana" ) newpage=yes header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=124 trailer.height=128 by=("fec_movim" , "nro_doc" ) header.color="536870912" trailer.color="536870912" )
+rectangle(band=summary x="41" y="48" height="108" width="3264"  name=r_1 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="0" )
+rectangle(band=trailer.1 x="46" y="36" height="108" width="3264"  name=r_2 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="41" y="4" height="52" width="293" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="if(isNull( apel_paterno ), ' ',  trim(apel_paterno) ) + ' ' +  if(isNull(  apel_materno  ), ' ',  trim( apel_materno ) ) + ' ' + if(isNull(  nombre1 ), ' ',  trim( nombre1 ) ) + ' ' + if(isNull(  nombre2  ), ' ',  trim( nombre2 ) )"border="0" color="0" x="338" y="4" height="52" width="1253" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="0" x="1595" y="4" height="52" width="201" format="[general]" html.valueishtml="0"  name=concep visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1801" y="4" height="52" width="983" format="[general]" html.valueishtml="0"  name=desc_breve visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="2789" y="4" height="52" width="288" format="[general]" html.valueishtml="0"  name=horas_sobret visible="1" editmask.mask="###,###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="0" x="3081" y="4" height="52" width="206" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="41" y="44" height="180" width="389" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="CONSISTENCIA DE SOBRETIEMPOS Y TURNOS" border="1" color="0" x="786" y="76" height="76" width="1760" html.valueishtml="0"  name=st_titulo visible="1"  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215"  height.autosize=yes)
+text(band=header alignment="2" text="" border="0" color="0" x="1111" y="192" height="56" width="1111" html.valueishtml="0"  name=st_rango_fecha visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Origen" border="2" color="33554432" x="686" y="280" height="56" width="224" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Trabajador" border="2" color="33554432" x="1445" y="280" height="56" width="334" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=15 alignment="2" tabsequence=32766 border="2" color="16711680" x="1783" y="280" height="56" width="443" format="[general]" html.valueishtml="0"  name=desc_tipo_trab visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=13 alignment="2" tabsequence=32766 border="2" color="16711680" x="914" y="280" height="56" width="526" format="[general]" html.valueishtml="0"  name=desc_origen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Semana" border="2" color="33554432" x="2231" y="280" height="56" width="261" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=16 alignment="2" tabsequence=32766 border="2" color="16711680" x="2496" y="280" height="56" width="151" format="[general]" html.valueishtml="0"  name=semana visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro." border="2" color="0" x="2789" y="356" height="56" width="288" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Trabajador" border="2" color="0" x="41" y="356" height="56" width="1550" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Concepto" border="2" color="0" x="1595" y="356" height="56" width="1189" html.valueishtml="0"  name=desc_concep_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="41" y="416" height="56" width="293" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Apellidos y Nombres" border="2" color="0" x="338" y="416" height="56" width="1253" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="1595" y="416" height="56" width="201" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="1801" y="416" height="56" width="983" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Horas" border="2" color="0" x="2789" y="416" height="56" width="288" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Usuario" border="2" color="0" x="3081" y="416" height="56" width="206" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="3081" y="356" height="56" width="206" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="41" y="240" height="56" width="389" html.valueishtml="0"  name=st_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="2711" y="240" height="56" width="576" html.valueishtml="0"  name=st_fecha visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="3077" y="164" height="56" width="210" html.valueishtml="0"  name=st_usuario visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2711" y="88" height="56" width="576" format="[general]" html.valueishtml="0"  name=st_pagina visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=9 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="32" height="52" width="274" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=6 alignment="0" tabsequence=32766 border="0" color="0" x="41" y="32" height="52" width="306" format="[shortdate] [time]" html.valueishtml="0"  name=fec_movim visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(horas_sobret for group 2)"border="0" color="0" x="2743" y="28" height="52" width="334" format="###,###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(horas_sobret for group 1)"border="0" color="16711680" x="2743" y="60" height="52" width="334" format="###,###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="2" expression="~"TOTAL  ~" + TRIM( desc_origen ) + ~"  -  ~" + TRIM( desc_tipo_trab )"border="0" color="16711680" x="78" y="60" height="56" width="2523" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(horas_sobret for all)"border="0" color="33554432" x="2743" y="72" height="56" width="334" format="###,###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="TOTAL GENERAL" border="0" color="0" x="78" y="72" height="56" width="2523" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

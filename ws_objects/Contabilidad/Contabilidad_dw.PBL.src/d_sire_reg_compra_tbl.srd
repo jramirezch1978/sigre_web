@@ -1,0 +1,425 @@
+﻿$PBExportHeader$d_sire_reg_compra_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(4000) updatewhereclause=yes name=datos dbname="datos" )
+ retrieve="  select -- 01. RUC
+			(select e.ruc
+            from empresa e
+           where e.cod_empresa = :as_empresa) ||  
+			-- 02. Razon Social                                                 
+         '|' || (select e.nombre
+            from empresa e
+           where e.cod_empresa = :as_empresa) ||     
+			-- 03.Periodo                                              
+         '|' || trim(to_char(cp.ano, '0000')) || trim(to_char(cp.mes, '00')) || 
+			-- 04. CAR Sunat => por ahora debe ir vacio
+         /*'|' || DECODE(p.tipo_doc_ident, '6', p.ruc, p.nro_doc_ident) 
+             || dc.cod_sunat 
+             || CP.SERIE_CP || cp.NUMERO_CP || */
+			'|' ||
+			-- 05. Fecha Emision Documento
+         '|' || to_char(cp.fecha_emision, 'dd/mm/yyyy')     ||  
+			-- 06. Fecha de Pago o vencimiento                                  
+         '|' || 
+         case 
+           when dc.cod_sunat in ('14', '50') then
+             case  
+               when trunc(cp.vencimiento) > pkg_utility.of_last_day(decode(:ani_mes, 12, :ani_year + 1, :ani_year), decode(:ani_mes, 12, 1, :ani_mes + 1)) then
+                 to_char(pkg_utility.of_last_day(decode(:ani_mes, 12, :ani_year + 1, :ani_year), decode(:ani_mes, 12, 1, :ani_mes + 1)), 'dd/mm/yyyy')
+               else
+                 to_char(cp.vencimiento, 'dd/mm/yyyy')
+             end 
+           else
+             ''                              
+         end                                                ||                          
+         -- 07. Tipo Documento
+			'|' || dc.cod_sunat                                ||    
+			-- 08. Serie del documento                      
+         '|' || 
+         case 
+           when dc.cod_sunat  = '05' then -- Boletos de Avion
+             '3'
+           when dc.cod_sunat in (46, 50, 51, 52, 53, 54) then
+             case
+               when cp.serie_cp is not null then
+                 substr(cp.serie_cp, 2)
+               else
+                 substr(PKG_FACT_ELECTRONICA.of_get_serie(cp.nro_doc), 2)
+             end
+           when cp.serie_cp is null or cp.tipo_doc = 'LC' then
+             case
+               when instr(cp.nro_doc, '-') > 0 then
+                 PKG_FACT_ELECTRONICA.of_get_serie(cp.nro_doc)
+               else '0000'
+             end
+           else
+             CP.SERIE_CP                     
+         end                                   ||  
+			-- 09. Año de Emision de la DUA                    
+         '|' ||  
+         case 
+           when dc.cod_sunat in (50, 52) then
+               to_char(cp.fecha_emision, 'yyyy')
+           else
+               ''
+         end                               ||      
+		   -- 10. Nro Documento                    
+         '|'  || 
+         case 
+          when dc.cod_sunat in (46, 50, 51, 52, 53, 54) then
+            case 
+              when CP.NUMERO_CP is not null and cp.serie_cp is not null then
+                PKG_UTILITY.of_trim(CP.NUMERO_CP, '0')
+                    when instr(cp.nro_doc, '-') > 0 then
+                      trim(substr(cp.nro_doc, instr(cp.nro_doc, '-') + 1))
+                    else 
+                trim(cp.nro_doc)
+            end
+              when CP.NUMERO_CP is null or cp.tipo_doc = 'LC' then
+                 case 
+                   when instr(cp.nro_doc, '-') > 0 then
+                     trim(substr(cp.nro_doc, instr(cp.nro_doc, '-') + 1))
+                   else 
+              trim(cp.nro_doc)
+                 end
+              else
+                  PKG_UTILITY.of_trim(CP.NUMERO_CP, '0')
+			end ||                                      
+			-- 11. Total de Operaciones / Rango Final de comprobante para consolidados diarios                           
+         '|' || '' ||                                                                   
+			-- 12. Tipo Documento Identidad
+         '|' || p.tipo_doc_ident ||                                                     
+			-- 13. Nro Documento Identidad
+         '|' || DECODE(p.tipo_doc_ident, '6', p.ruc, p.nro_doc_ident) ||                
+         -- 14. Razon Social o nombre completo
+			'|' || trim(substr(replace(p.nom_proveedor, '|', ''), 1, 100)) ||              
+
+         -- 15. Base Imponible Credito Fiscal 01
+         '|' ||
+         (select trim(to_char(nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpd.importe, cpd.importe * cp.tasa_cambio) * DECODE(dc.flag_signo, '+', 1, -1)), 0), '9999990.00'))
+            from cntas_pagar_det cpd
+           where cpd.cod_relacion = cp.cod_relacion
+             and cpd.tipo_doc     = cp.tipo_doc
+             and cpd.nro_doc      = cp.nro_doc
+             and cpd.tipo_cred_fiscal = '01') ||                                        
+
+         -- 16. IGV Credi Fiscal 01
+         '|' ||
+         (select trim(to_char(nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpi.importe, cpi.importe*cp.tasa_cambio) * DECODE(i.signo, '-', -1, 1) * DECODE(dc.flag_signo, '+', 1, -1)), 0), '9999990.00'))
+            from cntas_pagar_det cpd,
+                 cp_doc_det_imp  cpi,
+            impuestos_tipo  i
+           where cpd.cod_relacion   = cp.cod_relacion
+             and cpd.tipo_doc         = cp.tipo_doc
+             and cpd.nro_doc          = cp.nro_doc
+             and cpi.cod_relacion     = cpd.cod_relacion
+             and cpi.tipo_doc         = cpd.tipo_doc
+             and cpi.nro_doc          = cpd.nro_doc
+             and cpi.item             = cpd.item
+             and cpi.tipo_impuesto   = i.tipo_impuesto
+             and i.flag_igv        = '1'
+             and cpd.tipo_cred_fiscal = '01') ||
+                                        
+         -- 17. Base Imponible Credito Fiscal 02
+         '|' ||
+         (select trim(to_char(nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpd.importe, cpd.importe * cp.tasa_cambio) * DECODE(dc.flag_signo, '+', 1, -1)), 0), '9999990.00'))
+            from cntas_pagar_det cpd
+           where cpd.cod_relacion = cp.cod_relacion
+             and cpd.tipo_doc     = cp.tipo_doc
+             and cpd.nro_doc      = cp.nro_doc
+             and cpd.tipo_cred_fiscal = '02') ||  
+
+         -- 18. IGV Credi Fiscal 02                                      
+         '|' ||
+         (select trim(to_char(nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpi.importe, cpi.importe*cp.tasa_cambio) * DECODE(i.signo, '-', -1, 1) * DECODE(dc.flag_signo, '+', 1, -1)), 0), '9999990.00'))
+            from cntas_pagar_det cpd,
+                 cp_doc_det_imp  cpi,
+            impuestos_tipo  i
+           where cpd.cod_relacion = cp.cod_relacion
+             and cpd.tipo_doc     = cp.tipo_doc
+             and cpd.nro_doc      = cp.nro_doc
+             and cpi.cod_relacion  = cpd.cod_relacion
+             and cpi.tipo_doc      = cpd.tipo_doc
+             and cpi.nro_doc       = cpd.nro_doc
+             and cpi.item          = cpd.item
+             and cpi.tipo_impuesto = i.tipo_impuesto
+             and i.flag_igv        = '1'
+             and cpd.tipo_cred_fiscal = '02') ||                                        
+
+         -- 19. Base Imponible Credito Fiscal 03
+         '|' ||
+         (select trim(to_char(nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpd.importe, cpd.importe * cp.tasa_cambio) * DECODE(dc.flag_signo, '+', 1, -1)), 0), '9999990.00'))
+            from cntas_pagar_det cpd
+           where cpd.cod_relacion = cp.cod_relacion
+             and cpd.tipo_doc     = cp.tipo_doc
+             and cpd.nro_doc      = cp.nro_doc
+             and cpd.tipo_cred_fiscal = '03') ||                                        
+
+          -- 20. IGV Credi Fiscal 03
+         '|' ||
+         (select trim(to_char(nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpi.importe, cpi.importe*cp.tasa_cambio) * DECODE(i.signo, '-', -1, 1) * DECODE(dc.flag_signo, '+', 1, -1)), 0), '9999990.00'))
+            from cntas_pagar_det cpd,
+                 cp_doc_det_imp  cpi,
+            impuestos_tipo  i
+           where cpd.cod_relacion = cp.cod_relacion
+             and cpd.tipo_doc     = cp.tipo_doc
+             and cpd.nro_doc      = cp.nro_doc
+             and cpi.cod_relacion  = cpd.cod_relacion
+             and cpi.tipo_doc      = cpd.tipo_doc
+             and cpi.nro_doc       = cpd.nro_doc
+             and cpi.item          = cpd.item
+             and cpi.tipo_impuesto = i.tipo_impuesto
+             and i.flag_igv        = '1'
+             and cpd.tipo_cred_fiscal = '03') ||        
+
+         -- 21. Compras no gravadas                                
+         '|' ||
+         trim(to_char((select nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpd.importe, cpd.importe*cp.tasa_cambio) * DECODE(dc.flag_signo, '+', 1, -1)), 0)
+                         from cntas_pagar_det cpd
+                        where cpd.cod_relacion = cp.cod_relacion
+                          and cpd.tipo_doc     = cp.tipo_doc
+                          and cpd.nro_doc      = cp.nro_doc 
+                  and cpd.tipo_cred_fiscal = '04') +
+                      (select nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpi.importe, cpi.importe*cp.tasa_cambio) * DECODE(i.signo, '-', -1, 1) * DECODE(dc.flag_signo, '+', 1, -1)), 0)
+                         from cntas_pagar_det cpd,
+                    cp_doc_det_imp  cpi,
+                    impuestos_tipo   i
+                        where cpd.cod_relacion  = cp.cod_relacion
+                  and cpd.tipo_doc    = cp.tipo_doc
+                  and cpd.nro_doc     = cp.nro_doc
+                   and cpi.cod_relacion  = cpd.cod_relacion
+                          and cpi.tipo_doc      = cpd.tipo_doc
+                          and cpi.nro_doc       = cpd.nro_doc 
+                  and cpi.item        = cpd.item
+                  and cpi.tipo_impuesto = i.tipo_impuesto
+                  and cpd.tipo_cred_fiscal = '04'
+                  and i.flag_igv = '1'), '9999990.00')) ||   
+      
+         -- 22. Impuesto Selectivo al consumo
+         '|' ||
+         (select trim(to_char(nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpi.importe, cpi.importe*cp.tasa_cambio) * DECODE(i.signo, '-', -1, 1) * DECODE(dc.flag_signo, '+', 1, -1)), 0), '9999990.00'))
+            from cntas_pagar_det cpd,
+                 cp_doc_det_imp  cpi,
+            impuestos_tipo  i
+           where cpd.cod_relacion = cp.cod_relacion
+             and cpd.tipo_doc     = cp.tipo_doc
+             and cpd.nro_doc      = cp.nro_doc
+             and cpi.cod_relacion  = cpd.cod_relacion
+             and cpi.tipo_doc      = cpd.tipo_doc
+             and cpi.nro_doc       = cpd.nro_doc
+             and cpi.item          = cpd.item
+             and cpi.tipo_impuesto = i.tipo_impuesto
+         and cpi.tipo_impuesto = 'ISC') ||  
+      
+         -- 23. ICBPER                          
+         '|' ||
+         (select trim(to_char(nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpi.importe, cpi.importe*cp.tasa_cambio) * DECODE(i.signo, '-', -1, 1) * DECODE(dc.flag_signo, '+', 1, -1)), 0), '9999990.00'))
+            from cntas_pagar_det cpd,
+                 cp_doc_det_imp  cpi,
+            impuestos_tipo  i
+           where cpd.cod_relacion = cp.cod_relacion
+             and cpd.tipo_doc     = cp.tipo_doc
+             and cpd.nro_doc      = cp.nro_doc
+             and cpi.cod_relacion  = cpd.cod_relacion
+             and cpi.tipo_doc      = cpd.tipo_doc
+             and cpi.nro_doc       = cpd.nro_doc
+             and cpi.item          = cpd.item
+             and cpi.tipo_impuesto = i.tipo_impuesto
+         and cpi.tipo_impuesto = 'ICBPER') ||                                     
+
+         -- 24. Otros cargos o Impuestos                              
+         '|' ||
+         (select trim(to_char(nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpi.importe, cpi.importe*cp.tasa_cambio) * DECODE(i.signo, '-', -1, 1) * DECODE(dc.flag_signo, '+', 1, -1)), 0), '9999990.00'))
+            from cntas_pagar_det cpd,
+                 cp_doc_det_imp  cpi,
+            impuestos_tipo  i
+           where cpd.cod_relacion = cp.cod_relacion
+             and cpd.tipo_doc     = cp.tipo_doc
+             and cpd.nro_doc      = cp.nro_doc
+             and cpi.cod_relacion  = cpd.cod_relacion
+             and cpi.tipo_doc      = cpd.tipo_doc
+             and cpi.nro_doc       = cpd.nro_doc
+             and cpi.item          = cpd.item
+             and cpi.tipo_impuesto = i.tipo_impuesto
+             and cpi.tipo_impuesto not in ('ISC', 'ICBPER')
+             and i.flag_igv     = '0') ||                                         
+
+         -- 25. Importe Total del documento               
+         '|' ||
+         trim(to_char((select nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpd.importe, cpd.importe*cp.tasa_cambio) * DECODE(dc.flag_signo, '+', 1, -1)), 0)
+                         from cntas_pagar_det cpd
+                        where cpd.cod_relacion = cp.cod_relacion
+                          and cpd.tipo_doc     = cp.tipo_doc
+                          and cpd.nro_doc      = cp.nro_doc ) +
+                      (select nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , ci.importe, ci.importe*cp.tasa_cambio) * DECODE(i.signo, '-', -1, 1) * DECODE(dc.flag_signo, '+', 1, -1)), 0)
+                         from cp_doc_det_imp  ci,
+                    impuestos_tipo   i
+                        where ci.cod_relacion  = cp.cod_relacion
+                          and ci.tipo_doc      = cp.tipo_doc
+                          and ci.nro_doc       = cp.nro_doc 
+                  and ci.tipo_impuesto = i.tipo_impuesto), '9999990.00')) ||   
+         -- 26. Moneda
+         '|' || 
+         case 
+           when cp.cod_moneda = 'US$' then
+             'USD'
+           else
+             'PEN'
+         end ||
+			'|' ||   
+         -- 27. Tasa Cambio 
+			case 
+           when cp.cod_moneda = 'US$' then
+           	 trim(to_char(cp.tasa_cambio, '9990.000'))
+           else
+             '' 
+         end ||
+         -- 28. Fecha de emision del documento de referencia                           
+         '|' ||
+         case 
+           when cp.tipo_doc in ('NCP', 'NDP', 'CNC', 'CDB') then
+            (select to_char(cp2.fecha_emision, 'dd/mm/yyyy')
+               from doc_referencias dr,
+                    cntas_pagar     cp2
+              where dr.proveedor_ref = cp2.cod_relacion
+                and dr.tipo_ref      = cp2.tipo_doc
+                and dr.nro_ref       = cp2.nro_doc
+                and dr.cod_relacion  = cp.cod_relacion
+                and dr.tipo_doc      = cp.tipo_doc
+                and dr.nro_doc       = cp.nro_doc
+                and rownum           = 1)
+           else
+             ''
+         end ||  
+         -- 29. Tipo Documento Referencia                                                                       
+         '|' ||
+         case 
+           when cp.tipo_doc in ('NCP', 'NDP', 'CNC', 'CDB') then
+            (select dt2.cod_sunat
+               from doc_referencias dr,
+                    cntas_pagar     cp2,
+                    doc_tipo        dt2
+              where dr.proveedor_ref = cp2.cod_relacion
+                and dr.tipo_ref      = cp2.tipo_doc
+                and dr.nro_ref       = cp2.nro_doc
+                and cp2.tipo_doc     = dt2.tipo_doc
+                and dr.cod_relacion  = cp.cod_relacion
+                and dr.tipo_doc      = cp.tipo_doc
+                and dr.nro_doc       = cp.nro_doc
+           and rownum        = 1)
+           else
+             ''
+         end ||   
+         -- 30. Serie Documento Referencia                                                                      
+         '|' ||
+         case 
+           when cp.tipo_doc in ('NCP', 'NDP', 'CNC', 'CDB') then
+            (select case
+								when cp2.serie_cp is not null then
+									case
+										when instr(cp2.nro_doc, '-' ) > 0 then
+	                        		PKG_FACT_ELECTRONICA.of_get_serie(cp2.nro_doc)
+                      			else
+                        			'0000'
+									end
+								else
+		                   	CP2.SERIE_CP 
+                    end
+               from doc_referencias dr,
+                    cntas_pagar     cp2,
+                    doc_tipo        dt2
+              where dr.proveedor_ref = cp2.cod_relacion
+                and dr.tipo_ref      = cp2.tipo_doc
+                and dr.nro_ref       = cp2.nro_doc
+                and cp2.tipo_doc     = dt2.tipo_doc
+                and dr.cod_relacion  = cp.cod_relacion
+                and dr.tipo_doc      = cp.tipo_doc
+                and dr.nro_doc       = cp.nro_doc
+           and rownum        = 1 )
+           else
+             ''
+         end ||  
+         -- 31. Dependencia Aduanera                                                                       
+         '|' || '' ||      
+         -- 32. Numero Documento Referencia                                                             
+         '|' ||
+         case 
+           when cp.tipo_doc in ('NCP', 'NDP', 'CNC', 'CDB') then
+            (select case 
+								when dt2.cod_sunat in (46, 50, 51, 52, 53, 54) then
+									case 
+										when CP2.NUMERO_CP is not null and cp2.serie_cp is not null then
+											PKG_UTILITY.of_trim(CP2.NUMERO_CP, '0')
+										when instr(cp.nro_doc, '-') > 0 then
+											trim(substr(cp.nro_doc, instr(cp.nro_doc, '-') + 1))
+										else 
+											trim(cp.nro_doc)
+									end
+								when CP.NUMERO_CP is null or cp.tipo_doc = 'LC' then
+									case 
+										when instr(cp.nro_doc, '-') > 0 then
+											trim(substr(cp.nro_doc, instr(cp.nro_doc, '-') + 1))
+										else 
+											trim(cp.nro_doc)
+									end
+								else
+									PKG_UTILITY.of_trim(CP.NUMERO_CP, '0')
+							end
+               from doc_referencias dr,
+                    cntas_pagar     cp2,
+                    doc_tipo        dt2
+              where dr.proveedor_ref = cp2.cod_relacion
+                and dr.tipo_ref      = cp2.tipo_doc
+                and dr.nro_ref       = cp2.nro_doc
+                and cp2.tipo_doc     = dt2.tipo_doc
+                and dr.cod_relacion  = cp.cod_relacion
+                and dr.tipo_doc      = cp.tipo_doc
+                and dr.nro_doc       = cp.nro_doc
+            and rownum         = 1)
+           else
+             ''
+         end || 
+         -- 33. Clasificación de bienes y servicios adquiridos (Tabla 30 SUNAT) 
+         '|' || trim(NVL(CP.CLASE_BIEN_SERV,'0'))         ||                             
+         -- 34. Identificacion del Contrato o del proyecto en el caso de los Operadores de Sociedades irregulares
+         '|' || '' ||                             
+         -- 35. Porcentaje de participación en el Contrato o proyecto en el caso de los Operadores de las sociedades
+         '|' || '' ||                             
+         -- 36. Impuesto materia de beneficio Ley 31053. (5) y (10)
+         '|' || '' ||   
+         -- 37. CAR CP a modificar en ajustes posteriores o Indicador de exclusion o Inclusión
+         '|' || ''  ||  
+         -- 41. Inconsistencias (12) 
+         '|' || '' ||                              
+         '|' as datos
+  from   cntas_pagar cp,
+         proveedor   p,
+         doc_tipo    dc,
+         detraccion  d
+  where  cp.cod_relacion              = p.proveedor
+    AND  cp.tipo_doc                  = dc.tipo_doc
+    and  cp.nro_detraccion            = d.nro_detraccion   (+)
+    AND  cp.flag_estado               <> '0'
+    AND  cp.ano                       = :ani_year
+    AND  cp.mes                       = :ani_mes
+    AND  cp.nro_libro                 = '03'
+    and  cp.tipo_doc                  not in ('RE')
+    and  NVL(p.flag_personeria, 'N')  <> 'E'
+   ORDER BY p.nom_proveedor, cp.tipo_doc, cp.nro_doc
+" arguments=(("ani_year", number),("ani_mes", number),("as_empresa", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="56" width="8165" format="[general]" html.valueishtml="0"  name=datos visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Courier New" font.height="-7" font.weight="400"  font.family="3" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

@@ -1,0 +1,87 @@
+﻿$PBExportHeader$d_rpt_saldo_libre_ot_adm_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=476 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(6) update=yes updatewhereclause=yes name=almacen dbname="articulo_almacen.almacen" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_ot_adm dbname="orden_trabajo.ot_adm" )
+ column=(type=char(12) update=yes updatewhereclause=yes name=cod_art dbname="articulo_almacen.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=articulo_desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=decimal(6) update=yes updatewhereclause=yes name=costo_ult_compra dbname="articulo_almacen.costo_ult_compra" )
+ column=(type=char(60) updatewhereclause=yes name=almacen_desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=char(10) updatewhereclause=yes name=articulo_mov_proy_nro_doc dbname="articulo_mov_proy.nro_doc" )
+ column=(type=number updatewhereclause=yes name=saldo_total dbname="saldo_total" )
+ column=(type=number updatewhereclause=yes name=saldo_consignac dbname="saldo_consignac" )
+ column=(type=number updatewhereclause=yes name=saldo_reserv dbname="saldo_reserv" )
+ column=(type=number updatewhereclause=yes name=saldo_x_lleg dbname="saldo_x_lleg" )
+ column=(type=number updatewhereclause=yes name=saldo_libre dbname="saldo_libre" )
+ column=(type=number updatewhereclause=yes name=saldo_solic dbname="saldo_solic" )
+ retrieve="select aa.almacen, ot.ot_adm, aa.cod_art, a.desc_art, a.und, 
+       aa.costo_ult_compra, al.desc_almacen, amp.nro_doc,
+       sum(aa.sldo_total) as saldo_total, 
+       sum(aa.sldo_consignacion) as saldo_consignac, 
+       sum(aa.sldo_reservado) as saldo_reserv, 
+       sum(aa.sldo_por_llegar) as saldo_x_lleg, 
+       sum(aa.sldo_total - aa.sldo_reservado + aa.sldo_consignacion) as saldo_libre, 
+       sum(aa.sldo_solicitado) as saldo_solic
+from articulo_almacen aa, articulo a, almacen al, articulo_mov_proy amp, orden_trabajo ot  
+where (aa.cod_art = a.cod_art) and
+      (aa.almacen=al.almacen) and
+      (aa.cod_art = amp.cod_art and
+       amp.flag_estado='1' and
+       amp.tipo_doc = :as_doc_ot and
+       amp.nro_doc = ot.nro_orden and 
+       (amp.cant_proyect - amp.cant_procesada > 0)) and 
+      (a.flag_inventariable = '1' and
+       a.flag_estado <> '0' and
+       al.flag_tipo_almacen='M') and
+      (aa.sldo_total + aa.sldo_consignacion - aa.sldo_reservado) > 0 
+group by aa.almacen, ot.ot_adm, aa.cod_art, a.desc_art, a.und, aa.costo_ult_compra, al.desc_almacen, amp.nro_doc 
+order by aa.almacen, ot.ot_adm, amp.nro_doc , aa.cod_art " arguments=(("as_doc_ot", string)) )
+group(level=1 header.height=128 trailer.height=108 by=("almacen" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=132 trailer.height=0 by=("orden_trabajo_ot_adm" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="23" y="16" height="208" width="283" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="" border="0" color="0" x="23" y="244" height="40" width="283" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="18" y="308" height="40" width="283" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Código" border="2" color="33554432" x="14" y="408" height="56" width="343" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="370" y="408" height="56" width="1280" html.valueishtml="0"  name=articulo_desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="1664" y="408" height="56" width="110" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Saldo libre" border="2" color="33554432" x="2747" y="408" height="56" width="306" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="US$ libres" border="2" color="33554432" x="3707" y="408" height="56" width="325" html.valueishtml="0"  name=costo_ult_compra_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="3739" y="12" height="40" width="283" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="3739" y="148" height="40" width="283" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3739" y="76" height="48" width="283" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="1175" y="136" height="64" width="1783" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="REQUERIMIENTOS CON SALDOS LIBRES " border="0" color="0" x="1175" y="32" height="64" width="1783" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Saldo total" border="2" color="33554432" x="1787" y="408" height="56" width="306" html.valueishtml="0"  name=sldo_total_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Saldo Consig." border="2" color="33554432" x="2107" y="408" height="56" width="306" html.valueishtml="0"  name=sldo_consignacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Saldo Reserv" border="2" color="33554432" x="2427" y="408" height="56" width="306" html.valueishtml="0"  name=sldo_reservado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Saldo x llegar" border="2" color="33554432" x="3387" y="408" height="56" width="306" html.valueishtml="0"  name=sldo_por_llegar_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Saldo Solic." border="2" color="33554432" x="3067" y="408" height="56" width="306" html.valueishtml="0"  name=sldo_solicitado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Orden Trab" border="2" color="33554432" x="4046" y="408" height="56" width="302" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="229" y="36" height="56" width="1381" format="[general]" html.valueishtml="0"  name=almacen_desc_almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="36" height="56" width="192" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=2 alignment="0" tabsequence=32766 border="0" color="8388608" x="283" y="32" height="56" width="233" format="[general]" html.valueishtml="0"  name=orden_trabajo_ot_adm visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="0" text="OT_ADM :" border="0" color="8388608" x="14" y="32" height="56" width="251" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="3433" y="116" height="56" width="329" format="#,##0.00" html.valueishtml="0"  name=costo_ult_compra visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="8" height="56" width="343" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="370" y="8" height="56" width="1280" format="[general]" html.valueishtml="0"  name=articulo_desc_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="1664" y="8" height="56" width="110" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="4046" y="8" height="56" width="302" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="33554432" x="2747" y="8" height="56" width="306" format="#,##0.00" html.valueishtml="0"  name=saldo_libre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" saldo_libre *  costo_ult_compra "border="0" color="33554432" x="3707" y="8" height="56" width="325" format="#,##0.00" html.valueishtml="0"  name=monto_dol_libre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="1787" y="8" height="56" width="306" format="#,##0.00" html.valueishtml="0"  name=saldo_total visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="2107" y="8" height="56" width="306" format="#,##0.00" html.valueishtml="0"  name=saldo_consignac visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="33554432" x="2427" y="8" height="56" width="306" format="#,##0.00" html.valueishtml="0"  name=saldo_reserv visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="33554432" x="3387" y="8" height="56" width="306" format="#,##0.00" html.valueishtml="0"  name=saldo_x_lleg visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="0" color="33554432" x="3067" y="8" height="56" width="306" format="#,##0.00" html.valueishtml="0"  name=saldo_solic visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum( saldo_libre *  costo_ult_compra  for group 1)"border="0" color="255" x="3707" y="20" height="56" width="325" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="1" text="Total US$ en materiales libres :" border="0" color="255" x="2537" y="20" height="56" width="677" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

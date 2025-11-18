@@ -1,0 +1,59 @@
+﻿$PBExportHeader$d_ot_otros_gastos_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=64 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_orden dbname="ot_otros_gastos.nro_orden" )
+ column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_relacion dbname="ot_otros_gastos.cod_relacion" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_doc dbname="ot_otros_gastos.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_doc dbname="ot_otros_gastos.nro_doc" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_doc dbname="cntas_pagar.importe_doc" )
+ column=(type=decimal(3) updatewhereclause=yes name=tasa_cambio dbname="cntas_pagar.tasa_cambio" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(3) updatewhereclause=yes name=cod_dolares dbname="cod_dolares" )
+ retrieve="  SELECT ~"OT_OTROS_GASTOS~".~"NRO_ORDEN~",   
+         ~"OT_OTROS_GASTOS~".~"COD_RELACION~",   
+         ~"OT_OTROS_GASTOS~".~"TIPO_DOC~",   
+         ~"OT_OTROS_GASTOS~".~"NRO_DOC~",   
+         ~"CNTAS_PAGAR~".~"COD_MONEDA~",   
+         ~"CNTAS_PAGAR~".~"IMPORTE_DOC~",   
+         ~"CNTAS_PAGAR~".~"TASA_CAMBIO~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~", 
+			(SELECT COD_DOLARES FROM LOGPARAM WHERE RECKEY = '1') AS COD_DOLARES
+    FROM ~"OT_OTROS_GASTOS~",   
+         ~"CNTAS_PAGAR~",   
+         ~"PROVEEDOR~"  
+   WHERE ( ~"CNTAS_PAGAR~".~"COD_RELACION~" = ~"OT_OTROS_GASTOS~".~"COD_RELACION~" ) and  
+         ( ~"CNTAS_PAGAR~".~"TIPO_DOC~" = ~"OT_OTROS_GASTOS~".~"TIPO_DOC~" ) and  
+         ( ~"CNTAS_PAGAR~".~"NRO_DOC~" = ~"OT_OTROS_GASTOS~".~"NRO_DOC~" ) and  
+         ( ~"OT_OTROS_GASTOS~".~"NRO_ORDEN~" = :as_nro_orden ) and  
+         ( ~"PROVEEDOR~".~"PROVEEDOR~" = ~"CNTAS_PAGAR~".~"COD_RELACION~" )    
+" update="OT_OTROS_GASTOS" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_orden", string)) )
+text(band=header alignment="2" text="Nro Orden" border="2" color="8388608" x="5" y="4" height="56" width="302" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Proveedor" border="2" color="8388608" x="311" y="4" height="56" width="329" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Razón Social" border="2" color="8388608" x="645" y="4" height="56" width="1129" html.valueishtml="0"  name=proveedor_nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="TDoc" border="2" color="8388608" x="1778" y="4" height="56" width="137" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Documento" border="2" color="8388608" x="1920" y="4" height="56" width="315" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Mon" border="2" color="8388608" x="2240" y="4" height="56" width="160" html.valueishtml="0"  name=cntas_pagar_cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Importe" border="2" color="8388608" x="2405" y="4" height="56" width="416" html.valueishtml="0"  name=cntas_pagar_importe_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+text(band=header alignment="2" text="Tasa" border="2" color="8388608" x="2825" y="4" height="56" width="219" html.valueishtml="0"  name=cntas_pagar_tasa_cambio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217738" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="1769" y="152" height="64" width="82" format="[general]" html.valueishtml="0"  name=cod_dolares visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="/* if(  cntas_pagar_cod_moneda= cod_dolares,  cntas_pagar_importe_doc, if(  cntas_pagar_tasa_cambio>0,  cntas_pagar_importe_doc, 0 ) ) */"border="0" color="33554432" x="1883" y="156" height="64" width="215" format="[GENERAL]" html.valueishtml="0"  name=importe_dol visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=10 border="2" color="33554432" x="311" y="4" height="60" width="329" format="[general]" html.valueishtml="0"  name=cod_relacion pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="645" y="4" height="60" width="1129" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="2" color="33554432" x="1778" y="4" height="60" width="137" format="[general]" html.valueishtml="0"  name=tipo_doc pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=4 edit.case=upper edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=30 border="2" color="33554432" x="1920" y="4" height="60" width="315" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=upper edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2240" y="4" height="60" width="160" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2825" y="4" height="60" width="219" format="#,##0.000" html.valueishtml="0"  name=tasa_cambio visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2405" y="4" height="60" width="416" format="#,##0.00" html.valueishtml="0"  name=importe_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=summary alignment="2" text="Total dolares:" border="2" color="33554432" x="1984" y="4" height="56" width="416" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="65535" )
+compute(band=summary alignment="1" expression=" sum(if(  cod_moneda= cod_dolares,  importe_doc, if(  tasa_cambio>0,  importe_doc / tasa_cambio, 0 ) ) for all) "border="2" color="33554432" x="2405" y="4" height="56" width="416" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

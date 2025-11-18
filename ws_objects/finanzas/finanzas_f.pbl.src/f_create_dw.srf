@@ -1,0 +1,113 @@
+﻿$PBExportHeader$f_create_dw.srf
+global type f_create_dw from function_object
+end type
+
+forward prototypes
+global function boolean f_create_dw (string as_cod_banco, datawindow adw_1)
+end prototypes
+
+global function boolean f_create_dw (string as_cod_banco, datawindow adw_1);String  ls_form_disp,ls_alias,ls_flag_dw,ls_cadena
+String  ls_fdisplay [],ls_alias_sel [],ls_fdw []
+Integer li_arr
+Long    ll_inicio
+String  error_syntaxfromSQL, error_create
+String  new_syntax,ls_report_type,ls_style
+Boolean lb_ret = TRUE
+
+li_arr  = 1
+
+//CURSOR DE ESTRUCTURA DE 
+DECLARE estruct_file CURSOR FOR
+  SELECT formula_dislay,alias_select,flag_dw
+  	 FROM fin_imp_file_par 
+	WHERE (cod_banco = :as_cod_banco)
+ORDER BY nro_sec_select ;
+
+
+/*Abrir Cursor*/		  	
+OPEN estruct_file ;
+	
+	DO 				/*Recorro Cursor*/	
+	 FETCH estruct_file INTO :ls_form_disp,:ls_alias,:ls_flag_dw;
+	 
+	 IF sqlca.sqlcode = 100 THEN EXIT
+
+	 
+	 /**Inserción de Arreglo**/ 
+	 ls_fdisplay  [li_arr] = ls_form_disp
+	 ls_alias_sel [li_arr] = trim(ls_alias)
+	 ls_fdw 		  [li_arr] = ls_flag_dw 
+	 li_arr = li_arr + 1
+	 
+	LOOP WHILE TRUE
+	
+CLOSE estruct_file ; /*Cierra Cursor*/
+
+
+
+//armar select
+For ll_inicio = 1 to UpperBound(ls_fdisplay) 
+	 If ls_fdw [ll_inicio] = '2' or ls_fdw [ll_inicio] = '3' Then //
+		 If Len(ls_cadena) = 0 Then
+		 	 ls_cadena = ls_cadena + ls_fdisplay[ll_inicio] +' AS '+ ls_alias_sel[ll_inicio]
+	 	 Else	 
+		 	 ls_cadena = ls_cadena +','+ ls_fdisplay [ll_inicio] +' AS '+ ls_alias_sel [ll_inicio]
+	 	 End If	 
+	 End If
+Next	
+
+
+ls_cadena  = 'SELECT '+ls_cadena+' FROM TT_FIN_CONC'
+
+
+
+ls_report_type    = "grid"
+ls_style = 'style(type=' + ls_report_type + ')' + &
+	        'Text(background.mode=0 background.color=12632256 color=0  border=6' +&
+	        'font.face = "MS Sans Serif"  font.height = -8  font.weight = 400 font.family = 2 ' + &
+	        'font.pitch=2  ) ' + &
+	        'Column(background.mode=0 background.color=1073741824 color=0 border=0' +&
+           'font.face = "MS Sans Serif"  font.height = -8  font.weight = 400 font.family = 2 ' + &
+	        'font.pitch = 2 ) '
+
+
+
+new_syntax = SQLCA.SyntaxFromSQL(ls_cadena, ls_style, error_syntaxfromSQL)
+
+IF Len(error_syntaxfromSQL) > 0 THEN
+   // Display errors
+   Messagebox('Error en Generar Sintaxis', error_syntaxfromSQL)
+	lb_ret = FALSE
+	GOTO SALIDA	
+ELSE
+   // Generate new DataWindow
+   adw_1.Create(new_syntax, error_create)
+	
+   IF Len(error_create) > 0 THEN
+      Messagebox('Error al crear DW',error_create)
+		lb_ret = FALSE
+		GOTO SALIDA
+   END IF
+
+END IF
+
+
+	adw_1.SetTransObject(SQLCA)
+	/*modifica INDICADOR*/
+	adw_1.modify('conciliacion.checkbox.threed=yes ')
+	adw_1.modify('conciliacion.checkbox.on="1"     ')
+	adw_1.modify('conciliacion.checkbox.off="0" 	')
+	adw_1.modify('conciliacion.tabsequence = 10 	')
+	adw_1.modify('conciliacion.alignment = 2 	')
+	adw_1.modify('conciliacion.Background.Color = 255')
+
+
+
+
+SALIDA:
+
+Return lb_ret
+
+
+end function
+

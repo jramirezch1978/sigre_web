@@ -1,0 +1,40 @@
+﻿$PBExportHeader$f_monto_cri_x_prov.srf
+global type f_monto_cri_x_prov from function_object
+end type
+
+forward prototypes
+global subroutine f_monto_cri_x_prov (datawindow adw_detail, string as_cod_relacion, decimal adc_tasa_cambio, ref decimal adc_imp_ret_sol, ref decimal adc_imp_ret_dol)
+end prototypes
+
+global subroutine f_monto_cri_x_prov (datawindow adw_detail, string as_cod_relacion, decimal adc_tasa_cambio, ref decimal adc_imp_ret_sol, ref decimal adc_imp_ret_dol);String ls_expresion ,ls_order
+Long   ll_inicio    
+Decimal {2} ldc_impt_ret_igv
+
+adc_imp_ret_sol = 0.00 
+adc_imp_ret_dol = 0.00
+
+/*filtrar x codigo de relacion*/
+adw_detail.SetFilter('cod_relacion = '+"'"+as_cod_relacion+"'")
+adw_detail.Filter()
+
+
+
+For ll_inicio = 1 TO adw_detail.Rowcount()
+	 ldc_impt_ret_igv = adw_detail.object.impt_ret_igv [ll_inicio]
+	 IF Isnull(ldc_impt_ret_igv) THEN ldc_impt_ret_igv = 0.00
+	 
+	 adc_imp_ret_sol = adc_imp_ret_sol + ldc_impt_ret_igv
+	  
+Next	
+
+adc_imp_ret_dol = Round(adc_imp_ret_sol / adc_tasa_cambio ,2)
+
+
+/*desfiltrado*/ 
+adw_detail.SetFilter('')
+adw_detail.Filter()
+/*ordenamiento*/
+adw_detail.SetSort('item a')
+adw_detail.Sort()
+end subroutine
+

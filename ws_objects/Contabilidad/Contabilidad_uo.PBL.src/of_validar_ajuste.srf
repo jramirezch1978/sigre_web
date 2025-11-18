@@ -1,0 +1,32 @@
+﻿$PBExportHeader$of_validar_ajuste.srf
+global type of_validar_ajuste from function_object
+end type
+
+forward prototypes
+global function boolean of_validar_ajuste (string as_cuenta)
+end prototypes
+
+global function boolean of_validar_ajuste (string as_cuenta);String ls_cuenta_aju, ls_flag_cnta_ajuste
+Integer li_len, li_reg
+   If IsNull( as_cuenta ) Then
+		MessageBox("of_validar_ajuste","Argumento ingresado es Nulo",Exclamation!)
+		Return False
+	End if	
+	if len( trim( as_cuenta )) = 0 then return true
+   li_len = LEN(as_cuenta)
+//   ls_cuenta_aju = MID(as_cuenta,1,2)+'6'+MID(as_cuenta,4,li_len - 3)
+   //Seleccionamos
+   Select count(*), max( flag_cnta_ajuste ) 
+	  Into :li_reg, :ls_flag_cnta_ajuste
+	  from cntbl_cnta
+     where cnta_ctbl = :as_cuenta;
+	if li_reg = 0 then 
+		messagebox( 'no hay', 'no existe la cuenta' )
+	end if 
+	IF li_reg >= 1 and ls_flag_cnta_ajuste = '1' Then
+      Return TRUE
+	Else
+	   Return FALSE
+	End if  
+end function
+

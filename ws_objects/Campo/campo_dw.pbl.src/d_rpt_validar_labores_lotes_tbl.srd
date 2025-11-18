@@ -1,0 +1,60 @@
+﻿$PBExportHeader$d_rpt_validar_labores_lotes_tbl.srd
+release 9;
+datawindow(units=2 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 250 print.margin.right = 250 print.margin.top = 250 print.margin.bottom = 250 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=1302 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=187 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=fecha dbname="pd_jornal_campo.fecha" )
+ column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="pd_jornal_campo.cod_trabajador" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_item dbname="pd_jornal_campo.nro_item" )
+ column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="pd_jornal_campo.cod_labor" )
+ column=(type=char(40) updatewhereclause=yes name=desc_labor dbname="labor.desc_labor" )
+ column=(type=number updatewhereclause=yes name=nro_incidencias dbname="compute_0006" )
+ retrieve="select p.fecha, p.cod_trabajador, p.nro_item, p.cod_labor, l.desc_labor, count(*) 
+from pd_jornal_campo p,
+     pd_jornal_campo_lote pd,
+     labor                l,
+	  tt_labores_selec	  tt
+where p.fecha = pd.fecha
+  and p.cod_trabajador = pd.cod_trabajador     
+  and p.nro_item       = pd.nro_item
+  and p.cod_labor      = l.cod_labor
+  and p.cod_labor		  = tt.cod_labor
+  and p.rendimiento    > 0
+  and trunc(p.fecha) between :ad_fecha1 and :ad_fecha2
+group by p.fecha, p.cod_trabajador, p.nro_item, p.cod_labor, l.desc_labor
+having count(*) > 1
+order by p.fecha" arguments=(("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="0" text="" border="0" color="0" x="72" y="833" height="125" width="916" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Garamond" font.height="-8" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="62" y="52" height="562" width="927" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="72" y="666" height="125" width="916" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Garamond" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Validación de Labores x Lotes" border="0" color="8388608" x="1052" y="93" height="229" width="5031" html.valueishtml="0"  name=t_11 visible="1"  font.face="Bookman Old Style" font.height="-14" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="1052" y="385" height="135" width="5031" html.valueishtml="0"  name=t_titulo1 visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="1052" y="572" height="135" width="5031" html.valueishtml="0"  name=t_fecha visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="6364" y="125" height="156" width="906" format="dd/mm/yyyy" html.valueishtml="0"  name=compute_1 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="6364" y="312" height="135" width="906" html.valueishtml="0"  name=t_usuario visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Pag : ' + page() + ' de ' + pageCount()"border="0" color="0" x="6364" y="479" height="156" width="906" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="10" y="10" height="166" width="989" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fecha
+Campo" border="2" color="33554432" x="10" y="1000" height="291" width="989" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Código 
+Trabajador" border="2" color="33554432" x="1010" y="1000" height="291" width="885" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="1010" y="10" height="166" width="885" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1906" y="10" height="166" width="645" format="[general]" html.valueishtml="0"  name=nro_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro 
+Item" border="2" color="33554432" x="1906" y="1000" height="291" width="645" html.valueishtml="0"  name=nro_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="3343" y="10" height="166" width="2562" format="[general]" html.valueishtml="0"  name=desc_labor visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripción
+de la Labor" border="2" color="33554432" x="3343" y="1000" height="291" width="2562" html.valueishtml="0"  name=desc_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="5916" y="10" height="166" width="750" format="[general]" html.valueishtml="0"  name=nro_incidencias visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro de 
+Inciendias" border="2" color="33554432" x="5916" y="1000" height="291" width="750" html.valueishtml="0"  name=nro_incidencias_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Código
+Labor" border="2" color="33554432" x="2562" y="1000" height="291" width="770" html.valueishtml="0"  name=cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="2562" y="10" height="166" width="770" format="[general]" html.valueishtml="0"  name=cod_labor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,40 @@
+﻿$PBExportHeader$d_abc_conteo_inventario_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=79741120 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=340 color="79741120" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=192 color="536870912" )
+table(column=(type=char(6) updatewhereclause=yes name=almacen dbname="inventario_conteo.almacen" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_conteo dbname="inventario_conteo.nro_conteo" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_conteo dbname="inventario_conteo.fec_conteo" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="inventario_conteo.flag_replicacion" )
+ retrieve="  SELECT DISTINCT 
+			IC.ALMACEN,
+			IC.NRO_CONTEO,   
+         IC.FEC_CONTEO,
+			A.DESC_ALMACEN,
+			IC.FLAG_REPLICACION
+    FROM INVENTARIO_CONTEO IC,
+			ALMACEN				A  
+   WHERE a.almacen 		= IC.ALMACEN
+     and IC.NRO_CONTEO 	= :an_conteo  
+     and IC.ALMACEN		= :as_almacen  
+" arguments=(("as_almacen", string),("an_conteo", number)) )
+bitmap(band=header filename="gs_logo" x="50" y="36" height="272" width="663" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Ingreso de Productos de Inventario Por Nº de Conteo" border="0" color="0" x="1083" y="36" height="172" width="1499" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Fecha de Conteo :" border="0" color="0" x="891" y="116" height="64" width="494" html.valueishtml="0"  name=fec_conteo_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="5" color="0" x="1408" y="116" height="64" width="462" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_conteo visible="1" editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="Nro Conteo :" border="0" color="0" x="50" y="116" height="64" width="338" html.valueishtml="0"  name=nro_conteno_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=10 border="5" color="0" x="416" y="112" height="64" width="453" format="[general]" html.valueishtml="0"  name=nro_conteo visible="1" editmask.required=yes editmask.mask="#,###" editmask.imemode=0 editmask.focusrectangle=no  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=30 border="5" color="0" x="421" y="16" height="64" width="302" format="[general]" html.valueishtml="0"  name=almacen pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.required=yes edit.nilisnull=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="Almacen :" border="0" color="0" x="55" y="16" height="64" width="338" html.valueishtml="0"  name=t_2 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="5" color="0" x="759" y="16" height="64" width="1577" format="[general]" html.valueishtml="0"  name=desc_almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+button(band=detail text="Recuperar" enabled=yes action="0" border="0" color="0" x="2386" y="8" height="88" width="393" vtextalign="0" htextalign="0"  name=b_recuperar visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+button(band=detail text="Generar" enabled=yes action="0" border="0" color="0" x="2386" y="100" height="88" width="393" vtextalign="0" htextalign="0"  name=b_generar visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

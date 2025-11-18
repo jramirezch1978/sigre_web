@@ -1,0 +1,22 @@
+﻿$PBExportHeader$f_fecha_actual.srf
+global type f_fecha_actual from function_object
+end type
+
+forward prototypes
+global function datetime f_fecha_actual (integer ai_local)
+end prototypes
+
+global function datetime f_fecha_actual (integer ai_local);DateTime ldt_fecha
+if ai_local = 1 then
+	ldt_fecha = DateTime(Today(), Now())
+else
+	select sysdate 
+	  into :ldt_fecha
+	  from dual;
+	
+	if IsNull(ldt_fecha) then ldt_fecha = DateTime(Today(), Now())
+end if
+
+return ldt_fecha
+end function
+

@@ -1,0 +1,81 @@
+﻿$PBExportHeader$d_confin_comedor_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=524 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=com_compr_pago_det_parte_costo dbname="com_compr_pago_det.parte_costo" )
+ column=(type=char(8) updatewhereclause=yes name=cntas_pagar_det_cod_relacion dbname="cntas_pagar_det.cod_relacion" )
+ column=(type=char(60) updatewhereclause=yes name=codigo_relacion_nombre dbname="codigo_relacion.nombre" )
+ column=(type=char(10) updatewhereclause=yes name=cntas_pagar_det_nro_doc dbname="cntas_pagar_det.nro_doc" )
+ column=(type=char(4) updatewhereclause=yes name=cntas_pagar_det_tipo_doc dbname="cntas_pagar_det.tipo_doc" )
+ column=(type=decimal(2) updatewhereclause=yes name=cntas_pagar_det_importe dbname="cntas_pagar_det.importe" )
+ column=(type=char(8) updatewhereclause=yes name=cntas_pagar_det_confin dbname="cntas_pagar_det.confin" )
+ column=(type=datetime updatewhereclause=yes name=com_compr_pago_fecha_parte dbname="com_compr_pago.fecha_parte" )
+ column=(type=datetime updatewhereclause=yes name=compute_0009 dbname="compute_0009" )
+ retrieve="SELECT B.PARTE_COSTO,
+       A.COD_RELACION,
+       C.NOMBRE,
+       A.NRO_DOC,
+       A.TIPO_DOC,
+       A.IMPORTE,
+       A.CONFIN,
+       D.FECHA_PARTE,
+       TRUNC(CP.FECHA_REGISTRO)
+       
+       
+
+  FROM 	CNTAS_PAGAR_DET A, 
+			  COM_COMPR_PAGO_DET B,
+			  CODIGO_RELACION C,
+        COM_COMPR_PAGO  D,
+        CNTAS_PAGAR     CP
+        
+
+ WHERE A.COD_RELACION             = B.COD_RELACION
+   AND A.TIPO_DOC 		            = B.TIPO_DOC
+   AND A.NRO_DOC 			            = B.NRO_DOC
+   AND B.COD_RELACION             = C.COD_RELACION
+   AND CP.COD_RELACION            = A.COD_RELACION
+   AND CP.TIPO_DOC                = A.TIPO_DOC
+   AND CP.NRO_DOC                 = A.NRO_DOC
+   AND B.PARTE_COSTO              = D.PARTE_COSTO
+   AND CP.ANO                     = :as_year
+   AND A.CONFIN 			            <> :as_confin
+   AND SUBSTR(B.PARTE_COSTO, 1,2) = :as_origen
+
+   ORDER BY CP.FECHA_REGISTRO" arguments=(("as_year", string),("as_confin", string),("as_origen", string)) )
+bitmap(band=header filename="" x="23" y="28" height="340" width="498" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2976" y="20" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="2875" y="100" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="3131" y="188" height="56" width="261" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Parte de Costo" border="2" color="16777215" x="311" y="408" height="112" width="311" html.valueishtml="0"  name=com_compr_pago_det_parte_costo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Nro. Doc." border="2" color="16777215" x="1902" y="408" height="112" width="329" html.valueishtml="0"  name=cntas_pagar_det_nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Tipo. Doc." border="2" color="16777215" x="2235" y="408" height="112" width="261" html.valueishtml="0"  name=cntas_pagar_det_tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Nombre" border="2" color="16777215" x="878" y="464" height="56" width="1019" html.valueishtml="0"  name=codigo_relacion_nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Proveedor" border="2" color="16777215" x="626" y="408" height="52" width="1271" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Codigo" border="2" color="16777215" x="626" y="464" height="56" width="247" html.valueishtml="0"  name=cntas_pagar_det_cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Comprobantes de pago referecniados a un Parte de Costos de Comedores cuyo Concepto Financiero es diferente al:" border="2" color="0" x="704" y="112" height="224" width="2094" html.valueishtml="0"  name=t_2 visible="1"  font.face="Times New Roman" font.height="-11" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="4" color="0" x="1230" y="244" height="56" width="1541" html.valueishtml="0"  name=t_desc_confin visible="1"  font.face="Times New Roman" font.height="-8" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="4" color="0" x="745" y="244" height="56" width="489" html.valueishtml="0"  name=t_confin visible="1"  font.face="Times New Roman" font.height="-8" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="311" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=com_compr_pago_det_parte_costo visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="617" y="4" height="56" width="247" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="869" y="4" height="56" width="1029" format="[general]" html.valueishtml="0"  name=codigo_relacion_nombre visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1902" y="4" height="56" width="329" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2235" y="4" height="56" width="261" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2501" y="4" height="56" width="311" format="#,##0.00" html.valueishtml="0"  name=cntas_pagar_det_importe visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="2816" y="4" height="56" width="293" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_confin visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(cntas_pagar_det_importe for all)"border="2" color="33554432" x="2249" y="4" height="56" width="558" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Total" border="4" color="16777215" x="1902" y="0" height="56" width="343" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Confin." border="2" color="16777215" x="2816" y="408" height="112" width="297" html.valueishtml="0"  name=cntas_pagar_det_confin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Importe" border="2" color="16777215" x="2501" y="408" height="112" width="311" html.valueishtml="0"  name=cntas_pagar_det_importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=8 alignment="0" tabsequence=0 border="2" color="33554432" x="3113" y="4" height="56" width="352" html.valueishtml="0"  name=com_compr_pago_fecha_parte visible="1" editmask.mask="mm/dd/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=0 border="2" color="33554432" x="3470" y="4" height="56" width="343" html.valueishtml="0"  name=compute_0009 visible="1" editmask.mask="mm/dd/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fecha Parte de Costo" border="2" color="16777215" x="3118" y="408" height="112" width="343" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Fecha Registro Doc." border="2" color="16777215" x="3465" y="408" height="112" width="347" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="t" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><untitled><untitled_row __pbband=~"detail~"><com_compr_pago_det_parte_costo>com_compr_pago_det_parte_costo</com_compr_pago_det_parte_costo><cntas_pagar_det_cod_relacion>cntas_pagar_det_cod_relacion</cntas_pagar_det_cod_relacion><codigo_relacion_nombre>codigo_relacion_nombre</codigo_relacion_nombre><cntas_pagar_det_nro_doc>cntas_pagar_det_nro_doc</cntas_pagar_det_nro_doc><cntas_pagar_det_tipo_doc>cntas_pagar_det_tipo_doc</cntas_pagar_det_tipo_doc><cntas_pagar_det_importe>cntas_pagar_det_importe</cntas_pagar_det_importe><cntas_pagar_det_confin>cntas_pagar_det_confin</cntas_pagar_det_confin><com_compr_pago_det_parte_costo_1/></untitled_row></untitled>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

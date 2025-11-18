@@ -1,0 +1,98 @@
+﻿$PBExportHeader$d_pdb_forma_pago_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=72 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(4000) updatewhereclause=yes name=compute_0001 dbname="compute_0001" )
+ retrieve="select '01' || '|' -- 01. Tipo de Compra
+       || dt.cod_sunat || '|' --02. Tipo de Comprobante
+       || case 
+            when dt.cod_sunat in ('10', '12') then ''
+				when cp.serie_cp is not null then
+					cp.serie_cp
+            when instr(replace(cp.nro_doc, '.', ''), '-') > 0 then
+              	pkg_fact_electronica.of_get_serie(cp.nro_doc)
+            else
+             ''
+          end || '|' -- 3.Serie del Documento
+       || case 
+            when dt.cod_sunat in ('50', '52', '53', '54') then ''
+				when cp.numero_cp is not null then
+					cp.numero_cp
+				when instr(replace(cp.nro_doc, '.', ''), '-') > 0 then
+              	pkg_fact_electronica.of_get_nro(cp.nro_doc)
+            else 
+					lpad(cp.numero_cp, 10, ' ')
+          end || '|' -- 4.Nro del Documento
+       || DECODE(p.flag_personeria, 'N', '01', 'J', '02', '03') || '|' -- 5.Tipo de Persona
+       || p.tipo_doc_ident || '|' -- 6.Tipo de documento
+       || DECODE(p.ruc, null, p.nro_doc_ident, p.ruc) || '|' -- 7.Nro de documento
+       || case 
+             when cb.tipo_doc in ('TRF', 'TLC') then '003'
+             when cb.tipo_doc in ('CH') then '007'
+             when cb.tipo_doc in ('CB') then '001'
+             else '009'
+          end || '|' -- 8. Medios de Pago
+       || case 
+             when cb.tipo_doc in ('TRF', 'TLC', 'CH', 'CB') then b.cod_banco_sunat
+             else '  '
+          end || '|' -- 9. Codigo del banco o entidad
+       || case 
+             when cb.tipo_doc in ('TRF', 'TLC', 'CH', 'CB') then 
+					case 
+						when b.cod_banco_sunat = '99' then trim(substr(b.nom_banco,1,30))
+						else lpad(cb.nro_doc, 10, ' ')
+					 end
+             else lpad(' ', 10, ' ')
+          end || '|' -- 10.Numero de operacion
+       || case 
+             when cb.tipo_doc in ('TRF', 'TLC', 'CH', 'CB') then to_char(cb.fecha_emision, 'dd/mm/yyyy')
+             else lpad(' ', 10, ' ')
+          end || '|' -- 11.Fecha de la operacion
+       || case 
+            when cbd.cod_moneda = (select cod_soles from logparam where reckey = '1') then
+              trim(to_char(cbd.importe, '9999999990.00'))
+            else
+              trim(to_char(cbd.importe * cb.tasa_cambio, '9999999990.00'))
+          end || '|' -- 12. Monto de la operacion
+from caja_bancos     cb,
+     caja_bancos_det cbd,
+     cntas_pagar     cp,
+     doc_tipo        dt,
+     proveedor       p,
+     banco_cnta      bc,
+     banco           b,
+	  doc_grupo_relacion dgr
+where cb.origen      = cbd.origen
+  and cb.nro_registro  = cbd.nro_registro
+  and cbd.cod_relacion = cp.cod_relacion
+  and cbd.tipo_doc     = cp.tipo_doc
+  and cbd.nro_doc      = cp.nro_doc
+  and cp.tipo_doc      = dt.tipo_doc
+  and cp.cod_relacion  = p.proveedor
+  and cb.cod_ctabco    = bc.cod_ctabco
+  and bc.cod_banco     = b.cod_banco
+  and dt.tipo_doc		  = dgr.tipo_doc
+  and cbd.flag_provisionado = 'R'
+  and dgr.grupo		  = '09'
+  and cp.flag_estado   <> '0'
+  and cb.flag_Estado   <> '0' 
+  and cb.nro_libro     = 12  
+  and cp.ano           = :an_year
+  and cp.mes           = :an_mes
+  and dt.cod_sunat is not null" arguments=(("an_year", number),("an_mes", number)) )
+text(band=header alignment="2" text="Exp Row" border="2" color="33554432" x="14" y="8" height="60" width="4823" html.valueishtml="0"  name=exp_row_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="4" height="60" width="4823" format="[general]" html.valueishtml="0"  name=compute_0001 visible="1" edit.limit=114 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Courier New" font.height="-8" font.weight="400"  font.family="3" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

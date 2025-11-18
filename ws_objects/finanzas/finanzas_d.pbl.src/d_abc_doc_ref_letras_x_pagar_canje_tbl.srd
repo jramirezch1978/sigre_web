@@ -1,0 +1,75 @@
+﻿$PBExportHeader$d_abc_doc_ref_letras_x_pagar_canje_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_relacion dbname="doc_referencias.cod_relacion" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_doc dbname="doc_referencias.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_doc dbname="doc_referencias.nro_doc" )
+ column=(type=char(1) update=yes updatewhereclause=yes key=yes name=tipo_mov dbname="doc_referencias.tipo_mov" )
+ column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen_ref dbname="doc_referencias.origen_ref" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_ref dbname="doc_referencias.tipo_ref" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_ref dbname="doc_referencias.nro_ref" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="doc_referencias.importe" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flab_tabor dbname="doc_referencias.flab_tabor" )
+ column=(type=decimal(3) updatewhereclause=yes name=tasa_cambio dbname="letras_x_pagar.tasa_cambio" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda_cab dbname="letras_x_pagar.cod_moneda_cab" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda_det dbname="vw_fin_doc_x_pagar.cod_moneda_det" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_ret_igv dbname="doc_referencias.flag_ret_igv" values="	1/	0" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=imp_ret_igv dbname="doc_referencias.imp_ret_igv" )
+ column=(type=char(0) updatewhereclause=yes name=flag_impuesto dbname="doc_referencias.flag_impuesto" )
+ column=(type=char(1) updatewhereclause=yes name=flag_signo dbname="doc_tipo.flag_signo" )
+ retrieve="  SELECT ~"DOC_REFERENCIAS~".~"COD_RELACION~",   
+         ~"DOC_REFERENCIAS~".~"TIPO_DOC~"    ,   
+         ~"DOC_REFERENCIAS~".~"NRO_DOC~"     ,   
+         ~"DOC_REFERENCIAS~".~"TIPO_MOV~"    ,   
+         ~"DOC_REFERENCIAS~".~"ORIGEN_REF~"  ,   
+         ~"DOC_REFERENCIAS~".~"TIPO_REF~"    ,   
+         ~"DOC_REFERENCIAS~".~"NRO_REF~"     ,   
+         ~"DOC_REFERENCIAS~".~"IMPORTE~"     ,   
+         ~"DOC_REFERENCIAS~".~"FLAB_TABOR~"  ,   
+		   ~"LETRAS_X_PAGAR~".~"TASA_CAMBIO~"  ,   
+         ~"LETRAS_X_PAGAR~".~"COD_MONEDA~"     AS COD_MONEDA_CAB ,   
+         ~"VW_FIN_DOC_X_PAGAR~".~"COD_MONEDA~" AS COD_MONEDA_DET ,
+			~"DOC_REFERENCIAS~".~"FLAG_RET_IGV~",
+			~"DOC_REFERENCIAS~".~"IMP_RET_IGV~",
+			NULL AS FLAG_IMPUESTO,
+			~"DOC_TIPO~".~"FLAG_SIGNO~"
+    FROM ~"DOC_REFERENCIAS~"    ,   
+         ~"LETRAS_X_PAGAR~"     ,   
+         ~"VW_FIN_DOC_X_PAGAR~" ,
+			~"DOC_TIPO~"			   
+   WHERE (( ~"DOC_REFERENCIAS~".~"COD_RELACION~"  = ~"LETRAS_X_PAGAR~".~"COD_RELACION~"     )  AND  
+         (  ~"DOC_REFERENCIAS~".~"NRO_DOC~"       = ~"LETRAS_X_PAGAR~".~"NRO_LETRA~"        )) AND  
+         (( ~"DOC_REFERENCIAS~".~"TIPO_REF~"      = ~"VW_FIN_DOC_X_PAGAR~".~"TIPO_DOC~"     )  AND  
+         (  ~"DOC_REFERENCIAS~".~"NRO_REF~"       = ~"VW_FIN_DOC_X_PAGAR~".~"NRO_DOC~"      )  AND  
+         (  ~"DOC_REFERENCIAS~".~"COD_RELACION~"  = ~"VW_FIN_DOC_X_PAGAR~".~"COD_RELACION~" )) AND  
+			(( ~"DOC_REFERENCIAS~".~"TIPO_DOC~"		 = ~"DOC_TIPO~".~"TIPO_DOC~"					)) AND
+         (( ~"DOC_REFERENCIAS~".~"TIPO_DOC~"      = :as_tipo_doc                        )  AND  
+         (  ~"DOC_REFERENCIAS~".~"NRO_DOC~"       = :as_nro_doc                         )  AND  
+         (  ~"DOC_REFERENCIAS~".~"COD_RELACION~"  = :as_cod_relacion                    )  AND  
+         (  ~"LETRAS_X_PAGAR~".~"NRO_RENOVACION~" = 0                                   ))    
+" update="DOC_REFERENCIAS" updatewhere=1 updatekeyinplace=yes arguments=(("as_tipo_doc", string),("as_nro_doc", string),("as_cod_relacion", string)) )
+text(band=header alignment="2" text="T. Mov" border="2" color="8388608" x="9" y="4" height="56" width="142"  name=tipo_mov_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Origen Ref" border="2" color="8388608" x="155" y="4" height="56" width="311"  name=origen_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Ref" border="2" color="8388608" x="471" y="4" height="56" width="567"  name=tipo_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro. Doc.Ref" border="2" color="8388608" x="1042" y="4" height="56" width="288"  name=nro_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="1335" y="4" height="56" width="370"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="2" color="8388608" x="1710" y="4" height="56" width="485"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe x Conversion" border="2" color="8388608" x="2199" y="4" height="56" width="485"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Retencion" border="2" color="8388608" x="2688" y="4" height="56" width="293"  name=t_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Imp. Retención" border="2" color="8388608" x="2985" y="4" height="56" width="457"  name=t_5  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="60" width="142" format="[general]"  name=tipo_mov edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="0" x="155" y="0" height="60" width="311" format="[general]"  name=origen_ref dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="471" y="0" height="60" width="567" format="[general]"  name=tipo_ref dddw.name=d_dddw_tipo_doc_tbl dddw.displaycolumn=desc_tipo_doc dddw.datacolumn=tipo_doc dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="0" x="1042" y="0" height="60" width="288" format="[general]"  name=nro_ref edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="0" x="1335" y="0" height="60" width="370" format="[general]"  name=cod_moneda_det dddw.name=d_dddw_moneda_tbl dddw.displaycolumn=descripcion dddw.datacolumn=cod_moneda dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=10 border="2" color="0" x="1710" y="0" height="60" width="485" format="[general]"  name=importe editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="f_convertir_monto_pagos( cod_moneda_det, importe , cod_moneda_cab ,tasa_cambio )"border="2" color="0" x="2199" y="0" height="60" width="485" format="###,###.00"  name=monto_conv  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="255" x="18" y="76" height="56" width="183" format="[general]"  name=flag_impuesto edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="2" tabsequence=20 border="2" color="0" x="2688" y="0" height="60" width="293" format="[general]"  name=flag_ret_igv checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=14 alignment="1" tabsequence=30 border="2" color="0" x="2985" y="0" height="60" width="457" format="[general]"  name=imp_ret_igv editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

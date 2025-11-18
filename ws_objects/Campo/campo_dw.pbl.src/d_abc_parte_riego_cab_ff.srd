@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_abc_parte_riego_cab_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=684 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_parte dbname="cam_parte_riego_cab.nro_parte" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_registro dbname="cam_parte_riego_cab.fec_registro" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_parte dbname="cam_parte_riego_cab.fec_parte" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=operador dbname="cam_parte_riego_cab.operador" )
+ column=(type=char(93) updatewhereclause=yes name=nom_operador dbname="nom_operador" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=bomba dbname="cam_parte_riego_cab.bomba" )
+ column=(type=char(100) updatewhereclause=yes name=desc_bomba dbname="maquina.desc_bomba" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="cam_parte_riego_cab.cod_usr" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=campana dbname="cam_parte_riego_cab.campana" )
+ column=(type=char(100) updatewhereclause=yes name=desc_campana dbname="campanas.desc_campaña" )
+ column=(type=datetime updatewhereclause=yes name=fec_inicio dbname="campanas.fec_inicio" )
+ column=(type=datetime updatewhereclause=yes name=fec_fin dbname="campanas.fec_fin" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="cam_parte_riego_cab.cod_origen" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=tipo_riego dbname="cam_parte_riego_cab.tipo_riego" )
+ column=(type=char(50) updatewhereclause=yes name=desc_tipo_riego dbname="cam_tipo_riego.desc_tipo_riego" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="cam_parte_riego_cab.flag_estado" values="Activo	1/Anulado	0/" )
+ retrieve="select c.nro_parte,
+       c.fec_registro,
+       c.fec_parte,
+       c.operador, m.apel_paterno || ' ' || m.apel_materno || ', ' || m.nombre1 as nom_operador,
+       c.bomba, mq.desc_maq as desc_bomba,
+       c.cod_usr,
+       c.campana, ca.descripcion as desc_campaña, ca.fec_inicio, ca.fec_fin,
+       c.cod_origen, c.tipo_riego, ct.desc_tipo_riego,
+       c.flag_estado
+from cam_parte_riego_cab c,
+     maestro             m,
+     maquina             mq,
+     campanas            ca,
+	  cam_tipo_riego		 ct
+where c.operador = m.cod_trabajador
+  and c.bomba    = mq.cod_maquina     
+  and c.campana  = ca.campana
+  and c.tipo_riego = ct.cod_tipo_riego (+)
+  and c.nro_parte = :as_nro_parte
+" update="cam_parte_riego_cab" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_parte", string)) )
+groupbox(band=detail text=""border="5" color="33554432" x="137" y="8" height="188" width="777"  name=gb_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Fec Parte:" border="0" color="33554432" x="37" y="240" height="56" width="425" html.valueishtml="0"  name=cam_parte_riego_cab_fec_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Flag Estado:" border="0" color="33554432" x="1435" y="240" height="56" width="425" html.valueishtml="0"  name=cam_parte_riego_cab_flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="5" color="255" x="1888" y="236" height="64" width="498" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=detail alignment="2" text="Nro Parte:" border="0" color="33554432" x="192" y="28" height="56" width="635" html.valueishtml="0"  name=cam_parte_riego_cab_nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="255" x="192" y="104" height="64" width="635" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=3 alignment="0" tabsequence=10 border="5" color="33554432" x="480" y="236" height="64" width="603" format="[shortdate] [time]" html.valueishtml="0"  name=fec_parte visible="1" editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Operador:" border="0" color="33554432" x="27" y="332" height="56" width="425" html.valueishtml="0"  name=cam_parte_riego_cab_operador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=20 border="5" color="33554432" x="480" y="328" height="64" width="343" format="[general]" html.valueishtml="0"  name=operador pointer="H:\source\Cur\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="5" color="8388608" x="859" y="328" height="64" width="1531" format="[general]" html.valueishtml="0"  name=nom_operador visible="1" edit.limit=93 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="8388608" x="859" y="420" height="64" width="1531" format="[general]" html.valueishtml="0"  name=desc_bomba visible="1" edit.limit=100 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="5" color="8388608" x="859" y="512" height="64" width="1531" format="[general]" html.valueishtml="0"  name=desc_campana visible="1" edit.limit=100 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=6 alignment="0" tabsequence=30 border="5" color="33554432" x="480" y="420" height="64" width="343" format="[general]" html.valueishtml="0"  name=bomba pointer="H:\source\Cur\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Bomba:" border="0" color="33554432" x="27" y="424" height="56" width="425" html.valueishtml="0"  name=cam_parte_riego_cab_bomba_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Campana:" border="0" color="33554432" x="27" y="516" height="56" width="425" html.valueishtml="0"  name=cam_parte_riego_cab_campana_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=40 border="5" color="33554432" x="480" y="512" height="64" width="343" format="[general]" html.valueishtml="0"  name=campana pointer="H:\source\Cur\taladro.cur" visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=50 border="5" color="0" x="480" y="604" height="64" width="343" format="[general]" html.valueishtml="0"  name=tipo_riego pointer="H:\source\Cur\taladro.cur" visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="5" color="8388608" x="859" y="604" height="64" width="1531" format="[general]" html.valueishtml="0"  name=desc_tipo_riego visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=detail alignment="1" text="Tipo Riego:" border="0" color="33554432" x="27" y="604" height="64" width="425" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

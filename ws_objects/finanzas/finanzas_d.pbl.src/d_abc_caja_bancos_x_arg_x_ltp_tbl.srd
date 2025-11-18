@@ -1,0 +1,54 @@
+﻿$PBExportHeader$d_abc_caja_bancos_x_arg_x_ltp_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes name=origen dbname="caja_bancos.origen" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_registro dbname="caja_bancos.nro_registro" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="caja_bancos.flag_estado" values="Anulado	0/Activo	1/Contabilizado	2/" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_emision dbname="caja_bancos.fecha_emision" )
+ column=(type=decimal(0) updatewhereclause=yes name=ano dbname="caja_bancos.ano" )
+ column=(type=decimal(0) updatewhereclause=yes name=mes dbname="caja_bancos.mes" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_libro dbname="caja_bancos.nro_libro" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_asiento dbname="caja_bancos.nro_asiento" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="caja_bancos_det.tipo_doc" )
+ column=(type=char(125) updatewhereclause=yes name=voucher dbname="voucher" )
+ retrieve="SELECT cb.origen       ,
+       cb.nro_registro ,
+		 cb.flag_estado  ,	
+       cb.fecha_emision,
+       cb.ano          ,
+       cb.mes          ,
+       cb.nro_libro    ,
+       cb.nro_asiento  ,
+       cbd.tipo_doc	  ,
+		 RTRIM(LTRIM(cb.origen))||RTRIM(LTRIM(TO_CHAR(cb.ano)))||RTRIM(LTRIM(TO_CHAR(cb.mes,'09')))||RTRIM(LTRIM(TO_CHAR(cb.nro_libro)))||RTRIM(LTRIM(TO_CHAR(cb.nro_asiento))) AS VOUCHER		
+  FROM caja_bancos cb,
+       caja_bancos_det cbd
+ WHERE ((cb.origen       = cbd.origen       )  and
+        (cb.nro_registro = cbd.nro_registro )) and
+        (cbd.tipo_doc    = (select doc_letra_pagar from finparam where reckey = '1' )) and
+		  (cb.flag_tiptran = :as_flag_tiptran )
+GROUP BY cb.origen       ,
+         cb.nro_registro ,
+		   cb.flag_estado  ,	
+         cb.fecha_emision,
+         cb.ano          ,
+         cb.mes          ,
+         cb.nro_libro    ,
+         cb.nro_asiento  ,
+         cbd.tipo_doc" arguments=(("as_flag_tiptran", string)) )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="18" y="8" height="56" width="475"  name=origen_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Reg." border="2" color="8388608" x="498" y="8" height="56" width="233"  name=nro_registro_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Estado" border="2" color="8388608" x="736" y="8" height="56" width="238"  name=flag_estado_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha Emision" border="2" color="8388608" x="978" y="8" height="56" width="329"  name=fecha_emision_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Voucher" border="2" color="8388608" x="1312" y="8" height="56" width="498"  name=voucher_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="18" y="0" height="56" width="475" format="[general]"  name=origen dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="0" x="498" y="0" height="56" width="233" format="[general]"  name=nro_registro edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="0" x="736" y="0" height="56" width="238" format="[general]"  name=flag_estado ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="0" x="978" y="0" height="56" width="329" format="[shortdate] [time]"  name=fecha_emision editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="0" x="1312" y="0" height="56" width="498" format="[general]"  name=voucher edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,88 @@
+﻿$PBExportHeader$f_access_old.srf
+$PBExportComments$Control de acceso a la ventana
+global type f_access_old from function_object
+end type
+
+forward prototypes
+global function boolean f_access_old (string as_usuario, string as_objeto, ref string as_niveles)
+end prototypes
+
+global function boolean f_access_old (string as_usuario, string as_objeto, ref string as_niveles);// Funcon de Control de Acceso a Ventanas
+// Argumentos:	as_usuario	codigo del usuario
+//					as_objeto	objeto a validar el acceso
+//             as_niveles  retorna los niveles de acceso al objeto
+
+String 	ls_objeto, ls_i, ls_e, ls_m, ls_c, ls_temp, ls_gi, ls_ge, ls_gm, ls_gc, ls_grupo
+Boolean 	lbo_retorno = FALSE 
+Datastore	ldt_usr_grp
+Integer	li_x
+Long		ll_rc
+
+SELECT objeto_sis.objeto
+		INTO :ls_objeto 
+    	FROM objeto_sis
+		WHERE objeto_sis.objeto = :as_objeto ;
+		
+IF SQLCA.SQLCode = 100 THEN		// si el objeto no se encuentra no tiene control de acceso
+			lbo_retorno = TRUE
+			as_niveles = 'IEMC'
+			GOTO SALIDA
+ELSE
+	  IF SQLCA.SQLCode = -1 THEN
+		  MessageBox("Error en Data Base", SQLCA.SQLErrText, Exclamation!, OK!)
+		  HALT
+	  END IF
+END IF
+
+SELECT usuario_obj.objeto, usuario_obj.flag_insertar,
+       usuario_obj.flag_eliminar, usuario_obj.flag_modificar,
+		 usuario_obj.flag_consultar
+		INTO :ls_objeto, :ls_i, :ls_e, :ls_m, :ls_c
+    	FROM usuario_obj
+		WHERE ( usuario_obj.cod_usr = :as_usuario ) AND  
+         	( usuario_obj.objeto = :as_objeto ) ;   
+
+IF SQLCA.SQLCode = 0 THEN
+	lbo_retorno = TRUE
+	ls_temp = ls_i + ls_e + ls_m + ls_c
+	IF ls_temp = '1111' THEN 
+		as_niveles = 'IEMC'
+		GOTO SALIDA
+	END IF
+END IF
+
+ldt_usr_grp = CREATE Datastore
+ldt_usr_grp.DataObject = 'd_usr_grp_obj'
+ldt_usr_grp.SetTransObject(SQLCA)
+ll_rc = ldt_usr_grp.Retrieve(as_usuario, as_objeto)
+
+IF ll_rc > 0 THEN	lbo_retorno = TRUE
+
+FOR li_x = 1 to RowCount(ldt_usr_grp)
+	ls_gi = ldt_usr_grp.GetItemString(li_x, 'grp_obj_flag_insertar')
+	ls_ge = ldt_usr_grp.GetItemString(li_x, 'grp_obj_flag_eliminar')			
+	ls_gm = ldt_usr_grp.GetItemString(li_x, 'grp_obj_flag_modificar')
+	ls_gc = ldt_usr_grp.GetItemString(li_x, 'grp_obj_flag_consultar')
+	IF ls_i <> '1' AND ls_gi = '1' THEN ls_i = '1'
+	IF ls_e <> '1' AND ls_ge = '1' THEN ls_e = '1'
+	IF ls_m <> '1' AND ls_gm = '1' THEN ls_m = '1'
+	IF ls_c <> '1' AND ls_gc = '1' THEN ls_c = '1'
+Next
+
+as_niveles = ''
+IF ls_i = '1' THEN as_niveles = as_niveles + 'I'
+IF ls_e = '1' THEN as_niveles = as_niveles + 'E'
+IF ls_m = '1' THEN as_niveles = as_niveles + 'M'
+IF ls_c = '1' THEN as_niveles = as_niveles + 'C'
+
+	
+SALIDA:
+
+IF lbo_retorno = FALSE THEN
+	MessageBox("Access Control", "Acceso Denegado", Exclamation!, OK!)
+END IF
+
+RETURN lbo_retorno
+
+end function
+

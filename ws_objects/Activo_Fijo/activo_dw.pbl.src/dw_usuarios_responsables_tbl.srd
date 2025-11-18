@@ -1,0 +1,53 @@
+﻿$PBExportHeader$dw_usuarios_responsables_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=120 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(6) update=yes updatewhereclause=yes key=yes name=usr_responsable dbname="af_activo_usr.usr_responsable" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cod_activo dbname="af_activo_usr.cod_activo" )
+ column=(type=datetime update=yes updatewhereclause=yes key=yes name=fecha_asignacion dbname="af_activo_usr.fecha_asignacion" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_desvinc dbname="af_activo_usr.fecha_desvinc" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=obs dbname="af_activo_usr.obs" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="af_activo_usr.flag_estado" values="Activo	1/Inactivo	0/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="af_activo_usr.flag_replicacion" )
+ column=(type=char(60) updatewhereclause=yes name=descripcion dbname="af_maestro.descripcion" )
+ retrieve="SELECT   AFU.USR_RESPONSABLE,   
+         AFU.COD_ACTIVO,   
+         AFU.FECHA_ASIGNACION,   
+         AFU.FECHA_DESVINC,   
+         AFU.OBS,   
+         AFU.FLAG_ESTADO,   
+         AFU.FLAG_REPLICACION,   
+         AFM.DESCRIPCION  
+
+FROM     AF_ACTIVO_USR     AFU,   
+         AF_MAESTRO        AFM
+
+ WHERE   AFU.COD_ACTIVO = AFM.COD_ACTIVO 
+   AND   AFU.USR_RESPONSABLE = :AS_USUARIO" update="AF_ACTIVO_USR" updatewhere=0 updatekeyinplace=yes arguments=(("as_usuario", string)) )
+text(band=header alignment="2" text="Activo" border="2" color="33554432" x="201" y="4" height="52" width="1262" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="539" y="60" height="56" width="923" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Codigo" border="2" color="33554432" x="201" y="60" height="56" width="334" html.valueishtml="0"  name=cod_activo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Codigo
+" border="2" color="33554432" x="5" y="4" height="112" width="192" html.valueishtml="0"  name=usr_responsable_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Estado
+Registro" border="2" color="33554432" x="1467" y="4" height="112" width="251" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Fechas" border="2" color="33554432" x="1723" y="4" height="52" width="608" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Asignación" border="2" color="33554432" x="1723" y="60" height="56" width="302" html.valueishtml="0"  name=fecha_asignacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Desvincula" border="2" color="33554432" x="2030" y="60" height="56" width="302" html.valueishtml="0"  name=fecha_desvinc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Obs.
+" border="2" color="33554432" x="2336" y="4" height="112" width="215" html.valueishtml="0"  name=obs_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+button(band=detail text="..." filename="~tif( isNull( obs ), 'h:\source\bmp\info.bmp', 'h:\source\bmp\file_open.bmp' )" enabled=yes action="0" border="0" color="33554432" x="2409" y="4" height="64" width="96" vtextalign="0" htextalign="0"  name=b_descripcion visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="539" y="0" height="60" width="923" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="2" tabsequence=10 border="2" color="33554432" x="201" y="0" height="60" width="334" format="[general]" html.valueishtml="0"  name=cod_activo pointer="H:\source\Cur\taladro.cur" visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="5" y="0" height="60" width="192" format="[general]" html.valueishtml="0"  name=usr_responsable visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=6 alignment="2" tabsequence=20 border="2" color="33554432" x="1467" y="0" height="60" width="251" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=30 border="2" color="33554432" x="1723" y="0" height="60" width="302" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_asignacion visible="1" editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=40 border="2" color="33554432" x="2030" y="0" height="60" width="302" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_desvinc visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

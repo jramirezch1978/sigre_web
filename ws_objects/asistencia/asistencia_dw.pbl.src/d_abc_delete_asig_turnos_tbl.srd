@@ -1,0 +1,77 @@
+﻿$PBExportHeader$d_abc_delete_asig_turnos_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_trabajador dbname="rrhh_asignacion_turnos.cod_trabajador" )
+ column=(type=datetime update=yes updatewhereclause=yes key=yes name=fecha dbname="rrhh_asignacion_turnos.fecha" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=turno dbname="rrhh_asignacion_turnos.turno" )
+ column=(type=decimal(2) updatewhereclause=yes name=hora_entrada dbname="rrhh_turno_asistencia.hora_entrada" )
+ column=(type=decimal(2) updatewhereclause=yes name=hora_salida dbname="rrhh_turno_asistencia.hora_salida" )
+ column=(type=char(1) updatewhereclause=yes name=rrhh_turno_asistencia_flag_dis_siguiente_normal dbname="rrhh_turno_asistencia.flag_dis_siguiente_normal" )
+ column=(type=char(123) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="maestro.cod_origen" )
+ column=(type=char(50) updatewhereclause=yes name=nombre dbname="origen.nombre" )
+ column=(type=char(3) updatewhereclause=yes name=tipo_trabajador dbname="maestro.tipo_trabajador" )
+ column=(type=char(30) updatewhereclause=yes name=desc_tipo_tra dbname="tipo_trabajador.desc_tipo_tra" )
+ column=(type=char(1) updatewhereclause=yes name=cod_area dbname="maestro.cod_area" )
+ column=(type=char(30) updatewhereclause=yes name=desc_area dbname="area.desc_area" )
+ column=(type=char(1) updatewhereclause=yes name=flag_sel dbname="flag_sel" values="	1/	0" )
+ retrieve="SELECT rat.cod_trabajador ,
+       rat.fecha          ,
+       rat.turno          ,
+       rta.hora_entrada   ,
+       rta.hora_salida    ,
+       rta.flag_dis_siguiente_normal ,       
+       Nvl(m.apel_paterno,' ') ||' '|| Nvl(m.apel_materno,' ') ||' '|| Nvl(m.nombre1,' ') ||' '|| Nvl(m.nombre2,' ') as nombres,   
+       m.cod_origen       ,
+       o.nombre           ,  
+       m.tipo_trabajador  ,
+       tt.desc_tipo_tra   ,
+       m.cod_area         ,
+       a.desc_area    	  ,
+		 '0' as flag_sel
+ FROM rrhh_asignacion_turnos rat,   
+      rrhh_turno_asistencia  rta,
+      maestro                m  ,
+      origen                 o  ,
+      tipo_trabajador        tt ,
+      area                   a
+WHERE  (rat.turno         = rta.turno          ) and
+       (m.cod_trabajador  = rat.cod_trabajador ) and  
+       (m.cod_origen      = o.cod_origen       ) and
+       (m.tipo_trabajador = tt.tipo_trabajador ) and
+       (m.cod_area        = a.cod_area         ) and
+		 (m.cod_origen      like :as_origen      ) and
+		 (m.tipo_trabajador like :as_ttrab		  ) and
+		 (m.cod_trabajador  like :as_codigo		  ) and
+      ((rat.fecha         between :ad_fecha1 and :ad_fecha2 ) )    
+" update="rrhh_asignacion_turnos" updatewhere=1 updatekeyinplace=yes arguments=(("as_origen", string),("as_ttrab", string),("as_codigo", string),("ad_fecha1", date),("ad_fecha2", date))  sort="cod_origen A tipo_trabajador A cod_area A fecha A " )
+group(level=1 header.height=288 trailer.height=0 by=("cod_origen" , "tipo_trabajador" , "cod_area" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=104 trailer.height=0 by=("fecha" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="C. Trabajador" border="2" color="8388608" x="9" y="8" height="56" width="343" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Turno" border="2" color="8388608" x="357" y="8" height="56" width="197" html.valueishtml="0"  name=turno_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="H. Entrada" border="2" color="8388608" x="558" y="8" height="56" width="274" html.valueishtml="0"  name=hora_entrada_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="H. Salida" border="2" color="8388608" x="837" y="8" height="56" width="274" html.valueishtml="0"  name=hora_salida_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nombres" border="2" color="8388608" x="1115" y="8" height="56" width="1033" html.valueishtml="0"  name=nombres_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="23" y="16" height="76" width="119" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=10 alignment="0" tabsequence=32766 border="0" color="33554432" x="23" y="108" height="76" width="119" format="[general]" html.valueishtml="0"  name=tipo_trabajador visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="23" y="200" height="76" width="119" format="[general]" html.valueishtml="0"  name=cod_area visible="1" edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="160" y="16" height="76" width="850" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="160" y="108" height="76" width="850" format="[general]" html.valueishtml="0"  name=desc_tipo_tra visible="1" edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=13 alignment="0" tabsequence=32766 border="0" color="33554432" x="160" y="200" height="76" width="850" format="[general]" html.valueishtml="0"  name=desc_area visible="1" edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Fecha :" border="0" color="33554432" x="9" y="8" height="56" width="206" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="242" y="8" height="56" width="274" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="76" width="343" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="357" y="4" height="76" width="197" format="[general]" html.valueishtml="0"  name=turno visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="558" y="4" height="76" width="274" format="[general]" html.valueishtml="0"  name=hora_entrada visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="837" y="4" height="76" width="274" format="[general]" html.valueishtml="0"  name=hora_salida visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="1115" y="4" height="76" width="1033" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=123 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="2" tabsequence=10 border="0" color="33554432" x="2153" y="4" height="76" width="183" format="[general]" html.valueishtml="0"  name=flag_sel visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=yes checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

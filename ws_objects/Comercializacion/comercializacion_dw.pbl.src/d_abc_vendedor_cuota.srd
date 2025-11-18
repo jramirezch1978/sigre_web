@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_abc_vendedor_cuota.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(6) update=yes updatewhereclause=yes name=canal dbname="vendedor_cuota.canal" )
+ column=(type=char(30) updatewhereclause=yes name=descripcion dbname="canal_distribucion.descripcion" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=vendedor dbname="vendedor_cuota.vendedor" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="usuario.nombre" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=und dbname="vendedor_cuota.und" initial="TON" )
+ column=(type=number update=yes updatewhereclause=yes name=cant_cuota_men dbname="vendedor_cuota.cant_cuota_men" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_ini dbname="vendedor_cuota.fecha_ini" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_fin dbname="vendedor_cuota.fecha_fin" )
+ retrieve="  SELECT ~"VENDEDOR_CUOTA~".~"CANAL~",   
+         ~"CANAL_DISTRIBUCION~".~"DESCRIPCION~",   
+         ~"VENDEDOR_CUOTA~".~"VENDEDOR~",   
+         ~"USUARIO~".~"NOMBRE~",   
+         ~"VENDEDOR_CUOTA~".~"UND~",   
+         ~"VENDEDOR_CUOTA~".~"CANT_CUOTA_MEN~",   
+         ~"VENDEDOR_CUOTA~".~"FECHA_INI~",   
+         ~"VENDEDOR_CUOTA~".~"FECHA_FIN~"  
+    FROM ~"CANAL_DISTRIBUCION~",   
+         ~"USUARIO~",   
+         ~"VENDEDOR_CUOTA~"  
+   WHERE ( ~"VENDEDOR_CUOTA~".~"CANAL~" = ~"CANAL_DISTRIBUCION~".~"CANAL~" ) and  
+         ( ~"VENDEDOR_CUOTA~".~"VENDEDOR~" = ~"USUARIO~".~"COD_USR~" ) and  
+         ( ( ~"VENDEDOR_CUOTA~".~"FECHA_INI~" = to_date(Sysdate+1,'dd/mm/yy') ) ) 
+Union
+Select vz.canal, cd.descripcion, vz.vendedor, u.nombre, 'TON' as und, 0 As cuota,
+       USF_FECHA_INICIO_COMISION As fecha_ini, last_day(USF_FECHA_INICIO_COMISION) As fecha_fin
+  From vendedor_zona vz, canal_distribucion cd, usuario u
+ Where vz.canal    = cd.canal
+   And vz.vendedor = u.cod_usr
+ Group By vz.canal, cd.descripcion, vz.vendedor, u.nombre
+ Order By 2,4"  sort="descripcion A nombre A " )
+group(level=1 header.height=80 trailer.height=0 by=("canal" , "descripcion" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Nombre" border="2" color="0" x="315" y="4" height="56" width="1010" html.valueishtml="0"  name=usuario_nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="30277359" )
+text(band=header alignment="2" text="Unidad" border="2" color="0" x="1330" y="4" height="56" width="256" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="30277359" )
+text(band=header alignment="2" text="Vendedor" border="2" color="0" x="5" y="4" height="56" width="306" html.valueishtml="0"  name=vendedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="30277359" )
+text(band=header alignment="2" text="Cuota" border="2" color="0" x="1591" y="4" height="56" width="329" html.valueishtml="0"  name=cuota_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="30277359" )
+compute(band=header.1 alignment="0" expression=" canal + ' ' +  descripcion "border="0" color="8388608" x="9" y="12" height="64" width="1911" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="315" y="0" height="56" width="1010" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="1330" y="0" height="56" width="256" format="[general]" html.valueishtml="0"  name=und visible="1" dddw.name=d_dddw_unidad dddw.displaycolumn=und dddw.datacolumn=und dddw.percentwidth=420 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=yes dddw.case=any dddw.imemode=0 dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=10 border="2" color="33554432" x="5" y="0" height="56" width="306" format="[general]" html.valueishtml="0"  name=vendedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=20 border="2" color="33554432" x="1591" y="0" height="56" width="329" format="###,##0.0000" html.valueishtml="0"  name=cant_cuota_men visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

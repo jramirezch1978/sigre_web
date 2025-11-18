@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_abc_doc_referencias_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_relacion dbname="doc_referencias.cod_relacion" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_doc dbname="doc_referencias.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_doc dbname="doc_referencias.nro_doc" )
+ column=(type=char(1) update=yes updatewhereclause=yes key=yes name=tipo_mov dbname="doc_referencias.tipo_mov" )
+ column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen_ref dbname="doc_referencias.origen_ref" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_ref dbname="doc_referencias.tipo_ref" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_ref dbname="doc_referencias.nro_ref" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="doc_referencias.importe" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flab_tabor dbname="doc_referencias.flab_tabor" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda_det dbname="vw_fin_doc_general.cod_moneda_det" )
+ column=(type=char(1) updatewhereclause=yes name=flag_signo dbname="doc_tipo.flag_signo" )
+ retrieve="  SELECT ~"DOC_REFERENCIAS~".~"COD_RELACION~",   
+         ~"DOC_REFERENCIAS~".~"TIPO_DOC~",   
+         ~"DOC_REFERENCIAS~".~"NRO_DOC~",   
+         ~"DOC_REFERENCIAS~".~"TIPO_MOV~",   
+         ~"DOC_REFERENCIAS~".~"ORIGEN_REF~",   
+         ~"DOC_REFERENCIAS~".~"TIPO_REF~",   
+         ~"DOC_REFERENCIAS~".~"NRO_REF~",   
+         ~"DOC_REFERENCIAS~".~"IMPORTE~",   
+         ~"DOC_REFERENCIAS~".~"FLAB_TABOR~",   
+         ~"VW_FIN_DOC_GENERAL~".~"COD_MONEDA~" as cod_moneda_det,
+		   ~"DOC_TIPO~".~"FLAG_SIGNO~" 
+    FROM ~"DOC_REFERENCIAS~",   
+         ~"VW_FIN_DOC_GENERAL~",
+			~"DOC_TIPO~"  
+   WHERE ( ~"DOC_REFERENCIAS~".~"COD_RELACION~" = ~"VW_FIN_DOC_GENERAL~".~"COD_RELACION~" ) and  
+         ( ~"DOC_REFERENCIAS~".~"TIPO_DOC~" = ~"VW_FIN_DOC_GENERAL~".~"TIPO_DOC~" ) and  
+         ( ~"DOC_REFERENCIAS~".~"NRO_DOC~" = ~"VW_FIN_DOC_GENERAL~".~"NRO_DOC~" ) and  
+			( ~"DOC_REFERENCIAS~".~"TIPO_DOC~" = ~"DOC_TIPO~".~"TIPO_DOC~") AND
+         ( ( ~"DOC_REFERENCIAS~".~"TIPO_DOC~" = :as_tipo_doc ) AND  
+         ( ~"DOC_REFERENCIAS~".~"NRO_DOC~" = :as_nro_doc ) AND  
+         ( ~"DOC_REFERENCIAS~".~"COD_RELACION~" = :as_cod_relacion ) )    
+" update="DOC_REFERENCIAS" updatewhere=0 updatekeyinplace=yes arguments=(("as_tipo_doc", string),("as_nro_doc", string),("as_cod_relacion", string)) )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="60" width="165" format="[general]"  name=tipo_mov edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="0" x="178" y="0" height="60" width="325" format="[general]"  name=origen_ref dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="507" y="0" height="60" width="599" format="[general]"  name=tipo_ref dddw.name=d_dddw_tipo_doc_tbl dddw.displaycolumn=desc_tipo_doc dddw.datacolumn=tipo_doc dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="0" x="1111" y="0" height="60" width="302" format="[general]"  name=nro_ref edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=10 border="2" color="0" x="1417" y="0" height="60" width="512" format="[general]"  name=importe editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="T. Mov" border="2" color="8388608" x="9" y="8" height="52" width="165"  name=tipo_mov_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Origen Ref" border="2" color="8388608" x="178" y="8" height="52" width="325"  name=origen_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Ref" border="2" color="8388608" x="507" y="8" height="52" width="599"  name=tipo_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro. Doc.Ref" border="2" color="8388608" x="1111" y="8" height="52" width="302"  name=nro_ref_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="2" color="8388608" x="1417" y="8" height="52" width="512"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

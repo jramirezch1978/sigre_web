@@ -1,0 +1,37 @@
+﻿$PBExportHeader$d_abc_lista_comision_producto.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 selected.mouse=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=fecha_ini dbname="comision_producto.fecha_ini" )
+ column=(type=datetime updatewhereclause=yes name=fecha_fin dbname="comision_producto.fecha_fin" )
+ column=(type=char(9) updatewhereclause=yes name=mes dbname="mes" )
+ column=(type=char(4) updatewhereclause=yes name=ano dbname="ano" )
+ retrieve="Select fecha_ini, fecha_fin,
+       decode(to_char(fecha_ini,'MM'),'01','Enero',
+                                      '02','Febrero',
+                                      '03','Marzo',
+                                      '04','Abril',
+                                      '05','Mayo',
+                                      '06','Junio',
+                                      '07','Julio',
+                                      '08','Agosto',
+                                      '09','Setiembre',
+                                      '10','Octubre',
+                                      '11','Noviembre',
+                                      '12','Diciembre') As mes,
+       to_char(fecha_ini,'yyyy') As ano
+  From comision_producto
+ Group By fecha_ini, fecha_fin
+ Order By fecha_ini"  sort="fecha_ini A " )
+text(band=header alignment="2" text="Mes" border="2" color="33554432" x="9" y="4" height="56" width="334" html.valueishtml="0"  name=mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="30277359" )
+text(band=header alignment="2" text="Ano" border="2" color="33554432" x="352" y="4" height="56" width="169" html.valueishtml="0"  name=ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="30277359" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="60" width="334" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="352" y="0" height="60" width="169" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

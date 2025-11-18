@@ -1,0 +1,31 @@
+﻿$PBExportHeader$d_abc_retencion_snp_grd.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="cod_trabajador" )
+ column=(type=decimal(0) updatewhereclause=yes name=ano dbname="rrhh_formato_snp.ano" )
+ column=(type=char(124) updatewhereclause=yes name=nombre dbname="nombre" )
+ column=(type=char(8) updatewhereclause=yes name=maestro_dni dbname="maestro.dni" )
+ retrieve="SELECT DISTINCT(s.cod_trabajador), s.ano, 
+       trim(m.apel_paterno) ||' '||trim(m.apel_materno)||', '||trim(m.nombre1)||' '||trim(nvl(m.nombre2,' ')) as nombre, 
+       m.dni 
+  FROM rrhh_formato_snp s, maestro m 
+ WHERE s.cod_trabajador = m.cod_trabajador 
+   AND s.ano = :an_ano 
+   AND s.cod_origen = :as_origen " arguments=(("an_ano", number),("as_origen", string)) )
+text(band=header alignment="2" text="Dni" border="2" color="33554432" x="663" y="8" height="56" width="247" html.valueishtml="0"  name=maestro_dni_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Nombre" border="2" color="33554432" x="919" y="8" height="56" width="1577" html.valueishtml="0"  name=nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Año" border="2" color="33554432" x="9" y="8" height="56" width="238" html.valueishtml="0"  name=ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Trabajador" border="2" color="33554432" x="256" y="8" height="56" width="398" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="919" y="4" height="56" width="1577" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="663" y="4" height="56" width="247" format="[general]" html.valueishtml="0"  name=maestro_dni visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="56" width="238" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="256" y="4" height="56" width="398" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

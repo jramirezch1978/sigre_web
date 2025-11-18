@@ -1,0 +1,102 @@
+﻿$PBExportHeader$d_ve_embarque_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=1148 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_embarque dbname="embarque.nro_embarque" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_ov dbname="embarque.nro_ov" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="embarque.flag_estado" initial="1" values="Activo	1/Inactivo	0/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_medio_tranp dbname="embarque.flag_medio_tranp" values="Terrestre	T/Maritimo	M/Aereo	A/Multimodal	U/Otros	O/" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=agente_aduana dbname="embarque.agente_aduana" )
+ column=(type=char(50) updatewhereclause=yes name=nom_agente dbname="proveedor.nom_proveedor" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=naviera dbname="embarque.naviera" )
+ column=(type=char(50) updatewhereclause=yes name=nom_naviera dbname="proveedor.nom_proveedor" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=nave dbname="embarque.nave" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=courrier dbname="embarque.courrier" )
+ column=(type=char(50) updatewhereclause=yes name=nom_courrier dbname="proveedor.nom_proveedor" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=incoterm dbname="embarque.incoterm" )
+ column=(type=char(30) updatewhereclause=yes name=incoterm_descripcion dbname="incoterm.descripcion" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_zarpe_org dbname="embarque.fec_zarpe_org" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_arribo_dst dbname="embarque.fec_arribo_dst" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=puerto_origen dbname="embarque.puerto_origen" )
+ column=(type=char(50) updatewhereclause=yes name=nom_puerto_origen dbname="fl_puertos.descr_puerto" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=puerto_destino dbname="embarque.puerto_destino" )
+ column=(type=char(50) updatewhereclause=yes name=nom_puerto_destino dbname="fl_puertos.descr_puerto" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="embarque.cod_usr" )
+ retrieve="SELECT  E.NRO_EMBARQUE,   
+         E.NRO_OV,   
+         E.FLAG_ESTADO,   
+         E.FLAG_MEDIO_TRANP,   
+         E.AGENTE_ADUANA,   
+         P_A.NOM_PROVEEDOR,   
+         E.NAVIERA,   
+         P_B.NOM_PROVEEDOR,   
+         E.NAVE,   
+         E.COURRIER,   
+         P_C.NOM_PROVEEDOR,
+         E.INCOTERM,
+         I.DESCRIPCION,
+         E.FEC_ZARPE_ORG,
+         E.FEC_ARRIBO_DST,
+         E.PUERTO_ORIGEN,
+         PU_A.DESCR_PUERTO,
+         E.PUERTO_DESTINO,
+         PU_B.DESCR_PUERTO,
+			E.COD_USR
+           
+    FROM EMBARQUE        E,   
+         PROVEEDOR       P_A,   
+         PROVEEDOR       P_B,   
+         PROVEEDOR       P_C,   
+         FL_PUERTOS      PU_A,   
+         FL_PUERTOS      PU_B,  
+         INCOTERM        I   
+         
+   WHERE E.AGENTE_ADUANA = P_A.PROVEEDOR (+)
+     AND E.NAVIERA       = P_B.PROVEEDOR (+)
+     AND E.COURRIER      = P_C.PROVEEDOR (+)
+     AND E.INCOTERM      = I.INCOTERM
+     AND E.PUERTO_ORIGEN = PU_A.PUERTO   (+)
+     AND E.PUERTO_DESTINO= PU_B.PUERTO   (+)
+	  AND E.NRO_EMBARQUE	 =	:AS_NRO_EMBARQUE
+   
+   " update="EMBARQUE" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_embarque", string)) )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="255" x="1600" y="8" height="76" width="672" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.imemode=0  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="5" color="33554432" x="878" y="224" height="68" width="1399" format="[general]" html.valueishtml="0"  name=nom_agente visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Naviera :" border="0" color="33554432" x="9" y="312" height="56" width="512" html.valueishtml="0"  name=embarque_naviera_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=50 border="5" color="33554432" x="544" y="388" height="56" width="1728" format="[general]" html.valueishtml="0"  name=nave visible="1" edit.limit=100 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="2" tabsequence=30 border="5" color="33554432" x="544" y="224" height="68" width="302" format="[general]" html.valueishtml="0"  name=agente_aduana pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Agente de Aduana : " border="0" color="33554432" x="9" y="224" height="56" width="512" html.valueishtml="0"  name=embarque_agente_aduana_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=10 border="5" color="33554432" x="544" y="144" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_ov pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Nro Ov :" border="0" color="33554432" x="9" y="144" height="56" width="512" html.valueishtml="0"  name=embarque_nro_ov_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Medio Transporte :" border="0" color="33554432" x="1147" y="144" height="56" width="581" html.valueishtml="0"  name=embarque_flag_medio_tranp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=20 border="5" color="33554432" x="1751" y="144" height="56" width="521" format="[general]" html.valueishtml="0"  name=flag_medio_tranp visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.autohscroll=yes ddlb.vscrollbar=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="4" color="33554432" x="434" y="12" height="76" width="302" format="[general]" html.valueishtml="0"  name=nro_embarque visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Nro Embarque :" border="0" color="33554432" x="14" y="12" height="76" width="398" html.valueishtml="0"  name=embarque_nro_embarque_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Nave:" border="0" color="33554432" x="9" y="388" height="56" width="512" html.valueishtml="0"  name=embarque_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=40 border="5" color="33554432" x="544" y="312" height="56" width="302" format="[general]" html.valueishtml="0"  name=naviera pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="5" color="33554432" x="878" y="312" height="56" width="1399" format="[general]" html.valueishtml="0"  name=nom_naviera visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=10 alignment="2" tabsequence=60 border="5" color="33554432" x="544" y="468" height="56" width="302" format="[general]" html.valueishtml="0"  name=courrier pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="5" color="33554432" x="878" y="468" height="56" width="1399" format="[general]" html.valueishtml="0"  name=nom_courrier visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Courrier:" border="0" color="33554432" x="9" y="468" height="56" width="512" html.valueishtml="0"  name=embarque_courrier_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Incoterm:" border="0" color="33554432" x="9" y="552" height="56" width="512" html.valueishtml="0"  name=embarque_incoterm_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=70 border="5" color="33554432" x="544" y="552" height="56" width="302" format="[general]" html.valueishtml="0"  name=incoterm pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=3 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="5" color="33554432" x="878" y="552" height="56" width="1399" format="[general]" html.valueishtml="0"  name=incoterm_descripcion visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+groupbox(band=detail text="Origen"border="6" color="33554432" x="32" y="632" height="232" width="2295"  name=gb_1 visible="1"  resizeable=1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Fecha Zarpe:" border="0" color="33554432" x="123" y="732" height="56" width="325" html.valueishtml="0"  name=embarque_fec_zarpe_org_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="2" tabsequence=80 border="5" color="33554432" x="503" y="724" height="68" width="320" format="[shortdate] [time]" html.valueishtml="0"  name=fec_zarpe_org visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Puerto:" border="0" color="33554432" x="937" y="732" height="56" width="233" html.valueishtml="0"  name=embarque_puerto_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=90 border="5" color="33554432" x="1202" y="724" height="68" width="247" format="[general]" html.valueishtml="0"  name=puerto_origen pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="5" color="33554432" x="1504" y="724" height="68" width="754" format="[general]" html.valueishtml="0"  name=nom_puerto_origen visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+groupbox(band=detail text="Destino"border="6" color="33554432" x="32" y="888" height="232" width="2295"  name=gb_2 visible="1"  resizeable=1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Fecha Arribo:" border="0" color="33554432" x="73" y="976" height="56" width="375" html.valueishtml="0"  name=embarque_fec_arribo_dst_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="2" tabsequence=100 border="5" color="33554432" x="503" y="972" height="68" width="320" format="[shortdate] [time]" html.valueishtml="0"  name=fec_arribo_dst visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Puerto:" border="0" color="33554432" x="937" y="976" height="56" width="233" html.valueishtml="0"  name=embarque_puerto_destino_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=110 border="5" color="33554432" x="1202" y="972" height="68" width="247" format="[general]" html.valueishtml="0"  name=puerto_destino pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="5" color="33554432" x="1504" y="972" height="68" width="754" format="[general]" html.valueishtml="0"  name=nom_puerto_destino visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,26 @@
+﻿$PBExportHeader$f_tiempo_servicios.srf
+global type f_tiempo_servicios from function_object
+end type
+
+forward prototypes
+global function string f_tiempo_servicios (datetime adt_fec_ingreso, datetime adt_fec_cese)
+end prototypes
+
+global function string f_tiempo_servicios (datetime adt_fec_ingreso, datetime adt_fec_cese);integer li_years, li_meses, li_dias
+
+li_dias = DaysAfter(date(adt_fec_ingreso), date(adt_fec_cese)) + 1
+
+li_years = truncate(li_dias / 365,0)
+
+li_dias = li_dias - li_years * 365
+
+li_meses = truncate(li_dias / 30,0)
+
+li_dias = li_dias - li_meses * 30
+
+return string(li_years) + " Año(s), " + string(li_meses) + " Mes(es), " + string(li_dias) + " Día(s)"
+
+
+
+end function
+

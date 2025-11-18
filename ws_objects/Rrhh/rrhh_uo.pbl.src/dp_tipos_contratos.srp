@@ -1,0 +1,9 @@
+﻿$PBExportHeader$dp_tipos_contratos.srp
+PIPELINE(source_connect=RTPS,destination_connect=oemlm1_work5,type=append,commit=100,errors=100,keyname="rrhh_tipos_contrato_rtps")
+SOURCE(name="t_cont",COLUMN(type=double,name="codigo",dbtype="Numeric",nulls_allowed=yes)
+ COLUMN(type=varchar,name="descrpcion",dbtype="Char(71)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="flag_estado",dbtype="Char(254)",nulls_allowed=yes))
+RETRIEVE(statement="SELECT t_cont.codigo,              t_cont.descrpcion  ,  			'1' as flag_estado      FROM t_cont     ")
+DESTINATION(name="rrhh_tipos_contrato_rtps",COLUMN(type=char,name="cod_tipo_contrato",dbtype="CHAR(2)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="descripcion",dbtype="VARCHAR2(100)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_estado",dbtype="CHAR(1)",nulls_allowed=yes))

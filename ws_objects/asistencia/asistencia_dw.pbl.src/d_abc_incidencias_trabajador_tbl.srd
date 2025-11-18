@@ -1,0 +1,87 @@
+﻿$PBExportHeader$d_abc_incidencias_trabajador_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=248 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_trabajador dbname="asistencia.cod_trabajador" )
+ column=(type=datetime update=yes updatewhereclause=yes key=yes name=fec_movim dbname="asistencia.fec_movim" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=cod_tipo_mov dbname="asistencia.cod_tipo_mov" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_desde dbname="asistencia.fec_desde" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_hasta dbname="asistencia.fec_hasta" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="asistencia.cod_usr" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="asistencia.flag_replicacion" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="asistencia.cod_origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=ot_adm dbname="asistencia.ot_adm" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=turno dbname="asistencia.turno" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=cod_origen dbname="maestro.cod_origen" )
+ column=(type=char(3) updatewhereclause=yes name=tipo_trabajador dbname="maestro.tipo_trabajador" )
+ column=(type=char(50) updatewhereclause=yes name=nombre dbname="origen.nombre" )
+ column=(type=char(30) updatewhereclause=yes name=desc_tipo_tra dbname="tipo_trabajador.desc_tipo_tra" )
+ column=(type=char(50) updatewhereclause=yes name=desc_movimi dbname="tipo_mov_asistencia.desc_movimi" )
+ column=(type=char(123) updatewhereclause=yes name=nombres dbname="nombres" )
+ retrieve="SELECT  asistencia.cod_trabajador,
+           asistencia.fec_movim,
+           asistencia.cod_tipo_mov,
+           asistencia.fec_desde,
+           asistencia.fec_hasta,
+           asistencia.cod_usr              ,
+           asistencia.flag_replicacion     ,
+           asistencia.cod_origen           ,
+           asistencia.ot_adm               ,
+           asistencia.turno                ,
+			  maestro.cod_origen              ,
+			  maestro.tipo_trabajador         ,
+			  origen.nombre			          ,
+			  tipo_trabajador.desc_tipo_tra   ,
+			  tipo_mov_asistencia.desc_movimi ,
+			  Nvl(maestro.apel_paterno,' ')||' '||Nvl(maestro.apel_materno,' ')||' '||Nvl(maestro.nombre1,' ')||' '||Nvl(maestro.nombre2,' ') as Nombres
+        FROM asistencia ,
+             maestro    ,
+				 origen		,
+				 tipo_trabajador,
+				 tipo_mov_asistencia
+				
+        WHERE ( maestro.cod_trabajador      = asistencia.cod_trabajador        )  and   
+				  ( maestro.cod_origen		     = origen.cod_origen			         )  and
+				  ( maestro.tipo_trabajador     = tipo_trabajador.tipo_trabajador  )  and
+				  ( asistencia.cod_tipo_mov     = tipo_mov_asistencia.cod_tipo_mov )  and	
+			    (( maestro.cod_origen          like :as_cod_origen              )  and    
+      		  ( maestro.tipo_trabajador     like :as_tip_trabajador          )  and  
+        		  ( asistencia.cod_trabajador   like :as_cod_trabajador          )) and
+				  ( trunc(asistencia.fec_movim) between :ad_fecha_inicio and :ad_fecha_final )" update="asistencia" updatewhere=0 updatekeyinplace=no arguments=(("as_cod_origen", string),("as_tip_trabajador", string),("as_cod_trabajador", string),("ad_fecha_inicio", date),("ad_fecha_final", date))  sort="cod_origen A tipo_trabajador A cod_trabajador A fec_desde A " )
+group(level=1 header.height=156 trailer.height=0 by=("cod_origen" , "tipo_trabajador" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Trabajador" border="2" color="8388608" x="9" y="196" height="48" width="238" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nombres" border="2" color="8388608" x="251" y="196" height="48" width="773" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Fec Movim" border="2" color="8388608" x="1029" y="196" height="48" width="274" html.valueishtml="0"  name=fec_movim_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tipo Mov" border="2" color="8388608" x="1307" y="196" height="48" width="215" html.valueishtml="0"  name=cod_tipo_mov_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripción" border="2" color="8388608" x="1527" y="196" height="48" width="498" html.valueishtml="0"  name=desc_movimi_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Desde" border="2" color="8388608" x="2030" y="196" height="48" width="421" html.valueishtml="0"  name=fec_desde_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Hasta" border="2" color="8388608" x="2455" y="196" height="48" width="421" html.valueishtml="0"  name=fec_hasta_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Usuario" border="2" color="8388608" x="2880" y="196" height="48" width="215" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Turno" border="2" color="8388608" x="3099" y="196" height="48" width="233" html.valueishtml="0"  name=turno_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Hasta :" border="0" color="8388608" x="27" y="100" height="56" width="251" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Desde :" border="0" color="8388608" x="27" y="24" height="56" width="251" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression=" ad_fecha_final "border="0" color="0" x="302" y="100" height="56" width="361" format="[SHORTDATE]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression=" ad_fecha_inicio "border="0" color="0" x="302" y="24" height="56" width="361" format="[SHORTDATE]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Origen :" border="0" color="33554432" x="23" y="4" height="44" width="343" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=11 alignment="0" tabsequence=110 border="0" color="33554432" x="389" y="4" height="56" width="123" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="T.Trabajador :" border="0" color="33554432" x="23" y="84" height="44" width="343" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=12 alignment="0" tabsequence=120 border="0" color="33554432" x="389" y="84" height="56" width="123" format="[general]" html.valueishtml="0"  name=tipo_trabajador visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=13 alignment="0" tabsequence=110 border="0" color="33554432" x="544" y="4" height="56" width="571" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=14 alignment="0" tabsequence=120 border="0" color="33554432" x="544" y="84" height="56" width="571" format="[general]" html.valueishtml="0"  name=desc_tipo_tra visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="8388608" x="9" y="0" height="68" width="238" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="2" color="8388608" x="251" y="0" height="68" width="773" format="[general]" html.valueishtml="0"  name=nombres visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="8388608" x="1029" y="0" height="68" width="274" format="[shortdate] [time]" html.valueishtml="0"  name=fec_movim visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=3 alignment="0" tabsequence=10 border="2" color="33554432" x="1307" y="0" height="68" width="215" format="[general]" html.valueishtml="0"  name=cod_tipo_mov pointer="H:\Source\Cur\taladro.cur" visible="1" edit.limit=2 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="2" color="8388608" x="1527" y="0" height="68" width="498" format="[general]" html.valueishtml="0"  name=desc_movimi visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=4 alignment="0" tabsequence=20 border="2" color="8388608" x="2030" y="0" height="68" width="421" format="[shortdate] [time]" html.valueishtml="0"  name=fec_desde visible="1" editmask.mask="dd/mm/yyyy hh:mm:ss" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=30 border="2" color="8388608" x="2455" y="0" height="68" width="421" format="[shortdate] [time]" html.valueishtml="0"  name=fec_hasta visible="1" editmask.mask="dd/mm/yyyy hh:mm:ss" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="8388608" x="2880" y="0" height="68" width="215" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="2" color="8388608" x="3099" y="0" height="68" width="233" format="[general]" html.valueishtml="0"  name=turno visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

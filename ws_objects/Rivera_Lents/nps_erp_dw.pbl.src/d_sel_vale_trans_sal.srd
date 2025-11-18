@@ -1,0 +1,49 @@
+﻿$PBExportHeader$d_sel_vale_trans_sal.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=origen_oc dbname="orden_compra.cod_origen" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="articulo_mov_proy.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_oc dbname="orden_compra.nro_oc" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="proveedor.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(6) updatewhereclause=yes name=almacen dbname="articulo_mov_proy.almacen" )
+ retrieve="SELECT DISTINCT oc.cod_origen, amp.tipo_doc, oc.nro_oc,  
+		 p.proveedor, p.nom_proveedor,
+       amp.almacen
+  FROM vale_mov_trans      a,
+       vale_mov_trans_det  b,
+       articulo_mov_tipo   amt,
+       proveedor           p,
+       articulo_mov_proy   amp,
+		 orden_compra			oc
+WHERE a.nro_vale = b.nro_vale
+  AND amt.tipo_mov = a.tipo_mov       
+  AND amp.cod_origen    = b.Org_Amp_Oc
+  AND amp.nro_mov       = b.nro_amp_oc
+  and amp.tipo_doc		= (select doc_oc from logparam where reckey = '1')
+  and amp.nro_doc			= oc.nro_oc
+  and oc.proveedor		= p.proveedor
+  AND a.flag_estado 		<> '0'
+  AND b.flag_estado 		<> '0'
+  AND amp.cant_transportada > 0
+  AND amt.factor_sldo_total = -1
+  and amp.almacen				 = :as_almacen" arguments=(("as_almacen", string)) )
+text(band=header alignment="2" text="Proveedor" border="2" color="33554432" x="585" y="8" height="56" width="357" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nom Proveedor" border="2" color="33554432" x="951" y="8" height="56" width="1399" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Almacen" border="2" color="33554432" x="2359" y="8" height="56" width="466" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="T. Doc" border="2" color="0" x="9" y="8" height="56" width="187" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nro Oc" border="2" color="0" x="206" y="8" height="56" width="370" html.valueishtml="0"  name=nro_oc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="585" y="4" height="60" width="357" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="951" y="4" height="60" width="1399" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2359" y="4" height="60" width="466" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="60" width="187" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="206" y="4" height="60" width="370" format="[general]" html.valueishtml="0"  name=nro_oc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

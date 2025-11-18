@@ -1,0 +1,54 @@
+﻿$PBExportHeader$d_sel_vale_mov_trans.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=proveedor dbname="proveedor.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(2) updatewhereclause=yes name=origen_oc dbname="orden_compra.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=nro_oc dbname="orden_compra.nro_oc" )
+ column=(type=char(6) updatewhereclause=yes name=almacen dbname="almacen.almacen" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ retrieve="SELECT p.proveedor, p.nom_proveedor,
+       oc.cod_origen, oc.nro_oc,
+       al.almacen, al.desc_almacen,
+       sum(b.cant_procesada * amt.factor_sldo_total) as cantidad
+FROM vale_mov_trans 		a,
+     vale_mov_trans_det b,
+     articulo_mov_tipo  amt,
+     proveedor          p,
+     almacen            al,
+     articulo_mov_proy  amp,
+     orden_compra			oc
+WHERE a.nro_vale 			= b.nro_vale
+  AND a.tipo_mov 			= amt.tipo_mov
+  AND amp.almacen       = al.almacen
+  AND b.Org_Amp_Oc      = amp.cod_origen
+  AND b.nro_amp_oc      = amp.nro_mov
+  and oc.nro_oc			= amp.nro_doc
+  and al.prov_almacen	= p.proveedor (+)
+  and a.almacen			= :as_almacen
+  and a.flag_estado 		<> '0'
+  and b.flag_estado		<> '0'
+GROUP BY p.proveedor, p.nom_proveedor,
+       oc.cod_origen, oc.nro_oc,
+       al.almacen, al.desc_almacen 
+having sum(b.cant_procesada * amt.factor_sldo_total) > 0" arguments=(("as_almacen", string)) )
+text(band=header alignment="2" text="Desc Almacen" border="2" color="33554432" x="741" y="8" height="56" width="1074" html.valueishtml="0"  name=desc_almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Proveedor" border="2" color="33554432" x="1824" y="8" height="56" width="370" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nom Transportista" border="2" color="33554432" x="2203" y="8" height="56" width="1399" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro Oc" border="2" color="0" x="9" y="8" height="56" width="393" html.valueishtml="0"  name=nro_oc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Almacen" border="2" color="0" x="411" y="8" height="56" width="320" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="741" y="4" height="56" width="1074" format="[general]" html.valueishtml="0"  name=desc_almacen visible="1" edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="1824" y="4" height="56" width="370" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="2203" y="4" height="56" width="1399" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="56" width="393" format="[general]" html.valueishtml="0"  name=nro_oc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="411" y="4" height="56" width="320" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

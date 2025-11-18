@@ -1,0 +1,157 @@
+﻿$PBExportHeader$d_rpt_despacho_vs_ventas_crt.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file=""  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+header[2](height=176 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=116 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=84 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(20) updatewhereclause=yes name=desc_categoria dbname="desc_categoria" )
+ column=(type=char(20) updatewhereclause=yes name=desc_sub_categoria dbname="desc_sub_categoria" )
+ column=(type=char(20) updatewhereclause=yes name=und dbname="und" )
+ column=(type=number updatewhereclause=yes name=articulo_cantidad dbname="articulo_cantidad" )
+ retrieve="select DECODE(ccd.cod_art, null, 'SERVICIO', 'PRODUCTO') as desc_producto_servicio,
+       'VENTA' as concepto,
+       cc.ano,
+       cc.mes,
+       cc.tipo_doc,
+       pkg_fact_electronica.of_get_full_nro(cc.nro_doc) as full_nro_doc,
+       null as nro_guia,
+       p.nom_proveedor,
+       cc.fecha_documento as fec_emision,
+       a1.cat_art || '-' || a1.desc_categoria as desc_categoria,
+       a2.cod_sub_cat || '-' || a2.desc_sub_cat as desc_sub_categoria,
+       ccd.cod_Art,
+       ccd.descripcion,
+       --ccd.und as und_venta,
+       a.und,
+       sum(usf_ap_conv_und(ccd.und, a.und, ccd.cantidad * dt.factor)) as cantidad,
+       sum(
+          case
+             when cc.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+               ccd.cantidad * ccd.precio_unitario 
+             else
+               ccd.cantidad * ccd.precio_unitario *cc.tasa_cambio
+          end * dt.factor
+       ) as importe_sol
+from cntas_cobrar cc,
+     cntas_cobrar_det ccd,
+     articulo         a,
+     articulo_sub_categ a2,
+     articulo_categ     a1,
+     proveedor          p,
+     doc_tipo           dt
+where cc.tipo_doc 		= ccd.tipo_doc
+  and cc.nro_doc  		= ccd.nro_doc
+  and cc.cod_relacion   = p.proveedor
+  and cc.tipo_doc       = dt.tipo_doc
+  and ccd.cod_art 		= a.cod_art     (+)
+  and a.sub_cat_art 		= a2.cod_sub_cat  (+)
+  and a2.cat_art    		= a1.cat_art      (+)
+  and cc.ano				= :ani_year
+  and cc.mes				= :ani_mes
+  and cc.flag_estado		<> '0'
+  and (:asi_flag_incluye_mp = '1' or (:asi_flag_incluye_mp = '0' and a1.cat_art not in ('002')))
+group by DECODE(ccd.cod_art, null, 'SERVICIO', 'PRODUCTO'),
+       cc.ano,
+       cc.mes,
+       cc.tipo_doc,
+       pkg_fact_electronica.of_get_full_nro(cc.nro_doc),
+       p.nom_proveedor,
+       cc.fecha_documento,
+       a1.cat_art || '-' || a1.desc_categoria,
+       a2.cod_sub_cat || '-' || a2.desc_sub_cat,
+       ccd.cod_Art,
+       ccd.descripcion,
+       --ccd.und,
+       a.und  
+union
+select 'PRODUCTO' as desc_producto_servicio,
+       'DESPACHO ' || amt.tipo_mov || ' - ' || amt.desc_tipo_mov as concepto,
+       to_number(to_char(vm.fec_registro, 'yyyy')),
+       to_number(to_char(vm.fec_registro, 'mm')),
+       'AL',
+       vm.nro_Vale,
+       pkg_fact_electronica.of_get_full_nro(gv.nro_guia) as nro_guia,
+       p.nom_proveedor,
+       vm.fec_registro,
+       a1.cat_art || '-' || a1.desc_categoria as desc_categoria,
+       a2.cod_sub_cat || '-' || a2.desc_sub_cat as desc_sub_categoria,
+       am.cod_Art,
+       a.desc_art,
+       --a.und as und_venta,
+       a.und,
+       sum(am.cant_procesada * amt.factor_sldo_total * -1) as cantidad,
+       sum(am.cant_procesada * am.precio_unit * amt.factor_sldo_total * -1) as importe_sol
+from vale_mov         vm,
+     articulo_mov     am,
+     articulo         a,
+     articulo_sub_categ a2,
+     articulo_categ     a1,
+     articulo_mov_tipo  amt,
+     guia_vale          gv,
+     proveedor          p
+where vm.nro_vale  		= am.nro_vale
+  and vm.tipo_mov  		= amt.tipo_mov
+  and vm.nro_Vale  		= gv.nro_vale       (+)
+  and vm.proveedor 		= p.proveedor       (+)
+  and (amt.tipo_mov 		in ('S02', 'S16', 'S48') or amt.tipo_mov_dev 		in ('S02', 'S16', 'S48'))
+  and vm.flag_estado 	<> '0'
+  and am.flag_estado 	<> '0'
+  and am.cod_art 			= a.cod_art     
+  and a.sub_cat_art 		= a2.cod_sub_cat  
+  and a2.cat_art    		= a1.cat_art      
+  and to_number(to_char(vm.fec_registro, 'yyyy'))	= :ani_year
+  and to_number(to_char(vm.fec_registro, 'mm'))		= :ani_mes
+  and (:asi_flag_incluye_mp = '1' or (:asi_flag_incluye_mp = '0' and a1.cat_art not in ('002')))
+group by 
+       'DESPACHO ' || amt.tipo_mov || ' - ' || amt.desc_tipo_mov,
+       to_number(to_char(vm.fec_registro, 'yyyy')),
+       to_number(to_char(vm.fec_registro, 'mm')),
+       'AL',
+       vm.nro_Vale,
+       pkg_fact_electronica.of_get_full_nro(gv.nro_guia),
+       p.nom_proveedor,
+       vm.fec_registro,
+       a1.cat_art || '-' || a1.desc_categoria,
+       a2.cod_sub_cat || '-' || a2.desc_sub_cat,
+       am.cod_Art,
+       a.desc_art,
+       a.und    
+" arguments=(("ani_year", number),("ani_mes", number),("asi_flag_incluye_mp", string))  sort="desc_categoria A desc_sub_categoria A und A " )
+text(band=header[2] alignment="2" text="Descripcion
+Categoria
+" border="2" color="33554432" x="9" y="4" height="168" width="873" html.valueishtml="0"  name=desc_categoria_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header[2] alignment="2" text="Descripcion
+Sub categoria
+" border="2" color="33554432" x="891" y="4" height="168" width="946" html.valueishtml="0"  name=desc_sub_categoria_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header[2] alignment="2" text="Und
+
+" border="2" color="33554432" x="1847" y="4" height="168" width="178" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header[2] alignment="2" text="@concepto
+
+" border="2" color="33554432" x="2034" y="4" height="168" width="462" html.valueishtml="0"  name=articulo_cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header[2] alignment="2" text="Total
+General
+" border="2" color="33554432" x="2505" y="4" height="168" width="462" html.valueishtml="0"  name=grand_sum_articulo_cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="76" width="873" format="[general]" html.valueishtml="0"  name=desc_categoria visible="1" edit.limit=67 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="891" y="4" height="76" width="946" format="[general]" html.valueishtml="0"  name=desc_sub_categoria visible="1" edit.limit=67 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1847" y="4" height="76" width="178" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="2034" y="4" height="76" width="462" format="###,##0.00" html.valueishtml="0"  name=articulo_cantidad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes crosstab.repeat=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="0" color="33554432" x="2505" y="4" height="76" width="462" format="###,##0.00" html.valueishtml="0"  name=grand_sum_articulo_cantidad visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="~"Total :~""border="0" color="33554432" x="9" y="4" height="76" width="873" format="[general]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(articulo_cantidad for all )"border="0" color="33554432" x="2034" y="4" height="76" width="462" format="###,##0.00" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(grand_sum_articulo_cantidad for all )"border="0" color="33554432" x="2505" y="4" height="76" width="462" format="###,##0.00" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "concepto" rows = "desc_categoria, desc_sub_categoria, und" values = "sum(articulo_cantidad for crosstab)" sourcenames = "desc_producto_servicio, concepto, cntas_cobrar_ano, cntas_cobrar_mes, cntas_cobrar_tipo_doc, full_nro_doc, nro_guia, proveedor_nom_proveedor, cntas_cobrar_fec_emision, desc_categoria, desc_sub_categoria, cntas_cobrar_det_cod_art, cntas_cobrar_det_descripcion, und, articulo_cantidad, importe_sol")
+sparse(names="desc_categoria	desc_sub_categoria")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

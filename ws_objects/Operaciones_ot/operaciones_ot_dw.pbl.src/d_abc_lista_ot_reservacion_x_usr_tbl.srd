@@ -1,0 +1,48 @@
+﻿$PBExportHeader$d_abc_lista_ot_reservacion_x_usr_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(10) updatewhereclause=yes name=ot_adm dbname="orden_trabajo.ot_adm" )
+ column=(type=char(40) updatewhereclause=yes name=titulo dbname="orden_trabajo.titulo" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="orden_trabajo.cod_usr" )
+ column=(type=datetime updatewhereclause=yes name=fec_solicitud dbname="orden_trabajo.fec_solicitud" )
+ column=(type=datetime updatewhereclause=yes name=orden_trabajo_fec_inicio dbname="orden_trabajo.fec_inicio" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="orden_trabajo.flag_estado" values="Anulado	0/Activo	1/Cerrado	2/" )
+ column=(type=char(4) updatewhereclause=yes name=ot_tipo dbname="orden_trabajo.ot_tipo" )
+ retrieve="select distinct ot.nro_orden, ot.ot_adm, ot.titulo, ot.cod_usr, ot.fec_solicitud, ot.fec_inicio, ot.flag_estado,
+		 ot.ot_tipo
+from orden_trabajo ot,
+     articulo_mov_proy amp,
+     reservacion_det   rd,
+     ot_adm_usuario    oau
+where ot.nro_orden = amp.nro_doc
+  and amp.tipo_doc = (select doc_ot from logparam where reckey = '1')
+  and rd.org_amp_ref = amp.cod_origen
+  and rd.nro_amp_ref = amp.nro_mov
+  and oau.ot_adm     = ot.ot_adm
+  and oau.cod_usr    = :as_usuario
+  and rd.flag_estado = '1'     
+  and amp.flag_estado = '1'
+     
+     " arguments=(("as_usuario", string)) )
+text(band=header alignment="2" text="Nro Orden" border="2" color="0" x="9" y="8" height="56" width="430" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=1 alignment="0" tabsequence=0 border="2" color="0" x="9" y="4" height="64" width="430" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Usuario" border="2" color="0" x="443" y="8" height="56" width="219" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=4 alignment="0" tabsequence=0 border="2" color="0" x="443" y="4" height="64" width="219" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="OT Adm" border="2" color="0" x="667" y="8" height="56" width="311" html.valueishtml="0"  name=ot_adm_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=2 alignment="0" tabsequence=0 border="2" color="0" x="667" y="4" height="64" width="311" html.valueishtml="0"  name=ot_adm visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="OT Tipo" border="2" color="0" x="983" y="8" height="56" width="311" html.valueishtml="0"  name=ot_tipo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=8 alignment="0" tabsequence=0 border="2" color="0" x="983" y="4" height="64" width="311" html.valueishtml="0"  name=ot_tipo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Estado" border="2" color="0" x="1298" y="8" height="56" width="311" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=7 alignment="0" tabsequence=0 border="2" color="0" x="1298" y="4" height="64" width="311" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Titulo" border="2" color="0" x="1614" y="8" height="56" width="1147" html.valueishtml="0"  name=titulo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=3 alignment="0" tabsequence=0 border="2" color="0" x="1614" y="4" height="64" width="1147" html.valueishtml="0"  name=titulo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

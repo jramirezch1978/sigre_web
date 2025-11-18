@@ -1,0 +1,33 @@
+﻿$PBExportHeader$d_rpt_consumo_d2_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=112 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=tg_naves_nomb_nave dbname="tg_naves_nomb_nave" )
+ column=(type=number updatewhereclause=yes name=consumo dbname="consumo" )
+ retrieve="select tn.nomb_nave, 
+       DECODE(t.horas, 0, 0, t.petroleo_d2 / t.horas) as consumo,
+       'Promedio de Gal / Hr' as Datos
+from tt_fl_ratios t,
+     tg_naves     tn
+where tn.nave = t.nave     
+union
+select tn.nomb_nave, 
+       DECODE(t.pesca, 0, 0, t.petroleo_d2 / t.pesca) as consumo,
+       'Promedio de Gal / Tm' as datos
+from tt_fl_ratios t,
+     tg_naves     tn
+where tn.nave = t.nave "  sort="tg_naves_nomb_nave A " )
+text(band=header[2] alignment="0" text="@datos" border="2" color="33554432" x="462" y="4" height="104" width="439" html.valueishtml="0"  name=consumo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="462" y="4" height="56" width="439" format="###,##0.00" html.valueishtml="0"  name=consumo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="2" text="Nomb Nave" border="2" color="33554432" x="9" y="4" height="104" width="443" html.valueishtml="0"  name=tg_naves_nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="56" width="443" format="[general]" html.valueishtml="0"  name=tg_naves_nomb_nave visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "datos" rows = "tg_naves_nomb_nave" values = "sum(consumo for crosstab)" sourcenames = "tg_naves_nomb_nave, consumo, datos")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

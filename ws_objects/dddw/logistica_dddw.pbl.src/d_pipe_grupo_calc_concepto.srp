@@ -1,0 +1,11 @@
+﻿$PBExportHeader$d_pipe_grupo_calc_concepto.srp
+PIPELINE(source_connect=CN_DB_DB1_PROD5,destination_connect=CN_DB_DB1_PROD8,type=update,commit=100,errors=100,keyname="grupo_calc_concepto")
+SOURCE(name="GRUPO_CALC_CONCEPTO",COLUMN(type=char,name="GRUPO_CALC",dbtype="CHAR(2)",key=yes,nulls_allowed=no)
+ COLUMN(type=char,name="CONCEP",dbtype="CHAR(4)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="DESCRIPCION",dbtype="VARCHAR2(50)",nulls_allowed=yes)
+ COLUMN(type=char,name="FLAG_REPLICACION",dbtype="CHAR(1)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"grupo_calc_concepto~" ) COLUMN(NAME=~"grupo_calc_concepto.grupo_calc~") COLUMN(NAME=~"grupo_calc_concepto.concep~") COLUMN(NAME=~"grupo_calc_concepto.descripcion~") COLUMN(NAME=~"grupo_calc_concepto.flag_replicacion~")) ")
+DESTINATION(name="grupo_calc_concepto",COLUMN(type=char,name="grupo_calc",dbtype="CHAR(2)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=char,name="concep",dbtype="CHAR(4)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="descripcion",dbtype="VARCHAR2(50)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1' "))

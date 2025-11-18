@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_imp_bol_fact.srf
+global type f_imp_bol_fact from function_object
+end type
+
+forward prototypes
+global function boolean f_imp_bol_fact ()
+end prototypes
+
+global function boolean f_imp_bol_fact ();String  ls_print
+Boolean lb_ret = TRUE
+
+ls_print = ProfileString ('win.ini', 'Devices','BOL-FACT','')
+
+IF Isnull(ls_print) OR Trim(ls_print) = '' THEN
+//	Messagebox('Aviso','Debe Definir Impresora BOL-FACT , Comuniquese con Soporte - Sistemas')
+	lb_ret = FALSE
+	GOTO SALIDA
+END IF	
+
+SetProfileString('c:\windows\win.ini','windows','device','BOL-FACT,EPSON9,LPT2')
+
+SALIDA:
+IF lb_ret = FALSE THEN
+	//NO ENCONTRO IMPRESORA PREDIFINIDA
+END IF
+
+Return lb_ret
+end function
+

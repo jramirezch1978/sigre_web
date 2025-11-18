@@ -1,0 +1,303 @@
+﻿$PBExportHeader$m_main.srm
+$PBExportComments$Main menu
+forward
+global type m_main from menu
+end type
+type m_file from menu within m_main
+end type
+type m_new from menu within m_file
+end type
+type m_open from menu within m_file
+end type
+type m_extract from menu within m_file
+end type
+type m_exit from menu within m_file
+end type
+type m_file from menu within m_main
+m_new m_new
+m_open m_open
+m_extract m_extract
+m_exit m_exit
+end type
+type m_other from menu within m_main
+end type
+type m_comment from menu within m_other
+end type
+type m_setpassword from menu within m_other
+end type
+type m_inmemory from menu within m_other
+end type
+type m_other from menu within m_main
+m_comment m_comment
+m_setpassword m_setpassword
+m_inmemory m_inmemory
+end type
+type m_help from menu within m_main
+end type
+type m_about from menu within m_help
+end type
+type m_help from menu within m_main
+m_about m_about
+end type
+global type m_main from menu
+m_file m_file
+m_other m_other
+m_help m_help
+end type
+end forward
+
+global type m_main from menu
+m_file m_file
+m_other m_other
+m_help m_help
+end type
+global m_main m_main
+
+on m_main.create
+m_main=this
+call super::create
+this.m_file=create m_file
+this.m_other=create m_other
+this.m_help=create m_help
+this.Item[UpperBound(this.Item)+1]=this.m_file
+this.Item[UpperBound(this.Item)+1]=this.m_other
+this.Item[UpperBound(this.Item)+1]=this.m_help
+end on
+
+on m_main.destroy
+call super::destroy
+destroy(this.m_file)
+destroy(this.m_other)
+destroy(this.m_help)
+end on
+
+type m_file from menu within m_main
+m_new m_new
+m_open m_open
+m_extract m_extract
+m_exit m_exit
+end type
+
+on m_file.create
+call super::create
+this.text = "&File"
+this.m_new=create m_new
+this.m_open=create m_open
+this.m_extract=create m_extract
+this.m_exit=create m_exit
+this.Item[UpperBound(this.Item)+1]=this.m_new
+this.Item[UpperBound(this.Item)+1]=this.m_open
+this.Item[UpperBound(this.Item)+1]=this.m_extract
+this.Item[UpperBound(this.Item)+1]=this.m_exit
+end on
+
+on m_file.destroy
+call super::destroy
+destroy(this.m_new)
+destroy(this.m_open)
+destroy(this.m_extract)
+destroy(this.m_exit)
+end on
+
+type m_new from menu within m_file
+end type
+
+event clicked;// trigger event on window
+ParentWindow.Event Dynamic ue_newzip()
+
+end event
+
+on m_new.create
+call super::create
+this.text = "&New"
+this.microhelp = "Create Zip Archive"
+this.toolbaritemname = "New!"
+this.toolbaritemtext = "New,Create Zip Archive"
+end on
+
+on m_new.destroy
+call super::destroy
+end on
+
+type m_open from menu within m_file
+end type
+
+on m_open.create
+call super::create
+this.text = "&Open"
+this.microhelp = "Open Zip Archive"
+this.toolbaritemname = "Open!"
+this.toolbaritemtext = "Open,Open Zip Archive"
+end on
+
+event clicked;// trigger event on window
+ParentWindow.Event Dynamic ue_openzip()
+
+end event
+
+on m_open.destroy
+call super::destroy
+end on
+
+type m_extract from menu within m_file
+end type
+
+event clicked;// trigger event on window
+ParentWindow.Event Dynamic ue_extract()
+
+end event
+
+on m_extract.create
+call super::create
+this.text = "&Extract"
+this.microhelp = "Extract file from open archive"
+this.toolbaritemname = "DataPipeline!"
+this.toolbaritemtext = "Extract,Extract file from open archive"
+end on
+
+on m_extract.destroy
+call super::destroy
+end on
+
+type m_exit from menu within m_file
+end type
+
+event clicked;Close(ParentWindow)
+
+end event
+
+on m_exit.create
+call super::create
+this.text = "E&xit"
+this.microhelp = "Exit Program"
+this.toolbaritemname = "Exit!"
+this.toolbaritemtext = "Exit,Exit Program"
+this.toolbaritemorder = 99
+end on
+
+on m_exit.destroy
+call super::destroy
+end on
+
+type m_other from menu within m_main
+m_comment m_comment
+m_setpassword m_setpassword
+m_inmemory m_inmemory
+end type
+
+on m_other.create
+call super::create
+this.text = "&Other"
+this.m_comment=create m_comment
+this.m_setpassword=create m_setpassword
+this.m_inmemory=create m_inmemory
+this.Item[UpperBound(this.Item)+1]=this.m_comment
+this.Item[UpperBound(this.Item)+1]=this.m_setpassword
+this.Item[UpperBound(this.Item)+1]=this.m_inmemory
+end on
+
+on m_other.destroy
+call super::destroy
+destroy(this.m_comment)
+destroy(this.m_setpassword)
+destroy(this.m_inmemory)
+end on
+
+type m_comment from menu within m_other
+end type
+
+event clicked;// trigger event on window
+ParentWindow.Event Dynamic ue_comments()
+
+end event
+
+on m_comment.create
+call super::create
+this.text = "Global Comment"
+this.microhelp = "Display Global Comment"
+end on
+
+on m_comment.destroy
+call super::destroy
+end on
+
+type m_setpassword from menu within m_other
+end type
+
+event clicked;// set password
+Open(w_password)
+
+end event
+
+on m_setpassword.create
+call super::create
+this.text = "Set Password"
+this.microhelp = "Set the password for the file"
+this.toolbaritemname = "Custom016!"
+this.toolbaritemtext = "Password,Set the password for the file"
+end on
+
+on m_setpassword.destroy
+call super::destroy
+end on
+
+type m_inmemory from menu within m_other
+end type
+
+event clicked;Open(w_memory)
+
+end event
+
+on m_inmemory.create
+call super::create
+this.text = "In-memory"
+this.microhelp = "Demo of in-memory compress/uncompress"
+this.toolbaritemname = "Watcom!"
+this.toolbaritemtext = "In-memory,Demo of in-memory compress/uncompress"
+end on
+
+on m_inmemory.destroy
+call super::destroy
+end on
+
+type m_help from menu within m_main
+m_about m_about
+end type
+
+on m_help.create
+call super::create
+this.text = "&Help"
+this.m_about=create m_about
+this.Item[UpperBound(this.Item)+1]=this.m_about
+end on
+
+on m_help.destroy
+call super::destroy
+destroy(this.m_about)
+end on
+
+type m_about from menu within m_help
+end type
+
+event clicked;String ls_msg, ls_version
+n_zlib ln_zlib
+
+ls_version = ln_zlib.of_zlibVersion()
+
+ls_msg  = "ZLib Version: " + ls_version + "~r~n~r~n"
+ls_msg += "PB code by Roland Smith~r~n~r~n"
+ls_msg += "www.topwizprogramming.com"
+
+MessageBox("About ZLib", ls_msg)
+
+end event
+
+on m_about.create
+call super::create
+this.text = "&About"
+end on
+
+on m_about.destroy
+call super::destroy
+end on
+

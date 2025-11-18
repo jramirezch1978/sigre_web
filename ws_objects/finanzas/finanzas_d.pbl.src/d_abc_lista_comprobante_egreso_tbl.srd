@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_abc_lista_comprobante_egreso_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntas_pagar.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="cntas_pagar.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="cntas_pagar.nro_doc" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=decimal(3) updatewhereclause=yes name=tasa_cambio dbname="cntas_pagar.tasa_cambio" )
+ column=(type=decimal(2) updatewhereclause=yes name=total_pagar dbname="cntas_pagar.total_pagar" )
+ column=(type=datetime updatewhereclause=yes name=fecha_emision dbname="cntas_pagar.fecha_emision" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="cntas_pagar_det.cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="cntas_pagar_det.cnta_prsp" )
+ column=(type=char(60) updatewhereclause=yes name=descripcion dbname="descripcion" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="codigo_relacion.nombre" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="cntas_pagar.origen" )
+ retrieve="  SELECT ~"CNTAS_PAGAR~".~"COD_RELACION~",   
+         ~"CNTAS_PAGAR~".~"TIPO_DOC~",   
+         ~"CNTAS_PAGAR~".~"NRO_DOC~",   
+         ~"CNTAS_PAGAR~".~"COD_MONEDA~",   
+         ~"CNTAS_PAGAR~".~"TASA_CAMBIO~",   
+         ~"CNTAS_PAGAR~".~"TOTAL_PAGAR~",   
+         ~"CNTAS_PAGAR~".~"FECHA_EMISION~",   
+         ~"CNTAS_PAGAR_DET~".~"CENCOS~",   
+         ~"CNTAS_PAGAR_DET~".~"CNTA_PRSP~",   
+         SUBSTR(~"CNTAS_PAGAR~".~"DESCRIPCION~",1,60) AS DESCRIPCION,
+         ~"CODIGO_RELACION~".~"NOMBRE~",   
+         ~"CNTAS_PAGAR~".~"ORIGEN~"  
+    FROM ~"CNTAS_PAGAR~",   
+         ~"CODIGO_RELACION~",   
+         ~"CNTAS_PAGAR_DET~"  
+   WHERE ( ~"CNTAS_PAGAR~".~"COD_RELACION~" = ~"CODIGO_RELACION~".~"COD_RELACION~" ) and  
+         ( ~"CNTAS_PAGAR~".~"COD_RELACION~" = ~"CNTAS_PAGAR_DET~".~"COD_RELACION~" ) and  
+         ( ~"CNTAS_PAGAR~".~"TIPO_DOC~" = ~"CNTAS_PAGAR_DET~".~"TIPO_DOC~" ) and  
+         ( ~"CNTAS_PAGAR~".~"NRO_DOC~" = ~"CNTAS_PAGAR_DET~".~"NRO_DOC~" ) and  
+         ( ( ~"CNTAS_PAGAR~".~"TIPO_DOC~" = (select comprobante_egr from finparam) ) AND  
+         ( ~"CNTAS_PAGAR~".~"FLAG_ESTADO~" in ('1','2','3') ) AND  
+         ( ~"CNTAS_PAGAR~".~"COD_RELACION~" = :as_cod_relacion ) )   
+GROUP BY ~"CNTAS_PAGAR~".~"COD_RELACION~",   
+         ~"CNTAS_PAGAR~".~"TIPO_DOC~",   
+         ~"CNTAS_PAGAR~".~"NRO_DOC~",   
+         ~"CNTAS_PAGAR~".~"COD_MONEDA~",   
+         ~"CNTAS_PAGAR~".~"TASA_CAMBIO~",   
+         ~"CNTAS_PAGAR~".~"TOTAL_PAGAR~",   
+         ~"CNTAS_PAGAR~".~"FECHA_EMISION~",   
+         ~"CNTAS_PAGAR~".~"ORIGEN~",   
+         ~"CNTAS_PAGAR~".~"DESCRIPCION~",   
+         ~"CODIGO_RELACION~".~"NOMBRE~",   
+         ~"CNTAS_PAGAR_DET~".~"CENCOS~",   
+         ~"CNTAS_PAGAR_DET~".~"CNTA_PRSP~"   
+" arguments=(("as_cod_relacion", string)) )
+text(band=header alignment="2" text="Cod Relacion" border="2" color="8388608" x="9" y="8" height="60" width="352"  name=cod_relacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="8388608" x="366" y="8" height="60" width="210"  name=tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="581" y="8" height="60" width="302"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="887" y="8" height="60" width="233"  name=cod_moneda_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Total Pagar" border="2" color="8388608" x="1125" y="8" height="60" width="279"  name=total_pagar_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="68" width="352" format="[general]"  name=cod_relacion edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="366" y="0" height="68" width="210" format="[general]"  name=tipo_doc edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="581" y="0" height="68" width="302" format="[general]"  name=nro_doc edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="0" x="887" y="0" height="68" width="233" format="[general]"  name=cod_moneda edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="1125" y="0" height="68" width="279" format="[general]"  name=total_pagar editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

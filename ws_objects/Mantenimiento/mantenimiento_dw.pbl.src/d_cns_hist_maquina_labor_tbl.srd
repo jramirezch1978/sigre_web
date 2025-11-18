@@ -1,0 +1,97 @@
+﻿$PBExportHeader$d_cns_hist_maquina_labor_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=140 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=pd_ot_nro_parte dbname="pd_ot.nro_parte" )
+ column=(type=datetime updatewhereclause=yes name=pd_ot_fecha dbname="pd_ot.fecha" )
+ column=(type=char(10) updatewhereclause=yes name=pd_ot_ot_adm dbname="pd_ot.ot_adm" )
+ column=(type=decimal(0) updatewhereclause=yes name=pd_ot_det_nro_item dbname="pd_ot_det.nro_item" )
+ column=(type=char(10) updatewhereclause=yes name=pd_ot_det_nro_orden dbname="pd_ot_det.nro_orden" )
+ column=(type=char(8) updatewhereclause=yes name=pd_ot_det_cod_labor dbname="pd_ot_det.cod_labor" )
+ column=(type=char(4) updatewhereclause=yes name=pd_ot_det_cod_ejecutor dbname="pd_ot_det.cod_ejecutor" )
+ column=(type=decimal(2) updatewhereclause=yes name=pd_ot_det_cant_labor dbname="pd_ot_det.cant_labor" )
+ column=(type=decimal(3) updatewhereclause=yes name=pd_ot_det_cant_avance dbname="pd_ot_det.cant_avance" )
+ column=(type=decimal(2) updatewhereclause=yes name=pd_ot_det_horas_inciden dbname="pd_ot_det.horas_inciden" )
+ column=(type=decimal(2) updatewhereclause=yes name=pd_ot_det_costo_labor dbname="pd_ot_det.costo_labor" )
+ column=(type=char(10) updatewhereclause=yes name=pd_ot_det_oper_sec dbname="pd_ot_det.oper_sec" )
+ column=(type=char(12) updatewhereclause=yes name=pd_ot_insumos_cod_art dbname="pd_ot_insumos.cod_art" )
+ column=(type=decimal(4) updatewhereclause=yes name=pd_ot_insumos_cantidad dbname="pd_ot_insumos.cantidad" )
+ column=(type=decimal(2) updatewhereclause=yes name=pd_ot_insumos_costo_insumo dbname="pd_ot_insumos.costo_insumo" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=char(40) updatewhereclause=yes name=pd_ot_det_desc_labor dbname="pd_ot_det.desc_labor" )
+ column=(type=char(3) updatewhereclause=yes name=pd_ot_det_und_labor dbname="pd_ot_det.und_labor" )
+ retrieve="SELECT  ~"PD_OT~".~"NRO_PARTE~" ,
+           ~"PD_OT~".~"FECHA~" ,
+           ~"PD_OT~".~"OT_ADM~" ,
+           ~"PD_OT_DET~".~"NRO_ITEM~" ,
+           ~"PD_OT_DET~".~"NRO_ORDEN~" ,
+           ~"PD_OT_DET~".~"COD_LABOR~" ,
+           ~"PD_OT_DET~".~"COD_EJECUTOR~" ,
+           ~"PD_OT_DET~".~"CANT_LABOR~" ,
+           ~"PD_OT_DET~".~"CANT_AVANCE~" ,
+           ~"PD_OT_DET~".~"HORAS_INCIDEN~" ,
+           ~"PD_OT_DET~".~"COSTO_LABOR~" ,
+           ~"PD_OT_DET~".~"OPER_SEC~" ,
+           ~"PD_OT_INSUMOS~".~"COD_ART~" ,
+           ~"PD_OT_INSUMOS~".~"CANTIDAD~" ,
+           ~"PD_OT_INSUMOS~".~"COSTO_INSUMO~" ,
+           ~"ARTICULO~".~"NOM_ARTICULO~" ,
+           ~"ARTICULO~".~"UND~" ,
+           ~"PD_OT_DET~".~"DESC_LABOR~" ,
+           ~"PD_OT_DET~".~"UND_LABOR~"     
+        FROM ~"PD_OT~" ,
+           ~"PD_OT_DET~" ,
+           ~"PD_OT_INSUMOS~" ,
+           ~"ARTICULO~"     
+        WHERE ( ~"PD_OT_DET~".~"NRO_PARTE~" = ~"PD_OT_INSUMOS~".~"NRO_PARTE~" (+)) and 
+				  ( ~"PD_OT_DET~".~"NRO_ITEM~" = ~"PD_OT_INSUMOS~".~"NRO_ITEM~" (+)) and 
+				  ( ~"PD_OT~".~"NRO_PARTE~" = ~"PD_OT_DET~".~"NRO_PARTE~" ) and 
+				  ( ~"PD_OT_INSUMOS~".~"COD_ART~" = ~"ARTICULO~".~"COD_ART~" ) and 
+				( ( ~"PD_OT_DET~".~"COD_MAQUINA~" = :as_cod_maquina ) and 
+				  ( ~"PD_OT~".~"FECHA~" >= :ad_fec_ini ) and ( ~"PD_OT~".~"FECHA~" <= :ad_fec_fin ) ) 
+        ORDER BY ~"PD_OT_DET~".~"NRO_ITEM~"          ASC  " arguments=(("as_cod_maquina", string),("ad_fec_ini", date),("ad_fec_fin", date)) )
+group(level=1 header.height=72 trailer.height=0 by=("pd_ot_nro_parte" , "pd_ot_det_nro_item" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text=" Labor" border="2" color="33554432" x="1198" y="12" height="56" width="274" html.valueishtml="0"  name=pd_ot_det_cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha" border="2" color="33554432" x="343" y="12" height="124" width="288" html.valueishtml="0"  name=pd_ot_fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Item" border="2" color="33554432" x="635" y="12" height="124" width="146" html.valueishtml="0"  name=pd_ot_det_nro_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Orden trabajo" border="2" color="33554432" x="786" y="12" height="124" width="407" html.valueishtml="0"  name=pd_ot_det_nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Articulo" border="2" color="33554432" x="1198" y="72" height="64" width="274" html.valueishtml="0"  name=pd_ot_insumos_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="1477" y="12" height="56" width="919" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="2400" y="12" height="56" width="155" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ejec" border="2" color="33554432" x="2560" y="12" height="56" width="137" html.valueishtml="0"  name=pd_ot_det_cod_ejecutor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Oper Sec" border="2" color="33554432" x="2702" y="12" height="56" width="329" html.valueishtml="0"  name=pd_ot_det_oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Avance" border="2" color="33554432" x="3035" y="12" height="56" width="329" html.valueishtml="0"  name=pd_ot_det_cant_avance_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="33554432" x="3369" y="12" height="56" width="315" html.valueishtml="0"  name=pd_ot_det_cant_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="1477" y="72" height="64" width="1079" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="33554432" x="2560" y="72" height="64" width="137" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="33554432" x="2702" y="72" height="64" width="329" html.valueishtml="0"  name=pd_ot_insumos_cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Costo" border="2" color="33554432" x="3035" y="72" height="64" width="329" html.valueishtml="0"  name=pd_ot_insumos_costo_insumo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Total" border="2" color="33554432" x="3369" y="72" height="64" width="315" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Inciden" border="2" color="33554432" x="3689" y="12" height="124" width="238" html.valueishtml="0"  name=pd_ot_det_horas_inciden_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Costo" border="2" color="33554432" x="3931" y="12" height="124" width="329" html.valueishtml="0"  name=pd_ot_det_costo_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Parte" border="2" color="33554432" x="9" y="12" height="124" width="329" html.valueishtml="0"  name=pd_ot_nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=header.1 id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="635" y="4" height="60" width="146" format="[general]" html.valueishtml="0"  name=pd_ot_det_nro_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="786" y="4" height="60" width="407" format="[general]" html.valueishtml="0"  name=pd_ot_det_nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="1198" y="4" height="60" width="274" format="[general]" html.valueishtml="0"  name=pd_ot_det_cod_labor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=18 alignment="0" tabsequence=32766 border="2" color="33554432" x="1477" y="4" height="60" width="919" format="[general]" html.valueishtml="0"  name=pd_ot_det_desc_labor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=19 alignment="0" tabsequence=32766 border="2" color="33554432" x="2400" y="4" height="60" width="155" format="[general]" html.valueishtml="0"  name=pd_ot_det_und_labor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="2560" y="4" height="60" width="137" format="[general]" html.valueishtml="0"  name=pd_ot_det_cod_ejecutor visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=12 alignment="1" tabsequence=32766 border="2" color="33554432" x="2702" y="4" height="60" width="329" format="[general]" html.valueishtml="0"  name=pd_ot_det_oper_sec visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="3035" y="4" height="60" width="329" format="#,##0.00" html.valueishtml="0"  name=pd_ot_det_cant_avance visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="3369" y="4" height="60" width="315" format="#,##0.00" html.valueishtml="0"  name=pd_ot_det_cant_labor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=10 alignment="1" tabsequence=32766 border="2" color="33554432" x="3689" y="4" height="60" width="238" format="#,##0.00" html.valueishtml="0"  name=pd_ot_det_horas_inciden visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="3931" y="4" height="60" width="329" format="#,##0.00" html.valueishtml="0"  name=pd_ot_det_costo_labor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="343" y="4" height="60" width="288" format="dd/mm/yyyy" html.valueishtml="0"  name=pd_ot_fecha visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="60" width="329" format="[general]" html.valueishtml="0"  name=pd_ot_nro_parte visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="33554432" x="1198" y="0" height="60" width="274" format="[general]" html.valueishtml="0"  name=pd_ot_insumos_cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="2" color="33554432" x="1477" y="0" height="60" width="1079" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="2" color="33554432" x="2560" y="0" height="60" width="137" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="2702" y="0" height="60" width="329" format="#,##0.00" html.valueishtml="0"  name=pd_ot_insumos_cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="33554432" x="3035" y="0" height="60" width="329" format="#,##0.000" html.valueishtml="0"  name=pd_ot_insumos_costo_insumo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="round( pd_ot_insumos_cantidad * pd_ot_insumos_costo_insumo ,2)"border="2" color="33554432" x="3369" y="0" height="60" width="315" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

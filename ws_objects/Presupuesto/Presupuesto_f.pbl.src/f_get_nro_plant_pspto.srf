@@ -1,0 +1,35 @@
+﻿$PBExportHeader$f_get_nro_plant_pspto.srf
+global type f_get_nro_plant_pspto from function_object
+end type
+
+forward prototypes
+global function boolean f_get_nro_plant_pspto (string as_origen, string as_codigo, ref string as_ult_nro)
+end prototypes
+
+global function boolean f_get_nro_plant_pspto (string as_origen, string as_codigo, ref string as_ult_nro);String	ls_mensaje
+
+//create or replace function usf_fl_nro_plantilla(
+//       asi_origen          in origen.cod_origen%TYPE,
+//       asi_codigo          in varchar2
+//) return varchar2 is
+
+DECLARE usf_fl_nro_plantilla PROCEDURE FOR
+	usf_fl_nro_plantilla( :gs_origen, :as_codigo );
+
+EXECUTE usf_fl_nro_plantilla;
+
+IF SQLCA.sqlcode = -1 THEN
+	ls_mensaje = "FUNCTION usf_fl_nro_plantilla: " + SQLCA.SQLErrText
+	Rollback ;
+	MessageBox('SQL error', ls_mensaje, StopSign!)	
+	SetNull(as_ult_nro)
+	return FALSE
+END IF
+
+FETCH usf_fl_nro_plantilla INTO :as_ult_nro;
+CLOSE usf_fl_nro_plantilla;
+
+return TRUE
+
+end function
+

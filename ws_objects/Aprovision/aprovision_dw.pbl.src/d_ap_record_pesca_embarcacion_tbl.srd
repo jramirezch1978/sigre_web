@@ -1,0 +1,71 @@
+﻿$PBExportHeader$d_ap_record_pesca_embarcacion_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=460 color="536870912" )
+summary(height=60 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=proveedor dbname="ap_pd_descarga_det.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=char(12) updatewhereclause=yes name=matricula dbname="tg_naves.matricula" )
+ column=(type=decimal(2) updatewhereclause=yes name=capac_bodega dbname="tg_naves.capac_bodega" )
+ column=(type=number updatewhereclause=yes name=peso_venta_tn dbname="peso_venta_tn" )
+ retrieve="SELECT PDD.PROVEEDOR, 
+       N.NOMB_NAVE,
+       N.MATRICULA,
+       N.CAPAC_BODEGA,
+       SUM(ROUND(USF_AP_CONV_UND(PDD.UND, (SELECT UND_TM FROM AP_PARAM WHERE ORIGEN = 'XX'),
+					 GD.PESO_VENTA),4)) as PESO_VENTA_TN								/*Peso en toneladas*/
+      
+FROM  AP_PD_DESCARGA_DET      PDD,
+      TG_NAVES                N,
+      AP_GUIA_RECEPCION_DET   GD,
+      TG_ESPECIES             E
+
+WHERE PDD.PROVEEDOR = N.PROVEEDOR
+  AND PDD.ESPECIE   = E.ESPECIE
+  AND PDD.NRO_PARTE = GD.NRO_PARTE
+  AND PDD.ITEM      = GD.ITEM_PARTE
+  AND TRUNC(PDD.INICIO_DESCARGA) BETWEEN TRUNC(:AD_FECHA_INI) AND TRUNC(:AD_FECHA_FIN)
+  AND INSTR(:AS_COD_ORIGEN, PDD.COD_ORIGEN) > 0
+  AND E.FLAG_TIPO_MATPRIM        			  = 'H'        /* Solo filtra especies Hidrobiologicas */
+  AND N.FLAG_TIPO_FLOTA       				 LIKE :AS_FLOTA
+
+GROUP BY PDD.PROVEEDOR, 
+         N.NOMB_NAVE,
+         N.MATRICULA,
+         N.CAPAC_BODEGA
+
+
+" arguments=(("AD_FECHA_INI", date),("AD_FECHA_FIN", date),("AS_COD_ORIGEN", string),("AS_FLOTA", string))  sort="peso_venta_tn D " )
+text(band=header alignment="2" text="Nro
+" border="2" color="16777215" x="142" y="344" height="112" width="169" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Código
+Proveedor" border="2" color="16777215" x="315" y="344" height="112" width="334" html.valueishtml="0"  name=ap_pd_descarga_det_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nombre de Embarcación
+" border="2" color="16777215" x="654" y="344" height="112" width="1399" html.valueishtml="0"  name=tg_naves_nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Matricula
+" border="2" color="16777215" x="2057" y="344" height="112" width="357" html.valueishtml="0"  name=tg_naves_matricula_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Pesca Real
+TN" border="2" color="16777215" x="2715" y="344" height="112" width="361" html.valueishtml="0"  name=peso_venta_tn_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Capacidad
+Bodega" border="2" color="16777215" x="2418" y="344" height="112" width="293" html.valueishtml="0"  name=capac_bodega_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+compute(band=detail alignment="2" expression="cumulativeSum( 1 )"border="2" color="33554432" x="142" y="0" height="56" width="169" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="315" y="0" height="56" width="334" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="654" y="0" height="56" width="1399" format="[general]" html.valueishtml="0"  name=nomb_nave visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="2057" y="0" height="56" width="357" format="[general]" html.valueishtml="0"  name=matricula visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2715" y="0" height="56" width="361" format="#,##0.000" html.valueishtml="0"  name=peso_venta_tn visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="2418" y="0" height="56" width="293" format="#,##0.00" html.valueishtml="0"  name=capac_bodega visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="TOTALES               " border="2" color="0" x="142" y="0" height="56" width="2569" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(peso_venta_tn for all)"border="2" color="33554432" x="2715" y="0" height="56" width="361" format="#,##0.000" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="46" y="28" height="268" width="549" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="2816" y="112" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2917" y="32" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="3072" y="200" height="56" width="261" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="RECORD DE PESCA DE EMBARCACIONES" border="0" color="0" x="741" y="68" height="64" width="1970" html.valueishtml="0"  name=titulo_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="741" y="164" height="64" width="1970" html.valueishtml="0"  name=rango_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,125 @@
+﻿$PBExportHeader$d_sire_reg_compra85_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(4000) updatewhereclause=yes name=datos dbname="datos" )
+ retrieve="  select trim(to_char(cp.ano, '0000')) || trim(to_char(cp.mes, '00')) ||  '00' ||       --  01.Periodo
+         '|' || trim(cp.origen) || trim(to_char(cp.ano, '0000')) 
+             || trim(to_char(cp.mes, '00')) || trim(to_char(cp.nro_libro, '00')) 
+             || trim(to_char(cp.nro_asiento, '000000')) ||                              -- 02. Voucher
+         '|' || 'M' || trim(to_char(nro_asiento, '000000')) ||                          -- 03. Nro Asiento
+         '|' || to_char(cp.fecha_emision, 'dd/mm/yyyy')     ||                          -- 04. Fecha Emision Documento
+         '|' || dc.cod_sunat                                ||                          -- 05. Tipo Documento
+         '|' || CP.SERIE_CP                                 ||                          -- 06. Serie del documento
+         '|' || CP.NUMERO_CP                                ||                          -- 07. Nro Documento
+         '|' ||
+         trim(to_char((select nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpd.importe, cpd.importe * cp.tasa_cambio) * DECODE(dc.flag_signo, '+', 1, -1)), 0)
+                         from cntas_pagar_det cpd
+                        where cpd.cod_relacion = cp.cod_relacion
+                          and cpd.tipo_doc     = cp.tipo_doc
+                          and cpd.nro_doc      = cp.nro_doc ), '9999990.00')) ||        -- 08. Valor total de las adquisiciones
+         '|' || '' ||                                                                   -- 09. Otros conceptos adicionales
+         '|' ||
+         trim(to_char((select nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpd.importe, cpd.importe * cp.tasa_cambio) * DECODE(dc.flag_signo, '+', 1, -1)), 0)
+                         from cntas_pagar_det cpd
+                        where cpd.cod_relacion = cp.cod_relacion
+                          and cpd.tipo_doc     = cp.tipo_doc
+                          and cpd.nro_doc      = cp.nro_doc ) +
+                      (select nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , ci.importe, ci.importe * cp.tasa_cambio) * DECODE(i.signo, '-', -1, 1) * DECODE(dc.flag_signo, '+', 1, -1)), 0)
+                         from cp_doc_det_imp  ci,
+                    impuestos_tipo   i
+                        where ci.tipo_impuesto = i.tipo_impuesto
+                  and ci.cod_relacion  = cp.cod_relacion
+                          and ci.tipo_doc      = cp.tipo_doc
+                          and ci.nro_doc       = cp.nro_doc ), '9999990.00')) ||        -- 10. Importe total de las adquisiciones registradas
+         '|' || '' ||                                                                   -- 11. Tipo de comprobante de Pago o documentos que sustenta el credito fiscal
+         '|' || '' ||                                                                   -- 12. Serie del comprobante de pago
+         '|' || '' ||                                                                   -- 13. Año de emisión de la DUA
+         '|' || '' ||                                                                   -- 14. Numero del comprobante de pago o formulario
+         '|' || (select trim(to_char(nvl(
+											sum(decode(cp.cod_moneda , PKG_LOGISTICA.of_soles(null), cpi.importe, cpi.importe * cp.tasa_cambio))
+								, 0), '999999990.00')) 
+               from   cp_doc_det_imp cpi,
+                    impuestos_tipo it
+              where cpi.tipo_impuesto = it.tipo_impuesto
+                and cpi.cod_relacion  = cp.cod_Relacion
+                and cpi.tipo_doc    = cp.tipo_doc
+                and cpi.nro_doc     = cp.nro_doc
+                and it.flag_igv     = '1' ) 													 ||    -- 15. Monto de Retención de IGV
+         '|' || decode(cp.cod_moneda, PKG_LOGISTICA.of_soles(null), 'PEN', 'USD') ||    -- 16. Moneda
+         '|' || trim(to_char(cp.tasa_cambio, '9990.000')) ||                            -- 17. Tasa Cambio
+         '|' ||
+              (Select nvl(max(d.cod_pais_sunat), '')
+                 from direcciones d
+                 where d.codigo = p.proveedor )     ||                                  -- 18. Codigo de la residencia del sujeto no domiciliado
+         '|' || trim(substr(replace(p.nom_proveedor, '|', ''), 1, 100)) ||              -- 19. Razon Social o nombre completo
+         '|' || PKG_LOGISTICA.of_get_dir_comercial(cp.cod_relacion) ||                  -- 20. Domicilio en el exterior
+         '|' || DECODE(p.tipo_doc_ident, '6', p.ruc, p.nro_doc_ident) ||                -- 21. Numero de identificacion
+         '|' || '' ||                                                                   -- 22. Numero de Identificación del beneficiario
+         '|' || '' ||                                                                   -- 23. Apellidos y nombres del beneficiario
+         '|' || '' ||                                                                   -- 24. Pais de residencia del beneficiario de los pagos
+         '|' || '00' ||                                                                 -- 25. Vinculo entre el contribuyente y el residente del extranjero
+         '|' || ''   ||                                                                 -- 26. Renta Bruta
+         '|' || '' ||                                                                   -- 27. Deducción / Costo enajenación de bienes de capital
+         '|' || '' ||                                                                   -- 28. Renta Neta
+         '|' ||
+               (select trim(to_char(nvl(max(it.tasa_impuesto), 0), '999999990.00')) 
+               from   cp_doc_det_imp cpi,
+                    impuestos_tipo it
+              where cpi.tipo_impuesto = it.tipo_impuesto
+                and cpi.cod_relacion  = cp.cod_Relacion
+                and cpi.tipo_doc    = cp.tipo_doc
+                and cpi.nro_doc     = cp.nro_doc
+                and it.flag_igv     = '0' )      ||                                     -- 29. Tasa Impuesto	
+         '|' ||
+            (select trim(to_char(nvl(sum(DECODE(cp.cod_moneda , PKG_LOGISTICA.of_soles(null) , cpi.importe, cpi.importe * cp.tasa_cambio)), 0), '999999990.00'))
+             from   cp_doc_det_imp 	cpi,
+                    impuestos_tipo 	it
+            where cpi.tipo_impuesto = it.tipo_impuesto
+              and cpi.cod_relacion  = cp.cod_Relacion
+              and cpi.tipo_doc    = cp.tipo_doc
+              and cpi.nro_doc     = cp.nro_doc
+              and it.flag_igv     = '0')       ||                                       -- 30. Impuesto Retenido
+         '|' || '03' ||                                                                 -- 31. Convenios para evitar doble imputacion
+         '|' || '' ||                                                                   -- 32. Exoneracion aplicada
+         '|' || '00'  ||                                                                -- 33. Tipo Renta
+         '|' || '3' ||                                                                  -- 34. Modalidad de Servicio
+         '|' || '' ||                                                                   -- 35. Aplicación del penultimo parrafo del Art. 76° de la Ley del Impuesto a la Renta
+         '|' || '0' ||                                                                  -- 36. Estado que identifica la oportunidad de la anotación o indicación si ésta corresponde a un ajuste.
+         '|' as datos
+  from   cntas_pagar cp,
+         proveedor   p,
+         doc_tipo    dc,
+         detraccion  d,
+         (Select distinct cod_relacion, tipo_doc, nro_doc
+            from cntas_pagar_Det 
+            where tipo_cred_fiscal in ('01', '02', '03', '04')) cpd
+  where  cp.cod_relacion            = p.proveedor
+    AND  cp.tipo_doc                = dc.tipo_doc
+    and  cp.cod_relacion            = cpd.cod_relacion
+    and  cp.tipo_doc                = cpd.tipo_doc
+    and  cp.nro_doc                 = cpd.nro_doc
+    and  cp.nro_detraccion          = d.nro_detraccion   (+)
+    AND  cp.flag_estado             <> '0'
+    AND  to_char(cp.ano)            = :ani_year
+    AND  trim(to_char(cp.mes,'09')) = :ani_mes
+    AND  cp.nro_libro               = (select f.libro_compras from finparam f where f.reckey = '1')
+    and  cp.tipo_doc                <> 'RE  '
+    and  p.flag_personeria        = 'E'         -- Para no domiciliados
+   ORDER BY p.nom_proveedor, cp.tipo_doc, cp.nro_doc
+" arguments=(("ani_year", number),("ani_mes", number)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="56" width="8165" format="[general]" html.valueishtml="0"  name=datos visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Courier New" font.height="-7" font.weight="400"  font.family="3" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

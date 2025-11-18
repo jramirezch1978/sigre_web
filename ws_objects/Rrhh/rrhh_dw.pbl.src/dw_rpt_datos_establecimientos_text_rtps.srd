@@ -1,0 +1,35 @@
+﻿$PBExportHeader$dw_rpt_datos_establecimientos_text_rtps.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(252) updatewhereclause=yes name=compute_0001 dbname="compute_0001" )
+ retrieve="SELECT RPAD(NVL(E.TIPO_ESTABLECIMIENTO, ' '),2) || '|' ||
+       RPAD(NVL(E.COD_ESTABLECIMIENTO, ' '),4)  || '|' ||
+       RPAD(NVL(E.DENOMINACION, ' '),60)        || '|' ||
+       RPAD(NVL(E.DOMICILIO_FISCAL, ' '), 1)    || '|' ||
+       RPAD(NVL(E.COD_CONDICION_RPTS, ' '),2 )  || '|' ||
+       RPAD(NVL(EM.RUC, ' '), 11)               || '|' ||
+       RPAD(NVL(EM.NOMBRE, ' '), 60)            || '|' ||
+       RPAD(NVL(E.TIPO_VIA, ' '),2)             || '|' ||
+       RPAD(NVL(E.NOMBRE_VIA, ' '), 20)         || '|' ||
+       RPAD(NVL(E.NUMERO_VIA, ' '), 4)          || '|' ||
+       RPAD(NVL(E.INTERIOR, ' '), 4 )           || '|' ||
+       RPAD(NVL(E.TIPO_ZONA, ' '), 2 )          || '|' ||
+       RPAD(NVL(E.NOMBRE_ZONA, ' '), 20 )       || '|' ||
+       RPAD(NVL(E.REFERENCIA, ' '), 40)         || '|' ||
+       SUBSTR(E.COD_DPTO, -2 , 2) || SUBSTR(E.COD_PROV, -2, 2) || SUBSTR(E.COD_DISTR,-2, 2)      
+       
+FROM   rrhh_establecimientos_rtps E,
+       EMPRESA                    EM
+
+WHERE  E.COD_EMPRESA  = EM.COD_EMPRESA
+  AND  INSTR(:as_cod_origen, E.COD_ORIGEN) > 0 
+" arguments=(("AS_COD_ORIGEN", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="76" width="8622" format="[general]" html.valueishtml="0"  name=compute_0001 visible="1" edit.limit=252 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Courier New" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

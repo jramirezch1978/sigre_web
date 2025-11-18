@@ -1,0 +1,84 @@
+﻿$PBExportHeader$d_quiencena_adelanto_det_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=436 color="536870912" )
+summary(height=220 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=concep dbname="adelanto_quincena.concep" )
+ column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="adelanto_quincena.cod_trabajador" )
+ column=(type=char(30) updatewhereclause=yes name=apel_paterno dbname="maestro.apel_paterno" )
+ column=(type=char(30) updatewhereclause=yes name=apel_materno dbname="maestro.apel_materno" )
+ column=(type=char(30) updatewhereclause=yes name=nombre1 dbname="maestro.nombre1" )
+ column=(type=char(30) updatewhereclause=yes name=nombre2 dbname="maestro.nombre2" )
+ column=(type=number updatewhereclause=yes name=imp_adelanto dbname="adelanto_quincena.imp_adelanto" )
+ column=(type=datetime updatewhereclause=yes name=fec_proceso dbname="adelanto_quincena.fec_proceso" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="maestro.cod_origen" )
+ column=(type=char(50) updatewhereclause=yes name=desc_origen dbname="desc_origen" )
+ column=(type=char(3) updatewhereclause=yes name=tipo_trabajador dbname="maestro.tipo_trabajador" )
+ column=(type=char(30) updatewhereclause=yes name=desc_tipo_trab dbname="desc_tipo_trab" )
+ column=(type=char(1) updatewhereclause=yes name=cod_area dbname="maestro.cod_area" )
+ column=(type=char(3) updatewhereclause=yes name=cod_seccion dbname="maestro.cod_seccion" )
+ column=(type=char(30) updatewhereclause=yes name=desc_seccion dbname="desc_seccion" )
+ column=(type=char(2) updatewhereclause=yes name=mes dbname="mes" values="Enero	01/Febrero	02/Marzo	03/Abril	04/Mayo	05/Junio	06/Julio	07/Agosto	08/Setiembre	09/Octubre	10/Noviembre	11/Diciembre	12/" )
+ column=(type=char(4) updatewhereclause=yes name=ano dbname="ano" )
+ column=(type=char(60) updatewhereclause=yes name=concepto_desc_concep dbname="desc_concep" )
+ retrieve="select aq.concep, aq.cod_trabajador, m.apel_paterno, m.apel_materno, m.nombre1, m.nombre2, aq.imp_adelanto, aq.fec_proceso, m.cod_origen, initcap(o.nombre) as desc_origen, m.tipo_trabajador, initcap(tt.desc_tipo_tra) as desc_tipo_trab, m.cod_area, m.cod_seccion, trim(nvl(initcap(s.desc_seccion), 'Sección no descrita')) as desc_seccion, to_char(aq.fec_proceso, 'mm') as mes, to_char(aq.fec_proceso, 'yyyy') as ano, initcap(c.desc_concep) as desc_concep
+   from adelanto_quincena aq
+      left outer join maestro m on aq.cod_trabajador = m.cod_trabajador
+      left outer join origen o on m.cod_origen = o.cod_origen
+      left outer join tipo_trabajador tt on m.tipo_trabajador = tt.tipo_trabajador
+      left outer join area a on m.cod_area = a.cod_area
+      left outer join seccion s on m.cod_area = s.cod_area and m.cod_seccion = s.cod_seccion
+		left outer join concepto c on aq.concep = c.concep
+   where m.cod_origen in (select oao.cod_origen from ot_adm_origen oao inner join ot_adm_usuario oau on oao.ot_adm = oau.ot_adm where oau.cod_usr = 'mmcsn')
+   
+   union all
+
+select hc.concep, hc.cod_trabajador, m.apel_paterno, m.apel_materno, m.nombre1, m.nombre2, hc.imp_soles, hc.fec_calc_plan, m.cod_origen, initcap(o.nombre) as desc_origen, m.tipo_trabajador, initcap(tt.desc_tipo_tra) as desc_tipo_trab, m.cod_area, m.cod_seccion, trim(nvl(initcap(s.desc_seccion), 'Sección no descrita')) as desc_seccion, to_char(hc.fec_calc_plan, 'mm') as mes, to_char(hc.fec_calc_plan, 'yyyy') as ano, initcap(c.desc_concep) as desc_concep
+   from historico_calculo hc 
+      inner join grupo_calculo gc on hc.concep = gc.concepto_gen
+      left outer join adelanto_quincena aq on hc.cod_trabajador = aq.cod_trabajador 
+         and hc.concep = aq.concep 
+         and trunc(hc.fec_calc_plan) = trunc(aq.fec_proceso)
+      left outer join maestro m on hc.cod_trabajador = m.cod_trabajador
+      left outer join origen o on m.cod_origen = o.cod_origen
+      left outer join tipo_trabajador tt on m.tipo_trabajador = tt.tipo_trabajador
+      left outer join area a on m.cod_area = a.cod_area
+      left outer join seccion s on m.cod_area = s.cod_area and m.cod_seccion = s.cod_seccion
+		left outer join concepto c on hc.concep = c.concep
+   where gc.grupo_calculo = (select rc.adelanto_quincena from rrhhparam_cconcep rc where rc.reckey = '1') 
+      and aq.concep is null
+      and m.cod_origen in (select oao.cod_origen from ot_adm_origen oao inner join ot_adm_usuario oau on oao.ot_adm = oau.ot_adm where oau.cod_usr = 'mmcsn')
+
+order by tipo_trabajador, cod_origen, fec_proceso, apel_paterno, apel_materno, nombre1, nombre2, cod_area, cod_seccion" )
+group(level=1 header.height=0 trailer.height=212 by=("cod_origen" , "tipo_trabajador" ) newpage=yes header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=148 trailer.height=132 by=("cod_area" , "cod_seccion" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="105" y="56" height="172" width="389" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="983" y="172" height="56" width="1211" html.valueishtml="0"  name=st_rango_fecha visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="DETALLE DE ADELANTOS DE QUINCENA" border="1" color="0" x="786" y="52" height="76" width="1609" html.valueishtml="0"  name=st_titulo visible="1"  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215"  height.autosize=yes)
+text(band=header alignment="1" text="" border="0" color="0" x="2546" y="244" height="56" width="530" html.valueishtml="0"  name=st_fecha visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="2866" y="164" height="56" width="210" html.valueishtml="0"  name=st_usuario visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2546" y="84" height="56" width="530" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Origen" border="2" color="0" x="782" y="260" height="56" width="229" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Trabajador" border="2" color="0" x="1582" y="260" height="56" width="315" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=10 alignment="2" tabsequence=32766 border="2" color="16711680" x="1015" y="260" height="56" width="562" format="[general]" html.valueishtml="0"  name=desc_origen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=12 alignment="2" tabsequence=32766 border="2" color="16711680" x="1902" y="260" height="56" width="494" format="[general]" html.valueishtml="0"  name=desc_tipo_trab visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="105" y="244" height="56" width="389" html.valueishtml="0"  name=st_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Apellidos y Nombres" border="2" color="0" x="878" y="340" height="56" width="1335" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="498" y="340" height="56" width="375" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+compute(band=trailer.2 alignment="1" expression="sum(imp_adelanto for group 2)"border="0" color="0" x="2217" y="32" height="56" width="466" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="498" y="4" height="56" width="375" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="if(isNull( apel_paterno ), ' ',  trim(apel_paterno) ) + ' ' +  if(isNull(  apel_materno  ), ' ',  trim( apel_materno ) ) + ' ' + if(isNull(  nombre1 ), ' ',  trim( nombre1 ) ) + ' ' + if(isNull(  nombre2  ), ' ',  trim( nombre2 ) )"border="0" color="0" x="878" y="4" height="56" width="1335" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+rectangle(band=trailer.1 x="416" y="52" height="104" width="2341"  name=r_1 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="0" expression="~"Total  ~" + TRIM( desc_origen ) + ~"  -  ~" + TRIM( desc_tipo_trab )"border="0" color="16711680" x="498" y="72" height="56" width="1637" format="[GENERAL]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(imp_adelanto for group 1)"border="0" color="16711680" x="2222" y="76" height="56" width="466" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+rectangle(band=summary x="416" y="56" height="108" width="2341"  name=r_2 visible="1" brush.hatch="7" brush.color="553648127" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+compute(band=summary alignment="2" expression="~"T O T A L     G E N E R A L~""border="0" color="0" x="498" y="80" height="56" width="1637" format="[GENERAL]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(imp_adelanto for all)"border="0" color="0" x="2217" y="80" height="56" width="466" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Importe" border="2" color="0" x="2217" y="340" height="56" width="466" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=7 alignment="1" tabsequence=0 border="0" color="0" x="2217" y="4" height="56" width="466" html.valueishtml="0"  name=imp_adelanto visible="1" editmask.mask="##,###,###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=14 alignment="0" tabsequence=32766 border="0" color="0" x="105" y="40" height="52" width="128" format="[general]" html.valueishtml="0"  name=cod_seccion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=15 alignment="0" tabsequence=32766 border="0" color="0" x="251" y="40" height="52" width="1408" format="[general]" html.valueishtml="0"  name=desc_seccion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

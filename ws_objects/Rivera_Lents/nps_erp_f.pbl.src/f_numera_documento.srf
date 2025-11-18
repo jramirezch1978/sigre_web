@@ -1,0 +1,88 @@
+﻿$PBExportHeader$f_numera_documento.srf
+global type f_numera_documento from function_object
+end type
+
+forward prototypes
+global function string f_numera_documento (string asi_table_name, long ali_length_code)
+end prototypes
+
+global function string f_numera_documento (string asi_table_name, long ali_length_code);// Busca el numero en la tabla de numeradores pasada en el argumento y bloquea ese registro
+// Si el numero no existe, bloquea la tabla y crea un nuevo registro
+// Recibe nombre de tabla de numeradores y longitud del campo de numero a generar
+// Devuelve un numero de documento con el formato origen + numero (XX9999...999)
+
+String 	ls_next_nro, ls_execute, ls_table, ls_nro_act, ls_mensaje, ls_null
+Long 		ll_next_nro, j, ll_long
+ls_table = trim(asi_table_name)
+
+SetNull(ls_null)
+
+ls_execute = "SELECT ult_nro FROM " + ls_table + " WHERE trim(origen) = '" + gnvo_app.is_origen + "' FOR UPDATE"
+execute immediate :ls_execute;
+if SQLCA.SQLCode <> 0 then
+	ls_mensaje = SQLCA.SQLErrText
+	ROLLBACK;
+	MessageBox('Aviso', ls_mensaje)
+	return ls_null
+end if
+
+ls_execute = "INSERT INTO tt_numerador SELECT ult_nro FROM " + ls_table + " WHERE origen = '" + gnvo_app.is_origen + "'"
+execute immediate :ls_execute;
+if SQLCA.SQLCode <> 0 then
+	ls_mensaje = SQLCA.SQLErrText
+	ROLLBACK;
+	MessageBox('Aviso', ls_mensaje)
+	return ls_null
+end if
+
+SELECT numerador 
+	INTO :ll_next_nro 
+FROM tt_numerador;
+
+if isnull( ll_next_nro ) or ll_next_nro = 0 then
+
+	ls_execute = "LOCK TABLE " + ls_table + " IN EXCLUSIVE MODE NOWAIT"
+	execute immediate :ls_execute;
+	if SQLCA.SQLCode <> 0 then
+		ls_mensaje = SQLCA.SQLErrText
+		ROLLBACK;
+		MessageBox('Aviso', ls_mensaje)
+		return ls_null
+	end if
+
+
+	ll_next_nro = 1
+	ls_next_nro = String(ll_next_nro)
+	
+	ls_execute = "INSERT INTO " + ls_table + " (origen, ult_nro) VALUES ('" + gnvo_app.is_origen +"', " +ls_next_nro + ")"
+	execute immediate :ls_execute;
+	if SQLCA.SQLCode <> 0 then
+		ls_mensaje = SQLCA.SQLErrText
+		ROLLBACK;
+		MessageBox('Aviso', ls_mensaje)
+		return ls_null
+	end if
+end if
+
+ls_execute = "UPDATE " + ls_table + " SET ult_nro = " + string(ll_next_nro +1) + " WHERE origen = '" + gnvo_app.is_origen +"'"
+execute immediate :ls_execute;
+if SQLCA.SQLCode <> 0 then
+	ls_mensaje = SQLCA.SQLErrText
+	ROLLBACK;
+	MessageBox('Aviso', ls_mensaje)
+	return ls_null
+end if
+
+// Asigna numero a cabecera
+
+ls_nro_act = String(ll_next_nro)
+ll_long = ali_length_code - len(TRIM( gnvo_app.is_origen))
+if ll_long >= 1 then
+	ls_next_nro = TRIM(gnvo_app.is_origen) + f_llena_caracteres('0',Trim(ls_nro_act),ll_long) 		
+else
+	ls_next_nro = TRIM(gnvo_app.is_origen) + Trim(ls_nro_act)
+end if
+
+return ls_next_nro
+end function
+

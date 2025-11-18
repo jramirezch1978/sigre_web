@@ -1,0 +1,106 @@
+﻿$PBExportHeader$d_rpt_recibos_honorarios_fprovision_rtps.srd
+release 12.5;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=84 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(4000) updatewhereclause=yes name=dato dbname="dato" )
+ retrieve="select distinct trim(to_char(p.tipo_doc_ident, '00')) || '|' ||
+       trim(p.ruc) || '|R|' || 
+       PKG_FACT_ELECTRONICA.of_get_serie(cp.nro_doc) ||'|' || 
+       case when instr(cp.nro_doc, '-') > 0 then
+            trim(to_char(substr(trim(cp.nro_doc), instr(cp.nro_doc, '-') + 1), '00000000')) 
+       else
+            trim(cp.nro_doc) 
+       end || '|' ||
+       trim(to_char(
+			case
+				when cp.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+					cp.importe_doc 
+				else
+					cp.importe_doc * cp.tasa_cambio
+			end + 
+				(select nvl(sum(
+								case 
+									when cp.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+										cpi.importe
+									else
+										cpi.importe * cp.tasa_cambio
+								end ),0) 
+               from cp_doc_det_imp cpi 
+              where cpi.cod_relacion = cpd.cod_relacion 
+                and cpi.tipo_doc     = cp.tipo_doc
+                and cpi.nro_doc      = cp.nro_doc) 
+       , '999990.00')) ||'|' ||
+       trim(to_char(cp.fecha_emision, 'dd/mm/yyyy')) ||'|' || 
+       trim(to_char(decode(s.fecha_pago, null, cp.fecha_emision, s.fecha_pago), 'dd/mm/yyyy')) ||'|' ||
+       case when (select nvl(sum(
+										case
+											when cp.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+												cpi.importe
+											else
+												cpi.importe * cp.tasa_cambio
+										end),0) 
+                    from cp_doc_det_imp cpi 
+                   where cpi.cod_relacion = cpd.cod_relacion 
+                     and cpi.tipo_doc     = cp.tipo_doc
+                     and cpi.nro_doc      = cp.nro_doc) > 0 then '1'
+       else '0' end || '|' ||
+		 ''  || '|' ||
+		 ''  || '|' as dato
+from 	cntas_pagar cp,
+     	cntas_pagar_det cpd,
+		proveedor       p,
+		(select cbd.cod_relacion, cbd.tipo_doc, cbd.nro_doc,
+					 max(cb.fecha_emision) as fecha_pago
+			  from caja_bancos cb,
+					 caja_bancos_det cbd,
+					 cntas_pagar     cp2
+			 where cb.origen      = cbd.origen
+				and cb.nro_registro = cbd.nro_registro
+				and cb.flag_estado  <> '0'
+				and cbd.cod_relacion = cp2.cod_relacion
+				and cbd.tipo_doc     = cp2.tipo_doc
+				and cbd.nro_doc      = cp2.nro_doc 
+				and cbd.tipo_doc		= 'RE'
+				and instr(:as_cod_origen, cp2.origen) > 0
+			group by cbd.cod_relacion, cbd.tipo_doc, cbd.nro_doc
+		 union all
+		 select lq.proveedor, lq.tipo_doc, lq.nro_doc,
+					DECODE(max(sg.fecha_aprobacion), null, max(cp2.fecha_emision), max(sg.fecha_aprobacion)) as fecha_pago
+			from solicitud_giro sg,
+				  solicitud_giro_liq_det lq,
+				  cntas_pagar            cp2
+		  where sg.nro_solicitud = lq.nro_solicitud
+			 and lq.proveedor = cp2.cod_relacion
+			 and lq.tipo_doc     = cp2.tipo_doc
+			 and lq.nro_doc      = cp2.nro_doc 
+			 and instr(:as_cod_origen, sg.origen) > 0
+		 group by lq.proveedor, lq.tipo_doc, lq.nro_doc
+		) S
+where cp.cod_relacion 	= p.proveedor
+  and cp.cod_relacion 	= cpd.cod_relacion
+  and cp.tipo_doc     		= cpd.tipo_doc
+  and cp.nro_doc      		= cpd.nro_doc
+  and cp.cod_relacion 	= s.cod_relacion	(+)
+  and cp.tipo_doc			= s.tipo_doc			(+)
+  and cp.nro_doc			= s.nro_doc			(+)
+  and trim(to_char(cp.ano, '0000')) || trim(to_char(cp.mes, '00')) = trim(to_char(:an_year, '0000')) || trim(to_char(:an_mes, '00'))
+  and cp.tipo_doc     	= 'RE'
+  and cp.flag_estado  	<> '0'
+order by 1
+  
+" arguments=(("AN_YEAR", number),("AN_MES", number),("AS_COD_ORIGEN", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="0" y="0" height="76" width="4430" format="[general]" html.valueishtml="0"  name=dato visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

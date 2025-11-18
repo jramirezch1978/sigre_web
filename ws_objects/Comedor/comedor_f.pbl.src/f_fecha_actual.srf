@@ -1,0 +1,21 @@
+﻿$PBExportHeader$f_fecha_actual.srf
+global type f_fecha_actual from function_object
+end type
+
+forward prototypes
+global function datetime f_fecha_actual ()
+end prototypes
+
+global function datetime f_fecha_actual ();Datetime ldt_fecha_actual
+
+SELECT SYSDATE
+INTO   :ldt_fecha_actual
+FROM   DUAL ;
+
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox('SQL error','Fecha Actual no ha sido Recuperada'+' '+SQLCA.SQLErrText)
+END IF
+
+Return ldt_fecha_actual
+end function
+

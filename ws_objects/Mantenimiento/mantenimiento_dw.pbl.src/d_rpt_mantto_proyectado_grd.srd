@@ -1,0 +1,128 @@
+﻿$PBExportHeader$d_rpt_mantto_proyectado_grd.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=560 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=116 color="536870912" )
+table(column=(type=decimal(3) updatewhereclause=yes name=prox_mantto dbname="tt_mtt_proyectado.prox_mantto" )
+ column=(type=datetime updatewhereclause=yes name=fec_prox_mantto dbname="tt_mtt_proyectado.fec_prox_mantto" )
+ column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="mt_prog_ciclo_mantto.cod_maquina" )
+ column=(type=char(100) updatewhereclause=yes name=desc_maq dbname="maquina.desc_maq" )
+ column=(type=decimal(0) updatewhereclause=yes name=frecuencia dbname="mt_prog_ciclo_mantto.frecuencia" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tipo_ciclo dbname="mt_prog_ciclo_mantto.flag_tipo_ciclo" values="Funcionamiento	F/Calendario	C/" )
+ column=(type=char(3) updatewhereclause=yes name=und_actividad dbname="mt_prog_ciclo_mantto.und_actividad" )
+ column=(type=decimal(3) updatewhereclause=yes name=prom_dia dbname="mt_prog_ciclo_mantto.und_prom_dia" )
+ column=(type=char(1) updatewhereclause=yes name=flag_reprog dbname="tt_mtt_proyectado.flag_reprog" values="	1/	0" )
+ column=(type=decimal(3) updatewhereclause=yes name=reprog dbname="tt_mtt_proyectado.reprog" )
+ column=(type=char(1) updatewhereclause=yes name=flag_generar dbname="tt_mtt_proyectado.flag_generar" values="	1/	0" )
+ column=(type=char(10) updatewhereclause=yes name=nro_ot dbname="tt_mtt_proyectado.nro_ot" )
+ column=(type=decimal(4) updatewhereclause=yes name=horometro dbname="maquina.ind_act_acumulada" )
+ column=(type=char(25) updatewhereclause=yes name=desc_unidad dbname="unidad.desc_unidad" )
+ column=(type=char(100) updatewhereclause=yes name=desc_plantilla dbname="desc_plantilla" )
+ column=(type=datetime updatewhereclause=yes name=fec_ult_mantto dbname="tt_mtt_proyectado.fec_ult_mantto" )
+ column=(type=decimal(3) updatewhereclause=yes name=ult_mantto dbname="tt_mtt_proyectado.ult_mantto" )
+ column=(type=char(10) updatewhereclause=yes name=prog_mnt dbname="tt_mtt_proyectado.prog_mnt" )
+ column=(type=datetime updatewhereclause=yes name=fec_estimada dbname="orden_trabajo.fec_estimada" )
+ column=(type=datetime updatewhereclause=yes name=fec_inicio dbname="orden_trabajo.fec_inicio" )
+ column=(type=char(1) updatewhereclause=yes name=imprimir dbname="imprimir" values="	1/	0" )
+ retrieve="SELECT A.PROX_MANTTO,   
+         A.FEC_PROX_MANTTO,   
+         B.COD_MAQUINA,   
+         M.DESC_MAQ,   
+         B.FRECUENCIA,   
+         B.FLAG_TIPO_CICLO,   
+         B.UND_ACTIVIDAD,   
+         B.UND_PROM_DIA,   
+         A.FLAG_REPROG,   
+         A.REPROG,   
+         A.FLAG_GENERAR,   
+         A.NRO_OT,   
+         M.IND_ACT_ACUMULADA,   
+         U.DESC_UNIDAD,   
+         P.COD_PLANTILLA || ' ' || P.DESC_PLANTILLA || ' (' ||
+				to_char((select count(*) from plant_prod_oper where cod_plantilla = P.COD_plantilla)) || ' labores)'
+				as desc_plantilla,   
+         A.FEC_ULT_MANTTO,   
+         A.ULT_MANTTO,   
+         A.PROG_MNT,   
+         OT.FEC_ESTIMADA,   
+         OT.FEC_INICIO,   
+         '0' as imprimir  
+    FROM TT_MTT_PROYECTADO      A,   
+         MT_PROG_CICLO_MANTTO   B,   
+         MAQUINA                M,   
+         PLANT_PROD        	  P,   
+         UNIDAD                 U,   
+         ORDEN_TRABAJO          OT  
+   WHERE A.nro_ot          = OT.nro_orden (+)
+     and A.PROG_MNT        = B.PROG_MNT 
+     and M.COD_MAQUINA     = B.COD_MAQUINA 
+     and B.COD_PLANTILLA   = P.COD_PLANTILLA 
+     and B.UND_ACTIVIDAD   = U.UND    
+ORDER BY B.COD_MAQUINA ASC, B.FRECUENCIA ASC, A.PROG_MNT ASC   " )
+group(level=1 header.height=88 trailer.height=0 by=("cod_maquina" ) header.color="536870912" trailer.color="536870912" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="68" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2715" y="148" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2715" y="228" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="d_rpt_mantto_proyectado_grd" border="0" color="0" x="41" y="356" height="56" width="690" html.valueishtml="0"  name=t_codigo visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="41" y="284" height="56" width="690" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="96" y="24" height="244" width="585" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="Frecuen
+cia" border="2" color="0" x="1088" y="460" height="96" width="247" html.valueishtml="0"  name=frecuencia_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Ultimo
+Mnt" border="2" color="0" x="1339" y="460" height="96" width="274" html.valueishtml="0"  name=ultimo_mnt_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha
+Ult. Mnt" border="2" color="0" x="1618" y="460" height="96" width="265" html.valueishtml="0"  name=fecha_ultimo_mn_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Prox
+Mantto" border="2" color="0" x="1888" y="460" height="96" width="274" html.valueishtml="0"  name=prox_mantto_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha 
+Prox Mnt" border="2" color="0" x="2167" y="460" height="96" width="265" html.valueishtml="0"  name=fec_prox_mantto_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Tipo
+Ciclo" border="2" color="0" x="2437" y="460" height="96" width="293" html.valueishtml="0"  name=flag_tipo_ciclo_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Unid.
+Prom Dia" border="2" color="0" x="2734" y="460" height="96" width="247" html.valueishtml="0"  name=und_prom_dia_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Unidad
+Actividad" border="2" color="0" x="2985" y="460" height="96" width="338" html.valueishtml="0"  name=und_actividad_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Reprogra-
+mación" border="2" color="0" x="3328" y="460" height="96" width="297" html.valueishtml="0"  name=reprog_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Generar
+O. T." border="2" color="0" x="3630" y="460" height="96" width="229" html.valueishtml="0"  name=flag_generar_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Reporte de Mantenimientos Proyectados" border="0" color="0" x="837" y="72" height="92" width="1810" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="837" y="176" height="64" width="1810" html.valueishtml="0"  name=subtitulo_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="837" y="252" height="64" width="1810" html.valueishtml="0"  name=subtitulo2_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="837" y="328" height="64" width="1810" html.valueishtml="0"  name=subtitulo3_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Orden
+Trabajo" border="2" color="0" x="3863" y="460" height="96" width="311" html.valueishtml="0"  name=nro_ot_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fec. Est
+Inicio" border="2" color="0" x="4178" y="460" height="96" width="265" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fec. Real
+Inicio" border="2" color="0" x="4448" y="460" height="96" width="265" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Impr." border="2" color="0" x="4718" y="460" height="96" width="123" html.valueishtml="0"  name=imprimir_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion 
+Plantilla" border="2" color="0" x="14" y="460" height="96" width="1070" html.valueishtml="0"  name=desc_plantilla_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="0" text="Máquina y/o equipo" border="0" color="0" x="41" y="16" height="56" width="485" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="0" text="Medidor/horometro" border="0" color="0" x="2560" y="16" height="56" width="498" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="955" y="12" height="64" width="1563" format="[general]" html.valueishtml="0"  name=desc_maq visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="544" y="12" height="64" width="384" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1"  moveable=1 edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=13 alignment="1" tabsequence=32766 border="0" color="33554432" x="3077" y="16" height="56" width="430" format="###,##0.000" html.valueishtml="0"  name=horometro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="1" tabsequence=32766 border="2" color="33554432" x="1339" y="4" height="108" width="274" format="###,##0.000" html.valueishtml="0"  name=ult_mantto visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="2" tabsequence=32766 border="2" color="33554432" x="1618" y="4" height="108" width="265" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_ult_mantto visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="2" color="33554432" x="1888" y="4" height="108" width="274" format="###,##0.000" html.valueishtml="0"  name=prox_mantto visible="1" editmask.mask="###,##0.000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="2167" y="4" height="108" width="265" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_prox_mantto visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2437" y="4" height="108" width="293" format="[general]" html.valueishtml="0"  name=flag_tipo_ciclo visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=upper ddlb.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="2734" y="4" height="108" width="247" format="###,##0.000" html.valueishtml="0"  name=prom_dia visible="1" editmask.mask="###,##0.000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="2" color="33554432" x="2985" y="4" height="108" width="338" format="[general]" html.valueishtml="0"  name=desc_unidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=10 border="2" color="33554432" x="3328" y="4" height="108" width="297" format="###,##0.000" html.valueishtml="0"  name=reprog visible="1" editmask.mask="###,##0.000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=20 border="2" color="33554432" x="3630" y="4" height="108" width="229" format="[general]" html.valueishtml="0"  name=flag_generar visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="2" color="33554432" x="3863" y="4" height="108" width="311" format="[general]" html.valueishtml="0"  name=nro_ot visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="2" tabsequence=32766 border="2" color="33554432" x="4178" y="4" height="108" width="265" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_estimada visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="2" tabsequence=32766 border="2" color="33554432" x="4448" y="4" height="108" width="265" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_inicio visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="2" tabsequence=30 border="2" color="33554432" x="4718" y="4" height="108" width="123" format="[general]" html.valueishtml="0"  name=imprimir visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="1088" y="4" height="108" width="247" format="##,##0" html.valueishtml="0"  name=frecuencia visible="1" editmask.mask="###,##0" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=40 border="2" color="33554432" x="14" y="4" height="108" width="1070" format="[general]" html.valueishtml="0"  name=desc_plantilla visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

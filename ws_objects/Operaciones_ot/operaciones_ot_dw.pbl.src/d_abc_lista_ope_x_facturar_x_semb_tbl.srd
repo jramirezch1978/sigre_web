@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_abc_lista_ope_x_facturar_x_semb_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="operaciones.nro_orden" )
+ column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="operaciones.cod_labor" )
+ column=(type=char(40) updatewhereclause=yes name=desc_operacion dbname="operaciones.desc_operacion" )
+ column=(type=char(4) updatewhereclause=yes name=cod_ejecutor dbname="operaciones.cod_ejecutor" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="operaciones.oper_sec" )
+ column=(type=datetime updatewhereclause=yes name=fec_inicio dbname="operaciones.fec_inicio" )
+ column=(type=number updatewhereclause=yes name=precio dbname="facturacion_operacion.precio" )
+ column=(type=char(0) updatewhereclause=yes name=flag dbname="flag" values=" Facturar	1/ Facturar	0" )
+ retrieve="select op.nro_orden     ,
+       op.cod_labor     ,
+       op.desc_operacion,
+       op.cod_ejecutor  ,
+       op.oper_sec      ,
+       op.fec_inicio    ,
+       0.00 as precio   ,
+       '' as flag
+  from facturacion_operacion fo, operaciones op
+ where  (fo.oper_sec    = op.oper_sec      ) and
+        (fo.item        = 1                ) and
+        (op.flag_estado = '2'              ) and
+		  (op.proveedor   = :as_cod_relacion ) and  
+		  (op.cod_ejecutor= :as_ejecutor		 ) and        
+       ((to_char(op.fec_inicio,'yyyymmdd') >= :as_fecha_inicio )  and
+        (to_char(op.fec_inicio,'yyyymmdd') <= :as_fecha_final  )) and
+		  (fo.oper_sec		in (select oper_sec from facturacion_operacion where item = 1
+									 minus
+									 select oper_sec from facturacion_operacion where item = 2))" arguments=(("as_cod_relacion", string),("as_ejecutor", string),("as_fecha_inicio", string),("as_fecha_final", string)) )
+text(band=header alignment="2" text="Nº OT" border="2" color="8388608" x="9" y="4" height="56" width="302" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Labor" border="2" color="8388608" x="315" y="4" height="56" width="288" html.valueishtml="0"  name=cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="8388608" x="608" y="4" height="56" width="846" html.valueishtml="0"  name=desc_operacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ejecutor" border="2" color="8388608" x="1458" y="4" height="56" width="265" html.valueishtml="0"  name=cod_ejecutor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Oper Sec" border="2" color="8388608" x="1728" y="4" height="56" width="302" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha" border="2" color="8388608" x="2034" y="4" height="56" width="311" html.valueishtml="0"  name=fec_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Precio" border="2" color="8388608" x="2350" y="4" height="56" width="329" html.valueishtml="0"  name=precio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Facturar" border="2" color="8388608" x="2683" y="4" height="56" width="293" html.valueishtml="0"  name=flag_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="64" width="302" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="315" y="0" height="64" width="288" format="[general]" html.valueishtml="0"  name=cod_labor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=10 border="2" color="33554432" x="608" y="0" height="64" width="846" format="[general]" html.valueishtml="0"  name=desc_operacion visible="1" edit.limit=200 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.hscrollbar=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1458" y="0" height="64" width="265" format="[general]" html.valueishtml="0"  name=cod_ejecutor visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1728" y="0" height="64" width="302" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="2034" y="0" height="64" width="311" format="[shortdate] [time]" html.valueishtml="0"  name=fec_inicio visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=20 border="2" color="33554432" x="2350" y="0" height="64" width="329" format="[general]" html.valueishtml="0"  name=precio visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=30 border="2" color="33554432" x="2683" y="0" height="64" width="293" format="[general]" html.valueishtml="0"  name=flag visible="1" checkbox.text=" Facturar" checkbox.on="1" checkbox.off="0" checkbox.lefttext=yes checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

@@ -1,0 +1,66 @@
+﻿$PBExportHeader$m_generar_ajuste.srm
+forward
+global type m_generar_ajuste from menu
+end type
+type m_prorratearcosto from menu within m_generar_ajuste
+end type
+type m_anularmovdeajuste from menu within m_generar_ajuste
+end type
+global type m_generar_ajuste from menu
+m_prorratearcosto m_prorratearcosto
+m_anularmovdeajuste m_anularmovdeajuste
+end type
+end forward
+
+global type m_generar_ajuste from menu
+m_prorratearcosto m_prorratearcosto
+m_anularmovdeajuste m_anularmovdeajuste
+end type
+global m_generar_ajuste m_generar_ajuste
+
+on m_generar_ajuste.create
+m_generar_ajuste=this
+call super::create
+this.text = "m_generar_ajuste"
+this.m_prorratearcosto=create m_prorratearcosto
+this.m_anularmovdeajuste=create m_anularmovdeajuste
+this.Item[UpperBound(this.Item)+1]=this.m_prorratearcosto
+this.Item[UpperBound(this.Item)+1]=this.m_anularmovdeajuste
+end on
+
+on m_generar_ajuste.destroy
+call super::destroy
+destroy(this.m_prorratearcosto)
+destroy(this.m_anularmovdeajuste)
+end on
+
+type m_prorratearcosto from menu within m_generar_ajuste
+end type
+
+event clicked;ParentWindow.Event dynamic ue_generar()
+end event
+
+on m_prorratearcosto.create
+call super::create
+this.text = "Generar Mov de Ajuste"
+end on
+
+on m_prorratearcosto.destroy
+call super::destroy
+end on
+
+type m_anularmovdeajuste from menu within m_generar_ajuste
+end type
+
+event clicked;ParentWindow.Event dynamic ue_anular()
+end event
+
+on m_anularmovdeajuste.create
+call super::create
+this.text = "Anular Mov de Ajuste"
+end on
+
+on m_anularmovdeajuste.destroy
+call super::destroy
+end on
+

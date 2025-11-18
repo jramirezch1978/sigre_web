@@ -1,0 +1,48 @@
+﻿$PBExportHeader$f_verificacion_monto_os.srf
+global type f_verificacion_monto_os from function_object
+end type
+
+forward prototypes
+global subroutine f_verificacion_monto_os (string as_origen, string as_nro_os, ref decimal adc_monto_fac, ref decimal adc_monto_prov)
+end prototypes
+
+global subroutine f_verificacion_monto_os (string as_origen, string as_nro_os, ref decimal adc_monto_fac, ref decimal adc_monto_prov);String ls_nro_sol,ls_flag_os
+
+
+//parametro de verificacion
+select flag_os_provision into :ls_flag_os from finparam where reckey = '1' ;
+
+//recupera monto facturado
+select os.nro_sol_serv,Nvl(os.monto_facturado,0)
+  into :ls_nro_sol,:adc_monto_fac
+  from orden_servicio os
+ where (os.cod_origen = :as_origen ) and
+ 		 (os.nro_os		 = :as_nro_os );
+  
+  
+  
+//monto total de la o.servicio  
+IF (Isnull(ls_nro_sol) or Trim(ls_nro_sol) = '' ) and ls_flag_os = '1' THEN //controla aprobacion
+	
+	select Sum( (Nvl(osd.importe,0) - Nvl(osd.decuento,0)) + ( Nvl(osd.impuesto,0) + Nvl(osd.impuesto2,0))  )
+	  into :adc_monto_prov	
+	  from orden_servicio_det osd
+	 where (osd.conformidad_usr is not null   ) and
+   	    (osd.cod_origen       = :as_origen ) and
+	       (osd.nro_os           = :as_nro_os	) ;
+
+ELSE	
+	
+	select Nvl(os.monto_total,0)
+	  into :adc_monto_prov
+	  from orden_servicio os
+	 where (os.cod_origen = :as_origen ) and
+	       (os.nro_os     = :as_nro_os ) ;
+			 
+END IF
+
+       
+       
+
+end subroutine
+

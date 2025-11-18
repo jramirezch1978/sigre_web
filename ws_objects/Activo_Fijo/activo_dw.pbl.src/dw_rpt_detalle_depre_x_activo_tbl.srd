@@ -1,0 +1,68 @@
+﻿$PBExportHeader$dw_rpt_detalle_depre_x_activo_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=700 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=af_calculo_cntbl_cod_activo dbname="af_calculo_cntbl.cod_activo" )
+ column=(type=char(60) updatewhereclause=yes name=af_maestro_descripcion dbname="af_maestro.descripcion" )
+ column=(type=decimal(3) updatewhereclause=yes name=af_maestro_tasa_dep dbname="af_maestro.tasa_dep" )
+ column=(type=decimal(2) updatewhereclause=yes name=valor_adq_sol dbname="af_maestro.valor_adq_sol" )
+ column=(type=decimal(0) updatewhereclause=yes name=ano dbname="af_calculo_cntbl.ano" )
+ column=(type=number updatewhereclause=yes name=depre_prod dbname="depre_prod" )
+ column=(type=number updatewhereclause=yes name=depre_veda dbname="depre_veda" )
+ retrieve="SELECT AFC.COD_ACTIVO,  
+       AFM.DESCRIPCION,
+       AFM.TASA_DEP,
+       AFM.VALOR_ADQ_SOL,
+       AFC.ANO,
+       SUM(NVL(AFC.VALOR_PRODUCCION,0)) AS DEPRE_PROD,
+       SUM(NVL(AFC.VALOR_VEDA,0))       AS DEPRE_VEDA
+
+FROM   AF_CALCULO_CNTBL  AFC,
+       AF_MAESTRO        AFM
+
+WHERE  AFC.COD_ACTIVO = AFM.COD_ACTIVO
+  AND  AFC.COD_ACTIVO = :AS_COD_ACTIVO
+  
+GROUP BY AFC.COD_ACTIVO,  
+         AFM.DESCRIPCION,
+         AFM.TASA_DEP,
+         AFM.VALOR_ADQ_SOL,
+         AFC.ANO
+" arguments=(("AS_COD_ACTIVO", string)) )
+text(band=header alignment="2" text="RESUMEN ANUAL DE DEPRECIACION 
+DE ACTIVOS FIJOS" border="1" color="0" x="832" y="96" height="152" width="1426" html.valueishtml="0"  name=t_17 visible="1"  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="2537" y="228" height="56" width="581" format="dd/mm/yyyy    hh:mm:ss" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="0" x="2565" y="76" height="56" width="544" format="[general]" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="gs_user" border="0" color="0" x="2866" y="152" height="56" width="242" html.valueishtml="0"  name=t_usuario visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="37" y="28" height="268" width="549" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="gs_empresa" border="0" color="0" x="46" y="316" height="56" width="544" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="466" y="0" height="80" width="279" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="1143" y="0" height="80" width="389" format="[general]" html.valueishtml="0"  name=depre_prod visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="750" y="0" height="80" width="389" format="[general]" html.valueishtml="0"  name=valor_adq_sol visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="1536" y="0" height="80" width="389" format="[general]" html.valueishtml="0"  name=depre_veda visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" depre_prod + depre_veda "border="2" color="33554432" x="1929" y="0" height="80" width="389" format="###,##0.00" html.valueishtml="0"  name=total_depre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" valor_adq_sol - total_depre "border="2" color="33554432" x="2322" y="0" height="80" width="389" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Activo:
+" border="2" color="8388608" x="466" y="460" height="112" width="279" html.valueishtml="0"  name=af_calculo_cntbl_cod_activo_t visible="1"  slideup=directlyabove  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+column(band=header id=1 alignment="2" tabsequence=32766 border="2" color="8388608" x="750" y="460" height="112" width="389" format="[general]" html.valueishtml="0"  name=af_calculo_cntbl_cod_activo visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="2" color="8388608" x="1143" y="460" height="112" width="1175" format="[general]" html.valueishtml="0"  name=af_maestro_descripcion visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+text(band=header alignment="2" text="
+~t af_maestro_tasa_dep  + ' %'" border="2" color="8388608" x="2322" y="460" height="112" width="389" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+text(band=header alignment="2" text="Produccion" border="2" color="8388608" x="1143" y="632" height="56" width="389" html.valueishtml="0"  name=af_calculo_cntbl_valor_produccion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+text(band=header alignment="2" text="Veda" border="2" color="8388608" x="1536" y="632" height="56" width="389" html.valueishtml="0"  name=af_calculo_cntbl_valor_veda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+text(band=header alignment="2" text="Total" border="2" color="8388608" x="1929" y="632" height="56" width="389" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+text(band=header alignment="2" text="Valor Depreciación" border="2" color="8388608" x="1143" y="576" height="52" width="1175" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+text(band=header alignment="2" text="Periodo
+" border="2" color="8388608" x="466" y="576" height="112" width="279" html.valueishtml="0"  name=af_calculo_cntbl_ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+text(band=header alignment="2" text="Valor de
+Adquisición" border="2" color="8388608" x="750" y="576" height="112" width="389" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+text(band=header alignment="2" text="Valor Neto
+Contable" border="2" color="8388608" x="2322" y="576" height="112" width="389" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421504" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

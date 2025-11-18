@@ -1,0 +1,107 @@
+﻿$PBExportHeader$f_row_processing.srf
+global type f_row_processing from function_object
+end type
+
+forward prototypes
+global function boolean f_row_processing (datawindow ad_id, string as_form)
+end prototypes
+
+global function boolean f_row_processing (datawindow ad_id, string as_form);/*
+   Funcion que permite validar los items que deben ser ingresados
+	Parametros:
+	            ad_id        : nombre del datawindow a validar
+					as_form      : tipo del formato del dw
+					an_campos[]  : Array conteniendo los nro de campos a validar 
+*/
+//DwItemStatus l_rowstatus
+//Long j, k
+//String ls_colname, ls_tipo
+//
+//if Upperbound( an_campos) = 0 then
+//	Messagebox( "Error", "Debe indicar columnas a validar")
+//	Return False
+//End if
+//
+//ad_id.AcceptText()  
+//
+////row = dw_status.GetNextModified(row, Primary!)
+//
+//Any la_id
+//// Verifica todos los campos y valida en aquellos que son requeridos
+//For j = 1 to ad_id.RowCount()
+//	l_rowStatus = ad_id.GetItemStatus( j, 0, primary!)	
+//	// Si es un registro nuevo 
+//	if l_rowStatus = newmodified! or l_rowstatus = new! then			
+//		for k = 1 to UpperBound( an_campos)				
+//	   	l_rowStatus = ad_id.GetItemStatus(j, an_campos[k], Primary!)
+//			ad_id.SetColumn(an_campos[k])
+//			ls_colname = ad_id.GetColumnName()
+//
+//			if l_rowStatus = notmodified!  then
+//				Messagebox( "Error", "Campo Requerido en " + ls_colname, stopsign!)
+//				ad_id.ScrollToRow( j )
+//				if as_form <> 'form' then
+//					f_select_current_row(ad_id)
+//				end if
+//				ad_id.SetColumn( an_campos[k])
+//				Return False
+//			end if
+//		Next
+//	elseif l_rowstatus = datamodified! then			
+//	end if
+//Next
+//Return true
+//
+////			ls_tipo = ad_id.Describe("#" + String(k) + ".ColType")
+////			if LEFT( ls_tipo,1) = 'd' then
+////				la_id = ad_id.GetItemNumber( j,k)
+////			end if
+////			if LEFT( ls_tipo,1) = 'c' then
+////				la_id = ad_id.GetItemString( j,k)
+////			end if
+//
+//// and not isnull(la_id)
+
+
+// Funcion que valida campos que son requeridos
+// Argumentos:	ad_id	   Datawindow a verificar
+//				   as_form   Tipo de form del dw
+// Valor de Retorno: boolean
+
+DwItemStatus l_rowstatus
+Integer 	li_col, li_ok
+Long 		ll_row, j, k
+String 	ls_colname, ls_campo
+
+// Verifica todos los campos y valida en aquellos que son requeridos
+For j = 1 to ad_id.RowCount()
+	l_rowStatus = ad_id.GetItemStatus( j, 0, primary!)
+	if l_rowStatus = newmodified! or l_rowstatus = datamodified! then
+		
+		ll_row = j   // Numero de fila a evaluar
+		li_col = 1   // numero de la columna a evaluar
+		li_ok = ad_id.FindRequired( primary!, ll_row, li_col, ls_colname, true )
+
+		if li_ok = 1 and ll_row = j then 
+			// Encuentra el texto del campo seleccionado
+			ls_campo = ls_colname + "_t.text"
+			ls_campo = ad_id.describe( ls_campo )
+			if ls_campo <> '!' then
+				Messagebox( "Error", "Campo Requerido en " + ls_campo, stopsign!)
+			else
+				Messagebox( "Error", "Campo Requerido en " + ls_colname &
+					+ '~r~nls_campo: ' + ls_campo, stopsign!)
+			end if
+			ad_id.ScrollToRow( j )
+			if as_form <> 'form' then
+				f_select_current_row(ad_id)
+			end if
+			ad_id.SetColumn( ls_colname)
+			ad_id.SetFocus()
+			Return False		
+		end if	
+	end if	
+Next
+Return true
+end function
+

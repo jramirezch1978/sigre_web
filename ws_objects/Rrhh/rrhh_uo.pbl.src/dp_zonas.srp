@@ -1,0 +1,8 @@
+﻿$PBExportHeader$dp_zonas.srp
+PIPELINE(source_connect=RTPS,destination_connect=oemlm1_work5,type=append,commit=100,errors=100,keyname="rrhh_zonas_rtps")
+SOURCE(name="zona",COLUMN(type=double,name="codigo",dbtype="Numeric",nulls_allowed=yes)
+ COLUMN(type=varchar,name="descripcio",dbtype="Char(23)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"zona~" ) COLUMN(NAME=~"zona.codigo~") COLUMN(NAME=~"zona.descripcio~")) ")
+DESTINATION(name="rrhh_zonas_rtps",COLUMN(type=char,name="cod_zona",dbtype="CHAR(2)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="descripcion",dbtype="VARCHAR2(50)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_estado",dbtype="CHAR(1)",nulls_allowed=yes))

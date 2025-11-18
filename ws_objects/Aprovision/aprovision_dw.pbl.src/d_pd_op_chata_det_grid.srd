@@ -1,0 +1,84 @@
+﻿$PBExportHeader$d_pd_op_chata_det_grid.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_parte dbname="tg_parte_piso_det.nro_parte" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="tg_parte_piso_det.item" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=formato dbname="tg_parte_piso_det.formato" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_maquina dbname="tg_parte_piso_det.cod_maquina" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=atributo dbname="tg_parte_piso_det.atributo" )
+ column=(type=datetime update=yes updatewhereclause=yes name=hora_inicio dbname="tg_parte_piso_det.hora_inicio" )
+ column=(type=datetime update=yes updatewhereclause=yes name=hora_fin dbname="tg_parte_piso_det.hora_fin" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=numero_lectura dbname="tg_parte_piso_det.nro_lectura" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_control dbname="tg_parte_piso_det.nro_control" )
+ column=(type=decimal(3) update=yes updatewhereclause=yes name=valor_lectura dbname="tg_parte_piso_det.valor_lectura" )
+ column=(type=char(40) updatewhereclause=yes name=desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(20) updatewhereclause=yes name=desc_atributo dbname="tg_med_act_atributo.descripcion" )
+ column=(type=decimal(3) updatewhereclause=yes name=medicion_min dbname="tg_fmt_med_act_det.medicion_min" )
+ column=(type=decimal(3) updatewhereclause=yes name=medicion_max dbname="tg_fmt_med_act_det.medicion_max" )
+ column=(type=char(25) updatewhereclause=yes name=desc_unidad dbname="unidad.desc_unidad" )
+ retrieve="  SELECT A.NRO_PARTE,   
+         A.ITEM,   
+         A.FORMATO,   
+         A.COD_MAQUINA,   
+         A.ATRIBUTO,   
+         A.HORA_INICIO,   
+         A.HORA_FIN,   
+         A.NRO_LECTURA,   
+			A.NRO_CONTROL,
+         A.VALOR_LECTURA,   
+         B.DESC_MAQ,   
+         C.DESCRIPCION,   
+         D.MEDICION_MIN,   
+         D.MEDICION_MAX,
+			E.DESC_UNIDAD  
+    FROM TG_PARTE_PISO_DET A,   
+         MAQUINA B,   
+         TG_MED_ACT_ATRIBUTO C,   
+         TG_FMT_MED_ACT_DET D,
+			UNIDAD E  
+   WHERE A.COD_MAQUINA = B.COD_MAQUINA and  
+         A.ATRIBUTO    = C.ATRIBUTO and  
+         A.COD_MAQUINA = D.COD_MAQUINA AND
+         A.FORMATO     = D.FORMATO AND
+         A.ATRIBUTO    = D.ATRIBUTO AND
+			E.UND			  = C.UND AND
+         A.NRO_PARTE = :as_parte 
+ORDER BY A.COD_MAQUINA ASC,   
+         A.ATRIBUTO ASC,
+         A.NRO_LECTURA ASC    " update="TG_PARTE_PISO_DET" updatewhere=0 updatekeyinplace=no arguments=(("as_parte", string)) )
+text(band=header alignment="2" text="Item" border="2" color="33554432" x="9" y="8" height="56" width="160" html.valueishtml="0"  name=item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Hora Inicio" border="2" color="33554432" x="1321" y="8" height="56" width="430" html.valueishtml="0"  name=hora_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Hora Fin" border="2" color="33554432" x="1760" y="8" height="56" width="411" html.valueishtml="0"  name=hora_fin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Valor" border="2" color="33554432" x="2693" y="8" height="56" width="274" html.valueishtml="0"  name=valor_lectura_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro Parte" border="2" color="33554432" x="3808" y="8" height="56" width="302" html.valueishtml="0"  name=nro_parte_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Formato" border="2" color="33554432" x="3552" y="8" height="56" width="247" html.valueishtml="0"  name=formato_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descr Maq" border="2" color="0" x="178" y="8" height="56" width="672" html.valueishtml="0"  name=maquina_desc_maq_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Desc Atrib" border="2" color="0" x="859" y="8" height="56" width="453" html.valueishtml="0"  name=desc_atributo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cod Maq" border="2" color="33554432" x="2976" y="8" height="56" width="315" html.valueishtml="0"  name=cod_maquina_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cod Atr" border="2" color="33554432" x="3301" y="8" height="56" width="242" html.valueishtml="0"  name=atributo_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Medicion Min" border="2" color="0" x="4119" y="8" height="56" width="439" html.valueishtml="0"  name=medicion_min_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Medicion Max" border="2" color="0" x="4567" y="8" height="56" width="485" html.valueishtml="0"  name=medicion_max_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="0" text="Unidad Desc Unidad" border="0" color="0" x="5061" y="4" height="56" width="567" html.valueishtml="0"  name=desc_unidad_t visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="# Lect." border="2" color="0" x="2437" y="8" height="56" width="247" html.valueishtml="0"  name=tg_parte_piso_det_nro_lectura_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="# Control" border="2" color="0" x="2181" y="8" height="56" width="247" html.valueishtml="0"  name=nro_control_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="160" format="[general]" html.valueishtml="0"  name=item visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=6 alignment="0" tabsequence=10 border="2" color="33554432" x="1321" y="4" height="64" width="430" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=hora_inicio visible="1" editmask.mask="dd/mm/yyyy hh:mm" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=20 border="2" color="33554432" x="1760" y="4" height="64" width="411" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=hora_fin visible="1" editmask.mask="dd/mm/yyyy hh:mm" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=30 border="2" color="33554432" x="2693" y="4" height="64" width="274" format="###,###.00" html.valueishtml="0"  name=valor_lectura visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=50 border="2" color="33554432" x="3808" y="4" height="64" width="302" format="[general]" html.valueishtml="0"  name=nro_parte visible="0" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=40 border="2" color="33554432" x="3552" y="4" height="64" width="247" format="[general]" html.valueishtml="0"  name=formato visible="0" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="33554432" x="178" y="4" height="64" width="672" format="[general]" html.valueishtml="0"  name=desc_maq visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="859" y="4" height="64" width="453" format="[general]" html.valueishtml="0"  name=desc_atributo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="2976" y="4" height="64" width="315" format="[general]" html.valueishtml="0"  name=cod_maquina visible="0" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="3301" y="4" height="64" width="242" format="[general]" html.valueishtml="0"  name=atributo visible="0" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="2" color="33554432" x="4119" y="4" height="64" width="439" format="###,###.00" html.valueishtml="0"  name=medicion_min visible="0" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="4567" y="4" height="64" width="485" format="###,###.00" html.valueishtml="0"  name=medicion_max visible="0" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="2" color="33554432" x="5061" y="4" height="64" width="567" format="[general]" html.valueishtml="0"  name=desc_unidad visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="2437" y="4" height="64" width="247" format="[general]" html.valueishtml="0"  name=numero_lectura visible="1" editmask.mask="###" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="2185" y="4" height="64" width="242" format="###" html.valueishtml="0"  name=nro_control visible="1" editmask.required=yes editmask.spin=yes editmask.mask="###" editmask.imemode=0 editmask.spinincr=1 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

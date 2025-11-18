@@ -1,0 +1,64 @@
+﻿$PBExportHeader$d_abc_art_ov_pendientes_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(12) update=yes updatewhereclause=yes name=cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cant_procesada dbname="articulo_mov_proy.cant_procesada" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cant_facturada dbname="articulo_mov_proy.cant_facturada" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=decuento dbname="articulo_mov_proy.decuento" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=impuesto dbname="articulo_mov_proy.impuesto" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="articulo_mov_proy.cod_moneda" )
+ column=(type=decimal(6) updatewhereclause=yes name=precio_unit dbname="articulo_mov_proy.precio_unit" )
+ column=(type=char(8) updatewhereclause=yes name=confin dbname="concepto_financiero.confin" )
+ column=(type=char(8) updatewhereclause=yes name=matriz_cntbl dbname="concepto_financiero.matriz_cntbl" )
+ column=(type=number updatewhereclause=yes name=cant_pendiente dbname="cant_pendiente" )
+ column=(type=char(2) updatewhereclause=yes name=dl27400 dbname="dl27400" )
+ column=(type=char(8) updatewhereclause=yes name=cod_clase dbname="articulo.cod_clase" )
+ column=(type=char(4000) updatewhereclause=yes name=centro_benef dbname="centro_benef" )
+ retrieve="  SELECT ~"ARTICULO_MOV_PROY~".~"COD_ART~",   
+         ~"ARTICULO~".~"NOM_ARTICULO~",   
+         ~"ARTICULO_MOV_PROY~".~"CANT_PROCESADA~",   
+         ~"ARTICULO_MOV_PROY~".~"CANT_FACTURADA~",   
+         ~"ARTICULO_MOV_PROY~".~"DECUENTO~",  
+         ~"ARTICULO_MOV_PROY~".~"IMPUESTO~",   
+         ~"ARTICULO_MOV_PROY~".~"COD_MONEDA~",   
+         ~"ARTICULO_MOV_PROY~".~"PRECIO_UNIT~"  ,
+         ~"CONCEPTO_FINANCIERO~".~"CONFIN~",   
+         ~"CONCEPTO_FINANCIERO~".~"MATRIZ_CNTBL~",   
+         Nvl( ~"ARTICULO_MOV_PROY~".~"CANT_PROYECT~",0) - Nvl(~"ARTICULO_MOV_PROY~".~"CANT_FACTURADA~",0) AS CANT_PENDIENTE   ,
+			DECODE(~"ARTICULO_VENTA~".~"FLAG_DL27400~",'1',(SELECT tipo_cred_fiscal_dl27400 FROM comparam WHERE reckey = '1'),NULL) AS DL27400,
+			~"ARTICULO~".~"COD_CLASE~",
+
+			USF_COM_CENTRO_BENEFICIO_ART(almacen.cod_origen,articulo_mov_proy.cod_art) as centro_benef
+    FROM ~"ARTICULO_MOV_PROY~",   
+         ~"ARTICULO~",   
+         ~"ARTICULO_VENTA~",   
+         ~"CONCEPTO_FINANCIERO~",   
+         ~"LOGPARAM~"  ,
+			~"ALMACEN~"
+   WHERE ( articulo.cod_art                   = articulo_venta.cod_art        (+)) and  
+         ( articulo_venta.confin              = concepto_financiero.confin    (+)) and  
+			( articulo_mov_proy.almacen          = almacen.almacen 					(+)) and
+         ( ~"ARTICULO_MOV_PROY~".~"COD_ART~"      = ~"ARTICULO~".~"COD_ART~"             ) and  
+         ( ~"ARTICULO_MOV_PROY~".~"TIPO_DOC~"     = ~"LOGPARAM~".~"DOC_OV~"              ) and  
+         ( ( ~"ARTICULO_MOV_PROY~".~"COD_ORIGEN~" = :as_cod_origen 		            ) and
+         ( ~"ARTICULO_MOV_PROY~".~"NRO_DOC~" 		 = :as_nro_doc 				         ) and
+         ( Nvl( ~"ARTICULO_MOV_PROY~".~"CANT_PROYECT~",0) - Nvl(~"ARTICULO_MOV_PROY~".~"CANT_FACTURADA~",0) > 0 ) )    
+
+
+" arguments=(("as_cod_origen", string),("as_nro_doc", string)) )
+text(band=header alignment="2" text="Codigo " border="2" color="8388608" x="9" y="8" height="56" width="352" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nombre" border="2" color="8388608" x="366" y="8" height="56" width="1083" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="1454" y="8" height="56" width="425" html.valueishtml="0"  name=cant_procesada_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="64" width="352" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="366" y="0" height="64" width="1083" format="[general]" html.valueishtml="0"  name=nom_articulo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="0" x="1454" y="0" height="64" width="425" format="[general]" html.valueishtml="0"  name=cant_pendiente visible="1" editmask.mask="###,###.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

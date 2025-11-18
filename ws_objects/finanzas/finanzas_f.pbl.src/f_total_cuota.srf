@@ -1,0 +1,23 @@
+﻿$PBExportHeader$f_total_cuota.srf
+global type f_total_cuota from function_object
+end type
+
+forward prototypes
+global function decimal f_total_cuota (decimal adc_imp_capital, decimal adc_imp_interes, decimal adc_imp_impuesto, string as_flag_signo)
+end prototypes
+
+global function decimal f_total_cuota (decimal adc_imp_capital, decimal adc_imp_interes, decimal adc_imp_impuesto, string as_flag_signo);Decimal {2} ldc_imp_total = 0.00
+
+IF adc_imp_capital > 0 THEN
+	ldc_imp_total = (adc_imp_capital + adc_imp_interes )		
+	IF as_flag_signo = '+' 		THEN
+		ldc_imp_total = (ldc_imp_total + adc_imp_impuesto)
+	ELSEIF as_flag_signo = '-' THEN
+		ldc_imp_total = (ldc_imp_total - adc_imp_impuesto)
+	END IF
+END IF 
+
+
+Return ldc_imp_total
+end function
+

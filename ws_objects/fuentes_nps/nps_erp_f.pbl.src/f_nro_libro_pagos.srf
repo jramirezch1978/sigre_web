@@ -1,0 +1,22 @@
+﻿$PBExportHeader$f_nro_libro_pagos.srf
+global type f_nro_libro_pagos from function_object
+end type
+
+forward prototypes
+global function boolean f_nro_libro_pagos (ref long al_nro_libro)
+end prototypes
+
+global function boolean f_nro_libro_pagos (ref long al_nro_libro);Boolean lb_retorno = TRUE
+
+SELECT libro_pagos
+  INTO :al_nro_libro
+  FROM finparam
+ WHERE (reckey = '1') ;
+ 
+IF Isnull(al_nro_libro) OR al_nro_libro = 0 THEN
+	lb_retorno = FALSE
+END IF
+
+Return lb_retorno
+end function
+

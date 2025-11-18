@@ -1,0 +1,67 @@
+﻿$PBExportHeader$d_abc_cns_almacen_x_ot_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=124 color="536870912" )
+summary(height=60 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=articulo_cod_art dbname="articulo.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=articulo_desc_art dbname="articulo.desc_art" )
+ column=(type=char(10) updatewhereclause=yes name=vale_mov_nro_vale dbname="vale_mov.nro_vale" )
+ column=(type=number updatewhereclause=yes name=precio_un_sol dbname="precio_un_sol" )
+ column=(type=number updatewhereclause=yes name=cant_proc dbname="cant_proc" )
+ column=(type=number updatewhereclause=yes name=tipo_cambio dbname="tipo_cambio" )
+ column=(type=number updatewhereclause=yes name=precio_dolar dbname="precio_dolar" )
+ column=(type=number updatewhereclause=yes name=total dbname="total" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="articulo_mov.oper_sec" )
+ retrieve="select a.cod_art, 
+     a.desc_art,
+     vm.nro_vale,
+	  nvl(am.precio_unit, 0) as precio_un_sol,  
+     nvl(am.cant_procesada, 0) as cant_proc, 
+	  nvl(c.vta_dol_prom, 0) as tipo_cambio, 
+	  round((nvl(am.precio_unit, 0)) / nvl(c.vta_dol_prom, 0), 2) as precio_dolar, 
+	  round((nvl(am.precio_unit, 0) * nvl(am.cant_procesada, 0)) / nvl(c.vta_dol_prom, 0), 2) as total, 
+	  am.oper_sec
+   from vale_mov vm,
+      articulo_mov am,
+      calendario c,
+      articulo a 
+   where vm.cod_origen = am.cod_origen 
+      and trunc(vm.fec_registro) = trunc(c.fecha)
+      and am.cod_art = a.cod_art 
+      and vm.nro_vale = am.nro_vale
+      and am.oper_sec is not null 
+      and am.flag_estado <> 0
+      and am.oper_sec in (select op.oper_sec
+         from operaciones op
+         where op.nro_orden = :asi_nro_orden
+            and op.cod_labor = :asi_cod_labor
+            and op.cod_ejecutor = :asi_cod_ejecutor)
+   order by a.cod_art" arguments=(("asi_nro_orden", string),("asi_cod_labor", string),("asi_cod_ejecutor", string)) )
+group(level=1 header.height=64 trailer.height=0 by=("articulo_cod_art" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Descripción" border="2" color="33554432" x="366" y="68" height="56" width="1106" html.valueishtml="0"  name=articulo_desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Artículo" border="2" color="33554432" x="5" y="8" height="56" width="1467" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Precio" border="2" color="33554432" x="2144" y="8" height="56" width="997" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Unitario US $" border="2" color="33554432" x="2478" y="68" height="56" width="329" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Total US$" border="2" color="33554432" x="2811" y="68" height="56" width="329" html.valueishtml="0"  name=compute_0006_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Código" border="2" color="33554432" x="5" y="68" height="56" width="357" html.valueishtml="0"  name=articulo_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="CantidadProcesada" border="2" color="33554432" x="1810" y="8" height="116" width="329" html.valueishtml="0"  name=cant_proc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="3141" y="0" height="56" width="41" format="[general]" html.valueishtml="0"  name=oper_sec visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="1810" y="0" height="52" width="329" format="[general]" html.valueishtml="0"  name=cant_proc pointer="h:\Source\cur\taladro.cur" visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="1477" y="0" height="52" width="329" format="[general]" html.valueishtml="0"  name=vale_mov_nro_vale visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(total for all)"border="2" color="33554432" x="2811" y="0" height="52" width="329" format="#,###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="Total" border="2" color="33554432" x="5" y="0" height="52" width="2802" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="2811" y="0" height="52" width="329" format="[general]" html.valueishtml="0"  name=total pointer="h:\Source\cur\taladro.cur" visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2478" y="0" height="52" width="329" format="[general]" html.valueishtml="0"  name=precio_dolar pointer="h:\Source\cur\taladro.cur" visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="2144" y="0" height="52" width="329" format="[general]" html.valueishtml="0"  name=precio_un_sol pointer="h:\Source\cur\taladro.cur" visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="52" width="357" format="[general]" html.valueishtml="0"  name=articulo_cod_art pointer="h:\Source\cur\taladro.cur" visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="366" y="4" height="52" width="1106" format="[general]" html.valueishtml="0"  name=articulo_desc_art pointer="h:\Source\cur\taladro.cur" visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Númerode Vale" border="2" color="33554432" x="1477" y="8" height="116" width="329" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="1" text="" border="2" color="0" x="1477" y="4" height="52" width="329" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Unitario S/." border="2" color="33554432" x="2144" y="68" height="56" width="329" html.valueishtml="0"  name=precio_un_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="1" text="" border="2" color="0" x="2144" y="4" height="52" width="663" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=header.1 alignment="1" expression="sum(cant_proc for group 1)"border="2" color="33554432" x="1810" y="4" height="52" width="329" format="#,###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.1 alignment="1" expression="sum(total for group 1)"border="2" color="33554432" x="2811" y="4" height="52" width="329" format="#,###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

@@ -1,0 +1,46 @@
+﻿$PBExportHeader$d_abc_liquidacion_cierre_og_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen dbname="solicitud_giro.origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_solicitud dbname="solicitud_giro.nro_solicitud" )
+ column=(type=datetime updatewhereclause=yes name=fecha_registro dbname="solicitud_giro.fecha_registro" )
+ column=(type=datetime updatewhereclause=yes name=fecha_emision dbname="solicitud_giro.fecha_emision" )
+ column=(type=char(200) update=yes updatewhereclause=yes name=descripcion dbname="solicitud_giro.descripcion" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="solicitud_giro.importe" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="solicitud_giro.cod_moneda" )
+ column=(type=char(6) updatewhereclause=yes name=usuario dbname="solicitud_giro.usuario" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="solicitud_giro.cod_relacion" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=aprobacion dbname="solicitud_giro.aprobacion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="solicitud_giro.flag_estado" values="Anulada	0/Generada	1/Aprobada	2/Pagada	3/Liquidacion Parcial	4/Liquidacion Total	5/" )
+ retrieve="SELECT  ~"SOLICITUD_GIRO~".~"ORIGEN~" ,
+        ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~" ,
+        ~"SOLICITUD_GIRO~".~"FECHA_REGISTRO~" ,
+        ~"SOLICITUD_GIRO~".~"FECHA_EMISION~" ,
+        ~"SOLICITUD_GIRO~".~"DESCRIPCION~" ,
+        ~"SOLICITUD_GIRO~".~"IMPORTE~" ,
+        ~"SOLICITUD_GIRO~".~"COD_MONEDA~" ,
+        ~"SOLICITUD_GIRO~".~"USUARIO~" ,
+        ~"SOLICITUD_GIRO~".~"COD_RELACION~" ,
+        ~"SOLICITUD_GIRO~".~"APROBACION~" ,
+        ~"SOLICITUD_GIRO~".~"FLAG_ESTADO~"     
+   FROM ~"SOLICITUD_GIRO~"    
+  WHERE ~"SOLICITUD_GIRO~".~"FLAG_ESTADO~"  IN( '4','5')   AND
+		  ~"SOLICITUD_GIRO~".~"FLAG_TIPO_MVTO~" in  ('G','F')" update="SOLICITUD_GIRO" updatewhere=1 updatekeyinplace=no  sort="nro_solicitud A " )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="9" y="8" height="56" width="320" html.valueishtml="0"  name=origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Solicitud" border="2" color="8388608" x="334" y="8" height="56" width="283" html.valueishtml="0"  name=nro_solicitud_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Importe" border="2" color="8388608" x="896" y="8" height="56" width="329" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="1230" y="8" height="56" width="334" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha" border="2" color="8388608" x="622" y="8" height="56" width="270" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Estado" border="2" color="8388608" x="1568" y="8" height="56" width="430" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="68" width="320" format="[general]" html.valueishtml="0"  name=origen visible="1" dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="896" y="0" height="68" width="329" format="[general]" html.valueishtml="0"  name=importe visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="0" x="1230" y="0" height="68" width="334" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" dddw.name=d_dddw_moneda_tbl dddw.displaycolumn=descripcion dddw.datacolumn=cod_moneda dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="334" y="0" height="68" width="283" format="[general]" html.valueishtml="0"  name=nro_solicitud visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="622" y="0" height="68" width="270" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_emision visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="2" color="0" x="1568" y="0" height="68" width="430" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

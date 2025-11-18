@@ -1,0 +1,21 @@
+﻿$PBExportHeader$f_view_data.srf
+global type f_view_data from function_object
+end type
+
+forward prototypes
+global subroutine f_view_data (datastore ads_object, string as_titulo, integer ai_width, integer ai_height)
+end prototypes
+
+global subroutine f_view_data (datastore ads_object, string as_titulo, integer ai_width, integer ai_height);Long		ll_rc
+Blob		lblb_data
+w_data	lw_sheet
+
+OpenSheet(lw_sheet, w_main, 0, Original!)
+ll_rc = ads_object.GetFullState(lblb_data)
+ll_rc = lw_sheet.dw_1.SetFullState(lblb_data)
+lw_sheet.title  = as_titulo
+lw_sheet.width  = ai_width
+lw_sheet.height  = ai_height
+
+end subroutine
+

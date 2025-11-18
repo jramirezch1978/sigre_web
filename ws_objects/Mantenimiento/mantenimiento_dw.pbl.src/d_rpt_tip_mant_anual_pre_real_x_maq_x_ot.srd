@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_rpt_tip_mant_anual_pre_real_x_maq_x_ot.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=60 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=tt_maq_x_ot_val_cod_origen dbname="tt_maq_x_ot_val.cod_origen" )
+ column=(type=decimal(0) updatewhereclause=yes name=tt_maq_x_ot_val_nro_orden dbname="tt_maq_x_ot_val.nro_orden" )
+ column=(type=decimal(0) updatewhereclause=yes name=orden_trabajo_nro_mant_prog dbname="orden_trabajo.nro_mant_prog" )
+ column=(type=char(50) updatewhereclause=yes name=descripcion dbname="descripcion" )
+ column=(type=datetime updatewhereclause=yes name=tt_maq_x_ot_val_fec_inicio dbname="tt_maq_x_ot_val.fec_inicio" )
+ column=(type=number updatewhereclause=yes name=tt_maq_x_ot_val_gtos_operativos dbname="gtos_operativos" )
+ column=(type=number updatewhereclause=yes name=tt_maq_x_ot_val_gtos_insumos dbname="gtos_insumos" )
+ column=(type=number updatewhereclause=yes name=tt_maq_x_ot_val_gtos_total dbname="gtos_total" )
+ retrieve="  SELECT ~"TT_MAQ_X_OT_VAL~".~"COD_ORIGEN~",   
+         ~"TT_MAQ_X_OT_VAL~".~"NRO_ORDEN~",   
+         ~"ORDEN_TRABAJO~".~"NRO_MANT_PROG~",   
+         SUBSTR(~"TT_MAQ_X_OT_VAL~".~"DESCRIPCION~",1,50) AS DESCRIPCION,   
+         ~"TT_MAQ_X_OT_VAL~".~"FEC_INICIO~",   
+         SUM(~"TT_MAQ_X_OT_VAL~".~"GTOS_OPERATIVOS~") AS GTOS_OPERATIVOS,   
+         SUM(~"TT_MAQ_X_OT_VAL~".~"GTOS_INSUMOS~")	  AS GTOS_INSUMOS   ,   
+         SUM(~"TT_MAQ_X_OT_VAL~".~"GTOS_TOTAL~") 	  AS GTOS_TOTAL	 
+    FROM ~"TT_MAQ_X_OT_VAL~",   
+         ~"ORDEN_TRABAJO~"  
+   WHERE ( ~"TT_MAQ_X_OT_VAL~".~"COD_ORIGEN~" = ~"ORDEN_TRABAJO~".~"COD_ORIGEN~" ) and  
+         ( ~"TT_MAQ_X_OT_VAL~".~"NRO_ORDEN~" = ~"ORDEN_TRABAJO~".~"NRO_ORDEN~" ) and  
+         ( ( ~"TT_MAQ_X_OT_VAL~".~"COD_MAQUINA~" = :as_cod_maquina )         )    
+GROUP BY ~"TT_MAQ_X_OT_VAL~".~"COD_ORIGEN~",   
+         ~"TT_MAQ_X_OT_VAL~".~"NRO_ORDEN~",   
+         ~"ORDEN_TRABAJO~".~"NRO_MANT_PROG~",   
+         ~"TT_MAQ_X_OT_VAL~".~"DESCRIPCION~",   
+         ~"TT_MAQ_X_OT_VAL~".~"FEC_INICIO~"   " arguments=(("as_cod_maquina", string)) )
+text(band=header alignment="2" text="Origen" border="2" color="0" x="9" y="8" height="56" width="265"  name=tt_maq_x_ot_val_cod_origen_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="0" x="279" y="8" height="56" width="256"  name=tt_maq_x_ot_val_nro_orden_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro.Mant Prog" border="2" color="0" x="539" y="8" height="56" width="338"  name=orden_trabajo_nro_mant_prog_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="882" y="8" height="56" width="1399"  name=descripcion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fec Inicio" border="2" color="0" x="2286" y="8" height="56" width="279"  name=tt_maq_x_ot_val_fec_inicio_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Gtos Operativos" border="2" color="0" x="2569" y="8" height="56" width="389"  name=tt_maq_x_ot_val_gtos_operativos_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Gtos Insumos" border="2" color="0" x="2962" y="8" height="56" width="379"  name=tt_maq_x_ot_val_gtos_insumos_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Gtos Total" border="2" color="0" x="3346" y="8" height="56" width="347"  name=tt_maq_x_ot_val_gtos_total_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="64" width="265" format="[general]"  name=tt_maq_x_ot_val_cod_origen edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="0" x="279" y="0" height="64" width="256" format="[general]"  name=tt_maq_x_ot_val_nro_orden edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="539" y="0" height="64" width="338" format="[general]"  name=orden_trabajo_nro_mant_prog edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="882" y="0" height="64" width="1399" format="[general]"  name=descripcion edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="2569" y="0" height="64" width="389" format="[general]"  name=tt_maq_x_ot_val_gtos_operativos editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="0" x="2962" y="0" height="64" width="379" format="[general]"  name=tt_maq_x_ot_val_gtos_insumos editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="0" x="3346" y="0" height="64" width="347" format="[general]"  name=tt_maq_x_ot_val_gtos_total editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="2286" y="0" height="64" width="279" format="[shortdate] [time]"  name=tt_maq_x_ot_val_fec_inicio editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Total :" border="2" color="255" x="2286" y="0" height="56" width="279"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=summary alignment="1" expression="sum(  tt_maq_x_ot_val_gtos_total  for all )"border="2" color="0" x="3346" y="0" height="56" width="347" format="###,###.00"  name=compute_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  tt_maq_x_ot_val_gtos_insumos   for all )"border="2" color="0" x="2962" y="0" height="56" width="379" format="###,###.00"  name=compute_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="sum(  tt_maq_x_ot_val_gtos_operativos  for all )"border="2" color="0" x="2569" y="0" height="56" width="389" format="###,###.00"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

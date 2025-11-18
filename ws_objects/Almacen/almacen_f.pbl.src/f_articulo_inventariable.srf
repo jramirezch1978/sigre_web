@@ -1,0 +1,46 @@
+﻿$PBExportHeader$f_articulo_inventariable.srf
+global type f_articulo_inventariable from function_object
+end type
+
+forward prototypes
+global function integer f_articulo_inventariable (string as_codigo_sku)
+end prototypes
+
+global function integer f_articulo_inventariable (string as_codigo_sku);/*
+   Evalua si articulo es inventariable o no
+	
+	Parametro: codigo de articulo
+	retorna:  0 = no inventariable
+				 1 = inventariable
+				-1 = articulo no existe
+*/
+
+Long ll_count
+string ls_flag, ls_activo, ls_cod_art
+
+
+// Valida si es inventariable o no
+Select flag_inventariable, flag_estado 
+  into :ls_flag, :ls_activo 
+  from articulo
+  where cod_art = :as_codigo_sku
+    or cod_sku	 = :as_codigo_sku;
+
+if SQLCA.SQLCode = 100 then
+	Messagebox("Aviso", "Codigo " + as_codigo_sku + " no existe en maestro de artículo ni como código ni como SKU, por favor verifique!", StopSign!)
+	return -1
+end if
+
+if ls_flag = '0' then
+	Messagebox("Aviso", "Codigo " + as_codigo_sku + " no corresponde a un artículo inventariable, por favor verifique!", StopSign!)
+	return 0
+end if  
+
+if ls_activo = '0' then
+	Messagebox("Aviso", "Codigo " + as_codigo_sku + " no corresponde a un artículo que se encuentre activo, por favor verifique!", StopSign!)
+	return 0
+end if  
+
+return 1
+end function
+

@@ -1,0 +1,41 @@
+﻿$PBExportHeader$f_nro_registro.srf
+global type f_nro_registro from function_object
+end type
+
+forward prototypes
+global function long f_nro_registro ()
+end prototypes
+
+global function long f_nro_registro ();Long   ll_nro_reg
+String ls_lock_table
+
+//***********RETORNA EL NRO REGISTRO***********//
+
+ls_lock_table = 'LOCK TABLE NUM_CAJA_BANCOS IN EXCLUSIVE MODE'
+EXECUTE IMMEDIATE :ls_lock_table ;
+
+
+SELECT ULT_NRO
+INTO   :ll_nro_reg
+FROM   NUM_CAJA_BANCOS
+WHERE  RECKEY = '1';
+
+IF IsNull(ll_nro_reg) OR ll_nro_reg = 0 THEN
+   MessageBox('NUMERO DE INGRESO','Debe ser MAYOR que CERO')
+END IF
+
+UPDATE NUM_CAJA_BANCOS
+SET    ULT_NRO = :ll_nro_reg + 1
+WHERE  RECKEY = '1';
+
+IF sqlca.sqlcode = -1 Then
+	Messagebox('ERROR NUMERO REGISTRO',sqlca.sqlerrtext)
+	ROLLBACK;
+ELSE
+	COMMIT;
+END IF
+
+RETURN ll_nro_reg
+
+end function
+

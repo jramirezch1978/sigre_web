@@ -1,0 +1,40 @@
+﻿$PBExportHeader$f_select_current_row.srf
+global type f_select_current_row from function_object
+end type
+
+forward prototypes
+global function long f_select_current_row (datawindow adw_datawindow)
+end prototypes
+
+global function long f_select_current_row (datawindow adw_datawindow);/////////////////////////////////////////////////////////////////
+//
+// Purpose:
+// Will select the row of the datawindow that
+// is the current row.
+//
+// Must pass a datawindow to the function of 
+// which you want the current row selected.
+//
+// Will return the row number of the current
+// row.
+//
+/////////////////////////////////////////////////////////////////
+
+
+long 	ll_currentrow
+
+ll_currentrow = adw_datawindow.GetRow()
+
+IF ll_currentrow > 0 then
+	//change redraw to avoid flicker
+	adw_datawindow.setredraw(false)
+	
+	adw_datawindow.SelectRow(0,False)
+	adw_datawindow.SelectRow(ll_currentrow,True)
+	adw_datawindow.setfocus()
+
+	adw_datawindow.setredraw(true)
+END IF
+return ll_currentrow
+end function
+

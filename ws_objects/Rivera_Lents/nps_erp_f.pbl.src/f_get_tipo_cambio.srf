@@ -1,0 +1,56 @@
+﻿$PBExportHeader$f_get_tipo_cambio.srf
+global type f_get_tipo_cambio from function_object
+end type
+
+forward prototypes
+global function decimal f_get_tipo_cambio (date ad_fecha)
+end prototypes
+
+global function decimal f_get_tipo_cambio (date ad_fecha);// Verifica que tipo de cambio exista
+Decimal{2} ld_cambio
+String	ls_mensaje
+
+Select NVL(cmp_dol_prom,0)
+  into :ld_cambio 
+  from calendario 
+ where TRUNC(fecha) = :ad_fecha;
+
+if sqlca.sqlcode < 0 then
+	ls_mensaje = sqlca.sqlerrtext
+	ROLLBACK;
+	gnvo_log.of_errorlog(ls_mensaje)
+	gnvo_app.of_showmessagedialog( ls_mensaje )
+	Return 0
+end if
+
+if sqlca.sqlcode = 100 then
+	select NVL(ULT_TIPO_CAM,0)
+		into :ld_cambio
+	from logparam
+	where reckey = '1';
+	
+	if SQLCA.SQLCode = 100 then
+		ls_mensaje = "No ha definido ningun parametro en logparam"
+		gnvo_log.of_errorlog( ls_mensaje )
+		gnvo_app.of_showmessagedialog( ls_mensaje )
+		return 0
+	end if
+	
+	if ld_cambio = 0 or isnull( ld_cambio) then
+		ls_mensaje = "Tasa de cambio en Logparam no debe ser Cero" 
+		gnvo_log.of_errorlog( ls_mensaje )
+		gnvo_app.of_showmessagedialog( ls_mensaje )
+		return 0
+	end if
+end if
+
+if ld_cambio = 0 or isnull( ld_cambio) then
+	ls_mensaje = "Tasa de cambio no debe ser Cero~r~nPara el dia " + String( ad_fecha) 
+	gnvo_log.of_errorlog( ls_mensaje )
+	gnvo_app.of_showmessagedialog( ls_mensaje )
+	return 0
+end if
+
+Return ld_cambio
+end function
+

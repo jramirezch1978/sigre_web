@@ -1,0 +1,28 @@
+﻿$PBExportHeader$f_tasa_cambio_x_arg.srf
+global type f_tasa_cambio_x_arg from function_object
+end type
+
+forward prototypes
+global function decimal f_tasa_cambio_x_arg (date ad_fecha)
+end prototypes
+
+global function decimal f_tasa_cambio_x_arg (date ad_fecha);String      ls_fecha
+Decimal {3} ldc_tasa_cambio
+ 
+
+ls_fecha = String(ad_fecha,'yyyymmdd')
+
+select c.vta_dol_prom 
+into :ldc_tasa_cambio
+from calendario  c 
+where to_char(fecha,'yyyymmdd') = :ls_fecha;
+
+
+IF Isnull(ldc_tasa_cambio) OR ldc_tasa_cambio = 0 THEN
+	Messagebox('Aviso','No existe Tasa de Cambio de la Fecha del Documento ,Verifique!')
+	Return 0
+END IF
+
+Return ldc_tasa_cambio
+end function
+

@@ -1,0 +1,75 @@
+﻿$PBExportHeader$d_rpt_consumo_os_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=456 color="536870912" )
+summary(height=100 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=orden_trabajo_ot_adm dbname="orden_trabajo.ot_adm" )
+ column=(type=char(40) updatewhereclause=yes name=ot_administracion_descripcion dbname="ot_administracion.descripcion" )
+ column=(type=char(4) updatewhereclause=yes name=ano dbname="ano" )
+ column=(type=char(2) updatewhereclause=yes name=mes dbname="mes" )
+ column=(type=char(10) updatewhereclause=yes name=orden_servicio_det_cencos dbname="orden_servicio_det.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(10) updatewhereclause=yes name=orden_servicio_det_cnta_prsp dbname="orden_servicio_det.cnta_prsp" )
+ column=(type=char(50) updatewhereclause=yes name=presupuesto_cuenta_descripcion dbname="presupuesto_cuenta.descripcion" )
+ column=(type=number updatewhereclause=yes name=monto_dol dbname="monto_dol" )
+ retrieve="select ot.ot_adm, ota.descripcion, to_char(os.fec_registro,'yyyy') as ano, 
+       to_char(os.fec_registro,'mm') as mes, osd.cencos, cc.desc_cencos, 
+       osd.cnta_prsp, pc.descripcion, 
+       sum( decode(os.cod_moneda,(select cod_dolares from logparam  where reckey='1'), 
+            (nvl(osd.importe,0) + nvl(osd.impuesto,0) + nvl(osd.impuesto2,0) - nvl(osd.decuento,0)),
+            (nvl(osd.importe,0) + nvl(osd.impuesto,0) + nvl(osd.impuesto2,0) - nvl(osd.decuento,0))/USF_CMP_TIPO_CAMBIO(os.fec_registro))) as monto_dol
+from orden_servicio os, orden_servicio_det osd, operaciones o, 
+     orden_trabajo ot, proveedor p, ot_administracion ota, 
+     centros_costo cc, presupuesto_cuenta pc
+where os.cod_origen=osd.cod_origen and
+      os.nro_os=osd.nro_os and
+      os.proveedor = p.proveedor and
+      o.nro_orden = ot.nro_orden and
+      osd.oper_sec=o.oper_sec and 
+      osd.cencos = cc.cencos and
+      osd.cnta_prsp = pc.cnta_prsp and
+      os.flag_estado<>'0' and
+      osd.flag_estado<>'0' and
+      ot.ot_adm = ota.ot_adm and
+      to_char(os.fec_registro,'yyyy') = :as_ano
+group by ot.ot_adm, ota.descripcion, to_char(os.fec_registro,'yyyy'), 
+       to_char(os.fec_registro,'mm'), osd.cencos, cc.desc_cencos, 
+       osd.cnta_prsp, pc.descripcion
+order by ot.ot_adm, ota.descripcion, to_char(os.fec_registro,'yyyy'), 
+       to_char(os.fec_registro,'mm'), osd.cencos, osd.cnta_prsp" arguments=(("as_ano", string)) )
+group(level=1 header.height=100 trailer.height=96 by=("orden_trabajo_ot_adm" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="23" y="8" height="200" width="297" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="23" y="224" height="40" width="297" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="23" y="284" height="40" width="297" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2409" y="24" height="40" width="297" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="2409" y="80" height="40" width="297" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="2409" y="136" height="40" width="297" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="GASTOS DE SERVICIOS X OT_ADM" border="0" color="0" x="585" y="60" height="64" width="1669" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="585" y="180" height="56" width="1669" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=1 alignment="2" tabsequence=32766 border="0" color="0" x="18" y="16" height="56" width="320" format="[general]" html.valueishtml="0"  name=orden_trabajo_ot_adm visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="0" x="352" y="16" height="56" width="1426" format="[general]" html.valueishtml="0"  name=ot_administracion_descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Total General US$ :" border="0" color="16711680" x="2089" y="24" height="56" width="466" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(monto_dol for all)"border="0" color="16711680" x="2903" y="16" height="56" width="393" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Año" border="2" color="0" x="46" y="396" height="56" width="128" html.valueishtml="0"  name=ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Mes" border="2" color="0" x="187" y="396" height="56" width="87" html.valueishtml="0"  name=mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cencos" border="2" color="0" x="288" y="396" height="56" width="261" html.valueishtml="0"  name=orden_servicio_det_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Descripcion de Cencos" border="2" color="0" x="562" y="396" height="56" width="919" html.valueishtml="0"  name=centros_costo_desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cnta.Prsp" border="2" color="0" x="1495" y="396" height="56" width="297" html.valueishtml="0"  name=den_servicio_det_cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+compute(band=trailer.1 alignment="1" expression="sum(monto_dol for group 1)"border="0" color="16711680" x="2944" y="24" height="56" width="357" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=trailer.1 alignment="1" text="Total x año US$ :" border="0" color="16711680" x="2162" y="32" height="56" width="402" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Descripción de Cnta.Prsp" border="2" color="0" x="1806" y="396" height="56" width="1106" html.valueishtml="0"  name=presupuesto_cuenta_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Monto US$" border="2" color="0" x="2926" y="396" height="56" width="357" html.valueishtml="0"  name=monto_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="46" y="8" height="56" width="128" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="187" y="8" height="56" width="87" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="288" y="8" height="56" width="261" format="[general]" html.valueishtml="0"  name=orden_servicio_det_cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="562" y="8" height="56" width="919" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1495" y="8" height="56" width="297" format="[general]" html.valueishtml="0"  name=orden_servicio_det_cnta_prsp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1806" y="8" height="56" width="1106" format="[general]" html.valueishtml="0"  name=presupuesto_cuenta_descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="2926" y="8" height="56" width="357" format="#,##0.00" html.valueishtml="0"  name=monto_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

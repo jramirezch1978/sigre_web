@@ -1,0 +1,282 @@
+﻿$PBExportHeader$m_main.srm
+$PBExportComments$Menu for main window
+forward
+global type m_main from menu
+end type
+type m_file from menu within m_main
+end type
+type m_fileone from menu within m_file
+end type
+type m_filetwo from menu within m_file
+end type
+type m_submenuone from menu within m_filetwo
+end type
+type m_submenutwo from menu within m_filetwo
+end type
+type m_filetwo from menu within m_file
+m_submenuone m_submenuone
+m_submenutwo m_submenutwo
+end type
+type m_filethree from menu within m_file
+end type
+type m_exit from menu within m_file
+end type
+type m_file from menu within m_main
+m_fileone m_fileone
+m_filetwo m_filetwo
+m_filethree m_filethree
+m_exit m_exit
+end type
+type m_help from menu within m_main
+end type
+type m_helpone from menu within m_help
+end type
+type m_helptwo from menu within m_help
+end type
+type m_helpthree from menu within m_help
+end type
+type m_about from menu within m_help
+end type
+type m_help from menu within m_main
+m_helpone m_helpone
+m_helptwo m_helptwo
+m_helpthree m_helpthree
+m_about m_about
+end type
+global type m_main from menu
+m_file m_file
+m_help m_help
+end type
+end forward
+
+global type m_main from menu
+m_file m_file
+m_help m_help
+end type
+global m_main m_main
+
+on m_main.create
+m_main=this
+call super::create
+this.m_file=create m_file
+this.m_help=create m_help
+this.Item[UpperBound(this.Item)+1]=this.m_file
+this.Item[UpperBound(this.Item)+1]=this.m_help
+end on
+
+on m_main.destroy
+call super::destroy
+destroy(this.m_file)
+destroy(this.m_help)
+end on
+
+type m_file from menu within m_main
+m_fileone m_fileone
+m_filetwo m_filetwo
+m_filethree m_filethree
+m_exit m_exit
+end type
+
+on m_file.create
+call super::create
+this.text = "File"
+this.microhelp = "File Menu"
+this.m_fileone=create m_fileone
+this.m_filetwo=create m_filetwo
+this.m_filethree=create m_filethree
+this.m_exit=create m_exit
+this.Item[UpperBound(this.Item)+1]=this.m_fileone
+this.Item[UpperBound(this.Item)+1]=this.m_filetwo
+this.Item[UpperBound(this.Item)+1]=this.m_filethree
+this.Item[UpperBound(this.Item)+1]=this.m_exit
+end on
+
+on m_file.destroy
+call super::destroy
+destroy(this.m_fileone)
+destroy(this.m_filetwo)
+destroy(this.m_filethree)
+destroy(this.m_exit)
+end on
+
+type m_fileone from menu within m_file
+end type
+
+on m_fileone.create
+call super::create
+this.text = "file one"
+this.microhelp = "does file one"
+end on
+
+on m_fileone.destroy
+call super::destroy
+end on
+
+type m_filetwo from menu within m_file
+m_submenuone m_submenuone
+m_submenutwo m_submenutwo
+end type
+
+on m_filetwo.create
+call super::create
+this.text = "file two"
+this.microhelp = "does file two"
+this.m_submenuone=create m_submenuone
+this.m_submenutwo=create m_submenutwo
+this.Item[UpperBound(this.Item)+1]=this.m_submenuone
+this.Item[UpperBound(this.Item)+1]=this.m_submenutwo
+end on
+
+on m_filetwo.destroy
+call super::destroy
+destroy(this.m_submenuone)
+destroy(this.m_submenutwo)
+end on
+
+type m_submenuone from menu within m_filetwo
+end type
+
+on m_submenuone.create
+call super::create
+this.text = "submenu one"
+this.microhelp = "does submenu one"
+end on
+
+on m_submenuone.destroy
+call super::destroy
+end on
+
+type m_submenutwo from menu within m_filetwo
+end type
+
+on m_submenutwo.create
+call super::create
+this.text = "submenu two"
+this.microhelp = "does submenu two"
+end on
+
+on m_submenutwo.destroy
+call super::destroy
+end on
+
+type m_filethree from menu within m_file
+end type
+
+on m_filethree.create
+call super::create
+this.text = "file three"
+this.microhelp = "does file three"
+end on
+
+on m_filethree.destroy
+call super::destroy
+end on
+
+type m_exit from menu within m_file
+end type
+
+on m_exit.create
+call super::create
+this.text = "Exit"
+this.microhelp = "Exit the program"
+end on
+
+event clicked;Close(ParentWindow)
+
+end event
+
+on m_exit.destroy
+call super::destroy
+end on
+
+type m_help from menu within m_main
+m_helpone m_helpone
+m_helptwo m_helptwo
+m_helpthree m_helpthree
+m_about m_about
+end type
+
+on m_help.create
+call super::create
+this.text = "Help"
+this.microhelp = "Help Menu"
+this.m_helpone=create m_helpone
+this.m_helptwo=create m_helptwo
+this.m_helpthree=create m_helpthree
+this.m_about=create m_about
+this.Item[UpperBound(this.Item)+1]=this.m_helpone
+this.Item[UpperBound(this.Item)+1]=this.m_helptwo
+this.Item[UpperBound(this.Item)+1]=this.m_helpthree
+this.Item[UpperBound(this.Item)+1]=this.m_about
+end on
+
+on m_help.destroy
+call super::destroy
+destroy(this.m_helpone)
+destroy(this.m_helptwo)
+destroy(this.m_helpthree)
+destroy(this.m_about)
+end on
+
+type m_helpone from menu within m_help
+end type
+
+on m_helpone.create
+call super::create
+this.text = "help one"
+this.microhelp = "does help one"
+end on
+
+on m_helpone.destroy
+call super::destroy
+end on
+
+type m_helptwo from menu within m_help
+end type
+
+on m_helptwo.create
+call super::create
+this.text = "help two"
+this.microhelp = "does help two"
+end on
+
+on m_helptwo.destroy
+call super::destroy
+end on
+
+type m_helpthree from menu within m_help
+end type
+
+on m_helpthree.create
+call super::create
+this.text = "help three"
+this.microhelp = "does help three"
+end on
+
+on m_helpthree.destroy
+call super::destroy
+end on
+
+type m_about from menu within m_help
+end type
+
+event clicked;n_fileinfo ln_fvi
+String ls_version
+
+ls_version = ln_fvi.of_Get_FileVersion("comctl32.dll")
+
+MessageBox("Installed comctl32.dll", &
+	"Version: " + ls_version)
+
+end event
+
+on m_about.create
+call super::create
+this.text = "About"
+this.microhelp = "Display Common Controls Version"
+end on
+
+on m_about.destroy
+call super::destroy
+end on
+

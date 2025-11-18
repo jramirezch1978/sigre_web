@@ -1,0 +1,196 @@
+﻿$PBExportHeader$d_resumen_diario_retenciones_tbl.srd
+release 11.5;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=64 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(397) updatewhereclause=yes name=texto dbname="texto" )
+ retrieve="  SELECT '6'    ||'|' ||                                                                -- Campo 1. Motivo de Contingencia
+         lpad(substr(r.nro_certificado, 1,3), 4, '0') || '|' ||                         -- Campo 2. Serie del CRI
+         lpad(substr(r.nro_certificado, 5,8), 8, '0') || '|' ||                         -- Campo 3. Numero del CRI
+         to_char(r.fecha_emision, 'dd/mm/yyyy') || '|' ||                               -- Campo 4. Fecha de emisión
+         p.ruc || '|' ||                                                                -- Campo 5. RUC del proveedor
+         p.tipo_doc_ident || '|' ||                                                     -- Campo 6. Tipo documento identidad
+         substr(p.nom_proveedor, 1, 100) || '|' ||                                      -- Campo 7. Razon Social / Nombre completo
+         '01' || '|' ||                                                                 -- Campo 8. Regimen de Retenciones
+         trim(to_Char(r.porc_retencion, '999999999990.00')) || '|' ||                    -- campo 9. Porcentaje de retenciones                  
+         (select trim(to_Char(nvl(sum(cbd2.impt_ret_igv), 0), '999999999990.00'))
+            from caja_bancos_det cbd2
+           where cbd2.origen       = cb.origen
+             and cbd2.nro_registro = cb.nro_registro
+             and cbd2.flag_ret_igv = '1') || '|' ||                                     -- campo 10. Importe Total Retenido en soles
+         (select trim(to_Char(nvl(sum(
+                 case when cbd2.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                   cbd2.importe
+                 else
+                   cbd2.importe * cb.tasa_cambio
+                 end ), 0), '999999999990.00'))
+            from caja_bancos_det cbd2
+           where cbd2.origen       = cb.origen
+             and cbd2.nro_registro = cb.nro_registro
+             and cbd2.flag_ret_igv = '1') || '|' ||                                     -- campo 11. Importe Total Pagado en soles
+         dt.cod_sunat || '|' ||                                                         -- Campo 12. Tipo de Documento relacionado   
+         cp.serie_cp  || '|' ||                                                         -- Campo 13. Serie del documento relacionado
+         cp.numero_cp  || '|' ||                                                        -- Campo 14. Numero del documento relacionado
+         to_char(cp.fecha_emision, 'dd/mm/yyyy') || '|' ||                              -- Campo 15. fecha de emision del comprobante de Pago
+         trim(to_char(cp.importe_doc, '999999999990.00')) || '|' ||                     -- Campo 16. Importe Total del comprobante
+         case when cp.cod_moneda = PKG_LOGISTICA.of_soles(null) then 'PEN'
+         else 'USD'
+         end                       || '|' ||                                            -- Campo 17. Moneda del comprobante
+         to_char(cb.fecha_emision, 'dd/mm/yyyy') || '|' ||                              -- Campo 18. Fecha de Pago
+         trim(to_char(cb.nro_registro))          || '|' ||                              -- Campo 19. Nro Correlativo de Pago
+         trim(to_char(
+                     case 
+                       when cbd.cod_moneda = cb.cod_moneda then
+                          cbd.importe
+                       when cbd.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                          cbd.importe / cb.tasa_cambio
+                       else
+                          cbd.importe * cb.tasa_cambio
+                     end, '999999999990.00'))    || '|' ||                              -- Campo 20. Importe del pago (sin retencion)
+         case 
+           when cb.cod_moneda = PKG_LOGISTICA.of_soles(null) then 'PEN'
+           else 'USD'
+         end                       || '|' ||                                            -- Campo 21. Moneda del Pago
+         trim(to_Char(cbd.impt_ret_igv, '999999999990.00')) || '|' ||                   -- Campo 22. Importe retenido en soles
+         to_char(cb.fecha_emision, 'dd/mm/yyyy') || '|' ||                              -- Campo 23. Fecha de Retención
+         trim(to_char(
+                     case 
+                       when cbd.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                          cbd.importe 
+                       else
+                          cbd.importe * cb.tasa_cambio
+                     end - cbd.impt_ret_igv , '999999999990.00'))    || '|' ||          -- Campo 24. Importe total neto a pagar considerando la retencion (soles)
+         case 
+           when cp.cod_moneda = PKG_LOGISTICA.of_soles(null) then ''
+           else 'USD'
+         end                                                         || '|' ||          -- Campo 25. Moneda extranjera de referencia para el tipo de Cambio
+         case 
+           when cp.cod_moneda = PKG_LOGISTICA.of_soles(null) then ''
+           else trim(to_Char(cb.tasa_cambio, '999999999990.00'))
+         end                                                         || '|' ||          -- Campo 26. Tipo de cambio aplicado
+         case 
+           when cp.cod_moneda = PKG_LOGISTICA.of_soles(null) then ''
+           else to_char(cb.fecha_emision, 'dd/mm/yyyy')
+         end                                                         || '|' ||          -- Campo 27. Fecha del Tipo de Cambio
+         ''  as texto                          
+      
+    FROM CAJA_BANCOS_DET    CBD,   
+         RETENCION_IGV_CRT  R,   
+         PROVEEDOR          P,   
+         CAJA_BANCOS        CB,
+         doc_tipo           dt,
+         cntas_pagar        cp
+   WHERE R.ORIGEN             = CBD.ORIGEN 
+     and R.NRO_REG_CAJA_BAN   = CBD.NRO_REGISTRO 
+    and R.PROVEEDOR           = P.PROVEEDOR 
+    and cbd.tipo_doc          = dt.tipo_doc
+    and CBD.FLAG_RET_IGV       = '1'  
+    and CB.ORIGEN             = CBD.ORIGEN 
+    and CB.NRO_REGISTRO       = CBD.NRO_REGISTRO 
+    and CBD.COD_RELACION       = R.PROVEEDOR 
+    and cbd.cod_relacion       = cp.cod_relacion
+    and cbd.tipo_doc           = cp.tipo_doc
+    and cbd.nro_doc            = cp.nro_doc
+    and trunc(r.fecha_emision) = trunc(:ad_fecha)
+
+union
+
+  SELECT '6'    ||'|' ||                                                                -- Campo 1. Motivo de Contingencia
+         lpad(substr(r.nro_certificado, 1,3), 4, '0') || '|' ||                         -- Campo 2. Serie del CRI
+         lpad(substr(r.nro_certificado, 5,8), 8, '0') || '|' ||                         -- Campo 3. Numero del CRI
+         to_char(r.fecha_emision, 'dd/mm/yyyy') || '|' ||                               -- Campo 4. Fecha de emisión
+         p.ruc || '|' ||                                                                -- Campo 5. RUC del proveedor
+         p.tipo_doc_ident || '|' ||                                                     -- Campo 6. Tipo documento identidad
+         substr(p.nom_proveedor, 1, 100) || '|' ||                                      -- Campo 7. Razon Social / Nombre completo
+         '01' || '|' ||                                                                 -- Campo 8. Regimen de Retenciones
+         trim(to_Char(r.porc_retencion, '999999999990.00')) || '|' ||                    -- campo 9. Porcentaje de retenciones                  
+         (select trim(to_Char(nvl(sum(dr.imp_ret_igv), 0), '999999999990.00'))
+            from doc_referencias dr2
+           where dr2.cod_relacion = ltp.cod_relacion
+             and dr2.tipo_doc     = ltp.tipo_doc
+             and dr2.nro_doc      = ltp.nro_doc) || '|' ||                         -- campo 10. Importe Total Retenido en soles
+         (select trim(to_Char(nvl(sum(
+                 case when ltp.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                   dr2.importe
+                 else
+                   dr2.importe * ltp.tasa_cambio
+                 end ), 0), '999999999990.00'))
+            from doc_referencias dr2
+           where dr2.cod_relacion = ltp.cod_relacion
+             and dr2.tipo_doc     = ltp.tipo_doc
+             and dr2.nro_doc      = ltp.nro_doc) || '|' ||                              -- campo 11. Importe Total Pagado en soles
+         dt.cod_sunat || '|' ||                                                         -- Campo 12. Tipo de Documento relacionado   
+         cpa.serie_cp  || '|' ||                                                         -- Campo 13. Serie del documento relacionado
+         cpa.numero_cp  || '|' ||                                                        -- Campo 14. Numero del documento relacionado
+         to_char(cpa.fecha_emision, 'dd/mm/yyyy') || '|' ||                              -- Campo 15. fecha de emision del comprobante de Pago
+         trim(to_char(cpa.importe_doc, '999999999990.00')) || '|' ||                     -- Campo 16. Importe Total del comprobante
+         case when cpa.cod_moneda = PKG_LOGISTICA.of_soles(null) then 'PEN'
+         else 'USD'
+         end                       || '|' ||                                            -- Campo 17. Moneda del comprobante
+         to_char(ltp.fecha_emision, 'dd/mm/yyyy') || '|' ||                              -- Campo 18. Fecha de Pago
+         trim(to_char(ltp.nro_asiento))          || '|' ||                              -- Campo 19. Nro Correlativo de Pago
+         trim(to_char(dr.importe, '999999999990.00'))    || '|' ||                              -- Campo 20. Importe del pago (sin retencion)
+         case 
+           when ltp.cod_moneda = PKG_LOGISTICA.of_soles(null) then 'PEN'
+           else 'USD'
+         end                       || '|' ||                                            -- Campo 21. Moneda del Pago
+         trim(to_Char(dr.imp_ret_igv, '999999999990.00')) || '|' ||                   -- Campo 22. Importe retenido en soles
+         to_char(ltp.fecha_emision, 'dd/mm/yyyy') || '|' ||                              -- Campo 23. Fecha de Retención
+         trim(to_char(
+                     case 
+                       when LTP.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                          dr.importe 
+                       else
+                          dr.importe * LTP.tasa_cambio
+                     end - dr.imp_ret_igv , '999999999990.00'))    || '|' ||          -- Campo 24. Importe total neto a pagar considerando la retencion (soles)
+         case 
+           when LTP.cod_moneda = PKG_LOGISTICA.of_soles(null) then ''
+           else 'USD'
+         end                                                         || '|' ||          -- Campo 25. Moneda extranjera de referencia para el tipo de Cambio
+         case 
+           when LTP.cod_moneda = PKG_LOGISTICA.of_soles(null) then ''
+           else trim(to_Char(LTP.tasa_cambio, '999999999990.00'))
+         end                                                         || '|' ||          -- Campo 26. Tipo de cambio aplicado
+         case 
+           when LTP.cod_moneda = PKG_LOGISTICA.of_soles(null) then ''
+           else to_char(LTP.fecha_emision, 'dd/mm/yyyy')
+         end                                                         || '|' ||          -- Campo 27. Fecha del Tipo de Cambio
+         ''  as texto  
+
+    FROM DOC_REFERENCIAS    DR,   
+         RETENCION_IGV_CRT  R,   
+         DOC_TIPO           DT,   
+         PROVEEDOR          P,   
+         CNTAS_PAGAR        CPA ,   
+         CNTAS_PAGAR        LTP  
+   WHERE R.NRO_CERTIFICADO   = LTP.NRO_CERTIFICADO     
+    and dt.TIPO_DOC         = DR.TIPO_REF     
+    and DR.PROVEEDOR_REF    = CPA.COD_RELACION        
+    and DR.TIPO_REF         = CPA.TIPO_DOC            
+    and DR.NRO_REF          = CPA.NRO_DOC             
+    and DR.FLAG_RET_IGV     = '1'                              
+    and LTP.COD_RELACION    = DR.COD_RELACION 
+    and LTP.TIPO_DOC        = DR.TIPO_DOC     
+    and LTP.NRO_DOC         = DR.NRO_DOC      
+    and LTP.TIPO_DOC        = (SELECT doc_letra_pagar FROM finparam WHERE reckey = '1') 
+    and LTP.COD_RELACION    = P.PROVEEDOR  
+ 	 and trunc(r.fecha_emision) = trunc(:ad_fecha)
+
+
+
+
+" arguments=(("ad_fecha", date)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="0" y="4" height="56" width="8475" format="[general]" html.valueishtml="0"  name=texto visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="400"  font.family="3" font.pitch="1" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

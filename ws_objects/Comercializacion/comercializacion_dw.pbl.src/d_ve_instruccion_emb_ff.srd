@@ -1,0 +1,103 @@
+﻿$PBExportHeader$d_ve_instruccion_emb_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=1148 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=intruccion_emb dbname="instruccion_emb.intruccion_emb" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=puerto_carga dbname="instruccion_emb.puerto_carga" )
+ column=(type=char(50) updatewhereclause=yes name=descr_puerto dbname="fl_puertos.descr_puerto" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=bill_of_lading dbname="instruccion_emb.bill_of_lading" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=factura_tipo_doc dbname="instruccion_emb.factura_tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=factura_nro_doc dbname="instruccion_emb.factura_nro_doc" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=dua_nro dbname="instruccion_emb.dua_nro" )
+ column=(type=datetime update=yes updatewhereclause=yes name=dua_fecha dbname="instruccion_emb.dua_fecha" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_embarque dbname="instruccion_emb.fecha_embarque" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=flete_instruccion dbname="instruccion_emb.flete_instruccion" )
+ column=(type=char(100) updatewhereclause=yes name=flete_instruccion_texto dbname="flete_instruccion.texto" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cantidad_emb dbname="instruccion_emb.cantidad_emb" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=und_emb dbname="instruccion_emb.und_emb" )
+ column=(type=char(25) updatewhereclause=yes name=desc_unidad dbname="unidad.desc_unidad" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_tolerancia dbname="instruccion_emb.flag_tolerancia" values="Porcentual	P/Und. Despacho	U/Sin Variacion	N/" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=tolerancia dbname="instruccion_emb.tolerancia" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=forma_empaque dbname="instruccion_emb.forma_empaque" )
+ column=(type=char(30) updatewhereclause=yes name=forma_empaque_descripcion dbname="forma_empaque.descripcion" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_lote dbname="instruccion_emb.nro_lote" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="instruccion_emb.flag_estado" initial="1" values="ACTIVO	1/INACTIVO	0/" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="instruccion_emb.cod_usr" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="instruccion_emb.flag_replicacion" )
+ retrieve="SELECT IE.INTRUCCION_EMB,
+       IE.PUERTO_CARGA,
+       P.DESCR_PUERTO,
+       IE.BILL_OF_LADING,
+       IE.FACTURA_TIPO_DOC,
+       IE.FACTURA_NRO_DOC,
+       IE.DUA_NRO,
+       IE.DUA_FECHA,
+       IE.FECHA_EMBARQUE,
+       IE.FLETE_INSTRUCCION,
+       F.TEXTO,
+       IE.CANTIDAD_EMB,
+       IE.UND_EMB,
+       U.DESC_UNIDAD,
+       IE.FLAG_TOLERANCIA,
+       IE.TOLERANCIA,
+       IE.FORMA_EMPAQUE,
+       FE.DESCRIPCION,
+       IE.NRO_LOTE,
+       IE.FLAG_ESTADO,
+	    IE.COD_USR,
+       IE.FLAG_REPLICACION
+
+FROM   INSTRUCCION_EMB        IE,
+       FL_PUERTOS             P,
+       FLETE_INSTRUCCION      F,
+       UNIDAD                 U,
+       FORMA_EMPAQUE          FE
+
+WHERE  IE.PUERTO_CARGA        = P.PUERTO  (+)
+  AND  IE.FLETE_INSTRUCCION   = F.FLETE_INSTRUCCION (+)
+  AND  IE.UND_EMB             = U.UND (+)
+  AND  IE.FORMA_EMPAQUE       = FE.FORMA_EMPAQUE (+)
+  AND  IE.INTRUCCION_EMB		= :AS_NRO_INSTRUCCION" update="INSTRUCCION_EMB" updatewhere=0 updatekeyinplace=yes arguments=(("AS_NRO_INSTRUCCION", string)) )
+column(band=detail id=20 alignment="2" tabsequence=32766 border="0" color="255" x="1024" y="36" height="68" width="631" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=upper ddlb.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+roundrectangle(band=detail ellipseheight="36" ellipsewidth="41"x="64" y="4" height="148" width="549"  name=rr_1 visible="1" brush.hatch="6" brush.color="12632256" pen.style="0" pen.width="5" pen.color="12632256"  background.mode="2" background.color="0" )
+text(band=detail alignment="2" text="Nro Intruccion:" border="0" color="33554432" x="123" y="12" height="56" width="421" html.valueishtml="0"  name=instruccion_emb_intruccion_emb_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="4" color="33554432" x="192" y="72" height="68" width="302" format="[general]" html.valueishtml="0"  name=intruccion_emb visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Puerto Carga:" border="0" color="33554432" x="73" y="176" height="68" width="471" html.valueishtml="0"  name=instruccion_emb_puerto_carga_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="5" color="33554432" x="882" y="176" height="68" width="1399" format="[general]" html.valueishtml="0"  name=descr_puerto visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Bill Of Lading:" border="0" color="33554432" x="73" y="284" height="68" width="471" html.valueishtml="0"  name=instruccion_emb_bill_of_lading_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Factura Tipo Doc:" border="0" color="33554432" x="73" y="392" height="68" width="471" html.valueishtml="0"  name=instruccion_emb_factura_tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Factura Nro Doc:" border="0" color="33554432" x="1403" y="392" height="68" width="471" html.valueishtml="0"  name=instruccion_emb_factura_nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Dua Nro:" border="0" color="33554432" x="73" y="500" height="68" width="471" html.valueishtml="0"  name=instruccion_emb_dua_nro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Dua Fecha:" border="0" color="33554432" x="1495" y="500" height="68" width="379" html.valueishtml="0"  name=instruccion_emb_dua_fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Fecha Embarque:" border="0" color="33554432" x="73" y="608" height="68" width="471" html.valueishtml="0"  name=instruccion_emb_fecha_embarque_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Flete Instruccion:" border="0" color="33554432" x="73" y="716" height="68" width="471" html.valueishtml="0"  name=instruccion_emb_flete_instruccion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="5" color="33554432" x="750" y="716" height="68" width="1531" format="[general]" html.valueishtml="0"  name=flete_instruccion_texto visible="1" edit.limit=100 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Cantidad Emb:" border="0" color="33554432" x="73" y="824" height="68" width="471" html.valueishtml="0"  name=instruccion_emb_cantidad_emb_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Flag Tolerancia:" border="0" color="33554432" x="73" y="932" height="68" width="471" html.valueishtml="0"  name=instruccion_emb_flag_tolerancia_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Forma Empaque:" border="0" color="33554432" x="73" y="1040" height="68" width="471" html.valueishtml="0"  name=instruccion_emb_forma_empaque_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Und Emb:" border="0" color="33554432" x="1042" y="824" height="68" width="297" html.valueishtml="0"  name=instruccion_emb_und_emb_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="5" color="33554432" x="1568" y="824" height="68" width="713" format="[general]" html.valueishtml="0"  name=desc_unidad visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Tolerancia:" border="0" color="33554432" x="1563" y="932" height="68" width="357" html.valueishtml="0"  name=instruccion_emb_tolerancia_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="5" color="33554432" x="754" y="1040" height="68" width="814" format="[general]" html.valueishtml="0"  name=forma_empaque_descripcion visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Nro Lote:" border="0" color="33554432" x="1641" y="1040" height="68" width="279" html.valueishtml="0"  name=instruccion_emb_nro_lote_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=10 border="5" color="33554432" x="576" y="176" height="68" width="247" format="[general]" html.valueishtml="0"  name=puerto_carga pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=20 border="5" color="33554432" x="576" y="284" height="68" width="576" format="[general]" html.valueishtml="0"  name=bill_of_lading visible="1" edit.limit=20 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=30 border="5" color="33554432" x="576" y="392" height="68" width="137" format="[general]" html.valueishtml="0"  name=factura_tipo_doc visible="1" edit.limit=4 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=50 border="5" color="33554432" x="576" y="500" height="68" width="850" format="[general]" html.valueishtml="0"  name=dua_nro visible="1" edit.limit=30 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="2" tabsequence=60 border="5" color="33554432" x="1915" y="500" height="68" width="366" format="[shortdate]" html.valueishtml="0"  name=dua_fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=40 border="5" color="33554432" x="1915" y="392" height="68" width="366" format="[general]" html.valueishtml="0"  name=factura_nro_doc visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="2" tabsequence=70 border="5" color="33554432" x="576" y="608" height="68" width="366" format="[shortdate] " html.valueishtml="0"  name=fecha_embarque visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=80 border="5" color="33554432" x="571" y="716" height="68" width="137" format="[general]" html.valueishtml="0"  name=flete_instruccion pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=4 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="1" tabsequence=90 border="5" color="33554432" x="576" y="824" height="68" width="329" format="[general]" html.valueishtml="0"  name=cantidad_emb visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=100 border="5" color="33554432" x="1390" y="824" height="68" width="137" format="[general]" html.valueishtml="0"  name=und_emb pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=3 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=110 border="5" color="33554432" x="576" y="932" height="68" width="558" format="[general]" html.valueishtml="0"  name=flag_tolerancia visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.vscrollbar=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="1" tabsequence=120 border="5" color="33554432" x="1952" y="932" height="68" width="329" format="[general]" html.valueishtml="0"  name=tolerancia visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=19 alignment="0" tabsequence=140 border="5" color="33554432" x="1952" y="1040" height="68" width="329" format="[general]" html.valueishtml="0"  name=nro_lote visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="0" tabsequence=130 border="5" color="33554432" x="576" y="1040" height="68" width="137" format="[general]" html.valueishtml="0"  name=forma_empaque pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=4 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

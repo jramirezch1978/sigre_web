@@ -1,0 +1,316 @@
+﻿$PBExportHeader$d_remun_planilla_afp_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=4 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912"  height.autosize=yes)
+table(column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="vw_rh_afp_tots.cod_trabajador" )
+ column=(type=char(8) updatewhereclause=yes name=cod_empresa dbname="maestro.cod_empresa" )
+ column=(type=char(2) updatewhereclause=yes name=cod_afp dbname="maestro.cod_afp" )
+ column=(type=char(30) updatewhereclause=yes name=desc_afp dbname="admin_afp.desc_afp" )
+ column=(type=char(12) updatewhereclause=yes name=nro_afp_trabaj dbname="maestro.nro_afp_trabaj" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="codigo_relacion.nombre" )
+ column=(type=char(200) updatewhereclause=yes name=empresa_nombre dbname="empresa.nombre" )
+ column=(type=char(11) updatewhereclause=yes name=empresa_ruc dbname="empresa.ruc" )
+ column=(type=char(300) updatewhereclause=yes name=empresa_dir_calle dbname="empresa.dir_calle" )
+ column=(type=char(8) updatewhereclause=yes name=empresa_dir_numero dbname="empresa.dir_numero" )
+ column=(type=char(4) updatewhereclause=yes name=empresa_dir_lote dbname="empresa.dir_lote" )
+ column=(type=char(4) updatewhereclause=yes name=empresa_dir_mnz dbname="empresa.dir_mnz" )
+ column=(type=char(30) updatewhereclause=yes name=vw_rh_ubigeo_desc_dpto dbname="vw_rh_ubigeo.desc_dpto" )
+ column=(type=char(30) updatewhereclause=yes name=vw_rh_ubigeo_desc_prov dbname="vw_rh_ubigeo.desc_prov" )
+ column=(type=char(60) updatewhereclause=yes name=empresa_representante dbname="empresa.representante" )
+ column=(type=char(2) updatewhereclause=yes name=mes dbname="mes" )
+ column=(type=char(4) updatewhereclause=yes name=ano dbname="ano" )
+ column=(type=char(30) updatewhereclause=yes name=tipo_trabajador_desc_tipo_tra dbname="tipo_trabajador.desc_tipo_tra" )
+ column=(type=char(50) updatewhereclause=yes name=origen_dir_calle dbname="origen.dir_calle" )
+ column=(type=char(20) updatewhereclause=yes name=origen_dir_distrito dbname="origen.dir_distrito" )
+ column=(type=char(30) updatewhereclause=yes name=origen_dir_departamento dbname="origen.dir_departamento" )
+ column=(type=char(30) updatewhereclause=yes name=origen_dir_urbanizacion dbname="origen.dir_urbanizacion" )
+ column=(type=char(30) updatewhereclause=yes name=origen_dir_provincia dbname="origen.dir_provincia" )
+ column=(type=char(10) updatewhereclause=yes name=origen_telefono dbname="origen.telefono" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(1) updatewhereclause=yes name=proveedor_tipo_doc_ident dbname="proveedor.tipo_doc_ident" )
+ column=(type=char(20) updatewhereclause=yes name=proveedor_nro_doc_ident dbname="proveedor.nro_doc_ident" )
+ column=(type=char(60) updatewhereclause=yes name=nom_usuario dbname="nom_usuario" )
+ column=(type=number updatewhereclause=yes name=remuneracion_asegurable dbname="remuneracion_asegurable" )
+ column=(type=number updatewhereclause=yes name=aporte_obligatorio dbname="aporte_obligatorio" )
+ column=(type=number updatewhereclause=yes name=seguros dbname="seguros" )
+ column=(type=number updatewhereclause=yes name=comision_porcent dbname="comision_porcent" )
+ column=(type=datetime updatewhereclause=yes name=fecha_afp dbname="vw_rh_afp_tots.fecha_afp" )
+ column=(type=char(2) updatewhereclause=yes name=codigo_afp dbname="vw_rh_afp_tots.codigo_afp" )
+ column=(type=number updatewhereclause=yes name=factor_interes dbname="factor_interes" )
+ retrieve="select vrat.cod_trabajador         ,
+       m.cod_empresa               ,
+       m.cod_afp                   ,
+       aa.desc_afp                 ,
+       m.nro_afp_trabaj            ,
+       cr.nombre                   ,
+       e.nombre                    ,
+       e.ruc                       ,
+       e.dir_calle                 ,
+       e.dir_numero                ,
+       e.dir_lote                  ,
+       e.dir_mnz                   ,
+       vru.desc_dpto               ,
+       vru.desc_prov               ,
+       e.representante             ,
+       to_char(vrat.fecha,'mm')   as mes,
+       to_char(vrat.fecha,'yyyy') as ano,
+       tt.desc_tipo_tra           ,
+       o.dir_calle                ,
+       o.dir_distrito             ,
+		   o.dir_departamento			    ,
+       o.dir_urbanizacion         ,
+       o.dir_provincia            ,
+       o.telefono                 ,
+       p.nom_proveedor            ,
+       p.tipo_doc_ident           ,
+       p.nro_doc_ident            ,
+		 (select nombre from usuario where cod_usr = 'ososa') as nom_usuario,
+       Sum(vrat.remuneracion_asegurable) as remuneracion_asegurable,
+       Sum(vrat.aporte_obligatorio     ) as aporte_obligatorio     ,
+       Sum(vrat.seguros                ) as seguros                ,
+       Sum(vrat.comision_porcent       ) as comision_porcent       ,
+		 vrat.fecha_afp,
+		 vrat.codigo_afp,
+       decode(aa.flag_aplicar_interes, '1', aa.factor_interes, 0) as factor_interes
+   from vw_rh_afp_tots vrat
+      left outer join maestro m          on vrat.cod_trabajador = m.cod_trabajador
+      left outer join admin_afp aa       on m.cod_afp           = aa.cod_afp
+      left outer join empresa e          on m.cod_empresa       = e.cod_empresa
+      left outer join vw_rh_ubigeo vru   on e.ciu_cod_pais      = vru.cod_pais     and
+														  e.ciu_cod_dpto      = vru.cod_dpto     and
+														  e.ciu_cod_prov      = vru.cod_prov     
+      left outer join tipo_trabajador tt on m.tipo_trabajador = tt.desc_tipo_tra
+      left outer join codigo_relacion cr on m.cod_trabajador  = cr.cod_relacion
+      left outer join origen o           on m.cod_origen      = o.cod_origen
+      left outer join proveedor p        on e.repres_legal    = p.proveedor
+   where m.cod_origen in (select oao.cod_origen 
+                           from ot_adm_origen oao 
+                           inner join ot_adm_usuario oau on oao.ot_adm = oau.ot_adm 
+                           where oau.cod_usr = 'ososa')
+group by vrat.cod_trabajador         ,
+       m.cod_empresa               ,
+       m.cod_afp                   ,
+       aa.desc_afp                 ,
+       m.nro_afp_trabaj            ,
+       cr.nombre                   ,
+       e.nombre                    ,
+       e.ruc                       ,
+       e.dir_calle                 ,
+       e.dir_numero                ,
+       e.dir_lote                  ,
+       e.dir_mnz                   ,
+       vru.desc_dpto               ,
+       vru.desc_prov               ,
+       e.representante             ,
+       to_char(vrat.fecha,'mm')    ,
+       to_char(vrat.fecha,'yyyy')  ,
+       tt.desc_tipo_tra            ,
+       o.dir_calle                 ,
+       o.dir_distrito              ,
+		   o.dir_departamento		  ,
+       o.dir_urbanizacion          ,
+       o.dir_provincia             ,
+       o.telefono                  ,
+       p.nom_proveedor             ,
+       p.tipo_doc_ident            ,
+       p.nro_doc_ident				  ,
+		 vrat.fecha_afp				  ,
+		 vrat.codigo_afp				  ,
+		 decode(aa.flag_aplicar_interes, '1', aa.factor_interes, 0)
+
+order by ano, mes, e.nombre, aa.desc_afp, tt.desc_tipo_tra, cr.nombre
+			
+" )
+group(level=1 header.height=1076 trailer.height=964 by=("ano" , "mes" , "empresa_nombre" , "desc_afp" , "tipo_trabajador_desc_tipo_tra" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="27" y="12" height="176" width="357" border="0"  name=p_logo visible="0" )
+text(band=header alignment="0" text="" border="0" color="0" x="23" y="196" height="56" width="361" html.valueishtml="0"  name=st_empresa visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="1029" y="212" height="56" width="800" html.valueishtml="0"  name=st_rango_fecha visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="3479" y="172" height="56" width="1262" html.valueishtml="0"  name=st_usuario visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="3479" y="244" height="56" width="1262" html.valueishtml="0"  name=st_fecha visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="0" text="PERIODO DE DEVENGUE (mm/aaaa) :" border="0" color="0" x="1166" y="196" height="56" width="850" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="REMISION CON MEDIO MAGNETICO:  SI (   ) NO ( X )" border="0" color="0" x="2336" y="196" height="56" width="1216" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header.1 x1="1669" y1="312" x2="1669" y2="404"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="2194" y1="312" x2="2194" y2="404"  name=l_2 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="2615" y1="312" x2="2615" y2="404"  name=l_3 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="3218" y1="312" x2="3218" y2="404"  name=l_4 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="3849" y1="312" x2="3849" y2="404"  name=l_5 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="1669" y1="408" x2="1669" y2="484"  name=l_6 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="2921" y1="408" x2="2921" y2="480"  name=l_7 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="1669" y1="488" x2="1669" y2="564"  name=l_8 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="2921" y1="484" x2="2921" y2="564"  name=l_9 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="3854" y1="484" x2="3854" y2="564"  name=l_10 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="I. DATOS DEL EMPLEADOR:" border="0" color="0" x="18" y="248" height="56" width="827" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="DPTO. DE PERSONAL Y RR.LL" border="0" color="0" x="3090" y="640" height="48" width="690" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="Nombre o Razón Social:" border="0" color="0" x="41" y="332" height="56" width="521" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="RUC:" border="0" color="0" x="1696" y="332" height="56" width="105" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Cuenta Bancaria" border="0" color="0" x="2217" y="332" height="56" width="379" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Nro de Cuenta:" border="0" color="0" x="2642" y="332" height="56" width="338" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Tipo de Cuenta:" border="0" color="0" x="3241" y="332" height="56" width="352" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Institución Financiera: " border="0" color="0" x="3872" y="332" height="56" width="498" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="(Nro)   (Dpto.)  (Int)   (Mz)   (Lte) ::" border="0" color="0" x="1701" y="412" height="56" width="763" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text=" (Representante Legal) Apellidos y Nombre" border="0" color="0" x="41" y="584" height="56" width="951" html.valueishtml="0"  name=t_20 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="Tpo. Doc. Ident " border="0" color="0" x="1312" y="584" height="56" width="329" html.valueishtml="0"  name=t_21 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="Nro. Doc. Ident " border="0" color="0" x="1701" y="584" height="56" width="325" html.valueishtml="0"  name=t_22 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="(Elaborado por) Apellidos y Nombres " border="0" color="0" x="2112" y="584" height="56" width="814" html.valueishtml="0"  name=t_23 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="Area o Departamento" border="0" color="0" x="3090" y="584" height="56" width="475" html.valueishtml="0"  name=t_24 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="1280" y1="572" x2="1280" y2="700"  name=l_11 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="1669" y1="572" x2="1669" y2="700"  name=l_12 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="2066" y1="572" x2="2066" y2="700"  name=l_13 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="3058" y1="572" x2="3058" y2="700"  name=l_14 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="3854" y1="572" x2="3854" y2="700"  name=l_15 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="II. DETALLE DE APORTES OBLIGATORIOS Y VOLUNTARIOS (En Nuevos Soles)" border="0" color="0" x="18" y="756" height="56" width="2322" html.valueishtml="0"  name=t_26 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="27" y1="828" x2="4818" y2="824"  name=l_16 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="192" y1="836" x2="192" y2="1064"  name=l_17 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="571" y1="832" x2="571" y2="1064"  name=l_18 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="1893" y1="832" x2="1893" y2="1064"  name=l_20 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Remuneración Asegurable " border="0" color="0" x="1920" y="884" height="112" width="338" html.valueishtml="0"  name=t_29 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="2281" y1="832" x2="2281" y2="1068"  name=l_21 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Fondo de Pensiones" border="0" color="0" x="2958" y="840" height="48" width="471" html.valueishtml="0"  name=t_30 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="Apellidos y Nombres " border="0" color="0" x="713" y="916" height="56" width="457" html.valueishtml="0"  name=t_31 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="3854" y1="832" x2="3854" y2="1064"  name=l_22 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Retenciones y Retribuciones " border="0" color="0" x="4050" y="840" height="52" width="649" html.valueishtml="0"  name=t_32 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="2286" y1="900" x2="3854" y2="900"  name=l_23 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="Nro" border="0" color="0" x="41" y="916" height="56" width="82" html.valueishtml="0"  name=t_33 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="1390" y1="912" x2="1897" y2="912"  name=l_24 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="C.U.S.P.P." border="0" color="0" x="238" y="912" height="56" width="293" html.valueishtml="0"  name=t_34 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="1554" y1="920" x2="1554" y2="1068"  name=l_25 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="3858" y1="900" x2="4832" y2="900"  name=l_26 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Aporte Obligatorio" border="0" color="0" x="2309" y="924" height="108" width="270" html.valueishtml="0"  name=t_36 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="2597" y1="904" x2="2597" y2="1064"  name=l_27 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Aporte Voluntario trabaj" border="0" color="0" x="2624" y="920" height="48" width="549" html.valueishtml="0"  name=t_37 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="2601" y1="984" x2="3200" y2="984"  name=l_28 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Seguros" border="0" color="0" x="3877" y="932" height="56" width="210" html.valueishtml="0"  name=t_38 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="C/Fin Prev." border="0" color="0" x="2624" y="1000" height="48" width="265" html.valueishtml="0"  name=t_39 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="2912" y1="1000" x2="2912" y2="1048"  name=l_29 visible="1" pen.style="2" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="S/Fin Prev." border="0" color="0" x="2935" y="1000" height="52" width="238" html.valueishtml="0"  name=t_40 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Total Fondo de Pensiones" border="0" color="0" x="3506" y="932" height="112" width="334" html.valueishtml="0"  name=t_41 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="3200" y1="904" x2="3200" y2="1064"  name=l_30 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Aporte Empleador" border="0" color="0" x="3223" y="928" height="108" width="247" html.valueishtml="0"  name=t_42 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="3488" y1="904" x2="3488" y2="1064"  name=l_31 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="4105" y1="904" x2="4105" y2="1064"  name=l_32 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Comisión  % Sobre R.A." border="0" color="0" x="4133" y="928" height="104" width="283" html.valueishtml="0"  name=t_43 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="4434" y1="904" x2="4434" y2="1064"  name=l_33 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Total Retenciones Retribuciones" border="0" color="0" x="4457" y="928" height="104" width="398" html.valueishtml="0"  name=t_44 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=header.1 x1="32" y1="1068" x2="4823" y2="1064"  name=l_34 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="DESTINO           :   A.F.P" border="0" color="0" x="4192" y="184" height="56" width="576" html.valueishtml="0"  name=t_46 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header.1 x1="27" y1="316" x2="4818" y2="312"  name=l_35 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="27" y1="404" x2="4818" y2="404"  name=l_36 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="37" y1="480" x2="4827" y2="480"  name=l_37 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="27" y1="568" x2="4818" y2="564"  name=l_38 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header.1 x1="27" y1="700" x2="4818" y2="700"  name=l_39 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1824" y="328" height="56" width="334" format="[general]" html.valueishtml="0"  name=empresa_ruc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="0" color="0" x="581" y="328" height="56" width="987" format="[general]" html.valueishtml="0"  name=empresa_nombre visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=10 alignment="0" tabsequence=32766 border="0" color="0" x="2469" y="416" height="56" width="187" format="[general]" html.valueishtml="0"  name=empresa_dir_numero visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=11 alignment="0" tabsequence=32766 border="0" color="0" x="2825" y="416" height="56" width="91" format="[general]" html.valueishtml="0"  name=empresa_dir_lote visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=12 alignment="0" tabsequence=32766 border="0" color="0" x="2697" y="416" height="56" width="91" format="[general]" html.valueishtml="0"  name=empresa_dir_mnz visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="-" border="0" color="0" x="2661" y="416" height="56" width="32" html.valueishtml="0"  name=t_75 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="-" border="0" color="0" x="2793" y="416" height="56" width="32" html.valueishtml="0"  name=t_76 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header.1 x1="1390" y1="832" x2="1390" y2="1064"  name=l_19 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="Mvtos. de Personal" border="0" color="0" x="1426" y="848" height="52" width="430" html.valueishtml="0"  name=t_27 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="16711680" x="27" y="24" height="76" width="1106" format="[general]" html.valueishtml="0"  name=desc_afp visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="P L A N I L L A  D E  P A G O  D E  A P O R T E S  P R E V I S I O N A L E S" border="0" color="0" x="1271" y="20" height="60" width="2139" html.valueishtml="0"  name=st_titulo visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="553648127" )
+column(band=header.1 id=18 alignment="2" tabsequence=32766 border="0" color="255" x="1271" y="104" height="60" width="2139" format="[general]" html.valueishtml="0"  name=tipo_trabajador_desc_tipo_tra visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=16 alignment="2" tabsequence=32766 border="0" color="0" x="2030" y="196" height="56" width="82" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=17 alignment="2" tabsequence=32766 border="0" color="0" x="2144" y="196" height="56" width="137" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="/" border="0" color="0" x="2117" y="196" height="56" width="23" html.valueishtml="0"  name=t_77 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="65535" x="576" y="136" height="56" width="521" format="[general]" html.valueishtml="0"  name=cod_afp visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="65535" x="32" y="132" height="56" width="521" format="[general]" html.valueishtml="0"  name=cod_empresa visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Dirección:" border="0" color="0" x="41" y="412" height="56" width="233" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.1 id=19 alignment="0" tabsequence=32766 border="0" color="0" x="297" y="412" height="56" width="1353" format="[general]" html.valueishtml="0"  name=origen_dir_calle visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Distrito:" border="0" color="0" x="41" y="500" height="56" width="178" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.1 id=20 alignment="0" tabsequence=32766 border="0" color="0" x="233" y="500" height="56" width="1417" format="[general]" html.valueishtml="0"  name=origen_dir_distrito visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Urbanización o Localidad:" border="0" color="0" x="2939" y="412" height="56" width="585" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.1 id=22 alignment="0" tabsequence=32766 border="0" color="0" x="3547" y="412" height="56" width="1243" format="[general]" html.valueishtml="0"  name=origen_dir_urbanizacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Provincia:" border="0" color="0" x="1701" y="500" height="56" width="229" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.1 id=23 alignment="0" tabsequence=32766 border="0" color="0" x="1943" y="500" height="56" width="946" format="[general]" html.valueishtml="0"  name=origen_dir_provincia visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Departamento:" border="0" color="0" x="2944" y="500" height="56" width="329" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.1 id=21 alignment="0" tabsequence=32766 border="0" color="0" x="3278" y="500" height="56" width="544" format="[general]" html.valueishtml="0"  name=origen_dir_departamento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Teléfono: " border="0" color="0" x="3877" y="500" height="56" width="215" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.1 id=24 alignment="0" tabsequence=32766 border="0" color="0" x="4114" y="500" height="56" width="631" format="[general]" html.valueishtml="0"  name=origen_telefono visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Teléfono: " border="0" color="0" x="3877" y="584" height="56" width="215" html.valueishtml="0"  name=t_25 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.1 id=24 alignment="0" tabsequence=32766 border="0" color="0" x="4114" y="584" height="56" width="631" format="[general]" html.valueishtml="0"  name=origen_telefono_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=25 alignment="0" tabsequence=32766 border="0" color="0" x="41" y="648" height="44" width="1225" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=26 alignment="0" tabsequence=32766 border="0" color="0" x="1321" y="648" height="44" width="297" format="[general]" html.valueishtml="0"  name=proveedor_tipo_doc_ident visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=27 alignment="0" tabsequence=32766 border="0" color="0" x="1723" y="648" height="44" width="288" format="[general]" html.valueishtml="0"  name=proveedor_nro_doc_ident visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Nro PLANILLA :" border="0" color="0" x="3835" y="76" height="56" width="466" html.valueishtml="0"  name=t_45 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="" border="0" color="0" x="4320" y="76" height="56" width="448" html.valueishtml="0"  name=nro_planilla_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="2" text="Fecha (dd/mm/aaaa)" border="0" color="0" x="1573" y="928" height="112" width="311" html.valueishtml="0"  name=t_28 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="0" text="Tipo" border="0" color="0" x="1426" y="932" height="56" width="114" html.valueishtml="0"  name=t_35 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header.1 id=28 alignment="0" tabsequence=32766 border="0" color="0" x="2080" y="644" height="48" width="965" format="[general]" html.valueishtml="0"  name=nom_usuario visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="getrow()"border="0" color="16711680" x="41" y="4" height="56" width="82" format="[general]" html.valueishtml="0"  name=compute_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="178" y="4" height="56" width="379" format="[general]" html.valueishtml="0"  name=nro_afp_trabaj visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=29 alignment="1" tabsequence=32766 border="0" color="0" x="1920" y="4" height="56" width="338" format="[general]" html.valueishtml="0"  name=remuneracion_asegurable visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=30 alignment="1" tabsequence=32766 border="0" color="0" x="2309" y="4" height="56" width="270" format="[general]" html.valueishtml="0"  name=aporte_obligatorio visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=32 alignment="1" tabsequence=32766 border="0" color="0" x="4133" y="4" height="56" width="283" format="[general]" html.valueishtml="0"  name=comision_porcent visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" seguros + comision_porcent "border="0" color="0" x="4466" y="4" height="56" width="347" format="[GENERAL]" html.valueishtml="0"  name=tot_retenc visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=31 alignment="1" tabsequence=32766 border="0" color="0" x="3877" y="4" height="56" width="210" format="[general]" html.valueishtml="0"  name=seguros visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="aporte_obligatorio "border="0" color="0" x="3506" y="4" height="56" width="334" format="#,##0.00" html.valueishtml="0"  name=total_fondo_pension visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="594" y="4" height="56" width="791" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=33 alignment="0" tabsequence=32766 border="0" color="0" x="1573" y="8" height="56" width="311" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_afp visible="0~tif (isnull(codigo_afp),0,1)" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=34 alignment="0" tabsequence=32766 border="0" color="0" x="1417" y="8" height="56" width="123" format="[general]" html.valueishtml="0"  name=codigo_afp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="III. RESUMEN DE LOS APORTES" border="0" color="0" x="905" y="28" height="48" width="791" html.valueishtml="0"  name=t_49 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="1893" y1="12" x2="1893" y2="164"  name=l_40 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="2272" y1="12" x2="2272" y2="156"  name=l_41 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Total Página" border="0" color="0" x="1952" y="28" height="56" width="274" html.valueishtml="0"  name=t_50 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text=" Total Fondo de Pensiones" border="0" color="0" x="2912" y="232" height="56" width="562" html.valueishtml="0"  name=t_51 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="4448" y1="164" x2="4448" y2="312"  name=l_44 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="4453" y1="308" x2="4832" y2="308"  name=l_45 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="3493" y1="304" x2="3854" y2="304"  name=l_46 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Total General:" border="0" color="0" x="1952" y="92" height="56" width="274" html.valueishtml="0"  name=t_53 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="1897" y1="160" x2="4827" y2="156"  name=l_47 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="3488" y1="164" x2="3488" y2="308"  name=l_48 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="3854" y1="164" x2="3854" y2="304"  name=l_49 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="0" text="IV. FORMA DE PAGO" border="0" color="0" x="635" y="272" height="48" width="507" html.valueishtml="0"  name=t_56 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="635" y1="340" x2="2665" y2="336"  name=l_50 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Forma de Pago al Fondo" border="0" color="0" x="727" y="360" height="44" width="535" html.valueishtml="0"  name=t_57 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="(   ) Efectivo    ( X ) Cheque Nro " border="0" color="0" x="635" y="416" height="48" width="718" html.valueishtml="0"  name=t_58 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="1381" y1="344" x2="1381" y2="548"  name=l_51 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Forma de Pago por Retenciones y Retribuciones ( AFP )" border="0" color="0" x="1422" y="356" height="44" width="1234" html.valueishtml="0"  name=t_59 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="(   ) Efectivo    ( X ) Cheque Nro " border="0" color="0" x="1422" y="420" height="48" width="718" html.valueishtml="0"  name=t_60 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Banco: CREDITO" border="0" color="0" x="635" y="480" height="48" width="370" html.valueishtml="0"  name=t_61 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Banco:" border="0" color="0" x="1422" y="484" height="56" width="206" html.valueishtml="0"  name=t_62 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="635" y1="552" x2="2665" y2="548"  name=l_52 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="0" text="V. INFORMACION GENERAL" border="0" color="0" x="635" y="596" height="56" width="640" html.valueishtml="0"  name=t_63 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="635" y1="664" x2="2665" y2="660"  name=l_53 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Tipo de Pago" border="0" color="0" x="814" y="676" height="48" width="389" html.valueishtml="0"  name=t_64 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Datos Generales" border="0" color="0" x="1792" y="676" height="56" width="498" html.valueishtml="0"  name=t_65 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="(   ) Normal    (   ) Extemporaneo" border="0" color="0" x="626" y="740" height="56" width="713" html.valueishtml="0"  name=t_66 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="(   ) Regularizacion Nro Plla" border="0" color="0" x="626" y="804" height="56" width="608" html.valueishtml="0"  name=t_67 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="(   ) Liquidación Cbza. Nro" border="0" color="0" x="626" y="868" height="56" width="585" html.valueishtml="0"  name=t_68 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="1381" y1="668" x2="1381" y2="940"  name=l_54 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Nro de Hojas Adicionales :" border="0" color="0" x="1417" y="744" height="56" width="590" html.valueishtml="0"  name=t_69 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Nro Afiliados Declarados :" border="0" color="0" x="1417" y="812" height="56" width="590" html.valueishtml="0"  name=t_70 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="2" expression="count(  aporte_obligatorio   for group 1 ) "border="0" color="0" x="2016" y="812" height="56" width="206" format="[general]" html.valueishtml="0"  name=compute_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="635" y1="944" x2="2665" y2="940"  name=l_55 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="2715" y1="424" x2="4805" y2="420"  name=l_56 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="DECLARO BAJO JURAMENTO QUE LOS DATOS DECLARADOS SON EXPRESION FIEL DE LA REALIDAD" border="0" color="0" x="2706" y="440" height="48" width="2112" html.valueishtml="0"  name=t_71 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="3246" y1="812" x2="4297" y2="808"  name=l_57 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="FIRMA DEL EMPLEADOR O REPRESENTANTE LEGAL" border="0" color="0" x="3232" y="828" height="48" width="1083" html.valueishtml="0"  name=t_72 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="2738" y1="940" x2="4768" y2="936"  name=l_58 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="FECHA" border="0" color="0" x="206" y="800" height="56" width="165" html.valueishtml="0"  name=t_73 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="VoBo y SELLO DE CAJA" border="0" color="0" x="32" y="872" height="56" width="553" html.valueishtml="0"  name=t_74 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="32" y1="948" x2="585" y2="948"  name=l_59 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=trailer.1 x1="27" y1="8" x2="4832" y2="4"  name=l_42 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(  aporte_obligatorio   for group 1 ) "border="0" color="0" x="2309" y="92" height="56" width="270" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(  aporte_obligatorio  for group 1 )"border="0" color="0" x="3506" y="92" height="56" width="334" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(  comision_porcent  for group 1 )"border="0" color="0" x="4133" y="92" height="56" width="283" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(  seguros  for group 1 )"border="0" color="0" x="3877" y="92" height="56" width="210" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=trailer.1 x1="4832" y1="8" x2="4832" y2="312"  name=l_43 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+compute(band=footer alignment="0" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="0" x="928" y="356" height="68" width="773" format="[general]" html.valueishtml="0"  name=compute_11 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+line(band=footer x1="503" y1="0" x2="2533" y2="0"  name=l_60 visible="1" pen.style="2" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=footer x1="503" y1="4" x2="2533" y2="0"  name=l_61 visible="1" pen.style="2" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(  aporte_obligatorio  for group 1 ) * (1 + factor_interes)"border="0" color="0" x="3506" y="232" height="56" width="334" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=trailer.1 alignment="2" text="Ingresos Moratorios" border="0" color="0" x="2912" y="172" height="56" width="448" html.valueishtml="0"  name=t_54 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(  aporte_obligatorio  for group 1 ) *  factor_interes "border="0" color="0" x="3506" y="172" height="56" width="334" format="##,###,###,##0.00" html.valueishtml="0"  name=interes_fondo visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(  tot_retenc  for group 1 )"border="0" color="0" x="4466" y="92" height="56" width="347" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="Ingresos Moratorios" border="0" color="0" x="3877" y="172" height="56" width="448" html.valueishtml="0"  name=t_55 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(  tot_retenc  for group 1 ) *  factor_interes "border="0" color="0" x="4466" y="172" height="56" width="347" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text=" Total Retenciones y Retrib" border="0" color="0" x="3877" y="232" height="56" width="558" html.valueishtml="0"  name=t_52 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=trailer.1 alignment="1" expression="sum(  tot_retenc  for group 1 ) * (1 + factor_interes)"border="0" color="0" x="4466" y="232" height="56" width="347" format="##,###,###,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

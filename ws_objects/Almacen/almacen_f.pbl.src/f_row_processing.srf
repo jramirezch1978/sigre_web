@@ -1,0 +1,51 @@
+﻿$PBExportHeader$f_row_processing.srf
+global type f_row_processing from function_object
+end type
+
+forward prototypes
+global function boolean f_row_processing (datawindow adw_id, string as_form)
+end prototypes
+
+global function boolean f_row_processing (datawindow adw_id, string as_form);// Funcion que valida campos que son requeridos
+// Argumentos:	ad_id	   Datawindow a verificar
+//				   as_form   Tipo de form del dw
+// Valor de Retorno: boolean
+
+DwItemStatus 	l_rowstatus
+Integer 			li_col
+Long 				ll_row, ll_j, ll_k
+String 			ls_colname, ls_campo
+
+// Verifica todos los campos y valida en aquellos que son requeridos
+For ll_j = 1 to adw_id.RowCount()
+	l_rowStatus = adw_id.GetItemStatus( ll_j, 0, primary! )
+	if l_rowStatus = NewModified! or l_rowstatus = DataModified! then
+		
+		ll_row = ll_j   // Numero de fila a evaluar
+		li_col = 1   // numero de la columna a evaluar
+		
+		adw_id.FindRequired( primary!, ll_row, li_col, ls_colname, true )
+
+		if ll_row = ll_j then
+			// Encuentra el texto del campo seleccionado
+			ls_campo = ls_colname + "_t.text"
+			ls_campo = adw_id.describe( ls_campo )
+			if ls_campo <> '!' then
+				Messagebox( "Error", "Campo Requerido en " + ls_campo, stopsign!)
+			else
+				Messagebox( "Error", "Campo Requerido en " + ls_colname, stopsign!)
+			end if
+			
+			adw_id.ScrollToRow( ll_j )
+			if as_form <> 'form' then
+				f_select_current_row(adw_id)
+			end if
+			adw_id.SetColumn( ls_colname )
+			adw_id.SetFocus()
+			Return False		
+		end if	
+	end if	
+Next
+Return true
+end function
+

@@ -1,0 +1,11 @@
+﻿$PBExportHeader$d_pipe_departamento_estado.srp
+PIPELINE(source_connect=CN_DB_DB1_PROD5,destination_connect=CN_DB_DB1_PROD8,type=update,commit=100,errors=100,keyname="departamento_estado")
+SOURCE(name="DEPARTAMENTO_ESTADO",COLUMN(type=char,name="COD_PAIS",dbtype="CHAR(4)",key=yes,nulls_allowed=no)
+ COLUMN(type=char,name="COD_DPTO",dbtype="CHAR(3)",key=yes,nulls_allowed=no)
+ COLUMN(type=varchar,name="DESC_DPTO",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="FLAG_REPLICACION",dbtype="CHAR(1)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"departamento_estado~" ) COLUMN(NAME=~"departamento_estado.cod_pais~") COLUMN(NAME=~"departamento_estado.cod_dpto~") COLUMN(NAME=~"departamento_estado.desc_dpto~") COLUMN(NAME=~"departamento_estado.flag_replicacion~")) ")
+DESTINATION(name="departamento_estado",COLUMN(type=char,name="cod_pais",dbtype="CHAR(4)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=char,name="cod_dpto",dbtype="CHAR(3)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="desc_dpto",dbtype="VARCHAR2(30)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1' "))

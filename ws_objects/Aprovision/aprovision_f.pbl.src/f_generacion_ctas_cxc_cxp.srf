@@ -1,0 +1,391 @@
+﻿$PBExportHeader$f_generacion_ctas_cxc_cxp.srf
+global type f_generacion_ctas_cxc_cxp from function_object
+end type
+
+forward prototypes
+global function boolean f_generacion_ctas_cxc_cxp (datawindow adw_origen_cab, datawindow adw_origen, datawindow adw_referencia, datawindow adw_origen_imp, ref datawindow adw_destino, datastore ads_matriz_det, datastore ads_glosa, string as_moneda, decimal adc_tasa_cambio, string as_campo_formula, tab at_tab1, string as_flag_cxc_cxp, ref string as_cencos, ref string as_cbenef)
+end prototypes
+
+global function boolean f_generacion_ctas_cxc_cxp (datawindow adw_origen_cab, datawindow adw_origen, datawindow adw_referencia, datawindow adw_origen_imp, ref datawindow adw_destino, datastore ads_matriz_det, datastore ads_glosa, string as_moneda, decimal adc_tasa_cambio, string as_campo_formula, tab at_tab1, string as_flag_cxc_cxp, ref string as_cencos, ref string as_cbenef);Long 		   ll_inicio,ll_imatriz,ll_row_ins,ll_found,ll_found_imp,ll_inicio_for, &
+				ll_nro_mov, ll_nro_item
+String      ls_c_fin,ls_matriz,ls_formula,ls_soles,ls_dolares,ls_cnta_ctbl,&
+				ls_flag_debhab,ls_expresion,ls_expresion_form,ls_campo,ls_signo,&
+				ls_desc_cnta,ls_glosa_texto,ls_glosa_campo,ls_desc_glosa,ls_tipo_doc,&
+				ls_nro_doc,ls_cod_relacion,ls_flag_doc_ref,ls_flag_cod_rel,ls_flag_cencos,&
+				ls_flag_cta_bco,ls_flag_tip_ref,ls_tip_ref,ls_nro_ref,ls_flag_cbenef, &
+				ls_tipo_doc_grmp, ls_tipo_doc_cxp, ls_nro_doc_cxp, ls_doc_mov_alm, &
+				ls_origen_mov
+Boolean     lb_retorno = TRUE ,lb_flag_cta = TRUE
+Integer 	   li_pos = 1, li_pos_ini , li_pos_fin , li_cont ,li_item
+String      ls_armado[],ls_inicio[]
+Decimal {2} ldc_importe_imp,ldc_monto,ldc_monto_imp
+
+n_cst_asiento_glosa lnv_asiento_glosa
+lnv_asiento_glosa    = CREATE n_cst_asiento_glosa
+
+f_monedas(ls_soles,ls_dolares)
+
+//Obtiene el tipo de documento GRMP de APPARM y de MOV_ALMACEN DE AP_PARAM
+SELECT DOC_GUIA_MP
+ INTO :ls_tipo_doc_grmp
+FROM   AP_PARAM;
+
+IF Isnull(ls_tipo_doc_grmp) OR Trim(ls_tipo_doc_grmp) = '' THEN
+		 Messagebox('Aviso', 'Debe ingresar un tipo de Documento para GRMP en AP_PARAM')
+ 		 lb_retorno = FALSE
+END IF
+
+SELECT doc_mov_almacen
+ INTO  :ls_doc_mov_alm
+FROM 	 logparam
+WHERE  reckey = '1';
+
+IF Isnull(ls_doc_mov_alm) OR Trim(ls_doc_mov_alm) = '' THEN
+		 Messagebox('Aviso', 'Debe ingresar un tipo de Documento para MOVIMIENTO DE ALMACEN en LOGPARAM')
+ 		 lb_retorno = FALSE
+END IF
+
+////
+
+adw_origen.Accepttext()
+adw_destino.Accepttext()
+
+DO WHILE adw_destino.Rowcount() > 0
+	adw_destino.deleterow(0)
+LOOP
+
+/*Datos de Cabecera*/
+ls_tipo_doc		 = adw_origen_cab.object.tipo_doc 	  [1]
+ls_nro_doc		 = adw_origen_cab.object.nro_doc  	  [1]
+ls_cod_relacion = adw_origen_cab.object.cod_relacion [1]
+/**/
+
+as_cencos = ''
+
+FOR ll_inicio = 1 TO adw_origen.Rowcount()  //Recorro dw Origen de los items A generar Cuenta Contable
+	 // Variables para GRMP
+	 ls_tipo_doc_cxp = adw_origen.object.tipo_ref[ll_inicio]
+	
+	 /*Inicialización de Variables*/
+	 ls_c_fin = adw_origen.object.confin [ll_inicio]	
+	 li_item	 = adw_origen.object.item   [ll_inicio]	
+	
+	 //**//
+    IF Isnull(ls_c_fin) OR Trim(ls_c_fin) = '' THEN
+		 Messagebox('Item Nº '+String(li_item) ,'Item No se Ha ingresado Concepto Financiero')
+		 adw_destino.Reset()
+ 		 lb_retorno = FALSE
+		 at_tab1.SelectedTab = 1
+		 EXIT
+	 ELSE
+		 //Insercion de Cuentas dependiendo de la Matriz Contable
+		  ls_matriz = adw_origen.object.matriz_cntbl[ll_inicio]
+		  IF Isnull(ls_matriz) OR Trim(ls_matriz) = ''  THEN
+			  Messagebox('Aviso','Concepto Financiero Nº '+ls_c_fin+' No se ha Vinculado Matriz')
+		     adw_destino.Reset()
+ 		 	  lb_retorno = FALSE
+		 	  at_tab1.SelectedTab = 1
+			  EXIT
+		  END IF
+
+		  ads_matriz_det.Retrieve(ls_matriz)					// Recuperación de Información de Matriz Detalle
+		  
+		  FOR ll_imatriz = 1 TO ads_matriz_det.Rowcount()
+				
+				/**Inicializacion de Variables**/
+
+				ls_armado = ls_inicio
+
+			   ldc_monto   	= 0.00
+			   ldc_monto_imp  = 0.00
+    			li_pos 	   	= 1
+				li_pos_ini  	= 0
+			   li_pos_fin  	= 0
+				li_cont   		= 0
+				
+				ls_cnta_ctbl 	 =  ads_matriz_det.Object.cnta_ctbl   [ll_imatriz]
+				ls_desc_cnta	 =  ads_matriz_det.Object.desc_cnta    [ll_imatriz]
+				ls_flag_debhab  = ads_matriz_det.Object.flag_debhab  [ll_imatriz]
+				
+				/***************************************************/
+				/*Asignación de Información requerida x Cta Cntbl */
+				/***************************************************/
+				lb_flag_cta = f_cntbl_cnta(ls_cnta_ctbl, ls_flag_cta_bco, ls_flag_cencos, &
+								  ls_flag_doc_ref, ls_flag_cod_rel, ls_flag_cbenef)
+								
+				IF ls_tipo_doc_cxp = ls_tipo_doc_grmp THEN // Para casos de GRMP
+					ls_nro_doc_cxp  = adw_origen.object.nro_ref [ll_inicio]
+					ll_nro_item		 = adw_origen.object.item_ref[ll_inicio]
+					ls_tip_ref 	 	 = ls_doc_mov_alm
+					SELECT NRO_VALE
+					  INTO :ls_nro_ref
+					FROM ARTICULO_MOV           A,
+						  AP_GUIA_RECEPCION_DET  B
+					WHERE A.COD_ORIGEN = B.ORIGEN_MOV
+					  AND A.NRO_MOV    = B.NRO_MOV
+					  AND B.COD_GUIA_REC = :ls_nro_doc_cxp
+					  AND B.ITEM         = :ll_nro_item;
+			   
+					ls_expresion 	 = " cnta_ctbl =	'" + ls_cnta_ctbl+ "' AND flag_debhab	= '" + &
+											ls_flag_debhab + "'"
+					
+					IF ls_flag_doc_ref = '1' and ls_flag_debhab = 'D' THEN
+						ls_expresion = ls_expresion + " AND tipo_docref1 = '" + ls_tip_ref + &
+										"' AND nro_docref1 = '" +ls_nro_ref + "'"
+					END IF
+					
+					IF ls_flag_cencos = '1' THEN
+						ls_expresion = ls_expresion + " AND cencos = '" + as_cencos + "'"
+					END IF
+
+					IF ls_flag_cbenef = '1' THEN
+						ls_expresion = ls_expresion + " AND centro_benef = '" + as_cbenef + "'"
+					END IF
+				ELSE
+					ls_expresion 	 = 'cnta_ctbl =	'+"'"+ls_cnta_ctbl+"'"+' AND flag_debhab	= '+"'"+ls_flag_debhab+"'"+' AND cencos = '+"'"+as_cencos+"'"+' AND centro_benef = '+"'"+as_cbenef+"'"
+				END IF
+				
+				ll_found        = adw_destino.find(ls_expresion, 1, adw_destino.rowcount())
+				
+				ls_formula      = ads_matriz_det.Object.formula 	  [ll_imatriz]
+				ls_glosa_campo  = ads_matriz_det.Object.glosa_campo  [ll_imatriz]
+				ls_glosa_texto	 = ads_matriz_det.Object.glosa_texto  [ll_imatriz]
+				ls_flag_tip_ref = ads_matriz_det.Object.flag_tip_ref [ll_imatriz]
+
+				ls_desc_cnta = Mid(ls_desc_cnta,1,60)
+				/***************************************************/
+				/*Asignación de Información requerida x Cta Cntbl */
+				/***************************************************/
+//				lb_flag_cta = f_cntbl_cnta(ls_cnta_ctbl, ls_flag_cta_bco, ls_flag_cencos, &
+//								ls_flag_doc_ref, ls_flag_cod_rel, ls_flag_cbenef)
+
+				IF lb_flag_cta THEN						 
+					IF ls_flag_cencos = '1' THEN
+						//*Verifico si columna existe en el detalle*//
+						IF f_verifica_columna(adw_origen,'cencos') THEN  //Cuentas x Pagar	
+							as_cencos = adw_origen.object.cencos [ll_inicio] 		 
+							IF Isnull(as_cencos) THEN as_cencos = ''
+						ELSE															  //Cuentas x Cobrar
+		 					as_cencos = ''
+						END IF
+						/**/
+					ELSE
+						as_cencos = ''
+					END IF
+					
+					IF ls_flag_cbenef = '1' THEN  //CENTRO DE BENEFICIO
+						as_cbenef = adw_origen.object.centro_benef [ll_inicio] 	
+						IF Isnull(as_cbenef) THEN as_cbenef = ''
+					END IF
+				END IF
+				/**/
+				
+				/*Función de llenado de datastore*/
+				f_generacion_glosa_cxc_cxp(adw_origen_cab,adw_origen,ads_glosa,ll_inicio,ls_cnta_ctbl,ls_desc_cnta,as_flag_cxc_cxp)
+				/**/
+				
+				/***********************/
+				li_pos_ini     = Pos(ls_formula,'[',li_pos) 
+				
+				IF li_pos_ini = 1 THEN       /*Formula Pura */
+					ldc_monto  = 0.00
+				ELSEIF li_pos_ini > 1 THEN	  /*Campo + Formula*/
+					ls_campo = Mid(ls_formula,1,li_pos_ini - 2)
+					ldc_monto  = adw_origen.Getitemnumber(ll_inicio,ls_campo)
+				ELSEIF li_pos_ini = 0 THEN	  /*Campo*/
+					ldc_monto  = adw_origen.Getitemnumber(ll_inicio,ls_formula)
+				END IF
+				
+				DO WHILE li_pos_ini > 0
+					li_cont ++
+					li_pos_fin = Pos(ls_formula,']',li_pos_ini) 
+					ls_armado [li_cont] = Mid(ls_formula,li_pos_ini + 1,li_pos_fin - (li_pos_ini + 1))
+					//Inicializa Valor
+					li_pos_ini = Pos(ls_formula,'[',li_pos_fin) 
+				LOOP
+				
+				/*****Calculo de Monto si existiese Formula*****/
+				IF UpperBound(ls_armado) > 0 THEN
+					FOR ll_inicio_for = 1 TO UpperBound(ls_armado)
+						 /*Inicializa Monto de Impuesto*/
+						 ls_expresion_form	= 'item = '+Trim(String(li_item))+' AND  '+ as_campo_formula+" = '"+ls_armado[ll_inicio_for]+"'"
+
+						 ll_found_imp = adw_origen_imp.find(ls_expresion_form,1,adw_origen_imp.Rowcount())
+						 
+						 IF ll_found_imp > 0 THEN
+							 ls_signo  			 = adw_origen_imp.object.signo 	[ll_found_imp] 	
+							 ldc_importe_imp   = adw_origen_imp.object.importe	[ll_found_imp] 	
+							 
+							 IF ls_signo   = '+' THEN
+								 ldc_monto_imp = ldc_monto_imp + ldc_importe_imp
+							 ELSEIF ls_signo = '-'	THEN
+								 ldc_monto_imp = ldc_monto_imp - ldc_importe_imp
+							 END IF
+							 
+					    END IF
+					 NEXT
+					 
+					 ldc_monto = (ldc_monto + ldc_monto_imp)
+				END IF
+				/****/				
+				
+				IF ll_found = 0 THEN
+					/*Extraer Glosa*/
+					ls_desc_glosa = lnv_asiento_glosa.of_set_glosa(ads_glosa,1,ls_glosa_texto,ls_glosa_campo)
+					
+					ll_row_ins    = adw_destino.Insertrow(0)		
+					adw_destino.Object.item		     [ll_row_ins] = ll_row_ins
+					adw_destino.Object.cnta_ctbl    [ll_row_ins] = Mid(ads_matriz_det.Object.cnta_ctbl  [ll_imatriz],1,60)
+					adw_destino.Object.flag_debhab  [ll_row_ins] = ads_matriz_det.Object.flag_debhab[ll_imatriz]
+					adw_destino.Object.det_glosa    [ll_row_ins] = Mid(ls_desc_glosa,1,60)
+					adw_destino.Object.cencos		  [ll_row_ins] = ''
+					adw_destino.Object.centro_benef [ll_row_ins] = ''
+					
+					/*Asignacion de Valores de Acuerdo a Flag de Cuentas*/
+					IF lb_flag_cta THEN						 
+						IF ls_flag_doc_ref = '1' THEN
+							IF as_flag_cxc_cxp = 'P' THEN /*Solamente en cuentas x pagar*/
+								IF ls_flag_tip_ref = 'R' THEN /*DATOS DE DOCUMENTO DE REFERENCIA*/
+									IF adw_referencia.Rowcount() = 0 THEN
+										Messagebox('Aviso','Cuenta Contable '+ls_cnta_ctbl+' Requiere Documento de Referencia ,Revise Matriz Contable ')
+										adw_destino.Reset()
+								 		lb_retorno = FALSE
+										at_tab1.SelectedTab = 1
+									   EXIT
+									ELSE
+										IF ls_tipo_doc_cxp = ls_tipo_doc_grmp THEN
+											ls_nro_doc_cxp  = adw_origen.object.nro_ref [ll_inicio]
+											ll_nro_item		 = adw_origen.object.item_ref[ll_inicio]
+											ls_tip_ref 	 	 = ls_doc_mov_alm
+											 
+											SELECT NRO_VALE
+											  INTO :ls_nro_ref
+											FROM ARTICULO_MOV           A,
+												  AP_GUIA_RECEPCION_DET  B
+											WHERE A.COD_ORIGEN = B.ORIGEN_MOV
+											  AND A.NRO_MOV    = B.NRO_MOV
+											  AND B.COD_GUIA_REC = :ls_nro_doc_cxp
+											  AND B.ITEM         = :ll_nro_item;
+ 
+										ELSE
+											ls_tip_ref = adw_referencia.object.tipo_ref [1] //*en ctas x pagar solamnete existe una referencia*//
+											ls_nro_ref = adw_referencia.object.nro_ref  [1]
+										END IF
+
+										adw_destino.Object.tipo_docref1[ll_row_ins] = ls_tip_ref
+										adw_destino.Object.nro_docref1 [ll_row_ins] = ls_nro_ref
+									END IF
+									
+								ELSE
+									adw_destino.Object.tipo_docref1[ll_row_ins] = ls_tipo_doc
+									adw_destino.Object.nro_docref1 [ll_row_ins] = ls_nro_doc
+								END IF
+							ELSE
+								adw_destino.Object.tipo_docref1[ll_row_ins] = ls_tipo_doc
+								adw_destino.Object.nro_docref1 [ll_row_ins] = ls_nro_doc
+							END IF	
+						END IF
+						
+						IF ls_flag_cod_rel = '1' THEN
+							adw_destino.Object.cod_relacion [ll_row_ins] = ls_cod_relacion	
+						END IF
+						
+						IF ls_flag_cencos = '1' THEN
+							adw_destino.Object.cencos [ll_row_ins] = as_cencos
+						END IF
+						
+						IF ls_flag_cbenef = '1' THEN
+							adw_destino.Object.centro_benef [ll_row_ins] = as_cbenef
+						END IF
+						
+					END IF
+					/*Montos de Pre Asientos*/
+					
+					IF as_moneda = ls_soles THEN
+						adw_destino.Object.imp_movsol [ll_row_ins] = ldc_monto					
+						adw_destino.Object.imp_movdol [ll_row_ins] = Round(ldc_monto / adc_tasa_cambio,2)
+					ELSEIF as_moneda = ls_dolares THEN
+						adw_destino.Object.imp_movdol [ll_row_ins] = ldc_monto
+						adw_destino.Object.imp_movsol [ll_row_ins] = Round(ldc_monto * adc_tasa_cambio,2)					
+					END IF
+					
+				ELSE
+
+					IF as_moneda = ls_soles THEN
+						adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + ldc_monto					
+						adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + Round(ldc_monto / adc_tasa_cambio,2)
+					ELSEIF as_moneda = ls_dolares THEN
+						adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + ldc_monto
+						adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + Round(ldc_monto * adc_tasa_cambio,2)					
+					END IF
+				END IF
+		  NEXT
+	 END IF
+NEXT
+
+IF Not (lb_retorno = FALSE OR adw_origen.Rowcount() = 0 ) THEN  //Si Transación de Cntas x
+																					 //Detalle Esta Ok se Procesa 
+																					 //Impuestos
+		
+	  FOR ll_inicio = 1 TO adw_origen_imp.Rowcount()
+		
+   		ls_cnta_ctbl    =	adw_origen_imp.Object.cnta_ctbl   [ll_inicio]
+			li_item			 = adw_origen_imp.Object.item  	    [ll_inicio]
+			ls_flag_debhab  =	adw_origen_imp.object.flag_dh_cxp [ll_inicio]				
+			
+		   IF Isnull(ls_cnta_ctbl) OR Trim(ls_cnta_ctbl) = '' THEN
+		 		Messagebox('Fila de Impuestos Nº '+String(ll_inicio) ,' No se Ha ingresado Cuenta Contable de Impuesto')
+		 	   adw_destino.Reset()
+			   lb_retorno = FALSE
+				adw_origen_imp.SetRow(ll_inicio)
+		  	   at_tab1.SelectedTab = 3
+		      EXIT
+			END IF
+			
+			IF Isnull(ls_flag_debhab) OR Trim(ls_flag_debhab) = '' THEN
+		 		Messagebox('Fila de Impuestos Nº '+String(ll_inicio) ,' No se Ha ingresado Flag de Debe ó Haber de Impuesto')
+		 	   adw_destino.Reset()
+			   lb_retorno = FALSE
+				adw_origen_imp.SetRow(ll_inicio)
+		  	   at_tab1.SelectedTab = 3
+		      EXIT
+			END IF
+			
+			ls_desc_cnta	 = adw_origen_imp.object.desc_cnta	 [ll_inicio]
+			ls_expresion 	 = 'cnta_ctbl = '+"'"+ls_cnta_ctbl+"'"+' AND flag_debhab	= '+"'"+ls_flag_debhab+"'"
+			ll_found        = adw_destino.find(ls_expresion,1,adw_destino.rowcount())
+			ldc_importe_imp = adw_origen_imp.Object.importe 	[ll_inicio]
+			
+			ls_desc_cnta = Mid(ls_desc_cnta,1,60)
+			
+		   IF ll_found = 0 THEN
+        				
+				ll_row_ins    = adw_destino.Insertrow(0)		
+				adw_destino.Object.item		    [ll_row_ins] = ll_row_ins
+				adw_destino.Object.cnta_ctbl   [ll_row_ins] = ls_cnta_ctbl
+				adw_destino.Object.flag_debhab [ll_row_ins] = ls_flag_debhab
+				adw_destino.Object.det_glosa   [ll_row_ins] = ls_desc_cnta
+					
+				IF as_moneda = ls_soles THEN
+					adw_destino.Object.imp_movsol [ll_row_ins] = ldc_importe_imp					
+					adw_destino.Object.imp_movdol [ll_row_ins] = Round(ldc_importe_imp / adc_tasa_cambio,2)
+				ELSEIF as_moneda = ls_dolares THEN
+					adw_destino.Object.imp_movdol [ll_row_ins] = ldc_importe_imp
+					adw_destino.Object.imp_movsol [ll_row_ins] = Round(ldc_importe_imp * adc_tasa_cambio,2)					
+				END IF
+					
+			ELSE
+				IF as_moneda = ls_soles THEN
+					adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + ldc_importe_imp
+					adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + Round(ldc_importe_imp / adc_tasa_cambio,2)
+				ELSEIF as_moneda = ls_dolares THEN
+					adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + ldc_importe_imp
+					adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + Round(ldc_importe_imp * adc_tasa_cambio,2)					
+				END IF
+			END IF
+	  NEXT
+END IF
+
+Return lb_retorno 
+end function
+

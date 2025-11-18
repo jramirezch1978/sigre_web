@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_ap_cons_comp_pesca_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=124 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=origen_nombre dbname="origen.nombre" )
+ column=(type=datetime updatewhereclause=yes name=inicio_descarga dbname="ap_pd_descarga_det.inicio_descarga" )
+ column=(type=number updatewhereclause=yes name=peso_tn dbname="peso_tn" )
+ column=(type=number updatewhereclause=yes name=tota_s dbname="tota_s" )
+ retrieve="SELECT O.NOMBRE,
+		 PDD.INICIO_DESCARGA,
+		 USF_AP_CONV_UND(PDD.UND, (SELECT UND_TM FROM AP_PARAM WHERE 
+                  ORIGEN = 'XX'), GRD.PESO_VENTA) AS PESO_TN,
+        
+        ROUND(GRD.PESO_VENTA * USF_FL_CONV_MON(GRD.PRECIO_UNITARIO , 
+                 GR.COD_MONEDA, (SELECT COD_SOLES FROM LOGPARAM WHERE 
+                 RECKEY = '1'),PDD.INICIO_DESCARGA),2) AS TOTA_S
+        
+FROM   AP_PD_DESCARGA_DET      PDD,
+       AP_GUIA_RECEPCION       GR,
+       AP_GUIA_RECEPCION_DET   GRD,
+		 ORIGEN						 O
+
+WHERE  PDD.NRO_PARTE                 = GRD.NRO_PARTE
+  AND  PDD.ITEM                      = GRD.ITEM_PARTE
+  AND  GRD.COD_GUIA_REC              = GR.COD_GUIA_REC
+  AND  GR.ORIGEN							 = O.COD_ORIGEN
+  AND  TO_CHAR(PDD.INICIO_DESCARGA,'yyyymmdd') BETWEEN :AS_FEC_INI AND :AS_FEC_FIN
+  AND  GR.PROVEEDOR = :AS_PROVEEDOR
+" arguments=(("AS_FEC_INI", string),("AS_FEC_FIN", string),("AS_PROVEEDOR", string))  sort="inicio_descarga A " )
+text(band=header alignment="2" text="Origen
+" border="2" color="16777215" x="14" y="8" height="112" width="279" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Inicio Descarga
+" border="2" color="16777215" x="297" y="8" height="112" width="411" html.valueishtml="0"  name=inicio_descarga_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="14" y="0" height="56" width="279" format="[general]" html.valueishtml="0"  name=origen_nombre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="297" y="0" height="56" width="411" format="[shortdate] [time]" html.valueishtml="0"  name=inicio_descarga visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="TOTALES" border="2" color="0" x="14" y="4" height="52" width="695" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="713" y="0" height="56" width="256" format="#,##0.0000" html.valueishtml="0"  name=peso_tn visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(peso_tn for all)"border="2" color="33554432" x="713" y="4" height="52" width="256" format="#,##0.0000" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Peso 
+Tn" border="2" color="16777215" x="713" y="8" height="112" width="256" html.valueishtml="0"  name=peso_tn_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Total 
+S/." border="2" color="16777215" x="974" y="8" height="112" width="283" html.valueishtml="0"  name=tota_s_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="974" y="0" height="56" width="283" format="#,##0.00" html.valueishtml="0"  name=tota_s visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(tota_s for all)"border="2" color="33554432" x="974" y="4" height="52" width="283" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

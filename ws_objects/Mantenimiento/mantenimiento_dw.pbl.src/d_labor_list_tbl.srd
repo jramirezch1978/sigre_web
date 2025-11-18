@@ -1,0 +1,68 @@
+﻿$PBExportHeader$d_labor_list_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_labor dbname="labor.cod_labor" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_etapa dbname="labor.cod_etapa" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=desc_labor dbname="labor.desc_labor" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="labor.flag_estado" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_incidencia dbname="labor.flag_incidencia" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_marcador dbname="labor.flag_marcador" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_maq_mo dbname="labor.flag_maq_mo" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_tipo_has dbname="labor.flag_tipo_has" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_oper dbname="labor.cnta_oper" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=und dbname="labor.und" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_uso dbname="labor.flag_uso" values="Campo	C/DMA	D/Fabrica	F/Taller	T/Sistemas	S/Administracion	A/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_transporte dbname="labor.flag_transporte" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=labor_cnta_prsp dbname="labor.cnta_prsp" )
+ column=(type=char(50) updatewhereclause=yes name=presupuesto_cuenta_descripcion dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(25) updatewhereclause=yes name=cntbl_cnta_abrev_cnta dbname="cntbl_cnta.abrev_cnta" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp_3ro dbname="labor.cnta_prsp_3ro" )
+ column=(type=char(50) updatewhereclause=yes name=descripcion_1 dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=labor_cnta_prsp_insm dbname="labor.cnta_prsp_insm" )
+ column=(type=char(50) updatewhereclause=yes name=presupuesto_cuenta_desc_cuenta_ins dbname="presupuesto_cuenta.desc_cuenta_ins" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=labor_desc_extendida dbname="labor.desc_extendida" )
+ retrieve="  SELECT ~"LABOR~".~"COD_LABOR~",   
+         ~"LABOR~".~"COD_ETAPA~",   
+         ~"LABOR~".~"DESC_LABOR~",   
+         ~"LABOR~".~"FLAG_ESTADO~",   
+         ~"LABOR~".~"FLAG_INCIDENCIA~",   
+         ~"LABOR~".~"FLAG_MARCADOR~",   
+         ~"LABOR~".~"FLAG_MAQ_MO~",   
+         ~"LABOR~".~"FLAG_TIPO_HAS~",   
+         ~"LABOR~".~"CNTA_OPER~",   
+         ~"LABOR~".~"UND~",   
+         ~"LABOR~".~"FLAG_USO~",   
+         ~"LABOR~".~"FLAG_TRANSPORTE~",   
+         ~"LABOR~".~"CNTA_PRSP~",   
+         ~"PRESUPUESTO_CUENTA_A~".~"DESCRIPCION~",   
+         ~"CNTBL_CNTA~".~"ABREV_CNTA~",   
+         ~"LABOR~".~"CNTA_PRSP_3RO~",   
+         ~"PRESUPUESTO_CUENTA_B~".~"DESCRIPCION~",   
+         ~"LABOR~".~"CNTA_PRSP_INSM~",   
+         presupuesto_cuenta_c.descripcion as desc_cuenta_ins ,
+			~"LABOR~".~"DESC_EXTENDIDA~"   
+    FROM ~"LABOR~",   
+         ~"PRESUPUESTO_CUENTA~" ~"PRESUPUESTO_CUENTA_A~",   
+         ~"CNTBL_CNTA~",   
+         ~"PRESUPUESTO_CUENTA~" ~"PRESUPUESTO_CUENTA_B~",   
+         ~"PRESUPUESTO_CUENTA~" ~"PRESUPUESTO_CUENTA_C~"  
+   WHERE ( labor.cnta_prsp = presupuesto_cuenta_a.cnta_prsp (+)) and  
+         ( labor.cnta_oper = cntbl_cnta.cnta_ctbl (+)) and  
+         ( labor.cnta_prsp_3ro = presupuesto_cuenta_b.cnta_prsp (+)) and  
+         ( labor.cnta_prsp_insm = presupuesto_cuenta_c.cnta_prsp (+)) and  
+         ( ( ~"LABOR~".~"FLAG_USO~" in ('F','T','A','S','M') ) )   
+ORDER BY ~"LABOR~".~"COD_ETAPA~" ASC   
+" update="LABOR" updatewhere=1 updatekeyinplace=yes  sort="cod_etapa A cod_labor A " )
+text(band=header alignment="2" text="Descripcion" border="2" color="16777215" x="544" y="4" height="56" width="901"  name=desc_labor_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="544" y="0" height="64" width="901" format="[general]"  name=desc_labor edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Labor" border="2" color="16777215" x="274" y="4" height="56" width="265"  name=cod_labor_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="274" y="0" height="64" width="265" format="[general]"  name=cod_labor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Actividad" border="2" color="16777215" x="0" y="4" height="56" width="270"  name=cod_etapa_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="0" y="0" height="64" width="270" format="[general]"  name=cod_etapa edit.name="Etapa (Oper)" dddw.name=d_dddw_etapa dddw.displaycolumn=cod_etapa dddw.datacolumn=cod_etapa dddw.percentwidth=670 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="cod_etapa")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

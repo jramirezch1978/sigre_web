@@ -1,0 +1,63 @@
+﻿$PBExportHeader$d_ap_pd_compra_matprim_ct.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=64 color="536870912" )
+header[3](height=112 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=cod_prov dbname="cod_prov" )
+ column=(type=char(20) updatewhereclause=yes name=proveedor dbname="proveedor" )
+ column=(type=number updatewhereclause=yes name=peso_tn dbname="peso_tn" )
+ column=(type=number updatewhereclause=yes name=total_$ dbname="total_$" )
+ retrieve="SELECT gc.proveedor as cod_prov, 
+		 p.nom_proveedor as Proveedor, 
+		 trunc(pdd.inicio_descarga) as Fecha, 
+	    round(USF_AP_CONV_UND(pdd.UND, (SELECT UND_TM FROM AP_PARAM WHERE ORIGEN = 'XX'), gd.peso_venta),4) AS PESO_TN,
+       round((gd.peso_venta * usf_fl_conv_mon((gd.precio_unitario + gd.precio_unitario_castigo +
+                         gd.precio_representacion),gc.cod_moneda, (select cod_dolares from logparam where reckey = '1'
+                         ),pdd.inicio_descarga)),2) as Total_$ 
+FROM ap_guia_recepcion      gc,  /* cabecera de la guia */
+     ap_guia_recepcion_det  gd,  /* detalle de la guia */
+     proveedor              p,   /* datos del proveedor */
+     ap_pd_descarga_det     pdd  /* detalle del parte diario de descarga */
+WHERE trunc(pdd.inicio_descarga) BETWEEN trunc(:ad_fecha_ini) AND trunc(:ad_fecha_fin)
+  AND gc.cod_guia_rec = gd.cod_guia_rec
+  AND gc.proveedor    = p.proveedor 
+  AND gd.nro_parte    = pdd.nro_parte
+  AND gd.item_parte   = pdd.item
+  AND pdd.especie     LIKE :as_cod_especie   /*Para indicar la especies */
+  AND INSTR(:as_cod_origen, gc.origen) > 0  	/*Para indicar el origen   */
+ORDER BY pdd.inicio_descarga, gc.proveedor" arguments=(("ad_fecha_ini", date),("ad_fecha_fin", date),("as_cod_especie", string),("as_cod_origen", string))  sort="cod_prov A proveedor A " )
+group(level=1 header.height=0 trailer.height=0 by=("cod_prov" ) header.color="536870912" trailer.color="536870912" )
+text(band=header[2] alignment="2" text="@col" border="2" color="16777215" x="1106" y="4" height="52" width="443" html.valueishtml="0"  name=t_2 visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header[3] alignment="2" text="Cod 
+Prov" border="2" color="16777215" x="9" y="4" height="104" width="183" html.valueishtml="0"  name=cod_prov_t visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header[3] alignment="2" text="Proveedor" border="2" color="16777215" x="201" y="4" height="104" width="896" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header[3] alignment="2" text="Peso
+Total" border="2" color="16777215" x="1554" y="4" height="104" width="219" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header[3] alignment="2" text="Total
+$" border="2" color="16777215" x="1783" y="4" height="104" width="242" html.valueishtml="0"  name=t_3 visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header[3] alignment="2" text="Peso 
+Tn" border="2" color="16777215" x="1106" y="4" height="104" width="215" html.valueishtml="0"  name=peso_tn_t visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header[3] alignment="2" text="Precio
+$" border="2" color="16777215" x="1330" y="4" height="104" width="215" html.valueishtml="0"  name=total_$_t visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="201" y="0" height="60" width="896" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1106" y="0" height="60" width="215" format="#,##0.0000" html.valueishtml="0"  name=peso_tn visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="1330" y="0" height="60" width="215" format="#,##0.00" html.valueishtml="0"  name=total_$ visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="2" color="33554432" x="1554" y="0" height="60" width="219" format="#,##0.0000" html.valueishtml="0"  name=grand_sum_peso_tn visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(2)"border="2" color="33554432" x="1783" y="0" height="60" width="242" format="#,##0.00" html.valueishtml="0"  name=grand_sum_total_$ visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(total_$ for all )"border="2" color="33554432" x="1330" y="4" height="60" width="215" format="#,##0.00" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_peso_tn for all )"border="2" color="33554432" x="1554" y="4" height="60" width="219" format="#,##0.0000" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_total_$ for all )"border="2" color="33554432" x="1783" y="4" height="60" width="242" format="#,##0.00" html.valueishtml="0"  name=compute_10 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="60" width="183" format="[general]" html.valueishtml="0"  name=cod_prov visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(peso_tn for all )"border="2" color="33554432" x="1106" y="4" height="60" width="215" format="#,##0.0000" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="TOTALES" border="2" color="0" x="9" y="4" height="60" width="1093" html.valueishtml="0"  name=t_4 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "date(fecha)" rows = "cod_prov, proveedor" values = "sum(peso_tn for crosstab), sum(total_$ for crosstab)" sourcenames = "cod_prov, proveedor, fecha, peso_tn, total_$")
+sparse(names="cod_prov")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

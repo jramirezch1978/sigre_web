@@ -1,0 +1,48 @@
+﻿$PBExportHeader$d_cns_captura_pesca_grid.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=1 grid.columnmove=no selected.mouse=no )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=nave dbname="tg_naves.nave" )
+ column=(type=char(50) updatewhereclause=yes name=nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=number updatewhereclause=yes name=pesca dbname="pesca" )
+ column=(type=number updatewhereclause=yes name=importe_total dbname="importe_total" )
+ column=(type=number updatewhereclause=yes name=precio_promedio dbname="precio_promedio" )
+ retrieve="select 	tn.nave, tn.nomb_nave, 
+				sum(flv.cantidad_real - flv.cantidad_castigada) as pesca,
+        sum ( (flv.cantidad_real - flv.cantidad_castigada) * 
+					 			usf_fl_conv_mon(flv.precio_unitario, flv.cod_moneda, 'US$', 
+                trunc( flpp.fecha_hora_arribo ) ) ) as Importe_total,
+        sum ( (flv.cantidad_real - flv.cantidad_castigada) * 
+ 								usf_fl_conv_mon(flv.precio_unitario, flv.cod_moneda, 'US$', 
+                trunc( flpp.fecha_hora_arribo ) ) ) / 
+			sum(flv.cantidad_real - flv.cantidad_castigada) as Precio_promedio
+from 	tg_naves tn,
+		fl_venta flv,
+      fl_parte_de_pesca flpp
+where flv.parte_pesca = flpp.parte_pesca
+	and flpp.nave_real = tn.nave
+	and tn.flag_tipo_flota = 'P'
+	and tn.flag_estado = '1'
+	and to_char(flpp.fecha_hora_arribo, 'yyyymmdd' ) >= to_char(:ad_fecha1, 'yyyymmdd')
+	and to_char(flpp.fecha_hora_arribo, 'yyyymmdd' ) <= to_char(:ad_fecha2, 'yyyymmdd')
+group by tn.nave, tn.nomb_nave" arguments=(("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Codigo 
+Nave" border="2" color="33554432" x="9" y="8" height="112" width="247" html.valueishtml="0"  name=nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion
+Nave" border="2" color="33554432" x="265" y="8" height="112" width="1399" html.valueishtml="0"  name=nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Pesca 
+Capturada" border="2" color="33554432" x="1673" y="8" height="112" width="329" html.valueishtml="0"  name=pesca_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Importe 
+Total (US$)" border="2" color="33554432" x="2011" y="8" height="112" width="343" html.valueishtml="0"  name=importe_total_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Precio Prom.
+(US$/TM)" border="2" color="33554432" x="2363" y="8" height="112" width="439" html.valueishtml="0"  name=precio_promedio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="247" format="[general]" html.valueishtml="0"  name=nave visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="265" y="4" height="64" width="1399" format="[general]" html.valueishtml="0"  name=nomb_nave visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1673" y="4" height="64" width="329" format="###,###.000" html.valueishtml="0"  name=pesca pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="2011" y="4" height="64" width="343" format="###,##0.00" html.valueishtml="0"  name=importe_total pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2363" y="4" height="64" width="439" format="###,##0.00" html.valueishtml="0"  name=precio_promedio pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

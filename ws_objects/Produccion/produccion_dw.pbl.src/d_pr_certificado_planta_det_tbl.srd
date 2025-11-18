@@ -1,0 +1,44 @@
+﻿$PBExportHeader$d_pr_certificado_planta_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=128 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=200 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cod_certificado dbname="certificado_planta_det.cod_certificado" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=cod_servicio dbname="certificado_planta_det.cod_servicio" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=certificado_planta_det_flag_replicacion dbname="certificado_planta_det.flag_replicacion" initial="1" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=observacion dbname="certificado_planta_det.observacion" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_vencimiento dbname="certificado_planta_det.fec_vencimiento" )
+ column=(type=char(40) updatewhereclause=yes name=desc_servicio dbname="certificado_servicio.desc_servicio" )
+ retrieve="  SELECT ~"CERTIFICADO_PLANTA_DET~".~"COD_CERTIFICADO~",   
+         ~"CERTIFICADO_PLANTA_DET~".~"COD_SERVICIO~",   
+         ~"CERTIFICADO_PLANTA_DET~".~"FLAG_REPLICACION~",   
+         ~"CERTIFICADO_PLANTA_DET~".~"OBSERVACION~",   
+         ~"CERTIFICADO_PLANTA_DET~".~"FEC_VENCIMIENTO~",   
+         ~"CERTIFICADO_SERVICIO~".~"DESC_SERVICIO~"  
+    FROM ~"CERTIFICADO_PLANTA~",   
+         ~"CERTIFICADO_PLANTA_DET~",   
+         ~"CERTIFICADO_SERVICIO~"  
+   WHERE ( ~"CERTIFICADO_PLANTA_DET~".~"COD_CERTIFICADO~" = ~"CERTIFICADO_PLANTA~".~"COD_CERTIFICADO~"(+) ) and  
+         ( ~"CERTIFICADO_SERVICIO~".~"COD_SERVICIO~"(+) = ~"CERTIFICADO_PLANTA_DET~".~"COD_SERVICIO~" ) and
+           CERTIFICADO_PLANTA_DET.COD_CERTIFICADO = :as_nro_certificado
+" update="CERTIFICADO_PLANTA_DET" updatewhere=1 updatekeyinplace=yes arguments=(("as_nro_certificado", string)) )
+text(band=header alignment="2" text="Flag Replicacion" border="2" color="16777215" x="7145" y="208" height="56" width="635" html.valueishtml="0"  name=flag_replicacion_t visible="0"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Descripción" border="2" color="16777215" x="539" y="68" height="56" width="901" html.valueishtml="0"  name=certificado_servicio_desc_servicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Servicio" border="2" color="16777215" x="329" y="8" height="56" width="1111" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Código" border="2" color="16777215" x="329" y="68" height="56" width="197" html.valueishtml="0"  name=certificado_planta_det_cod_servicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Cod. Certificado" border="2" color="16777215" x="14" y="8" height="116" width="302" html.valueishtml="0"  name=cod_certificado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Fecha de Vencimiento" border="2" color="16777215" x="1454" y="8" height="112" width="357" html.valueishtml="0"  name=fec_vencimiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Observacion" border="2" color="16777215" x="1824" y="8" height="116" width="1605" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="4558" y="0" height="56" width="55" format="[general]" html.valueishtml="0"  name=certificado_planta_det_flag_replicacion visible="0" edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="539" y="4" height="56" width="901" format="[general]" html.valueishtml="0"  name=desc_servicio visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=2 alignment="0" tabsequence=10 border="2" color="33554432" x="329" y="4" height="56" width="197" format="[general]" html.valueishtml="0"  name=cod_servicio pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="14" y="4" height="56" width="297" format="[general]" html.valueishtml="0"  name=cod_certificado visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=5 alignment="0" tabsequence=30 border="2" color="33554432" x="1454" y="4" height="56" width="361" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_vencimiento visible="1" editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=20 border="2" color="33554432" x="1829" y="4" height="108" width="1605" format="[general]" html.valueishtml="0"  name=observacion visible="1" edit.limit=100 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="t" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><untitled><untitled_row __pbband=~"detail~"><certificado_planta_det_cod_certificado>cod_certificado</certificado_planta_det_cod_certificado><certificado_planta_det_cod_servicio>cod_servicio</certificado_planta_det_cod_servicio><certificado_planta_det_flag_replicacion>certificado_planta_det_flag_replicacion</certificado_planta_det_flag_replicacion><certificado_planta_det_observacion>observacion</certificado_planta_det_observacion><certificado_planta_det_fec_vencimiento>fec_vencimiento</certificado_planta_det_fec_vencimiento><certificado_servicio_desc_servicio>desc_servicio</certificado_servicio_desc_servicio><certificado_planta_cod_certificado/></untitled_row></untitled>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

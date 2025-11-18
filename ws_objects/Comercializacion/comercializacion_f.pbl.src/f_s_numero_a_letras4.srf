@@ -1,0 +1,94 @@
+﻿$PBExportHeader$f_s_numero_a_letras4.srf
+global type f_s_numero_a_letras4 from function_object
+end type
+
+forward prototypes
+global function string f_s_numero_a_letras4 (double p_num)
+end prototypes
+
+global function string f_s_numero_a_letras4 (double p_num);string ls_num
+string ls_tmp
+string ls_montos[]
+string ls_cadenas[]
+string ls_ent
+string ls_decimal
+dec{0} ln_count , ln_fila , ln_count11
+string ls_cadena 
+
+datastore	lds_avance_od
+lds_avance_od = CREATE datastore
+lds_avance_od.dataobject = 'd_lista_moneda_letras'
+lds_avance_od.settransobject(sqlca)
+lds_avance_od.reset()
+ls_num = String(p_num, "000000000000.00")
+ls_decimal = right(ls_num,2)
+ls_ent     = Left(ls_num, Len(ls_num) - 3)
+
+ln_count11 = 0
+
+do while ( len(ls_ent) <> 0 )
+	ln_count11 = ln_count11 + 1
+	ls_cadena = trim(mid(ls_ent,1,3))
+	ls_ent    = trim(mid(ls_ent,4,len(ls_ent)))
+//	if (trim(ls_cadena) <> '000') or (trim(ls_cadena) = '000' and dec(ls_ent) <> 0) then
+		ln_fila = lds_avance_od.insertrow(0)
+		lds_avance_od.object.montos[ln_fila] = trim(ls_cadena)
+//		if trim(ls_cadena) = '000' then 
+//			lds_avance_od.object.texto[ln_fila]  = ' '
+//		else
+			lds_avance_od.object.texto[ln_fila]  = f_s_numero3_a_letras4(trim(ls_cadena)) 
+//		end if
+//	end if
+loop
+
+//for ln_count11 = 1 to lds_avance_od.rowcount()
+//	messagebox("1",trim(lds_avance_od.object.montos[ln_count11]))
+//next
+
+do while (lds_avance_od.object.montos[1] = '000') and (lds_avance_od.rowcount() > 0)
+	lds_avance_od.deleterow(1)
+	lds_avance_od.accepttext()
+loop
+
+//for ln_count11 = 1 to lds_avance_od.rowcount()
+//	messagebox("2",trim(lds_avance_od.object.montos[ln_count11]))
+//next
+
+dec{0} ln_Rec11
+string ls_retorno
+
+if lds_avance_od.rowcount() = 1 then
+elseif lds_avance_od.rowcount() = 2 then
+	lds_avance_od.object.texto[1] = trim(lds_avance_od.object.texto[1]) + " THOUSAND "
+elseif lds_avance_od.rowcount() = 3 then
+	if dec(lds_avance_od.object.montos[1]) = 1 then
+		lds_avance_od.object.texto[1] = trim(lds_avance_od.object.texto[1]) + " MILLION "
+	else
+		lds_avance_od.object.texto[1] = trim(lds_avance_od.object.texto[1]) + " MILLIONS "
+	end if
+	lds_avance_od.object.texto[2] = trim(lds_avance_od.object.texto[2]) + " THOUSAND "
+elseif lds_avance_od.rowcount() = 4 then
+	lds_avance_od.object.texto[1] = trim(lds_avance_od.object.texto[1]) + " THOUSAND "
+	if dec(lds_avance_od.object.montos[2]) = 1 then
+		lds_avance_od.object.texto[2] = trim(lds_avance_od.object.texto[2]) + " MILLION "
+	else
+		lds_avance_od.object.texto[2] = trim(lds_avance_od.object.texto[2]) + " MILLIONS "
+	end if
+	lds_avance_od.object.texto[3] = trim(lds_avance_od.object.texto[3]) + " THOUSAND "
+end if
+
+setnull(ls_retorno)
+for ln_rec11 = 1 to lds_avance_od.rowcount()
+	if isnull(ls_retorno) or trim(ls_retorno) = '' then
+		ls_retorno = trim(lds_avance_od.object.texto[ln_rec11])
+	else
+		ls_retorno = trim(ls_retorno) + " " + trim(lds_avance_od.object.texto[ln_rec11])
+	end if
+next
+
+DESTROY lds_avance_od
+
+Return trim(ls_retorno) + " AND " + Right(ls_decimal, 2) + "/100"
+
+end function
+

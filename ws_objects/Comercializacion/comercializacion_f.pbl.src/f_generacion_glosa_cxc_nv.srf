@@ -1,0 +1,58 @@
+﻿$PBExportHeader$f_generacion_glosa_cxc_nv.srf
+global type f_generacion_glosa_cxc_nv from function_object
+end type
+
+forward prototypes
+global subroutine f_generacion_glosa_cxc_nv (datawindow adw_1, datawindow adw_2, datastore ads_1, long al_row_det, string as_cnta_cntbl, string as_desc_cnta, string as_flag_cxc_cxp)
+end prototypes
+
+global subroutine f_generacion_glosa_cxc_nv (datawindow adw_1, datawindow adw_2, datastore ads_1, long al_row_det, string as_cnta_cntbl, string as_desc_cnta, string as_flag_cxc_cxp);/****************************************************/
+/*LLenado de Datastore en Caso de Liquidación       */
+/* adw_1 = Cabecera de Cntas_Cobrar					    */
+/* adw_2 = Detalle  de Cntas_Cobrar                 */
+/* ads_1 = Datastore de Datos Para Glosa				 */
+/* al_row_det = Linea de Detalle de cntas_cobrar	 */
+/****************************************************/
+Long   ll_ins_ds
+
+ads_1.Reset()
+
+ll_ins_ds = ads_1.InsertRow(0)
+/*Cabecera de Nota de ventas*/
+ads_1.Object.origen			    [ll_ins_ds] = adw_1.Object.origen 				 [1]
+ads_1.Object.tipo_doc		    [ll_ins_ds] =	adw_1.Object.tipo_doc 			 [1]
+ads_1.Object.nro_doc			    [ll_ins_ds] =	adw_1.Object.nro_doc  			 [1]
+ads_1.Object.cod_relacion	    [ll_ins_ds] =	adw_1.Object.cod_relacion 		 [1]
+ads_1.Object.nom_proveedor	    [ll_ins_ds] =	adw_1.Object.nom_proveedor 	 [1]
+ads_1.Object.cod_moneda			 [ll_ins_ds] = adw_1.Object.cod_moneda 		 [1]
+ads_1.Object.tasa_cambio       [ll_ins_ds] = adw_1.Object.tasa_cambio 		 [1] 
+ads_1.Object.observacion		 [ll_ins_ds] =	adw_1.Object.observacion 		 [1] 
+ads_1.Object.fecha_documento   [ll_ins_ds] = adw_1.Object.fecha_documento 	 [1]
+ads_1.Object.fecha_vencimiento [ll_ins_ds] = adw_1.Object.fecha_vencimiento [1]
+ads_1.Object.fecha_registro	 [ll_ins_ds] = adw_1.Object.fecha_registro	 [1]
+ads_1.Object.item_direccion    [ll_ins_ds] = adw_1.Object.item_direccion	 [1]
+ads_1.Object.flag_estado       [ll_ins_ds] = adw_1.Object.flag_estado	 	 [1]
+ads_1.Object.motivo            [ll_ins_ds] = adw_1.Object.motivo	 			 [1]
+ads_1.Object.ano               [ll_ins_ds] = adw_1.Object.ano	 				 [1]
+ads_1.Object.mes               [ll_ins_ds] = adw_1.Object.mes	 				 [1]
+ads_1.Object.nro_libro         [ll_ins_ds] = adw_1.Object.nro_libro	 		 [1]
+ads_1.Object.nro_asiento       [ll_ins_ds] = adw_1.Object.nro_asiento 	 	 [1]
+ads_1.Object.importe_a_cobrar  [ll_ins_ds] = adw_1.Object.importe_doc		 [1]
+ads_1.Object.cod_usr           [ll_ins_ds] = adw_1.Object.cod_usr 	 		 [1]
+
+/*Detalle de Nota de venta*/
+ads_1.Object.cnta_ctbl			 [ll_ins_ds] = as_cnta_cntbl
+ads_1.Object.desc_cnta			 [ll_ins_ds] = Mid(as_desc_cnta,1,60)
+ads_1.Object.item					 [ll_ins_ds] = adw_2.Object.item					 [al_row_det]
+ads_1.Object.cod_art				 [ll_ins_ds] = adw_2.Object.cod_art				 [al_row_det]
+ads_1.Object.descripcion		 [ll_ins_ds] = Mid(adw_2.Object.descripcion	[al_row_det],1,60)
+ads_1.Object.cantidad		    [ll_ins_ds] = adw_2.Object.cantidad          [al_row_det]
+ads_1.Object.precio_unitario   [ll_ins_ds] = adw_2.Object.precio_unitario	 [al_row_det] 	
+ads_1.Object.total             [ll_ins_ds] = adw_2.Object.total             [al_row_det]
+ads_1.Object.tipo_ref          [ll_ins_ds] = adw_2.Object.tipo_ref          [al_row_det] 
+ads_1.Object.nro_ref           [ll_ins_ds] = adw_2.Object.nro_ref           [al_row_det] 
+ads_1.Object.item_ref          [ll_ins_ds] = adw_2.Object.item_ref          [al_row_det]
+
+
+end subroutine
+

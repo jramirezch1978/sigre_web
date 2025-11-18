@@ -1,0 +1,88 @@
+﻿$PBExportHeader$f_access.srf
+$PBExportComments$Control de acceso a la ventana
+global type f_access from function_object
+end type
+
+forward prototypes
+global function boolean f_access (string as_usuario, string as_objeto, ref string as_niveles)
+end prototypes
+
+global function boolean f_access (string as_usuario, string as_objeto, ref string as_niveles);// Funcion de Control de Acceso a Ventanas
+// Argumentos:	as_usuario	codigo del usuario
+//					as_objeto	objeto a validar el acceso
+//             as_niveles  retorna los niveles de acceso al objeto
+
+String 	ls_objeto, ls_temp, ls_gi, ls_ge, ls_gm, ls_gc, ls_grupo
+String	ls_iu, ls_eu, ls_mu, ls_cu, ls_au, ls_nu
+String   ls_ig, ls_eg, ls_mg, ls_cg, ls_ag, ls_ng
+Boolean 	lbo_retorno = FALSE 
+Integer	li_x, li_regs
+Long		ll_rc
+
+SELECT objeto_sis.objeto
+		INTO :ls_objeto 
+    	FROM objeto_sis
+		WHERE objeto_sis.objeto = :as_objeto ;
+		
+IF SQLCA.SQLCode = 100 THEN		// si el objeto no se encuentra no tiene control de acceso
+	lbo_retorno = TRUE
+	as_niveles = 'IEMCAN'
+	GOTO LOG_OBJ
+ELSE
+	IF SQLCA.SQLCode = -1 THEN
+	   MessageBox("Error", "Se ha producido un error al momento de obtener una consulta de la tabla objeto_sis: " + SQLCA.SQLErrText, Exclamation!, OK!)
+		HALT
+	END IF
+END IF
+
+SELECT usuario_obj.flag_insertar, usuario_obj.flag_eliminar, 
+       usuario_obj.flag_modificar, usuario_obj.flag_consultar,
+		 usuario_obj.flag_anular, usuario_obj.flag_cancelar
+		INTO :ls_iu, :ls_eu, :ls_mu, :ls_cu, :ls_au, :ls_nu
+    	FROM usuario_obj
+		WHERE ( usuario_obj.cod_usr = :as_usuario ) AND  
+         	( usuario_obj.objeto = :as_objeto ) ;   
+
+IF SQLCA.SQLCode = 0 THEN 	lbo_retorno = TRUE
+
+SELECT MAX("GRP_OBJ"."FLAG_INSERTAR"), MAX("GRP_OBJ"."FLAG_ELIMINAR"),   
+       MAX("GRP_OBJ"."FLAG_MODIFICAR"), MAX("GRP_OBJ"."FLAG_CONSULTAR"),
+		 MAX("GRP_OBJ"."FLAG_ANULAR"), MAX("GRP_OBJ"."FLAG_CANCELAR"), COUNT(*)
+  INTO :ls_ig, :ls_eg,   
+       :ls_mg, :ls_cg,
+		 :ls_ag, :ls_ng, :li_regs
+  FROM "GRP_OBJ", "USR_GRP"  
+ WHERE ( "GRP_OBJ"."GRUPO" = "USR_GRP"."GRUPO" ) and  
+       ( ( "USR_GRP"."COD_USR" = :as_usuario ) AND  
+       ( "GRP_OBJ"."OBJETO" = :as_objeto ) )   ;
+
+IF li_regs > 0 THEN 	lbo_retorno = TRUE
+
+// Crear String con los niveles especificos de acceso
+IF lbo_retorno = TRUE THEN
+	as_niveles = ''
+	IF ls_iu = '1' OR ls_ig = '1' THEN as_niveles = as_niveles + 'I'
+	IF ls_eu = '1' OR ls_eg = '1' THEN as_niveles = as_niveles + 'E'
+	IF ls_mu = '1' OR ls_mg = '1' THEN as_niveles = as_niveles + 'M'
+	IF ls_cu = '1' OR ls_cg = '1' THEN as_niveles = as_niveles + 'C'
+	IF ls_au = '1' OR ls_ag = '1' THEN as_niveles = as_niveles + 'A'
+	IF ls_nu = '1' OR ls_ng = '1' THEN as_niveles = as_niveles + 'N'
+ELSE
+	MessageBox(as_objeto+'/'+as_usuario, "Acceso Denegado, por favor coordine con su jefe superior para que le brinde el acceso a esta Ventana", Exclamation!, OK!)
+	GOTO SALIDA
+END IF
+
+LOG_OBJ:
+// Grabar en Log_Objeto
+IF gb_log_objeto THEN
+	INSERT INTO "LOG_OBJETO" ( "OBJETO", "FECHA", "COD_USR" )  
+        VALUES ( :as_objeto, sysdate, :gs_user )  ;
+	COMMIT;
+END IF
+
+SALIDA:
+
+RETURN lbo_retorno
+
+end function
+

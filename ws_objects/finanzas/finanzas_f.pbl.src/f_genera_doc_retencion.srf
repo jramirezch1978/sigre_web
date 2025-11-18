@@ -1,0 +1,149 @@
+﻿$PBExportHeader$f_genera_doc_retencion.srf
+global type f_genera_doc_retencion from function_object
+end type
+
+forward prototypes
+global function boolean f_genera_retencion (long al_nro_serie, string as_mensaje, ref string as_nro_ret)
+global function boolean f_genera_doc_retencion (long al_nro_serie, ref string as_mensaje, ref string as_nro_ret)
+end prototypes
+
+global function boolean f_genera_retencion (long al_nro_serie, string as_mensaje, ref string as_nro_ret);Long    ll_nro_doc
+Integer li_dig_serie,li_dig_numero
+String  ls_nro_doc,ls_tip_doc
+Boolean lb_retorno = TRUE
+
+/*Archivo de Parametros*/
+SELECT digitos_serie,digitos_numero,doc_ret_igv_crt
+  INTO :li_dig_serie,:li_dig_numero,:ls_tip_doc
+  FROM finparam
+ WHERE (reckey = '1')  ;
+
+
+IF Isnull(ls_tip_doc) OR Trim(ls_tip_doc) = '' THEN
+	lb_retorno = FALSE
+	as_mensaje = 'Debe Definir Un TIpo de Documento para CRI ,Verifique!'
+	GOTO SALIDA	
+END IF
+
+IF Isnull(li_dig_serie) OR li_dig_serie = 0 THEN
+	lb_retorno = FALSE
+	as_mensaje = 'Digitos Para Serie de Documento No ha sido inicializado en Tabla FINPARAM, Verifique!'
+	GOTO SALIDA
+END IF
+
+IF Isnull(li_dig_numero) OR li_dig_numero = 0 THEN
+	lb_retorno = FALSE
+	as_mensaje = 'Digitos Para Numeros de Documento No ha sido inicializado en Tabla FINPARAM, Verifique!'
+	GOTO SALIDA
+END IF
+
+
+//*Genero Comprobate de Retencion*/
+SELECT ultimo_numero
+  INTO :ll_nro_doc
+  FROM num_doc_tipo
+ WHERE ((tipo_doc  = :ls_tip_doc   )  AND
+ 		  (nro_serie = :al_nro_serie )) 
+FOR UPDATE NOWAIT		  ;
+
+	
+IF Isnull(ll_nro_doc) OR ll_nro_doc = 0 THEN
+	lb_retorno = FALSE
+	as_mensaje = 'Numerador de Tipo de Documento No Ha sido Inicializado, Verifique!'
+	GOTO SALIDA
+END IF	
+
+//****************************//
+//Actualiza Tabla num_doc_tipo//
+//****************************//
+	
+UPDATE num_doc_tipo
+   SET ultimo_numero = :ll_nro_doc + 1
+ WHERE ((tipo_doc  = :ls_tip_doc   )) AND
+		  (nro_serie = :al_nro_serie ) ;
+	
+IF SQLCA.SQLCode = -1 THEN 
+	as_mensaje = 'No se Pudo Actualizar Tabla num_doc_tipo por Tipo de Documento Ha Generar, Verifique!'
+	lb_retorno = FALSE
+	GOTO SALIDA
+ELSE
+	/**/
+	as_nro_ret = f_llena_caracteres('0',Trim(String(al_nro_serie)),li_dig_serie)+'-'+ f_llena_caracteres('0',Trim(String(ll_nro_doc)),li_dig_numero)
+	
+END IF
+SALIDA:
+
+Return lb_retorno
+
+end function
+
+global function boolean f_genera_doc_retencion (long al_nro_serie, ref string as_mensaje, ref string as_nro_ret);Long    ll_nro_doc
+Integer li_dig_serie,li_dig_numero
+String  ls_nro_doc,ls_tip_doc
+Boolean lb_retorno = TRUE
+
+/*Archivo de Parametros*/
+SELECT digitos_serie,digitos_numero,doc_ret_igv_crt
+  INTO :li_dig_serie,:li_dig_numero,:ls_tip_doc
+  FROM finparam
+ WHERE (reckey = '1')  ;
+
+
+IF Isnull(ls_tip_doc) OR Trim(ls_tip_doc) = '' THEN
+	lb_retorno = FALSE
+	as_mensaje = 'Debe Definir Un TIpo de Documento para CRI ,Verifique!'
+	GOTO SALIDA	
+END IF
+
+IF Isnull(li_dig_serie) OR li_dig_serie = 0 THEN
+	lb_retorno = FALSE
+	as_mensaje = 'Digitos Para Serie de Documento No ha sido inicializado en Tabla FINPARAM, Verifique!'
+	GOTO SALIDA
+END IF
+
+IF Isnull(li_dig_numero) OR li_dig_numero = 0 THEN
+	lb_retorno = FALSE
+	as_mensaje = 'Digitos Para Numeros de Documento No ha sido inicializado en Tabla FINPARAM, Verifique!'
+	GOTO SALIDA
+END IF
+
+
+//*Genero Comprobate de Retencion*/
+SELECT ultimo_numero
+  INTO :ll_nro_doc
+  FROM num_doc_tipo
+ WHERE ((tipo_doc  = :ls_tip_doc   )  AND
+ 		  (nro_serie = :al_nro_serie )) 
+FOR UPDATE NOWAIT		  ;
+
+	
+IF Isnull(ll_nro_doc) OR ll_nro_doc = 0 THEN
+	lb_retorno = FALSE
+	as_mensaje = 'Numerador de Tipo de Documento No Ha sido Inicializado, Verifique!'
+	GOTO SALIDA
+END IF	
+
+//****************************//
+//Actualiza Tabla num_doc_tipo//
+//****************************//
+	
+UPDATE num_doc_tipo
+   SET ultimo_numero = :ll_nro_doc + 1
+ WHERE ((tipo_doc  = :ls_tip_doc   )) AND
+		  (nro_serie = :al_nro_serie ) ;
+	
+IF SQLCA.SQLCode = -1 THEN 
+	as_mensaje = 'No se Pudo Actualizar Tabla num_doc_tipo por Tipo de Documento Ha Generar, Verifique!'
+	lb_retorno = FALSE
+	GOTO SALIDA
+ELSE
+	/**/
+	as_nro_ret = f_llena_caracteres('0',Trim(String(al_nro_serie)),li_dig_serie)+'-'+ f_llena_caracteres('0',Trim(String(ll_nro_doc)),li_dig_numero)
+	
+END IF
+SALIDA:
+
+Return lb_retorno
+
+end function
+

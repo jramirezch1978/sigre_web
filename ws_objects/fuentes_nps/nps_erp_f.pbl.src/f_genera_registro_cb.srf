@@ -1,0 +1,65 @@
+﻿$PBExportHeader$f_genera_registro_cb.srf
+global type f_genera_registro_cb from function_object
+end type
+
+forward prototypes
+global function boolean f_genera_registro_cb (string as_origen, ref long al_nro_reg)
+end prototypes
+
+global function boolean f_genera_registro_cb (string as_origen, ref long al_nro_reg);Boolean 	lb_retorno = TRUE
+String  	ls_lock_table, ls_mensaje
+Long		ll_count
+
+ls_lock_table = 'LOCK TABLE NUM_CAJA_BANCOS IN EXCLUSIVE MODE'
+EXECUTE IMMEDIATE :ls_lock_table ;
+
+select count(*)
+	into :ll_count
+FROM num_caja_bancos 
+WHERE (origen = :as_origen ) ;
+
+if ll_count = 0 then
+	insert into num_caja_bancos (origen, ult_nro)
+	values(:as_origen, 1);
+	
+	IF SQLCA.SQLCode = -1 THEN 
+		ls_mensaje = SQLCA.SQLErrText
+		ROLLBACK;
+		MessageBox("SQL error insert en num_caja_bancos", ls_mensaje)
+		lb_retorno = FALSE
+		GOTO SALIDA
+	END IF	
+
+end if
+
+SELECT ult_nro 
+	INTO :al_nro_reg 
+FROM num_caja_bancos 
+WHERE (origen = :as_origen ) ;
+
+	
+//*******************************//
+//Actualiza Tabla num_caja_bancos//
+//*******************************//
+
+UPDATE num_caja_bancos
+   SET ult_nro = :al_nro_reg + 1
+ WHERE (origen = :as_origen ) ;
+	
+
+	
+IF SQLCA.SQLCode = -1 THEN 
+	ls_mensaje = SQLCA.SQLErrText
+	ROLLBACK;
+	MessageBox("SQL error update en num_caja_bancos", ls_mensaje)
+	lb_retorno = FALSE
+	GOTO SALIDA
+END IF	
+
+
+
+SALIDA:
+RETURN lb_retorno	
+
+end function
+

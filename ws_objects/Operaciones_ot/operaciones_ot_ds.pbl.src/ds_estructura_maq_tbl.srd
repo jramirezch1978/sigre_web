@@ -1,0 +1,26 @@
+﻿$PBExportHeader$ds_estructura_maq_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes name=cod_maquina dbname="maq_estructura.maq_hijo" )
+ column=(type=char(100) updatewhereclause=yes name=desc_maquina dbname="maquina.desc_maq" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="maquina.und" )
+ column=(type=decimal(4) updatewhereclause=yes name=horometro dbname="maquina.ind_act_acumulada" )
+ retrieve="select t.maq_hijo, m.desc_maq, m.und, m.ind_act_acumulada
+from maq_estructura t,
+	  maquina		  m
+where m.cod_maquina = t.maq_hijo
+START WITH maq_padre = :as_cod_maq
+CONNECT BY PRIOR maq_hijo = maq_padre
+" arguments=(("as_cod_maq", string)) )
+column(band=detail id=1 alignment="0" tabsequence=20 border="0" color="33554432" x="297" y="4" height="76" width="439" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=30 border="0" color="33554432" x="878" y="0" height="64" width="2702" format="[general]" html.valueishtml="0"  name=desc_maquina visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=40 border="0" color="33554432" x="3579" y="0" height="64" width="82" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=50 border="0" color="33554432" x="3662" y="0" height="64" width="1161" format="[general]" html.valueishtml="0"  name=horometro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

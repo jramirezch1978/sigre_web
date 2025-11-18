@@ -1,0 +1,118 @@
+﻿$PBExportHeader$d_rpt_liquidacion_ff_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=644 color="536870912" )
+summary(height=756 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=origen dbname="solicitud_giro.origen" )
+ column=(type=char(10) updatewhereclause=yes name=nro_solicitud dbname="solicitud_giro.nro_solicitud" )
+ column=(type=datetime updatewhereclause=yes name=fecha_emision dbname="solicitud_giro.fecha_emision" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="solicitud_giro.cod_relacion" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe dbname="solicitud_giro.importe" )
+ column=(type=char(200) updatewhereclause=yes name=descripcion dbname="solicitud_giro.descripcion" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="solicitud_giro.cod_moneda" )
+ column=(type=decimal(0) updatewhereclause=yes name=item dbname="solicitud_giro_liq_det_usr.item" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="solicitud_giro_liq_det_usr.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="solicitud_giro_liq_det_usr.nro_doc" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="solicitud_giro_liq_det_usr.proveedor" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="solicitud_giro_liq_det_usr.cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="solicitud_giro_liq_det_usr.cnta_prsp" )
+ column=(type=decimal(2) updatewhereclause=yes name=solicitud_giro_liq_det_usr_importe dbname="solicitud_giro_liq_det_usr.importe" )
+ column=(type=char(3) updatewhereclause=yes name=solicitud_giro_liq_det_usr_cod_moneda dbname="solicitud_giro_liq_det_usr.cod_moneda" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=presupuesto_cuenta_descripcion dbname="presupuesto_cuenta.descripcion" )
+ column=(type=decimal(3) updatewhereclause=yes name=solicitud_giro_liq_det_usr_tasa_cambio dbname="solicitud_giro_liq_det_usr.tasa_cambio" )
+ column=(type=char(60) updatewhereclause=yes name=nombres_prep dbname="nombres_prep" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="codigo_relacion.nombre" )
+ retrieve="  SELECT ~"SOLICITUD_GIRO~".~"ORIGEN~",   
+         ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~",   
+         ~"SOLICITUD_GIRO~".~"FECHA_EMISION~",   
+         ~"SOLICITUD_GIRO~".~"COD_RELACION~",   
+         ~"SOLICITUD_GIRO~".~"IMPORTE~",   
+         ~"SOLICITUD_GIRO~".~"DESCRIPCION~",   
+         ~"SOLICITUD_GIRO~".~"COD_MONEDA~",   
+         ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"ITEM~",   
+         ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"TIPO_DOC~",   
+         ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"NRO_DOC~",   
+         ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"PROVEEDOR~",   
+         ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"CENCOS~",   
+         ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"CNTA_PRSP~",   
+         ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"IMPORTE~",   
+         ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"COD_MONEDA~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"PRESUPUESTO_CUENTA~".~"DESCRIPCION~",   
+         ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"TASA_CAMBIO~",   
+         Upper(usuario.nombre) as nombres_prep,   
+         ~"CODIGO_RELACION~".~"NOMBRE~"  
+
+    FROM ~"SOLICITUD_GIRO~",   
+         ~"SOLICITUD_GIRO_LIQ_DET_USR~",   
+         ~"PROVEEDOR~" ,   
+         ~"PRESUPUESTO_CUENTA~",   
+         ~"USUARIO~",   
+         ~"CODIGO_RELACION~"
+   WHERE ( ~"SOLICITUD_GIRO~".~"ORIGEN~"            = ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"ORIGEN~"        ) and  
+         ( ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~"     = ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"NRO_SOLICITUD~" ) and  
+         ( ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"PROVEEDOR~" = ~"PROVEEDOR~".~"PROVEEDOR~"                  ) and  
+         ( ~"SOLICITUD_GIRO_LIQ_DET_USR~".~"CNTA_PRSP~" = ~"PRESUPUESTO_CUENTA~".~"CNTA_PRSP~"  (+)    ) and  
+         ( ~"SOLICITUD_GIRO~".~"USUARIO~"           = ~"USUARIO~".~"COD_USR~"                      ) and  
+         ( ~"SOLICITUD_GIRO~".~"COD_RELACION~"      = ~"CODIGO_RELACION~".~"COD_RELACION~"         ) and  
+        (( ~"SOLICITUD_GIRO~".~"ORIGEN~"            = :as_origen                               ) and
+         ( ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~"     = :as_nro_solicitud                        ) and
+         ( ~"SOLICITUD_GIRO~".~"FLAG_ESTADO~"       in ('4','5')                               ))    
+" arguments=(("as_origen", string),("as_nro_solicitud", string))  sort="item A " )
+rectangle(band=header x="9" y="556" height="84" width="3342"  name=r_1 brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="LIQUIDACION" border="0" color="0" x="1349" y="128" height="72" width="530"  name=t_1  font.face="Draft 12cpi" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="AGRO INDUSTRIAL PARAMONGA S.A.A." border="0" color="0" x="0" y="16" height="56" width="1024"  name=t_2  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=header x1="101" y1="556" x2="101" y2="640"  name=l_1 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+line(band=header x1="485" y1="556" x2="485" y2="640"  name=l_2 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+line(band=header x1="1582" y1="556" x2="1582" y2="640"  name=l_4 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+text(band=header alignment="0" text="Cta. Presup." border="0" color="0" x="1760" y="576" height="44" width="270"  name=t_8  font.face="Draft 12cpi" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=header x1="2446" y1="556" x2="2446" y2="640"  name=l_5 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+text(band=header alignment="0" text="Responsable   :" border="0" color="0" x="23" y="348" height="56" width="347"  name=t_3  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Orden de Giro :" border="0" color="0" x="23" y="420" height="56" width="347"  name=t_4  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1285" y="420" height="56" width="1001" format="[general]"  name=descripcion edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="384" y="420" height="56" width="174" format="[general]"  name=origen edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="571" y="420" height="56" width="695" format="[general]"  name=nro_solicitud edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Lin" border="0" color="0" x="23" y="576" height="44" width="69"  name=t_5  font.face="Draft 12cpi" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="0" x="384" y="348" height="56" width="558" format="[general]"  name=cod_relacion edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=20 alignment="0" tabsequence=32766 border="0" color="0" x="960" y="348" height="56" width="1326" format="[general]"  name=nombre edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="C.Cost." border="0" color="0" x="1408" y="576" height="44" width="160"  name=t_7  font.face="Draft 12cpi" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=header x1="1390" y1="556" x2="1390" y2="640"  name=l_3 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+text(band=header alignment="2" text="Codigo de Relacion" border="0" color="0" x="704" y="576" height="44" width="448"  name=t_6  font.face="Draft 12cpi" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Documento" border="0" color="0" x="142" y="576" height="44" width="247"  name=t_14  font.face="Draft 12cpi" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Importe Orig. " border="0" color="0" x="2766" y="576" height="44" width="270"  name=t_11  font.face="Draft 12cpi" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=header x1="2743" y1="556" x2="2743" y2="640"  name=l_6 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+text(band=header alignment="0" text="Importe" border="0" color="0" x="2514" y="576" height="44" width="160"  name=t_10  font.face="Draft 12cpi" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2981" y="16" height="56" width="338" format="dd/mm/yyyy"  name=date_1  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fecha :" border="0" color="0" x="2743" y="16" height="56" width="224"  name=t_13  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="1600" y="4" height="56" width="297" format="[general]"  name=cnta_prsp edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="1911" y="4" height="56" width="526" format="[general]"  name=presupuesto_cuenta_descripcion_1 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="0" x="23" y="4" height="56" width="69" format="[general]"  name=item edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="1394" y="4" height="56" width="183" format="[general]"  name=cencos edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="800" y="4" height="56" width="576" format="[general]"  name=nom_proveedor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="498" y="4" height="56" width="288" format="[general]"  name=proveedor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="110" y="4" height="56" width="91" format="[general]"  name=tipo_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="215" y="4" height="56" width="265" format="[general]"  name=nro_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="2455" y="4" height="56" width="55" format="[general]"  name=solicitud_giro_liq_det_usr_cod_moneda edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="0" color="0" x="2523" y="4" height="56" width="215" format="[general]"  name=solicitud_giro_liq_det_usr_importe editmask.mask="######,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2752" y="4" height="56" width="59" format="[general]"  name=cod_moneda edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression=" f_convertir_monto_pagos(   solicitud_giro_liq_det_usr_cod_moneda   ,  solicitud_giro_liq_det_usr_importe   , cod_moneda  ,  solicitud_giro_liq_det_usr_tasa_cambio   )"border="0" color="0" x="2825" y="4" height="56" width="229" format="######,###.00"  name=imp_orig  font.face="Draft 12cpi" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=summary x1="9" y1="28" x2="3374" y2="28"  name=l_8 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+text(band=summary alignment="2" text="AUTORIZADO POR" border="0" color="0" x="1358" y="616" height="60" width="494"  name=t_19  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="2" text="RECIBI CONFORME" border="0" color="0" x="2761" y="616" height="60" width="521"  name=t_20  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="2" text="PREPARADO POR" border="0" color="0" x="155" y="616" height="60" width="494"  name=t_18  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=summary x1="1307" y1="604" x2="1888" y2="604"  name=l_10 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+line(band=summary x1="2729" y1="604" x2="3310" y2="604"  name=l_11 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+line(band=summary x1="55" y1="604" x2="759" y2="604"  name=l_9 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+column(band=summary id=19 alignment="2" tabsequence=32766 border="0" color="0" x="55" y="692" height="56" width="704" format="[general]"  name=nombres_prep_1 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="=============" border="0" color="0" x="1710" y="252" height="60" width="421"  name=t_16  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="Round( importe - sum_imporig ,2)"border="0" color="0" x="1710" y="332" height="60" width="421" format="######,###.00"  name=compute_1  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(  imp_orig  for all ) "border="0" color="0" x="1710" y="164" height="60" width="421" format="######,###.00"  name=sum_imporig  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=summary id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1710" y="64" height="60" width="421" format="[general]"  name=importe editmask.mask="######,###.00" editmask.focusrectangle=no  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Saldo ...............:" border="0" color="0" x="809" y="332" height="60" width="823"  name=t_17  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Importe Regularizado :" border="0" color="0" x="809" y="164" height="60" width="823"  name=t_15  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Importe de OG :" border="0" color="0" x="814" y="64" height="60" width="818"  name=t_9  font.face="Draft 12cpi" font.height="-9" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

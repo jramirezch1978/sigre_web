@@ -1,0 +1,47 @@
+﻿$PBExportHeader$d_pr_parte_piso_cal_ctb_2_crs_new.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=0 color="536870912" )
+header[3](height=124 color="536870912" )
+header[4](height=0 color="536870912" )
+header[5](height=120 color="536870912" )
+header[6](height=76 color="536870912" )
+header[7](height=0 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=32 color="536870912" )
+table(column=(type=number updatewhereclause=yes name=nro_control dbname="nro_control" )
+ column=(type=char(20) updatewhereclause=yes name=valor_lectura dbname="valor_lectura" )
+ retrieve="SELECT F.NRO_ATRIBUTO, INITCAP(TRIM(M.DESC_MAQ)) AS MAQUINA, F.ATRIBUTO, INITCAP(TRIM(A.DESCRIPCION)) AS DESC_ATRIBUTO, TRIM(TO_CHAR(F.MEDICION_MIN, '999,999,990.00')) || ' - ' || TRIM(TO_CHAR(F.MEDICION_MAX, '999,999,990.00')) AS LIMITES, PPD.NRO_LECTURA, PPD.NRO_CONTROL, PPD.VALOR_LECTURA
+   FROM TG_PARTE_PISO_DET   PPD,
+       MAQUINA             M,
+       TG_MED_ACT_ATRIBUTO A,
+       TG_PARTE_PISO       PP,
+       TG_FMT_MED_ACT_DET  F
+       
+ WHERE PPD.NRO_PARTE       =  PP.NRO_PARTE
+   AND PPD.FORMATO         =  F.FORMATO(+)
+   AND PPD.NRO_ITEM        =  F.NRO_ITEM
+   AND F.COD_MAQUINA       =  M.COD_MAQUINA(+)
+   AND F.ATRIBUTO          =  A.ATRIBUTO(+)
+   AND PPD.NRO_PARTE       =  :asi_nro_parte
+   AND PPD.NRO_CONTROL     >  0
+   ORDER BY                F.NRO_ATRIBUTO " arguments=(("asi_nro_parte", string))  sort="nro_control A " )
+text(band=header[1] alignment="0" text=" " border="0" color="16777215" x="9" y="4" height="28" width="14" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[1] alignment="0" text="Nro Atributo" border="0" color="16777215" x="27" y="4" height="28" width="201" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[2] alignment="0" text="@nro_atributo" border="0" color="16777215" x="27" y="4" height="28" width="201" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[3] alignment="2" text="@maquina" border="2" color="0" x="27" y="4" height="116" width="201" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-5" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[4] alignment="0" text="@atributo" border="0" color="16777215" x="27" y="4" height="28" width="201" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[5] alignment="2" text="@desc_atributo" border="2" color="0" x="27" y="4" height="112" width="201" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-5" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header[6] alignment="2" text="@limites" border="2" color="0" x="27" y="4" height="64" width="201" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-5" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header[7] alignment="2" text="@nro_lectura" border="2" color="16777215" x="27" y="4" height="28" width="201" html.valueishtml="0"  name=valor_lectura_t visible="0"  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[7] alignment="2" text="HRA \ #Ctrl" border="2" color="16777215" x="9" y="4" height="28" width="9" html.valueishtml="0"  name=nro_control_t visible="0"  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="16777215" x="9" y="0" height="28" width="9" format="[general]" html.valueishtml="0"  name=nro_control visible="1" editmask.mask="00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="16777215" x="27" y="0" height="28" width="201" format="[general]" html.valueishtml="0"  name=valor_lectura visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-5" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "nro_atributo, maquina, atributo, desc_atributo, limites, nro_lectura" rows = "nro_control" values = "valor_lectura" sourcenames = "nro_atributo, maquina, atributo, desc_atributo, limites, nro_lectura, nro_control, valor_lectura")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

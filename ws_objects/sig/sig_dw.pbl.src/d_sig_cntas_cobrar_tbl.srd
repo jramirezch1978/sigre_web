@@ -1,0 +1,165 @@
+﻿$PBExportHeader$d_sig_cntas_cobrar_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=196 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=72 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=60 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" height.autosize=yes )
+table(column=(type=char(1) updatewhereclause=yes name=rango dbname="rango" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cod_relacion" )
+ column=(type=char(200) updatewhereclause=yes name=nom_proveedor dbname="nom_proveedor" )
+ column=(type=char(20) updatewhereclause=yes name=ruc_dni dbname="ruc_dni" )
+ column=(type=number updatewhereclause=yes name=venta_dol dbname="venta_dol" )
+ column=(type=number updatewhereclause=yes name=porcentaje dbname="porcentaje" )
+ column=(type=number updatewhereclause=yes name=sum_porc_acum dbname="sum_porc_acum" )
+ retrieve="select '1' as rango,
+       vw1.cod_relacion,
+       vw1.nom_proveedor,
+       vw1.ruc_dni,
+       vw1.venta_dol,
+       vw1.porcentaje,
+       vw1.sum_porc_acum
+from(select vw.cod_relacion,
+             vw.nom_proveedor,
+             vw.ruc_dni,
+             vw.venta_dol,
+             vw.porcentaje,
+             sum(porcentaje) over (order by porcentaje desc) sum_porc_acum
+       from (select cc.cod_relacion,
+                   p.nom_proveedor,
+                   decode(p.tipo_doc_ident, '6', p.ruc, p.nro_doc_ident) as ruc_dni,
+                   sum(
+                      case
+                         when cc.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                           cc.importe_doc / cc.tasa_cambio
+                         else
+                           cc.importe_doc
+                      end * decode(dt.flag_signo, '+', 1, -1)
+                    ) venta_dol,
+                    round(
+                        sum(case
+                               when cc.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                                 cc.importe_doc / cc.tasa_cambio
+                               else
+                                 cc.importe_doc
+                            end * decode(dt.flag_signo, '+', 1, -1)
+                          ) / (select sum(case
+                                             when cc1.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                                               cc1.importe_doc / cc1.tasa_cambio
+                                             else
+                                               cc1.importe_doc
+                                          end * decode(dt1.flag_signo, '+', 1, -1))
+                                   from 	cntas_cobrar 	cc1,	
+														doc_tipo			dt1
+                                  where cc1.tipo_doc	= dt1.tipo_doc
+ 												and ((:as_filtro = '1' and cc1.ano = :ani_year and cc1.mes = :ani_mes) or
+                            				  (:as_filtro = '2' and trunc(cc1.fecha_documento) between trunc(:adi_fecha1) and trunc(:adi_fecha2)))  
+                                    and cc1.nro_libro = 04
+                                    and cc1.flag_estado <> '0') * 100,4)  as porcentaje
+            from cntas_cobrar 	 cc,
+                 proveedor        p,
+            	  doc_tipo         dt
+            where cc.cod_relacion = p.proveedor
+          and cc.tipo_doc    = dt.tipo_doc
+              and cc.flag_estado <> '0'
+              and cc.nro_libro = 04 -- registro de ventas
+              and ((:as_filtro = '1' and cc.ano = :ani_year and cc.mes = :ani_mes) or
+             (:as_filtro = '2' and trunc(cc.fecha_documento) between trunc(:adi_fecha1) and trunc(:adi_fecha2)))
+            group by cc.cod_relacion,
+                   p.nom_proveedor,
+                   decode(p.tipo_doc_ident, '6', p.ruc, p.nro_doc_ident)) vw
+       ) vw1
+where vw1.sum_porc_acum <= 90   
+union
+select '2' as rango,
+       null as cod_relacion,
+       'OTROS VARIOS CLIENTES ' as nom_proveedor,
+       null as ruc_dni,
+       sum(vw1.venta_dol) as venta_dol,
+       sum(vw1.porcentaje) as porcentaje,
+       100 as sum_porc_acum
+from(select vw.cod_relacion,
+             vw.nom_proveedor,
+             vw.ruc_dni,
+             vw.venta_dol,
+             vw.porcentaje,
+             sum(porcentaje) over (order by porcentaje desc) sum_porc_acum
+       from (select cc.cod_relacion,
+                   p.nom_proveedor,
+                   decode(p.tipo_doc_ident, '6', p.ruc, p.nro_doc_ident) as ruc_dni,
+                   sum(
+                      case
+                         when cc.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                           cc.importe_doc / cc.tasa_cambio
+                         else
+                           cc.importe_doc
+                      end * decode(dt.flag_signo, '+', 1, -1)
+                    ) venta_dol,
+                    round(
+                        sum(case
+                               when cc.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                                 cc.importe_doc / cc.tasa_cambio
+                               else
+                                 cc.importe_doc
+                            end * decode(dt.flag_signo, '+', 1, -1)
+                          ) / (select sum(case
+                                             when cc1.cod_moneda = PKG_LOGISTICA.of_soles(null) then
+                                               cc1.importe_doc / cc1.tasa_cambio
+                                             else
+                                               cc1.importe_doc
+                                          end * decode(dt1.flag_signo, '+', 1, -1))
+                                   from 	cntas_cobrar 	cc1,
+														doc_tipo			dt1
+                                  where cc1.tipo_doc		= dt1.tipo_doc
+												and ((:as_filtro = '1' and cc1.ano = :ani_year and cc1.mes = :ani_mes) or
+                            				  (:as_filtro = '2' and trunc(cc1.fecha_documento) between trunc(:adi_fecha1) and trunc(:adi_fecha2)))  
+                                    and cc1.nro_libro = 04
+                                    and cc1.flag_estado <> '0') * 100,4)  as porcentaje
+            from cntas_cobrar   	cc,
+                 proveedor       p,
+            	  doc_tipo      	dt
+            where cc.cod_relacion = p.proveedor
+          and cc.tipo_doc    = dt.tipo_doc
+              and cc.flag_estado <> '0'
+              and cc.nro_libro = 04 -- registro de ventas
+              and ((:as_filtro = '1' and cc.ano = :ani_year and cc.mes = :ani_mes) or
+             (:as_filtro = '2' and trunc(cc.fecha_documento) between trunc(:adi_fecha1) and trunc(:adi_fecha2)))
+            group by cc.cod_relacion,
+                   p.nom_proveedor,
+                   decode(p.tipo_doc_ident, '6', p.ruc, p.nro_doc_ident),
+                   cc.cod_moneda ) vw
+       ) vw1
+where vw1.sum_porc_acum > 90   
+    
+order by rango asc, porcentaje desc            
+             " arguments=(("ani_year", number),("ani_mes", number),("adi_Fecha1", date),("adi_Fecha2", date),("as_filtro", string)) )
+text(band=header alignment="2" text="CUENTAS POR COBRAR US$" border="0" color="33554432" x="14" y="24" height="64" width="2043" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="RUC or
+DNI" border="2" color="33554432" x="5" y="104" height="88" width="306" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Razon Social o 
+Nombre Comercial" border="2" color="33554432" x="315" y="104" height="88" width="946" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Porcentaje
+Ventas" border="2" color="33554432" x="1568" y="104" height="88" width="256" html.valueishtml="0"  name=ventas_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Venta
+Dolares" border="2" color="33554432" x="1266" y="104" height="88" width="297" html.valueishtml="0"  name=venta_dol_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Porcentaje
+Acumulado" border="2" color="33554432" x="1829" y="104" height="88" width="265" html.valueishtml="0"  name=cobranzas_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="0" x="5" y="0" height="56" width="306" format="[general]" html.valueishtml="0"  name=ruc_dni visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="315" y="0" height="56" width="946" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1266" y="0" height="56" width="297" format="###,##0.00" html.valueishtml="0"  name=venta_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="1568" y="0" height="56" width="256" format="###,##0.00" html.valueishtml="0"  name=porcentaje visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="1829" y="0" height="56" width="265" format="###,##0.00" html.valueishtml="0"  name=sum_porc_acum visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=summary alignment="1" text="TOTAL :" border="0" color="33554432" x="14" y="4" height="44" width="1189" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0"  height.autosize=yes)
+compute(band=summary alignment="1" expression="sum(venta_dol for all)"enabled="0" border="0" color="0" x="1266" y="4" height="56" width="297" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(porcentaje for all)"enabled="0" border="0" color="0" x="1568" y="4" height="56" width="256" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

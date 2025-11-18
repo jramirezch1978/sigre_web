@@ -1,0 +1,83 @@
+﻿$PBExportHeader$d_rpt_art_reposic_pendientes_resumen_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=416 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=char(6) updatewhereclause=yes name=articulo_mov_proy_almacen dbname="articulo_mov_proy.almacen" )
+ column=(type=number updatewhereclause=yes name=articulo_almacen_sldo_total dbname="sldo_total" )
+ column=(type=number updatewhereclause=yes name=articulo_almacen_sldo_por_llegar dbname="sldo_por_llegar" )
+ column=(type=number updatewhereclause=yes name=articulo_almacen_costo_ult_compra dbname="costo_ult_compra" )
+ column=(type=number updatewhereclause=yes name=articulo_almacen_sldo_minimo dbname="sldo_minimo" )
+ column=(type=number updatewhereclause=yes name=articulo_almacen_sldo_maximo dbname="sldo_maximo" )
+ column=(type=number updatewhereclause=yes name=cant_pendiente dbname="cant_pendiente" )
+ retrieve="SELECT A.COD_ART,   
+       A.NOM_ARTICULO,   
+       A.UND,          
+       AMP.ALMACEN,
+       NVL(AA.SLDO_TOTAL,0) AS SLDO_TOTAL,
+       NVL(AA.SLDO_POR_LLEGAR,0) AS SLDO_POR_LLEGAR,
+       NVL(AA.COSTO_ULT_COMPRA,0) AS COSTO_ULT_COMPRA,
+       NVL(AA.SLDO_MINIMO,0) AS SLDO_MINIMO, 
+       NVL(AA.SLDO_MAXIMO,0) AS SLDO_MAXIMO,
+       SUM((AMP.CANT_PROYECT - AMP.CANT_PROCESADA)) as cant_pendiente       
+  FROM ARTICULO_MOV_PROY AMP,   
+       ARTICULO A,   
+       ARTICULO_ALMACEN AA
+   WHERE ( AMP.COD_ART = A.COD_ART ) and  
+         ( AMP.ALMACEN = AA.ALMACEN and
+           AMP.COD_ART = AA.COD_ART ) and  
+         ( AMP.FLAG_ESTADO = '1' ) AND  
+         ( AMP.CANT_PROYECT > AMP.CANT_PROCESADA ) AND  
+         ( TRUNC(AMP.FEC_PROYECT) <= :ad_fecha ) AND  
+         ( AMP.TIPO_DOC = (select l.doc_ot from logparam l where reckey='1') AND 
+			( AMP.TIPO_MOV=(select l.oper_cons_interno from logparam l where reckey='1')) AND
+         ( A.FLAG_REPOSICION = '1' OR AA.SLDO_MINIMO > 0 ) )
+GROUP BY  A.COD_ART,   
+       A.NOM_ARTICULO,   
+       A.UND,          
+       AMP.ALMACEN,
+       AA.SLDO_TOTAL,   
+       AA.SLDO_POR_LLEGAR,   
+       AA.COSTO_ULT_COMPRA,
+       AA.SLDO_MINIMO, 
+       AA.SLDO_MAXIMO
+ORDER BY A.COD_ART          
+" arguments=(("ad_fecha", date)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="23" y="12" height="56" width="311" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="352" y="12" height="56" width="96" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="466" y="12" height="56" width="997" format="[general]" html.valueishtml="0"  name=nom_articulo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="2199" y="12" height="56" width="370" format="#,##0.00" html.valueishtml="0"  name=articulo_almacen_sldo_por_llegar visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1806" y="12" height="56" width="370" format="#,##0.00" html.valueishtml="0"  name=articulo_almacen_sldo_total visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="2592" y="12" height="56" width="265" format="#,##0.00" html.valueishtml="0"  name=articulo_almacen_costo_ult_compra visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="2880" y="12" height="56" width="370" format="#,##0.00" html.valueishtml="0"  name=cant_pendiente visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="3273" y="12" height="56" width="370" format="#,##0.00" html.valueishtml="0"  name=articulo_almacen_sldo_minimo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="3666" y="12" height="56" width="370" format="#,##0.00" html.valueishtml="0"  name=articulo_almacen_sldo_maximo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="0" x="1486" y="12" height="56" width="293" format="[general]" html.valueishtml="0"  name=articulo_mov_proy_almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="3735" y="8" height="40" width="297" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="3735" y="68" height="40" width="297" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="3730" y="128" height="40" width="297" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Código" border="6" color="33554432" x="27" y="352" height="56" width="311" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Und" border="6" color="33554432" x="357" y="352" height="56" width="96" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Nombre artículo" border="6" color="33554432" x="466" y="352" height="56" width="997" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Sdo x llegar" border="6" color="33554432" x="2199" y="352" height="56" width="370" html.valueishtml="0"  name=articulo_almacen_sldo_por_llegar_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Sdo.total" border="6" color="33554432" x="1806" y="352" height="56" width="370" html.valueishtml="0"  name=articulo_almacen_sldo_total_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Costo US$ " border="6" color="33554432" x="2592" y="352" height="56" width="265" html.valueishtml="0"  name=articulo_almacen_costo_ult_compra_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cant.Solicitada" border="6" color="33554432" x="2880" y="352" height="56" width="370" html.valueishtml="0"  name=cant_pendiente_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Stock mínimo" border="6" color="33554432" x="3264" y="352" height="56" width="379" html.valueishtml="0"  name=articulo_almacen_sldo_minimo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Stock Máximo" border="6" color="33554432" x="3666" y="352" height="56" width="370" html.valueishtml="0"  name=articulo_almacen_sldo_maximo_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Almacen" border="6" color="33554432" x="1486" y="352" height="56" width="293" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Resumen de artículos de reposición pendientes a comprar" border="3" color="33554432" x="1106" y="40" height="64" width="1760" html.valueishtml="0"  name=t_2 visible="1"  resizeable=1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1106" y="140" height="64" width="1760" html.valueishtml="0"  name=t_fecha visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="37" y="12" height="188" width="293" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="37" y="212" height="40" width="293" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="37" y="268" height="40" width="293" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

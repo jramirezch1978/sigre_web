@@ -1,0 +1,32 @@
+﻿$PBExportHeader$f_direccion_proveedor.srf
+global type f_direccion_proveedor from function_object
+end type
+
+forward prototypes
+global function string f_direccion_proveedor (string as_cod_prov, string as_tipo)
+end prototypes
+
+global function string f_direccion_proveedor (string as_cod_prov, string as_tipo);// funcion que devuelve la direccion del proveedor
+String ls_dir  //, ls_dir_calle, ls_dir_numero, ls_dir_lote, ls_dir_mnz, ls_dir_urbanizacion, & 
+
+DECLARE usp_dir PROCEDURE  FOR USF_AP_DIREC_PROV(:as_cod_prov, :as_tipo);
+
+EXECUTE usp_dir;
+
+IF sqlca.sqlcode <> 0 THEN
+	IF sqlca.sqlcode = 100 THEN
+		messagebox( "Atencion", "Defina direccion en tabla origen")
+	ELSE
+	  messagebox( "Error en direccion empresa", sqlca.sqlerrtext)
+	END IF
+END IF
+
+FETCH usp_dir INTO :ls_dir;
+
+CLOSE usp_dir;
+
+RETURN ls_dir
+
+
+end function
+

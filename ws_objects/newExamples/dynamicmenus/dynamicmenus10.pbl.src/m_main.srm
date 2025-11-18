@@ -1,0 +1,121 @@
+﻿$PBExportHeader$m_main.srm
+forward
+global type m_main from menu
+end type
+type m_file from menu within m_main
+end type
+type m_recentfiles from menu within m_file
+end type
+type m_fixed from menu within m_recentfiles
+end type
+type m_recentfiles from menu within m_file
+m_fixed m_fixed
+end type
+type m_exit from menu within m_file
+end type
+type m_file from menu within m_main
+m_recentfiles m_recentfiles
+m_exit m_exit
+end type
+global type m_main from menu
+m_file m_file
+end type
+end forward
+
+global type m_main from menu
+m_file m_file
+end type
+global m_main m_main
+
+type variables
+n_dynamicitem in_dyn
+
+end variables
+
+on m_main.create
+m_main=this
+call super::create
+this.text = "m_main"
+this.m_file=create m_file
+this.Item[UpperBound(this.Item)+1]=this.m_file
+end on
+
+on m_main.destroy
+call super::destroy
+destroy(this.m_file)
+end on
+
+type m_file from menu within m_main
+m_recentfiles m_recentfiles
+m_exit m_exit
+end type
+
+on m_file.create
+call super::create
+this.text = "File"
+this.m_recentfiles=create m_recentfiles
+this.m_exit=create m_exit
+this.Item[UpperBound(this.Item)+1]=this.m_recentfiles
+this.Item[UpperBound(this.Item)+1]=this.m_exit
+end on
+
+on m_file.destroy
+call super::destroy
+destroy(this.m_recentfiles)
+destroy(this.m_exit)
+end on
+
+type m_recentfiles from menu within m_file
+m_fixed m_fixed
+end type
+
+on m_recentfiles.create
+call super::create
+this.text = "Recent Files"
+this.m_fixed=create m_fixed
+this.Item[UpperBound(this.Item)+1]=this.m_fixed
+end on
+
+on m_recentfiles.destroy
+call super::destroy
+destroy(this.m_fixed)
+end on
+
+type m_fixed from menu within m_recentfiles
+end type
+
+on m_fixed.create
+call super::create
+this.text = "Fixed"
+end on
+
+on m_fixed.destroy
+call super::destroy
+end on
+
+event clicked;// this item shows that process works when
+// there is already an item
+
+MessageBox("Clicked", "Fixed Item")
+
+end event
+
+type m_exit from menu within m_file
+end type
+
+event clicked;Close(ParentWindow)
+
+end event
+
+on m_exit.create
+call super::create
+this.text = "Exit"
+this.microhelp = "Exit the program"
+this.toolbaritemname = "Exit!"
+this.toolbaritemtext = "Exit,Exit the program"
+end on
+
+on m_exit.destroy
+call super::destroy
+end on
+

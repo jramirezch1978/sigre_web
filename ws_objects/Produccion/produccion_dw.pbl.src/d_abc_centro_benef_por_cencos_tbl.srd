@@ -1,0 +1,67 @@
+﻿$PBExportHeader$d_abc_centro_benef_por_cencos_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=440 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=centro_beneficio_centro_benef dbname="centro_beneficio.centro_benef" )
+ column=(type=char(100) updatewhereclause=yes name=centro_beneficio_desc_centro dbname="centro_beneficio.desc_centro" )
+ column=(type=char(1) updatewhereclause=yes name=centro_beneficio_flag_estado dbname="centro_beneficio.flag_estado" values="Activo	1/Anulado	0/" )
+ column=(type=char(1) updatewhereclause=yes name=centro_beneficio_flag_estructura dbname="centro_beneficio.flag_estructura" values="	1/	0/	0" )
+ column=(type=char(1) updatewhereclause=yes name=centro_beneficio_flag_fondo dbname="centro_beneficio.flag_fondo" values="	1/	0/	0" )
+ column=(type=char(1) updatewhereclause=yes name=centro_beneficio_flag_ventas dbname="centro_beneficio.flag_ventas" values="	1/	0/	0" )
+ column=(type=char(10) updatewhereclause=yes name=centro_benef_cencos_cencos dbname="centro_benef_cencos.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" values="	 /	 " )
+ retrieve="SELECT CB.CENTRO_BENEF,
+       CB.DESC_CENTRO,
+       CB.FLAG_ESTADO,
+       CB.FLAG_ESTRUCTURA,
+       CB.FLAG_FONDO,
+       CB.FLAG_VENTAS,
+       CBC.CENCOS, CC.DESC_CENCOS
+       
+  FROM CENTRO_BENEFICIO     CB,
+       ORIGEN               O,
+       TG_PLANTAS           P,
+       CENTRO_BENEF_CENCOS  CBC,
+       CENTROS_COSTO        CC
+       
+ WHERE CB.COD_ORIGEN        = O.COD_ORIGEN(+)
+   AND CB.COD_PLANTA        = P.COD_PLANTA(+)
+   AND CBC.CENTRO_BENEF     = CB.CENTRO_BENEF
+   AND CC.CENCOS            = CBC.CENCOS
+	AND CB.COD_PLANTA        like :as_cod_planta
+   AND CB.COD_ORIGEN        like :as_cod_origen
+ 
+  ORDER BY CB.CENTRO_BENEF" arguments=(("as_cod_planta", string),("as_cod_origen", string)) )
+group(level=1 header.height=152 trailer.height=0 by=("centro_benef_cencos_cencos" , "centros_costo_desc_cencos" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="55" y="36" height="208" width="407" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="1" color="0" x="594" y="68" height="244" width="1797" html.valueishtml="0"  name=cabecera_t visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="73" y="256" height="56" width="366" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2519" y="28" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2519" y="96" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2519" y="164" height="56" width="613" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cencos" border="2" color="0" x="165" y="380" height="56" width="375" html.valueishtml="0"  name=centro_benef_cencos_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Desc Cencos" border="2" color="0" x="539" y="380" height="56" width="1399" html.valueishtml="0"  name=centros_costo_desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=header.1 id=8 alignment="2" tabsequence=32766 border="0" color="33554432" x="3433" y="492" height="52" width="320" format="[general]" html.valueishtml="0"  name=centro_beneficio_flag_estructura visible="1"  resizeable=1 checkbox.text="" checkbox.on=" " checkbox.off=" " checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="2423" y="792" height="52" width="233" format="[general]" html.valueishtml="0"  name=centro_beneficio_flag_estado visible="1"  resizeable=1 ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="4" color="33554432" x="165" y="16" height="52" width="375" format="[general]" html.valueishtml="0"  name=centro_benef_cencos_cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="4" color="33554432" x="539" y="16" height="52" width="1399" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="F. Estructura" border="0" color="0" x="1797" y="92" height="52" width="320" html.valueishtml="0"  name=centro_beneficio_flag_estructura_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="F. Fondo" border="0" color="0" x="2130" y="92" height="52" width="215" html.valueishtml="0"  name=centro_beneficio_flag_fondo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="F. Ventas" border="0" color="0" x="2359" y="92" height="52" width="242" html.valueishtml="0"  name=centro_beneficio_flag_ventas_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Estado" border="0" color="0" x="2615" y="92" height="52" width="233" html.valueishtml="0"  name=centro_beneficio_flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="1806" y="8" height="52" width="329" format="[general]" html.valueishtml="0"  name=centro_beneficio_flag_estructura_1 visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.other="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="2135" y="8" height="52" width="229" format="[general]" html.valueishtml="0"  name=centro_beneficio_flag_fondo visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.other="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="2363" y="8" height="52" width="261" format="[general]" html.valueishtml="0"  name=centro_beneficio_flag_ventas visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.other="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="2619" y="8" height="52" width="233" format="[general]" html.valueishtml="0"  name=centro_beneficio_flag_estado_1 visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Desc Centro" border="0" color="0" x="571" y="92" height="52" width="1211" html.valueishtml="0"  name=centro_beneficio_desc_centro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="571" y="8" height="52" width="1211" format="[general]" html.valueishtml="0"  name=centro_beneficio_desc_centro visible="1" edit.limit=100 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="CentBenef" border="0" color="0" x="165" y="92" height="52" width="393" html.valueishtml="0"  name=centro_beneficio_centro_benef_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="165" y="8" height="52" width="393" format="[general]" html.valueishtml="0"  name=centro_beneficio_centro_benef visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,33 @@
+﻿$PBExportHeader$d_log_login_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=log_login_sistema dbname="log_login.sistema" )
+ column=(type=char(2) updatewhereclause=yes name=mes dbname="mes" )
+ column=(type=number updatewhereclause=yes name=accesos dbname="accesos" )
+ column=(type=datetime updatewhereclause=yes name=fmax dbname="fmax" )
+ retrieve="  SELECT ~"LOG_LOGIN~".~"SISTEMA~",   
+         to_char(~"LOG_LOGIN~".~"FECHA~",'MM') as mes,   
+         count(*) as accesos,
+			max(~"LOG_LOGIN~".~"FECHA~") as fmax  
+    FROM ~"LOG_LOGIN~"  
+   WHERE ( ~"LOG_LOGIN~".~"COD_USR~" = :as_usuario ) AND  
+         ( to_char(~"LOG_LOGIN~".~"FECHA~",'YYYY') = :as_ano )   
+           
+GROUP BY ~"LOG_LOGIN~".~"SISTEMA~",   
+         to_char(~"LOG_LOGIN~".~"FECHA~",'MM')   
+" arguments=(("as_ano", string),("as_usuario", string))  sort="mes A log_login_sistema A " )
+text(band=header alignment="0" text="Mes" border="6" color="33554432" x="18" y="0" height="56" width="105" html.valueishtml="0"  name=mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="18" y="4" height="56" width="114" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Sistema" border="6" color="33554432" x="146" y="0" height="56" width="311" html.valueishtml="0"  name=log_login_sistema_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Accesos" border="6" color="33554432" x="485" y="0" height="56" width="238" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="146" y="0" height="76" width="311" format="[general]" html.valueishtml="0"  name=log_login_sistema visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="33554432" x="485" y="4" height="56" width="238" format="[general]" html.valueishtml="0"  name=accesos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Fecha.Max" border="6" color="33554432" x="745" y="0" height="56" width="283" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=4 alignment="0" tabsequence=0 border="0" color="33554432" x="736" y="4" height="56" width="297" format="m/d/yy hh:mm" html.valueishtml="0"  name=fmax visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+
+sparse(names="mes")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

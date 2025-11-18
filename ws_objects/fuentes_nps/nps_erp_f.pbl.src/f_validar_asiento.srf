@@ -1,0 +1,56 @@
+﻿$PBExportHeader$f_validar_asiento.srf
+global type f_validar_asiento from function_object
+end type
+
+forward prototypes
+global function boolean f_validar_asiento (datawindow adw_destino)
+end prototypes
+
+global function boolean f_validar_asiento (datawindow adw_destino);// Funcion para validar que no grabe asientos descuadrados
+
+boolean 	lb_retorno = TRUE
+String	ls_flag_val_Asiento
+decimal {2} ldc_tot_dol_h, ldc_tot_dol_d, ldc_tot_sol_d, ldc_tot_sol_h , &
+				ldc_dif_dol, ldc_dif_sol
+integer	ll_i
+
+//Para validar Asiento
+
+SELECT FLAG_VALIDAR_ASIENTO
+ INTO  :ls_flag_val_asiento
+FROM   FINPARAM
+WHERE  reckey = '1';
+
+ldc_tot_dol_h = 0; ldc_tot_dol_d = 0;  ldc_tot_sol_d = 0; ldc_tot_sol_h = 0
+
+IF ls_flag_val_asiento = '1' THEN
+	FOR ll_i = 1 TO adw_destino.rowcount()
+		IF adw_destino.object.flag_debhab[ll_i] = 'H' THEN
+			ldc_tot_sol_h = ldc_tot_sol_h + Round(adw_destino.object.imp_movsol[ll_i],2)
+			ldc_tot_dol_h = ldc_tot_dol_h + Round(adw_destino.object.imp_movdol[ll_i],2)
+		ELSEIF adw_destino.object.flag_debhab[ll_i] = 'D' THEN
+			ldc_tot_sol_d = ldc_tot_sol_d + Round(adw_destino.object.imp_movsol[ll_i],2)
+			ldc_tot_dol_d = ldc_tot_dol_d + Round(adw_destino.object.imp_movdol[ll_i],2)
+		END IF
+		
+	NEXT
+	
+	ldc_dif_dol = ldc_tot_dol_h - ldc_tot_dol_d
+	ldc_dif_sol = ldc_tot_sol_h - ldc_tot_sol_d
+	
+	IF ldc_dif_dol <> 0 THEN
+		messagebox('DESCUADRE EN US$', 'DEBE ==> ' + string(ldc_tot_dol_d)  + ' HABER ==> ' + STRING(ldc_tot_dol_h))		
+		lb_retorno = FALSE
+	ELSEIF ldc_dif_sol <> 0 THEN
+		messagebox('DESCUADRE EN S/.', 'DEBE ==> ' + string(ldc_tot_sol_d)  + ' HABER ==> ' + STRING(ldc_tot_sol_h))	
+		lb_retorno = FALSE
+	END IF
+
+END IF
+
+RETURN lb_retorno
+
+
+
+end function
+

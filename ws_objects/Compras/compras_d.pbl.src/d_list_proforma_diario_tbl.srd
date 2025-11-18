@@ -1,0 +1,134 @@
+﻿$PBExportHeader$d_list_proforma_diario_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=124 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=80 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=datetime updatewhereclause=yes name=fec_emision dbname="fec_emision" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cod_moneda" )
+ column=(type=number updatewhereclause=yes name=nro_proformas dbname="nro_proformas" )
+ column=(type=number updatewhereclause=yes name=cant_solicitada dbname="cant_solicitada" )
+ column=(type=number updatewhereclause=yes name=pend_compra_t dbname="pend_compra" )
+ column=(type=number updatewhereclause=yes name=importe_proforma dbname="importe_proforma" )
+ retrieve="select vw.fec_emision,
+		 vw.cod_moneda,
+       count(vw.nro_proforma) as nro_proformas,
+       sum(vw.cantidad) as cant_solicitada,
+       sum(vw.pend_compra) as pend_compra,
+       sum(vw.cantidad * vw.precio_venta) as importe_proforma
+  from (select p.nro_proforma,
+					 trunc(p.fec_registro) as fec_emision,
+					 pd.nro_item,
+					 a.cod_art,
+					 a.desc_art,
+					 pd.cantidad,
+					 a.und,
+			  p.cod_moneda,
+					 pd.precio_vta + pd.igv as precio_venta,
+					 (select nvl(sum(case when amp.flag_estado = '1' then amp.cant_proyect else amp.cant_procesada end),0)
+						 from orden_compra oc,
+								articulo_mov_proy amp
+						where oc.nro_oc = amp.nro_doc
+						  and amp.tipo_doc = (select doc_oc from logparam where reckey = '1')
+						  and amp.nro_proforma  = pd.nro_proforma
+						  and amp.item_proforma = pd.nro_item
+						  and amp.flag_estado   <> '0') as compromiso_compra,
+					 pd.cantidad - (select nvl(sum(case when amp.flag_estado = '1' then amp.cant_proyect else amp.cant_procesada end),0)
+											from orden_compra oc,
+												  articulo_mov_proy amp
+										  where oc.nro_oc = amp.nro_doc
+											 and amp.tipo_doc = (select doc_oc from logparam where reckey = '1')
+											 and amp.nro_proforma  = pd.nro_proforma
+											 and amp.item_proforma = pd.nro_item
+											 and amp.flag_estado   <> '0') as pend_compra
+			  from proforma p,
+					 proforma_det pd,
+					 articulo     a
+			 where p.nro_proforma = pd.nro_proforma
+				and pd.cod_art     = a.cod_art
+				and p.flag_estado  = '1'
+				and pd.cod_art     not in (select ac.cod_art
+													  from articulo_composicion ac)
+				and pd.cantidad - (select nvl(sum(case when amp.flag_estado = '1' then amp.cant_proyect else amp.cant_procesada end),0)
+											from orden_compra oc,
+												  articulo_mov_proy amp
+										  where oc.nro_oc = amp.nro_doc
+											 and amp.tipo_doc = (select doc_oc from logparam where reckey = '1')
+											 and amp.nro_proforma  = pd.nro_proforma
+											 and amp.item_proforma = pd.nro_item
+											 and amp.flag_estado   <> '0') > 0
+			union
+			select p.nro_proforma,
+								trunc(p.fec_registro) as fec_emision,
+								pd.nro_item,
+								a.cod_art,
+								a.desc_art,
+								pd.cantidad * ac.cantidad as cantidad,
+								a.und,
+								p.cod_moneda,
+								pd.precio_vta + pd.igv as precio_venta,
+								(select nvl(sum(case when amp.flag_estado = '1' then amp.cant_proyect else amp.cant_procesada end),0)
+									from orden_compra oc,
+										  articulo_mov_proy amp
+								  where oc.nro_oc = amp.nro_doc
+									 and amp.tipo_doc = (select doc_oc from logparam where reckey = '1')
+									 and amp.nro_proforma  = pd.nro_proforma
+									 and amp.item_proforma = pd.nro_item
+									 and amp.flag_estado   <> '0') as compromiso_compra,
+								pd.cantidad * ac.cantidad - (select nvl(sum(case when amp.flag_estado = '1' then amp.cant_proyect else amp.cant_procesada end),0)
+																		 from orden_compra oc,
+																				articulo_mov_proy amp
+																		where oc.nro_oc = amp.nro_doc
+																		  and amp.tipo_doc = (select doc_oc from logparam where reckey = '1')
+																		  and amp.nro_proforma  = pd.nro_proforma
+																		  and amp.item_proforma = pd.nro_item
+																		  and amp.flag_estado   <> '0') as pend_compra
+						 from proforma             p,
+								proforma_det         pd,
+								articulo_composicion ac,
+								articulo             a
+						where p.nro_proforma = pd.nro_proforma
+						  and pd.cod_art     = ac.cod_art
+						  and ac.componente  = a.cod_art
+						  and p.flag_estado  = '1'
+						  and pd.cantidad * ac.cantidad - (select nvl(sum(case when amp.flag_estado = '1' then amp.cant_proyect else amp.cant_procesada end),0)
+																		 from orden_compra oc,
+																				articulo_mov_proy amp
+																		where oc.nro_oc = amp.nro_doc
+																		  and amp.tipo_doc = (select doc_oc from logparam where reckey = '1')
+																		  and amp.nro_proforma  = pd.nro_proforma
+																		  and amp.item_proforma = pd.nro_item
+																		  and amp.flag_estado   <> '0')  > 0) vw
+group by vw.fec_emision, vw.cod_moneda                                "  sort="fec_emision D " )
+text(band=header alignment="2" text="Fecha
+Emisión" border="2" color="0" x="5" y="8" height="112" width="329" html.valueishtml="0"  name=fec_emision_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Total
+Proformas" border="2" color="0" x="338" y="8" height="112" width="329" html.valueishtml="0"  name=nro_proformas_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Cantidad
+Solicitada" border="2" color="0" x="672" y="8" height="112" width="329" html.valueishtml="0"  name=cant_solicitada_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Pendiente
+Compra" border="2" color="0" x="1006" y="8" height="112" width="329" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Importe
+Diario" border="2" color="0" x="1339" y="8" height="112" width="402" html.valueishtml="0"  name=importe_proforma_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="0" x="5" y="0" height="64" width="329" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_emision visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="338" y="0" height="64" width="329" format="###,##0" html.valueishtml="0"  name=nro_proformas visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="672" y="0" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=cant_solicitada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="0" x="1006" y="0" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=pend_compra_t visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="1339" y="0" height="64" width="69" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="1413" y="0" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=importe_proforma visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(pend_compra_t for all)"enabled="0" border="2" color="0" x="1006" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(cant_solicitada for all)"enabled="0" border="2" color="0" x="672" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(nro_proformas for all)"enabled="0" border="2" color="0" x="338" y="4" height="64" width="329" format="###,##0" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=summary alignment="1" expression="sum(importe_proforma for all)"enabled="0" border="2" color="0" x="1413" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

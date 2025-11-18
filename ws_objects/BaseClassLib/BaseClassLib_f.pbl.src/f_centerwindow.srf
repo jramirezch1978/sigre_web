@@ -1,0 +1,37 @@
+﻿$PBExportHeader$f_centerwindow.srf
+global type f_centerwindow from function_object
+end type
+
+forward prototypes
+global function integer f_centerwindow (readonly window w_param)
+end prototypes
+
+global function integer f_centerwindow (readonly window w_param);/*
+	FUNCION			: 	f_CenterWindow
+	Paramateros		:	window w_param (ventana - Solo Lectura)
+	Objetivo			:	Centrar la ventana que se le pase a la funcion (w_param)
+							en el Escritorio de Windows 
+							
+	
+*/
+
+Environment env
+integer rtn
+Long xUnits, yUnits
+rtn=GetEnvironment(env)
+if rtn <>1 Then
+	return -1
+end if
+
+if IsValid(w_param) then
+	xUnits=PixelsToUnits(Env.ScreenWidth, XPixelsToUnits!)
+	yUnits=PixelsToUnits(Env.ScreenHeight, YPixelsToUnits!)
+	w_param.x=(xUnits - w_param.Width)/2
+	w_param.y=(yUnits - w_param.Height)/2
+	Return 1
+else
+	Return -1
+end if
+
+end function
+

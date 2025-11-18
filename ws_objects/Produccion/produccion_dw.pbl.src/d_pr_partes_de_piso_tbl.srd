@@ -1,0 +1,67 @@
+﻿$PBExportHeader$d_pr_partes_de_piso_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="tg_parte_piso.nro_parte" )
+ column=(type=char(50) updatewhereclause=yes name=documento_desc dbname="tg_parte_piso.documento_desc" )
+ column=(type=datetime updatewhereclause=yes name=fecha_reg dbname="tg_parte_piso.fecha_reg" )
+ column=(type=char(10) updatewhereclause=yes name=formato dbname="tg_parte_piso.formato" )
+ column=(type=datetime updatewhereclause=yes name=fecha_parte dbname="tg_parte_piso.fecha_parte" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="tg_parte_piso.flag_estado" values="Activo	1/Inactivo	0/" )
+ column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="tg_parte_piso.cod_usr" )
+ column=(type=char(2) updatewhereclause=yes name=flag_tipo dbname="tg_parte_piso.flag_tipo" )
+ column=(type=char(4) updatewhereclause=yes name=turno dbname="tg_parte_piso.turno" )
+ column=(type=char(1) updatewhereclause=yes name=tg_parte_piso_flag_replicacion dbname="tg_parte_piso.flag_replicacion" )
+ column=(type=char(40) updatewhereclause=yes name=turno_descripcion dbname="turno.descripcion" )
+ column=(type=char(200) updatewhereclause=yes name=descripcion dbname="tg_fmt_med_act.descripcion" )
+ column=(type=char(40) updatewhereclause=yes name=tg_plantas_desc_planta dbname="tg_plantas.desc_planta" )
+ retrieve="  SELECT ~"TG_PARTE_PISO~".~"NRO_PARTE~",   
+         ~"TG_PARTE_PISO~".~"DOCUMENTO_DESC~",   
+         ~"TG_PARTE_PISO~".~"FECHA_REG~",   
+         ~"TG_PARTE_PISO~".~"FORMATO~",   
+         ~"TG_PARTE_PISO~".~"FECHA_PARTE~",   
+         ~"TG_PARTE_PISO~".~"FLAG_ESTADO~",   
+         ~"TG_PARTE_PISO~".~"COD_USR~",   
+         ~"TG_PARTE_PISO~".~"FLAG_TIPO~",   
+         ~"TG_PARTE_PISO~".~"TURNO~",   
+         ~"TG_PARTE_PISO~".~"FLAG_REPLICACION~",   
+         ~"TURNO~".~"DESCRIPCION~",   
+         ~"TG_FMT_MED_ACT~".~"DESCRIPCION~",   
+         ~"TG_PLANTAS~".~"DESC_PLANTA~"  
+    FROM ~"TG_PARTE_PISO~",   
+         ~"TURNO~",   
+         ~"TG_FMT_MED_ACT~",   
+         ~"TG_PLANTAS~"  
+   WHERE ( turno.turno (+) = tg_parte_piso.turno) and  
+         ( tg_fmt_med_act.formato (+) = tg_parte_piso.formato) and  
+         ( tg_plantas.cod_planta (+) = tg_parte_piso.cod_planta) AND
+         ( tg_fmt_med_act.nro_version = tg_parte_piso.nro_version)AND
+         ( trunc(tg_parte_piso.fecha_parte) between trunc(:ad_fecha1) and trunc(:ad_fecha2))" arguments=(("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Nro Parte" border="2" color="16777215" x="5" y="4" height="56" width="288" html.valueishtml="0"  name=nro_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Descripción" border="2" color="16777215" x="297" y="4" height="56" width="923" html.valueishtml="0"  name=desc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Fecha Reg" border="2" color="16777215" x="1225" y="4" height="56" width="466" html.valueishtml="0"  name=fecha_reg_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Formato" border="2" color="16777215" x="1696" y="4" height="56" width="229" html.valueishtml="0"  name=formato_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Fecha Parte" border="2" color="16777215" x="1929" y="4" height="56" width="613" html.valueishtml="0"  name=fecha_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Estado" border="2" color="16777215" x="2546" y="4" height="56" width="192" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Usuario" border="2" color="16777215" x="2743" y="4" height="56" width="201" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Tipo" border="2" color="16777215" x="2944" y="4" height="56" width="119" html.valueishtml="0"  name=flag_tipo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Turno" border="2" color="16777215" x="3067" y="4" height="56" width="169" html.valueishtml="0"  name=turno_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Formato de Descripcion" border="2" color="16777215" x="3237" y="4" height="56" width="850" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="52" width="288" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="297" y="4" height="52" width="923" format="[general]" html.valueishtml="0"  name=documento_desc visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1225" y="4" height="52" width="466" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_reg visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1696" y="4" height="52" width="238" format="[general]" html.valueishtml="0"  name=formato visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1938" y="4" height="52" width="603" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_parte visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2546" y="4" height="52" width="187" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="2743" y="4" height="52" width="197" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="2944" y="4" height="52" width="114" format="[general]" html.valueishtml="0"  name=flag_tipo visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="3063" y="4" height="52" width="169" format="[general]" html.valueishtml="0"  name=turno visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="3237" y="4" height="52" width="850" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="r" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><d_pr_partes_de_piso_tbl><d_pr_partes_de_piso_tbl_row __pbband=~"detail~"><tg_parte_piso_nro_parte>tg_parte_piso_nro_parte</tg_parte_piso_nro_parte><tg_parte_piso_documento_desc>tg_parte_piso_documento_desc</tg_parte_piso_documento_desc><tg_parte_piso_fecha_reg>tg_parte_piso_fecha_reg</tg_parte_piso_fecha_reg><tg_parte_piso_formato>tg_parte_piso_formato</tg_parte_piso_formato><tg_parte_piso_fecha_parte>tg_parte_piso_fecha_parte</tg_parte_piso_fecha_parte><tg_parte_piso_flag_estado>tg_parte_piso_flag_estado</tg_parte_piso_flag_estado><tg_parte_piso_cod_usr>tg_parte_piso_cod_usr</tg_parte_piso_cod_usr><tg_parte_piso_flag_tipo>tg_parte_piso_flag_tipo</tg_parte_piso_flag_tipo><tg_parte_piso_turno>tg_parte_piso_turno</tg_parte_piso_turno><tg_parte_piso_flag_replicacion/><turno_descripcion/><tg_fmt_med_act_descripcion>tg_fmt_med_act_descripcion</tg_fmt_med_act_descripcion><tg_plantas_desc_planta/></d_pr_partes_de_piso_tbl_row></d_pr_partes_de_piso_tbl>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

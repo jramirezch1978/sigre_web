@@ -1,0 +1,120 @@
+﻿$PBExportHeader$d_rpt_historial_material_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=528 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="553648127"  height.autosize=yes)
+table(column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="tt_man_hist_reparac.oper_sec" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="tt_man_hist_reparac.nro_orden" )
+ column=(type=char(30) updatewhereclause=yes name=desc_cc_niv3 dbname="tt_man_hist_reparac.desc_cc_niv3" )
+ column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="tt_man_hist_reparac.cod_maquina" )
+ column=(type=char(10) updatewhereclause=yes name=cod_labor dbname="tt_man_hist_reparac.cod_labor" )
+ column=(type=char(10) updatewhereclause=yes name=cencos_rsp dbname="tt_man_hist_reparac.cencos_rsp" )
+ column=(type=char(4) updatewhereclause=yes name=cod_ejecutor dbname="tt_man_hist_reparac.cod_ejecutor" )
+ column=(type=decimal(2) updatewhereclause=yes name=tiempo_estim dbname="tt_man_hist_reparac.tiempo_estim" )
+ column=(type=decimal(4) updatewhereclause=yes name=costo_mo dbname="tt_man_hist_reparac.costo_mo" )
+ column=(type=decimal(4) updatewhereclause=yes name=costo_mat dbname="tt_man_hist_reparac.costo_mat" )
+ column=(type=char(10) updatewhereclause=yes name=cencos_slc dbname="tt_man_hist_reparac.cencos_slc" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos_slc dbname="centros_costo.desc_cencos" )
+ column=(type=char(40) updatewhereclause=yes name=labor_desc_labor dbname="labor.desc_labor" )
+ column=(type=char(100) updatewhereclause=yes name=maquina_desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(12) updatewhereclause=yes name=tt_man_hist_reparac_cod_art dbname="tt_man_hist_reparac.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=articulo_nom_articulo dbname="articulo.nom_articulo" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantid dbname="tt_man_hist_reparac.cantid" )
+ column=(type=char(10) updatewhereclause=yes name=nro_parte dbname="tt_man_hist_reparac.nro_parte" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_item dbname="tt_man_hist_reparac.nro_item" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="tt_man_hist_reparac.fecha" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_manten dbname="tt_man_hist_reparac.tipo_manten" )
+ retrieve="  SELECT ~"TT_MAN_HIST_REPARAC~".~"OPER_SEC~",   
+         ~"TT_MAN_HIST_REPARAC~".~"NRO_ORDEN~",   
+         ~"TT_MAN_HIST_REPARAC~".~"DESC_CC_NIV3~",   
+         ~"TT_MAN_HIST_REPARAC~".~"COD_MAQUINA~",   
+         ~"TT_MAN_HIST_REPARAC~".~"COD_LABOR~",   
+         ~"TT_MAN_HIST_REPARAC~".~"CENCOS_RSP~",   
+         ~"TT_MAN_HIST_REPARAC~".~"COD_EJECUTOR~",   
+         ~"TT_MAN_HIST_REPARAC~".~"TIEMPO_ESTIM~",   
+         ~"TT_MAN_HIST_REPARAC~".~"COSTO_MO~",   
+         ~"TT_MAN_HIST_REPARAC~".~"COSTO_MAT~",   
+         ~"TT_MAN_HIST_REPARAC~".~"CENCOS_SLC~",   
+         ~"CENTROS_COSTO_A~".~"DESC_CENCOS~",   
+         ~"LABOR~".~"DESC_LABOR~",   
+         ~"MAQUINA~".~"DESC_MAQ~",   
+         ~"CENTROS_COSTO_B~".~"DESC_CENCOS~",   
+         ~"TT_MAN_HIST_REPARAC~".~"COD_ART~",   
+         ~"ARTICULO~".~"NOM_ARTICULO~",   
+         ~"TT_MAN_HIST_REPARAC~".~"CANTID~",   
+         ~"TT_MAN_HIST_REPARAC~".~"NRO_PARTE~",   
+         ~"TT_MAN_HIST_REPARAC~".~"NRO_ITEM~",   
+         ~"TT_MAN_HIST_REPARAC~".~"FECHA~",   
+         ~"TT_MAN_HIST_REPARAC~".~"TIPO_MANTEN~"  
+    FROM ~"TT_MAN_HIST_REPARAC~",   
+         ~"CENTROS_COSTO~" ~"CENTROS_COSTO_A~",   
+         ~"LABOR~",   
+         ~"MAQUINA~",   
+         ~"CENTROS_COSTO~" ~"CENTROS_COSTO_B~",   
+         ~"ARTICULO~"  
+   WHERE ( tt_man_hist_reparac.cencos_slc = centros_costo_a.cencos (+)) and  
+         ( tt_man_hist_reparac.cod_labor = labor.cod_labor (+)) and  
+         ( tt_man_hist_reparac.cod_maquina = maquina.cod_maquina (+)) and  
+         ( tt_man_hist_reparac.cencos_rsp = centros_costo_b.cencos (+)) and  
+         ( ~"TT_MAN_HIST_REPARAC~".~"COD_ART~" = ~"ARTICULO~".~"COD_ART~" )   
+ORDER BY ~"TT_MAN_HIST_REPARAC~".~"DESC_CC_NIV3~" ASC,   
+         ~"TT_MAN_HIST_REPARAC~".~"CENCOS_SLC~" ASC,   
+         ~"TT_MAN_HIST_REPARAC~".~"COD_MAQUINA~" ASC   
+" )
+group(level=1 header.height=56 trailer.height=56 by=("desc_cc_niv3" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=56 trailer.height=60 by=("cencos_slc" ) header.color="536870912" trailer.color="536870912" )
+group(level=3 header.height=60 trailer.height=56 by=("cod_maquina" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="H:\Source\BMP\aipsa.bmp" x="14" y="8" height="204" width="402" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="Area 3er nivel c.c solic. / Centro costo solicitante / Maquina" border="2" color="0" x="14" y="416" height="44" width="1518" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="HISTORIAL DE REPARACION DE TALLERES - MATERIALES" border="0" color="0" x="1097" y="24" height="64" width="1678" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="1271" y="100" height="44" width="1335" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' of ' + pageCount()"border="0" color="0" x="3479" y="16" height="56" width="389" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="3287" y="20" height="56" width="174" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3479" y="92" height="48" width="389" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="3287" y="92" height="48" width="174" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nro. Parte" border="2" color="8388608" x="9" y="480" height="44" width="279" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Labor" border="2" color="8388608" x="1248" y="480" height="44" width="859" html.valueishtml="0"  name=cod_labor_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Ejec" border="2" color="8388608" x="2903" y="480" height="44" width="142" html.valueishtml="0"  name=cod_ejecutor_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cantidad" border="2" color="8388608" x="4160" y="480" height="44" width="242" html.valueishtml="0"  name=costo_mo_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Costo US$" border="2" color="8388608" x="4407" y="480" height="44" width="242" html.valueishtml="0"  name=costo_mat_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cencos Responsable" border="2" color="8388608" x="2112" y="480" height="44" width="786" html.valueishtml="0"  name=cencos_rsp_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="8388608" x="987" y="480" height="44" width="256" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Oper Sec" border="2" color="8388608" x="686" y="480" height="44" width="297" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha" border="2" color="8388608" x="443" y="480" height="44" width="238" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Item" border="2" color="8388608" x="293" y="480" height="44" width="146" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Articulo" border="2" color="8388608" x="3310" y="480" height="44" width="846" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="T mtt" border="2" color="8388608" x="3049" y="480" height="44" width="256" html.valueishtml="0"  name=tipo_manten_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="255" x="23" y="4" height="44" width="1294" format="[general]" html.valueishtml="0"  name=desc_cc_niv3 visible="1" edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=12 alignment="0" tabsequence=32766 border="0" color="128" x="270" y="8" height="44" width="1019" format="[general]" html.valueishtml="0"  name=desc_cencos_slc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=11 alignment="0" tabsequence=32766 border="0" color="128" x="46" y="8" height="44" width="201" format="[general]" html.valueishtml="0"  name=cencos_slc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.3 id=14 alignment="0" tabsequence=32766 border="0" color="16711680" x="343" y="4" height="44" width="937" format="[general]" html.valueishtml="0"  name=maquina_desc_maq visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.3 id=4 alignment="0" tabsequence=32766 border="0" color="16711680" x="73" y="4" height="44" width="247" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="987" y="0" height="56" width="256" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1248" y="0" height="56" width="270" format="[general]" html.valueishtml="0"  name=cod_labor visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="1522" y="0" height="56" width="585" format="[general]" html.valueishtml="0"  name=labor_desc_labor visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="1" tabsequence=32766 border="0" color="0" x="4160" y="0" height="56" width="242" format="#,##0.00" html.valueishtml="0"  name=cantid visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="4407" y="0" height="56" width="242" format="#,##0.00" html.valueishtml="0"  name=costo_mat visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="686" y="0" height="56" width="297" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="0" height="56" width="279" format="[general]" html.valueishtml="0"  name=nro_parte visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="2" tabsequence=32766 border="0" color="0" x="293" y="0" height="56" width="146" format="[general]" html.valueishtml="0"  name=nro_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="2" tabsequence=32766 border="0" color="0" x="443" y="0" height="56" width="238" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="3314" y="0" height="56" width="233" format="[general]" html.valueishtml="0"  name=tt_man_hist_reparac_cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="3552" y="0" height="56" width="590" format="[general]" html.valueishtml="0"  name=articulo_nom_articulo visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=22 alignment="0" tabsequence=32766 border="0" color="0" x="3054" y="0" height="56" width="256" format="[general]" html.valueishtml="0"  name=tipo_manten visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2112" y="0" height="56" width="192" format="[general]" html.valueishtml="0"  name=cencos_rsp visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2903" y="0" height="56" width="142" format="[general]" html.valueishtml="0"  name=cod_ejecutor visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="255" x="2309" y="0" height="56" width="576" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.3 alignment="1" expression="sum(  cantid  for group 3 )"border="0" color="16711680" x="4160" y="4" height="44" width="242" format="###,###.00" html.valueishtml="0"  name=mo_maq visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.3 alignment="1" expression="sum(  costo_mat  for group 3 )"border="0" color="16711680" x="4407" y="4" height="44" width="242" format="###,###.00" html.valueishtml="0"  name=mat_maq visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(  cantid  for group 2 )"border="0" color="8388736" x="4160" y="8" height="44" width="242" format="###,###.00" html.valueishtml="0"  name=mo_ccs visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(  costo_mat  for group 2 )"border="0" color="8388736" x="4407" y="8" height="44" width="242" format="###,###.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(  cantid  for group 1 )"border="0" color="255" x="4160" y="4" height="44" width="242" format="###,###.00" html.valueishtml="0"  name=mo_asc visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(  costo_mat  for group 1 )"border="0" color="255" x="4407" y="4" height="44" width="242" format="###,###.00" html.valueishtml="0"  name=mat_asc visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

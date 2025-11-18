@@ -1,0 +1,48 @@
+﻿$PBExportHeader$f_genera_liq_cb.srf
+global type f_genera_liq_cb from function_object
+end type
+
+forward prototypes
+global function boolean f_genera_liq_cb (string as_origen, ref string as_num_liquidacion)
+end prototypes
+
+global function boolean f_genera_liq_cb (string as_origen, ref string as_num_liquidacion);Boolean lb_retorno = TRUE
+Long	  ll_nro_reg
+String  ls_lock_table
+
+ls_lock_table = 'LOCK TABLE NUM_REMESAS IN EXCLUSIVE MODE'
+EXECUTE IMMEDIATE :ls_lock_table ;
+
+SELECT ult_nro INTO :ll_nro_reg FROM num_remesas WHERE (origen = :as_origen ) ;
+	
+IF Isnull(ll_nro_reg) OR ll_nro_reg = 0 THEN
+	Messagebox('Aviso','Debe Verificar Tabla de Numeración NUM_REMESAS, Comuniquese con Sistemas!')
+	lb_retorno = FALSE
+	GOTO SALIDA
+END IF
+
+
+//Actualiza Tabla num_liquidacion
+
+
+UPDATE num_remesas
+   SET ult_nro = :ll_nro_reg + 1
+ WHERE (origen = :as_origen ) ;
+	
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox("SQL error", SQLCA.SQLErrText)
+	lb_retorno = FALSE
+	GOTO SALIDA
+END IF	
+
+//ARMAR NRO DE LIQUIDACION
+as_num_liquidacion = as_origen + f_llena_caracteres('0',Trim(String(ll_nro_reg)),8)
+
+
+
+SALIDA:
+
+RETURN lb_retorno	
+
+end function
+

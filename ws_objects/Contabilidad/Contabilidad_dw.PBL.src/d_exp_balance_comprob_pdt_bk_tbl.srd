@@ -1,0 +1,110 @@
+﻿$PBExportHeader$d_exp_balance_comprob_pdt_bk_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(507) updatewhereclause=yes name=compute_0001 dbname="compute_0001" )
+ retrieve="select trim(cnta_ctbl) || '|' ||
+       to_char(round(saldo_inicial_debe,0)) || '|' ||
+       to_char(round(saldo_inicial_haber,0)) || '|' ||
+       to_char(round(mov_ejercicio_debe, 0)) || '|' ||
+       to_char(round(mov_ejercicio_haber, 0)) || '|' ||
+       to_char(round(saldo_inicial_debe + mov_ejercicio_debe, 0)) || '|' ||
+       to_char(round(saldo_inicial_haber + mov_ejercicio_haber, 0)) || '|' ||
+       case when saldo_inicial_debe + mov_ejercicio_debe > saldo_inicial_haber + mov_ejercicio_haber 
+            then to_char(round(saldo_inicial_debe + mov_ejercicio_debe - (saldo_inicial_haber + mov_ejercicio_haber),0))
+       else
+            '0'
+       end || '|' ||
+       case when saldo_inicial_haber + mov_ejercicio_haber > saldo_inicial_debe + mov_ejercicio_debe 
+            then to_char(round(saldo_inicial_haber + mov_ejercicio_haber - (saldo_inicial_debe + mov_ejercicio_debe),0))
+       else
+            '0'
+       end || '|' ||
+       '0' || '|' ||
+       '0' || '|' ||
+       case when trim(cnta_ctbl) <= '592' and (saldo_inicial_debe + mov_ejercicio_debe) > (saldo_inicial_haber + mov_ejercicio_haber) then
+            to_char(round((saldo_inicial_debe + mov_ejercicio_debe) - (saldo_inicial_haber + mov_ejercicio_haber),0))            
+       else
+            '0'
+       end || '|' ||
+       case when trim(cnta_ctbl) <= '592' and (saldo_inicial_haber + mov_ejercicio_haber) > (saldo_inicial_debe + mov_ejercicio_debe) then
+            to_char(round((saldo_inicial_haber + mov_ejercicio_haber) - (saldo_inicial_debe + mov_ejercicio_debe),0))
+       else
+            '0'
+       end || '|' ||
+       case when trim(cnta_ctbl) > '592' and (saldo_inicial_debe + mov_ejercicio_debe) > (saldo_inicial_haber + mov_ejercicio_haber) then
+            to_char(round((saldo_inicial_debe + mov_ejercicio_debe) - (saldo_inicial_haber + mov_ejercicio_haber), 0))
+       else
+            '0'
+       end || '|' ||
+       case when trim(cnta_ctbl) > '592' and (saldo_inicial_haber + mov_ejercicio_haber) > (saldo_inicial_debe + mov_ejercicio_debe) then
+            to_char(round((saldo_inicial_haber + mov_ejercicio_haber) - (saldo_inicial_debe + mov_ejercicio_debe), 0))
+       else
+            '0'
+       end || '|'
+from (select t.cnta_ctbl, cc.desc_cnta,
+         (select NVL(sum(cad.imp_movsol),0)
+            from cntbl_asiento ca,
+                 cntbl_asiento_det cad
+           where ca.origen = cad.origen
+             and ca.ano    = cad.ano
+             and ca.mes    = cad.mes
+             and ca.nro_libro = cad.nro_libro
+             and ca.nro_asiento = cad.nro_asiento
+             and substr(cad.cnta_ctbl, 1, length(trim(t.cnta_ctbl))) = trim(t.cnta_ctbl)
+             and cad.ano = :ani_year
+             and cad.mes = 0
+             and cad.flag_debhab = 'D'
+             and ca.flag_estado = '1') as saldo_inicial_debe,
+         (select NVL(sum(cad.imp_movsol),0)
+            from cntbl_asiento ca,
+                 cntbl_asiento_det cad
+           where ca.origen = cad.origen
+             and ca.ano    = cad.ano
+             and ca.mes    = cad.mes
+             and ca.nro_libro = cad.nro_libro
+             and ca.nro_asiento = cad.nro_asiento
+             and substr(cad.cnta_ctbl, 1, length(trim(t.cnta_ctbl))) = trim(t.cnta_ctbl)
+             and cad.ano = :ani_year
+             and cad.mes = 0
+             and cad.flag_debhab = 'H'
+             and ca.flag_estado = '1') as saldo_inicial_haber,
+         (select NVL(sum(cad.imp_movsol),0)
+            from cntbl_asiento ca,
+                 cntbl_asiento_det cad
+           where ca.origen = cad.origen
+             and ca.ano    = cad.ano
+             and ca.mes    = cad.mes
+             and ca.nro_libro = cad.nro_libro
+             and ca.nro_asiento = cad.nro_asiento
+             and substr(cad.cnta_ctbl, 1, length(trim(t.cnta_ctbl))) = trim(t.cnta_ctbl)
+             and cad.ano = :ani_year
+             and cad.mes between 1 and 12
+             and cad.flag_debhab = 'D'
+             and ca.flag_estado = '1') as mov_ejercicio_debe,
+         (select NVL(sum(cad.imp_movsol),0)
+            from cntbl_asiento ca,
+                 cntbl_asiento_det cad
+           where ca.origen = cad.origen
+             and ca.ano    = cad.ano
+             and ca.mes    = cad.mes
+             and ca.nro_libro = cad.nro_libro
+             and ca.nro_asiento = cad.nro_asiento
+             and substr(cad.cnta_ctbl, 1, length(trim(t.cnta_ctbl))) = trim(t.cnta_ctbl)
+             and cad.ano = :ani_year
+             and cad.mes between 1 and 12
+             and cad.flag_debhab = 'H'
+             and ca.flag_estado = '1') as mov_ejercicio_haber
+  from cntas_balance t,
+       cntbl_cnta    cc
+  where t.cnta_ctbl = cc.cnta_ctbl (+)
+ )
+ " arguments=(("ani_year", number)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="76" width="4389" format="[general]" html.valueishtml="0"  name=compute_0001 visible="1" edit.limit=507 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Courier New" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

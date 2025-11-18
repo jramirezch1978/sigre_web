@@ -1,0 +1,38 @@
+﻿$PBExportHeader$f_saldos_pto_x_ccosto.srf
+global type f_saldos_pto_x_ccosto from function_object
+end type
+
+forward prototypes
+global function integer f_saldos_pto_x_ccosto (integer an_mes, integer an_ano, string as_cencos)
+end prototypes
+
+global function integer f_saldos_pto_x_ccosto (integer an_mes, integer an_ano, string as_cencos);// Funcion que genera saldos de presupuesto desde un c.costo especificado
+Long lpos
+
+if an_mes = 0 then  // cuando es mes cero, procesar todo el año   
+	DECLARE proc1 PROCEDURE FOR USP_PTO_SALDOS_CC_ANUAL( :an_ano, :as_cencos);	
+	EXECUTE Proc1;
+else	
+	DECLARE proc2 PROCEDURE FOR USP_PTO_SALDOS_CC( :an_mes, :an_ano, :as_cencos);	
+	EXECUTE Proc2;
+end if
+	if sqlca.sqlcode = -1 then   // Fallo
+	   // Encontrar el error
+		lpos = POS( sqlca.sqlerrtext, ':')	
+				
+		CHOOSE CASE LEFT(sqlca.sqlerrtext,lpos - 1)		
+			CASE 'ORA-20100'
+				Messagebox( 'ERROR', 'defina flag de control para partida', stopsign!)
+				return 0
+			CASE 'ORA-20101'
+				Messagebox( 'Atencion', 'No existen partidas para el mes indicado', stopsign!)
+				return 0					
+			CASE ELSE
+				Messagebox( "Error", sqlca.sqlerrtext, stopsign!)
+				return 0
+	   END CHOOSE
+	end if
+
+return 1
+end function
+

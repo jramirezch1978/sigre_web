@@ -1,0 +1,37 @@
+﻿$PBExportHeader$d_rpt_ot_servicios_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=180 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_os dbname="vw_pr_servicios_x_ot.nro_os" )
+ column=(type=char(200) updatewhereclause=yes name=descripcion dbname="vw_pr_servicios_x_ot.descripcion" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="vw_pr_servicios_x_ot.fecha" )
+ column=(type=char(3) updatewhereclause=yes name=moneda dbname="vw_pr_servicios_x_ot.moneda" )
+ column=(type=number updatewhereclause=yes name=total dbname="vw_pr_servicios_x_ot.total" )
+ retrieve="  SELECT A.NRO_OS,   
+         A.DESCRIPCION,   
+			A.FECHA,
+			A.COD_MONEDA AS MONEDA,
+         A.TOTAL
+    FROM VW_PR_SERVICIOS_X_OT A  
+   WHERE A.NRO_ORDEN = :as_orden   
+
+" arguments=(("as_orden", string)) )
+text(band=header alignment="0" text="SERVICIOS VARIOS" border="4" color="0" x="18" y="24" height="60" width="530" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(total for all)"border="2" color="255" x="2670" y="4" height="56" width="334" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="Total" border="2" color="33554432" x="2336" y="4" height="56" width="329" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nro O.S." border="2" color="16777215" x="9" y="116" height="56" width="302" html.valueishtml="0"  name=nro_os_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Fecha" border="2" color="16777215" x="315" y="116" height="56" width="306" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Descripcion Orden de Servicio" border="2" color="16777215" x="626" y="116" height="56" width="2043" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Total ($)" border="2" color="16777215" x="2674" y="116" height="56" width="334" html.valueishtml="0"  name=total_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="64" width="302" format="[general]" html.valueishtml="0"  name=nro_os visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="311" y="4" height="64" width="306" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="622" y="4" height="64" width="2043" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=200 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="0" x="2670" y="4" height="64" width="334" format="###,##0.00" html.valueishtml="0"  name=total visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

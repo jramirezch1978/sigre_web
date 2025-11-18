@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_monedas.srf
+global type f_monedas from function_object
+end type
+
+forward prototypes
+global function boolean f_monedas (ref string as_cod_soles, ref string as_cod_dolares)
+end prototypes
+
+global function boolean f_monedas (ref string as_cod_soles, ref string as_cod_dolares);SELECT cod_soles,
+		 cod_dolares
+  INTO :as_cod_soles,
+  		 :as_cod_dolares
+ FROM  logparam
+ WHERE reckey = '1' ; 
+ 
+IF SQLCA.SQLCode = 100 THEN 
+	MessageBox('SQL error , Recuperación de Moneda', &
+		'No existen parametros en logparam, por favor verifique')
+	return false
+END IF 
+ 
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox('SQL error , Recuperación de Moneda', SQLCA.SQLErrText)
+	return false
+END IF
+
+return true
+end function
+

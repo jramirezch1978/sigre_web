@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_verifica_columna.srf
+global type f_verifica_columna from function_object
+end type
+
+forward prototypes
+global function boolean f_verifica_columna (datawindow adw_1, string as_colname)
+end prototypes
+
+global function boolean f_verifica_columna (datawindow adw_1, string as_colname);Integer li_totcol ,li_x,li_pos
+String  ls_colname
+Boolean lb_retorno = FALSE
+
+li_totcol = Integer(adw_1.Describe("DataWindow.Column.Count"))
+
+FOR li_x = 1 TO li_totcol
+	ls_colname = '#'+String(li_x)+ ".dbName"
+	ls_colname = adw_1.Describe(ls_colname)
+	li_pos = Pos(ls_colname,".")
+	
+	ls_colname = Mid(ls_colname,li_pos + 1)
+	IF ls_colname = as_colname THEN
+		lb_retorno = TRUE
+		EXIT
+	END IF
+NEXT
+
+Return lb_retorno
+end function
+

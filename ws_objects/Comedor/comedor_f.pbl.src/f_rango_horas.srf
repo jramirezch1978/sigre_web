@@ -1,0 +1,28 @@
+﻿$PBExportHeader$f_rango_horas.srf
+global type f_rango_horas from function_object
+end type
+
+forward prototypes
+global function decimal f_rango_horas (datetime adt_fecha1, datetime adt_fecha2)
+end prototypes
+
+global function decimal f_rango_horas (datetime adt_fecha1, datetime adt_fecha2);long 			ll_row
+Date			ld_fecha1, ld_fecha2
+Time			lt_time1, lt_time2
+decimal{3}	ldc_horas
+
+ld_fecha1  = Date(adt_fecha1)
+lt_time1	  = Time(adt_fecha1)
+ld_fecha2  = Date(adt_fecha2)
+lt_time2	  = Time(adt_fecha2)
+
+if ld_fecha1 = ld_fecha2 then
+	ldc_horas = SecondsAfter(lt_time1, lt_time2)/3600  //Horas de funcionamiento del Equipo
+else
+	ldc_horas = (DaysAfter(ld_fecha1, ld_fecha2) - 1) * 24
+	ldc_horas = ldc_horas + ( SecondsAfter(lt_time1, Time("23:59:59") ) + 1 + SecondsAfter(Time("00:00:00"), lt_time2) ) / 3600
+end if
+
+return ldc_horas
+end function
+

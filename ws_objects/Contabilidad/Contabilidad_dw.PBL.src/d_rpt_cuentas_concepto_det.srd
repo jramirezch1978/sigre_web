@@ -1,0 +1,63 @@
+﻿$PBExportHeader$d_rpt_cuentas_concepto_det.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 50 print.margin.right = 50 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=296 color="536870912" )
+header[2](height=48 color="536870912" )
+summary(height=48 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=48 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=cnta dbname="cnta" )
+ column=(type=char(20) updatewhereclause=yes name=concepto dbname="concepto" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ retrieve="Select Trim(ccad.cnta_ctbl)||' - '||(c.abrev_cnta) As cnta,
+       lpad(to_char((Select orden From cnt_concepto_anexo 
+       Where cnta_ctbl = ccad.cnta_ctbl And concepto_cnt = ccad.concepto_cnt And ano = :an_ano)),2,'00')||' - '||cc.descripcion As concepto,
+       lpad(ccad.mes,2,'00')||' - '||decode(ccad.mes,0,'Apertura',   1,'Enero',     2,'Febrero',  3,'Marzo',
+                     4,'Abril',  5,'Mayo',      6,'Junio',    7,'Julio',
+                     8,'Agosto', 9,'Setiembre', 10,'Octubre', 11,'Noviembre',
+                     12,'Diciembre',13,'Mes Trece') As mes, 
+       round(sum(cad.imp_movsol),2) As importe
+  From cnt_concepto_anexo_det ccad, cntbl_asiento_det cad, cnt_concepto cc,
+       cntbl_cnta c
+ Where ccad.Origen       = cad.origen
+   And ccad.ano          = cad.ano
+   And ccad.mes          = cad.mes
+   And ccad.nro_libro    = cad.nro_libro
+   And ccad.nro_asiento  = cad.nro_asiento
+   And ccad.item         = cad.item
+   And ccad.cnta_ctbl    = cc.cnta_ctbl
+   And ccad.concepto_cnt = cc.concepto_cnt
+   And ccad.cnta_ctbl    = c.cnta_ctbl
+   And ccad.ano          = :an_ano
+   And ccad.cnta_ctbl    Like :as_cnta
+ Group By ccad.cnta_ctbl, c.abrev_cnta, ccad.concepto_cnt, cc.descripcion, ccad.mes" arguments=(("an_ano", number),("as_cnta", string),("as_empresa", string),("as_user", string))  sort="cnta A concepto A " )
+group(level=1 header.height=0 trailer.height=48 by=("cnta" ) header.color="536870912" trailer.color="536870912" )
+text(band=header[2] alignment="2" text="@mes" border="2" color="0" x="1102" y="0" height="44" width="251" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header[2] alignment="2" text="Total " border="2" color="0" x="1362" y="0" height="44" width="251" html.valueishtml="0"  name=grand_sum_importe_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header[2] alignment="2" text="Cuenta Contable" border="2" color="0" x="9" y="0" height="44" width="699" html.valueishtml="0"  name=cnta_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header[2] alignment="2" text="Concepto" border="2" color="0" x="718" y="0" height="44" width="375" html.valueishtml="0"  name=concepto_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1102" y="0" height="44" width="251" format="###,###,##0.00" html.valueishtml="0"  name=importe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="2" color="33554432" x="1362" y="0" height="44" width="251" format="###,###,##0.00" html.valueishtml="0"  name=grand_sum_importe visible="1"  font.face="Arial" font.height="-5" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="718" y="0" height="44" width="375" format="[general]" html.valueishtml="0"  name=concepto visible="1" edit.limit=45 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="44" width="699" format="[general]" html.valueishtml="0"  name=cnta visible="1" edit.limit=38 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-5" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="1" text="Sub - Total :" border="0" color="8388608" x="718" y="4" height="44" width="375" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(importe for group 1)"border="2" color="33554432" x="1102" y="0" height="44" width="251" format="###,###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-5" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=trailer.1 alignment="1" expression="sum(grand_sum_importe for group 1)"border="2" color="33554432" x="1362" y="0" height="44" width="251" format="###,###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-5" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=summary alignment="1" text="Total :" border="0" color="8388608" x="718" y="4" height="44" width="375" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(importe for all )"border="2" color="33554432" x="1102" y="0" height="44" width="251" format="###,###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-5" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=summary alignment="1" expression="sum(grand_sum_importe for all )"border="2" color="33554432" x="1362" y="0" height="44" width="251" format="###,###,##0.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-5" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=foreground alignment="2" text="CUENTAS CONTABLES Y CONCEPTOS" border="1" color="0" x="1394" y="52" height="68" width="1513" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="2" expression="'Año : '+string( an_ano ) + ' y Cuenta Contable a Dos Digitos: ' +  as_cnta "border="0" color="33554432" x="1408" y="152" height="56" width="1490" format="[GENERAL]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=foreground filename="" x="23" y="20" height="148" width="233" border="0"  name=p_logo visible="1" )
+compute(band=foreground alignment="2" expression=" as_empresa "border="0" color="0" x="27" y="188" height="56" width="229" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="1" text="Usuario :" border="0" color="0" x="3881" y="176" height="56" width="238" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="2" expression=" as_user "border="0" color="0" x="4123" y="176" height="56" width="229" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="2" expression="today()"border="0" color="0" x="3881" y="108" height="56" width="471" format="[SHORTDATE] [TIME]" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="2" expression="'Pagina ' + page() + ' de ' + pageCount()"border="0" color="0" x="3881" y="40" height="56" width="475" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "mes" rows = "cnta, concepto" values = "sum(importe for crosstab)" sourcenames = "cnta, concepto, mes, importe")
+sparse(names="cnta")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

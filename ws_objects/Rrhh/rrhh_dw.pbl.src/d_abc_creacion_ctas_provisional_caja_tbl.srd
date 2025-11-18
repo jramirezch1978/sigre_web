@@ -1,0 +1,22 @@
+﻿$PBExportHeader$d_abc_creacion_ctas_provisional_caja_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(480) updatewhereclause=yes name=cadena dbname="cadena" )
+ retrieve="select rpad(' ',4,' ')||rpad('20105384590',15,' ')||rpad(' ',20,' ')||m.flag_sexo||'1'||rpad(m.dni,15,' ')||
+       rpad(' ',15,' ')||substr(m.flag_estado_civil,1,1)||to_char(m.fec_nacimiento,'yyyymmdd')||'4028'|| rpad(' ',118,' ') ||
+       rpad(Nvl(m.apel_paterno,' '),50,' ')||rpad(Nvl(m.apel_materno,' '),50,' ')||rpad(Nvl(m.nombre1,' '),100,' ')||rpad(nvl(m.nombre2,' '),50,' ')||
+       rpad(' ',23 ,' ')||decode(m.moneda_cts,'S/.','001','002')||'2'||'0' AS CADENA
+  from maestro m 
+ where m.tipo_trabajador = 'JOR' AND m.cod_origen = 'CN' and m.flag_estado = '1' and m.cod_banco_cts = '009' and
+       m.nro_cnta_cts is null
+" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="255" x="9" y="0" height="76" width="8768" format="[general]" html.valueishtml="0"  name=cadena visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

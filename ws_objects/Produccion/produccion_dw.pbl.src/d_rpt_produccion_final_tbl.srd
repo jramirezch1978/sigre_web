@@ -1,0 +1,49 @@
+﻿$PBExportHeader$d_rpt_produccion_final_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=216 color="536870912" )
+table(column=(type=char(46) updatewhereclause=yes name=producto dbname="producto" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="fecha" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ column=(type=char(40) updatewhereclause=yes name=desc_estado dbname="estado_producto.desc_estado" )
+ retrieve="SELECT TP.COD_PROD || ' - ' || TP.DESC_PROD AS PRODUCTO,
+       TRUNC(OT.FECHA)   AS FECHA,
+       SUM(PF.CANTIDAD)  AS CANTIDAD,
+       E.DESC_ESTADO
+       
+  FROM PD_OT_PROD_FINAL PF, 
+       PD_OT            OT,
+       LABOR            L,
+       TIPO_PRODUCTO    TP,
+       PD_OT_DET        OTD,
+       ESTADO_PRODUCTO  E
+       
+ WHERE TP.COD_PROD      = PF.COD_PRODUCTO
+   AND OT.NRO_PARTE     = OTD.NRO_PARTE
+   AND OTD.NRO_PARTE    = PF.NRO_PARTE
+   AND OTD.NRO_ITEM     = PF.NRO_ITEM
+   AND L.COD_LABOR      = OTD.COD_LABOR
+   AND E.COD_ESTADO     = PF.COD_ESTADO
+   AND OT.OT_ADM        = :as_ot_adm
+   AND SUBSTR(OT.NRO_PARTE,1,2) = :as_origen
+   AND trunc(OT.FECHA)  BETWEEN(:ad_fecha1) AND (:ad_fecha2)
+GROUP BY TP.COD_PROD || ' - ' || TP.DESC_PROD,
+       TRUNC(OT.FECHA),
+       L.DESC_LABOR,
+       E.DESC_ESTADO" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_ot_adm", string),("as_origen", string)) )
+text(band=detail alignment="1" text="Fecha:" border="0" color="8388608" x="50" y="12" height="56" width="325" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="4" color="33554432" x="398" y="12" height="56" width="370" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.mask="mm/dd/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="2" text="Estado:" border="0" color="8388608" x="2299" y="100" height="56" width="256" html.valueishtml="0"  name=estado_producto_desc_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="4" color="33554432" x="2592" y="100" height="60" width="1125" format="[general]" html.valueishtml="0"  name=desc_estado visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="2" text="Cantidad:" border="0" color="8388608" x="1614" y="100" height="56" width="329" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="4" color="33554432" x="1952" y="100" height="60" width="329" format="#,##00.00" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Producto:" border="0" color="8388608" x="50" y="100" height="60" width="325" html.valueishtml="0"  name=producto_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="4" color="33554432" x="398" y="100" height="60" width="1193" format="[general]" html.valueishtml="0"  name=producto visible="1" edit.limit=46 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=detail x1="64" y1="192" x2="3712" y2="192"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

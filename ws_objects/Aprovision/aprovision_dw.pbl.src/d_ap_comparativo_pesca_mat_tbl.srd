@@ -1,0 +1,134 @@
+﻿$PBExportHeader$d_ap_comparativo_pesca_mat_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=532 color="536870912" )
+summary(height=80 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=proveedor dbname="ap_guia_recepcion.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=tg_naves_nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=char(12) updatewhereclause=yes name=matricula dbname="tg_naves.matricula" )
+ column=(type=number updatewhereclause=yes name=pesca_tn dbname="pesca_tn" )
+ column=(type=number updatewhereclause=yes name=imp_pesca_sol dbname="imp_pesca_sol" )
+ column=(type=number updatewhereclause=yes name=cant dbname="cant" )
+ column=(type=number updatewhereclause=yes name=imp_cant_sol dbname="imp_cant_sol" )
+ retrieve="SELECT GR.PROVEEDOR, 
+       P.NOM_PROVEEDOR,
+		 N.NOMB_NAVE,
+       N.MATRICULA,
+       USF_AP_PESCA_MAT('1',TRUNC(:AD_FECHA_INI), TRUNC(:AD_FECHA_FIN), GR.PROVEEDOR) as PESCA_TN,
+       USF_AP_PESCA_MAT('2',TRUNC(:AD_FECHA_INI), TRUNC(:AD_FECHA_FIN), GR.PROVEEDOR) as IMP_PESCA_SOL,
+       USF_AP_PESCA_MAT('3',TRUNC(:AD_FECHA_INI), TRUNC(:AD_FECHA_FIN), GR.PROVEEDOR) as CANT,
+       USF_AP_PESCA_MAT('4',TRUNC(:AD_FECHA_INI), TRUNC(:AD_FECHA_FIN), GR.PROVEEDOR) as IMP_CANT_SOL
+       
+FROM   AP_PD_DESCARGA_DET      PDD,
+       AP_GUIA_RECEPCION       GR,
+       AP_GUIA_RECEPCION_DET   GRD,
+       TG_NAVES                N,
+       PROVEEDOR               P
+     
+WHERE  PDD.NRO_PARTE                 = GRD.NRO_PARTE 
+  AND  PDD.ITEM                      = GRD.ITEM_PARTE 
+  AND  GRD.COD_GUIA_REC              = GR.COD_GUIA_REC
+  AND  GR.PROVEEDOR                  = P.PROVEEDOR 
+  AND  P.PROVEEDOR                   = N.PROVEEDOR  (+)
+  AND  TRUNC(PDD.INICIO_DESCARGA) BETWEEN TRUNC(:AD_FECHA_INI) AND TRUNC(:AD_FECHA_FIN)
+
+GROUP BY  GR.PROVEEDOR,
+          P.NOM_PROVEEDOR,
+    		 N.NOMB_NAVE,
+          N.MATRICULA
+UNION 
+SELECT VM.PROVEEDOR, 
+       P.NOM_PROVEEDOR,
+       N.NOMB_NAVE,
+       N.MATRICULA,
+       0.00  AS PESCA_TN,
+       0.00  AS IMP_PESCA_SOL,
+       ROUND(SUM(AM.CANT_PROCESADA),3) AS CANT,
+       ROUND(SUM(AM.CANT_PROCESADA * USF_FL_CONV_MON(AM.PRECIO_UNIT, 
+                  AM.COD_MONEDA, (SELECT COD_SOLES FROM LOGPARAM WHERE 
+                 RECKEY = '1'),VM.FEC_REGISTRO)),2) AS IMP_CANT_SOL
+
+FROM  VALE_MOV           VM,
+      PROVEEDOR          P,
+      TG_NAVES           N,
+      ARTICULO_MOV       AM,
+      ARTICULO_MOV_TIPO  AMT
+
+WHERE TRUNC(VM.FEC_REGISTRO) BETWEEN TRUNC(:AD_FECHA_INI) AND TRUNC(:AD_FECHA_FIN)
+  AND VM.PROVEEDOR        = P.PROVEEDOR
+  AND P.PROVEEDOR         = N.PROVEEDOR
+  AND VM.COD_ORIGEN       = AM.COD_ORIGEN
+  AND VM.NRO_VALE         = AM.NRO_VALE
+  AND VM.TIPO_MOV                   = AMT.TIPO_MOV
+  AND NVL(AMT.FACTOR_SLDO_TOTAL, 0) = -1
+  AND VM.PROVEEDOR NOT IN(SELECT GR.PROVEEDOR
+                            FROM   AP_PD_DESCARGA_DET      PDD,
+                                   AP_GUIA_RECEPCION       GR,
+                                   AP_GUIA_RECEPCION_DET   GRD,
+                                   TG_NAVES                N,
+                                   PROVEEDOR               P
+                                 
+                            WHERE  PDD.NRO_PARTE                 = GRD.NRO_PARTE 
+                              AND  PDD.ITEM                      = GRD.ITEM_PARTE 
+                              AND  GRD.COD_GUIA_REC              = GR.COD_GUIA_REC
+                              AND  GR.PROVEEDOR                  = P.PROVEEDOR 
+                              AND  P.PROVEEDOR                   = N.PROVEEDOR  (+)
+                              AND  TRUNC(PDD.INICIO_DESCARGA) BETWEEN TRUNC(:AD_FECHA_INI) AND TRUNC(:AD_FECHA_FIN)                            
+									)
+
+GROUP BY VM.PROVEEDOR, 
+       P.NOM_PROVEEDOR,
+       N.NOMB_NAVE,
+       N.MATRICULA" arguments=(("AD_FECHA_INI", date),("AD_FECHA_FIN", date))  sort="proveedor A " )
+text(band=header alignment="2" text="Nro
+Ord." border="2" color="16777215" x="46" y="416" height="112" width="128" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cod.
+Prov." border="2" color="16777215" x="178" y="416" height="112" width="206" html.valueishtml="0"  name=ap_guia_recepcion_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nombre de 
+Embarcación
+" border="2" color="16777215" x="1646" y="416" height="168" width="626" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro. de
+Matricula" border="2" color="16777215" x="2277" y="416" height="112" width="297" html.valueishtml="0"  name=tg_naves_matricula_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nombre de Proveedor
+" border="2" color="16777215" x="389" y="416" height="112" width="1253" html.valueishtml="0"  name=proveedor_nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Ingreso
+Pesca (Tn)" border="2" color="16777215" x="2578" y="416" height="112" width="357" html.valueishtml="0"  name=pesca_tn_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Importe 
+Pesca (S/.)" border="2" color="16777215" x="2939" y="416" height="112" width="357" html.valueishtml="0"  name=imp_pesca_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cant
+Mat." border="2" color="16777215" x="3301" y="416" height="112" width="357" html.valueishtml="0"  name=cant_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Importe
+Mat. (S/.)" border="2" color="16777215" x="3662" y="416" height="112" width="357" html.valueishtml="0"  name=imp_cant_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Saldo
+Neto. (S/.)" border="2" color="16777215" x="4023" y="416" height="112" width="357" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+compute(band=detail alignment="2" expression="cumulativesum(1)"border="2" color="33554432" x="46" y="4" height="64" width="128" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="178" y="4" height="64" width="206" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1646" y="4" height="64" width="626" format="[general]" html.valueishtml="0"  name=tg_naves_nomb_nave visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="2277" y="4" height="64" width="297" format="[general]" html.valueishtml="0"  name=matricula visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="389" y="4" height="64" width="1253" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2578" y="4" height="64" width="357" format="#,##0.0000" html.valueishtml="0"  name=pesca_tn visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2939" y="4" height="64" width="357" format="#,##0.00" html.valueishtml="0"  name=imp_pesca_sol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="3301" y="4" height="64" width="357" format="#,##0.00" html.valueishtml="0"  name=cant visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="3662" y="4" height="64" width="357" format="#,##0.00" html.valueishtml="0"  name=imp_cant_sol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" imp_pesca_sol - imp_cant_sol "border="2" color="33554432~tIF( saldo_s < 1 , RGB(255,0,0), RGB(0,0,0))" x="4023" y="4" height="64" width="357" format="#,##0.00" html.valueishtml="0"  name=saldo_s visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="TOTALES" border="2" color="134217856" x="46" y="4" height="64" width="2528" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(pesca_tn for all)"border="2" color="134217856" x="2578" y="4" height="64" width="357" format="#,##0.0000" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(imp_pesca_sol for all)"border="2" color="134217856" x="2939" y="4" height="64" width="357" format="#,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(cant for all)"border="2" color="134217856" x="3301" y="4" height="64" width="357" format="#,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(imp_cant_sol for all)"border="2" color="134217856" x="3662" y="4" height="64" width="357" format="#,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(saldo_s for all) "border="2" color="134217856" x="4023" y="4" height="64" width="357" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="46" y="28" height="268" width="549" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="CUADRO COMPARATIVO ENTRE INGRESOS 
+POR PESCA Y MATERIALES" border="0" color="0" x="1038" y="84" height="128" width="1970" html.valueishtml="0"  name=titulo_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="1271" y="252" height="64" width="1358" html.valueishtml="0"  name=rango_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="3826" y="128" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="3927" y="48" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="4082" y="216" height="56" width="261" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

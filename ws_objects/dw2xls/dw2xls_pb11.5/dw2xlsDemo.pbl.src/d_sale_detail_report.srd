@@ -1,0 +1,91 @@
+﻿$PBExportHeader$d_sale_detail_report.srd
+$PBExportComments$销售明细表
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=428 color="536870912" )
+summary(height=92 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=96 color="536870912~tIF(Mod(GetRow(),2)=0,RGB(255, 239, 213),RGB(230,240,250))" )
+table(column=(type=char(16) updatewhereclause=yes name=sales_companyid dbname="sales.CompanyID" )
+ column=(type=char(25) updatewhereclause=yes name=sales_id dbname="sales.ID" )
+ column=(type=char(10) updatewhereclause=yes name=sales_billtype dbname="sales.BillType" )
+ column=(type=char(16) updatewhereclause=yes name=sales_saleunitid dbname="sales.SaleUnitID" )
+ column=(type=char(16) updatewhereclause=yes name=sales_customerid dbname="sales.CustomerID" )
+ column=(type=char(16) updatewhereclause=yes name=sales_departmentid dbname="sales.DepartmentID" )
+ column=(type=char(16) updatewhereclause=yes name=sales_employeeid dbname="sales.EmployeeID" )
+ column=(type=datetime updatewhereclause=yes name=sales_billdate dbname="sales.BillDate" )
+ column=(type=char(16) updatewhereclause=yes name=sales_siteid dbname="sales.SiteID" )
+ column=(type=long updatewhereclause=yes name=sale_detail_seq dbname="sale_detail.Seq" )
+ column=(type=char(32) updatewhereclause=yes name=sale_detail_itemid dbname="sale_detail.Itemid" )
+ column=(type=char(10) updatewhereclause=yes name=sale_detail_unitid dbname="sale_detail.UnitID" )
+ column=(type=decimal(7) updatewhereclause=yes name=sale_detail_qty dbname="sale_detail.Qty" )
+ column=(type=decimal(7) updatewhereclause=yes name=sale_detail_amount_tax dbname="sale_detail.Amount_tax" )
+ column=(type=char(60) updatewhereclause=yes name=sales_remark dbname="sales.Remark" )
+ column=(type=decimal(7) updatewhereclause=yes name=sale_detail_dutyprice dbname="sale_detail.DutyPrice" )
+ column=(type=char(30) updatewhereclause=yes name=customer_short_name dbname="Customer.short_name" )
+ column=(type=char(60) updatewhereclause=yes name=item_name dbname="item.name" )
+ retrieve="  SELECT sales.CompanyID,   
+         sales.ID,   
+         sales.BillType,   
+         sales.SaleUnitID,   
+         sales.CustomerID,   
+         sales.DepartmentID,   
+         sales.EmployeeID,   
+         sales.BillDate,   
+         sales.SiteID,   
+         sale_detail.Seq,   
+         sale_detail.Itemid,   
+         sale_detail.UnitID,   
+         sale_detail.Qty,   
+         sale_detail.Amount_tax,   
+         sales.Remark,   
+         sale_detail.DutyPrice,   
+         Customer.short_name,   
+         item.name  
+    FROM sales,   
+         sale_detail,   
+         Customer,   
+         item  
+   WHERE ( sales.BillType = sale_detail.BillType ) and  
+         ( sales.Id = sale_detail.Id ) AND  
+         ( sales.CompanyID = sale_detail.CompanyID ) AND  
+         (Sales.customerid = Customer.ID AND  
+         Customer.Flag = 'D')  AND
+			(sale_detail.Itemid = Item.id) and
+			Sales.blankoutflag <>'1' 
+ORDER BY sales.ID ASC,   
+         sale_detail.Seq ASC   
+" )
+data("001","001","SO","001","001","001","001",2004-01-01 00:00:00:000000,"001", 1,"0001","套", 100.0000000,null "这是测试而已", 34234.0000000,"aaa","货品名称一","001","001","SO","001","001","001","001",2004-01-01 00:00:00:000000,"001", 2,"0002","套", 100.0000000,null null  2.0000000,"b","硬盘","001","001","SO","001","001","001","001",2004-01-01 00:00:00:000000,"001", 3,"0003","台", 100.0000000,null null  3.0000000,"c","财务软件","001","001","SO","001","001","001","001",2004-01-01 00:00:00:000000,"001", 4,"0004","个", 5000.0000000,null "单双行显示不同颜色", 4.0000000,"d","测试","001","001","SO","001","001","001","001",2004-01-01 00:00:00:000000,"001", 5,"0005","套", 800.2580000,null null  5.0000000,"e","内存",) 
+text(band=header alignment="2" text="日期" border="0" color="8388608" x="9" y="360" height="56" width="329" html.valueishtml="0"  name=sales_billdate_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="备注" border="0" color="8388608" x="3122" y="356" height="56" width="494" html.valueishtml="0"  name=sales_remark_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="单号" border="0" color="8388608" x="347" y="356" height="56" width="434" html.valueishtml="0"  name=sales_id_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="序号" border="0" color="8388608" x="791" y="356" height="56" width="137" html.valueishtml="0"  name=sale_detail_seq_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="货品编码" border="0" color="8388608" x="937" y="356" height="56" width="302" html.valueishtml="0"  name=sale_detail_itemid_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="单位" border="0" color="8388608" x="1778" y="356" height="56" width="151" html.valueishtml="0"  name=sale_detail_unitid_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="数量" border="0" color="8388608" x="1938" y="356" height="56" width="393" html.valueishtml="0"  name=sale_detail_qty_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="含税金额" border="0" color="8388608" x="2674" y="356" height="56" width="439" html.valueishtml="0"  name=sale_detail_amount_tax_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="含税单价" border="0" color="8388608" x="2341" y="356" height="56" width="325" html.valueishtml="0"  name=sale_detail_dutyprice_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="货品名称" border="0" color="8388608" x="1248" y="356" height="56" width="521" html.valueishtml="0"  name=item_name_t visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="553648127" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="347" y="8" height="76" width="434" format="[general]" html.valueishtml="0"  name=sales_id visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="33554432" x="9" y="8" height="76" width="329" format="yyyy-mm-dd" html.valueishtml="0"  name=sales_billdate visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="0" color="33554432" x="791" y="8" height="76" width="137" format="[general]" html.valueishtml="0"  name=sale_detail_seq visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="937" y="8" height="76" width="302" format="[general]" html.valueishtml="0"  name=sale_detail_itemid visible="1" edit.limit=32 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="33554432" x="3122" y="8" height="76" width="494" format="[general]" html.valueishtml="0"  name=sales_remark visible="1" edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="0" color="33554432" x="1778" y="8" height="76" width="151" format="[general]" html.valueishtml="0"  name=sale_detail_unitid visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="33554432" x="1248" y="8" height="76" width="521" format="[general]" html.valueishtml="0"  name=item_name visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="33554432" x="1943" y="8" height="76" width="389" format="~tIF( ceiling(sale_detail_qty )= sale_detail_qty ,  ~"##,###,###,##0~",   ~"###,###,###,##0.0####~"  )" html.valueishtml="0"  name=sale_detail_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="1" tabsequence=32766 border="0" color="33554432" x="2341" y="8" height="76" width="325" format="#,##0.00" html.valueishtml="0"  name=sale_detail_dutyprice visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="0" color="33554432" x="2674" y="8" height="76" width="439" format="#,##0.00" html.valueishtml="0"  name=sale_detail_amount_tax visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="宋体" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="''"border="0" color="33554432" x="3625" y="24" height="56" width="5" format="[GENERAL]" html.valueishtml="0"  name=sys_lastcol visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="合计:" border="0" color="0" x="9" y="24" height="56" width="329" html.valueishtml="0"  name=t_2 visible="1"  font.face="宋体" font.height="-9" font.weight="700"  font.family="0" font.pitch="2" font.charset="134" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(sale_detail_qty for all)"border="0" color="0" x="1938" y="4" height="56" width="393" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="宋体" font.height="-9" font.weight="700"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(sale_detail_dutyprice for all)"border="0" color="0" x="2341" y="4" height="56" width="325" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="宋体" font.height="-9" font.weight="700"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(sale_detail_amount_tax for all)"border="0" color="0" x="2674" y="4" height="56" width="439" format="#,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="宋体" font.height="-9" font.weight="700"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="" border="4" color="33554432" x="0" y="0" height="332" width="3616~tLong(Describe(~"sys_lastcol.x~"))" html.valueishtml="0"  name=sys_back visible="1"  font.face="宋体" font.height="-20" font.weight="700"  font.family="0" font.pitch="2" font.charset="134" background.mode="2" background.color="33554431" )
+text(band=foreground alignment="2" text="销货单位:" border="0" color="33554432" x="37" y="240" height="56" width="357" html.valueishtml="0"  name=t_1 visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="2" background.color="33554431" )
+text(band=foreground alignment="2" text="销售明细表" border="0" color="16711680" x="14" y="96" height="140" width="3593~tLong(Describe(~"sys_lastcol.x~"))" html.valueishtml="0"  name=report_title visible="1"  font.face="宋体" font.height="-20" font.weight="700"  font.family="0" font.pitch="2" font.charset="134" background.mode="2" background.color="33554431" )
+compute(band=foreground alignment="1" expression="~"打印日期：~"+String(Today(),~"yyyy-mm-dd~")"border="0" color="33554432" x="2761" y="260" height="56" width="809" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="2" text="广州市XX公司" border="0" color="16711680" x="1413" y="20" height="56" width="869" html.valueishtml="0"  name=t_3 visible="1"  font.face="宋体" font.height="-9" font.weight="400"  font.family="0" font.pitch="2" font.charset="134" background.mode="2" background.color="33554431" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

@@ -1,0 +1,62 @@
+﻿$PBExportHeader$d_oc_usr_compradas_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=416 color="536870912" )
+summary(height=92 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(6) updatewhereclause=yes name=cod_usr dbname="usuario.cod_usr" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="nombre" )
+ column=(type=number updatewhereclause=yes name=tip_cam dbname="tip_cam" )
+ column=(type=number updatewhereclause=yes name=imp_dol dbname="imp_dol" )
+ retrieve="  SELECT U.COD_USR,
+         MAX(U.NOMBRE) as nombre,
+			avg(C.VTA_DOL_PROM) as tip_cam,   
+			SUM(CASE WHEN AMP.COD_MONEDA = :as_mon_dol THEN 
+                  NVL(AMP.CANT_PROCESADA,0) * (NVL(AMP.PRECIO_UNIT,0) - NVL(AMP.DECUENTO,0))
+             ElSE NVL(AMP.CANT_PROCESADA,0) * (NVL(AMP.PRECIO_UNIT,0) - NVL(AMP.DECUENTO,0)) / NVL(C.VTA_DOL_PROM,1) END) as imp_dol
+    FROM ARTICULO_MOV_PROY AMP,   
+         ORDEN_COMPRA OC,   
+         USUARIO U,   
+         ARTICULO A,   
+         CALENDARIO C  
+   WHERE ( OC.COD_USR = U.COD_USR ) and  
+         ( AMP.NRO_DOC = OC.NRO_OC ) and  
+         ( AMP.COD_ORIGEN = OC.COD_ORIGEN ) and  
+         ( A.COD_ART = AMP.COD_ART ) and  
+         ( TRUNC(AMP.FEC_REGISTRO) = C.FECHA(+)) and  
+         ( ( AMP.TIPO_DOC = :as_doc_oc ) AND  
+         ( AMP.FLAG_ESTADO <> '0' ) AND
+         ( AMP.CANT_PROCESADA > 0 ) AND  
+         ( trunc(AMP.FEC_REGISTRO) between :ad_inicial and :ad_final ) AND  
+         ( AMP.COD_ORIGEN in ( :as_origen ) ) )  
+GROUP BY U.COD_USR
+ORDER BY 4 DESC   
+" retrieve.asneeded=yes arguments=(("as_doc_oc", string),("as_mon_dol", string),("ad_inicial", date),("ad_final", date),("as_origen", stringlist)) )
+bitmap(band=header filename="gs_logo" x="18" y="12" height="172" width="389" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="" border="0" color="0" x="18" y="200" height="56" width="389" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="18" y="272" height="56" width="384" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cod Prov" border="2" color="33554432" x="9" y="348" height="56" width="215" html.valueishtml="0"  name=proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nombre" border="2" color="33554432" x="229" y="348" height="56" width="1861" html.valueishtml="0"  name=nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="COMPRAS X COMPRADOR" border="1" color="0" x="745" y="44" height="76" width="1257" html.valueishtml="0"  name=t_2 visible="1"  font.face="Century Gothic" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="745" y="172" height="56" width="1257" html.valueishtml="0"  name=t_subtitulo visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Importe US$" border="2" color="33554432" x="2094" y="348" height="56" width="329" html.valueishtml="0"  name=imp_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tipo Cam" border="2" color="33554432" x="2427" y="348" height="56" width="256" html.valueishtml="0"  name=tip_cam_prom_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="%" border="2" color="33554432" x="2688" y="348" height="56" width="197" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="% Ac" border="2" color="33554432" x="2889" y="348" height="56" width="197" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="0" x="2807" y="100" height="56" width="242" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' de ' + pageCount()"border="0" color="0" x="2606" y="20" height="56" width="443" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="2533" y="180" height="56" width="517" format="dd/mm/yyyy   hh:mm:ss" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="215" y="4" height="56" width="1577" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="2098" y="4" height="56" width="329" format="#,##0.00" html.valueishtml="0"  name=imp_dol pointer="\Source\Cur\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="33554432" x="2446" y="4" height="56" width="229" format="#0.0000" html.valueishtml="0"  name=tip_cam visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" imp_dol * 100 /  total_dol "border="0" color="33554432" x="2702" y="4" height="56" width="183" format="##0.00" html.valueishtml="0"  name=porcentaje visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="cumulativeSum(  porcentaje  for all )"border="0" color="0" x="2921" y="8" height="56" width="165" format="##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="8" height="56" width="192" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(imp_dol for all)"border="0" color="33554432" x="2098" y="32" height="56" width="329" format="#,##0.00" html.valueishtml="0"  name=total_dol visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=summary x1="2098" y1="12" x2="2427" y2="12"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

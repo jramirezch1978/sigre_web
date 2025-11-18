@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_call_calendar.srf
+$PBExportComments$Muestra un Calendario para seleccionar una fecha
+global type f_call_calendar from function_object
+end type
+
+forward prototypes
+global function integer f_call_calendar (ref datawindow a_dw, string a_col_name, string a_col_type, long a_row)
+end prototypes
+
+global function integer f_call_calendar (ref datawindow a_dw, string a_col_name, string a_col_type, long a_row);String ls
+
+IF a_row <= 0 THEN RETURN -2 // return if no row is selected
+
+IF a_col_type <> 'datetime' AND a_col_type <> 'date' THEN RETURN -1
+
+ls = a_col_name
+a_dw.setcolumn(ls) //to set focus to the column if necessary
+a_dw.AcceptText()  // pushes edits into the primary buffer
+str_calendar lstr_cal  // create a structure (included in the calendar .pbl)
+lstr_cal.active_datawindow = a_dw
+lstr_cal.active_column = a_col_name
+lstr_cal.active_row = a_row
+openwithparm(w_pb_calendar,lstr_cal)
+a_dw.Accepttext()
+
+RETURN 1
+
+end function
+

@@ -1,0 +1,35 @@
+﻿$PBExportHeader$f_numeracion_doc.srf
+global type f_numeracion_doc from function_object
+end type
+
+forward prototypes
+global function long f_numeracion_doc (string as_tipo_doc)
+end prototypes
+
+global function long f_numeracion_doc (string as_tipo_doc);Long ls_numero
+
+SELECT ULTIMO_NUMERO
+INTO   :ls_numero
+FROM   NUM_DOC_TIPO N
+WHERE  TIPO_DOC =:as_tipo_doc 
+FOR UPDATE;
+
+IF isnull(ls_numero) or ls_numero = 0 THEN
+   Messagebox('FUNCION NUMERACION','Verifique si se tiene numero asignado')
+	return 0
+END IF	
+
+UPDATE NUM_DOC_TIPO
+SET    ULTIMO_NUMERO =: ls_numero + 1
+WHERE  TIPO_DOC =:as_tipo_doc;
+
+If sqlca.sqlcode = -1 Then
+	Messagebox('ERROR FUNCION NUMERACION',sqlca.sqlerrtext)
+	ROLLBACK;
+ELSE
+	COMMIT;
+End If	
+
+return ls_numero
+end function
+

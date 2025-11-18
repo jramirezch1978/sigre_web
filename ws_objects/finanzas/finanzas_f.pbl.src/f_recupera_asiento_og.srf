@@ -1,0 +1,43 @@
+﻿$PBExportHeader$f_recupera_asiento_og.srf
+global type f_recupera_asiento_og from function_object
+end type
+
+forward prototypes
+global function boolean f_recupera_asiento_og (long al_nro_reg_cb, string as_tipo_doc, string as_nro_doc, string as_cod_relacion, ref string as_cnta_cntbl, ref string as_det_glosa, ref string as_flag_dh, ref string as_cencos, ref string as_ctabco, ref decimal adc_saldo_sol, ref decimal adc_saldo_dol, ref decimal adc_tasa_cambio)
+end prototypes
+
+global function boolean f_recupera_asiento_og (long al_nro_reg_cb, string as_tipo_doc, string as_nro_doc, string as_cod_relacion, ref string as_cnta_cntbl, ref string as_det_glosa, ref string as_flag_dh, ref string as_cencos, ref string as_ctabco, ref decimal adc_saldo_sol, ref decimal adc_saldo_dol, ref decimal adc_tasa_cambio);Boolean lb_ret = TRUE
+
+
+SELECT cad.cnta_ctbl    ,cad.det_glosa    ,
+		 decode(cad.flag_debhab,'D','H','D') as flag_debhab ,   
+       cad.cencos       ,cad.cod_ctabco   ,cad.imp_movsol ,
+		 cad.imp_movdol		,ca.tasa_cambio
+  INTO :as_cnta_cntbl,:as_det_glosa,:as_flag_dh   ,
+  		 :as_cencos		,:as_ctabco   ,:adc_saldo_sol,
+		 :adc_saldo_dol,:adc_tasa_cambio		 
+  FROM cntbl_asiento          ca ,
+       cntbl_asiento_det 		cad    
+
+ WHERE ((ca.origen        = cad.origen       )  AND
+        (ca.ano           = cad.ano          )  AND
+        (ca.mes           = cad.mes          )  AND
+        (ca.nro_libro     = cad.nro_libro    )  AND
+        (ca.nro_asiento   = cad.nro_asiento  )) AND
+		 ((ca.flag_estado	  <> '0'					)) AND
+		  (ca.nro_libro     IN (select nro_libro from cntbl_libro_grp_det  where lbro_grp in (SELECT LBRO_GRP_CAJA_BANCOS FROM FINPARAM))       )  AND
+       ((cad.tipo_docref1 = :as_tipo_doc     )  AND  
+        (cad.nro_docref1  = :as_nro_doc      )  AND  
+        (cad.cod_relacion = :as_cod_relacion )) ;
+
+
+		  
+IF Isnull(as_cnta_cntbl) OR Trim(as_cnta_cntbl) = '' THEN
+	Messagebox('Aviso','Problemas al Recuperar Asiento Generados por OG en Cartera de pagos Verifique!')
+	lb_ret = FALSE
+END IF
+
+Return lb_ret
+
+end function
+

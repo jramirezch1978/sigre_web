@@ -1,0 +1,112 @@
+﻿$PBExportHeader$d_ap_control_pesca_rmp.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=836 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=number updatewhereclause=yes name=semana dbname="semana" )
+ column=(type=datetime updatewhereclause=yes name=inicio_descarga dbname="ap_pd_descarga_det.inicio_descarga" )
+ column=(type=char(50) updatewhereclause=yes name=tg_naves_nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=char(12) updatewhereclause=yes name=matricula dbname="tg_naves.matricula" )
+ column=(type=decimal(4) updatewhereclause=yes name=peso_estimado dbname="ap_pd_descarga_det.peso_estimado" )
+ column=(type=number updatewhereclause=yes name=est_vs_real dbname="est_vs_real" )
+ column=(type=number updatewhereclause=yes name=porc_var dbname="porc_var" )
+ column=(type=char(20) updatewhereclause=yes name=ticket dbname="ap_pd_descarga_det.ticket" )
+ column=(type=decimal(4) updatewhereclause=yes name=peso_venta dbname="ap_guia_recepcion_det.peso_venta" )
+ column=(type=char(0) updatewhereclause=yes name=facturacion dbname="facturacion" )
+ column=(type=char(0) updatewhereclause=yes name=descart dbname="descart" )
+ column=(type=char(0) updatewhereclause=yes name=ing_prod dbname="ing_prod" )
+ column=(type=char(0) updatewhereclause=yes name=difere dbname="difere" )
+ column=(type=char(0) updatewhereclause=yes name=observa dbname="observa" )
+ retrieve="SELECT USF_AP_SEMANA(trunc(pdd.inicio_descarga)) AS SEMANA,
+       PDD.INICIO_DESCARGA,
+       N.NOMB_NAVE,
+		 N.MATRICULA,
+       PDD.PESO_ESTIMADO,
+       (GRD.PESO_VENTA - PDD.PESO_ESTIMADO) AS EST_VS_REAL,
+       DECODE(PDD.PESO_ESTIMADO,0,0,ROUND(((GRD.PESO_VENTA - PDD.PESO_ESTIMADO)/ PDD.PESO_ESTIMADO),2)) AS PORC_VAR,
+       PDD.NRO_TICKET  AS TICKET,
+       GRD.PESO_VENTA,
+       '' AS FACTURACION,
+       '' AS DESCART,
+       '' AS ING_PROD,
+       '' AS DIFERE ,
+       '' AS OBSERVA
+
+FROM  AP_PD_DESCARGA_DET      PDD,
+      TG_NAVES                N  ,
+      AP_GUIA_RECEPCION_DET   GRD,
+      AP_GUIA_RECEPCION       GC
+
+WHERE PDD.PROVEEDOR                         = N.PROVEEDOR
+ AND  PDD.NRO_PARTE                         = GRD.NRO_PARTE
+ AND  PDD.ITEM                              = GRD.ITEM_PARTE
+ AND  GC.COD_GUIA_REC                       = GRD.COD_GUIA_REC
+ AND  TRUNC(pdd.inicio_descarga) BETWEEN TRUNC(:ad_fecha_ini) AND TRUNC(:ad_fecha_fin)
+ AND  PDD.especie     LIKE :as_cod_especie     /*Para indicar la especies */
+ AND  INSTR(:as_cod_origen, gc.origen) > 0   	/*Para indicar el origen   */
+
+" arguments=(("ad_fecha_ini", date),("ad_fecha_fin", date),("as_cod_especie", string),("as_cod_origen", string))  sort="semana A inicio_descarga A " )
+group(level=1 header.height=0 trailer.height=76 by=("semana" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="46" y="28" height="268" width="549" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="CONTROL DE PESOS EN RECEPCION DE MATERIA PRIMA" border="0" color="0" x="690" y="124" height="72" width="1929" html.valueishtml="0"  name=titulo_1 visible="1"  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="978" y="212" height="64" width="1358" html.valueishtml="0"  name=rango_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="3904" y="120" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="4005" y="40" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="4160" y="208" height="56" width="261" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nro
+Sem." border="2" color="16777215" x="9" y="704" height="112" width="146" html.valueishtml="0"  name=semana_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Inicio
+Descarga" border="2" color="16777215" x="160" y="704" height="112" width="247" html.valueishtml="0"  name=ap_pd_descarga_det_inicio_descarga_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Peso
+Estimado" border="2" color="16777215" x="1609" y="704" height="112" width="247" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Estimado
+Vs Real" border="2" color="16777215" x="1861" y="704" height="112" width="247" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Porc.
+Variacion" border="2" color="16777215" x="2112" y="704" height="112" width="247" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Peso (TM)" border="2" color="16777215" x="2363" y="704" height="52" width="1266" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Ticket/Balan." border="2" color="16777215" x="2363" y="760" height="56" width="338" html.valueishtml="0"  name=ticket_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="PLLA Comp MP" border="2" color="16777215" x="2706" y="760" height="56" width="402" html.valueishtml="0"  name=ap_guia_recepcion_det_peso_venta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Facturacion" border="2" color="16777215" x="3113" y="760" height="56" width="306" html.valueishtml="0"  name=facturacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Descart" border="2" color="16777215" x="3424" y="760" height="56" width="206" html.valueishtml="0"  name=descart_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="TM. Ingr.
+Producc" border="2" color="16777215" x="3634" y="704" height="112" width="279" html.valueishtml="0"  name=ing_prod_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Difere
+" border="2" color="16777215" x="3918" y="704" height="112" width="183" html.valueishtml="0"  name=difere_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Observa
+" border="2" color="16777215" x="4105" y="704" height="112" width="494" html.valueishtml="0"  name=observa_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nomb 
+de Embarcación" border="2" color="16777215" x="411" y="704" height="112" width="887" html.valueishtml="0"  name=tg_naves_nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Matricula
+Nº" border="2" color="16777215" x="1303" y="704" height="112" width="302" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="56" width="146" format="[general]" html.valueishtml="0"  name=semana visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="33554432" x="2395" y="4" height="56" width="293" format="[general]" html.valueishtml="0"  name=ticket visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="2706" y="4" height="56" width="402" format="#,##0.000" html.valueishtml="0"  name=peso_venta visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="33554432" x="3113" y="4" height="56" width="306" format="[general]" html.valueishtml="0"  name=facturacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="3424" y="4" height="56" width="206" format="[general]" html.valueishtml="0"  name=descart visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="3634" y="4" height="56" width="279" format="[general]" html.valueishtml="0"  name=ing_prod visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="33554432" x="3918" y="4" height="56" width="183" format="[general]" html.valueishtml="0"  name=difere visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="33554432" x="4105" y="4" height="56" width="494" format="[general]" html.valueishtml="0"  name=observa visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="1861" y="4" height="56" width="247" format="#,##0.000" html.valueishtml="0"  name=est_vs_real visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="2112" y="4" height="56" width="247" format="##0.00" html.valueishtml="0"  name=porc_var visible="1" editmask.mask="##0.00%" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="160" y="4" height="56" width="247" format="[shortdate] [time]" html.valueishtml="0"  name=inicio_descarga visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="430" y="4" height="56" width="859" format="[general]" html.valueishtml="0"  name=tg_naves_nomb_nave visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="1609" y="4" height="56" width="247" format="#,##0.000" html.valueishtml="0"  name=peso_estimado visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="1317" y="4" height="56" width="279" format="[general]" html.valueishtml="0"  name=matricula visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(peso_venta for group 1)"border="2" color="33554432" x="2706" y="4" height="64" width="402" format="#,##0.000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="" border="2" color="33554432" x="3113" y="4" height="64" width="306" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="" border="2" color="33554432" x="3424" y="4" height="64" width="206" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="" border="2" color="33554432" x="3634" y="4" height="64" width="279" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="" border="2" color="33554432" x="3918" y="4" height="64" width="183" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="" border="2" color="33554432" x="4105" y="4" height="64" width="494" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(peso_estimado for group 1)"border="2" color="33554432" x="1609" y="4" height="64" width="247" format="#,##0.000" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="" border="2" color="33554432" x="1861" y="4" height="64" width="247" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="" border="2" color="33554432" x="2112" y="4" height="64" width="247" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="" border="2" color="33554432" x="2363" y="4" height="64" width="338" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="0" text="~t'semana Nro :  ' +  semana " border="2" color="33554432" x="14" y="4" height="64" width="1591" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

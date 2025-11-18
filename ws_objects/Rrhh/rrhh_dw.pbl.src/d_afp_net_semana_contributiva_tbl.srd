@@ -1,0 +1,123 @@
+﻿$PBExportHeader$d_afp_net_semana_contributiva_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=80 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(25) updatewhereclause=yes name=datos dbname="datos" )
+ retrieve="select tipo_doc_afpnet 										||
+		 lpad(trim(nro_doc_ident_rtps), 20, ' ') 		|| 
+		 lpad(trim(to_char(semana, '00')), 2, '0') 	|| 
+		 '1' 														||
+		 cargo  as datos
+from (	
+		SELECT distinct
+				 r.tipo_doc_afpnet,
+				 m.nro_doc_ident_rtps,
+				 fl.semana,
+				 max(case
+					when fl.cargo_tripulante = '01' then
+					  '1' -- patron
+					when fl.cargo_tripulante = '02' then
+					  '2' -- segundo patron  
+					when fl.cargo_tripulante = '03' then
+					  '3' -- motorista
+					when fl.cargo_tripulante = '04' then
+					  '4' -- segundo motorista
+					when fl.cargo_tripulante = '05' then
+					  '5' -- segundo motorista  
+					else '6'
+				 end) as cargo
+		  from (select fl1.tripulante, trunc(fl1.fecha) as fecha, max(fl1.cargo_tripulante) as cargo_tripulante,
+							(select trim(to_char(s.semana, '00'))
+								from semanas s
+							  where trunc(fl1.fecha) between trunc(s.fecha_inicio) and trunc(s.fecha_fin)) as semana
+					 from fl_asistencia fl1
+					group by fl1.tripulante, trunc(fl1.fecha), fl1.fecha) fl,
+				 maestro       m,
+				 rrhh_documento_identidad_rtps r,
+				 (select cod_trabajador, max(cod_afp) as cod_afp
+						  from (select distinct m1.cod_trabajador, m1.cod_afp
+									 from calculo   c1,
+											maestro   m1
+									where c1.cod_trabajador  = m1.cod_trabajador
+									  and to_char(c1.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+									  and m1.cod_afp is not null
+								  union
+								  select distinct hc.cod_trabajador, hc.cod_afp
+									 from historico_calculo hc
+									where to_char(hc.FEC_CALC_PLAN, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+									  and hc.cod_afp is not null
+								  union
+								  select distinct a.cod_trabajador, m1.cod_afp
+									 from liquidacion_benef a,
+											liquidacion_benef_det b,
+											maestro               m1
+									where a.nro_liquidacion = b.nro_liquidacion
+									  and a.cod_trabajador = m1.cod_trabajador
+									  and to_Char(a.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+									  and a.nro_liquidacion in (select nro_liquidacion from liquidacion_benef_det where flag_titulo_lbs = '5')
+									  and b.flag_titulo_lbs = '4'
+									  and a.flag_estado   <> '0'
+									  and m1.cod_afp  is not null) s
+						 group by cod_trabajador) tt
+		 where fl.tripulante 									= m.cod_trabajador
+    		and fl.tripulante										= tt.cod_trabajador
+			and m.cod_trabajador									in (select distinct c1.cod_trabajador 
+																			   from calculo c1 
+																			  where to_char(c1.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+																			 union
+																			 select distinct c2.cod_trabajador 
+																			   from historico_calculo c2 
+																			  where to_char(c2.FEC_CALC_PLAN, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+																			 union
+																			 select cod_trabajador
+																			   from liquidacion_benef
+																			  where to_Char(fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00')))
+			and m.tipo_doc_ident_rtps 							= r.cod_doc_identidad
+			and trunc(to_char(fl.fecha, 'yyyy')) 			= :an_year
+		   and trunc(to_char(fl.fecha, 'mm')) 				= :an_mes
+			and nvl(m.flag_pensionista, '0') = '0'
+		   AND INSTR(:as_cod_origen, M.COD_ORIGEN) 		> 0 
+		   and INSTR(:as_tipo_trabaj, M.tipo_trabajador) > 0 
+			and m.nro_afp_trabaj is not null 
+			and ((select NVL(sum(c.imp_soles),0)
+									 from calculo c,
+											grupo_calculo_det  gcd
+									where c.concep          = gcd.concepto_calc
+									  and c.cod_trabajador  = m.cod_trabajador
+									  and gcd.GRUPO_CALCULO = (select concep_calculo_afp from rrhhparam_cconcep where reckey = '1')
+									  and to_char(c.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))) +
+							(select NVL(sum(hc.imp_soles),0)
+									 from historico_calculo hc,
+											grupo_calculo_det  gcd
+									where hc.concep         = gcd.concepto_calc
+									  and hc.cod_trabajador = m.cod_trabajador
+									  and gcd.GRUPO_CALCULO = (select concep_calculo_afp from rrhhparam_cconcep where reckey = '1')
+									  and to_char(hc.FEC_CALC_PLAN, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))) +
+						  (select nvl(sum(b.importe),0)
+							from liquidacion_benef a,
+								 liquidacion_benef_det b
+							where a.nro_liquidacion = b.nro_liquidacion
+							  and to_Char(a.fec_proceso, 'yyyymm') = to_char(:an_year) || trim(to_char(:an_mes, '00'))
+							  and a.nro_liquidacion in (select nro_liquidacion from liquidacion_benef_det where flag_titulo_lbs = '5')
+							  and b.flag_titulo_lbs = '4'
+							  and a.flag_estado   <> '0'
+							  and a.cod_trabajador = m.cod_trabajador)) > 0
+		group by tipo_doc_afpnet,m.nro_doc_ident_rtps, fl.semana
+		order by tipo_doc_afpnet,m.nro_doc_ident_rtps, semana
+	)s
+" arguments=(("as_cod_origen", string),("as_tipo_trabaj", string),("an_year", number),("an_mes", number)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="0" y="0" height="72" width="3045" format="[general]" html.valueishtml="0"  name=datos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

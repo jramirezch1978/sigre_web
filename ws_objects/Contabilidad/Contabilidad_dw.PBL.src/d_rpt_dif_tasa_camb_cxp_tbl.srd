@@ -1,0 +1,100 @@
+﻿$PBExportHeader$d_rpt_dif_tasa_camb_cxp_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=416 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntas_pagar.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="cntas_pagar.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="cntas_pagar.nro_doc" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="fecha" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="cntas_pagar.origen" )
+ column=(type=decimal(0) updatewhereclause=yes name=ano dbname="cntas_pagar.ano" )
+ column=(type=decimal(0) updatewhereclause=yes name=mes dbname="cntas_pagar.mes" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_libro dbname="cntas_pagar.nro_libro" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_asiento dbname="cntas_pagar.nro_asiento" )
+ column=(type=decimal(3) updatewhereclause=yes name=tc_prov dbname="cntas_pagar.tc_prov" )
+ column=(type=decimal(4) updatewhereclause=yes name=tc_tabl dbname="calendario.tc_tabl" )
+ column=(type=char(10) updatewhereclause=yes name=cntbl_asiento_det_cnta_ctbl dbname="cntbl_asiento_det.cnta_ctbl" )
+ column=(type=char(1) updatewhereclause=yes name=cntbl_asiento_det_flag_debhab dbname="cntbl_asiento_det.flag_debhab" )
+ column=(type=decimal(2) updatewhereclause=yes name=cntbl_asiento_det_imp_movsol dbname="cntbl_asiento_det.imp_movsol" )
+ retrieve="select cp.cod_relacion, 
+		 cp.tipo_doc, 
+		 cp.nro_doc, 
+		 trunc(cp.fecha_emision) as fecha, 
+       cp.cod_moneda, 
+		 cp.origen, 
+		 cp.ano, 
+		 cp.mes, 
+		 cp.nro_libro, 
+		 cp.nro_asiento, 
+       cp.tasa_cambio as tc_prov, 
+		 c.vta_dol_prom as tc_tabl, 
+       cad.cnta_ctbl, 
+		 cad.flag_debhab, 
+		 cad.imp_movsol
+  from cntas_pagar cp, calendario c, cntbl_asiento ca, cntbl_asiento_det cad
+ where ( trunc(cp.fecha_emision)=trunc(c.fecha) ) and 
+       ( cp.flag_estado<>'0' and 
+         cp.ano=:an_ano and 
+         cp.mes>=:an_mes_ini and 
+         cp.mes<=:an_mes_fin and 
+         cp.cod_moneda=:as_moneda and 
+			cp.nro_libro = :an_nro_libro ) and 
+      (round(cp.tasa_cambio,3) <> round(c.vta_dol_prom,3)) and 
+      (ca.origen=cad.origen and 
+       ca.ano=cad.ano and 
+       ca.mes=cad.mes and 
+       ca.nro_libro=cad.nro_libro and 
+       ca.nro_asiento=cad.nro_asiento and 
+       ca.flag_estado<>'0' and 
+       cad.flag_gen_aut is null) and 
+      (cp.origen=ca.origen and 
+       cp.ano=ca.ano and 
+       cp.mes=ca.mes and 
+       cp.nro_libro=ca.nro_libro and 
+       cp.nro_asiento=ca.nro_asiento ) 
+order by cp.ano, cp.mes, cp.nro_libro, cp.nro_asiento, cp.origen, cp.cod_relacion, 
+		 cp.tipo_doc, cp.nro_doc" arguments=(("an_ano", number),("an_mes_ini", number),("an_mes_fin", number),("as_moneda", string),("an_nro_libro", number)) )
+bitmap(band=header filename="" x="14" y="8" height="176" width="274" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="" border="0" color="0" x="14" y="200" height="40" width="274" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="14" y="256" height="40" width="274" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="CodRel" border="2" color="33554432" x="23" y="352" height="56" width="238" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Voucher" border="2" color="33554432" x="1326" y="352" height="56" width="750" html.valueishtml="0"  name=nro_asiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="33554432" x="407" y="352" height="56" width="302" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Fec.Emision" border="2" color="33554432" x="722" y="352" height="56" width="274" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Mon" border="2" color="33554432" x="1010" y="352" height="56" width="96" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="TC prov" border="2" color="33554432" x="1120" y="352" height="56" width="192" html.valueishtml="0"  name=tc_prov_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="TC tabl" border="2" color="33554432" x="2089" y="352" height="56" width="192" html.valueishtml="0"  name=tc_tabl_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="TD" border="2" color="33554432" x="274" y="352" height="56" width="119" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="D/H" border="2" color="33554432" x="2592" y="352" height="56" width="82" html.valueishtml="0"  name=cntbl_asiento_det_flag_debhab_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Cnta Ctbl" border="2" color="33554432" x="2295" y="352" height="56" width="283" html.valueishtml="0"  name=cntbl_asiento_det_cnta_ctbl_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Soles" border="2" color="33554432" x="2688" y="352" height="56" width="270" html.valueishtml="0"  name=cntbl_asiento_det_imp_movsol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2674" y="56" height="40" width="283" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="2674" y="184" height="40" width="283" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="2674" y="120" height="40" width="283" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cntas x Pagar en dolares con variación de tipo de cambio" border="0" color="0" x="613" y="36" height="64" width="1742" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="613" y="160" height="64" width="1742" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="23" y="4" height="56" width="238" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="33554432" x="1120" y="4" height="56" width="192" format="###.000" html.valueishtml="0"  name=tc_prov visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="33554432" x="2085" y="4" height="56" width="192" format="###.000" html.valueishtml="0"  name=tc_tabl visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="33554432" x="1330" y="4" height="56" width="78" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="33554432" x="1422" y="4" height="56" width="110" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="0" color="33554432" x="1792" y="4" height="56" width="283" format="[general]" html.valueishtml="0"  name=nro_asiento visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="33554432" x="1545" y="4" height="56" width="96" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="0" color="33554432" x="1655" y="4" height="56" width="123" format="[general]" html.valueishtml="0"  name=nro_libro visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="407" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="722" y="4" height="56" width="274" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="1010" y="4" height="56" width="96" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="274" y="4" height="56" width="119" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="0" color="33554432" x="2592" y="4" height="56" width="82" format="[general]" html.valueishtml="0"  name=cntbl_asiento_det_flag_debhab visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="33554432" x="2295" y="4" height="56" width="283" format="[general]" html.valueishtml="0"  name=cntbl_asiento_det_cnta_ctbl visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="0" color="33554432" x="2688" y="4" height="56" width="270" format="###,###.00" html.valueishtml="0"  name=cntbl_asiento_det_imp_movsol visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="ano	mes	nro_libro	nro_asiento	origen	cod_relacion	tipo_doc	nro_doc")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

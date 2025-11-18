@@ -1,0 +1,17 @@
+﻿$PBExportHeader$d_sel_ejecucion_x_ccosto.srd
+$PBExportComments$Muestra los centros de costos tomados de la ejecucion
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cencos dbname="presupuesto_ejec.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ retrieve="PBSELECT( VERSION(400) DISTINCT ()TABLE(NAME=~"presupuesto_ejec~" )  TABLE(NAME=~"centros_costo~" ) COLUMN(NAME=~"presupuesto_ejec.cencos~") COLUMN(NAME=~"centros_costo.desc_cencos~")    JOIN (LEFT=~"presupuesto_ejec.cencos~"    OP =~"=~"RIGHT=~"centros_costo.cencos~" )WHERE(    EXP1 =~"~~~"PRESUPUESTO_EJEC~~~".~~~"FECHA~~~"~"   OP =~">=~"    EXP2 =~":ad_desde~"    LOGIC =~"And~" ) WHERE(    EXP1 =~"~~~"PRESUPUESTO_EJEC~~~".~~~"FECHA~~~"~"   OP =~"<=~"    EXP2 =~":ad_hasta~" ) ) ARG(NAME = ~"ad_desde~" TYPE = date)  ARG(NAME = ~"ad_hasta~" TYPE = date) " arguments=(("ad_desde", date),("ad_hasta", date)) )
+text(band=header alignment="2" text="Cencos" border="0" color="0" x="9" y="8" height="56" width="302"  name=cencos_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="5" y="4" height="60" width="302" format="[general]"  name=cencos edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripcion" border="0" color="0" x="311" y="8" height="56" width="1179"  name=t_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="311" y="4" height="60" width="1179" format="[general]"  name=centros_costo_desc_cencos edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

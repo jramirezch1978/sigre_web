@@ -1,0 +1,44 @@
+﻿$PBExportHeader$f_insert_motivo.srf
+global type f_insert_motivo from function_object
+end type
+
+forward prototypes
+global function string f_insert_motivo (string as_tipo_doc, long al_numero, string as_descripcion)
+end prototypes
+
+global function string f_insert_motivo (string as_tipo_doc, long al_numero, string as_descripcion);Long ll_lenght, ll_digito, ll_count
+String ls_motivo = '' 
+Int i
+
+//******* LONGITUD DE LA COLUMNA MOTIVO **********//
+SELECT data_length 
+INTO   :ll_lenght
+FROM   user_tab_columns  
+WHERE  table_name = 'MOTIVO_NOTA' AND column_name = 'MOTIVO';
+
+ll_digito = ll_lenght - LEN(as_tipo_doc) - LEN(string(al_numero)) 
+
+IF ll_digito > 0 THEN
+	FOR i=0 TO ll_digito - 1  
+		ls_motivo = '0'+ls_motivo
+	NEXT 	
+	ls_motivo = as_tipo_doc+ls_motivo+string(al_numero)
+	
+	SELECT COUNT(MN.MOTIVO)
+	INTO   :ll_count
+	FROM   MOTIVO_NOTA MN 
+	WHERE  MN.MOTIVO =:ls_motivo;
+	
+	IF ll_count = 0 THEN
+		
+		INSERT INTO MOTIVO_NOTA (MOTIVO , DESCRIPCION )
+		VALUES ( :ls_motivo, :as_descripcion );
+		COMMIT;
+		
+	END IF	
+	
+END IF
+
+RETURN ls_motivo
+end function
+

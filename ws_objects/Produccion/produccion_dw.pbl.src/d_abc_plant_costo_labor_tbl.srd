@@ -1,0 +1,27 @@
+﻿$PBExportHeader$d_abc_plant_costo_labor_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=120 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cod_plantilla dbname="plant_costo_labor.cod_plantilla" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_item dbname="plant_costo_labor.nro_item" )
+ column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_labor dbname="plant_costo_labor.cod_labor" )
+ column=(type=char(40) updatewhereclause=yes name=desc_labor dbname="labor.desc_labor" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_incluir_excluir dbname="plant_costo_labor.flag_incluir_excluir" values="Incluir	I/Excluir	E/" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"plant_costo_labor~" )  TABLE(NAME=~"labor~" ) COLUMN(NAME=~"plant_costo_labor.cod_plantilla~") COLUMN(NAME=~"plant_costo_labor.nro_item~") COLUMN(NAME=~"plant_costo_labor.cod_labor~") COLUMN(NAME=~"labor.desc_labor~") COLUMN(NAME=~"plant_costo_labor.flag_incluir_excluir~")    JOIN (LEFT=~"labor.cod_labor~"    OP =~"=~"RIGHT=~"plant_costo_labor.cod_labor~" )WHERE(    EXP1 =~"~~~"PLANT_COSTO_LABOR~~~".~~~"COD_PLANTILLA~~~"~"   OP =~"=~"    EXP2 =~":as_plantilla~"    LOGIC =~"and~" ) WHERE(    EXP1 =~"~~~"PLANT_COSTO_LABOR~~~".~~~"NRO_ITEM~~~"~"   OP =~"=~"    EXP2 =~":an_item~" ) ) ARG(NAME = ~"as_plantilla~" TYPE = string)  ARG(NAME = ~"an_item~" TYPE = number) " update="PLANT_COSTO_LABOR" updatewhere=0 updatekeyinplace=yes arguments=(("as_plantilla", string),("an_item", number)) )
+text(band=header alignment="2" text="Código
+Labor" border="2" color="0" x="9" y="4" height="112" width="283" html.valueishtml="0"  name=cod_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Descripción
+Labor" border="2" color="0" x="297" y="4" height="112" width="1125" html.valueishtml="0"  name=labor_desc_labor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Incluir o
+Excluir" border="2" color="0" x="1426" y="4" height="112" width="329" html.valueishtml="0"  name=flag_incluir_excluir_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=3 alignment="0" tabsequence=10 border="2" color="33554432" x="9" y="4" height="64" width="283" format="[general]" html.valueishtml="0"  name=cod_labor pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="8388608" x="297" y="4" height="64" width="1125" format="[general]" html.valueishtml="0"  name=desc_labor visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=5 alignment="0" tabsequence=20 border="2" color="33554432" x="1426" y="4" height="64" width="329" format="[general]" html.valueishtml="0"  name=flag_incluir_excluir visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.nilisnull=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,63 @@
+﻿$PBExportHeader$f_generacion_glosa_financiamiento.srf
+global type f_generacion_glosa_financiamiento from function_object
+end type
+
+forward prototypes
+global subroutine f_generacion_glosa_financiamiento (datawindow adw_1, datawindow adw_2, datastore ads_1, long al_row_det, string as_cnta_cntbl, string as_desc_cnta)
+end prototypes
+
+global subroutine f_generacion_glosa_financiamiento (datawindow adw_1, datawindow adw_2, datastore ads_1, long al_row_det, string as_cnta_cntbl, string as_desc_cnta);/****************************************************/
+/*LLenado de Datastore en Caso de Liquidación       */
+/* adw_1 = Cabecera de Financiamiento				    */
+/* adw_2 = Detalle  de Financiamiento					 */
+/* ads_1 = Datastore de Datos Para Glosa				 */
+/* al_row_det = Linea de Detalle de cntas_cobrar	 */
+/****************************************************/
+Long   ll_ins_ds
+
+ads_1.Reset()
+
+ll_ins_ds = ads_1.InsertRow(0)
+//--Cabecera
+ads_1.Object.origen		 	  [ll_ins_ds] = adw_1.Object.origen				[1]
+ads_1.Object.num_registro	  [ll_ins_ds] = adw_1.Object.num_registro		[1]
+ads_1.Object.fecha_emision	  [ll_ins_ds] = adw_1.Object.fecha_emision	[1]
+ads_1.Object.nro_doc_fin	  [ll_ins_ds] = adw_1.Object.nro_doc			[1]
+ads_1.Object.cod_relacion	  [ll_ins_ds] = adw_1.Object.cod_relacion		[1]
+ads_1.Object.nom_proveedor	  [ll_ins_ds] = adw_1.Object.nom_proveedor	[1]
+ads_1.Object.cod_aval		  [ll_ins_ds] = adw_1.Object.cod_aval			[1]
+ads_1.Object.nom_aval		  [ll_ins_ds] = adw_1.Object.nom_aval			[1]
+ads_1.Object.cod_ctabco		  [ll_ins_ds] = adw_1.Object.cod_ctabco		[1]
+ads_1.Object.cod_moneda		  [ll_ins_ds] = adw_1.Object.cod_moneda		[1]
+ads_1.Object.tasa_cambio	  [ll_ins_ds] = adw_1.Object.tasa_cambio		[1]
+ads_1.Object.imp_capital	  [ll_ins_ds] = adw_1.Object.imp_capital		[1]
+ads_1.Object.imp_interes	  [ll_ins_ds] = adw_1.Object.imp_interes		[1]
+ads_1.Object.flag_interes	  [ll_ins_ds] = adw_1.Object.flag_interes		[1]
+ads_1.Object.doc_garantia	  [ll_ins_ds] = adw_1.Object.doc_garantia		[1]
+ads_1.Object.nro_libro		  [ll_ins_ds] = adw_1.Object.nro_libro			[1]
+ads_1.Object.ano				  [ll_ins_ds] = adw_1.Object.ano					[1]
+ads_1.Object.mes		  		  [ll_ins_ds] = adw_1.Object.mes					[1]
+ads_1.Object.nro_asiento     [ll_ins_ds] = adw_1.Object.nro_asiento		[1]
+//--Detalle
+ads_1.Object.num_cuota 			 [ll_ins_ds] = adw_2.object.num_cuota			 [al_row_det]
+ads_1.Object.confin    			 [ll_ins_ds] = adw_2.object.confin				 [al_row_det]
+ads_1.Object.imp_cuota_capital [ll_ins_ds] = adw_2.object.imp_cuota_capital [al_row_det]
+ads_1.Object.tasa_interes		 [ll_ins_ds] = adw_2.object.tasa_interes	    [al_row_det]
+ads_1.Object.flag_tasa_interes [ll_ins_ds] = adw_2.object.flag_tasa_interes [al_row_det]
+ads_1.Object.imp_cuota_interes [ll_ins_ds] = adw_2.object.imp_cuota_interes [al_row_det]
+ads_1.Object.fecha_vcto			 [ll_ins_ds] = adw_2.object.fecha_vcto		 	 [al_row_det]
+ads_1.Object.tipo_impuesto		 [ll_ins_ds] = adw_2.object.tipo_impuesto  	 [al_row_det]
+ads_1.Object.imp_impuesto		 [ll_ins_ds] = adw_2.object.imp_impuesto	 	 [al_row_det]
+ads_1.Object.tipo_doc			 [ll_ins_ds] = adw_2.object.tipo_doc		 	 [al_row_det]
+ads_1.Object.nro_doc				 [ll_ins_ds] = adw_2.object.nro_doc			 	 [al_row_det]
+ads_1.Object.fecha_pago_int	 [ll_ins_ds] =	adw_2.object.fecha_pago_int 	 [al_row_det]
+ads_1.Object.flag_estado		 [ll_ins_ds] = adw_2.object.flag_estado	 	 [al_row_det]	
+ads_1.Object.matriz_cntbl		 [ll_ins_ds] = adw_2.object.matriz_cntbl	 	 [al_row_det]	
+ads_1.Object.signo				 [ll_ins_ds] =	adw_2.object.signo			 	 [al_row_det]
+/**/
+ads_1.Object.cnta_ctbl			 [ll_ins_ds] = as_cnta_cntbl
+ads_1.Object.desc_cnta			 [ll_ins_ds] = Mid(as_desc_cnta,1,60)
+
+
+end subroutine
+

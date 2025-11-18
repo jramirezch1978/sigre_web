@@ -1,0 +1,79 @@
+﻿$PBExportHeader$dw_lista_traslados_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=136 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_movimiento dbname="af_traslado.nro_movimiento" )
+ column=(type=char(10) updatewhereclause=yes name=cod_activo dbname="af_traslado.cod_activo" )
+ column=(type=char(60) updatewhereclause=yes name=descripcion dbname="af_maestro.descripcion" )
+ column=(type=datetime updatewhereclause=yes name=af_traslado_fecha_registro dbname="af_traslado.fecha_registro" )
+ column=(type=char(10) updatewhereclause=yes name=af_traslado_cencos_origen dbname="af_traslado.cencos_origen" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(10) updatewhereclause=yes name=af_traslado_cencos_destino dbname="af_traslado.cencos_destino" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos_1 dbname="centros_costo.desc_cencos" )
+ column=(type=char(6) updatewhereclause=yes name=af_traslado_usr_autorizacion dbname="af_traslado.usr_autorizacion" )
+ column=(type=char(60) updatewhereclause=yes name=usuario_nombre dbname="usuario.nombre" )
+ column=(type=char(6) updatewhereclause=yes name=af_traslado_usr_registra dbname="af_traslado.usr_registra" )
+ column=(type=datetime updatewhereclause=yes name=af_traslado_fecha_movimiento dbname="af_traslado.fecha_movimiento" )
+ column=(type=datetime updatewhereclause=yes name=af_traslado_fecha_autorizacion dbname="af_traslado.fecha_autorizacion" )
+ column=(type=char(1) updatewhereclause=yes name=af_traslado_flag_tipo_destino dbname="af_traslado.flag_tipo_destino" )
+ column=(type=char(1) updatewhereclause=yes name=af_traslado_flag_temporalidad dbname="af_traslado.flag_temporalidad" )
+ column=(type=char(15) updatewhereclause=yes name=af_traslado_nro_doc_fisico dbname="af_traslado.nro_doc_fisico" )
+ column=(type=char(100) updatewhereclause=yes name=af_traslado_obs dbname="af_traslado.obs" )
+ column=(type=char(6) updatewhereclause=yes name=af_traslado_usr_origen dbname="af_traslado.usr_origen" )
+ column=(type=char(60) updatewhereclause=yes name=usuario_nombre dbname="usuario.nombre" )
+ column=(type=char(6) updatewhereclause=yes name=af_traslado_usr_destino dbname="af_traslado.usr_destino" )
+ column=(type=char(60) updatewhereclause=yes name=usuario_nombre dbname="usuario.nombre" )
+ column=(type=char(1) updatewhereclause=yes name=af_traslado_flag_replicacion dbname="af_traslado.flag_replicacion" )
+ retrieve="SELECT  AFT.NRO_MOVIMIENTO,
+        AFT.COD_ACTIVO ,
+        AFM.DESCRIPCION,
+        AFT.FECHA_REGISTRO ,
+        AFT.CENCOS_ORIGEN,
+        CCA.DESC_CENCOS,
+        AFT.CENCOS_DESTINO ,
+        CCB.DESC_CENCOS,
+        AFT.USR_AUTORIZACION ,
+        U.NOMBRE,
+        AFT.USR_REGISTRA ,
+        AFT.FECHA_MOVIMIENTO ,
+        AFT.FECHA_AUTORIZACION ,
+        AFT.FLAG_TIPO_DESTINO ,
+        AFT.FLAG_TEMPORALIDAD ,
+        AFT.NRO_DOC_FISICO ,
+        AFT.OBS ,
+        AFT.USR_ORIGEN,
+        U2.NOMBRE,
+        AFT.USR_DESTINO,
+        U3.NOMBRE,
+        AFT.FLAG_REPLICACION     
+        
+FROM    AF_TRASLADO          AFT,
+        CENTROS_COSTO        CCA,
+        CENTROS_COSTO        CCB,
+        AF_MAESTRO           AFM,
+        USUARIO              U,
+        USUARIO              U2,
+        USUARIO              U3
+
+WHERE   AFT.CENCOS_ORIGEN    = CCA.CENCOS
+   AND  AFT.CENCOS_DESTINO   = CCB.CENCOS
+   AND  AFT.COD_ACTIVO       = AFM.COD_ACTIVO
+   AND  AFT.USR_AUTORIZACION = U.COD_USR  (+)
+   AND  AFT.USR_ORIGEN       = U2.COD_USR (+)
+   AND  AFT.USR_DESTINO      = U3.COD_USR (+)"  sort="nro_movimiento A " )
+text(band=header alignment="2" text="Codigo" border="2" color="33554432" x="343" y="76" height="56" width="302" html.valueishtml="0"  name=cod_activo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="343" y="0" height="68" width="302" format="[general]" html.valueishtml="0"  name=cod_activo visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=0 border="2" color="33554432" x="14" y="0" height="68" width="325" html.valueishtml="0"  name=nro_movimiento visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Nro.
+Movimiento" border="2" color="33554432" x="14" y="16" height="116" width="325" html.valueishtml="0"  name=nro_movimiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Activo" border="2" color="33554432" x="343" y="16" height="56" width="2053" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+text(band=header alignment="2" text="Descripcion" border="2" color="33554432" x="649" y="76" height="56" width="1746" html.valueishtml="0"  name=af_maestro_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="649" y="0" height="68" width="1746" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

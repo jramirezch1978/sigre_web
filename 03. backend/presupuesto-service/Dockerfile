@@ -1,0 +1,6 @@
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY target/presupuesto-service-*.jar app.jar
+EXPOSE 8099
+ENTRYPOINT ["java", "-jar", "app.jar"]
+

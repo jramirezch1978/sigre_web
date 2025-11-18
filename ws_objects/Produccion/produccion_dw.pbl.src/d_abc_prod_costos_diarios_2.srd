@@ -1,0 +1,80 @@
+﻿$PBExportHeader$d_abc_prod_costos_diarios_2.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=3972 color="536870912" )
+table(column=(type=char(12) update=yes updatewhereclause=yes key=yes name=cod_art dbname="prod_costos_diarios.cod_art" )
+ column=(type=char(6) update=yes updatewhereclause=yes key=yes name=almacen dbname="prod_costos_diarios.almacen" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=datetime update=yes updatewhereclause=yes key=yes name=fecha dbname="prod_costos_diarios.fecha" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=moneda dbname="prod_costos_diarios.cod_moneda" )
+ column=(type=char(40) updatewhereclause=yes name=desc_moneda dbname="moneda.descripcion" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cod_plantilla dbname="prod_costos_diarios.cod_plantilla" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=costo_produccion dbname="prod_costos_diarios.costo_produccion" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=costo_contable dbname="prod_costos_diarios.costo_contable" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=valor_venta dbname="prod_costos_diarios.valor_venta" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=unidades_producidas dbname="prod_costos_diarios.unidades_producidas" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=unidades_vendidas dbname="prod_costos_diarios.unidades_vendidas" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(100) updatewhereclause=yes name=observaciones dbname="plantilla_costo.observaciones" )
+ retrieve="SELECT PCD.COD_ART,   
+       PCD.ALMACEN,   
+       AL.DESC_ALMACEN,   
+       PCD.FECHA,   
+       PCD.COD_MONEDA,   
+       M.DESCRIPCION,   
+       PCD.COD_PLANTILLA,   
+       PCD.COSTO_PRODUCCION,   
+       PCD.COSTO_CONTABLE,   
+       PCD.VALOR_VENTA,   
+       PCD.UNIDADES_PRODUCIDAS,   
+       PCD.UNIDADES_VENDIDAS,   
+       A.DESC_ART,   
+       PC.OBSERVACIONES  
+  FROM PROD_COSTOS_DIARIOS PCD,   
+       ALMACEN				   AL,   
+       MONEDA				   M,   
+       ARTICULO			   A,   
+       PLANTILLA_COSTO     PC
+ WHERE PCD.cod_plantilla 	= PC.cod_plantilla (+)
+   and AL.ALMACEN 			= PCD.ALMACEN 
+   and PCD.cod_moneda		= M.cod_moneda (+) 
+	and A.COD_ART 	= PCD.COD_ART 
+   and PCD.COD_ART 			like :as_articulo 
+   AND PCD.ALMACEN 			like :as_almacen     
+ORDER BY PCD.FECHA, AL.ALMACEN, A.COD_ART
+" update="PROD_COSTOS_DIARIOS" updatewhere=0 updatekeyinplace=yes arguments=(("as_articulo", string),("as_almacen", string)) )
+line(band=detail x1="37" y1="316" x2="2501" y2="316"  name=l_1 visible="1" pen.style="0" pen.width="18" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=detail x1="37" y1="24" x2="2496" y2="24"  name=l_2 visible="1" pen.style="0" pen.width="18" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Cod Art:" border="2" color="16777215" x="37" y="64" height="56" width="581" html.valueishtml="0"  name=prod_costos_diarios_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Cod Moneda:" border="2" color="16777215" x="37" y="360" height="56" width="581" html.valueishtml="0"  name=prod_costos_diarios_cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Fecha:" border="2" color="16777215" x="37" y="232" height="56" width="581" html.valueishtml="0"  name=prod_costos_diarios_fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Almacen:" border="2" color="16777215" x="37" y="152" height="56" width="581" html.valueishtml="0"  name=prod_costos_diarios_almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Cod Plantilla:" border="2" color="16777215" x="37" y="448" height="56" width="581" html.valueishtml="0"  name=prod_costos_diarios_cod_plantilla_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Costo Produccion:" border="2" color="16777215" x="37" y="540" height="56" width="581" html.valueishtml="0"  name=prod_costos_diarios_costo_produccion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=8 alignment="1" tabsequence=60 border="5" color="33554432" x="640" y="540" height="56" width="357" format="#,###,##0.0000" html.valueishtml="0"  name=costo_produccion visible="1" editmask.required=yes editmask.mask="###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Unidades Vendidas:" border="2" color="16777215" x="37" y="896" height="56" width="581" html.valueishtml="0"  name=prod_costos_diarios_unidades_vendidas_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1010" y="152" height="56" width="1015" format="[general]" html.valueishtml="0"  name=desc_almacen visible="1" edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="33554432" x="1010" y="64" height="56" width="1490" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=7 alignment="0" tabsequence=50 border="5" color="33554432" x="640" y="448" height="56" width="357" format="[general]" html.valueishtml="0"  name=cod_plantilla pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=40 border="5" color="33554432" x="640" y="360" height="56" width="361" format="[general]" html.valueishtml="0"  name=moneda pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="1019" y="360" height="56" width="1015" format="[general]" html.valueishtml="0"  name=desc_moneda visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=detail alignment="1" text="Unidades Producidas:" border="2" color="16777215" x="37" y="712" height="56" width="581" html.valueishtml="0"  name=prod_costos_diarios_unidades_producidas_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=detail alignment="1" text="Valor Venta:" border="2" color="16777215" x="41" y="808" height="56" width="581" html.valueishtml="0"  name=prod_costos_diarios_valor_venta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=10 alignment="1" tabsequence=80 border="5" color="33554432" x="645" y="808" height="56" width="357" format="#,###,##0.0000" html.valueishtml="0"  name=valor_venta visible="1" editmask.mask="###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+button(band=detail text="Act. Cost. Prod." enabled=yes action="0" border="0" color="0" x="1893" y="560" height="76" width="640" vtextalign="0" htextalign="0"  name=b_costo_p visible="0"  resizeable=1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Costo Contable (S/.):" border="2" color="16777215" x="37" y="628" height="56" width="581" html.valueishtml="0"  name=prod_costos_diarios_costo_contable_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=9 alignment="1" tabsequence=70 border="5" color="33554432" x="640" y="628" height="56" width="357" format="#,###,##0.0000" html.valueishtml="0"  name=costo_contable visible="1" editmask.mask="###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="2" color="33554432" x="1019" y="456" height="56" width="1015" format="[general]" html.valueishtml="0"  name=observaciones visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+button(band=detail text="Act. Cost. Contable" enabled=yes action="0" border="0" color="0" x="1019" y="620" height="76" width="640" vtextalign="0" htextalign="0"  name=b_costo_c visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="5" color="16711680" x="640" y="712" height="56" width="357" format="#,###,##0.0000" html.valueishtml="0"  name=unidades_producidas visible="1" editmask.mask="###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="5" color="16711680" x="640" y="896" height="56" width="357" format="#,###,##0.0000" html.valueishtml="0"  name=unidades_vendidas visible="1" editmask.mask="###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="33554432" x="640" y="64" height="56" width="357" format="[general]" html.valueishtml="0"  name=cod_art pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=12 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="5" color="33554432" x="640" y="152" height="56" width="357" format="[general]" html.valueishtml="0"  name=almacen pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=30 border="5" color="33554432" x="640" y="232" height="56" width="357" format="[shortdate] [time]" html.valueishtml="0"  name=fecha visible="1" editmask.required=yes editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="kk" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><untitled><untitled_row __pbband=~"detail~"><prod_costos_diarios_cod_art>cod_art</prod_costos_diarios_cod_art><prod_costos_diarios_almacen>almacen</prod_costos_diarios_almacen><almacen_desc_almacen>desc_almacen</almacen_desc_almacen><prod_costos_diarios_fecha>fecha</prod_costos_diarios_fecha><prod_costos_diarios_cod_moneda>moneda</prod_costos_diarios_cod_moneda><moneda_descripcion>desc_moneda</moneda_descripcion><prod_costos_diarios_cod_plantilla>cod_plantilla</prod_costos_diarios_cod_plantilla><prod_costos_diarios_costo_produccion>costo_produccion</prod_costos_diarios_costo_produccion><prod_costos_diarios_costo_contable>costo_contable</prod_costos_diarios_costo_contable><prod_costos_diarios_valor_venta>valor_venta</prod_costos_diarios_valor_venta><prod_costos_diarios_unidades_producidas>unidades_producidas</prod_costos_diarios_unidades_producidas><prod_costos_diarios_unidades_vendidas>unidades_vendidas</prod_costos_diarios_unidades_vendidas></untitled_row></untitled>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

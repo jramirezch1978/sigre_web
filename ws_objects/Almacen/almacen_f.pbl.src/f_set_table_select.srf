@@ -1,0 +1,107 @@
+﻿$PBExportHeader$f_set_table_select.srf
+$PBExportComments$Return SELECT statement for retrieving table names from system catalog
+global type f_set_table_select from function_object
+end type
+
+forward prototypes
+global function integer f_set_table_select (ref datawindow adw_datawindow)
+end prototypes
+
+global function integer f_set_table_select (ref datawindow adw_datawindow);//**********************************************************************
+//		Function Declaration
+// Integer FUNCTION f_set_table_select (REF adw_datawindow)
+//
+//		Passing adw_datawindow by reference is necessary because it's sql statement
+//		is going to be changed adw_datawindow, sets appropriate
+//		SQL Select statement for selecting  tablenames from system catalog
+//***********************************************************************
+
+string	ls_sql
+integer	li_PosUid, li_PosEqual, li_PosSemiColon
+
+choose case Upper(Left(sqlca.dbms,3) )
+
+	case "GUP"		// Gupta SQLBase
+		ls_sql = "SELECT DISTINCT SYSADM.PBCATTBL.PBT_TNAM, SYSADM.PBCATTBL.PBT_CMNT " &  
+			   + " FROM SYSADM.PBCATTBL " &  
+			   + " WHERE SYSADM.PBCATTBL.PBT_OWNR = '" &
+				+ Upper(sqlca.userid) + "' order by 1 ASC"   ;
+	
+	case "ODB"		// ODBC
+		//******************************************************************
+		//	since UserId can be blank for ODBC, we will have to 
+		// Look at the DBPARM values  This code may be specific to 
+		// the values that watcom uses in the DBPARAM and may need to be
+		// Updated for other ODBC interfaces
+		//******************************************************************
+		If sqlca.userid = "" then
+			li_posuid = Pos(sqlca.dbparm, "UID", 1)
+			li_posequal = Pos(sqlca.dbparm, "=", li_posuid)
+			li_possemicolon = Pos(sqlca.dbparm, ";", li_posequal)
+			sqlca.userid = Mid(sqlca.dbparm, li_posequal + 1, li_possemicolon - &
+				 (li_posequal +1 ))
+		End If
+
+		ls_sql = 'SELECT DISTINCT "DBA"."PBCATTBL"."PBT_TNAM", "DBA"."PBCATTBL"."PBT_CMNT" ' &  
+			   + ' FROM "DBA"."PBCATTBL" ' &  
+			   + ' WHERE "DBA"."PBCATTBL"."PBT_OWNR" = ~'' &
+				+ Upper(sqlca.userid) + '~' order by 1 ASC'   ;
+
+	case "XDB"		// XDB
+		ls_sql = "Select DISTINCT PBCATTBL.PBT_TNAM, PBCATTBL.PBT_CMNT " &
+				+ " from PBCATTBL where PBT_OWNR = '" & 
+				+ Upper(sqlca.userid) + "' order by 1 ASC"
+
+	case "SYB", "SYC"	// Sybase SQL Server
+	   ls_sql = "SELECT DISTINCT pbcattbl.pbt_tnam, pbcattbl.pbt_cmnt " &  
+	         + " FROM pbcattbl order by 1 ASC"
+
+	case "ORA", "OR6", "OR7"	// ORACLE
+		ls_sql = "SELECT DISTINCT SYSTEM.PBCATTBL.PBT_TNAM, SYSTEM.PBCATTBL.PBT_CMNT " &  
+			   + " FROM SYSTEM.PBCATTBL " &  
+			   + " WHERE system.PBCATTBL.PBT_OWNR = '" &
+				+ Upper(sqlca.logid) + "' order by 1 ASC"   ;
+
+	case "O84"  
+//		ls_sql = "select table_name " &
+//					+ " from SYS.all_tables t" & 
+//					+ " where t.owner = '" &
+//					+ Upper(sqlca.logid) + "'" ;
+//		ls_sql = "select * " &
+//  					+ " from all_tables at " &
+// 					+ " where owner = '" &
+//					+ Upper(sqlca.logid) + "'" ; 
+
+		ls_sql = "SELECT DISTINCT * " &  
+			   + " FROM SYS.CATALOG " &
+			   + " WHERE sys.CATALOG.OWNR = '" &
+				+ Upper(sqlca.logid) + "'"   ; 
+				//SYS.ALL_CATALOG.TABLE_NAME, SYS.ALL_CATALOG.TABLE_NAME
+  
+		
+	case "HPA"		// ALLBASE/SQL
+		ls_sql = "SELECT DISTINCT SYSSQL.PBCATTBL.PBT_TNAM, SYSSQL.PBCATTBL.PBT_CMNT " &  
+			   + " FROM SYSSQL.PBCATTBL " &  
+			   + " WHERE syssql.PBCATTBL.PBT_OWNR = '" &
+				+ Upper(sqlca.userid) + "' order by 1 ASC"   ;
+
+	case "INF"		// INFORMIX
+		ls_sql = "Select DISTINCT PBT_TNAM, PBT_CMNT " &
+				+ "from 'informix'.PBCATTBL " &
+				+ "where PBT_OWNR = '" + sqlca.logid &
+				+ "' order by 1 ASC"
+
+	case ELSE
+		MessageBox ("Error!", "Nombre de motor no existe")
+
+end choose
+
+if Len(ls_sql) > 0 then	
+	messagebox("", ls_sql)
+	Return adw_datawindow.SetSQLSelect(ls_sql)
+else
+	return -1
+end if
+
+end function
+

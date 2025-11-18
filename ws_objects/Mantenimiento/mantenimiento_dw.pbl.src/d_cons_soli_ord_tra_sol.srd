@@ -1,0 +1,79 @@
+﻿$PBExportHeader$d_cons_soli_ord_tra_sol.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=552 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=188 color="536870912"  height.autosize=yes)
+table(column=(type=char(10) updatewhereclause=yes name=nro_solicitud dbname="solicitud_ot.nro_solicitud" )
+ column=(type=char(10) updatewhereclause=yes name=cencos_rsp dbname="solicitud_ot.cencos_rsp" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=datetime updatewhereclause=yes name=fecha_esperada dbname="solicitud_ot.fecha_esperada" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="solicitud_ot.flag_estado" values="Anulado	0/Pendiente	1/Aceptado	2/Rechazado	3/" )
+ column=(type=char(400) updatewhereclause=yes name=descripcion dbname="solicitud_ot.descripcion" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(1) updatewhereclause=yes name=orden_trabajo_flag_estado dbname="orden_trabajo.flag_estado" values="Anulado	0/Activo	1/Cerrado	2/Proyectado	3/" )
+ column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="solicitud_ot.cod_maquina" )
+ column=(type=char(40) updatewhereclause=yes name=maquina_desc_maq dbname="maquina.desc_maq" )
+ retrieve="  SELECT ~"SOLICITUD_OT~".~"NRO_SOLICITUD~" ,   
+         ~"SOLICITUD_OT~".~"CENCOS_RSP~"    ,   
+         ~"CENTROS_COSTO~".~"DESC_CENCOS~"  ,   
+         ~"SOLICITUD_OT~".~"FECHA_ESPERADA~",   
+			~"SOLICITUD_OT~".~"FLAG_ESTADO~"   ,
+         ~"SOLICITUD_OT~".~"DESCRIPCION~"   ,   
+         ~"ORDEN_TRABAJO~".~"NRO_ORDEN~"    ,   
+         ~"ORDEN_TRABAJO~".~"FLAG_ESTADO~"  ,
+			~"SOLICITUD_OT~".~"COD_MAQUINA~"	 ,
+			~"MAQUINA~".~"DESC_MAQ~"
+    FROM ~"SOLICITUD_OT~" ,   
+         ~"ORDEN_TRABAJO~",   
+         ~"CENTROS_COSTO~",
+			~"MAQUINA~"		,
+			~"TT_OPE_CENCOS~"
+   WHERE ( solicitud_ot.nro_solicitud   = orden_trabajo.nro_solicitud (+)) and  
+         ( ~"SOLICITUD_OT~".~"CENCOS_RSP~"  = ~"CENTROS_COSTO~".~"CENCOS~"       ) and	
+			( ~"SOLICITUD_OT~".~"COD_MAQUINA~" = ~"MAQUINA~".~"COD_MAQUINA~"     (+)) AND
+			( ~"SOLICITUD_OT~".~"CENCOS_SLC~"  = ~"TT_OPE_CENCOS~".~"CENCOS~"	    ) AND
+         ((~"SOLICITUD_OT~".~"FECHA_ESPERADA~" between :ad_fecha_inicio and :ad_fecha_final )) AND  
+			(( ~"SOLICITUD_OT~".~"FLAG_ESTADO~" in (:asa_estado)						 )) 
+			
+
+    
+" arguments=(("asa_estado", stringlist),("ad_fecha_inicio", date),("ad_fecha_final", date),("as_empresa", string),("as_user", string)) )
+text(band=header alignment="2" text="Fecha
+Esperada" border="2" color="8388608" x="2226" y="436" height="112" width="279" html.valueishtml="0"  name=solicitud_ot_fecha_esperada_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Estado
+" border="2" color="8388608" x="2510" y="436" height="112" width="261" html.valueishtml="0"  name=sol_ot_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="8388608" x="2775" y="492" height="56" width="334" html.valueishtml="0"  name=orden_trabajo_nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Orden de Trabajo" border="2" color="8388608" x="2775" y="436" height="52" width="613" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Estado" border="2" color="8388608" x="3113" y="492" height="56" width="274" html.valueishtml="0"  name=orden_trabajo_flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="2935" y="24" height="56" width="165" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3113" y="24" height="56" width="265" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="SOLICITUD DE ORDENES DE TRABAJO X CENTRO DE COSTO SOLICITANTE" border="0" color="0" x="640" y="28" height="140" width="2057" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Desde : '+String(ad_fecha_inicio,'dd/mm/yyyy')+' Hasta :  '+String(ad_fecha_final,'dd/mm/yyyy')"border="0" color="0" x="1015" y="188" height="76" width="1344" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="14" y="24" height="180" width="466" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="2" expression="Trim(as_empresa)"border="0" color="0" x="14" y="224" height="60" width="466" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="3113" y="96" height="56" width="265" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="Trim( as_user )"border="0" color="0" x="3113" y="172" height="56" width="265" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="2990" y="96" height="56" width="110" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="2889" y="172" height="56" width="210" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Responsable" border="2" color="8388608" x="329" y="436" height="48" width="1051" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="0" text="CenCos" border="2" color="8388608" x="329" y="488" height="60" width="187" html.valueishtml="0"  name=solicitud_ot_cencos_rsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripción" border="2" color="8388608" x="521" y="488" height="60" width="859" html.valueishtml="0"  name=centros_costo_desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Maquina" border="2" color="8388608" x="1385" y="436" height="48" width="837" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Codigo" border="2" color="8388608" x="1385" y="488" height="60" width="238" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripción" border="2" color="8388608" x="1627" y="488" height="60" width="594" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro 
+Solicitud" border="2" color="8388608" x="9" y="436" height="112" width="315" html.valueishtml="0"  name=solicitud_ot_nro_solicitud_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="0" x="2226" y="0" height="56" width="279" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_esperada visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="0" x="2510" y="0" height="56" width="261" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="0" x="2775" y="0" height="56" width="334" format="[general]" html.valueishtml="0"  name=orden_trabajo_nro_orden visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="5" color="0" x="9" y="72" height="108" width="3378" format="[general]" html.valueishtml="0"  name=descripcion visible="1" height.autosize=yes edit.limit=800 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="0" x="3113" y="0" height="56" width="274" format="[general]" html.valueishtml="0"  name=orden_trabajo_flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="329" y="0" height="56" width="187" format="[general]" html.valueishtml="0"  name=cencos_rsp visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="521" y="0" height="56" width="859" format="[general]" html.valueishtml="0"  name=desc_cencos visible="1" edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="0" x="1385" y="0" height="56" width="238" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="0" x="1627" y="0" height="56" width="594" format="[general]" html.valueishtml="0"  name=maquina_desc_maq visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="2" color="0" x="9" y="0" height="56" width="315" format="[general]" html.valueishtml="0"  name=nro_solicitud visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

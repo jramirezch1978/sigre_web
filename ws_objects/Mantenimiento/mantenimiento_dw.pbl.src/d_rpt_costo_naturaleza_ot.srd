@@ -1,0 +1,104 @@
+﻿$PBExportHeader$d_rpt_costo_naturaleza_ot.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=436 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(10) updatewhereclause=yes name=cencos_slc dbname="orden_trabajo.cencos_slc" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cencos_rsp dbname="orden_trabajo.cencos_rsp" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos_rsp dbname="centros_costo.desc_cencos" )
+ column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="orden_trabajo.cod_maquina" )
+ column=(type=char(100) updatewhereclause=yes name=desc_maq dbname="maquina.desc_maq" )
+ column=(type=datetime updatewhereclause=yes name=fec_solicitud dbname="orden_trabajo.fec_solicitud" )
+ column=(type=char(10) updatewhereclause=yes name=nro_solicitud dbname="orden_trabajo.nro_solicitud" )
+ column=(type=datetime updatewhereclause=yes name=fec_inicio dbname="orden_trabajo.fec_inicio" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="orden_trabajo.flag_estado" values="Anulado	0/Generado	1/Cerrado	2/Proyectado	3/" )
+ column=(type=number updatewhereclause=yes name=costo_material dbname="costo_material" )
+ column=(type=number updatewhereclause=yes name=costo_jornal dbname="costo_jornal" )
+ column=(type=number updatewhereclause=yes name=costo_terceros dbname="costo_terceros" )
+ retrieve="select distinct 
+		 ot.nro_orden, 
+       ot.cencos_slc, cc1.desc_cencos,
+       ot.cencos_rsp, cc2.desc_cencos,
+       ot.cod_maquina, m.desc_maq,
+       ot.fec_solicitud,
+       ot.nro_solicitud,
+       ot.fec_inicio,
+       ot.flag_estado,
+       round(usf_mto_costo_art_x_ot(ot.nro_orden), 2) as costo_material,
+       round(usf_ope_costo_jor_x_ot(ot.nro_orden), 2) as costo_jornal,
+       round(usf_ope_costo_os_x_ot(ot.nro_orden), 2) as costo_terceros
+from orden_trabajo ot,
+     centros_costo cc1,
+     centros_costo cc2,
+     maquina       m,
+	  operaciones   op
+where ot.cencos_slc = cc1.cencos
+  and ot.cencos_rsp = cc2.cencos     
+  and op.nro_orden  = ot.nro_orden
+  and ot.cod_maquina  = m.cod_maquina (+)
+  and ot.ot_adm like :as_ot_adm
+  and ( ( :as_fec_inicio = '0' and trunc(ot.fec_inicio) between trunc(:ad_fecha1) and trunc(:ad_fecha2) )
+		or ( :as_fec_inicio = '1' and ot.fec_inicio is null ) )
+  and ot.ot_tipo like :as_tipo_ot
+  and ot.flag_estado in (:as_estado)
+  and ot.cencos_rsp like :as_cencos_rsp
+  and ot.cencos_slc like :as_cencos_slc
+  and op.cod_ejecutor like :as_ejecutor
+  and ( (:as_maquina = '1' and ot.cod_maquina is not null) or (:as_maquina = '0') )
+  and ( (:as_fec_inicio = '1' and ( round(usf_mto_costo_art_x_ot(ot.nro_orden), 2) +
+       									  round(usf_ope_costo_jor_x_ot(ot.nro_orden), 2) +
+       									  round(usf_ope_costo_os_x_ot(ot.nro_orden), 2) ) > 0) or (:as_fec_inicio = '0') )
+  " arguments=(("ad_fecha1", date),("ad_Fecha2", date),("as_tipo_ot", string),("as_ot_adm", string),("as_cencos_rsp", string),("as_cencos_slc", string),("as_estado", stringlist),("as_maquina", string),("as_fec_inicio", string),("as_ejecutor", string)) )
+text(band=header alignment="1" text="Usuario :" border="0" color="33554432" x="2843" y="112" height="56" width="197" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Fecha :" border="0" color="33554432" x="2843" y="180" height="64" width="197" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Pag :" border="0" color="33554432" x="2843" y="40" height="56" width="197" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="3058" y="112" height="56" width="270" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3058" y="180" height="64" width="270" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="33554432" x="3058" y="40" height="56" width="270" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="32" y="24" height="164" width="480" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="32" y="208" height="56" width="480" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="2455" y="4" height="60" width="311" format="[general]" html.valueishtml="0"  name=nro_solicitud visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="33554432" x="3031" y="4" height="60" width="256" format="[general]" html.valueishtml="0"  name=flag_estado visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="2" color="33554432" x="3291" y="4" height="60" width="315" format="###,##0.00" html.valueishtml="0"  name=costo_material visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="2" color="33554432" x="3611" y="4" height="60" width="315" format="###,##0.00" html.valueishtml="0"  name=costo_jornal visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432" x="3931" y="4" height="60" width="315" format="###,##0.00" html.valueishtml="0"  name=costo_terceros visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" costo_material + costo_jornal + costo_terceros "border="2" color="255" x="4251" y="4" height="60" width="315" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="2" color="33554432" x="2770" y="4" height="60" width="256" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_inicio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="379" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=cencos_slc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="686" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=cencos_rsp visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="992" y="4" height="60" width="247" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="1243" y="4" height="60" width="946" format="[general]" html.valueishtml="0"  name=desc_maq visible="1" edit.limit=100 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="2194" y="4" height="60" width="256" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_solicitud visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="73" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(costo_jornal for all)"border="2" color="255" x="3611" y="4" height="60" width="315" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(costo_terceros for all)"border="2" color="255" x="3931" y="4" height="60" width="315" format="###,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( costo_material + costo_jornal + costo_terceros  for all)"border="2" color="255" x="4251" y="4" height="60" width="315" format="###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(costo_material for all)"border="2" color="255" x="3291" y="4" height="60" width="315" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total:" border="0" color="33554432" x="2949" y="4" height="56" width="315" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="0" expression="String(count(  nro_orden for all ) ) + ' Ordenes de Trabajo'"border="0" color="33554432" x="73" y="4" height="56" width="1646" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Nro Solic." border="2" color="33554432" x="2455" y="376" height="56" width="311" html.valueishtml="0"  name=nro_solicitud_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fec Inicio" border="2" color="33554432" x="2770" y="376" height="56" width="256" html.valueishtml="0"  name=fec_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Estado" border="2" color="33554432" x="3031" y="376" height="56" width="256" html.valueishtml="0"  name=flag_estado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="US$ Material" border="2" color="33554432" x="3291" y="376" height="56" width="315" html.valueishtml="0"  name=costo_material_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="US$ Jornal" border="2" color="33554432" x="3611" y="376" height="56" width="315" html.valueishtml="0"  name=costo_jornal_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="US$ OS" border="2" color="33554432" x="3931" y="376" height="56" width="315" html.valueishtml="0"  name=costo_terceros_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Total US$" border="2" color="33554432" x="4251" y="376" height="56" width="315" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="33554432" x="73" y="376" height="56" width="302" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cencos Slc" border="2" color="33554432" x="379" y="376" height="56" width="302" html.valueishtml="0"  name=cencos_slc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cencos Rsp" border="2" color="33554432" x="686" y="376" height="56" width="302" html.valueishtml="0"  name=cencos_rsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Codigo" border="2" color="33554432" x="992" y="376" height="56" width="247" html.valueishtml="0"  name=orden_trabajo_cod_maquina_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Desc Maq" border="2" color="33554432" x="1243" y="376" height="56" width="946" html.valueishtml="0"  name=maquina_desc_maq_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fec Solic." border="2" color="33554432" x="2194" y="376" height="56" width="256" html.valueishtml="0"  name=fec_solicitud_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Costo x Naturaleza de Orden de Trabajo" border="0" color="33554432" x="1083" y="40" height="80" width="1477" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1083" y="140" height="56" width="1477" html.valueishtml="0"  name=titulo_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1083" y="216" height="56" width="1477" html.valueishtml="0"  name=titulo_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="1083" y="292" height="56" width="1477" html.valueishtml="0"  name=titulo_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

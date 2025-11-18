@@ -1,0 +1,83 @@
+﻿$PBExportHeader$d_rpt_pago_cbssp_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=532 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=nave dbname="tg_naves.nave" )
+ column=(type=char(50) updatewhereclause=yes name=nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=decimal(0) updatewhereclause=yes name=ano dbname="semanas.ano" )
+ column=(type=decimal(0) updatewhereclause=yes name=semanas_semana dbname="semanas.semana" )
+ column=(type=number updatewhereclause=yes name=pago dbname="pago" )
+ column=(type=number updatewhereclause=yes name=bonificacion dbname="bonificacion" )
+ column=(type=number updatewhereclause=yes name=grati_vaca dbname="grati_vaca" )
+ column=(type=number updatewhereclause=yes name=pago_100 dbname="pago_100" )
+ column=(type=number updatewhereclause=yes name=pago_2299 dbname="pago_2299" )
+ retrieve="select tn.nave, 
+       tn.nomb_nave,
+       b.ano, b.semana,
+       round(sum(participacion_pesca),2) as pago,
+		 round(sum(bonificacion_pesca),2) as bonificacion,
+       round(sum(a.gratificacion + a.vacaciones),2) as grati_vaca,
+       round(round(sum(participacion_pesca),2) * (select f.tasa_aport_cbssp from fl_param f where reckey = '1')/100,2) as pago_100,
+       round(round(sum(a.gratificacion + a.vacaciones),2) * (select tasa_aport_cbssp from fl_param where reckey = '1')/100,2) as pago_2299
+from fl_participacion_pesca a,
+     semanas                b,
+     tg_naves               tn
+where tn.nave = a.nave
+  and trunc(a.fecha) between trunc(b.fecha_inicio) and trunc(b.fecha_fin)
+  and b.ano = :ani_year
+  and b.semana = :ani_semana
+  and a.sueldo_fijo = 0
+group by tn.nave, 
+       tn.nomb_nave,
+       b.ano, b.semana" arguments=(("ani_year", number),("ani_semana", number)) )
+text(band=header alignment="0" text="" border="0" color="0" x="27" y="340" height="56" width="425" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pagecount()"border="0" color="33554432" x="3045" y="20" height="64" width="366" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3045" y="184" height="64" width="279" format="[shortdate]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="27" y="16" height="228" width="430" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="" border="0" color="0" x="3045" y="104" height="60" width="288" html.valueishtml="0"  name=t_usuario visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="27" y="272" height="56" width="425" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="RESUMEN PAGO A LA CAJA DE BENEFICIO SOCAL Y SEGURO DEL PESCADOR X EMBARCACION" border="0" color="8388608" x="535" y="24" height="188" width="2377" html.valueishtml="0"  name=t_1 visible="1"  font.face="Bookman Old Style" font.height="-14" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="535" y="228" height="68" width="2377" html.valueishtml="0"  name=t_titulo1 visible="1"  font.face="Garamond" font.height="-11" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1687" y="312" height="56" width="146" format="[general]" html.valueishtml="0"  name=semanas_semana visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Semana:" border="0" color="33554432" x="1454" y="312" height="56" width="215" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1216" y="312" height="56" width="210" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Año:" border="0" color="33554432" x="1047" y="312" height="56" width="155" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Código
+Nave" border="2" color="33554432" x="14" y="416" height="112" width="274" html.valueishtml="0"  name=nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="14" y="4" height="64" width="274" format="[general]" html.valueishtml="0"  name=nave visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nombre
+Embarcación" border="2" color="33554432" x="293" y="416" height="112" width="1061" html.valueishtml="0"  name=nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="293" y="4" height="64" width="1061" format="[general]" html.valueishtml="0"  name=nomb_nave visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total:" border="0" color="33554432" x="1019" y="8" height="56" width="334" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Pago
+Participación" border="2" color="33554432" x="1358" y="416" height="112" width="329" html.valueishtml="0"  name=pago_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=summary alignment="1" expression="sum(pago for all)"border="2" color="255" x="1358" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="1358" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=pago visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=0 border="2" color="33554432" x="1691" y="4" height="64" width="329" html.valueishtml="0"  name=bonificacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Gratificacion
+Vacaciones" border="2" color="33554432" x="2025" y="416" height="112" width="329" html.valueishtml="0"  name=grati_vaca_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Obligación
+al 100%" border="2" color="33554432" x="2359" y="416" height="112" width="329" html.valueishtml="0"  name=pago_100_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Obligación de 
+Gratif/Vacac" border="2" color="33554432" x="2693" y="416" height="112" width="352" html.valueishtml="0"  name=pago_2299_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Total
+Obligacion" border="2" color="33554432" x="3049" y="416" height="112" width="352" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2025" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=grati_vaca visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="2359" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=pago_100 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="2693" y="4" height="64" width="352" format="###,##0.00" html.valueishtml="0"  name=pago_2299 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" pago_100 + pago_2299 "border="2" color="33554432" x="3049" y="4" height="64" width="352" format="###,##0.00" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(grati_vaca for all)"border="2" color="255" x="2025" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(pago_100 for all)"border="2" color="255" x="2359" y="4" height="64" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(pago_2299 for all)"border="2" color="255" x="2693" y="4" height="64" width="352" format="###,##0.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( pago_100 + pago_2299  for all)"border="2" color="255" x="3049" y="4" height="64" width="352" format="###,##0.00" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Bonifica.
+Mensual" border="2" color="33554432" x="1691" y="416" height="112" width="329" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=summary alignment="1" expression="sum(bonificacion for all)"border="2" color="255" x="1691" y="4" height="64" width="329" format="[general]" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,74 @@
+﻿$PBExportHeader$d_abc_change_number_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntas_pagar.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="cntas_pagar.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="cntas_pagar.nro_doc" )
+ column=(type=datetime updatewhereclause=yes name=fecha_emision dbname="cntas_pagar.fecha_emision" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="cntas_pagar.origen" )
+ column=(type=decimal(0) updatewhereclause=yes name=ano dbname="cntas_pagar.ano" )
+ column=(type=decimal(0) updatewhereclause=yes name=mes dbname="cntas_pagar.mes" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_libro dbname="cntas_pagar.nro_libro" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_asiento dbname="cntas_pagar.nro_asiento" )
+ column=(type=char(0) updatewhereclause=yes name=new_crel dbname="cntas_pagar.new_crel" )
+ column=(type=char(0) updatewhereclause=yes name=new_tdoc dbname="cntas_pagar.new_tdoc" )
+ column=(type=char(0) updatewhereclause=yes name=new_nro dbname="cntas_pagar.new_nro" )
+ column=(type=char(1) updatewhereclause=yes name=flag_sel dbname="flag_sel" values="	1/	0" )
+ retrieve="select a.cod_relacion  ,a.tipo_doc  ,a.nro_doc     ,
+		 a.fecha_emision ,a.origen    ,a.ano         ,
+		 a.mes           ,a.nro_libro ,a.nro_asiento ,   
+		 null as new_crel,
+		 null as new_tdoc,	
+       null as new_nro ,'0' as flag_sel
+  from cntas_pagar a,cntas_pagar_det b,cp_doc_det_imp c      
+ where ((a.cod_relacion      = b.cod_relacion    )  and
+        (a.tipo_doc          = b.tipo_doc        )  and    
+        (a.nro_doc           = b.nro_doc         )) and
+       ((b.cod_relacion      = c.cod_relacion    )  and
+        (b.tipo_doc          = c.tipo_doc        )  and
+        (b.nro_doc           = c.nro_doc         )  and
+        (b.item              = c.item            )) and
+        (instr(a.nro_doc,'-',1,1) = 0 or instr(a.nro_doc,'-',1,1) >= 6)   and
+        (a.flag_provisionado = 'R'               ) and
+        (a.ano               = :al_ano           ) and
+        (a.nro_libro         = (select libro_compras from finparam where reckey = '1'    ) ) and
+        (b.tipo_cred_fiscal  = (select tipo_cred_fiscal from finparam where reckey = '1' ) ) and 
+        (c.tipo_impuesto     = (select cod_igv from logparam where reckey = '1' )          )       
+group by a.cod_relacion  ,a.tipo_doc  ,a.nro_doc     ,
+		 a.fecha_emision ,a.origen    ,a.ano         ,
+		 a.mes           ,a.nro_libro ,a.nro_asiento " arguments=(("al_ano", number)) )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="494" y="8" height="56" width="302" html.valueishtml="0"  name=cntas_pagar_nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Fecha Emision" border="2" color="8388608" x="800" y="8" height="56" width="338" html.valueishtml="0"  name=cntas_pagar_fecha_emision_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="1143" y="8" height="56" width="187" html.valueishtml="0"  name=cntas_pagar_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Año" border="2" color="8388608" x="1335" y="8" height="56" width="187" html.valueishtml="0"  name=cntas_pagar_ano_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Mes" border="2" color="8388608" x="1527" y="8" height="56" width="329" html.valueishtml="0"  name=cntas_pagar_mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nro Libro" border="2" color="8388608" x="1861" y="8" height="56" width="329" html.valueishtml="0"  name=cntas_pagar_nro_libro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="C. Relacion" border="2" color="8388608" x="9" y="8" height="56" width="311" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="T. Doc" border="2" color="8388608" x="325" y="8" height="56" width="165" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nro Asiento" border="2" color="8388608" x="2194" y="8" height="56" width="329" html.valueishtml="0"  name=cntas_pagar_nro_asiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nuevo C.Rel." border="2" color="8388608" x="2528" y="8" height="56" width="325" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nuevo T.Doc" border="2" color="8388608" x="2857" y="8" height="56" width="302" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Sel" border="2" color="8388608" x="3465" y="8" height="56" width="123" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+text(band=header alignment="2" text="Nuevo Nro" border="2" color="8388608" x="3163" y="8" height="56" width="297" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="494" y="0" height="72" width="302" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="800" y="0" height="72" width="338" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_emision visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1143" y="0" height="72" width="187" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="1335" y="0" height="72" width="187" format="[general]" html.valueishtml="0"  name=ano visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="1527" y="0" height="72" width="329" format="[general]" html.valueishtml="0"  name=mes visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="1861" y="0" height="72" width="329" format="[general]" html.valueishtml="0"  name=nro_libro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="72" width="311" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="325" y="0" height="72" width="165" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="2194" y="0" height="72" width="329" format="[general]" html.valueishtml="0"  name=nro_asiento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="2528" y="0" height="72" width="325" format="[general]" html.valueishtml="0"  name=new_crel pointer="H:\Source\Cur\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217752" )
+column(band=detail id=11 alignment="0" tabsequence=10 border="2" color="33554432" x="2857" y="0" height="72" width="302" format="[general]" html.valueishtml="0"  name=new_tdoc pointer="H:\Source\Cur\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="2" tabsequence=30 border="2" color="33554432" x="3465" y="0" height="72" width="123" format="[general]" html.valueishtml="0"  name=flag_sel visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=20 border="2" color="33554432" x="3163" y="0" height="72" width="297" format="[general]" html.valueishtml="0"  name=new_nro visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

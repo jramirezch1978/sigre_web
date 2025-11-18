@@ -1,0 +1,33 @@
+﻿$PBExportHeader$d_sig_caja_bancos_us_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=244 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(13) updatewhereclause=yes name=tipo_cuenta dbname="tipo_cuenta" )
+ column=(type=number updatewhereclause=yes name=saldo dbname="saldo" )
+ column=(type=number updatewhereclause=yes name=ingresos dbname="ingresos" )
+ column=(type=number updatewhereclause=yes name=egresos dbname="egresos" )
+ retrieve="select Decode(tt.tipo_ctabco,'A','Ahorros','C','Cta Corriente') AS TIPO_CUENTA,
+       Sum(tt.saldo_anterior) AS SALDO   ,
+		 Sum(tt.ingresos)		   AS INGRESOS,
+		 Sum(tt.egresos)  		AS EGRESOS 
+from tt_fin_rpt_libro_bancos tt 
+group by Decode(tt.tipo_ctabco,'A','Ahorros','C','Cta Corriente') " )
+text(band=header alignment="0" text="CAJA Y BANCOS EN US$" border="0" color="33554432" x="14" y="24" height="56" width="686" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="14" y="4" height="68" width="315" format="[general]" html.valueishtml="0"  name=tipo_cuenta visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Tipo Cuenta" border="2" color="33554432" x="14" y="184" height="56" width="315" html.valueishtml="0"  name=tipo_cuenta_ visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="0" x="334" y="4" height="68" width="325" format="[general]" html.valueishtml="0"  name=saldo visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Saldo Inicial" border="2" color="33554432" x="334" y="184" height="56" width="325" html.valueishtml="0"  name=saldo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="663" y="4" height="68" width="325" format="[general]" html.valueishtml="0"  name=ingresos visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Ingresos" border="2" color="33554432" x="663" y="184" height="56" width="325" html.valueishtml="0"  name=ingresos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="992" y="4" height="68" width="325" format="[general]" html.valueishtml="0"  name=egresos visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Egresos" border="2" color="33554432" x="992" y="184" height="56" width="325" html.valueishtml="0"  name=egresos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="saldo + ingresos - egresos "border="2" color="0" x="1321" y="4" height="68" width="325" format="###,###.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Saldo" border="2" color="33554432" x="1321" y="184" height="56" width="325" html.valueishtml="0"  name=total_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

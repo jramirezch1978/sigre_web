@@ -1,0 +1,70 @@
+﻿$PBExportHeader$d_rpt_com_partes_costo.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=68 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=com_parte_rac_parte_racion dbname="com_parte_rac_parte_racion" )
+ column=(type=char(20) updatewhereclause=yes name=com_parte_rac_det_cencos dbname="com_parte_rac_det_cencos" )
+ column=(type=char(20) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo_desc_cencos" )
+ column=(type=char(20) updatewhereclause=yes name=com_parte_rac_proveedor dbname="com_parte_rac_proveedor" )
+ column=(type=char(20) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor_nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ retrieve="SELECT 			 a.parte_racion,
+                b.flag_tipo_racion,
+                r.ratio,
+                b.nro_raciones,
+                round(r.ratio * b.nro_raciones, 2) as Importe,
+                b.cencos,
+                c.desc_cencos,
+					 a.proveedor, 
+                p.nom_proveedor
+
+  FROM com_parte_rac       a,
+       com_parte_rac_det   b,
+       centros_costo       c,
+       com_parte_rac_ratio r,
+		 proveedor				p
+      
+ Where a.parte_racion                = b.parte_racion
+   And b.parte_racion                = r.parte_racion
+   And b.flag_tipo_racion            = r.flag_tipo_racion
+   And a.proveedor                   = p.proveedor(+)
+   and b.cencos                      = c.cencos
+	and NVL(a.flag_estado, '0') = '1'
+	and substr(a.parte_racion, 1, 2)  = :as_origen
+   and Trunc(a.fecha_parte_rac) BETWEEN trunc(:ad_fecha1) AND trunc(:ad_fecha2)
+
+Order by a.parte_racion" arguments=(("as_origen", string),("ad_fecha1", date),("ad_fecha2", date))  sort="com_parte_rac_parte_racion A com_parte_rac_det_cencos A centros_costo_desc_cencos A com_parte_rac_proveedor A proveedor_nom_proveedor A " )
+group(level=1 header.height=0 trailer.height=64 by=("com_parte_rac_parte_racion" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=0 trailer.height=0 by=("com_parte_rac_det_cencos" ) header.color="536870912" trailer.color="536870912" )
+group(level=3 header.height=0 trailer.height=0 by=("centros_costo_desc_cencos" ) header.color="536870912" trailer.color="536870912" )
+group(level=4 header.height=0 trailer.height=0 by=("com_parte_rac_proveedor" ) header.color="536870912" trailer.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="3753" y="0" height="56" width="347" format="#,##0.00" html.valueishtml="0"  name=importe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="2" color="33554432" x="4110" y="0" height="56" width="686" format="#,##0.00" html.valueishtml="0"  name=grand_sum_importe visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="~"Grand Total~""border="2" color="33554432" x="9" y="4" height="56" width="311" format="[general]" html.valueishtml="0"  name=compute_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(importe for all )"border="2" color="33554432" x="3753" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=compute_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_importe for all )"border="2" color="33554432" x="4110" y="4" height="56" width="686" format="[general]" html.valueishtml="0"  name=compute_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="0" text="Parte Racion" border="2" color="16777215" x="9" y="4" height="56" width="311" html.valueishtml="0"  name=com_parte_rac_parte_racion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[2] alignment="0" text="Cencos" border="2" color="16777215" x="329" y="4" height="56" width="599" html.valueishtml="0"  name=com_parte_rac_det_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[2] alignment="0" text="Desc Cencos" border="2" color="16777215" x="937" y="4" height="56" width="1125" html.valueishtml="0"  name=centros_costo_desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[2] alignment="0" text="Proveedor" border="2" color="16777215" x="2071" y="4" height="56" width="265" html.valueishtml="0"  name=com_parte_rac_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[2] alignment="0" text="Nom Proveedor" border="2" color="16777215" x="2345" y="4" height="56" width="1399" html.valueishtml="0"  name=proveedor_nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[2] alignment="2" text="@com_parte_rac_det_flag_tipo_racion" border="2" color="16777215" x="3753" y="4" height="56" width="347" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header[2] alignment="0" text="Totales" border="2" color="16777215" x="4110" y="4" height="56" width="686" html.valueishtml="0"  name=grand_sum_importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+compute(band=trailer.1 alignment="1" expression="sum(grand_sum_importe for group 1)"border="2" color="33554432" x="4110" y="4" height="56" width="686" format="[general]" html.valueishtml="0"  name=compute_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(importe for group 1)"border="2" color="33554432" x="3753" y="4" height="56" width="347" format="#,##0.00" html.valueishtml="0"  name=compute_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="56" width="311" format="[general]" html.valueishtml="0"  name=com_parte_rac_parte_racion visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="329" y="0" height="56" width="599" format="[general]" html.valueishtml="0"  name=com_parte_rac_det_cencos visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="937" y="0" height="56" width="1125" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="2071" y="0" height="56" width="265" format="[general]" html.valueishtml="0"  name=com_parte_rac_proveedor visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2345" y="0" height="56" width="1399" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "com_parte_rac_det_flag_tipo_racion" rows = "com_parte_rac_parte_racion, com_parte_rac_det_cencos, centros_costo_desc_cencos, com_parte_rac_proveedor, proveedor_nom_proveedor" values = "sum(importe for crosstab)" sourcenames = "com_parte_rac_parte_racion, com_parte_rac_det_flag_tipo_racion, com_parte_rac_ratio_ratio, com_parte_rac_det_nro_raciones, importe, com_parte_rac_det_cencos, centros_costo_desc_cencos, com_parte_rac_proveedor, proveedor_nom_proveedor")
+sparse(names="com_parte_rac_parte_racion	com_parte_rac_det_cencos	centros_costo_desc_cencos	com_parte_rac_proveedor")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

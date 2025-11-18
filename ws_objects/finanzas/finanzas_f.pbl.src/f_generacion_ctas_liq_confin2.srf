@@ -1,0 +1,230 @@
+﻿$PBExportHeader$f_generacion_ctas_liq_confin2.srf
+global type f_generacion_ctas_liq_confin2 from function_object
+end type
+
+forward prototypes
+global function boolean f_generacion_ctas_liq_confin2 (datawindow adw_origen_cab, datawindow adw_origen, datawindow adw_origen_imp, ref datawindow adw_destino, datastore ads_matriz_det, datastore ads_glosa, string as_campo_formula, tab at_tab1, long al_row_det, long al_nro_libro, long al_nro_asiento, string as_origen, long al_ano, long al_mes)
+end prototypes
+
+global function boolean f_generacion_ctas_liq_confin2 (datawindow adw_origen_cab, datawindow adw_origen, datawindow adw_origen_imp, ref datawindow adw_destino, datastore ads_matriz_det, datastore ads_glosa, string as_campo_formula, tab at_tab1, long al_row_det, long al_nro_libro, long al_nro_asiento, string as_origen, long al_ano, long al_mes);Long 		   ll_inicio,ll_imatriz,ll_row_ins,ll_found,ll_found_imp,ll_inicio_for
+String      ls_c_fin ,ls_matriz ,ls_formula ,ls_soles ,ls_dolares ,ls_cnta_ctbl ,&
+				ls_campo ,ls_signo  ,ls_moneda  ,ls_glosa_texto ,ls_glosa_campo ,&
+				ls_desc_glosa ,ls_desc_cnta ,ls_expresion ,ls_flag_debhab ,ls_expresion_form
+Boolean     lb_retorno = TRUE,lb_flag = FALSE
+Integer 	   li_pos = 1, li_pos_ini , li_pos_fin , li_cont ,li_item
+String      ls_armado[],ls_inicio[]
+Decimal {2} ldc_importe_imp,ldc_monto,ldc_monto_imp
+Decimal {3} ldc_tasa_cambio
+
+n_cst_asiento_glosa lnv_asiento_glosa
+lnv_asiento_glosa    = CREATE n_cst_asiento_glosa
+
+f_monedas(ls_soles,ls_dolares)
+
+
+adw_origen.Accepttext()
+adw_destino.Accepttext()
+
+	/*Inicialización de Variables*/
+	ls_c_fin 		  = adw_origen.object.confin2    [al_row_det]	
+	li_item	 		  = adw_origen.object.item       [al_row_det]	
+   ls_moneda		  = adw_origen.object.cod_moneda [al_row_det]	
+	ldc_tasa_cambio = adw_origen.object.tasa_cambio [al_row_det]	 	
+	
+   IF Isnull(ls_c_fin) OR Trim(ls_c_fin) = '' THEN
+	   Messagebox('Item Nº '+String(li_item) ,'Item No se Ha ingresado Concepto Financiero')
+	   adw_destino.Reset()
+	   at_tab1.SelectedTab = 1
+  	   Return FALSE
+	ELSE
+		 //Insercion de Cuentas dependiendo de la Matriz Contable
+		  SELECT matriz_cntbl
+		    INTO :ls_matriz
+			 FROM concepto_financiero
+			WHERE (confin = :ls_c_fin);
+
+		  IF Isnull(ls_matriz) OR Trim(ls_matriz) = ''  THEN
+			  Messagebox('Aviso','Concepto Financiero Nº '+ls_c_fin+' No se ha Vinculado Matriz')
+		     adw_destino.Reset()
+		 	  at_tab1.SelectedTab = 1
+			  Return FALSE				
+		  END IF
+
+		  ads_matriz_det.Retrieve(ls_matriz)					// Recuperación de Información de Matriz Detalle
+		  
+		  FOR ll_imatriz = 1 TO ads_matriz_det.Rowcount()
+				/**Inicializacion de Variables**/
+				ls_armado = ls_inicio
+
+			   ldc_monto   	= 0.00
+			   ldc_monto_imp  = 0.00
+    			li_pos 	   	= 1
+				li_pos_ini  	= 0
+			   li_pos_fin  	= 0
+				li_cont   		= 0
+
+				ls_cnta_ctbl 	= ads_matriz_det.Object.cnta_ctbl   [ll_imatriz]
+				ls_desc_cnta	= ads_matriz_det.Object.desc_cnta   [ll_imatriz]
+				
+ 				/*Verifica Flag de Cnta Contable*/
+				lb_flag = f_verifica_flag_cntbl_cnta(ls_cnta_ctbl)
+				/**/
+				ls_flag_debhab  = ads_matriz_det.Object.flag_debhab [ll_imatriz]
+				ls_expresion	 =	'origen    = '+"'"+as_origen+"'"+' AND ano = '+Trim(String(al_ano))+' AND mes = '+Trim(String(al_mes))+&
+									   ' AND nro_libro = '+Trim(String(al_nro_libro))+' AND nro_asiento = '+Trim(String(al_nro_asiento))+&
+										' AND cnta_ctbl =	'+"'"+ls_cnta_ctbl+"'"+' AND flag_debhab	= '+"'"+ls_flag_debhab+"'"
+				
+				ll_found        = adw_destino.find(ls_expresion,1,adw_destino.rowcount())
+				ls_formula      = ads_matriz_det.Object.formula 	 [ll_imatriz]
+				ls_glosa_campo  = ads_matriz_det.Object.glosa_campo [ll_imatriz]
+				ls_glosa_texto	 = ads_matriz_det.Object.glosa_texto [ll_imatriz]
+				/*funcion de llenado de datastore*/
+				f_generacion_glosa_liquidacion(adw_origen_cab,adw_origen,ads_glosa,al_row_det,ls_cnta_ctbl,ls_desc_cnta)
+				/**/
+
+				/***********************/
+				li_pos_ini     = Pos(ls_formula,'[',li_pos) 
+				
+				IF li_pos_ini = 1 THEN       /*Formula Pura */
+					ldc_monto  = 0.00
+				ELSEIF li_pos_ini > 1 THEN	  /*Campo + Formula*/
+					ls_campo = Mid(ls_formula,1,li_pos_ini - 2)
+					ldc_monto  = adw_origen.Getitemnumber(al_row_det,ls_campo)
+				ELSEIF li_pos_ini = 0 THEN	  /*Campo*/
+					ldc_monto  = adw_origen.Getitemnumber(al_row_det,ls_formula)
+				END IF
+
+				
+				DO WHILE li_pos_ini > 0
+					li_cont ++
+					li_pos_fin = Pos(ls_formula,']',li_pos_ini) 
+					ls_armado [li_cont] = Mid(ls_formula,li_pos_ini + 1,li_pos_fin - (li_pos_ini + 1))
+					//Inicializa Valor
+					li_pos_ini = Pos(ls_formula,'[',li_pos_fin) 
+				LOOP
+				
+				/*****Calculo de Monto si existiese Formula*****/
+				IF UpperBound(ls_armado) > 0 THEN
+					FOR ll_inicio_for = 1 TO UpperBound(ls_armado)
+						 /*Inicializa Monto de Impuesto*/
+						 ls_expresion_form	= 'item = '+Trim(String(li_item))+' AND  '+ as_campo_formula+" = '"+ls_armado[ll_inicio_for]+"'"
+
+						 ll_found_imp = adw_origen_imp.find(ls_expresion_form,1,adw_origen_imp.Rowcount())
+						 
+						 IF ll_found_imp > 0 THEN
+							 ls_signo  			 = adw_origen_imp.object.signo 	[ll_found_imp] 	
+							 ldc_importe_imp   = adw_origen_imp.object.importe	[ll_found_imp] 	
+							 
+							 IF ls_signo   = '+' THEN
+								 ldc_monto_imp = ldc_monto_imp + ldc_importe_imp
+							 ELSEIF ls_signo = '-'	THEN
+								 ldc_monto_imp = ldc_monto_imp - ldc_importe_imp
+							 END IF
+							 
+					    END IF
+					 NEXT
+					 
+					 ldc_monto = (ldc_monto + ldc_monto_imp)
+				END IF
+				
+			
+				/****/				
+				IF ll_found = 0 OR lb_flag THEN
+					/*Extraer Glosa*/
+					ls_desc_glosa = lnv_asiento_glosa.of_set_glosa(ads_glosa,1,ls_glosa_texto,ls_glosa_campo)
+					
+					ll_row_ins    = adw_destino.Insertrow(0)		
+					
+					adw_destino.Object.item		    [ll_row_ins] = ll_row_ins
+					adw_destino.Object.cnta_ctbl   [ll_row_ins] = ads_matriz_det.Object.cnta_ctbl  [ll_imatriz]
+					adw_destino.Object.flag_debhab [ll_row_ins] = ads_matriz_det.Object.flag_debhab[ll_imatriz]
+					adw_destino.Object.det_glosa   [ll_row_ins] = Mid(ls_desc_glosa,1,60)
+					adw_destino.Object.origen	    [ll_row_ins] = as_origen
+					adw_destino.Object.ano		    [ll_row_ins] = al_ano
+					adw_destino.Object.mes		    [ll_row_ins] = al_mes
+					adw_destino.Object.nro_libro   [ll_row_ins] = al_nro_libro
+					adw_destino.Object.nro_asiento [ll_row_ins] = al_nro_asiento
+					
+					IF ls_moneda = ls_soles THEN
+						adw_destino.Object.imp_movsol [ll_row_ins] = ldc_monto					
+						adw_destino.Object.imp_movdol [ll_row_ins] = Round(ldc_monto / ldc_tasa_cambio,2)
+					ELSEIF ls_moneda = ls_dolares THEN
+						adw_destino.Object.imp_movdol [ll_row_ins] = ldc_monto
+						adw_destino.Object.imp_movsol [ll_row_ins] = Round(ldc_monto * ldc_tasa_cambio,2)					
+					END IF
+					
+				ELSE
+					IF ls_moneda = ls_soles THEN
+						adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + ldc_monto					
+						adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + Round(ldc_monto / ldc_tasa_cambio,2)
+					ELSEIF ls_moneda = ls_dolares THEN
+						adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + ldc_monto
+						adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + Round(ldc_monto * ldc_tasa_cambio,2)					
+					END IF
+				END IF
+		  NEXT
+	 END IF
+
+
+//*Generacion de Pre Asiento de Impuestos *//		
+
+	FOR ll_inicio = 1 TO adw_origen_imp.Rowcount()
+  		 ls_cnta_ctbl  = adw_origen_imp.Object.cnta_ctbl [ll_inicio]
+		 li_item			= adw_origen_imp.Object.item  	  [ll_inicio]
+			
+		 IF Isnull(ls_cnta_ctbl) OR Trim(ls_cnta_ctbl) = '' THEN
+		 	 Messagebox('Fila de Impuestos Nº '+String(ll_inicio) ,' No se Ha ingresado Cuenta Contable de Impuesto')
+		 	 adw_destino.Reset()
+			 lb_retorno = FALSE
+			 adw_origen_imp.SetRow(ll_inicio)
+		  	 at_tab1.SelectedTab = 2
+		    EXIT
+		 END IF
+
+		 ls_flag_debhab  = adw_origen_imp.object.flag_dh_cxp [ll_inicio]
+		 
+		 ls_expresion	 =	'origen    = '+"'"+as_origen+"'"+' AND ano = '+Trim(String(al_ano))+' AND mes = '+Trim(String(al_mes))+&
+							   ' AND nro_libro = '+Trim(String(al_nro_libro))+' AND nro_asiento = '+Trim(String(al_nro_asiento))+&
+								' AND cnta_ctbl =	'+"'"+ls_cnta_ctbl+"'"+' AND flag_debhab	= '+"'"+ls_flag_debhab+"'"
+
+		 
+		 ll_found        = adw_destino.find(ls_expresion,1,adw_destino.rowcount())
+		 ldc_importe_imp = adw_origen_imp.Object.importe 	[ll_inicio]
+		 ls_desc_cnta	  = adw_origen_imp.object.desc_cnta [ll_inicio]			
+		 
+		   IF ll_found = 0 THEN
+				ll_row_ins    = adw_destino.Insertrow(0)		
+				adw_destino.Object.item		    [ll_row_ins] = ll_row_ins
+				adw_destino.Object.cnta_ctbl   [ll_row_ins] = ls_cnta_ctbl
+				adw_destino.Object.flag_debhab [ll_row_ins] = ls_flag_debhab
+				adw_destino.Object.det_glosa   [ll_row_ins] = Mid(ls_desc_cnta,1,60)
+				adw_destino.Object.origen	    [ll_row_ins] = as_origen
+				adw_destino.Object.ano		    [ll_row_ins] = al_ano
+				adw_destino.Object.mes		    [ll_row_ins] = al_mes
+				adw_destino.Object.nro_libro   [ll_row_ins] = al_nro_libro
+				adw_destino.Object.nro_asiento [ll_row_ins] = al_nro_asiento
+				
+				
+				IF ls_moneda = ls_soles THEN
+					adw_destino.Object.imp_movsol [ll_row_ins] = ldc_importe_imp					
+					adw_destino.Object.imp_movdol [ll_row_ins] = Round(ldc_importe_imp / ldc_tasa_cambio,2)
+				ELSEIF ls_moneda = ls_dolares THEN
+					adw_destino.Object.imp_movdol [ll_row_ins] = ldc_importe_imp
+					adw_destino.Object.imp_movsol [ll_row_ins] = Round(ldc_importe_imp * ldc_tasa_cambio,2)					
+				END IF
+					
+			ELSE
+				IF ls_moneda = ls_soles THEN
+					adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + ldc_importe_imp
+					adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + Round(ldc_importe_imp / ldc_tasa_cambio,2)
+				ELSEIF ls_moneda = ls_dolares THEN
+					adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + ldc_importe_imp
+					adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + Round(ldc_importe_imp * ldc_tasa_cambio,2)					
+				END IF
+			END IF
+			
+	  NEXT
+	  
+Return lb_retorno 
+end function
+

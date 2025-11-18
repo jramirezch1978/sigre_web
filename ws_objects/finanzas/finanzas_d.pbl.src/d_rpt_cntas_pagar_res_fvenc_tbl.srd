@@ -1,0 +1,56 @@
+﻿$PBExportHeader$d_rpt_cntas_pagar_res_fvenc_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=484 color="536870912" )
+header[2](height=64 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=nom_proveedor dbname="nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=saldo_dol dbname="saldo_dol" )
+ retrieve="  SELECT ~"PROVEEDOR~".~"NOM_PROVEEDOR~", 
+		   
+			to_char(~"CNTAS_PAGAR~".~"VENCIMIENTO~",'YYYY/MM') AS ANO_MES,
+         DECODE(~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~",(SELECT COD_DOLARES FROM LOGPARAM WHERE RECKEY = '1'),~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~" ,~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~") * (~"DOC_PENDIENTES_CTA_CTE~".~"FACTOR~" * -1) as saldo_Dol
+    FROM ~"CNTAS_PAGAR~",   
+         ~"PROVEEDOR~",   
+         ~"FORMA_PAGO~",   
+         ~"DOC_PENDIENTES_CTA_CTE~"  
+   WHERE (  ~"PROVEEDOR~".~"PROVEEDOR~"                              = ~"CNTAS_PAGAR~".~"COD_RELACION~"            ) and  
+         (  forma_pago.forma_pago (+)                            = cntas_pagar.forma_pago                              ) and  
+         (  ~"CNTAS_PAGAR~".~"COD_RELACION~"                         = ~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" ) and  
+         (  ~"CNTAS_PAGAR~".~"TIPO_DOC~"                             = ~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~"     ) and  
+         (  ~"CNTAS_PAGAR~".~"NRO_DOC~"                              = ~"DOC_PENDIENTES_CTA_CTE~".~"NRO_DOC~"      ) and  
+         ( ( To_char(~"CNTAS_PAGAR~".~"VENCIMIENTO~",'yyyymmdd') >= :as_dia_inicio                          )  AND  
+			  ( To_char(~"CNTAS_PAGAR~".~"VENCIMIENTO~",'yyyymmdd') <= :as_dia_final	                          )) AND
+           (~"CNTAS_PAGAR~".~"ORIGEN~"										  Like :as_origen										  )  AND
+           ( ~"CNTAS_PAGAR~".~"FLAG_PROVISIONADO~"                  = 'R'                                                    )    AND
+        ( ((~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"               =  (SELECT COD_SOLES FROM LOGPARAM WHERE RECKEY = '1')   )    AND  
+           (~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~"                 >  0                                                     ))   OR  
+          ((~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"               =  (SELECT COD_DOLARES FROM LOGPARAM WHERE RECKEY = '1') )    AND  
+           (~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~"                >  0                                                     )) ) 
+ORDER BY to_char(~"CNTAS_PAGAR~".~"VENCIMIENTO~",'YYYYMM')" arguments=(("as_dia_inicio", string),("as_dia_final", string),("as_origen", string))  sort="nom_proveedor A " )
+text(band=header[1] alignment="0" text="Saldo Dol" border="0" color="33554432" x="9" y="428" height="48" width="882" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header[1] alignment="0" text="Ano Mes" border="6" color="33554432" x="901" y="420" height="48" width="343" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+text(band=header[2] alignment="0" text="Nom Proveedor" border="6" color="33554432" x="9" y="4" height="48" width="882" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+text(band=header[2] alignment="0" text="@ano_mes" border="6" color="33554432" x="901" y="4" height="48" width="343" html.valueishtml="0"  name=saldo_dol_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+text(band=header[2] alignment="2" text="Total " border="6" color="33554432" x="1253" y="4" height="48" width="302" html.valueishtml="0"  name=grand_sum_saldo_dol_t visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15793151" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="60" width="882" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="33554432" x="905" y="4" height="60" width="338" format="[general]" html.valueishtml="0"  name=saldo_dol visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="0" color="33554432" x="1253" y="4" height="60" width="302" format="###,###.00" html.valueishtml="0"  name=grand_sum_saldo_dol visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(grand_sum_saldo_dol for all )"border="0" color="33554432" x="1253" y="4" height="60" width="302" format="###,###.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(saldo_dol for all )"border="0" color="33554432" x="901" y="4" height="60" width="343" format="###,###.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="~"Total : ~""border="0" color="33554432" x="5" y="4" height="60" width="887" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="" border="0" color="0" x="105" y="244" height="48" width="471" html.valueishtml="0"  name=t_nombre visible="1"  resizeable=1  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=foreground filename="H:\Source\BMP\blanco.bmp" x="105" y="12" height="208" width="471" border="0"  name=p_logo visible="1"  resizeable=1  moveable=1 )
+compute(band=foreground alignment="0" expression="page() + ' of ' + pageCount()"border="0" color="0" x="3899" y="236" height="48" width="539" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  resizeable=1  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="1" text="Usuario :" border="0" color="0" x="3616" y="168" height="48" width="251" html.valueishtml="0"  name=t_3 visible="1"  resizeable=1  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="1" text="Pag :" border="0" color="0" x="3621" y="236" height="48" width="247" html.valueishtml="0"  name=t_4 visible="1"  resizeable=1  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="" border="0" color="0" x="3890" y="164" height="48" width="274" html.valueishtml="0"  name=t_user visible="1"  resizeable=1  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="today()"border="0" color="0" x="3890" y="88" height="48" width="137" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  resizeable=1  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "ano_mes" rows = "nom_proveedor" values = "sum(saldo_dol for crosstab)" sourcenames = "nom_proveedor, ano_mes, saldo_dol")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

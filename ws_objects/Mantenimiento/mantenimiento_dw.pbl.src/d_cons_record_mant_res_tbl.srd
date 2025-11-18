@@ -1,0 +1,38 @@
+﻿$PBExportHeader$d_cons_record_mant_res_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=64 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=flag_manten dbname="tt_record_manten.flag_manten" values="Preventivo	P/Predictivo	M/Correctivo	C/Regular	R/Otros	O/Diario	D/" )
+ column=(type=number updatewhereclause=yes name=gtos_insumos dbname="gtos_insumos" )
+ column=(type=number updatewhereclause=yes name=gtos_operativos dbname="gtos_operativos" )
+ column=(type=number updatewhereclause=yes name=gtos_total dbname="gtos_total" )
+ retrieve="  SELECT ~"TT_RECORD_MANTEN~".~"FLAG_MANTEN~",   
+         SUM(gtos_insumos)  AS gtos_insumos,   
+         SUM(gtos_operativos)  AS gtos_operativos,  
+			SUM(gtos_insumos + gtos_operativos) AS gtos_total
+    FROM ~"TT_RECORD_MANTEN~"  
+   WHERE ( ~"TT_RECORD_MANTEN~".~"COD_MAQUINA~" like :as_cod_maquina ) AND  
+         ( ~"TT_RECORD_MANTEN~".~"CENCOS_RSP~" like :as_cencos ) AND  
+         ( ~"TT_RECORD_MANTEN~".~"FLAG_MANTEN~" like :as_flag_manten )   
+GROUP BY ~"TT_RECORD_MANTEN~".~"FLAG_MANTEN~"   
+" arguments=(("as_cod_maquina", string),("as_cencos", string),("as_flag_manten", string)) )
+text(band=header alignment="2" text="Gastos Insumos" border="2" color="0" x="347" y="8" height="56" width="425"  name=gtos_insumos_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Gastos Operativos" border="2" color="0" x="782" y="8" height="56" width="466"  name=gtos_operativos_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Ind. Manten" border="2" color="0" x="9" y="8" height="56" width="329"  name=flag_manten_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Gastos Totales" border="2" color="0" x="1257" y="8" height="56" width="393"  name=t_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="% Part." border="2" color="0" x="1659" y="8" height="56" width="265"  name=t_3  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="56" width="329" format="[general]"  name=flag_manten pointer="H:\Source\Cur\Help.cur" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="0" x="347" y="0" height="56" width="425" format="[general]"  name=gtos_insumos editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="782" y="0" height="56" width="466" format="[general]"  name=gtos_operativos editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="1257" y="0" height="56" width="393" format="[general]"  name=gtos_total editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="(  gtos_total  /  total  ) * 100"border="2" color="0" x="1659" y="0" height="56" width="265" format="###,###.00"  name=part  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  gtos_insumos  for all )"border="2" color="0" x="347" y="4" height="56" width="425" format="###,###.00"  name=total_ins  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  gtos_operativos  for all )"border="2" color="0" x="782" y="4" height="56" width="466" format="###,###.00"  name=total_ope  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total :" border="2" color="0" x="9" y="4" height="56" width="329"  name=t_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=summary alignment="1" expression="sum(  gtos_total  for all )"border="2" color="0" x="1257" y="4" height="56" width="393" format="###,###.00"  name=total  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  part  for all )"border="2" color="0" x="1659" y="4" height="56" width="265" format="###,###.00"  name=total_part  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,28 @@
+﻿$PBExportHeader$d_lista_trabajador_x_labor_pd_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="cod_trabajador" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="nom_proveedor" )
+ retrieve="( SELECT l.cod_trabajador, p.nom_proveedor 
+    FROM labor_trabajador l, proveedor p  
+   WHERE l.cod_trabajador = p.proveedor 
+     AND l.cod_labor = :as_cod_labor 
+     AND l.cod_ejecutor = :as_cod_ejecutor ) 
+MINUS
+( SELECT pd.cod_trabajador, pr.nom_proveedor 
+    FROM pd_ot_asistencia pd, proveedor pr 
+   WHERE pd.no_parte = :as_nro_parte 
+     AND pd.nro_item = :an_nro_item )" arguments=(("as_cod_labor", string),("as_cod_ejecutor", string),("as_nro_parte", string),("an_nro_item", number)) )
+text(band=header alignment="2" text="Trabajador" border="2" color="33554432" x="5" y="4" height="56" width="279" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="64" width="279" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nombre" border="2" color="33554432" x="288" y="4" height="56" width="1216" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="288" y="4" height="64" width="1216" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,20 @@
+﻿$PBExportHeader$d_sel_presup_partida_cnta_cc.srd
+$PBExportComments$Muestra los centros de costo que hay en presupuesto_partida
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="presupuesto_partida.cnta_prsp" )
+ column=(type=char(50) updatewhereclause=yes name=presupuesto_cuenta_descripcion dbname="presupuesto_cuenta.descripcion" )
+ retrieve="PBSELECT( VERSION(400) DISTINCT ()TABLE(NAME=~"presupuesto_partida~" )  TABLE(NAME=~"presupuesto_cuenta~" ) COLUMN(NAME=~"presupuesto_partida.cnta_prsp~") COLUMN(NAME=~"presupuesto_cuenta.descripcion~")    JOIN (LEFT=~"presupuesto_partida.cnta_prsp~"    OP =~"=~"RIGHT=~"presupuesto_cuenta.cnta_prsp~" )WHERE(    EXP1 =~"~~~"PRESUPUESTO_PARTIDA~~~".~~~"ANO~~~"~"   OP =~"=~"    EXP2 =~":an_ano~"    LOGIC =~"and~" ) WHERE(    EXP1 =~"~~~"PRESUPUESTO_PARTIDA~~~".~~~"CENCOS~~~"~"   OP =~"=~"    EXP2 =~":as_cencos~" ) ) ARG(NAME = ~"an_ano~" TYPE = number)  ARG(NAME = ~"as_cencos~" TYPE = string) " arguments=(("an_ano", number),("as_cencos", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="4" height="60" width="311" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="329" y="4" height="60" width="1143" format="[general]" html.valueishtml="0"  name=presupuesto_cuenta_descripcion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cnta Prsp" border="2" color="0" x="9" y="8" height="56" width="311" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024"  height.autosize=yes)
+text(band=header alignment="2" text="Presupuesto Cuenta Descripcion" border="2" color="0" x="329" y="8" height="56" width="1143" html.valueishtml="0"  name=presupuesto_cuenta_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="10789024" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

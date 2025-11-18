@@ -1,0 +1,8 @@
+﻿$PBExportHeader$dp_establec.srp
+PIPELINE(source_connect=RTPS,destination_connect=oemlm1_work5,type=append,commit=100,errors=100,keyname="rrhh_tipo_establecimiento_rtp")
+SOURCE(name="estable",COLUMN(type=varchar,name="codigo",dbtype="Char(7)",nulls_allowed=yes)
+ COLUMN(type=varchar,name="descripcio",dbtype="Char(38)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"estable~" ) COLUMN(NAME=~"estable.codigo~") COLUMN(NAME=~"estable.descripcio~")) ")
+DESTINATION(name="rrhh_tipo_establecimiento_rtps",COLUMN(type=char,name="tipo_establecimiento",dbtype="CHAR(2)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="descripcion",dbtype="VARCHAR2(50)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_estado",dbtype="CHAR(1)",nulls_allowed=yes))

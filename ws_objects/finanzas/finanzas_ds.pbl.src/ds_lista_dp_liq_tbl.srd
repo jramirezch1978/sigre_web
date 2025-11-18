@@ -1,0 +1,99 @@
+﻿$PBExportHeader$ds_lista_dp_liq_tbl.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=64 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=origen dbname="cntas_cobrar.origen" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="doc_pendientes_cta_cte.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="doc_pendientes_cta_cte.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="doc_pendientes_cta_cte.nro_doc" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="doc_pendientes_cta_cte.cod_moneda" )
+ column=(type=number updatewhereclause=yes name=sldo_sol dbname="doc_pendientes_cta_cte.sldo_sol" )
+ column=(type=number updatewhereclause=yes name=saldo_dol dbname="doc_pendientes_cta_cte.saldo_dol" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tabla dbname="doc_pendientes_cta_cte.flag_tabla" )
+ column=(type=char(180) updatewhereclause=yes name=observacion dbname="cntas_cobrar.observacion" )
+ retrieve="SELECT 	cc.origen,
+			dp.cod_relacion,
+			dp.tipo_doc,
+			dp.nro_doc,
+			dp.cod_moneda,
+			dp.sldo_sol,
+			dp.saldo_dol,
+			dp.flag_tabla,
+			cc.observacion as observacion
+  FROM doc_pendientes_cta_cte dp,
+       cntas_cobrar cc
+ WHERE dp.cod_relacion = cc.cod_relacion AND
+       dp.tipo_doc     = cc.tipo_doc     AND
+       dp.nro_doc      = cc.nro_doc      AND
+       dp.flag_tabla   = '1'             AND
+		 dp.cod_relacion = :as_cod_relacion
+UNION
+SELECT 	lc.origen,
+			dp.cod_relacion,
+			dp.tipo_doc,
+			dp.nro_doc,
+			dp.cod_moneda,
+			dp.sldo_sol,
+			dp.saldo_dol,
+			dp.flag_tabla,
+			lc.observacion as observacion 
+  FROM doc_pendientes_cta_cte dp,
+       letras_x_cobrar lc
+ WHERE dp.cod_relacion = lc.cod_relacion AND
+       dp.tipo_doc     = (select f.doc_letra_cobrar from finparam f where f.reckey = '1') AND
+       dp.nro_doc      = lc.nro_letra    AND
+       dp.flag_tabla   = '2'             AND
+		 dp.cod_relacion = :as_cod_relacion
+UNION
+SELECT 	cp.origen,
+			dp.cod_relacion,
+			dp.tipo_doc,
+			dp.nro_doc,
+			dp.cod_moneda,
+			dp.sldo_sol,
+			dp.saldo_dol,
+			dp.flag_tabla,
+			cp.descripcion as observacion  
+  FROM doc_pendientes_cta_cte dp,
+       cntas_pagar cp
+ WHERE dp.cod_relacion = cp.cod_relacion AND
+       dp.tipo_doc     = cp.tipo_doc     AND
+       dp.nro_doc      = cp.nro_doc      AND
+       dp.flag_tabla   = '3'             AND
+		 dp.cod_relacion = :as_cod_relacion 
+UNION
+SELECT 	lp.origen,
+			dp.cod_relacion,
+			dp.tipo_doc,
+			dp.nro_doc,
+			dp.cod_moneda,
+			dp.sldo_sol,
+			dp.saldo_dol,
+			dp.flag_tabla,
+			lp.observacion as observacion
+  FROM doc_pendientes_cta_cte dp,
+       letras_x_pagar lp
+ WHERE dp.cod_relacion = lp.cod_relacion AND
+       dp.tipo_doc     = (select f.doc_letra_pagar from finparam f where f.reckey = '1') AND
+       dp.nro_doc      = lp.nro_letra    AND
+       dp.flag_tabla   = '4'             AND
+		 dp.cod_relacion = :as_cod_relacion" arguments=(("as_cod_relacion", string)) )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="9" y="4" height="56" width="187" html.valueishtml="0"  name=cntas_cobrar_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T. Doc" border="2" color="8388608" x="201" y="4" height="56" width="210" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="416" y="4" height="56" width="338" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="759" y="4" height="56" width="219" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo Dol" border="2" color="8388608" x="1339" y="4" height="56" width="352" html.valueishtml="0"  name=saldo_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo Sol" border="2" color="8388608" x="983" y="4" height="56" width="352" html.valueishtml="0"  name=sldo_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Observaciones" border="2" color="8388608" x="1696" y="4" height="56" width="2085" html.valueishtml="0"  name=observacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="56" width="187" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="201" y="4" height="56" width="210" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="416" y="4" height="56" width="338" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="759" y="4" height="56" width="219" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="1339" y="4" height="56" width="352" format="[general]" html.valueishtml="0"  name=saldo_dol visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="983" y="4" height="56" width="352" format="[general]" html.valueishtml="0"  name=sldo_sol visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="1696" y="4" height="56" width="2085" format="[general]" html.valueishtml="0"  name=observacion visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

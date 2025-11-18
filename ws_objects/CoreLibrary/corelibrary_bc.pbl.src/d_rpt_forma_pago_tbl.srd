@@ -1,0 +1,166 @@
+﻿$PBExportHeader$d_rpt_forma_pago_tbl.srd
+release 17;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=36 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=392 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" height.autosize=yes )
+table(column=(type=char(33) updatewhereclause=yes name=forma_pago dbname="forma_pago" )
+ column=(type=char(73) updatewhereclause=yes name=texto1 dbname="texto1" )
+ column=(type=char(41) updatewhereclause=yes name=texto2 dbname="texto2" )
+ column=(type=char(35) updatewhereclause=yes name=texto3 dbname="texto3" )
+ column=(type=char(73) updatewhereclause=yes name=texto4 dbname="texto4" )
+ column=(type=char(26) updatewhereclause=yes name=texto5 dbname="texto5" )
+ retrieve="select case 
+        when t.flag_forma_pago = 'E' then
+          'PAGO EN EFECTIVO'
+        when t.flag_forma_pago = 'T' then
+          'PAGO CON TARJETA DEBITO / CREDITO'
+        when t.flag_forma_pago = 'N' then
+          'APLICACION NC / ND'
+		  when t.flag_forma_pago = 'Y' then
+          'PAGO POR YAPE'
+		  when t.flag_forma_pago = 'P' then
+          'PAGO POR PLIN'
+        when t.flag_forma_pago = 'C' then
+				case	
+					when t.flag_tipo_credito = 'A' then
+          			'FINANCIMIENTO CREDITO DIRECTO'
+					when t.flag_tipo_credito = 'B' then
+						'CREDITO'
+					WHEN t.flag_tipo_credito = '1' then
+						'FACTURA A 7 DIAS'
+					WHEN t.flag_tipo_credito = '2' then
+						'FACTURA A 15 DIAS'
+					WHEN t.flag_tipo_credito = '3' then
+						'FACTURA A 30 DIAS'
+					WHEN t.flag_tipo_credito = '4' then
+						'FACTURA A 60 DIAS'
+					WHEN t.flag_tipo_credito = '5' then
+						'FACTURA A 90 DIAS'
+					WHEN t.flag_tipo_credito = '6' then
+						'FACTURA A 120 DIAS'
+					WHEN t.flag_tipo_credito = '7' then
+						'FACTURA A 150 DIAS'
+					WHEN t.flag_tipo_credito = '8' then
+						'FACTURA A 180 DIAS'
+					WHEN t.flag_tipo_credito = '9' then
+						'FACTURA A 45 DIAS'
+					ELSE
+						'INDEFINIDO'
+				END
+        when t.flag_forma_pago = 'D' then
+          'DEPOSITO/ABONO BANCARIO'
+       end as forma_pago,
+		--texto 1
+		case 
+        when t.flag_forma_pago in ('E', 'N', 'H', 'D', 'Y', 'P') then
+          	'IMPORTE TOTAL = ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto, '999,990.00')) || '.'
+        when t.flag_forma_pago = 'T' then
+          'TIPO TARJETA: ' || DECODE(T.TIPO_TARJETA, 'V', 'VISA', 'M', 'MASTERCARD', 'A', 'AMERICAN EXPRESS', 'S', 'ESTILOS', 'D', 'DINNERS CLUB') 
+        	when t.flag_forma_pago = 'C' then
+				case	
+					WHEN t.flag_tipo_credito = '1' then
+						'Fecha Venc. = ' || to_char(a.FEC_REGISTRO + 7, 'dd/mm/yyyy') || '.'
+					WHEN t.flag_tipo_credito = '2' then
+						'Fecha Venc. = ' || to_char(a.FEC_REGISTRO + 15, 'dd/mm/yyyy') || '.'
+					WHEN t.flag_tipo_credito = '3' then
+						'Fecha Venc. = ' || to_char(a.FEC_REGISTRO + 30, 'dd/mm/yyyy') || '.'
+					WHEN t.flag_tipo_credito = '4' then
+						'Fecha Venc. = ' || to_char(a.FEC_REGISTRO + 60, 'dd/mm/yyyy') || '.'
+					WHEN t.flag_tipo_credito = '5' then
+						'Fecha Venc. = ' || to_char(a.FEC_REGISTRO + 90, 'dd/mm/yyyy') || '.'
+					WHEN t.flag_tipo_credito = '6' then
+						'Fecha Venc. = ' || to_char(a.FEC_REGISTRO + 120, 'dd/mm/yyyy') || '.'
+					WHEN t.flag_tipo_credito = '7' then
+						'Fecha Venc. = ' || to_char(a.FEC_REGISTRO + 150, 'dd/mm/yyyy') || '.'
+					WHEN t.flag_tipo_credito = '8' then
+						'Fecha Venc. = ' || to_char(a.FEC_REGISTRO + 190, 'dd/mm/yyyy') || '.'
+					when t.flag_tipo_Credito = 'B' then
+			 			'SON ' || TRIM(TO_CHAR(T.NRO_CUOTAS)) || ' LETRA(S) DE ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago / T.NRO_CUOTAS * (1 + T.PORC_INTERES/100), '999,990.00')) || '.'
+					ELSE
+						null
+				END
+
+		end as texto1,
+		-- texto 2
+		case 
+			when t.flag_forma_pago = 'E' then
+				'EFECTIVO      = ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago, '999,990.00')) || '.'
+			when t.flag_forma_pago = 'Y' then
+				'YAPE      = ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago, '999,990.00')) || '.'
+			when t.flag_forma_pago = 'P' then
+				'PLIN      = ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago, '999,990.00')) || '.'
+        	when t.flag_forma_pago = 'D' then
+				'DEPOSITO      = ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago, '999,990.00')) || '.'
+        	when t.flag_forma_pago in ('T', 'N') then
+         	'TOTAL MONTO: ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago, '999,990.00'))
+        	when t.flag_forma_pago = 'C' then
+				CASE
+					WHEN t.flag_tipo_credito = 'A' then
+			 			'INTERES FINANCIEMIENTO = ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago  * T.PORC_INTERES / 100, '999,990.00')) || '.'
+					when t.flag_tipo_credito in ('1', '2', '3', '4', '5', '6', '7', '8', '9') then
+						'IMPORTE = ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago, '999,990.00')) || '.'
+				end
+					
+		end as texto2,
+		--Nro de Pago o Tarjeta
+		case 
+        when t.flag_forma_pago = 'E' then
+				case 
+					when t.monto_pago > t.monto then 
+						'VUELTO        = ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago - t.monto, '999,990.00')) || '.'
+					else '' 
+				end  
+        	when t.flag_forma_pago = 'T' then
+          	'NUMERO: **** **** **** ' || TRIM(T.NRO_TJ4) || '.'
+        	when t.flag_forma_pago = 'N' then
+          	'APLICACION  ' || T.TIPO_REF || ' ' || T.NRO_REF
+			when t.forma_pago = 'C' then
+				case 
+					when t.flag_tipo_Credito = 'A' then
+						'MONTO FINANCIADO = ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago  * (1 + T.PORC_INTERES / 100), '999,990.00')) || '.'
+				end		
+       end as texto3,
+		--Texto 4
+		case 
+        	when t.flag_forma_pago = 'C' then
+				case 
+					when t.flag_tipo_Credito = 'A' then
+			 			'SON ' || TRIM(TO_CHAR(T.NRO_CUOTAS)) || ' LETRA(S) DE ' || trim(a.cod_moneda) || ' ' || trim(to_char(t.monto_pago / T.NRO_CUOTAS * (1 + T.PORC_INTERES/100), '999,990.00')) || '.'
+				end
+			else
+				null
+				
+       end as texto4,
+		--Texto 5
+		case 
+        	when t.flag_forma_pago = 'C' then
+				case
+					when t.flag_tipo_Credito = 'A' then
+			 			'Primer Venc. = ' || to_char(t.primer_vencimiento, 'dd/mm/yyyy') || '.'
+				end
+			else
+				null	
+       end as texto5
+from 	fs_factura_simpl_pagos t,
+		fs_factura_simpl		  a
+where a.nro_registro = t.nro_registro
+  and t.nro_registro = :as_nro_registro" arguments=(("as_nro_registro", string)) )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="60" width="1051" format="[general]" html.valueishtml="0"  name=forma_pago visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="68" height="60" width="1051" format="[general]" html.valueishtml="0"  name=texto1 visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="700"  font.family="3" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="132" height="60" width="1051" format="[general]" html.valueishtml="0"  name=texto2 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="700"  font.family="3" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="196" height="60" width="1051" format="[general]" html.valueishtml="0"  name=texto3 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="700"  font.family="3" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="260" height="60" width="1051" format="[general]" html.valueishtml="0"  name=texto4 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="700"  font.family="3" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="324" height="60" width="1051" format="[general]" html.valueishtml="0"  name=texto5 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Courier New" font.height="-8" font.weight="700"  font.family="3" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

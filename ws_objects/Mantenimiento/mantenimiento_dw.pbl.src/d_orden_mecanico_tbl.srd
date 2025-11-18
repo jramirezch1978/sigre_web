@@ -1,0 +1,31 @@
+﻿$PBExportHeader$d_orden_mecanico_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=60 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes key=yes name=cod_origen dbname="orden_mecanico.cod_origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_orden dbname="orden_mecanico.nro_orden" )
+ column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_trabajador dbname="orden_mecanico.cod_trabajador" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_funcion dbname="orden_mecanico.flag_funcion" values="Responsable	R/Mecanico	M/Electricista	E/Operador	O/Tecnicos	T/" )
+ column=(type=char(92) updatewhereclause=yes name=nombres dbname="nombres" )
+ retrieve="  SELECT ~"ORDEN_MECANICO~".~"COD_ORIGEN~",   
+         ~"ORDEN_MECANICO~".~"NRO_ORDEN~",   
+         ~"ORDEN_MECANICO~".~"COD_TRABAJADOR~",   
+         ~"ORDEN_MECANICO~".~"FLAG_FUNCION~",   
+         RTRIM(LTRIM(~"MAESTRO~".~"APEL_PATERNO~"))||' '||RTRIM(LTRIM(~"MAESTRO~".~"APEL_MATERNO~"))||' '||RTRIM(LTRIM(~"MAESTRO~".~"NOMBRE1~")) AS NOMBRES
+    FROM ~"ORDEN_MECANICO~",   
+         ~"MAESTRO~"  
+   WHERE ( orden_mecanico.cod_trabajador = maestro.cod_trabajador (+)) and  
+         ( ( ~"ORDEN_MECANICO~".~"COD_ORIGEN~" = :as_cod_origen ) AND  
+         ( ~"ORDEN_MECANICO~".~"NRO_ORDEN~" = :as_nro_orden ) )    
+" update="ORDEN_MECANICO" updatewhere=0 updatekeyinplace=no arguments=(("as_cod_origen", string),("as_nro_orden", string)) )
+text(band=header alignment="2" text="Codigo" border="2" color="0" x="14" y="0" height="56" width="722"  name=cod_trabajador_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Apellidos y Nombres" border="2" color="0" x="741" y="0" height="56" width="1042"  name=t_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Función" border="2" color="0" x="1787" y="0" height="56" width="567"  name=flag_funcion_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="0" tabsequence=10 border="2" color="0" x="14" y="0" height="48" width="722" format="[general]" protect="0~tIf(IsRowNew(), 0, 1)"  name=cod_trabajador edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="741" y="0" height="48" width="1042" format="[general]"  name=nombres edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=20 border="2" color="0" x="1787" y="0" height="48" width="567" format="[general]"  name=flag_funcion ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.useasborder=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

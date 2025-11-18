@@ -1,0 +1,71 @@
+﻿$PBExportHeader$d_rpt_dias_destajo_lab_tbl_1.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=576 color="536870912" )
+summary(height=4 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=maestro_cod_trabajador dbname="maestro.cod_trabajador" )
+ column=(type=char(123) updatewhereclause=yes name=nombre dbname="nombre" )
+ column=(type=char(10) updatewhereclause=yes name=maestro_cencos dbname="maestro.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(2) updatewhereclause=yes name=maestro_cod_afp dbname="maestro.cod_afp" )
+ column=(type=char(30) updatewhereclause=yes name=desc_afp dbname="admin_afp.desc_afp" )
+ column=(type=number updatewhereclause=yes name=dias_parte dbname="dias_parte" )
+ retrieve="SELECT m.cod_trabajador,
+       m.apel_paterno||' '||m.apel_materno||' '||m.nombre1||' '||m.nombre2 AS nombre,
+       m.cencos, c.desc_cencos,
+       m.cod_afp,
+		 f.desc_afp,
+       NVL(COUNT(distinct(p.nro_parte)),0) AS dias_parte
+
+ FROM  maestro              m,
+       centros_costo        c,
+       PD_OT_ASIST_DESTAJO  AD,
+       PD_OT                P,
+       admin_afp            f
+        
+ WHERE m.cencos             = c.cencos
+   AND m.cod_afp            = f.cod_afp(+)
+   AND M.COD_TRABAJADOR     = AD.COD_TRABAJADOR
+   AND p.nro_parte          = ad.nro_parte
+   AND AD.cod_trabajador    = :as_cod_trabajador
+   AND M.FLAG_ESTADO        <> 0
+   AND trunc(p.fecha) between trunc(:ad_fecha_1) and trunc(:ad_fecha_2)
+ 
+ GROUP BY
+       m.cod_trabajador,
+       m.apel_paterno||' '||m.apel_materno||' '||m.nombre1||' '||m.nombre2,
+       m.cencos, c.desc_cencos,
+       m.cod_afp,
+       f.desc_afp
+
+" arguments=(("ad_fecha_1", date),("ad_fecha_2", date),("as_cod_trabajador", string)) )
+bitmap(band=header filename="" x="37" y="84" height="268" width="421" border="0"  name=p_logo visible="1" )
+text(band=header alignment="1" text="" border="0" color="0" x="4206" y="256" height="56" width="261" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="3950" y="168" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="4050" y="88" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="REPORTE DE DIAS LABORADOS POR TRABAJADOR" border="0" color="0" x="763" y="100" height="60" width="1952" html.valueishtml="0"  name=t_7 visible="1"  font.face="Rockwell" font.height="-10" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="33554431" )
+text(band=header alignment="2" text="Nombre" border="2" color="16777215" x="430" y="444" height="128" width="1239" html.valueishtml="0"  name=nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Cod Trabajador" border="2" color="16777215" x="142" y="444" height="128" width="283" html.valueishtml="0"  name=maestro_cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Cencos" border="2" color="16777215" x="1673" y="444" height="128" width="302" html.valueishtml="0"  name=maestro_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Desc Cencos" border="2" color="16777215" x="1979" y="444" height="128" width="1125" html.valueishtml="0"  name=centros_costo_desc_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Cod Afp" border="2" color="16777215" x="3109" y="444" height="128" width="128" html.valueishtml="0"  name=maestro_cod_afp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Desc Afp" border="2" color="16777215" x="3232" y="444" height="128" width="581" html.valueishtml="0"  name=admin_afp_desc_afp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Dias" border="2" color="16777215" x="3817" y="444" height="128" width="229" html.valueishtml="0"  name=dias_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="430" y="4" height="52" width="1239" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=123 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="142" y="4" height="52" width="283" format="[general]" html.valueishtml="0"  name=maestro_cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1673" y="4" height="52" width="302" format="[general]" html.valueishtml="0"  name=maestro_cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1979" y="4" height="52" width="1125" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="3109" y="4" height="52" width="128" format="[general]" html.valueishtml="0"  name=maestro_cod_afp visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="3241" y="4" height="52" width="576" format="[general]" html.valueishtml="0"  name=desc_afp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Del:" border="0" color="0" x="1225" y="252" height="52" width="105" html.valueishtml="0"  name=t_4 visible="1"  font.face="Times New Roman" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Al:" border="0" color="0" x="1847" y="252" height="52" width="105" html.valueishtml="0"  name=t_5 visible="1"  font.face="Times New Roman" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="4" color="0" x="1957" y="252" height="52" width="434" html.valueishtml="0"  name=t_fecha2 visible="1"  font.face="Times New Roman" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="4" color="0" x="1339" y="252" height="52" width="480" html.valueishtml="0"  name=t_fecha1 visible="1"  font.face="Times New Roman" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="1" tabsequence=0 border="2" color="33554432" x="3822" y="4" height="52" width="224" format="#,##0.00" html.valueishtml="0"  name=dias_parte visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="o" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><d_rpt_dias_destajo_lab_tbl_1><d_rpt_dias_destajo_lab_tbl_1_row __pbband=~"detail~"><maestro_cod_trabajador>maestro_cod_trabajador</maestro_cod_trabajador><nombre>nombre</nombre><maestro_cencos>maestro_cencos</maestro_cencos><centros_costo_desc_cencos>centros_costo_desc_cencos</centros_costo_desc_cencos><maestro_cod_afp>maestro_cod_afp</maestro_cod_afp><admin_afp_desc_afp>desc_afp</admin_afp_desc_afp><dias/></d_rpt_dias_destajo_lab_tbl_1_row></d_rpt_dias_destajo_lab_tbl_1>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

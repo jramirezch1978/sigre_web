@@ -1,0 +1,54 @@
+﻿$PBExportHeader$d_cons_soli_ord_tra_res.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=120 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=solicitud_ot_nro_solicitud dbname="solicitud_ot.nro_solicitud" )
+ column=(type=char(10) updatewhereclause=yes name=solicitud_ot_cencos_slc dbname="solicitud_ot.cencos_slc" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=datetime updatewhereclause=yes name=solicitud_ot_fecha_esperada dbname="solicitud_ot.fecha_esperada" )
+ column=(type=char(1) updatewhereclause=yes name=solicitud_ot_flag_estado dbname="solicitud_ot.flag_estado" values="Anulado	0/Pendiente	1/Aceptado	2/Rechazado	3/" )
+ column=(type=char(400) updatewhereclause=yes name=solicitud_ot_descripcion dbname="solicitud_ot.descripcion" )
+ column=(type=char(10) updatewhereclause=yes name=orden_trabajo_nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(1) updatewhereclause=yes name=orden_trabajo_flag_estado dbname="orden_trabajo.flag_estado" values="Cerrada	2/Abierta	1/" )
+ retrieve="  SELECT ~"SOLICITUD_OT~".~"NRO_SOLICITUD~",   
+         ~"SOLICITUD_OT~".~"CENCOS_SLC~",   
+         ~"CENTROS_COSTO~".~"DESC_CENCOS~",   
+         ~"SOLICITUD_OT~".~"FECHA_ESPERADA~",   
+			~"SOLICITUD_OT~".~"FLAG_ESTADO~",
+         ~"SOLICITUD_OT~".~"DESCRIPCION~",   
+         ~"ORDEN_TRABAJO~".~"NRO_ORDEN~",   
+         ~"ORDEN_TRABAJO~".~"FLAG_ESTADO~"  
+    FROM ~"SOLICITUD_OT~",   
+         ~"ORDEN_TRABAJO~",   
+         ~"CENTROS_COSTO~"  
+   WHERE ( solicitud_ot.nro_solicitud = orden_trabajo.nro_solicitud (+)) and  
+         ( ~"SOLICITUD_OT~".~"CENCOS_SLC~" = ~"CENTROS_COSTO~".~"CENCOS~" ) and  
+         ( ( ~"SOLICITUD_OT~".~"FECHA_ESPERADA~" between :ad_fec_inicio and :ad_fec_fin ) AND  
+         ( ~"SOLICITUD_OT~".~"CENCOS_RSP~" = :as_cencos_rsp ) )    
+" arguments=(("ad_fec_inicio", date),("ad_fec_fin", date),("as_cencos_rsp", string)) )
+text(band=header alignment="2" text="Orden de Trabajo" border="2" color="0" x="2944" y="0" height="56" width="466"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Solicitante" border="2" color="0" x="265" y="4" height="52" width="914"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro 
+Solicitud" border="2" color="0" x="5" y="4" height="112" width="256"  name=solicitud_ot_nro_solicitud_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="CenCos" border="2" color="0" x="265" y="60" height="56" width="256"  name=solicitud_ot_cencos_slc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="526" y="60" height="56" width="654"  name=centros_costo_desc_cencos_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha
+Esperada" border="2" color="0" x="1184" y="4" height="112" width="256"  name=solicitud_ot_fecha_esperada_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripcion de la Solicitud" border="2" color="0" x="1655" y="60" height="56" width="1285"  name=solicitud_ot_descripcion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="0" x="2944" y="60" height="56" width="256"  name=orden_trabajo_nro_orden_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Estado" border="2" color="0" x="3205" y="60" height="56" width="206"  name=orden_trabajo_flag_estado_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="2" color="0" x="5" y="0" height="56" width="256" format="[general]"  name=solicitud_ot_nro_solicitud edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="265" y="0" height="56" width="256" format="[general]"  name=solicitud_ot_cencos_slc edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="526" y="0" height="56" width="654" format="[general]"  name=centros_costo_desc_cencos edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="1655" y="0" height="56" width="1285" format="[general]"  name=solicitud_ot_descripcion edit.limit=800 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="0" x="2944" y="0" height="56" width="256" format="[general]"  name=orden_trabajo_nro_orden edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="0" x="3205" y="0" height="56" width="206" format="[general]"  name=orden_trabajo_flag_estado edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.codetable=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="1184" y="0" height="56" width="256" format="dd/mm/yyyy"  name=solicitud_ot_fecha_esperada edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Estado" border="2" color="0" x="1445" y="60" height="56" width="206"  name=sol_ot_estado_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=5 alignment="0" tabsequence=0 border="2" color="0" x="1445" y="0" height="56" width="206"  name=solicitud_ot_flag_estado ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="solicitud_ot_nro_solicitud	solicitud_ot_cencos_slc	centros_costo_desc_cencos	solicitud_ot_fecha_esperada	solicitud_ot_descripcion")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

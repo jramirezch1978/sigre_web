@@ -1,0 +1,47 @@
+﻿$PBExportHeader$f_max_ano_mes.srf
+global type f_max_ano_mes from function_object
+end type
+
+forward prototypes
+global function boolean f_max_ano_mes (string as_codigo, ref integer ai_ano, ref integer ai_mes)
+end prototypes
+
+global function boolean f_max_ano_mes (string as_codigo, ref integer ai_ano, ref integer ai_mes);Integer 	li_ok
+string	ls_mensaje
+//create or replace procedure usp_fl_pesca_proy_permax (
+//       asi_nave      in String, 
+//       aio_ano       out fl_pesca_proy.ano%TYPE,
+//       aio_mes       out fl_pesca_proy.mes%TYPE, 
+//     	aso_mensaje   out varchar2,
+//       aio_ok        out number ) is
+
+DECLARE usp_fl_pesca_proy_permax PROCEDURE FOR
+	usp_fl_pesca_proy_permax( :as_codigo );
+
+EXECUTE usp_fl_pesca_proy_permax;
+
+IF SQLCA.sqlcode = -1 THEN
+	SetNull(ai_ano)
+	SetNull(ai_mes)
+	ls_mensaje = "PROCEDURE usp_fl_pesca_proy_permax: " + SQLCA.SQLErrText
+	Rollback ;
+	MessageBox('SQL error', ls_mensaje, StopSign!)	
+	return false
+END IF
+
+FETCH usp_fl_pesca_proy_permax 
+	INTO :ai_ano, :ai_mes, :ls_mensaje, :li_ok;
+	
+CLOSE usp_fl_pesca_proy_permax;
+
+if li_ok <> 1 then
+	SetNull(ai_ano)
+	SetNull(ai_mes)
+	MessageBox('Error PROCEDURE usp_fl_pesca_proy_permax', ls_mensaje, StopSign!)	
+	return false
+end if
+
+return true
+
+end function
+

@@ -1,0 +1,71 @@
+﻿$PBExportHeader$d_rpt_pallet_fusion_lbl.srd
+release 17;
+datawindow(units=3 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=2 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 500 print.margin.right = 100 print.margin.top = 100 print.margin.bottom = 100 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" label.name="Pin Fed Address 5.0 x 1.94 1-Across 4090" label.width=10000 label.height=7510 label.rows=1 label.rows.spacing=150 label.columns=1 label.columns.spacing=400 label.topdown=no label.sheet=yes label.shape=roundrectangle label.ellipse_height=176 label.ellipse_width=176 )
+detail(height=7514 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(6) updatewhereclause=yes name=almacen dbname="vale_mov.almacen" )
+ column=(type=char(13) updatewhereclause=yes name=nro_pallet dbname="articulo_mov.nro_pallet" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov.cod_art" )
+ column=(type=char(3000) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=char(3) updatewhereclause=yes name=und2 dbname="articulo.und2" )
+ column=(type=datetime updatewhereclause=yes name=fec_produccion dbname="tg_parte_empaque.fec_produccion" )
+ column=(type=datetime updatewhereclause=yes name=fec_empaque dbname="tg_parte_empaque.fec_empaque" )
+ column=(type=datetime updatewhereclause=yes name=fec_reproceso dbname="tg_parte_empaque.fec_reproceso" )
+ column=(type=number updatewhereclause=yes name=cant_producida dbname="cant_producida" )
+ column=(type=number updatewhereclause=yes name=total_caja dbname="total_caja" )
+ column=(type=char(0) updatewhereclause=yes name=titulo1 dbname="titulo1" )
+ column=(type=char(37) updatewhereclause=yes name=code_qr dbname="codigo_qr" )
+ retrieve="select vm.almacen, 
+       am.nro_pallet, 
+       am.cod_art,
+       a.desc_Art,
+       a.und,
+       a.und2,
+       te.fec_produccion,
+       te.fec_empaque,
+       te.fec_reproceso,
+       sum(am.cant_procesada) as cant_producida, 
+       sum(am.cant_proc_und2) as total_caja,
+     '' as titulo1,
+     'C:\SIGRE\resources\PNG\qr_example.png' as codigo_qr
+from vale_mov vm,
+     articulo_mov am,
+     articulo     a,
+     tg_parte_empaque    te,
+     tg_parte_empaque_und  teu
+where vm.nro_vale  = am.nro_vale
+  and am.cod_art   = a.cod_art
+  and te.nro_parte   = teu.nro_parte
+  and am.cus         = teu.codigo_cu
+  and vm.flag_estado <> '0'
+  and am.flag_estado <> '0'
+  and vm.nro_vale    = :as_nro_vale
+  and am.nro_pallet 	= :as_nro_pallet
+  and vm.almacen   	= :as_almacen
+group by vm.almacen, 
+         am.nro_pallet, 
+         am.cod_art,
+         a.desc_Art,
+         a.und,
+         a.und2,
+         te.fec_produccion,
+         te.fec_empaque,
+         te.fec_reproceso
+--having sum(t.saldo) > 0       
+" arguments=(("as_nro_pallet", string),("as_almacen", string),("as_nro_vale", string))  sort="fec_empaque A " )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="132" y="211" height="4630" width="5635" format="[general]" html.valueishtml="0"  name=code_qr visible="1" bitmapname=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="0" x="5926" y="211" height="846" width="3915" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_empaque visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-18" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="5953" y="1137" height="1799" width="3915" format="[general]" html.valueishtml="0"  name=titulo1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-18" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="0" x="105" y="6826" height="635" width="9604" format="[general]" html.valueishtml="0"  name=nro_pallet visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-15" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="105" y="4974" height="1825" width="9604" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-15" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
+export.xhtml()
+ 

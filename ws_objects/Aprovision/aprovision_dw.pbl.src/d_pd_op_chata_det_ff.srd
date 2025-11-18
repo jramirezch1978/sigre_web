@@ -1,0 +1,63 @@
+﻿$PBExportHeader$d_pd_op_chata_det_ff.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=320 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=tg_parte_piso_det_nro_parte dbname="tg_parte_piso_det.nro_parte" )
+ column=(type=decimal(0) updatewhereclause=yes name=tg_parte_piso_det_item dbname="tg_parte_piso_det.item" )
+ column=(type=char(8) updatewhereclause=yes name=tg_parte_piso_det_formato dbname="tg_parte_piso_det.formato" )
+ column=(type=char(8) updatewhereclause=yes name=tg_parte_piso_det_cod_maquina dbname="tg_parte_piso_det.cod_maquina" )
+ column=(type=char(4) updatewhereclause=yes name=tg_parte_piso_det_atributo dbname="tg_parte_piso_det.atributo" )
+ column=(type=datetime updatewhereclause=yes name=tg_parte_piso_det_hora_inicio dbname="tg_parte_piso_det.hora_inicio" )
+ column=(type=datetime updatewhereclause=yes name=tg_parte_piso_det_hora_fin dbname="tg_parte_piso_det.hora_fin" )
+ column=(type=decimal(0) updatewhereclause=yes name=tg_parte_piso_det_nro_lectura dbname="tg_parte_piso_det.nro_lectura" )
+ column=(type=decimal(0) updatewhereclause=yes name=tg_parte_piso_det_nro_control dbname="tg_parte_piso_det.nro_control" )
+ column=(type=decimal(3) updatewhereclause=yes name=tg_parte_piso_det_valor_lectura dbname="tg_parte_piso_det.valor_lectura" )
+ column=(type=char(40) updatewhereclause=yes name=desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(20) updatewhereclause=yes name=desc_atributo dbname="tg_med_act_atributo.descripcion" )
+ column=(type=decimal(3) updatewhereclause=yes name=medicion_min dbname="tg_fmt_med_act_det.medicion_min" )
+ column=(type=decimal(3) updatewhereclause=yes name=medicion_max dbname="tg_fmt_med_act_det.medicion_max" )
+ column=(type=char(25) updatewhereclause=yes name=unidad_desc_unidad dbname="unidad.desc_unidad" )
+ retrieve="  SELECT A.NRO_PARTE,   
+         A.ITEM,   
+         A.FORMATO,   
+         A.COD_MAQUINA,   
+         A.ATRIBUTO,   
+         A.HORA_INICIO,   
+         A.HORA_FIN,   
+         A.NRO_LECTURA,   
+			A.NRO_CONTROL,
+         A.VALOR_LECTURA,   
+         B.DESC_MAQ,   
+         C.DESCRIPCION,   
+         D.MEDICION_MIN,   
+         D.MEDICION_MAX,
+			E.DESC_UNIDAD  
+    FROM TG_PARTE_PISO_DET A,   
+         MAQUINA B,   
+         TG_MED_ACT_ATRIBUTO C,   
+         TG_FMT_MED_ACT_DET D,
+			UNIDAD E  
+   WHERE A.COD_MAQUINA = B.COD_MAQUINA and  
+         A.ATRIBUTO    = C.ATRIBUTO and  
+         A.COD_MAQUINA = D.COD_MAQUINA AND
+         A.FORMATO     = D.FORMATO AND
+         A.ATRIBUTO    = D.ATRIBUTO AND
+			E.UND			  = C.UND AND
+         A.NRO_PARTE = :as_parte 
+ORDER BY A.COD_MAQUINA ASC,   
+         A.ATRIBUTO ASC,
+         A.NRO_LECTURA ASC      " arguments=(("as_parte", string)) )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="5" color="33554432" x="398" y="176" height="56" width="311" format="[general]" html.valueishtml="0"  name=medicion_min visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Medicion Max:" border="0" color="33554432" x="750" y="176" height="56" width="375" html.valueishtml="0"  name=tg_fmt_med_act_det_medicion_max_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="5" color="33554432" x="1147" y="176" height="56" width="311" format="[general]" html.valueishtml="0"  name=medicion_max visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="5" color="33554432" x="398" y="96" height="56" width="1061" format="[general]" html.valueishtml="0"  name=desc_atributo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="5" color="33554432" x="398" y="16" height="56" width="1061" format="[general]" html.valueishtml="0"  name=desc_maq visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Maquina:" border="0" color="33554432" x="14" y="16" height="56" width="361" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Atributo:" border="0" color="33554432" x="14" y="96" height="56" width="361" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Medicion Min:" border="0" color="33554432" x="14" y="176" height="56" width="361" html.valueishtml="0"  name=tg_fmt_med_act_det_medicion_min_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="5" color="33554432" x="398" y="252" height="56" width="1061" format="[general]" html.valueishtml="0"  name=unidad_desc_unidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Unidad:" border="0" color="33554432" x="14" y="252" height="56" width="361" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

@@ -1,0 +1,111 @@
+﻿$PBExportHeader$f_gener_ctas_shared.srf
+global type f_gener_ctas_shared from function_object
+end type
+
+forward prototypes
+global function boolean f_gener_ctas_shared (datawindow adw_origen, ref datawindow adw_destino, ref datastore ads_matriz_det, string as_moneda, decimal adc_tasa_cambio, string as_cencos, string as_ctabco, string as_tipo_doc, string as_nro_doc, ref tab at_tab1)
+end prototypes
+
+global function boolean f_gener_ctas_shared (datawindow adw_origen, ref datawindow adw_destino, ref datastore ads_matriz_det, string as_moneda, decimal adc_tasa_cambio, string as_cencos, string as_ctabco, string as_tipo_doc, string as_nro_doc, ref tab at_tab1);Long 		 ll_inicio,ll_imatriz,ll_row_ins,ll_found, ll_i
+String    ls_c_fin,ls_matriz,ls_campo,ls_soles,ls_dolares,ls_ind_cencos,ls_ind_ctabco,&
+			 ls_ind_docref,ls_cnta_ctbl,ls_flag_debhab,ls_expresion
+Double    ldb_monto
+Boolean   lb_retorno = TRUE
+
+f_monedas(ls_soles,ls_dolares)
+
+adw_origen.Accepttext()
+
+//* Limpia Pre Asiento Detalle *//
+DO WHILE adw_destino.Rowcount() > 0
+	adw_destino.deleterow(0)
+LOOP
+	
+//FOR ll_inicio = 1 TO adw_origen.Rowcount()  //Recorro dw Origen de los items A generar Cuenta Contable
+	 ll_inicio = adw_origen.Getrow()
+	 ls_c_fin = adw_origen.object.confin [ll_inicio]	
+	 
+    IF Isnull(ls_c_fin) OR Trim(ls_c_fin) = '' THEN
+		 Messagebox('Item Nº '+String(ll_inicio) ,'Item No se Ha ingresado Concepto Financiero')
+		 adw_destino.Reset()
+ 		 lb_retorno = FALSE
+		 at_tab1.SelectedTab = 1
+		 return lb_retorno
+		 //EXIT
+
+	 ELSE
+		 //Insercion de Cuentas dependiendo de la Matriz Contable
+		  ls_matriz = adw_origen.object.matriz[ll_inicio]
+		  IF Isnull(ls_matriz) OR Trim(ls_matriz) = ''  THEN
+			  Messagebox('Aviso','Concepto Financiero Nº '+ls_c_fin+' No se ha Vinculado Matriz')
+		     adw_destino.Reset()
+ 		 	  lb_retorno = FALSE
+		 	  at_tab1.SelectedTab = 1
+           return lb_retorno
+			  //EXIT
+		  END IF
+		  
+		  ads_matriz_det.Retrieve(ls_matriz)					// Recuperación de Información de Matriz Detalle
+		  
+		  FOR ll_imatriz = 1 TO ads_matriz_det.Rowcount()
+
+				ls_cnta_ctbl 	= ads_matriz_det.Object.cnta_ctbl  [ll_imatriz]
+				ls_flag_debhab = ads_matriz_det.Object.flag_debhab[ll_imatriz]
+				ls_expresion 	= 'cnta_ctbl =	'+"'"+ls_cnta_ctbl+"'"+' AND flag_debhab	= '+"'"+ls_flag_debhab+"'"
+				ll_found       = adw_destino.find(ls_expresion,1,adw_destino.rowcount())
+				ls_campo	      = ads_matriz_det.Object.campo [ll_imatriz]
+				ldb_monto      = adw_origen.Getitemnumber(ll_inicio,ls_campo)
+				
+				IF ll_found = 0 THEN
+					ll_row_ins    = adw_destino.Insertrow(0)		
+					
+					ls_ind_cencos = ads_matriz_det.Object.flag_cencos [ll_imatriz]
+					ls_ind_ctabco = ads_matriz_det.Object.flag_ctabco [ll_imatriz]
+					ls_ind_docref = ads_matriz_det.Object.flag_doc_ref [ll_imatriz]
+					
+					adw_destino.Object.item		   [ll_row_ins] = ll_row_ins
+					adw_destino.Object.cnta_ctbl  [ll_row_ins] = ads_matriz_det.Object.cnta_ctbl  [ll_imatriz]
+					adw_destino.Object.flag_debhab[ll_row_ins] = ads_matriz_det.Object.flag_debhab[ll_imatriz]
+					
+					//adw_destino.Object.det_glosa  [ll_row_ins] = Trim(String(adw_origen.object.cantidad[ll_inicio])) +' '+ Trim(adw_origen.object.descripcion[ll_inicio])					
+					//*****//
+					//		 // 	
+					//*****//
+
+					IF ls_ind_cencos = '1' THEN
+						adw_destino.Object.cencos	   [ll_row_ins] = as_cencos
+					END IF
+
+					IF ls_ind_ctabco = '1' THEN
+						adw_destino.Object.cod_ctabco [ll_row_ins] = as_ctabco
+					END IF
+				
+					IF ls_ind_docref = '1' THEN
+						adw_destino.Object.tipo_docref [ll_row_ins] = as_tipo_doc
+						adw_destino.Object.nro_docref1 [ll_row_ins] = as_nro_doc
+					END IF
+					
+					IF as_moneda = ls_soles THEN
+						adw_destino.Object.imp_movsol [ll_row_ins] = ldb_monto					
+						adw_destino.Object.imp_movdol [ll_row_ins] = Round(ldb_monto / adc_tasa_cambio,2)
+					ELSEIF as_moneda = ls_dolares THEN
+						adw_destino.Object.imp_movdol [ll_row_ins] = ldb_monto
+						adw_destino.Object.imp_movsol [ll_row_ins] = Round(ldb_monto * adc_tasa_cambio,2)					
+					END IF
+						
+				ELSE
+					IF as_moneda = ls_soles THEN
+						adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + ldb_monto					
+						adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + Round(ldb_monto / adc_tasa_cambio,2)
+					ELSEIF as_moneda = ls_dolares THEN
+						adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + ldb_monto
+						adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + Round(ldb_monto * adc_tasa_cambio,2)					
+					END IF
+				END IF
+		  NEXT
+	 END IF
+//NEXT
+
+Return lb_retorno 
+end function
+

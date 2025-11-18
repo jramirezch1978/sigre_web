@@ -1,0 +1,51 @@
+﻿$PBExportHeader$d_jornal_horas_resumen_ctb.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=52 color="536870912" )
+summary(height=56 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=ot_adm_desc dbname="ot_adm_desc" )
+ column=(type=char(20) updatewhereclause=yes name=cod_trab dbname="cod_trab" )
+ column=(type=char(20) updatewhereclause=yes name=nom_trab dbname="nom_trab" )
+ column=(type=number updatewhereclause=yes name=horas dbname="horas" )
+ retrieve="select oa.descripcion as ot_adm_desc, 
+       a.cod_trabajador as cod_trab, 
+       cr.nombre as nom_trab, 
+       trunc(a.fec_movim) as fecha, 
+       (a.fec_hasta - a.fec_desde) * 24 as horas
+   from asistencia a
+      left outer join codigo_relacion cr on a.cod_trabajador = cr.cod_relacion
+      left outer join ot_administracion oa on a.ot_adm = oa.ot_adm
+      inner join maestro m on m.cod_trabajador = a.cod_trabajador
+   where a.ot_adm in (select distinct u.ot_adm from ot_adm_usuario u where trim(u.cod_usr) = trim(:asi_user))
+      and trunc(a.fec_movim) between trunc(:adi_ini) and trunc(:adi_fin)
+      and trim(m.cod_origen) = trim(:asi_cod_origen)
+   order by oa.descripcion, cr.nombre, a.fec_movim" arguments=(("asi_user", string),("asi_cod_origen", string),("adi_ini", date),("adi_fin", date))  sort="ot_adm_desc A cod_trab A nom_trab A " )
+group(level=1 header.height=0 trailer.height=56 by=("ot_adm_desc" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=0 trailer.height=4 by=("cod_trab" ) header.color="536870912" trailer.color="536870912" )
+text(band=header[1] alignment="0" text="Sum Of Horas" border="0" color="33554432" x="9" y="4" height="48" width="1093" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[1] alignment="0" text="Fechapp" border="0" color="33554432" x="1111" y="4" height="48" width="197" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="52" width="1093" format="[general]" html.valueishtml="0"  name=ot_adm_desc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="1111" y="4" height="52" width="197" format="[general]" html.valueishtml="0"  name=cod_trab visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1317" y="4" height="52" width="1006" format="[general]" html.valueishtml="0"  name=nom_trab visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="2331" y="4" height="52" width="219" format="[general]" html.valueishtml="0"  name=horas visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no crosstab.repeat=yes  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="2" color="255" x="2560" y="4" height="52" width="274" format="###,##0.00" html.valueishtml="0"  name=grand_sum_horas visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header[2] alignment="2" text="CÓDIGO" border="2" color="0" x="1111" y="4" height="44" width="197" html.valueishtml="0"  name=cod_trab_tx visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="NOMBRE" border="2" color="0" x="1317" y="4" height="44" width="1006" html.valueishtml="0"  name=nom_trab_tx visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="0" text="@fecha" border="2" color="0" x="2331" y="4" height="44" width="219" html.valueishtml="0"  name=horas_tx visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header[2] alignment="2" text="TOTAL" border="2" color="0" x="2560" y="4" height="44" width="274" html.valueishtml="0"  name=grand_sum_horas_tx visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=summary alignment="1" expression="~"TOTAL GENERAL~""border="2" color="255" x="9" y="4" height="48" width="1093" format="[general]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(horas for all )"border="2" color="255" x="2331" y="4" height="48" width="219" format="###,##0.00" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(grand_sum_horas for all )"border="2" color="255" x="2560" y="4" height="48" width="274" format="###,##0.00" html.valueishtml="0"  name=compute_9 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=trailer.1 alignment="1" expression="sum(grand_sum_horas for group 1)"border="2" color="255" x="2560" y="4" height="52" width="274" format="###,##0.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=trailer.1 alignment="1" expression="sum(horas for group 1)"border="2" color="16711680" x="2331" y="4" height="52" width="219" format="###,##0.00" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=trailer.1 alignment="1" expression="UPPER(ot_adm_desc + ~" Total~")"border="2" color="16711680" x="9" y="4" height="52" width="1093" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "fecha" rows = "ot_adm_desc, cod_trab, nom_trab" values = "sum(horas for crosstab)" sourcenames = "ot_adm_desc, cod_trab, nom_trab, fecha, horas")
+sparse(names="ot_adm_desc	cod_trab")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

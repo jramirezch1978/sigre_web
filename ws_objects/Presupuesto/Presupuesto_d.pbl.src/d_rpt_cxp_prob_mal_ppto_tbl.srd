@@ -1,0 +1,91 @@
+﻿$PBExportHeader$d_rpt_cxp_prob_mal_ppto_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=512 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=148 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="nom_proveedor" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="nro_doc" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="cod_moneda" )
+ column=(type=number update=yes updatewhereclause=yes name=importe_doc dbname="importe_doc" )
+ column=(type=number update=yes updatewhereclause=yes name=saldo_sol dbname="saldo_sol" )
+ column=(type=number update=yes updatewhereclause=yes name=saldo_dol dbname="saldo_dol" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_emision dbname="fecha_emision" )
+ column=(type=datetime update=yes updatewhereclause=yes name=vencimiento dbname="vencimiento" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="cnta_prsp" )
+ column=(type=char(180) updatewhereclause=yes name=descripcion dbname="descripcion" )
+ retrieve="(SELECT DISTINCT(cp.cod_relacion) as cod_relacion, p.nom_proveedor, 
+        cp.tipo_doc, cp.nro_doc, cp.cod_moneda, 
+        cp.importe_doc, cp.saldo_sol, cp.saldo_dol, 
+        cp.fecha_emision, cp.vencimiento, cpd.cencos, 
+        cpd.cnta_prsp, cp.descripcion
+   FROM cntas_pagar cp, cntas_pagar_det cpd, proveedor p  
+  WHERE (cp.cod_relacion=cpd.cod_relacion and 
+         cp.tipo_doc=cpd.tipo_doc and 
+         cp.nro_doc=cpd.nro_doc) 
+    AND (cp.cod_relacion=p.proveedor) 
+    AND (cp.flag_estado<>'0' and 
+			cp.cod_moneda=:as_soles and 
+			cp.importe_doc>0 and 
+			cp.importe_doc=cp.saldo_sol) 
+    AND (trunc(cp.vencimiento) between :ad_fec_ini and :ad_fec_fin))
+UNION 
+(SELECT DISTINCT(cp.cod_relacion) as cod_relacion, p.nom_proveedor, 
+        cp.tipo_doc, cp.nro_doc, cp.cod_moneda, 
+        cp.importe_doc, cp.saldo_sol, cp.saldo_dol, 
+        cp.fecha_emision, cp.vencimiento, cpd.cencos, 
+        cpd.cnta_prsp, cp.descripcion
+   FROM cntas_pagar cp, cntas_pagar_det cpd, proveedor p  
+  WHERE (cp.cod_relacion=cpd.cod_relacion and 
+         cp.tipo_doc=cpd.tipo_doc and 
+         cp.nro_doc=cpd.nro_doc) 
+    AND (cp.cod_relacion=p.proveedor) 
+    AND (cp.flag_estado<>'0' and 
+			cp.cod_moneda=:as_dolares and 
+			cp.importe_doc>0 and 
+			cp.importe_doc=cp.saldo_dol) 
+    AND (trunc(cp.vencimiento) between :ad_fec_ini and :ad_fec_fin))" arguments=(("as_soles", string),("as_dolares", string),("ad_fec_ini", date),("ad_fec_fin", date)) )
+bitmap(band=header filename="" x="5" y="8" height="212" width="325" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="5" y="240" height="40" width="325" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cod Relac" border="2" color="33554432" x="23" y="388" height="56" width="247" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nombre o razón social" border="2" color="33554432" x="283" y="388" height="56" width="850" html.valueishtml="0"  name=nom_proveedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="TDoc" border="2" color="33554432" x="1147" y="388" height="56" width="137" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="33554432" x="1298" y="388" height="56" width="311" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Fec Emision" border="2" color="33554432" x="1623" y="388" height="56" width="279" html.valueishtml="0"  name=fecha_emision_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Fec. Vcto." border="2" color="33554432" x="1915" y="388" height="56" width="302" html.valueishtml="0"  name=vencimiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Mon" border="2" color="33554432" x="2231" y="388" height="56" width="110" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Importe Doc" border="2" color="33554432" x="2354" y="388" height="56" width="329" html.valueishtml="0"  name=importe_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Saldo Sol" border="2" color="33554432" x="2697" y="388" height="56" width="329" html.valueishtml="0"  name=saldo_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="5" y="292" height="40" width="325" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Saldo Dol" border="2" color="33554432" x="3040" y="388" height="56" width="329" html.valueishtml="0"  name=saldo_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="3045" y="16" height="48" width="325" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="3045" y="84" height="48" width="325" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="3045" y="152" height="48" width="325" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="CUENTAS POR PAGAR PROBABLEMENTE MAL PRESUPUESTADAS" border="0" color="33554432" x="544" y="68" height="64" width="2176" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="544" y="196" height="64" width="2176" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Obervaciones" border="2" color="33554432" x="23" y="452" height="56" width="2661" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Saldo Sol" border="2" color="33554432" x="2697" y="452" height="56" width="329" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="Saldo Dol" border="2" color="33554432" x="3040" y="452" height="56" width="329" html.valueishtml="0"  name=cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="283" y="4" height="56" width="850" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="1147" y="4" height="56" width="137" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="1298" y="4" height="56" width="311" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="0" color="33554432" x="1623" y="4" height="56" width="279" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_emision visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="0" color="33554432" x="1915" y="4" height="56" width="302" format="dd/mm/yyyy" html.valueishtml="0"  name=vencimiento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="2231" y="4" height="56" width="110" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="2354" y="4" height="56" width="329" format="###,###.00" html.valueishtml="0"  name=importe_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=detail x1="23" y1="140" x2="3369" y2="140"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="23" y="4" height="56" width="247" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="2697" y="4" height="56" width="329" format="###,###.00" html.valueishtml="0"  name=saldo_sol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="3040" y="4" height="56" width="329" format="###,###.00" html.valueishtml="0"  name=saldo_dol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="2697" y="76" height="56" width="329" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="3040" y="76" height="56" width="329" format="[general]" html.valueishtml="0"  name=cnta_prsp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="33554432" x="23" y="76" height="56" width="2661" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

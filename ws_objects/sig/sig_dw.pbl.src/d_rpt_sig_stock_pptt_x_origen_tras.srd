@@ -1,0 +1,48 @@
+﻿$PBExportHeader$d_rpt_sig_stock_pptt_x_origen_tras.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=440 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=orden_traslado_nro_otr dbname="orden_traslado.nro_otr" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="fecha" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo_mov_proy.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=articulo_desc_art dbname="articulo.desc_art" )
+ retrieve="   SELECT ot.nro_otr, trunc(ot.fec_registro) as fecha, nvl(amp.cant_procesada,0)  as cantidad, amp.cod_art, a.desc_art
+     FROM orden_traslado ot, articulo_mov_proy amp, articulo a
+    WHERE ( ot.nro_otr = amp.nro_doc and
+            ot.flag_estado <> '0' and
+            amp.cod_art = a.cod_art and
+            amp.cod_origen = :as_origen and
+            amp.tipo_doc = :as_tipo ) 
+      AND ( amp.cod_art = :as_articulo) and
+          ( to_date(ot.fec_registro,'dd/mm/yyyy') between to_date(:ad_inicio_fec,'dd/mm/yyyy') and to_date(:ad_fin_fec,'dd/mm/yyyy') ) 
+    group by ot.nro_otr, ot.fec_registro, amp.cant_procesada, amp.cod_art, a.desc_art
+" arguments=(("ad_inicio_fec", date),("ad_fin_fec", date),("as_origen", string),("as_articulo", string),("as_tipo", string)) )
+group(level=1 header.height=84 trailer.height=76 by=("cod_art" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Movimientos Trastado de Almacen" border="0" color="33554432" x="581" y="76" height="64" width="1751" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="581" y="164" height="64" width="1751" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="14" y="16" height="204" width="347" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="9" y="236" height="40" width="352" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="2459" y="176" height="40" width="402" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="33554432" x="2459" y="104" height="40" width="402" format="dd/mm/yyyy hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="33554432" x="2459" y="40" height="40" width="402" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="9" y="288" height="40" width="576" html.valueishtml="0"  name=windows_t visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Nro Orden" border="2" color="33554432" x="366" y="372" height="64" width="443" html.valueishtml="0"  name=nro_vale_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Fecha" border="2" color="33554432" x="832" y="372" height="64" width="384" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header alignment="2" text="Cantidad" border="2" color="33554432" x="1243" y="372" height="64" width="512" html.valueishtml="0"  name=stk_bolsa_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=header.1 alignment="0" text="Articulo :" border="0" color="33554432" x="302" y="12" height="56" width="224" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=5 alignment="0" tabsequence=32766 border="0" color="0" x="837" y="12" height="56" width="2089" format="[general]" html.valueishtml="0"  name=articulo_desc_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="549" y="12" height="56" width="279" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="0" x="837" y="4" height="60" width="384" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="1253" y="4" height="60" width="512" format="[general]" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="0" x="379" y="8" height="56" width="434" format="[general]" html.valueishtml="0"  name=orden_traslado_nro_otr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(cantidad for group 1)"border="0" color="0" x="1253" y="4" height="60" width="512" format="#,##0" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=trailer.1 alignment="1" text="Totales :" border="0" color="0" x="997" y="8" height="56" width="242" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

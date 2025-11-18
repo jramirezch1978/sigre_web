@@ -1,0 +1,49 @@
+﻿$PBExportHeader$d_rpt_disponib_estructura_det2_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=304 color="536870912" )
+summary(height=64 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=fecha dbname="fecha" )
+ column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="mt_pd_grupo_trab_det.cod_maquina" )
+ column=(type=number updatewhereclause=yes name=und_trabajadas dbname="und_trabajadas" )
+ column=(type=number updatewhereclause=yes name=horas_incidencias dbname="horas_incidencias" )
+ column=(type=number updatewhereclause=yes name=horas_diponibles dbname="horas_diponibles" )
+ retrieve="  SELECT trunc(mc.fecha) as fecha,
+         md.cod_maquina,
+         sum(md.und_trabajadas) as und_trabajadas,
+         usf_mtt_horas_inc_x_maq(md.cod_maquina, trunc(mc.fecha)) as horas_incidencias,
+         usf_mtt_horas_disponibles(trunc(mc.fecha)) as horas_diponibles
+    FROM mt_pd_grupo_trab       mc,
+         mt_pd_grupo_trab_det   md,
+			maquina					  m
+   WHERE mc.nro_parte = md.nro_parte 
+     and md.cod_maquina = m.cod_maquina
+     AND trunc(mc.fecha) between trunc(:ad_fecha1) and trunc(:ad_fecha2)
+     and mc.cod_maquina = :as_cod_maquina
+GROUP BY trunc(mc.fecha), md.cod_maquina" arguments=(("as_cod_maquina", string),("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Horas Incid." border="2" color="33554432" x="1431" y="240" height="56" width="329" html.valueishtml="0"  name=horas_incidencia_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="0" text="Estructura :" border="0" color="33554432" x="891" y="56" height="56" width="288" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Máquina" border="2" color="33554432" x="160" y="240" height="56" width="247" html.valueishtml="0"  name=cod_maquina_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha" border="2" color="33554432" x="421" y="240" height="56" width="311" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Horas Trabaj" border="2" color="33554432" x="1088" y="240" height="56" width="329" html.valueishtml="0"  name=horas_trabaj_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Horas Incid." border="2" color="33554432" x="1431" y="240" height="56" width="329" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Horas Disp." border="2" color="33554432" x="745" y="240" height="56" width="329" html.valueishtml="0"  name=horas_disponib_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="%Disponibilidad" border="2" color="33554432" x="1774" y="240" height="56" width="361" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="160" y="12" height="56" width="247" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="421" y="12" height="56" width="311" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Total: " border="2" color="33554432" x="366" y="4" height="56" width="183" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if(   horas_diponibles > 0, 100 * (  horas_diponibles  -  horas_incidencias  )/  horas_diponibles  , 0 )"border="2" color="33554432" x="1774" y="12" height="56" width="361" format="###,##0.0000" html.valueishtml="0"  name=dispon_maquina visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="if(    tot_horas_disp > 0, 100 * (   tot_horas_disp -   total_hoas_inc )/  tot_horas_disp , 0 )"border="2" color="33554432" x="1774" y="4" height="56" width="361" format="###,##0.0000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="1431" y="12" height="56" width="329" format="###,##0.0000" html.valueishtml="0"  name=horas_incidencias visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(horas_incidencias for all)"border="2" color="33554432" x="1431" y="4" height="56" width="329" format="###,##0.0000" html.valueishtml="0"  name=total_hoas_inc visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(und_trabajadas for all)"border="2" color="33554432" x="1088" y="4" height="56" width="329" format="###,##0.0000" html.valueishtml="0"  name=tot_horas_trab visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(  horas_diponibles for all)"border="2" color="33554432" x="745" y="4" height="56" width="329" format="###,##0.0000" html.valueishtml="0"  name=tot_horas_disp visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1088" y="12" height="56" width="329" format="###,##0.0000" html.valueishtml="0"  name=und_trabajadas visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="745" y="12" height="56" width="329" format="###,##0.0000" html.valueishtml="0"  name=horas_diponibles visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

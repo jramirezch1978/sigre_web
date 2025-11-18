@@ -1,0 +1,65 @@
+﻿$PBExportHeader$d_abc_conformidad_servicio_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=116 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_conformidad dbname="conformidad_servicio_det.nro_conformidad" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_item dbname="conformidad_servicio_det.nro_item" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen_os dbname="conformidad_servicio_det.origen_os" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_os dbname="conformidad_servicio_det.nro_os" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=item_os dbname="conformidad_servicio_det.item_os" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="conformidad_servicio_det.cod_usr" )
+ column=(type=char(800) update=yes updatewhereclause=yes name=glosa dbname="conformidad_servicio_det.glosa" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="orden_servicio_det.oper_sec" )
+ column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="operaciones.nro_orden" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="orden_servicio.cod_moneda" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ retrieve="SELECT csd.nro_conformidad,
+       csd.nro_item,
+       csd.origen_os,
+       csd.nro_os,
+       csd.item_os,
+       csd.cod_usr,
+       csd.glosa,
+		 osd.oper_sec,
+		 op.nro_orden,
+		 os.cod_moneda,
+		 (osd.importe - osd.decuento) as importe
+  FROM conformidad_servicio_det  csd,
+		 orden_servicio				os,
+		 orden_servicio_det			osd,
+		 operaciones					op
+ WHERE os.cod_origen	 = osd.cod_origen
+	and os.nro_os		 = osd.nro_os
+	and osd.cod_origen = csd.origen_os
+   and osd.nro_os		 = csd.nro_os
+   and osd.nro_item	 = csd.item_os
+   and op.oper_sec	 = osd.oper_sec (+)
+   and csd.nro_conformidad = :as_nro_conformidad" update="conformidad_servicio_det" updatewhere=0 updatekeyinplace=yes arguments=(("as_nro_conformidad", string)) )
+text(band=header alignment="2" text="Item" border="2" color="16777215" x="9" y="8" height="56" width="151" html.valueishtml="0"  name=nro_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro Os" border="2" color="16777215" x="165" y="8" height="56" width="306" html.valueishtml="0"  name=nro_os_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Item Os" border="2" color="16777215" x="475" y="8" height="56" width="329" html.valueishtml="0"  name=item_os_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Glosa" border="2" color="16777215" x="809" y="8" height="56" width="1815" html.valueishtml="0"  name=glosa_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Usuario" border="2" color="16777215" x="2629" y="8" height="56" width="251" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nro OT" border="2" color="16777215" x="2885" y="8" height="56" width="306" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="OperSec" border="2" color="16777215" x="3195" y="8" height="56" width="306" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Importe" border="2" color="16777215" x="3506" y="8" height="56" width="425" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=summary alignment="1" text="Total:" border="0" color="0" x="3214" y="8" height="56" width="265" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(importe for all)"border="2" color="255" x="3611" y="4" height="64" width="311" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=summary id=10 alignment="0" tabsequence=40 border="2" color="255" x="3506" y="4" height="64" width="101" format="[general]" html.valueishtml="0"  name=cod_moneda_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="108" width="151" format="[general]" html.valueishtml="0"  name=nro_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="165" y="4" height="108" width="306" format="[general]" html.valueishtml="0"  name=nro_os visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="475" y="4" height="108" width="329" format="[general]" html.valueishtml="0"  name=item_os visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=7 alignment="0" tabsequence=10 border="2" color="33554432" x="809" y="4" height="108" width="1815" format="[general]" html.valueishtml="0"  name=glosa visible="1" edit.limit=800 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2629" y="4" height="108" width="251" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="2885" y="4" height="108" width="306" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="3195" y="4" height="108" width="306" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="33554432" x="3611" y="4" height="108" width="311" format="###,##0.00" html.valueishtml="0"  name=importe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="3506" y="4" height="108" width="101" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,63 @@
+﻿$PBExportHeader$w_ma302_orden_trabajo_rpt_prev.srw
+forward
+global type w_ma302_orden_trabajo_rpt_prev from w_report_smpl
+end type
+end forward
+
+global type w_ma302_orden_trabajo_rpt_prev from w_report_smpl
+integer x = 329
+integer y = 188
+string title = "Reporte de Orden de Trabajo (MA302RPT)"
+string menuname = "m_rpt_smpl"
+windowstate windowstate = maximized!
+end type
+global w_ma302_orden_trabajo_rpt_prev w_ma302_orden_trabajo_rpt_prev
+
+type variables
+Str_cns_pop istr_1
+end variables
+
+event ue_open_pre();call super::ue_open_pre;// 
+Long	ll_row, ll_total
+
+
+istr_1 = Message.PowerObjectParm					// lectura de parametros
+
+
+This.Event ue_retrieve()
+of_position(0,0)
+// ii_help = 101           // help topic
+
+
+end event
+
+event ue_retrieve;call super::ue_retrieve;
+idw_1.Visible = True
+idw_1.SettransObject(sqlca)
+
+
+
+idw_1.Retrieve(TRIM(istr_1.arg[1]),istr_1.arg[2],istr_1.arg[3])
+
+dw_report.object.dw_1.object.p_logo.filename = gs_logo
+
+end event
+
+on w_ma302_orden_trabajo_rpt_prev.create
+call super::create
+if this.MenuName = "m_rpt_smpl" then this.MenuID = create m_rpt_smpl
+end on
+
+on w_ma302_orden_trabajo_rpt_prev.destroy
+call super::destroy
+if IsValid(MenuID) then destroy(MenuID)
+end on
+
+type dw_report from w_report_smpl`dw_report within w_ma302_orden_trabajo_rpt_prev
+string dataobject = "d_rpt_formato_ot_prev_tbl"
+end type
+
+event dw_report::constructor;call super::constructor;is_dwform = 'form'  
+idw_1 = This
+end event
+

@@ -1,0 +1,69 @@
+﻿$PBExportHeader$d_lista_cntas_x_pagar_cab_grd.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=12632256 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes key=yes name=cod_relacion dbname="cntas_pagar.cod_relacion" )
+ column=(type=char(4) update=yes updatewhereclause=yes key=yes name=tipo_doc dbname="cntas_pagar.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_doc dbname="cntas_pagar.nro_doc" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="cntas_pagar.flag_estado" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_registro dbname="cntas_pagar.fecha_registro" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_emision dbname="cntas_pagar.fecha_emision" )
+ column=(type=datetime update=yes updatewhereclause=yes name=vencimiento dbname="cntas_pagar.vencimiento" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=forma_pago dbname="cntas_pagar.forma_pago" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=decimal(3) update=yes updatewhereclause=yes name=tasa_cambio dbname="cntas_pagar.tasa_cambio" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=total_pagar dbname="cntas_pagar.total_pagar" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=total_pagado dbname="cntas_pagar.total_pagado" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=cod_usr dbname="cntas_pagar.cod_usr" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=origen dbname="cntas_pagar.origen" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_libro dbname="cntas_pagar.nro_libro" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_provisional dbname="cntas_pagar.nro_provisional" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=descripcion dbname="cntas_pagar.descripcion" )
+ column=(type=char(25) updatewhereclause=yes name=desc_forma_pago dbname="forma_pago.desc_forma_pago" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=job dbname="cntas_pagar.job" )
+ column=(type=char(7) updatewhereclause=yes name=periodo dbname="periodo" )
+ retrieve="  SELECT ~"CNTAS_PAGAR~".~"COD_RELACION~",   
+         ~"CNTAS_PAGAR~".~"TIPO_DOC~",   
+         ~"CNTAS_PAGAR~".~"NRO_DOC~",   
+         ~"CNTAS_PAGAR~".~"FLAG_ESTADO~",   
+         ~"CNTAS_PAGAR~".~"FECHA_REGISTRO~",   
+         ~"CNTAS_PAGAR~".~"FECHA_EMISION~",   
+         ~"CNTAS_PAGAR~".~"VENCIMIENTO~",   
+         ~"CNTAS_PAGAR~".~"FORMA_PAGO~",   
+         ~"CNTAS_PAGAR~".~"COD_MONEDA~",   
+         ~"CNTAS_PAGAR~".~"TASA_CAMBIO~",   
+         ~"CNTAS_PAGAR~".~"TOTAL_PAGAR~",   
+         ~"CNTAS_PAGAR~".~"TOTAL_PAGADO~",   
+         ~"CNTAS_PAGAR~".~"COD_USR~",   
+         ~"CNTAS_PAGAR~".~"ORIGEN~",   
+         ~"CNTAS_PAGAR~".~"NRO_LIBRO~",   
+         ~"CNTAS_PAGAR~".~"NRO_PROVISIONAL~",   
+         ~"CNTAS_PAGAR~".~"DESCRIPCION~",   
+         ~"FORMA_PAGO~".~"DESC_FORMA_PAGO~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"CNTAS_PAGAR~".~"JOB~",   
+         to_char(~"CNTAS_PAGAR~".~"FECHA_REGISTRO~",'mm')||'/'||to_char(~"CNTAS_PAGAR~".~"FECHA_REGISTRO~",'yyyy') as PERIODO  
+    FROM ~"CNTAS_PAGAR~",   
+         ~"FORMA_PAGO~",   
+         ~"PROVEEDOR~"  
+   WHERE ( cntas_pagar.forma_pago = forma_pago.forma_pago (+)) and  
+         ( ~"CNTAS_PAGAR~".~"COD_RELACION~" = ~"PROVEEDOR~".~"PROVEEDOR~" )    
+" update="CNTAS_PAGAR" updatewhere=1 updatekeyinplace=no )
+text(band=header alignment="2" text="Tipo Doc" border="6" color="0" x="393" y="8" height="56" width="352"  name=cntas_pagar_tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Doc" border="6" color="0" x="754" y="8" height="56" width="384"  name=cntas_pagar_nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Estado" border="6" color="0" x="1147" y="8" height="56" width="238"  name=cntas_pagar_flag_estado_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cod Relacion" border="6" color="0" x="9" y="8" height="56" width="375"  name=cntas_pagar_cod_relacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fecha Registro" border="6" color="0" x="1394" y="8" height="56" width="416"  name=cntas_pagar_fecha_registro_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="5" color="0" x="9" y="4" height="56" width="375" format="[general]"  name=cod_relacion edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="5" color="0" x="393" y="4" height="56" width="352" format="[general]"  name=tipo_doc edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="5" color="0" x="754" y="4" height="56" width="384" format="[general]"  name=nro_doc edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="5" color="0" x="1147" y="4" height="56" width="238" format="[general]"  name=flag_estado edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="5" color="0" x="1394" y="4" height="56" width="416" format="[shortdate]"  name=fecha_registro edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=21 alignment="0" tabsequence=0 border="0" color="0" x="1824" y="0" height="56" width="151"  name=periodo visible="1~t0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Periodo" border="0" color="0" x="1819" y="4" height="56" width="155" visible="1~t0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

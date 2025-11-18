@@ -1,0 +1,97 @@
+﻿$PBExportHeader$d_comp_sug_cons_interno_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(6) updatewhereclause=yes name=almacen dbname="tt_compras_sugeridas.almacen" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="tt_compras_sugeridas.cod_art" )
+ column=(type=datetime updatewhereclause=yes name=fecha dbname="tt_compras_sugeridas.fecha" )
+ column=(type=decimal(4) updatewhereclause=yes name=ingresos dbname="tt_compras_sugeridas.ingresos" )
+ column=(type=decimal(4) updatewhereclause=yes name=salidas dbname="tt_compras_sugeridas.salidas" )
+ column=(type=decimal(4) updatewhereclause=yes name=saldo dbname="tt_compras_sugeridas.saldo" )
+ column=(type=decimal(4) updatewhereclause=yes name=disponible dbname="tt_compras_sugeridas.disponible" )
+ column=(type=decimal(4) updatewhereclause=yes name=por_comprar dbname="tt_compras_sugeridas.por_comprar" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_item dbname="tt_compras_sugeridas.nro_item" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_mov dbname="tt_compras_sugeridas.nro_mov" )
+ column=(type=char(6) updatewhereclause=yes name=tipo_mov dbname="tt_compras_sugeridas.tipo_mov" )
+ column=(type=char(20) updatewhereclause=yes name=operacion dbname="tt_compras_sugeridas.operacion" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="tt_compras_sugeridas.cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="tt_compras_sugeridas.cnta_prsp" )
+ column=(type=decimal(4) updatewhereclause=yes name=stock dbname="tt_compras_sugeridas.stock" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="tt_compras_sugeridas.flag_estado" )
+ column=(type=decimal(4) updatewhereclause=yes name=comp_sugerida dbname="tt_compras_sugeridas.comp_sugerida" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="tt_compras_sugeridas.oper_sec" )
+ column=(type=char(10) updatewhereclause=yes name=origen_mov_proy dbname="tt_compras_sugeridas.origen_mov_proy" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_mov_proy dbname="tt_compras_sugeridas.nro_mov_proy" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="tt_compras_sugeridas.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="tt_compras_sugeridas.nro_doc" )
+ retrieve="  SELECT TT.ALMACEN,
+			TT.COD_ART,   
+         TT.FECHA,   
+         TT.INGRESOS,   
+         TT.SALIDAS,   
+         TT.SALDO,   
+         TT.DISPONIBLE,   
+         TT.POR_COMPRAR,   
+         A.DESC_ART,   
+         A.UND,   
+         TT.NRO_ITEM,   
+         TT.NRO_MOV,   
+         TT.TIPO_MOV,   
+         TT.OPERACION,   
+         TT.CENCOS,   
+         TT.CNTA_PRSP,   
+         TT.STOCK,
+  			TT.FLAG_ESTADO,
+			TT.comp_sugerida,
+			TT.OPER_SEC,
+			TT.origen_mov_proy,
+			tt.nro_mov_proy,
+			tt.tipo_doc,
+			tt.nro_doc
+    FROM TT_COMPRAS_SUGERIDAS TT,   
+         ARTICULO 				A
+   WHERE TT.COD_ART 				= A.COD_ART 
+     and TT.TIPO_MOV = (Select OPER_CONS_INTERNO from logparam where reckey = '1')
+	  and NVL(A.FLAG_INVENTARIABLE, '0') = '1'
+     and TT.POR_COMPRAR > 0 
+     and trim(tt.origen_mov_proy) || trim(to_char(tt.nro_mov_proy)) not in (
+				SELECT trim(amp_origen) || trim(to_char(amp_nro)) 
+				FROM prog_compras_amp  	a,
+					  prog_compras_det	b
+				WHERE a.nro_programa = b.nro_programa
+              and a.nro_item		= b.nro_item
+				  and b.flag_estado = '1'
+				  and b.cant_proyect > NVL(b.cant_procesada,0))
+ORDER BY TT.ALMACEN ASC,
+			A.COD_ART ASC,   
+         TT.NRO_ITEM ASC   
+
+" )
+text(band=header alignment="2" text="Descripción Artículo" border="2" color="0" x="718" y="8" height="56" width="960" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cmp Sug" border="2" color="0" x="1682" y="8" height="56" width="315" html.valueishtml="0"  name=comp_sugerida_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="0" x="2002" y="8" height="56" width="114" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Oper_sec" border="2" color="0" x="2121" y="8" height="56" width="338" html.valueishtml="0"  name=oper_sec_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T.Doc" border="2" color="0" x="2464" y="8" height="56" width="137" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="0" x="2606" y="8" height="56" width="379" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cod Art" border="2" color="0" x="439" y="8" height="56" width="274" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Alm." border="2" color="0" x="14" y="8" height="56" width="183" html.valueishtml="0"  name=almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha" border="2" color="0" x="201" y="8" height="56" width="233" html.valueishtml="0"  name=fecha_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="0" x="718" y="4" height="56" width="960" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=19 alignment="1" tabsequence=32766 border="2" color="0" x="1682" y="4" height="56" width="315" format="###,##0.0000" html.valueishtml="0"  name=comp_sugerida visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="2" color="0" x="2002" y="4" height="56" width="114" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=20 alignment="2" tabsequence=32766 border="2" color="0" x="2121" y="4" height="56" width="338" format="[general]" html.valueishtml="0"  name=oper_sec visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=23 alignment="2" tabsequence=32766 border="2" color="0" x="2464" y="4" height="56" width="137" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=24 alignment="2" tabsequence=32766 border="2" color="0" x="2606" y="4" height="56" width="379" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="439" y="4" height="56" width="274" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="0" x="14" y="4" height="56" width="183" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="0" x="201" y="4" height="56" width="233" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif( flag_estado = '6', RGB(0,255,255), RGB(255,255,255) )" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

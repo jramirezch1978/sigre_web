@@ -1,0 +1,76 @@
+﻿$PBExportHeader$d_rpt_saldo_alm_transito_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=468 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912"  height.autosize=yes)
+table(column=(type=char(6) updatewhereclause=yes name=almacen dbname="almacen.almacen" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=char(10) updatewhereclause=yes name=orden_compra_nro_oc dbname="orden_compra.nro_oc" )
+ column=(type=char(8) updatewhereclause=yes name=proveedor dbname="proveedor.proveedor" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ retrieve="SELECT al.almacen, al.desc_almacen,
+       ar.cod_art, ar.desc_art, ar.und, 
+       oc.nro_oc, p.proveedor, p.nom_proveedor,
+       SUM(b.cant_procesada * amt.factor_sldo_total) AS cantidad
+FROM vale_mov_trans     a,
+     vale_mov_trans_det b,
+     articulo_mov_proy  amp,
+     almacen            al,
+     articulo           ar,
+     articulo_mov_tipo  amt,
+     orden_compra       oc,
+     proveedor          p
+WHERE a.nro_vale = b.nro_vale
+  AND b.Org_Amp_Oc = amp.cod_origen
+  AND b.nro_amp_oc = amp.nro_mov
+  AND amp.almacen  = al.almacen
+  AND b.cod_art    = ar.cod_art     
+  AND a.tipo_mov   = amt.tipo_mov
+  AND oc.nro_oc    = amp.nro_doc
+  AND amp.tipo_doc = (SELECT doc_oc FROM logparam WHERE reckey = '1')
+  AND p.proveedor  = oc.proveedor
+  AND a.flag_estado <> '0'
+  AND b.flag_estado <> '0'
+  and a.almacen	  = :as_almacen
+  and trunc(a.fec_documento) <= trunc(:ad_fecha)
+GROUP BY al.almacen, al.desc_almacen,
+       ar.cod_art, ar.desc_art, ar.und,
+       oc.nro_oc, p.proveedor, p.nom_proveedor 
+" arguments=(("as_almacen", string),("ad_fecha", date)) )
+group(level=1 header.height=68 trailer.height=0 by=("almacen" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="gs_logo" x="59" y="16" height="212" width="521" border="0"  name=p_logo visible="1" )
+text(band=header alignment="0" text="" border="0" color="0" x="59" y="240" height="48" width="622" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Garamond" font.height="-8" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Saldos Almacén Tránsito (Detalle)" border="0" color="0" x="955" y="28" height="96" width="1701" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2885" y="36" height="52" width="379" format="dd/mm/yyyy" html.valueishtml="0"  name=compute_3 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Pag : ' + page() + ' de ' + pageCount()"border="0" color="0" x="2885" y="168" height="52" width="379" format="[general]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="text" border="0" color="0" x="2885" y="100" height="52" width="357" html.valueishtml="0"  name=t_user visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="1051" y="224" height="52" width="1495" html.valueishtml="0"  name=t_almacen visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="1705" y="144" height="52" width="352" html.valueishtml="0"  name=fec_ini visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Al:" border="0" color="0" x="1591" y="144" height="52" width="101" html.valueishtml="0"  name=t_4 visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="59" y="300" height="48" width="622" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Garamond" font.height="-8" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Codigo" border="2" color="0" x="18" y="404" height="52" width="334" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="357" y="404" height="52" width="1289" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Und" border="2" color="0" x="1650" y="404" height="52" width="160" html.valueishtml="0"  name=und_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo Tránsito" border="2" color="0" x="1815" y="404" height="52" width="352" html.valueishtml="0"  name=saldo_total_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Orden Compra" border="2" color="0" x="2171" y="404" height="52" width="352" html.valueishtml="0"  name=t_2 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Proveedor" border="2" color="0" x="2528" y="404" height="52" width="832" html.valueishtml="0"  name=t_5 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="0" x="59" y="4" height="56" width="224" format="[general]" html.valueishtml="0"  name=almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="0" x="325" y="4" height="56" width="1381" format="[general]" html.valueishtml="0"  name=desc_almacen visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="18" y="4" height="56" width="334" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="357" y="4" height="56" width="1289" format="[general]" html.valueishtml="0"  name=desc_art visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1650" y="4" height="56" width="160" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="1815" y="4" height="56" width="352" format="###,##0.0000" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2171" y="4" height="56" width="352" format="[general]" html.valueishtml="0"  name=orden_compra_nro_oc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2528" y="4" height="56" width="215" format="[general]" html.valueishtml="0"  name=proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="2747" y="4" height="56" width="599" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

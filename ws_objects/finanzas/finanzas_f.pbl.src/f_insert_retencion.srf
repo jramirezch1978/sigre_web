@@ -1,0 +1,34 @@
+﻿$PBExportHeader$f_insert_retencion.srf
+global type f_insert_retencion from function_object
+end type
+
+forward prototypes
+global function boolean f_insert_retencion (string as_nro_certificado, datetime adt_fecha_emision, string as_origen, string as_flag_estado, ref string as_mensaje, string as_flag_tabla, decimal adc_saldo_sol, decimal adc_saldo_dol, string as_cod_relacion)
+end prototypes
+
+global function boolean f_insert_retencion (string as_nro_certificado, datetime adt_fecha_emision, string as_origen, string as_flag_estado, ref string as_mensaje, string as_flag_tabla, decimal adc_saldo_sol, decimal adc_saldo_dol, string as_cod_relacion);Boolean lb_ret = TRUE
+
+Insert Into retencion_igv_crt
+(nro_certificado ,fecha_emision ,   
+ origen			  ,flag_estado   ,
+ flag_tabla		  ,importe_doc	  ,
+ saldo_sol		  ,saldo_dol 	  ,
+ proveedor)  
+Values
+(:as_nro_certificado ,:adt_fecha_emision ,
+ :as_origen          ,:as_flag_estado    ,
+ :as_flag_tabla		,:adc_saldo_sol     ,
+ :adc_saldo_sol	   ,:adc_saldo_dol     ,
+ :as_cod_relacion)  ;
+
+
+IF SQLCA.SQLCode = -1 THEN 
+	as_mensaje = SQLCA.SQLErrText
+	lb_ret = FALSE
+	Rollback ;
+END IF
+
+
+Return lb_ret 
+end function
+

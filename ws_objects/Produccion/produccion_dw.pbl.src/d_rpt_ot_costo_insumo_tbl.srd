@@ -1,0 +1,55 @@
+﻿$PBExportHeader$d_rpt_ot_costo_insumo_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=544 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=pd_ot_insumos_cod_art dbname="pd_ot_insumos.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=articulo_desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=articulo_und dbname="articulo.und" )
+ column=(type=number updatewhereclause=yes name=cantidad dbname="cantidad" )
+ column=(type=decimal(2) updatewhereclause=yes name=pd_ot_insumos_costo dbname="pd_ot_insumos.costo" )
+ column=(type=number updatewhereclause=yes name=total_costo dbname="total_costo" )
+ retrieve="select pdi.cod_art,
+       a.desc_art,
+       a.und,
+       Sum(pdi.cantidad) as cantidad,
+       pdi.costo_insumo as costo,
+       Sum(pdi.cantidad * pdi.costo_insumo) as total_costo
+  from pd_ot_insumos pdi, articulo a, pd_ot p
+ WHERE a.cod_art = pdi.cod_art
+   and p.nro_parte = pdi.nro_parte
+   and p.ot_adm = :as_ot_adm
+   and trunc(p.fecha) BETWEEN TRUNC(:ad_Fecha1) AND TRUNC(:ad_fecha2)
+   and substr(p.nro_parte, 1, 2) = :as_origen
+   
+GROUP BY pdi.cod_art, a.desc_art, a.und, pdi.costo_insumo" arguments=(("as_ot_adm", string),("as_origen", string),("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Codigo" border="2" color="16777215" x="443" y="484" height="56" width="416" html.valueishtml="0"  name=pd_ot_insumos_cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Descripción" border="2" color="16777215" x="864" y="484" height="56" width="1234" html.valueishtml="0"  name=articulo_desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Unidad" border="2" color="16777215" x="2103" y="484" height="56" width="224" html.valueishtml="0"  name=articulo_und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Articulo" border="2" color="16777215" x="443" y="424" height="56" width="1883" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Cantidad" border="2" color="16777215" x="2331" y="424" height="116" width="306" html.valueishtml="0"  name=cantidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Costo" border="2" color="16777215" x="2642" y="424" height="116" width="416" html.valueishtml="0"  name=pd_ot_insumos_costo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+text(band=header alignment="2" text="Costo total" border="2" color="16777215" x="3063" y="424" height="116" width="398" html.valueishtml="0"  name=total_costo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+bitmap(band=header filename="" x="27" y="32" height="292" width="370" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="INSUMOS CONSUMIDOS" border="4" color="0" x="1294" y="56" height="92" width="1111" html.valueishtml="0"  name=cabecera_t visible="1"  font.face="Tahoma" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2889" y="56" height="64" width="613" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm:ss am/pm')"border="0" color="0" x="2889" y="136" height="64" width="613" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2889" y="216" height="56" width="613" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'De la OT_adm de :  '   + as_ot_adm + ' : '"border="4" color="0" x="754" y="168" height="56" width="663" format="[general]" html.valueishtml="0"  name=page_4 visible="1"  font.face="Times New Roman" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Desde : ' + string(ad_fecha1) + ' Hasta :  '  + string(ad_fecha2)"border="4" color="0" x="1285" y="236" height="56" width="887" format="[general]" html.valueishtml="0"  name=page_2 visible="1"  font.face="Times New Roman" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="4" color="0" x="1435" y="172" height="52" width="1358" html.valueishtml="0"  name=t_desc_ot_adm visible="1"  font.face="Times New Roman" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="4" color="33554432" x="443" y="4" height="52" width="425" format="[general]" html.valueishtml="0"  name=pd_ot_insumos_cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="4" color="33554432" x="869" y="4" height="52" width="1243" format="[general]" html.valueishtml="0"  name=articulo_desc_art visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="4" color="33554432" x="2112" y="4" height="52" width="233" format="[general]" html.valueishtml="0"  name=articulo_und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="4" color="33554432" x="2345" y="4" height="52" width="302" format="#,##0.00" html.valueishtml="0"  name=cantidad visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="4" color="33554432" x="2647" y="4" height="52" width="411" format="#,##0.00" html.valueishtml="0"  name=pd_ot_insumos_costo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="4" color="33554432" x="3058" y="4" height="52" width="407" format="#,##0.00" html.valueishtml="0"  name=total_costo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Del Origen de: '  +  as_origen +' : '"border="4" color="0" x="1280" y="320" height="56" width="471" format="[general]" html.valueishtml="0"  name=page_3 visible="1"  font.face="Times New Roman" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="4" color="0" x="1801" y="324" height="52" width="402" html.valueishtml="0"  name=t_desc_origen visible="1"  font.face="Times New Roman" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

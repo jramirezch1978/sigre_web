@@ -1,0 +1,103 @@
+﻿$PBExportHeader$d_ap_pd_compra_matprim_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=552 color="536870912" )
+summary(height=100 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_prov dbname="cod_prov" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor dbname="proveedor" )
+ column=(type=char(4000) updatewhereclause=yes name=nom_embarcacion dbname="nom_embarcacion" )
+ column=(type=char(12) updatewhereclause=yes name=matricula dbname="matricula" )
+ column=(type=char(0) updatewhereclause=yes name=patron_lancha dbname="compute_0005" )
+ column=(type=number updatewhereclause=yes name=peso_venta dbname="peso_venta" )
+ column=(type=number updatewhereclause=yes name=precio_unitario dbname="precio_unitario" )
+ column=(type=number updatewhereclause=yes name=precio_castigo dbname="precio_castigo" )
+ retrieve="SELECT gc.proveedor as cod_prov,
+       p.nom_proveedor as proveedor,
+       USF_AP_NOM_PROVEEDOR(pdd.proveedor) AS NOM_EMBARCACION,
+       n.matricula,
+		 '',
+       sum(round(USF_AP_CONV_UND(pdd.UND,
+					 (SELECT UND_TM FROM AP_PARAM WHERE ORIGEN = 'XX'),
+					 gd.peso_venta),4)) as peso_venta, 								/*Peso en toneladas*/
+
+       round(sum(gd.peso_venta * USF_FL_CONV_MON(gd.precio_unitario, 
+					 gc.cod_moneda, (select cod_dolares from logparam where 
+					 reckey = '1'), pdd.inicio_descarga)) / sum(gd.peso_venta),2) 
+					 as Precio_unitario,													/* Precio unitario en dolares */
+
+		round(sum(gd.peso_venta * USF_FL_CONV_MON(gd.precio_unitario_castigo, 
+					 gc.cod_moneda, (select cod_dolares from logparam where 
+					 reckey = '1'), pdd.inicio_descarga)) / sum(gd.peso_venta),2) 
+					 as precio_castigo													/* Precio castigo en dolares */
+
+	/*	round(sum(gd.peso_venta * USF_FL_CONV_MON(gd.precio_representacion, 
+					 gc.cod_moneda, (select cod_dolares from logparam where 
+					 reckey = '1'), pdd.inicio_descarga))/ sum(gd.peso_venta),2) 
+					 as precio_representacion											 Precio representacion en dolares */
+
+FROM ap_guia_recepcion     gc,   /* cabecera de la guia */
+     ap_guia_recepcion_det gd,    /* detalle de la guia */
+     proveedor              p,    /* datos del proveedor */
+     ap_pd_descarga_det     pdd,  /* detalle del parte diario de descarga */
+     tg_naves               n    /* tabla de naves */
+
+WHERE trunc(pdd.inicio_descarga) BETWEEN trunc(:ad_fecha_ini) AND trunc(:ad_fecha_fin)
+  AND gc.cod_guia_rec 	= gd.cod_guia_rec
+  AND gd.nro_parte    	= pdd.nro_parte
+  AND gd.item_parte   	= pdd.item
+  AND pdd.proveedor   	= p.proveedor
+  AND pdd.proveedor   	= n.proveedor (+)
+  AND pdd.especie     LIKE :as_cod_especie      /*Para indicar la especies */
+  AND INSTR(:as_cod_origen, gc.origen) > 0   	/*Para indicar el origen   */
+
+GROUP BY gc.proveedor,
+       p.nom_proveedor,
+       USF_AP_NOM_PROVEEDOR(pdd.proveedor),
+       n.matricula
+
+ORDER BY gc.proveedor
+" arguments=(("as_cod_origen", string),("as_cod_especie", string),("ad_fecha_ini", date),("ad_fecha_fin", date),("an_tipo_cambio", number)) )
+text(band=header alignment="2" text="Proveedor" border="2" color="16777215" x="5682" y="428" height="112" width="873" html.valueishtml="0"  name=proveedor_t visible="0"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Cod
+Prov" border="2" color="16777215" x="9" y="432" height="112" width="210" html.valueishtml="0"  name=cod_prov_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nombre
+Embarcacion" border="2" color="16777215" x="224" y="432" height="112" width="910" html.valueishtml="0"  name=nom_embarcacion_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Peso 
+Venta (Tn)" border="2" color="16777215" x="2245" y="432" height="112" width="329" html.valueishtml="0"  name=peso_venta_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Matricula" border="2" color="16777215" x="1138" y="432" height="112" width="283" html.valueishtml="0"  name=matricula_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Patron de Lancha" border="2" color="16777215" x="1426" y="432" height="112" width="814" html.valueishtml="0"  name=fecha_registro_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="1" text="" border="0" color="0" x="2240" y="348" height="52" width="759" html.valueishtml="0"  name=tc_t visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="4" color="0" x="3026" y="348" height="52" width="315" html.valueishtml="0"  name=tipo_cambio visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="" x="27" y="28" height="268" width="549" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="PLANILLA DE COMPRA DE MATERIA PRIMA" border="0" color="0" x="946" y="124" height="72" width="1422" html.valueishtml="0"  name=titulo_1 visible="1"  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="978" y="212" height="64" width="1358" html.valueishtml="0"  name=rango_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="string(DateTime(today(), Now()), 'dd/mm/yyyy h:mm am/pm')"border="0" color="0" x="2825" y="136" height="64" width="517" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Página ' + page() + ' of ' + pageCount()"border="0" color="0" x="2926" y="56" height="64" width="416" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="0" x="3081" y="224" height="56" width="261" html.valueishtml="0"  name=usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="5682" y="0" height="72" width="873" format="[general]" html.valueishtml="0"  name=proveedor visible="0" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="224" y="4" height="72" width="910" format="[general]" html.valueishtml="0"  name=nom_embarcacion visible="1" edit.limit=4000 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="1138" y="4" height="72" width="283" format="[general]" html.valueishtml="0"  name=matricula visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1426" y="4" height="72" width="814" format="[general]" html.valueishtml="0"  name=patron_lancha visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2245" y="4" height="72" width="329" format="#,##0.0000" html.valueishtml="0"  name=peso_venta visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="72" width="210" format="[general]" html.valueishtml="0"  name=cod_prov visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(peso_venta for all)"border="2" color="33554432" x="2245" y="4" height="72" width="329" format="#,##0.0000" html.valueishtml="0"  name=total_pv visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="TOTALES  :  " border="2" color="0" x="9" y="4" height="72" width="2231" html.valueishtml="0"  name=t_2 visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="P.U.
+Cast." border="2" color="16777215" x="2578" y="432" height="112" width="178" html.valueishtml="0"  name=precio_unitario_castigo_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Total
+P.Cas (S/.)" border="2" color="16777215" x="3035" y="432" height="112" width="338" html.valueishtml="0"  name=total_pc_s_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Total
+P.Cas $" border="2" color="16777215" x="2761" y="432" height="112" width="270" html.valueishtml="0"  name=total_pc_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+compute(band=detail alignment="1" expression="round(  peso_venta  *  precio_castigo , 2 ) "border="2" color="33554432" x="2761" y="4" height="72" width="270" format="#,##0.00" html.valueishtml="0"  name=total_pc visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" total_pc *  an_tipo_cambio "border="2" color="33554432" x="3035" y="4" height="72" width="338" format="#,##0.00" html.valueishtml="0"  name=total_pc_s visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="2578" y="4" height="72" width="178" format="#,##0.00" html.valueishtml="0"  name=precio_castigo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="MS Sans Serif" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(round(  peso_venta  *  precio_castigo , 2 )  for all)"border="2" color="33554432" x="2761" y="4" height="72" width="270" format="#,##0.00" html.valueishtml="0"  name=total_ca_dol visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( total_pc *  an_tipo_cambio  for all)"border="2" color="33554432" x="3035" y="4" height="72" width="338" format="#,##0.00" html.valueishtml="0"  name=total_ca_sol visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="" border="2" color="0" x="2578" y="4" height="72" width="178" html.valueishtml="0"  name=t_3 visible="1"  font.face="MS Sans Serif" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

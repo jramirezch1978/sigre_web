@@ -1,0 +1,50 @@
+﻿$PBExportHeader$d_rpt_ot_operaciones_det_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="tt_oper_orden_trabajo.cod_origen" )
+ column=(type=decimal(0) updatewhereclause=yes name=nro_orden dbname="tt_oper_orden_trabajo.nro_orden" )
+ column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="tt_oper_orden_trabajo.cod_maquina" )
+ column=(type=char(40) updatewhereclause=yes name=maquina_desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(1) updatewhereclause=yes name=tipo_ot dbname="tt_oper_orden_trabajo.tipo_ot" values="Regular	R/Mntto_Diario	D/Mntto Preventivo	P/Mntto Predictivo	M/Mntto Correctivo	C/Otros	O/" )
+ column=(type=number updatewhereclause=yes name=costo_insumo dbname="costo_insumo" )
+ column=(type=number updatewhereclause=yes name=costo_oper dbname="costo_oper" )
+ retrieve="  SELECT ~"TT_OPER_ORDEN_TRABAJO~".~"COD_ORIGEN~",  
+			~"TT_OPER_ORDEN_TRABAJO~".~"NRO_ORDEN~",   
+         ~"TT_OPER_ORDEN_TRABAJO~".~"COD_MAQUINA~",   
+         ~"MAQUINA~".~"DESC_MAQ~",   
+         ~"TT_OPER_ORDEN_TRABAJO~".~"TIPO_OT~",   
+         SUM(~"TT_OPER_ORDEN_TRABAJO~".~"COSTO_INSUMO~") AS COSTO_INSUMO,   
+         SUM(~"TT_OPER_ORDEN_TRABAJO~".~"COSTO_OPER~")   AS COSTO_OPER   
+    FROM ~"TT_OPER_ORDEN_TRABAJO~",   
+         ~"MAQUINA~"  
+   WHERE ( ~"TT_OPER_ORDEN_TRABAJO~".~"COD_MAQUINA~" = ~"MAQUINA~".~"COD_MAQUINA~" ) AND
+			
+			( ~"TT_OPER_ORDEN_TRABAJO~".~"TIPO_OT~"     = :as_tipo_ot					)  
+GROUP BY ~"TT_OPER_ORDEN_TRABAJO~".~"COD_ORIGEN~",  
+			~"TT_OPER_ORDEN_TRABAJO~".~"NRO_ORDEN~",   
+         ~"TT_OPER_ORDEN_TRABAJO~".~"COD_MAQUINA~",   
+         ~"MAQUINA~".~"DESC_MAQ~",   
+         ~"TT_OPER_ORDEN_TRABAJO~".~"TIPO_OT~"   
+" arguments=(("as_tipo_ot", string)) )
+group(level=1 header.height=64 trailer.height=0 by=("cod_maquina" , "maquina_desc_maq" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Orden Trabajo" border="2" color="0" x="9" y="8" height="56" width="727"  name=nro_orden_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Orden Trabajo" border="2" color="0" x="741" y="8" height="56" width="480"  name=tipo_ot_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Costo Oper" border="2" color="0" x="1225" y="8" height="56" width="329"  name=costo_oper_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Costo Insumo" border="2" color="0" x="1559" y="8" height="56" width="366"  name=costo_insumo_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header.1 alignment="2" text="Maquina :" border="2" color="0" x="9" y="4" height="56" width="238"  name=t_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="0" x="270" y="4" height="56" width="247" format="[general]"  name=cod_maquina edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="530" y="4" height="56" width="1307" format="[general]"  name=maquina_desc_maq edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="0" x="425" y="4" height="52" width="311" format="[general]"  name=nro_orden edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="4" height="52" width="411" format="[general]"  name=cod_origen dddw.name=d_dddw_origen dddw.displaycolumn=desc_origen dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="741" y="4" height="52" width="480" format="[general]"  name=tipo_ot ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="0" x="1225" y="4" height="52" width="329" format="[general]"  name=costo_oper editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="1559" y="4" height="52" width="366" format="[general]"  name=costo_insumo editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Totales :" border="2" color="0" x="1006" y="0" height="64" width="215"  name=t_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=summary alignment="1" expression="sum(  costo_oper  for all )"border="2" color="0" x="1225" y="0" height="64" width="329" format="###,###.00"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(   costo_insumo   for all )"border="2" color="0" x="1559" y="0" height="64" width="366" format="###,###.00"  name=compute_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

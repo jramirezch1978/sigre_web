@@ -1,0 +1,96 @@
+﻿$PBExportHeader$d_rpt_nota_venta_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=1508 color="536870912" )
+summary(height=960 color="536870912" )
+footer(height=-124 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=fecha_documento dbname="cntas_cobrar.fecha_documento" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntas_cobrar.cod_relacion" )
+ column=(type=decimal(0) updatewhereclause=yes name=tem_direccion dbname="cntas_cobrar.item_direccion" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_cobrar.cod_moneda" )
+ column=(type=datetime updatewhereclause=yes name=cntas_cobrar_fecha_registro dbname="cntas_cobrar.fecha_registro" )
+ column=(type=decimal(0) updatewhereclause=yes name=item dbname="cntas_cobrar_det.item" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntas_cobrar_det_item_ref dbname="cntas_cobrar_det.item_ref" )
+ column=(type=char(800) updatewhereclause=yes name=descripcion dbname="cntas_cobrar_det.descripcion" )
+ column=(type=char(12) updatewhereclause=yes name=cod_art dbname="cntas_cobrar_det.cod_art" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantidad dbname="cntas_cobrar_det.cantidad" )
+ column=(type=decimal(6) updatewhereclause=yes name=cntas_cobrar_det_precio_unitario dbname="cntas_cobrar_det.precio_unitario" )
+ column=(type=decimal(2) updatewhereclause=yes name=cntas_cobrar_det_redondeo_manual dbname="cntas_cobrar_det.redondeo_manual" )
+ column=(type=decimal(2) updatewhereclause=yes name=cntas_cobrar_det_descuento dbname="cntas_cobrar_det.descuento" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_ref dbname="cntas_cobrar_det.tipo_ref" )
+ column=(type=char(10) updatewhereclause=yes name=nro_ref dbname="cntas_cobrar_det.nro_ref" )
+ column=(type=char(2) updatewhereclause=yes name=cntas_cobrar_det_tipo_cred_fiscal dbname="cntas_cobrar_det.tipo_cred_fiscal" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(11) updatewhereclause=yes name=ruc dbname="proveedor.ruc" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_a_cobrar dbname="cntas_cobrar.importe_a_cobrar" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_igv dbname="cc_doc_det_imp.importe" )
+ column=(type=char(40) updatewhereclause=yes name=moneda_descripcion dbname="moneda.descripcion" )
+ column=(type=decimal(2) updatewhereclause=yes name=impuestos_tipo_tasa_impuesto dbname="impuestos_tipo.tasa_impuesto" )
+ column=(type=char(202) updatewhereclause=yes name=dire_cliente dbname="dire_cliente" )
+ column=(type=decimal(0) updatewhereclause=yes name=cc_doc_det_imp_item dbname="cc_doc_det_imp.item" )
+ retrieve="  SELECT ~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~",   
+         ~"CNTAS_COBRAR~".~"COD_RELACION~",   
+         ~"CNTAS_COBRAR~".~"ITEM_DIRECCION~",   
+         ~"CNTAS_COBRAR~".~"COD_MONEDA~",   
+         ~"CNTAS_COBRAR~".~"FECHA_REGISTRO~",   
+         ~"CNTAS_COBRAR_DET~".~"ITEM~",   
+         ~"CNTAS_COBRAR_DET~".~"ITEM_REF~",   
+         ~"CNTAS_COBRAR_DET~".~"DESCRIPCION~",   
+         ~"CNTAS_COBRAR_DET~".~"COD_ART~",   
+         ~"CNTAS_COBRAR_DET~".~"CANTIDAD~",   
+         ~"CNTAS_COBRAR_DET~".~"PRECIO_UNITARIO~",   
+         ~"CNTAS_COBRAR_DET~".~"REDONDEO_MANUAL~",   
+         ~"CNTAS_COBRAR_DET~".~"DESCUENTO~",   
+         ~"CNTAS_COBRAR_DET~".~"TIPO_REF~",   
+         ~"CNTAS_COBRAR_DET~".~"NRO_REF~",   
+         ~"CNTAS_COBRAR_DET~".~"TIPO_CRED_FISCAL~",   
+         ~"PROVEEDOR~".~"NOM_PROVEEDOR~",   
+         ~"PROVEEDOR~".~"RUC~",   
+         ~"CNTAS_COBRAR~".~"IMPORTE_A_COBRAR~",   
+         ~"CC_DOC_DET_IMP~".~"IMPORTE~",   
+         ~"MONEDA~".~"DESCRIPCION~",   
+         ~"IMPUESTOS_TIPO~".~"TASA_IMPUESTO~",   
+         NVL(~"DIRECCIONES~".~"DIR_DIRECCION~",'')||' '||NVL(~"DIRECCIONES~".~"DIR_NUMERO~",'')||' '||NVL(~"DIRECCIONES~".~"DIR_MNZ~",'')||' '||NVL(~"DIRECCIONES~".~"DIR_LOTE~",'')||' '||NVL(~"DIRECCIONES~".~"DIR_URBANIZACION~",'')||' '||NVL(~"DIRECCIONES~".~"DIR_DISTRITO~",'')||' '||NVL(~"DIRECCIONES~".~"DIR_CIUDAD~",'')||' '||NVL(~"DIRECCIONES~".~"DIR_PROVINCIA~",'')||' - '||NVL(~"DIRECCIONES~".~"DIR_DEP_ESTADO~",'') AS DIRE_CLIENTE,   
+         ~"CC_DOC_DET_IMP~".~"ITEM~"  
+    FROM ~"CNTAS_COBRAR~",   
+         ~"CNTAS_COBRAR_DET~",   
+         ~"PROVEEDOR~",   
+         ~"DIRECCIONES~",   
+         ~"CC_DOC_DET_IMP~",   
+         ~"MONEDA~",   
+         ~"IMPUESTOS_TIPO~"  
+   WHERE ( cntas_cobrar.cod_relacion (+) = direcciones.codigo) and  
+         ( cntas_cobrar.item_direccion (+) = direcciones.item) and  
+         ( cntas_cobrar.cod_relacion = proveedor.proveedor (+)) and  
+         ( cntas_cobrar.cod_moneda = moneda.cod_moneda (+)) and  
+         ( cc_doc_det_imp.tipo_impuesto = impuestos_tipo.tipo_impuesto (+)) and  
+         ( ~"CNTAS_COBRAR_DET~".~"TIPO_DOC~" = ~"CNTAS_COBRAR~".~"TIPO_DOC~" ) and  
+         ( ~"CNTAS_COBRAR_DET~".~"NRO_DOC~" = ~"CNTAS_COBRAR~".~"NRO_DOC~" ) and  
+         ( ~"CNTAS_COBRAR~".~"TIPO_DOC~" = ~"CC_DOC_DET_IMP~".~"TIPO_DOC~" ) and  
+         ( ~"CNTAS_COBRAR~".~"NRO_DOC~" = ~"CC_DOC_DET_IMP~".~"NRO_DOC~" ) and  
+         ( ( ~"CNTAS_COBRAR~".~"TIPO_DOC~" = :as_tipo_doc ) AND  
+         ( ~"CNTAS_COBRAR~".~"NRO_DOC~" = :as_nro_documento ) )    
+" arguments=(("as_tipo_doc", string),("as_nro_documento", string)) )
+group(level=1 header.height=0 trailer.height=4 by=("" ) header.color="536870912" trailer.color="536870912" )
+column(band=header id=14 alignment="0" tabsequence=32766 border="0" color="0" x="2944" y="1116" height="56" width="128" format="[general]"  name=tipo_ref edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=15 alignment="0" tabsequence=32766 border="0" color="0" x="2551" y="1236" height="56" width="320" format="[general]"  name=nro_ref edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="32" y="1000" height="56" width="384" format="[general]"  name=cod_relacion edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=17 alignment="0" tabsequence=32766 border="0" color="0" x="448" y="1000" height="56" width="1751" format="[general]"  name=nom_proveedor edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=18 alignment="0" tabsequence=32766 border="0" color="0" x="37" y="1236" height="56" width="567" format="[general]"  name=ruc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=23 alignment="0" tabsequence=32766 border="0" color="0" x="32" y="1120" height="56" width="2432" format="[general]"  name=dire_cliente edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression=" Left(Trim(String( fecha_documento )),2)  "border="0" color="0" x="119" y="892" height="56" width="96" format="[GENERAL]"  name=compute_1  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="2" expression=" if(month( fecha_documento )=1,'Enero',if(month( fecha_documento )=2,'Febrero',if(month( fecha_documento )=3,'Marzo',if(month( fecha_documento )=4,'Abril',if(month( fecha_documento )=5,'Mayo',if(month( fecha_documento )=6,'Junio',if(month( fecha_documento )=7,'Julio',if(month( fecha_documento )=8,'Agosto',if(month( fecha_documento )=9,'Setiembre',if(month( fecha_documento )=10,'Octubre',if(month( fecha_documento )=11,'Noviembre',  if(month( fecha_documento )=11,'Diciembre','')  ))))))))))) "border="0" color="0" x="293" y="892" height="56" width="599" format="[General]"  name=compute_2  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression=" Right(Trim(String( fecha_documento )),1) "border="0" color="0" x="1230" y="888" height="56" width="73" format="[GENERAL]"  name=compute_3  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="23" y="8" height="56" width="215" format="[general]"  name=cantidad edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="261" y="8" height="56" width="347" format="[general]"  name=cod_art edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="635" y="8" height="56" width="1801" format="[general]"  name=descripcion edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="2455" y="8" height="56" width="306" format="#,##0.00"  name=cntas_cobrar_det_precio_unitario edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" cantidad  *  cntas_cobrar_det_precio_unitario "border="0" color="0" x="2779" y="8" height="56" width="357" format="#,##0.00"  name=compute_6  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression=" f_conv_numlet_F(string(  importe_a_cobrar   )) + ' '+UPPER( moneda_descripcion ) "border="0" color="0" x="27" y="828" height="56" width="1911" format="[GENERAL]"  name=compute_4  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="Round( impuestos_tipo_tasa_impuesto ,0 )"border="0" color="0" x="2848" y="736" height="56" width="96" format="[GENERAL]"  name=compute_5  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=summary id=4 alignment="0" tabsequence=32766 border="0" color="0" x="2848" y="816" height="56" width="96" format="[general]"  name=cod_moneda edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=summary id=20 alignment="1" tabsequence=32766 border="0" color="0" x="2962" y="732" height="56" width="389" format="#,##0.00"  name=importe_igv edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=summary id=19 alignment="1" tabsequence=32766 border="0" color="0" x="2962" y="816" height="56" width="389" format="#,##0.00"  name=importe_a_cobrar edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Draft 12cpi" font.height="-8" font.weight="400"  font.family="1" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

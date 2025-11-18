@@ -1,0 +1,79 @@
+﻿$PBExportHeader$d_abc_cuentas_pagar_gen_ch_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="cntas_pagar.cod_relacion" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="cntas_pagar.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="cntas_pagar.nro_doc" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ column=(type=datetime update=yes updatewhereclause=yes name=vencimiento dbname="cntas_pagar.vencimiento" )
+ column=(type=char(1) updatewhereclause=yes name=flab_tabor dbname="doc_pendientes_cta_cte.flab_tabor" )
+ column=(type=char(1) updatewhereclause=yes name=origen_doc dbname="origen_doc" )
+ column=(type=char(0) updatewhereclause=yes name=confin dbname="confin" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="cntas_pagar.origen" )
+ column=(type=char(1) updatewhereclause=yes name=flag_edit dbname="flag_edit" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="codigo_relacion.nombre" )
+ column=(type=char(60) updatewhereclause=yes name=obs dbname="obs" )
+ column=(type=number updatewhereclause=yes name=nro dbname="nro" )
+ column=(type=char(0) updatewhereclause=yes name=flag_ret dbname="cntas_pagar.flag_ret" values="	1/	0" )
+ column=(type=number updatewhereclause=yes name=serie_cr dbname="serie_cr" )
+ column=(type=char(0) updatewhereclause=yes name=nro_cr dbname="cntas_pagar.nro_cr" )
+ column=(type=number updatewhereclause=yes name=monto_ret dbname="monto_ret" )
+ retrieve="  SELECT ~"CNTAS_PAGAR~".~"COD_RELACION~",   
+         ~"CNTAS_PAGAR~".~"TIPO_DOC~",   
+         ~"CNTAS_PAGAR~".~"NRO_DOC~",   
+         DECODE(~"CNTAS_PAGAR~".~"COD_MONEDA~",(SELECT COD_SOLES FROM LOGPARAM),~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~",~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~") AS IMPORTE,
+         ~"CNTAS_PAGAR~".~"VENCIMIENTO~",   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FLAG_TABLA~"  AS FLAB_TABOR  ,
+			   'C' AS ORIGEN_DOC ,
+         '' AS CONFIN   ,
+			   ~"CNTAS_PAGAR~".~"ORIGEN~",
+			   '1' AS FLAG_EDIT,
+			   ~"CODIGO_RELACION~".~"NOMBRE~",
+				substr(~"CNTAS_PAGAR~".~"DESCRIPCION~",1,60) AS OBS,
+			   0 AS NRO,
+			   null as flag_ret,
+			   0 as serie_cr,
+			   null as nro_cr  ,
+			   0.00 as monto_ret
+				
+   FROM ~"CNTAS_PAGAR~"           ,   
+    		~"DOC_PENDIENTES_CTA_CTE~",   
+		   	~"CODIGO_RELACION~"       ,
+        ~"DOC_GRUPO_RELACION~"  
+   WHERE ((~"CNTAS_PAGAR~".~"COD_RELACION~"            = ~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" )  AND
+			    (~"CNTAS_PAGAR~".~"TIPO_DOC~"                = ~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~"     )  AND
+			 (~"CNTAS_PAGAR~".~"NRO_DOC~"                 = ~"DOC_PENDIENTES_CTA_CTE~".~"NRO_DOC~"      )) AND
+			 (~"CNTAS_PAGAR~".~"TIPO_DOC~"                = ~"DOC_GRUPO_RELACION~".~"TIPO_DOC~"         )  AND 
+         ((~"DOC_GRUPO_RELACION~".~"GRUPO~"            = '06'                                    )) AND
+			((~"CNTAS_PAGAR~".~"COD_RELACION~"            = ~"CODIGO_RELACION~".~"COD_RELACION~"        )) AND
+			 (~"DOC_PENDIENTES_CTA_CTE~".~"FLAG_DEBHAB~"  = 'H'                                     )"  sort="tipo_doc A vencimiento A " )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="1623" y="8" height="60" width="302" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T. Doc" border="2" color="8388608" x="1385" y="8" height="60" width="233" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Vencimiento" border="2" color="8388608" x="2254" y="8" height="60" width="311" html.valueishtml="0"  name=vencimiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo" border="2" color="8388608" x="1929" y="8" height="60" width="320" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nombre" border="2" color="8388608" x="526" y="8" height="60" width="855" html.valueishtml="0"  name=nombre_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cod. Relacion" border="2" color="8388608" x="169" y="8" height="60" width="352" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro" border="2" color="8388608" x="9" y="8" height="60" width="155" html.valueishtml="0"  name=nro_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Confin" border="2" color="8388608" x="2569" y="8" height="60" width="334" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Retención" border="2" color="8388608" x="2907" y="8" height="60" width="265" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Monto Retención" border="2" color="8388608" x="3177" y="8" height="60" width="375" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="1385" y="0" height="68" width="233" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="0" x="2254" y="0" height="68" width="311" format="[shortdate] [time]" html.valueishtml="0"  name=vencimiento visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="1623" y="0" height="68" width="302" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=10 border="2" color="0" x="1929" y="0" height="68" width="320" format="[general]" html.valueishtml="0" protect="0~tif(isnull( flag_edit ),0,1)
+"  name=importe visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="169" y="0" height="68" width="352" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="0" x="526" y="0" height="68" width="855" format="[general]" html.valueishtml="0"  name=nombre visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="68" width="155" format="[general]" html.valueishtml="0"  name=nro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=20 border="2" color="0" x="2569" y="0" height="68" width="334" format="[general]" html.valueishtml="0"  name=confin visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="2" tabsequence=30 border="2" color="0" x="2907" y="0" height="68" width="265" format="[general]" html.valueishtml="0"  name=flag_ret visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="1" tabsequence=32766 border="2" color="0" x="3177" y="0" height="68" width="375" format="[general]" html.valueishtml="0"  name=monto_ret visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

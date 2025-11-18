@@ -1,0 +1,63 @@
+﻿$PBExportHeader$d_rpt_dsc_x_planta.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no  crosstab.dynamic = yes grid.lines=1 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=76 color="536870912" )
+header[3](height=52 color="536870912" )
+summary(height=56 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=100 color="536870912"  height.autosize=yes)
+table(column=(type=char(20) updatewhereclause=yes name=destino dbname="destino" )
+ column=(type=number updatewhereclause=yes name=tg_naves_nave dbname="tg_naves_nave" )
+ column=(type=number updatewhereclause=yes name=porc dbname="porc" )
+ retrieve="select rtrim(p.nom_proveedor) || ' ' || rtrim(flp.descr_puerto) as destino, 
+       tn.nomb_nave as nave,
+       sum(b.cantidad_real - b.cantidad_castigada) as cantidad,
+       sum(b.cantidad_real - b.cantidad_castigada) /
+          (select sum(b1.cantidad_real - b1.cantidad_castigada)
+          from fl_parte_de_pesca a1,
+               fl_venta          b1
+         where a1.parte_pesca = b1.parte_pesca
+           and a1.nave_real   = a.nave_real
+			  and trunc(b1.hora_inicio_descarga) between trunc(:ad_fecha1) and trunc(:ad_fecha2) ) * 100 as porc,
+           (select sum(b1.cantidad_real - b1.cantidad_castigada)
+          from fl_parte_de_pesca a1,
+               fl_venta          b1
+         where a1.parte_pesca = b1.parte_pesca
+           and a1.nave_real   = a.nave_real
+			  and trunc(b1.hora_inicio_descarga) between trunc(:ad_fecha1) and trunc(:ad_fecha2) ) as total
+from fl_parte_de_pesca a,
+     fl_venta          b,
+     proveedor         p,
+     fl_puertos        flp,
+     tg_naves          tn
+where a.parte_pesca = b.parte_pesca
+  and p.proveedor   = b.cliente     
+  and flp.puerto    = a.puerto_arribo
+  and tn.nave       = a.nave_real
+  and trunc(b.hora_inicio_descarga) between trunc(:ad_fecha1) and trunc(:ad_fecha2)
+group by rtrim(p.nom_proveedor) || ' ' || rtrim(flp.descr_puerto), 
+       tn.nomb_nave,
+       a.nave_real  
+  
+ " arguments=(("ad_fecha1", date),("ad_fecha2", date))  sort="destino A " )
+text(band=header[2] alignment="2" text="@tg_naves_nave" border="2" color="0" x="512" y="4" height="68" width="402" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header[2] alignment="2" text="Total" border="2" color="0" x="919" y="4" height="76" width="293" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header[3] alignment="0" text="Destino" border="2" color="0" x="9" y="4" height="44" width="494" html.valueishtml="0"  name=destino_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header[3] alignment="2" text="Cantidad" border="2" color="0" x="512" y="4" height="44" width="270" html.valueishtml="0"  name=tg_naves_nave_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header[3] alignment="2" text="%" border="2" color="0" x="791" y="4" height="44" width="119" html.valueishtml="0"  name=porc_t visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header[3] alignment="2" text="    " border="2" color="0" x="919" y="0" height="56" width="293" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="88" width="494" format="[general]" html.valueishtml="0"  name=destino visible="1" edit.limit=101 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="2" color="33554432" x="512" y="4" height="88" width="270" format="[general]" html.valueishtml="0"  name=tg_naves_nave visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="791" y="4" height="88" width="119" format="##0.00" html.valueishtml="0"  name=porc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0 crosstab.repeat=yes  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="crosstabsum(1)"border="2" color="33554432" x="919" y="4" height="88" width="293" format="###,##0.00" html.valueishtml="0"  name=grand_sum_cantidad visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+compute(band=summary alignment="1" expression="~"Total~""border="2" color="0" x="9" y="4" height="48" width="494" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+compute(band=summary alignment="1" expression="sum(tg_naves_nave for all )"border="2" color="33554432" x="512" y="4" height="48" width="270" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+compute(band=summary alignment="1" expression="sum(porc for all )"border="2" color="33554432" x="791" y="4" height="48" width="119" format="##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+compute(band=summary alignment="1" expression="sum(grand_sum_cantidad for all )"border="2" color="33554432" x="919" y="4" height="48" width="293" format="###,##0.00" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "tg_naves_nave" rows = "destino" values = "sum(cantidad for crosstab), sum(porc for crosstab)" sourcenames = "destino, tg_naves_nave, cantidad, porc, total")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

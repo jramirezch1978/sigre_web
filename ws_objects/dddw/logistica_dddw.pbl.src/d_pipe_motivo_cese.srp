@@ -1,0 +1,9 @@
+﻿$PBExportHeader$d_pipe_motivo_cese.srp
+PIPELINE(source_connect=CN_DB_DB1_PROD5,destination_connect=CN_DB_DB1_PROD8,type=update,commit=100,errors=100,keyname="motivo_cese")
+SOURCE(name="MOTIVO_CESE",COLUMN(type=char,name="COD_MOTIV_CESE",dbtype="CHAR(2)",key=yes,nulls_allowed=no)
+ COLUMN(type=varchar,name="DESC_MOTIV_CESE",dbtype="VARCHAR2(20)",nulls_allowed=yes)
+ COLUMN(type=char,name="FLAG_REPLICACION",dbtype="CHAR(1)",nulls_allowed=yes))
+RETRIEVE(statement="PBSELECT( VERSION(400) TABLE(NAME=~"motivo_cese~" ) COLUMN(NAME=~"motivo_cese.cod_motiv_cese~") COLUMN(NAME=~"motivo_cese.desc_motiv_cese~") COLUMN(NAME=~"motivo_cese.flag_replicacion~")) ")
+DESTINATION(name="motivo_cese",COLUMN(type=char,name="cod_motiv_cese",dbtype="CHAR(2)",key=yes,nulls_allowed=no,initial_value="spaces")
+ COLUMN(type=varchar,name="desc_motiv_cese",dbtype="VARCHAR2(20)",nulls_allowed=yes)
+ COLUMN(type=char,name="flag_replicacion",dbtype="CHAR(1)",nulls_allowed=yes,default_value="'1' "))

@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_conv_dec_hr.srf
+global type f_conv_dec_hr from function_object
+end type
+
+forward prototypes
+global function string f_conv_dec_hr (string as_data)
+end prototypes
+
+global function string f_conv_dec_hr (string as_data);String	ls_temp, ls_resultado, ls_hr, ls_min, ls_ent, ls_frac
+INTEGER	li_2p, li_p
+Dec		ldc_frac, ldc_temp
+
+ls_temp = as_data
+
+li_2p = Pos(ls_temp, ':')
+li_p	= Pos(ls_temp, '.')
+
+IF li_p > 0 AND li_2p = 0 THEN
+	ls_ent  = Left(ls_temp, li_p -1)
+	ls_frac = Mid(ls_temp, li_p)
+	ldc_frac = Dec(ls_frac)
+	ls_resultado = String(Dec(ls_ent)) + ':' + Left(String(ldc_frac * 60),2)
+ELSE
+	ls_resultado = ls_temp
+END IF
+
+RETURN ls_resultado
+end function
+

@@ -1,0 +1,111 @@
+﻿$PBExportHeader$d_rpt_doc_por_directo_cebe_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 96 print.margin.right = 96 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=404 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=cntas_pagar_origen dbname="cntas_pagar.origen" )
+ column=(type=char(4) updatewhereclause=yes name=cntas_pagar_tipo_doc dbname="cntas_pagar.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=cntas_pagar_nro_doc dbname="cntas_pagar.nro_doc" )
+ column=(type=datetime updatewhereclause=yes name=cntas_pagar_fecha_registro dbname="cntas_pagar.fecha_registro" )
+ column=(type=char(6) updatewhereclause=yes name=cntas_pagar_cod_usr dbname="cntas_pagar.cod_usr" )
+ column=(type=decimal(0) updatewhereclause=yes name=cntas_pagar_det_item dbname="cntas_pagar_det.item" )
+ column=(type=decimal(2) updatewhereclause=yes name=cntas_pagar_det_importe dbname="cntas_pagar_det.importe" )
+ column=(type=char(3) updatewhereclause=yes name=cntas_pagar_cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=char(40) updatewhereclause=yes name=moneda_descripcion dbname="moneda.descripcion" )
+ column=(type=char(60) updatewhereclause=yes name=cntas_pagar_det_descripcion dbname="cntas_pagar_det.descripcion" )
+ column=(type=char(8) updatewhereclause=yes name=cntas_pagar_cod_relacion dbname="cntas_pagar.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(10) updatewhereclause=yes name=cntas_pagar_det_cencos dbname="cntas_pagar_det.cencos" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(10) updatewhereclause=yes name=cntas_pagar_det_cnta_prsp dbname="cntas_pagar_det.cnta_prsp" )
+ column=(type=char(12) updatewhereclause=yes name=cntas_pagar_det_centro_benef dbname="cntas_pagar_det.centro_benef" )
+ column=(type=char(100) updatewhereclause=yes name=centro_beneficio_desc_centro dbname="centro_beneficio.desc_centro" )
+ retrieve="SELECT CP.ORIGEN,
+       CP.TIPO_DOC,
+       CP.NRO_DOC,
+       CP.FECHA_REGISTRO,
+		 CP.COD_USR,
+       CPD.ITEM,
+		 CPD.IMPORTE,
+       CP.COD_MONEDA,
+       M.DESCRIPCION,
+		 CPD.DESCRIPCION,
+       CP.COD_RELACION,
+       P.NOM_PROVEEDOR,
+       CPD.CENCOS,
+       CC.DESC_CENCOS,
+       CPD.CNTA_PRSP,
+       CPD.CENTRO_BENEF,
+       CB.DESC_CENTRO
+       
+  FROM CNTAS_PAGAR      CP,
+       CNTAS_PAGAR_DET  CPD,
+       CENTRO_BENEFICIO CB,
+       CENTROS_COSTO    CC,
+       PROVEEDOR        P,
+	    MONEDA				M
+       
+ WHERE CP.COD_RELACION  = CPD.COD_RELACION
+   AND CP.TIPO_DOC      = CPD.TIPO_DOC
+   AND CP.NRO_DOC       = CPD.NRO_DOC
+   AND CPD.CENTRO_BENEF = CB.CENTRO_BENEF(+)
+   AND CPD.CENCOS       = CC.CENCOS(+)
+   AND P.PROVEEDOR      = CP.COD_RELACION
+   AND M.COD_MONEDA	   = CP.COD_MONEDA
+	AND CP.FLAG_PROVISIONADO = 'D'
+   AND CP.FLAG_ESTADO   <> '0'
+   AND CP.TIPO_DOC IN(SELECT NVL(F.DOC_FACT_PAGAR,' ')FROM FINPARAM F)
+   AND trunc(CP.FECHA_REGISTRO) BETWEEN (:ad_fecha1) AND (:ad_fecha2)
+   AND CP.ORIGEN LIKE :as_cod_origen" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_cod_origen", string)) )
+group(level=1 header.height=228 trailer.height=108 by=("cntas_pagar_origen" , "cntas_pagar_tipo_doc" , "cntas_pagar_nro_doc" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="gs_logo" x="27" y="36" height="184" width="370" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="gs_empresa" border="0" color="0" x="27" y="236" height="56" width="370" html.valueishtml="0"  name=t_nombre visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="0" x="4311" y="212" height="56" width="530" format="dd/mm/yyyy  hh:mm:ss" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="gs_user" border="0" color="0" x="4599" y="132" height="56" width="242" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' / ' + pageCount()"border="0" color="0" x="4311" y="52" height="56" width="530" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="CONTROL DE DOCUMENTOS POR PAGAR DIRECTOS / CENTRO BENEFICIO" border="1" color="0" x="800" y="76" height="172" width="2642" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="text" border="2" color="16711680" x="1527" y="308" height="56" width="462" html.valueishtml="0"  name=t_fec_desde visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="text" border="2" color="16711680" x="2267" y="308" height="56" width="462" html.valueishtml="0"  name=t_fec_hasta visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Desde" border="2" color="0" x="1266" y="308" height="56" width="242" html.valueishtml="0"  name=fec_desde_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Hasta" border="2" color="0" x="2007" y="308" height="56" width="242" html.valueishtml="0"  name=fec_hasta_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Item" border="2" color="0" x="123" y="164" height="56" width="133" html.valueishtml="0"  name=cntas_pagar_det_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+line(band=header.1 x1="119" y1="8" x2="3470" y2="8"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Descripción" border="2" color="0" x="261" y="164" height="56" width="1271" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Cnta Prsp" border="2" color="0" x="3214" y="164" height="56" width="311" html.valueishtml="0"  name=cntas_pagar_det_cnta_prsp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Centro de Costos" border="2" color="0" x="1989" y="164" height="56" width="1221" html.valueishtml="0"  name=cntas_pagar_det_cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="1" text="Importe" border="2" color="0" x="1536" y="164" height="56" width="448" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header.1 alignment="2" text="Centros Beneficio" border="2" color="0" x="3529" y="164" height="56" width="1298" html.valueishtml="0"  name=cntas_pagar_det_centro_benef_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="123" y="8" height="56" width="133" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="261" y="8" height="56" width="1275" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="1541" y="8" height="56" width="448" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_importe visible="1" editmask.mask="###,##0.0000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="33554432" x="1993" y="8" height="56" width="265" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_cencos visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="2" color="33554432" x="2263" y="8" height="56" width="946" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="2" color="33554432" x="3525" y="8" height="56" width="357" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_centro_benef visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif( isnull(cntas_pagar_det_centro_benef) , rgb( 236, 233, 216),  rgb(255, 255, 255))" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="2" color="33554432" x="3214" y="8" height="56" width="306" format="[general]" html.valueishtml="0"  name=cntas_pagar_det_cnta_prsp visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="2" color="33554432" x="3886" y="8" height="56" width="942" format="[general]" html.valueishtml="0"  name=centro_beneficio_desc_centro visible="1" edit.limit=100 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif( isnull(cntas_pagar_det_centro_benef) , rgb( 236, 233, 216),  rgb(255, 255, 255))" )
+rectangle(band=trailer.1 x="119" y="12" height="88" width="4713"  name=r_1 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+compute(band=trailer.1 alignment="1" expression="sum(cntas_pagar_det_importe for group 1)"border="2" color="33554432" x="1541" y="28" height="56" width="448" format="###,##0.0000" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="2" text="T O T A L     G E N E R A L" border="0" color="0" x="462" y="44" height="28" width="850" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-5" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="2" text="Origen" border="2" color="0" x="123" y="28" height="56" width="178" html.valueishtml="0"  name=cntas_pagar_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.1 id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="123" y="96" height="56" width="178" format="[general]" html.valueishtml="0"  name=cntas_pagar_origen visible="1" edit.limit=2 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Tipo Doc" border="2" color="0" x="306" y="28" height="56" width="219" html.valueishtml="0"  name=cntas_pagar_tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.1 id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="306" y="96" height="56" width="219" format="[general]" html.valueishtml="0"  name=cntas_pagar_tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Nro Doc" border="2" color="0" x="530" y="28" height="56" width="279" html.valueishtml="0"  name=cntas_pagar_nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.1 id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="530" y="96" height="56" width="279" format="[general]" html.valueishtml="0"  name=cntas_pagar_nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Usuario" border="2" color="0" x="814" y="28" height="56" width="261" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.1 id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="814" y="96" height="56" width="261" format="[general]" html.valueishtml="0"  name=cntas_pagar_cod_usr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Moneda" border="2" color="0" x="1079" y="28" height="56" width="283" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.1 id=8 alignment="2" tabsequence=0 border="2" color="33554432" x="1367" y="28" height="56" width="224" html.valueishtml="0"  name=cntas_pagar_cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=9 alignment="0" tabsequence=0 border="2" color="33554432" x="1079" y="96" height="56" width="512" html.valueishtml="0"  name=moneda_descripcion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=11 alignment="0" tabsequence=32766 border="2" color="33554432" x="2075" y="96" height="56" width="247" format="[general]" html.valueishtml="0"  name=cntas_pagar_cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Fecha Registro" border="2" color="0" x="1595" y="28" height="56" width="475" html.valueishtml="0"  name=cntas_pagar_fecha_registro_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.1 id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="1595" y="96" height="56" width="475" format="[shortdate] [time]" html.valueishtml="0"  name=cntas_pagar_fecha_registro visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Proveedor" border="2" color="0" x="2075" y="28" height="56" width="1481" html.valueishtml="0"  name=cntas_pagar_cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=header.1 id=12 alignment="0" tabsequence=32766 border="2" color="33554432" x="2327" y="96" height="56" width="1230" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

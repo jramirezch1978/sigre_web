@@ -1,0 +1,54 @@
+﻿$PBExportHeader$d_abc_cartera_cobros_det_tbl_bak.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=72 color="536870912" )
+summary(height=28 color="536870912" )
+footer(height=4 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen dbname="caja_bancos_det.origen" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_registro dbname="caja_bancos_det.nro_registro" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=item dbname="caja_bancos_det.item" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="caja_bancos_det.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="caja_bancos_det.nro_doc" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="caja_bancos_det.importe" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flab_tabor dbname="caja_bancos_det.flab_tabor" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda_mst dbname="caja_bancos.cod_moneda" )
+ column=(type=decimal(3) updatewhereclause=yes name=tasa_cambio dbname="caja_bancos.tasa_cambio" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda_ref dbname="tt_doc_ref_cart_cobros.cod_moneda" )
+ retrieve="  SELECT ~"CAJA_BANCOS_DET~".~"ORIGEN~",   
+         ~"CAJA_BANCOS_DET~".~"NRO_REGISTRO~",   
+         ~"CAJA_BANCOS_DET~".~"ITEM~",   
+         ~"CAJA_BANCOS_DET~".~"TIPO_DOC~",   
+         ~"CAJA_BANCOS_DET~".~"NRO_DOC~",   
+         ~"CAJA_BANCOS_DET~".~"IMPORTE~",   
+         ~"CAJA_BANCOS_DET~".~"FLAB_TABOR~",   
+         ~"CAJA_BANCOS~".~"COD_MONEDA~",   
+         ~"CAJA_BANCOS~".~"TASA_CAMBIO~",   
+         ~"TT_DOC_REF_CART_COBROS~".~"COD_MONEDA~"  
+    FROM ~"CAJA_BANCOS_DET~",   
+         ~"CAJA_BANCOS~",   
+         ~"TT_DOC_REF_CART_COBROS~"  
+   WHERE ( ~"CAJA_BANCOS~".~"ORIGEN~" = ~"CAJA_BANCOS_DET~".~"ORIGEN~" ) and  
+         ( ~"CAJA_BANCOS~".~"NRO_REGISTRO~" = ~"CAJA_BANCOS_DET~".~"NRO_REGISTRO~" ) and  
+         ( caja_bancos_det.tipo_doc = tt_doc_ref_cart_cobros.tipo_doc (+)) and  
+         ( caja_bancos_det.nro_doc = tt_doc_ref_cart_cobros.nro_doc (+)) and  
+         ( ( ~"CAJA_BANCOS_DET~".~"ORIGEN~" = :as_origen ) AND  
+         ( ~"CAJA_BANCOS_DET~".~"NRO_REGISTRO~" = :an_nro_reg ) )    
+" update="CAJA_BANCOS_DET" updatewhere=0 updatekeyinplace=no arguments=(("as_origen", string),("an_nro_reg", number)) )
+text(band=header alignment="2" text="Tipo Doc" border="6" color="0" x="233" y="8" height="56" width="233"  name=tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Doc" border="6" color="0" x="485" y="8" height="56" width="306"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Flab Tabor" border="6" color="0" x="1522" y="8" height="56" width="279"  name=flab_tabor_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Imp Original" border="6" color="0" x="809" y="8" height="56" width="329"  name=importe_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Imp. Convertido" border="6" color="0" x="1157" y="8" height="56" width="347"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Item" border="6" color="0" x="18" y="8" height="56" width="197"  name=item_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="5" color="0" x="18" y="4" height="56" width="201" format="[general]"  name=item edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="5" color="0" x="233" y="4" height="56" width="233" format="[general]"  name=tipo_doc edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="5" color="0" x="485" y="4" height="56" width="306" format="[general]"  name=nro_doc edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="0" x="1522" y="4" height="56" width="279" format="[general]"  name=flab_tabor edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=10 border="5" color="0" x="809" y="4" height="56" width="329" format="###,##0.00"  name=importe editmask.mask="###,##0.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="f_importe_cambio( cod_moneda_mst , cod_moneda_ref ,  importe , tasa_cambio )"border="5" color="0" x="1157" y="4" height="56" width="347" format="###,##0.00"  name=cf_imp  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1870" y="8" height="56" width="288" format="[general]"  name=cod_moneda_mst visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="2167" y="8" height="56" width="375" format="[general]"  name=tasa_cambio visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="2551" y="8" height="56" width="375" format="[general]"  name=cod_moneda_ref visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

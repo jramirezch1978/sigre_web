@@ -1,0 +1,45 @@
+﻿$PBExportHeader$f_calc_quinta_categ.srf
+global type f_calc_quinta_categ from function_object
+end type
+
+forward prototypes
+global function decimal f_calc_quinta_categ (decimal adc_renta_neta, integer ai_year)
+end prototypes
+
+global function decimal f_calc_quinta_categ (decimal adc_renta_neta, integer ai_year);Decimal {2} ldc_quinta_categ, ldc_tasa, ldc_tope_ini, ldc_tope_fin, ldc_importe
+date		ld_fecha
+
+ld_fecha = date(ai_year, 1,1)
+
+declare c_topes cursor for
+	select NVL(r.tasa,0), NVL(r.tope_ini,0), NVL(r.tope_fin,0)
+	  from rrhh_impuesto_renta r
+	  where :ld_fecha between r.fecha_vig_ini and r.fecha_vig_fin
+	  order by r.secuencia;
+
+open c_topes;
+
+ldc_quinta_categ = 0
+
+fetch c_topes into :ldc_tasa, :ldc_tope_ini, :ldc_tope_fin;
+do while SQLCA.SQLCode <> 100 
+	if adc_renta_neta <= ldc_tope_fin then
+		ldc_importe = adc_renta_neta - ldc_tope_ini
+      if ldc_importe > 0 then
+      	ldc_importe   = ldc_importe * ldc_tasa/100
+         ldc_quinta_categ += ldc_importe
+      end if 
+   else
+		ldc_importe   = ldc_tope_fin - ldc_tope_ini
+		ldc_importe   = ldc_importe * ldc_tasa/100
+		ldc_quinta_categ += ldc_importe
+	end if 
+	
+	fetch c_topes into :ldc_tasa, :ldc_tope_ini, :ldc_tope_fin;
+loop
+
+close c_topes;
+
+return ldc_quinta_categ
+end function
+

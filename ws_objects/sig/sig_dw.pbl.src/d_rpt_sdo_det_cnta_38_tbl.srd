@@ -1,0 +1,61 @@
+﻿$PBExportHeader$d_rpt_sdo_det_cnta_38_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=412 color="536870912" )
+summary(height=120 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=cnta_ctbl dbname="cntbl_asiento_det.cnta_ctbl" )
+ column=(type=char(150) updatewhereclause=yes name=cntbl_cnta_desc_cnta dbname="cntbl_cnta.desc_cnta" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntbl_asiento_det.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_docref1 dbname="cntbl_asiento_det.tipo_docref1" )
+ column=(type=char(15) updatewhereclause=yes name=nro_docref1 dbname="cntbl_asiento_det.nro_docref1" )
+ column=(type=number updatewhereclause=yes name=tot_dol dbname="tot_dol" )
+ retrieve="select cad.cnta_ctbl, c.desc_cnta, cad.cod_relacion, p.nom_proveedor, cad.tipo_docref1, 
+		 cad.nro_docref1, sum(decode(cad.flag_debhab,'D',cad.imp_movdol,cad.imp_movdol*-1)) as tot_dol
+from cntbl_asiento ca, cntbl_asiento_det cad, cntbl_cnta c, proveedor p
+where ( ca.origen=cad.origen and
+        ca.ano=cad.ano and
+        ca.mes=cad.mes and
+        ca.nro_libro=cad.nro_libro and
+        ca.nro_asiento=cad.nro_asiento ) and
+      (cad.cnta_ctbl = c.cnta_ctbl ) and
+      ( ca.flag_estado<>'0' and
+        ca.ano= :an_ano ) and
+      (cad.cnta_ctbl = :as_cnta_contab and
+        cad.cod_relacion is not null and
+        cad.tipo_docref1 is not null and
+        cad.nro_docref1 is not null ) and
+	   ( cad.cod_relacion = p.proveedor ) 
+group by cad.cnta_ctbl, c.desc_cnta, cad.cod_relacion, p.nom_proveedor, cad.tipo_docref1, 
+		 cad.nro_docref1
+having sum(decode(cad.flag_debhab,'D',cad.imp_movdol,cad.imp_movdol*-1)) <> 0
+order by cad.cod_relacion, sum(decode(cad.flag_debhab,'D',cad.imp_movdol,cad.imp_movdol*-1)) desc" arguments=(("an_ano", number),("as_cnta_contab", string)) )
+group(level=1 header.height=80 trailer.height=116 by=("cod_relacion" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="18" y="20" height="204" width="389" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="14" y="244" height="40" width="393" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="33554432" x="2715" y="128" height="40" width="352" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2715" y="72" height="40" width="352" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="0" x="2715" y="12" height="40" width="352" format="[General]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Saldo detallado de cuenta contable 38" border="0" color="33554432" x="704" y="60" height="64" width="1755" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="704" y="168" height="64" width="1755" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="699" y="168" height="64" width="352" format="[general]" html.valueishtml="0"  name=cnta_ctbl visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1056" y="168" height="64" width="1408" format="[general]" html.valueishtml="0"  name=cntbl_cnta_desc_cnta visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="TDoc" border="2" color="33554432" x="1088" y="336" height="64" width="160" html.valueishtml="0"  name=tipo_docref1_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Documento" border="2" color="33554432" x="1262" y="336" height="64" width="407" html.valueishtml="0"  name=nro_docref1_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Saldo US$" border="2" color="33554432" x="1682" y="336" height="64" width="498" html.valueishtml="0"  name=tot_dol_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1079" y="4" height="64" width="1161" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="0" x="727" y="4" height="64" width="338" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1097" y="4" height="64" width="160" format="[general]" html.valueishtml="0"  name=tipo_docref1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1271" y="4" height="64" width="407" format="[general]" html.valueishtml="0"  name=nro_docref1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="1691" y="4" height="64" width="535" format="#,##0.00" html.valueishtml="0"  name=tot_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(tot_dol for group 1)"border="0" color="0" x="1691" y="20" height="64" width="535" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=trailer.1 alignment="1" text=".. Subtotal :" border="0" color="0" x="713" y="20" height="64" width="859" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(tot_dol for all)"border="0" color="255" x="1691" y="20" height="64" width="535" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Total general  :" border="0" color="255" x="713" y="20" height="64" width="859" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

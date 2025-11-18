@@ -1,0 +1,109 @@
+﻿$PBExportHeader$d_cns_inconsistencias_pdb_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=128 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntas_pagar.cod_relacion" )
+ column=(type=char(4) updatewhereclause=yes name=cntas_pagar_tipo_doc dbname="cntas_pagar.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=cntas_pagar_nro_doc dbname="cntas_pagar.nro_doc" )
+ column=(type=char(3) updatewhereclause=yes name=cntas_pagar_cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=decimal(4) updatewhereclause=yes name=cntas_pagar_tasa_cambio dbname="cntas_pagar.tasa_cambio" )
+ column=(type=number updatewhereclause=yes name=compute_0006 dbname="compute_0006" )
+ column=(type=datetime updatewhereclause=yes name=cntas_pagar_fecha_emision dbname="cntas_pagar.fecha_emision" )
+ column=(type=number updatewhereclause=yes name=total dbname="total" )
+ column=(type=number updatewhereclause=yes name=igv dbname="igv" )
+ retrieve="SELECT a.cod_relacion ,
+       a.tipo_doc     ,
+       a.nro_doc      ,
+       a.cod_moneda   ,
+       a.tasa_cambio  ,
+       usf_fin_tasa_cambio(a.fecha_emision),
+       a.fecha_emision ,
+       SUM(Nvl(b.importe,0) ) as total,
+       SUM(Nvl(c.importe,0) ) as igv
+
+FROM  cntas_pagar           a, 
+      cntas_pagar_det       b, 
+      cp_doc_det_imp        c, 
+      proveedor             d, 
+      doc_tipo              dc,
+      detraccion            dt,
+      detr_bien_serv        dbs,
+      credito_fiscal        e
+
+WHERE   ((a.cod_relacion     = b.cod_relacion   )   
+  AND    (a.tipo_doc         = b.tipo_doc       )   
+  AND    (a.nro_doc          = b.nro_doc        ))  
+  AND   ((b.cod_relacion     = c.cod_relacion   )   
+  AND    (b.tipo_doc         = c.tipo_doc       )  
+  AND    (b.nro_doc          = c.nro_doc        )  
+  AND    (b.item             = c.item           )) 
+  AND    (b.tipo_cred_fiscal  = e.tipo_cred_fiscal ) 
+  AND    (dc.tipo_doc        = a.tipo_doc           )  
+  AND    (a.cod_relacion     = d.proveedor          )  
+  AND    (a.nro_detraccion   = dt.nro_detraccion (+))  
+  AND    (a.bien_serv        = dbs.bien_serv     (+))  
+  AND    (a.tipo_doc        NOT IN (select 'PZ' from dual ) ) 
+  AND    (a.nro_libro        = (select libro_compras from finparam where reckey = '1' )    ) 
+  AND    (b.tipo_cred_fiscal = (select tipo_cred_fiscal from finparam where reckey = '1' ) ) 
+  AND    (c.tipo_impuesto    = (select cod_igv from logparam where reckey = '1' )          ) 
+  AND    (a.ano              = :AS_YEAR                                                     ) 
+  AND    (a.mes              = :AS_MES                                               ) 
+  AND    length(nvl(substr(a.nro_doc,1,instr(a.nro_doc,'-',1,1) - 1),''))  <= 4
+         
+GROUP BY a.cod_relacion, 
+         d.ruc, 
+         a.nro_asiento, 
+         a.tipo_doc, 
+         dc.cod_sunat, 
+         a.nro_doc,
+         a.fecha_emision, 
+         a.cod_moneda,
+         a.tasa_cambio,  
+         a.ano,a.mes,
+         d.flag_personeria, 
+         d.nom_proveedor,
+         d.apellido_pat,
+         d.apellido_mat,
+         d.nombre1,
+         d.nombre2,
+         a.flag_detraccion ,
+         dbs.bien_serv,
+         dt.nro_deposito,
+         a.flag_retencion,
+         a.porc_ret_igv,
+         b.tipo_cred_fiscal ,
+         e.cod_sunat " arguments=(("AS_YEAR", string),("AS_MES", string)) )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="23" y="0" height="68" width="283" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="311" y="0" height="68" width="137" format="[general]" html.valueishtml="0"  name=cntas_pagar_tipo_doc visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="453" y="0" height="68" width="302" format="[general]" html.valueishtml="0"  name=cntas_pagar_nro_doc visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="759" y="0" height="68" width="133" format="[general]" html.valueishtml="0"  name=cntas_pagar_cod_moneda visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="896" y="0" height="68" width="215" format="[general]" html.valueishtml="0"  name=cntas_pagar_tasa_cambio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="33554432" x="1115" y="0" height="68" width="503" format="[shortdate] [time]" html.valueishtml="0"  name=cntas_pagar_fecha_emision visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="1623" y="0" height="68" width="219" format="[general]" html.valueishtml="0"  name=compute_0006 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="1847" y="0" height="68" width="329" format="[general]" html.valueishtml="0"  name=total visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="2181" y="0" height="68" width="329" format="[general]" html.valueishtml="0"  name=igv visible="1" editmask.mask="###,##0.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fecha Emision" border="2" color="8388608" x="1115" y="68" height="56" width="503" html.valueishtml="0"  name=cntas_pagar_fecha_emision_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+text(band=header alignment="2" text="T/C" border="2" color="8388608" x="1623" y="68" height="56" width="219" html.valueishtml="0"  name=compute_0006_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+text(band=header alignment="2" text="Cod 
+Proveedor" border="2" color="8388608" x="23" y="12" height="112" width="283" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+text(band=header alignment="2" text="Tipo 
+Doc" border="2" color="8388608" x="311" y="12" height="112" width="137" html.valueishtml="0"  name=cntas_pagar_tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+text(band=header alignment="2" text="Nro 
+Doc" border="2" color="8388608" x="453" y="12" height="112" width="302" html.valueishtml="0"  name=cntas_pagar_nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+text(band=header alignment="2" text="Cod 
+Mon" border="2" color="8388608" x="759" y="12" height="112" width="133" html.valueishtml="0"  name=cntas_pagar_cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+text(band=header alignment="2" text="Tasa 
+Cambio" border="2" color="8388608" x="896" y="12" height="112" width="215" html.valueishtml="0"  name=cntas_pagar_tasa_cambio_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+text(band=header alignment="2" text="Cuentas por Pagar" border="2" color="8388608" x="1115" y="12" height="56" width="727" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+text(band=header alignment="2" text="Total
+" border="2" color="8388608" x="1847" y="12" height="112" width="329" html.valueishtml="0"  name=total_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+text(band=header alignment="2" text="Igv
+" border="2" color="8388608" x="2181" y="12" height="112" width="329" html.valueishtml="0"  name=igv_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217728" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

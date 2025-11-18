@@ -1,0 +1,59 @@
+﻿$PBExportHeader$d_abc_item_x_os_pendientes_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="orden_servicio_det.cod_origen" )
+ column=(type=char(10) updatewhereclause=yes name=nro_os dbname="orden_servicio_det.nro_os" )
+ column=(type=number updatewhereclause=yes name=nro_item dbname="orden_servicio_det.nro_item" )
+ column=(type=char(1) updatewhereclause=yes name=flag_estado dbname="orden_servicio_det.flag_estado" )
+ column=(type=datetime updatewhereclause=yes name=fec_registro dbname="orden_servicio_det.fec_registro" )
+ column=(type=datetime updatewhereclause=yes name=fec_proyect dbname="orden_servicio_det.fec_proyect" )
+ column=(type=char(60) updatewhereclause=yes name=descripcion dbname="descripcion" )
+ column=(type=number updatewhereclause=yes name=importe dbname="orden_servicio_det.importe" )
+ column=(type=number updatewhereclause=yes name=impuesto dbname="orden_servicio_det.impuesto" )
+ column=(type=number updatewhereclause=yes name=descuento dbname="descuento" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="orden_servicio_det.cencos" )
+ column=(type=char(0) updatewhereclause=yes name=vacio dbname="orden_servicio.vacio" )
+ column=(type=char(10) updatewhereclause=yes name=cnta_prsp dbname="orden_servicio_det.cnta_prsp" )
+ column=(type=char(10) updatewhereclause=yes name=oper_sec dbname="orden_servicio_det.oper_sec" )
+ retrieve="select osd.cod_origen   ,osd.nro_os      ,osd.nro_item              ,osd.flag_estado  ,   
+       osd.fec_registro ,osd.fec_proyect ,Substr(osd.descripcion,1,60) as descripcion ,   
+       osd.importe      ,osd.impuesto    ,Nvl(osd.decuento,0) as descuento            ,
+       osd.cencos       ,null as vacio	  ,osd.cnta_prsp   ,osd.oper_sec
+  from orden_servicio os,orden_servicio_det osd
+ where (os.nro_os           = osd.nro_os    ) and
+       (os.nro_sol_serv     is not null     ) and
+       (osd.conformidad_usr is null         ) and
+       (os.flag_estado      IN ('1','3')    ) and
+		 (os.cod_origen   	 = :as_cod_origen) and
+		 (os.nro_os				 = :as_nro_os    )
+union
+select osd.cod_origen   ,osd.nro_os      ,osd.nro_item              ,osd.flag_estado  ,   
+       osd.fec_registro ,osd.fec_proyect ,Substr(osd.descripcion,1,60) as descripcion ,   
+       osd.importe      ,osd.impuesto    ,Nvl(osd.decuento,0) as descuento            ,
+       osd.cencos       ,null as vacio   ,osd.cnta_prsp   ,osd.oper_sec
+  from orden_servicio os,orden_servicio_det osd
+ where (os.nro_os           = osd.nro_os     ) and
+       (osd.conformidad_usr is not null      ) and
+       (os.nro_sol_serv     is null          ) and              
+       (os.flag_estado      IN ('1','3')     ) and
+		 (os.cod_origen		 = :as_cod_origen ) and
+		 (os.nro_os				 = :as_nro_os     )
+
+
+
+ 	    " arguments=(("as_cod_origen", string),("as_nro_os", string)) )
+text(band=header alignment="2" text="Nro Item" border="2" color="33554432" x="9" y="8" height="56" width="256" html.valueishtml="0"  name=nro_item_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripcion" border="2" color="33554432" x="270" y="8" height="56" width="1335" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Importe" border="2" color="33554432" x="1609" y="8" height="56" width="306" html.valueishtml="0"  name=importe_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="9" y="0" height="68" width="256" format="[general]" html.valueishtml="0"  name=nro_item visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="270" y="0" height="68" width="1335" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="1609" y="0" height="68" width="306" format="[general]" html.valueishtml="0"  name=importe visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

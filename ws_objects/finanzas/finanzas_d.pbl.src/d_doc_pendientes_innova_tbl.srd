@@ -1,0 +1,346 @@
+﻿$PBExportHeader$d_doc_pendientes_innova_tbl.srd
+release 12.5;
+datawindow(units=3 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 635 print.margin.right = 635 print.margin.top = 635 print.margin.bottom = 635 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=yes showbackcoloronxp=no picture.file="" )
+header(height=1190 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=449 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="cod_relacion" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="nro_doc" )
+ column=(type=char(4000) updatewhereclause=yes name=full_nro_doc dbname="full_nro_doc" )
+ column=(type=char(4) updatewhereclause=yes name=tipo_doc_ref dbname="tipo_doc_ref" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc_ref dbname="nro_doc_ref" )
+ column=(type=char(4000) updatewhereclause=yes name=full_nro_doc_ref dbname="full_nro_doc_ref" )
+ column=(type=number updatewhereclause=yes name=nro_cuota dbname="nro_cuota" )
+ column=(type=datetime updatewhereclause=yes name=fecha_vencimiento dbname="fecha_vencimiento" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_tabla dbname="flag_tabla" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_ctbl dbname="cnta_ctbl" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="cod_moneda" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_debhab dbname="flag_debhab" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=sldo_sol dbname="sldo_sol" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=saldo_dol dbname="saldo_dol" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_doc dbname="fecha_doc" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=factor dbname="factor" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="origen" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ column=(type=char(1) updatewhereclause=yes name=flag_provisionado dbname="flag_provisionado" )
+ column=(type=char(200) updatewhereclause=yes name=nom_proveedor dbname="nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=flag_pln dbname="flag_pln" )
+ column=(type=number updatewhereclause=yes name=tasa_cambio dbname="tasa_cambio" )
+ column=(type=number updatewhereclause=yes name=saldo_aplicado_sol dbname="saldo_aplicado_sol" )
+ column=(type=number updatewhereclause=yes name=saldo_aplicado_dol dbname="saldo_aplicado_dol" )
+ column=(type=char(10) updatewhereclause=yes name=cencos dbname="cencos" )
+ column=(type=char(10) updatewhereclause=yes name=mnz dbname="mnz" )
+ column=(type=char(10) updatewhereclause=yes name=lote dbname="lote" )
+ retrieve="-- Cuentas por Cobrar
+SELECT DC.COD_RELACION,   
+       DC.TIPO_DOC    ,   
+       DC.NRO_DOC     ,   
+       PKG_FACT_ELECTRONICA.of_get_full_nro(dc.nro_doc) as full_nro_doc,
+       dr.tipo_doc as tipo_doc_ref,
+       dr.nro_doc  as nro_doc_ref,  
+       PKG_FACT_ELECTRONICA.of_get_full_nro(dr.nro_doc) as full_nro_doc_ref,
+       fpr.nro_cuota,
+       cc.fecha_vencimiento,
+       DC.FLAG_TABLA  ,   
+       DC.CNTA_CTBL   ,   
+       DC.COD_MONEDA  ,   
+       DC.FLAG_DEBHAB ,   
+       DC.SLDO_SOL    ,   
+       DC.SALDO_DOL   ,   
+       DC.FECHA_DOC   ,   
+       DC.FACTOR      ,   
+       CC.ORIGEN            ,
+       case
+          when DC.COD_MONEDA = pkg_logistica.of_soles(null) then
+             DC.SLDO_SOL
+          else
+             DC.SALDO_DOL
+       end AS IMPORTE,
+       CC.FLAG_PROVISIONADO    ,
+       P.NOM_PROVEEDOR      ,
+       (SELECT Count(*) 
+          FROM pln_cobranza pln ,
+               pln_cobranza_det pld 
+         WHERE pln.nro_planilla = PLD.nro_planilla              
+           AND decode(PLD.flag_tabla,'1',doc_cxc    ,doc_cxp    ) = DC.tipo_doc     
+           AND decode(PLD.flag_tabla,'1',nro_doc_cxc,nro_doc_cxp) = DC.nro_doc      
+           AND PLD.cod_rel_cxp                                    = DC.cod_relacion ) as flag_pln,
+       CC.TASA_CAMBIO,
+       0.00 AS SALDO_APLICADO_SOL,
+       0.00 AS SALDO_APLICADO_DOL,
+		 null as cencos,
+		 a.mnz,
+		 a.lote
+  FROM DOC_PENDIENTES_CTA_CTE      DC,
+       CNTAS_COBRAR                CC,
+		 cntas_cobrar_det				  ccd,
+		 articulo						  a,
+       PROVEEDOR                   P,            
+       fs_factura_simpl_pagos_ref	fpr,
+       (select 'DTRC' as tipo_doc_dtr, cp2.* 
+          from cntas_pagar cp2,
+               DETRACCION  DTR
+         where dtr.nro_detraccion = cp2.nro_detraccion) DR
+ WHERE DC.COD_RELACION   = CC.COD_RELACION     
+   AND DC.TIPO_DOC       = CC.TIPO_DOC         
+   AND DC.NRO_DOC        = CC.NRO_DOC          
+   and cc.tipo_doc		 = ccd.tipo_doc
+   and cc.nro_doc			 = ccd.nro_doc
+   and ccd.cod_art		 = a.cod_art			(+)
+   AND DC.COD_RELACION   = P.PROVEEDOR  
+   AND CC.tipo_doc       = DR.tipo_doc_dtr   (+)
+   AND CC.nro_doc        = DR.nro_detraccion (+)
+   and cc.tipo_doc       = fpr.tipo_doc_cxc  (+)
+   and cc.nro_doc        = fpr.nro_doc_cxc  (+)
+   AND case
+        when DC.COD_MONEDA  = pkg_logistica.of_soles(null)   then
+           DC.SLDO_SOL   
+        else
+           DC.SALDO_DOL 
+      end > 0
+  AND DC.COD_RELACION  like :as_cod_relacion  
+UNION
+-- Cntas x Pagar
+SELECT DC.COD_RELACION,   
+       DC.TIPO_DOC    ,   
+       DC.NRO_DOC     ,  
+       PKG_FACT_ELECTRONICA.of_get_full_nro(dc.nro_doc) as full_nro_doc,
+       dr.tipo_doc   as tipo_doc_ref,
+       dr.nro_doc    as nro_doc_ref,
+       PKG_FACT_ELECTRONICA.of_get_full_nro(dr.nro_doc) as full_nro_doc_ref,
+       0 as nro_cuota,
+       cp.vencimiento as fecha_vencimiento,
+       DC.FLAG_TABLA  ,   
+       DC.CNTA_CTBL   ,   
+       DC.COD_MONEDA  ,   
+       DC.FLAG_DEBHAB ,   
+       DC.SLDO_SOL    ,   
+       DC.SALDO_DOL   ,   
+       DC.FECHA_DOC   ,   
+       DC.FACTOR      ,   
+       CP.ORIGEN            ,
+       case
+         when DC.COD_MONEDA = pkg_logistica.of_soles(null) then
+           DC.SLDO_SOL
+         else
+           DC.SALDO_DOL
+       end AS IMPORTE,
+       CP.FLAG_PROVISIONADO,
+       P.NOM_PROVEEDOR    ,
+       (SELECT Count(*) 
+          FROM pln_cobranza pln ,
+               pln_cobranza_det pld 
+         WHERE pln.nro_planilla = PLD.nro_planilla              
+           AND decode(PLD.flag_tabla,'1',doc_cxc    ,doc_cxp    ) = DC.tipo_doc     
+           AND decode(PLD.flag_tabla,'1',nro_doc_cxc,nro_doc_cxp) = DC.nro_doc      
+           AND PLD.cod_rel_cxp                                    = DC.cod_relacion ) as flag_pln,
+       CP.TASA_CAMBIO,
+       CP.SALDO_APLICADO_SOL,
+       CP.SALDO_APLICADO_DOL,
+		 (select max(cpd.cencos)
+		    from cntas_pagar_det cpd
+		   where cpd.cod_relacion 	= cp.cod_relacion
+ 			  and cpd.tipo_doc		= cp.tipo_doc
+			  and cpd.nro_doc			= cp.nro_doc) as cencos,
+		 null as mnz,
+		 null as lote
+
+  FROM DOC_PENDIENTES_CTA_CTE  DC,
+       CNTAS_PAGAR             CP,
+       PROVEEDOR               P,
+       (select 'DTRP' as tipo_doc_dtr, cp2.* 
+          from cntas_pagar cp2,
+               DETRACCION  DTR
+         where dtr.nro_detraccion = cp2.nro_detraccion) DR
+ WHERE DC.COD_RELACION    = CP.COD_RELACION      
+   AND DC.TIPO_DOC        = CP.TIPO_DOC         
+   AND DC.NRO_DOC         = CP.NRO_DOC           
+   AND DC.COD_RELACION    = P.PROVEEDOR
+   AND cp.tipo_doc        = DR.tipo_doc_dtr   (+)
+   AND cp.nro_doc         = DR.nro_detraccion (+)
+   AND case
+        when DC.COD_MONEDA  = pkg_logistica.of_soles(null)   then
+           DC.SLDO_SOL   
+        else
+           DC.SALDO_DOL 
+      end > 0    
+   and DC.COD_RELACION   LIKE :as_cod_relacion   
+UNION
+-- Orden de Giro
+SELECT DC.COD_RELACION,   
+       DC.TIPO_DOC    ,   
+       DC.NRO_DOC     , 
+       PKG_FACT_ELECTRONICA.of_get_full_nro(dc.nro_doc) as full_nro_doc,
+       null as tipo_doc_ref,
+       null as nro_doc_ref,  
+       null as full_nro_doc_ref,
+       null as nro_cuota,
+       og.fecha_emision as fec_vencimiento,
+       DC.FLAG_TABLA  ,   
+       DC.CNTA_CTBL   ,   
+       DC.COD_MONEDA  ,   
+       DC.FLAG_DEBHAB ,   
+       DC.SLDO_SOL    ,   
+       DC.SALDO_DOL   ,   
+       DC.FECHA_DOC   ,   
+       DC.FACTOR      ,   
+       OG.ORIGEN    ,
+       case
+         when DC.COD_MONEDA = pkg_logistica.of_soles(null) then
+           DC.SLDO_SOL
+         else
+           DC.SALDO_DOL
+       end AS IMPORTE,
+       'O'          ,
+       P.NOM_PROVEEDOR  ,
+       (SELECT Count(*) 
+          FROM pln_cobranza   pln ,
+               pln_cobranza_det pld 
+         WHERE pln.nro_planilla = PLD.nro_planilla              
+           AND decode(PLD.flag_tabla,'1',doc_cxc    ,doc_cxp    ) = DC.tipo_doc     
+           AND decode(PLD.flag_tabla,'1',nro_doc_cxc,nro_doc_cxp) = DC.nro_doc      
+           AND PLD.cod_rel_cxp                                    = DC.cod_relacion ) as flag_pln,
+       0.0000 AS TASA_CAMBIO  ,
+       0.00  AS SALDO_APLICADO_SOL,
+       0.00  AS SALDO_APLICADO_DOL,
+		 og.cencos,
+		 null as mnz,
+		 null as lote
+  FROM DOC_PENDIENTES_CTA_CTE  DC  ,
+       SOLICITUD_GIRO          OG,
+       PROVEEDOR               P            
+ WHERE DC.COD_RELACION = OG.COD_RELACION   
+   AND DC.TIPO_DOC     = (select doc_sol_giro from finparam where reckey = '1') 
+   AND DC.NRO_DOC      = OG.NRO_SOLICITUD  
+   AND DC.COD_RELACION = P.PROVEEDOR         
+   AND case
+         when DC.COD_MONEDA = pkg_logistica.of_soles(null) then
+           DC.SLDO_SOL
+         else
+           DC.SALDO_DOL
+       end > 0
+   AND DC.COD_RELACION   LIKE :as_cod_relacion                
+union
+-- Comprobantes de retencion de IGV
+SELECT dpc.COD_RELACION,   
+       dpc.TIPO_DOC    ,   
+       dpc.NRO_DOC     ,   
+       PKG_FACT_ELECTRONICA.of_get_full_nro(dpc.nro_doc) as full_nro_doc,
+       null as tipo_doc_ref,
+       null as nro_doc_ref,  
+       null as full_nro_doc_ref,
+       0 as nro_cuota,
+       cri.fecha_emision as fec_vecimiento,
+       dpc.FLAG_TABLA  ,   
+       dpc.CNTA_CTBL   ,   
+       dpc.COD_MONEDA  ,   
+       dpc.FLAG_DEBHAB ,   
+       dpc.SLDO_SOL    ,   
+       dpc.SALDO_DOL   ,   
+       dpc.FECHA_DOC   ,   
+       dpc.FACTOR      ,   
+       cri.origen      ,
+       dpc.SLDO_SOL AS IMPORTE,
+       'C' as FLAG_PROVISIONADO    ,
+       p.NOM_PROVEEDOR        ,
+       (SELECT Count(*) 
+          FROM pln_cobranza     pln ,
+               pln_cobranza_det   pld 
+         WHERE pln.nro_planilla = PLD.nro_planilla              
+           AND decode(PLD.flag_tabla,'1',doc_cxc    ,doc_cxp    ) = dpc.tipo_doc     
+           AND decode(PLD.flag_tabla,'1',nro_doc_cxc,nro_doc_cxp) = dpc.nro_doc      
+           AND plD.cod_rel_cxp                                    = dpc.cod_relacion ) as flag_pln,
+       cri.tasa_cambio,
+       0.00 AS SALDO_APLICADO_SOL,
+       0.00 AS SALDO_APLICADO_DOL,
+		 null as cencos,
+		 null as mnz,
+		 null as lote
+  FROM DOC_PENDIENTES_CTA_CTE     dpc  ,
+       retencion_igv_crt          cri ,
+       PROVEEDOR                  p
+ WHERE dpc.COD_RELACION = cri.PROVEEDOR
+   AND dpc.TIPO_DOC     = (select f.doc_ret_igv_crt from finparam f where f.reckey = '1')
+   and dpc.NRO_DOC      = cri.nro_certificado 
+   AND dpc.COD_RELACION = p.PROVEEDOR         
+   and dpc.SLDO_SOL     >  0       
+   and dpc.COD_RELACION LIKE :as_cod_relacion                                                   
+
+" arguments=(("as_cod_relacion", string))  sort="nom_proveedor A nro_cuota A tipo_doc A nro_doc A " )
+group(level=1 header.height=449 header.height.autosize=yes trailer.height=687 trailer.height.autosize=yes by=("nom_proveedor" ) resetpagecount=yes header.suppress=yes header.color="536870912" header.transparency="0" header.gradient.color="8421504" header.gradient.transparency="0" header.gradient.angle="0" header.brushmode="0" header.gradient.repetition.mode="0" header.gradient.repetition.count="0" header.gradient.repetition.length="100" header.gradient.focus="0" header.gradient.scale="100" header.gradient.spread="100" trailer.color="536870912" trailer.transparency="0" trailer.gradient.color="8421504" trailer.gradient.transparency="0" trailer.gradient.angle="0" trailer.brushmode="0" trailer.gradient.repetition.mode="0" trailer.gradient.repetition.count="0" trailer.gradient.repetition.length="100" trailer.gradient.focus="0" trailer.gradient.scale="100" trailer.gradient.spread="100" )
+text(band=header alignment="2" text="Numero
+Documento
+" border="2" color="8388608" x="952" y="52" height="1111" width="1931" html.valueishtml="0"  name=full_nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Nro
+Cuota
+" border="2" color="8388608" x="2910" y="52" height="1111" width="1111" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Tipo
+Doc
+" border="2" color="8388608" x="52" y="52" height="1111" width="873" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=header.1 id=21 alignment="0" tabsequence=32766 border="0" color="0" x="449" y="26" height="370" width="17674" format="[general]" html.valueishtml="0"  name=nom_proveedor visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="52" y="0" height="423" width="873" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="0~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="952" y="0" height="423" width="1931" format="[general]" html.valueishtml="0"  name=full_nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="0~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="2910" y="0" height="423" width="1111" format="[general]" html.valueishtml="0"  name=nro_cuota visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="0~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="8387" y="0" height="423" width="873" format="[general]" html.valueishtml="0"  name=tipo_doc_ref visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="0~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="9286" y="0" height="423" width="1931" format="[general]" html.valueishtml="0"  name=full_nro_doc_ref visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=16 alignment="2" tabsequence=32766 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="14737" y="0" height="423" width="2037" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_doc visible="1" editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=26 alignment="2" tabsequence=32766 border="2" color="0" x="16801" y="0" height="423" width="1957" format="[general]" html.valueishtml="0"  name=cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=detail alignment="2" expression="if ( flag_pln > 0 ,'Planilla Cobranza','')"border="2" color="255" x="18785" y="0" height="423" width="2910" format="[GENERAL]" html.valueishtml="0"  name=indicador visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="11244" y="0" height="423" width="1719" format="[general]" html.valueishtml="0"  name=sldo_sol visible="1" editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="12991" y="0" height="423" width="1719" format="[general]" html.valueishtml="0"  name=saldo_dol visible="1" editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=trailer.1 alignment="1" expression="sum(sldo_sol for group 1)"border="2" color="0" x="11244" y="27" height="423" width="1719" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+compute(band=trailer.1 alignment="1" expression="sum(saldo_dol for group 1)"border="2" color="0" x="12991" y="27" height="423" width="1719" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="21722" y="0" height="423" width="1957" format="[general]" html.valueishtml="0"  name=cnta_ctbl visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="23706" y="0" height="423" width="952" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Numero
+Documento
+Referencia" border="2" color="8388608" x="9286" y="52" height="1111" width="1931" html.valueishtml="0"  name=nro_doc_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Tipo
+Doc.
+Ref" border="2" color="8388608" x="8387" y="52" height="1111" width="873" html.valueishtml="0"  name=tipo_doc_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Fecha
+Vencimiento
+" border="2" color="8388608" x="6323" y="52" height="1111" width="2037" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Saldo
+Soles
+" border="2" color="8388608" x="11244" y="52" height="1111" width="1719" html.valueishtml="0"  name=sldo_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Saldo
+Dolares
+" border="2" color="8388608" x="12991" y="52" height="1111" width="1719" html.valueishtml="0"  name=saldo_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Fecha
+Documento
+" border="2" color="8388608" x="14737" y="52" height="1111" width="2037" html.valueishtml="0"  name=fecha_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Centro
+Costo
+" border="2" color="8388608" x="16801" y="52" height="1111" width="1957" html.valueishtml="0"  name=cencos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Indicador
+
+" border="2" color="8388608" x="18785" y="52" height="1111" width="2910" html.valueishtml="0"  name=indicador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Cuenta
+Contable
+" border="2" color="8388608" x="21722" y="52" height="1111" width="1957" html.valueishtml="0"  name=cnta_ctbl_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Cod.
+Mon.
+" border="2" color="8388608" x="23706" y="52" height="1111" width="952" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Mnz
+
+" border="2" color="8388608" x="4048" y="52" height="1111" width="1111" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Lote
+
+" border="2" color="8388608" x="5185" y="52" height="1111" width="1111" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="0~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="6323" y="0" height="423" width="2037" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_vencimiento visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=27 alignment="2" tabsequence=0 border="2" color="0" x="4048" y="0" height="423" width="1111" html.valueishtml="0"  name=mnz visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=28 alignment="2" tabsequence=0 border="2" color="0" x="5185" y="0" height="423" width="1111" html.valueishtml="0"  name=lote visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

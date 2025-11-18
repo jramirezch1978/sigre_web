@@ -1,0 +1,110 @@
+﻿$PBExportHeader$d_rpt_solicitud_ot_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=2128 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=456 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes name=nro_solicitud dbname="solicitud_ot.nro_solicitud" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fec_solicitud dbname="solicitud_ot.fec_solicitud" )
+ column=(type=datetime updatewhereclause=yes name=fecha_esperada dbname="solicitud_ot.fecha_esperada" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos_slc dbname="solicitud_ot.cencos_slc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos_rsp dbname="solicitud_ot.cencos_rsp" )
+ column=(type=char(400) update=yes updatewhereclause=yes name=descripcion dbname="solicitud_ot.descripcion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_urgencia dbname="solicitud_ot.flag_urgencia" )
+ column=(type=char(10) updatewhereclause=yes name=solicitud_ot_cnta_prsp dbname="solicitud_ot.cnta_prsp" )
+ column=(type=char(50) updatewhereclause=yes name=presupuesto_cuenta_descripcion dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(8) updatewhereclause=yes name=maquina_cod_maquina dbname="maquina.cod_maquina" )
+ column=(type=char(100) updatewhereclause=yes name=maquina_desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(40) updatewhereclause=yes name=centros_costo_desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(30) updatewhereclause=yes name=cencos_niv3_desc_solicitante dbname="cencos_niv3.desc_solicitante" )
+ column=(type=char(30) updatewhereclause=yes name=cencos_niv3_desc_responsable dbname="cencos_niv3.desc_responsable" )
+ retrieve="  SELECT ~"SOLICITUD_OT~".~"NRO_SOLICITUD~",   
+         ~"SOLICITUD_OT~".~"FEC_SOLICITUD~",
+ 			~"SOLICITUD_OT~".~"FECHA_ESPERADA~", 
+         ~"SOLICITUD_OT~".~"CENCOS_SLC~",   
+         ~"SOLICITUD_OT~".~"CENCOS_RSP~",   
+         ~"SOLICITUD_OT~".~"DESCRIPCION~",   
+         ~"SOLICITUD_OT~".~"FLAG_URGENCIA~",
+         ~"SOLICITUD_OT~".~"CNTA_PRSP~",
+         ~"PRESUPUESTO_CUENTA~".~"DESCRIPCION~",
+         ~"MAQUINA~".~"COD_MAQUINA~",   
+         ~"MAQUINA~".~"DESC_MAQ~",   
+         ~"CENTROS_COSTO_A~".~"DESC_CENCOS~",   
+         ~"CENCOS_NIV3_A~".~"DESCRIPPCION~" as desc_solicitante,   
+         ~"CENCOS_NIV3_B~".~"DESCRIPPCION~" as desc_responsable
+    FROM ~"SOLICITUD_OT~",   
+         ~"MAQUINA~",
+         ~"PRESUPUESTO_CUENTA~",
+         ~"CENTROS_COSTO~" ~"CENTROS_COSTO_A~",   
+         ~"CENTROS_COSTO~" ~"CENTROS_COSTO_B~",   
+         ~"CENCOS_NIV3~" ~"CENCOS_NIV3_A~",   
+         ~"CENCOS_NIV3~" ~"CENCOS_NIV3_B~"  
+   WHERE ( ~"SOLICITUD_OT~".~"COD_MAQUINA~" = ~"MAQUINA~".~"COD_MAQUINA~" (+) ) and  
+         ( ~"SOLICITUD_OT~".~"CENCOS_SLC~" = ~"CENTROS_COSTO_A~".~"CENCOS~" ) and  
+         ( ~"SOLICITUD_OT~".~"CENCOS_RSP~" = ~"CENTROS_COSTO_B~".~"CENCOS~" ) and  
+         ( ~"SOLICITUD_OT~".~"CNTA_PRSP~" = ~"PRESUPUESTO_CUENTA~".~"CNTA_PRSP~" (+) ) and  
+         ( ~"CENTROS_COSTO_A~".~"COD_N1~" = ~"CENCOS_NIV3_A~".~"COD_N1~" ) and  
+         ( ~"CENTROS_COSTO_A~".~"COD_N2~" = ~"CENCOS_NIV3_A~".~"COD_N2~" ) and  
+         ( ~"CENTROS_COSTO_A~".~"COD_N3~" = ~"CENCOS_NIV3_A~".~"COD_N3~" ) and  
+         ( ~"CENTROS_COSTO_B~".~"COD_N1~" = ~"CENCOS_NIV3_B~".~"COD_N1~" ) and  
+         ( ~"CENTROS_COSTO_B~".~"COD_N2~" = ~"CENCOS_NIV3_B~".~"COD_N2~" ) and  
+         ( ~"CENTROS_COSTO_B~".~"COD_N3~" = ~"CENCOS_NIV3_B~".~"COD_N3~" ) and  
+         ( ( ~"SOLICITUD_OT~".~"NRO_SOLICITUD~" = :as_nro_solicitud ) )    
+" arguments=(("as_nro_solicitud", string)) )
+rectangle(band=header x="622" y="588" height="84" width="1157"  name=r_9 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="   URGENTE" border="2" color="0" x="1038" y="1760" height="152" width="750" html.valueishtml="0"  name=t_9 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+rectangle(band=header x="87" y="904" height="108" width="1865"  name=r_7 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="SOLICITUD DE MANTENIMIENTO" border="0" color="0" x="1211" y="64" height="64" width="1275" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+rectangle(band=header x="1033" y="1912" height="204" width="2263"  name=r_3 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=header x1="1906" y1="2040" x2="2592" y2="2040"  name=l_2 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="FIRMA" border="0" color="0" x="1906" y="2056" height="40" width="686" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="PRIORIDAD DEL
+TRABAJO" border="2" color="0" x="91" y="1760" height="152" width="942" html.valueishtml="0"  name=t_10 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="
+FIRMA DE
+AUTORIZACION" border="2" color="0" x="91" y="1916" height="196" width="942" html.valueishtml="0"  name=t_8 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=header id=4 alignment="2" tabsequence=30 border="0" color="0" x="645" y="604" height="56" width="274" format="[general]" html.valueishtml="0"  name=cencos_slc visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=13 alignment="0" tabsequence=32766 border="0" color="0" x="119" y="936" height="56" width="1806" format="[general]" html.valueishtml="0"  name=cencos_niv3_desc_solicitante visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="DESCRIPCION DEL PROBLEMA :" border="0" color="0" x="96" y="1032" height="48" width="672" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=6 alignment="0" tabsequence=50 border="0" color="0" x="96" y="1096" height="56" width="2752" format="[general]" html.valueishtml="0"  name=descripcion visible="1" height.autosize=yes edit.limit=400 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+rectangle(band=header x="96" y="588" height="84" width="530"  name=r_2 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=header id=3 alignment="2" tabsequence=32766 border="0" color="0" x="123" y="604" height="56" width="489" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_esperada visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="FECHA EST.ENTR" border="2" color="0" x="101" y="516" height="72" width="521" html.valueishtml="0"  name=t_2 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=header id=1 alignment="2" tabsequence=10 border="2" color="0" x="242" y="432" height="72" width="379" format="[general]" html.valueishtml="0"  name=nro_solicitud visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="2" tabsequence=20 border="2" color="0" x="1129" y="432" height="72" width="402" format="[shortdate] [time]" html.valueishtml="0"  name=fec_solicitud visible="1" editmask.mask="DD/MM/YYYY" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nº" border="2" color="0" x="101" y="432" height="72" width="128" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="FECHA EMISION:" border="2" color="0" x="635" y="432" height="72" width="480" html.valueishtml="0"  name=t_18 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+bitmap(band=header filename="" x="114" y="12" height="208" width="485" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="114" y="232" height="56" width="485" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="AREA SOLICITANTE" border="2" color="0" x="91" y="768" height="136" width="1856" html.valueishtml="0"  name=t_5 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+rectangle(band=header x="1947" y="904" height="108" width="1394"  name=r_8 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Descripción" border="2" color="0" x="2249" y="844" height="60" width="1088" html.valueishtml="0"  name=t_24 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Código" border="2" color="0" x="1952" y="844" height="60" width="293" html.valueishtml="0"  name=t_23 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+line(band=header x1="2245" y1="908" x2="2245" y2="1012"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="0" )
+column(band=header id=10 alignment="0" tabsequence=32766 border="0" color="0" x="1966" y="936" height="56" width="270" format="[general]" html.valueishtml="0"  name=maquina_cod_maquina visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=11 alignment="0" tabsequence=32766 border="0" color="0" x="2267" y="936" height="56" width="1051" format="[general]" html.valueishtml="0"  name=maquina_desc_maq visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="MAQUINA O EQUIPO" border="2" color="0" x="1952" y="768" height="72" width="1385" html.valueishtml="0"  name=t_11 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+rectangle(band=header x="2263" y="588" height="84" width="1074"  name=r_10 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=header id=14 alignment="0" tabsequence=32766 border="0" color="0" x="2286" y="600" height="56" width="1029" format="[general]" html.valueishtml="0"  name=cencos_niv3_desc_responsable visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="SOLICITADO A" border="2" color="0" x="2267" y="516" height="72" width="1065" html.valueishtml="0"  name=t_4 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+rectangle(band=header x="1774" y="588" height="84" width="494"  name=r_11 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="CUENTA PRSP" border="2" color="0" x="1778" y="516" height="72" width="485" html.valueishtml="0"  name=t_17 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=header id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1792" y="604" height="56" width="457" format="[general]" html.valueishtml="0"  name=solicitud_ot_cnta_prsp_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="CENTRO DE COSTO DEL SOLICITANTE" border="2" color="0" x="626" y="516" height="72" width="1147" html.valueishtml="0"  name=t_3 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=header id=12 alignment="0" tabsequence=32766 border="0" color="0" x="937" y="604" height="56" width="823" format="[general]" html.valueishtml="0"  name=centros_costo_desc_cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Codigo: FMO-R-006" border="0" color="0" x="2793" y="24" height="56" width="503" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Revision : 01" border="0" color="0" x="2793" y="100" height="56" width="283" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+rectangle(band=header x="1669" y="1772" height="72" width="105"  name=r_4 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="if ( flag_urgencia = '1' ,'X','')"border="0" color="0" x="1682" y="1784" height="48" width="78" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="   PRIORIDAD MEDIA" border="2" color="0" x="1792" y="1760" height="152" width="750" html.valueishtml="0"  name=t_7 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+rectangle(band=header x="2423" y="1772" height="72" width="105"  name=r_5 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="if ( flag_urgencia = '2' ,'X','')"border="0" color="0" x="2441" y="1784" height="48" width="78" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="   PRIORIDAD BAJA" border="2" color="0" x="2546" y="1760" height="152" width="745" html.valueishtml="0"  name=t_12 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+rectangle(band=header x="3150" y="1772" height="72" width="105"  name=r_6 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=header alignment="2" expression="if ( flag_urgencia = '3' ,'X','')"border="0" color="0" x="3163" y="1784" height="48" width="78" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

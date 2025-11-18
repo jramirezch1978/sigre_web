@@ -1,0 +1,21 @@
+﻿$PBExportHeader$f_get_error.srf
+$PBExportComments$Mostrar el codigo y descripcion del error segun tabla
+global type f_get_error from function_object
+end type
+
+forward prototypes
+global subroutine f_get_error (integer ai_error)
+end prototypes
+
+global subroutine f_get_error (integer ai_error);String ls_desc_error
+
+SELECT desc_error
+	INTO	:ls_desc_error
+	FROM	error_lista
+	WHERE	cod_error = :ai_error ;
+	
+MessageBox("Error", ls_desc_error,StopSign!)
+
+RETURN
+end subroutine
+

@@ -1,0 +1,55 @@
+﻿$PBExportHeader$f_habilita_opc.srf
+global type f_habilita_opc from function_object
+end type
+
+forward prototypes
+global function integer f_habilita_opc (menu am_menu)
+end prototypes
+
+global function integer f_habilita_opc (menu am_menu);Double	n_per[]
+Double	n_cod_tag
+Long		i_row 
+Integer	i_nro_item1
+Integer	i_nro_item2
+Integer	i,i1
+Integer	j,j1
+
+/* TODO ESTO DEBERIA SER REMPLAZADO POR LA LECTURA DE LA OPCIONES QUE SE TENGA GUARDADA EN UNA TABLA
+	DONDE I_ROW = NUMERO DE FILAS DEVUELTAS POR LA COLNSULTA 
+			n_pe = Vector que cargara todas las opciones que sera activadas r*/
+i_row = 3
+n_per[1] = 10
+n_per[2] = 102
+n_per[3] = 20
+/*FINI */
+i_nro_item1 = UpperBound(am_menu.Item)
+For i=1 To i_nro_item1 //Busca el tag en el primer nivel
+	n_cod_tag = Double(Upper(Trim(m_menu.Item[i].Tag)))
+	If Not isNull (n_cod_tag) Then
+		m_menu.Item[i].Enabled = False
+		For j=1 To i_row  
+			If n_cod_tag = n_per[j] Then
+				m_menu.Item[i].Enabled = True
+				Continue
+			End If
+		Next
+	End If
+
+	i_nro_item2 = UpperBound(m_menu.Item[i].Item)
+	For i1=1 To i_nro_item2 //Busca el tag en el segundo nivel
+		n_cod_tag = Double(Upper(Trim(m_menu.Item[i].Item[i1].Tag)))
+		If Not isNull (n_cod_tag) Then
+			m_menu.Item[i].Item[i1].Enabled = False
+			For j1=1 To i_row
+				If n_cod_tag = n_per[j1] Then
+					m_menu.Item[i].Item[i1].Enabled = True
+					Continue
+				End If
+			Next 
+		End If
+	Next
+Next
+
+return 0
+end function
+

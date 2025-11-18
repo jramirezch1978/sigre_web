@@ -1,0 +1,174 @@
+﻿$PBExportHeader$f_generacion_ctas_financiamiento.srf
+global type f_generacion_ctas_financiamiento from function_object
+end type
+
+forward prototypes
+global function boolean f_generacion_ctas_financiamiento (datawindow adw_master, datawindow adw_origen, ref datawindow adw_destino, datastore ads_data_glosa_fin, datastore ads_matriz_det, string as_cta_banco, string as_cod_relacion, string as_moneda, decimal adc_tasa_cambio, tab at_tab1)
+end prototypes
+
+global function boolean f_generacion_ctas_financiamiento (datawindow adw_master, datawindow adw_origen, ref datawindow adw_destino, datastore ads_data_glosa_fin, datastore ads_matriz_det, string as_cta_banco, string as_cod_relacion, string as_moneda, decimal adc_tasa_cambio, tab at_tab1);Long 		 ll_inicio,ll_imatriz,ll_row_ins,ll_found,ll_iref,ll_ipend
+String    ls_c_fin,ls_matriz,ls_formula,ls_soles,ls_dolares,&
+			 ls_cod_relacion,ls_cod_moneda,ls_cnta_ctbl,ls_flag_debhab,&
+			 ls_expresion,ls_glosa_texto,ls_glosa_campo,ls_flag_cta_bco,&
+			 ls_flag_cencos,ls_flag_doc_ref,ls_flag_cod_rel,ls_tipo_doc,&
+			 ls_nro_doc,ls_desc_cnta,ls_desc_glosa,ls_cnta_ctbl_bco,ls_desc_cnta_bco,&
+			 ls_flag_cebef
+Double    ldb_monto
+Boolean   lb_retorno = TRUE,lb_flag = FALSE
+
+
+n_cst_asiento_glosa lnv_asiento_glosa
+lnv_asiento_glosa    = CREATE n_cst_asiento_glosa
+
+f_monedas(ls_soles,ls_dolares)
+
+adw_origen.Accepttext()
+adw_destino.Accepttext()
+
+
+
+DO WHILE adw_destino.Rowcount() > 0
+	adw_destino.deleterow(0)
+LOOP
+
+/** Cuenta de Banco **/
+SELECT bc.cnta_ctbl,cc.desc_cnta
+  INTO :ls_cnta_ctbl_bco,:ls_desc_cnta_bco
+  FROM banco_cnta bc ,
+  		 cntbl_cnta	cc
+ WHERE (bc.cnta_ctbl = cc.cnta_ctbl) AND
+ 		 (bc.cod_ctabco = :as_cta_banco) ;
+/****/
+
+IF Isnull(ls_cnta_ctbl_bco) OR Trim(ls_cnta_ctbl_bco) = '' THEN
+	Messagebox('Aviso','Cuenta de Banco no Tiene Cuenta Contable')
+	Return False
+END IF	
+
+
+FOR ll_inicio = 1 TO adw_origen.Rowcount()  //Recorro dw Origen de los items A generar Cuenta Contable
+	 
+	 ls_c_fin 	 = adw_origen.object.confin   [ll_inicio]	
+	 ls_tipo_doc = adw_origen.object.tipo_doc [ll_inicio]	
+	 ls_nro_doc  = adw_origen.object.nro_doc  [ll_inicio]	
+	 
+    IF Isnull(ls_c_fin) OR Trim(ls_c_fin) = '' THEN
+		 Messagebox('Item Nº '+String(ll_inicio) ,'Item No se Ha ingresado Concepto Financiero')
+		 adw_destino.Reset()
+ 		 lb_retorno = FALSE
+		 at_tab1.SelectedTab = 1
+		 EXIT
+
+	 ELSE
+		 //Insercion de Cuentas dependiendo de la Matriz Contable
+		  ls_matriz = adw_origen.object.matriz_cntbl[ll_inicio]
+		  IF Isnull(ls_matriz) OR Trim(ls_matriz) = ''  THEN
+			  Messagebox('Aviso','Concepto Financiero Nº '+ls_c_fin+' No se ha Vinculado Matriz')
+		     adw_destino.Reset()
+ 		 	  lb_retorno = FALSE
+		 	  at_tab1.SelectedTab = 1
+			  EXIT
+		  END IF
+		  
+
+		  ads_matriz_det.Retrieve(ls_matriz)					// Recuperación de Información de Matriz Detalle
+		  
+		  FOR ll_imatriz = 1 TO ads_matriz_det.Rowcount()
+				ls_formula     =  ads_matriz_det.Object.formula 		[ll_imatriz]
+				
+				ldb_monto = adw_origen.Getitemnumber(ll_inicio,ls_formula)
+
+				ls_cnta_ctbl 	=	ads_matriz_det.Object.cnta_ctbl  [ll_imatriz]
+				ls_desc_cnta	=  ads_matriz_det.Object.desc_cnta  [ll_imatriz]
+				ls_flag_debhab =	ads_matriz_det.Object.flag_debhab[ll_imatriz]
+				ls_expresion 	= 'cnta_ctbl =	'+"'"+ls_cnta_ctbl+"'"+' AND flag_debhab	= '+"'"+ls_flag_debhab+"'"
+				ll_found       = adw_destino.find(ls_expresion,1,adw_destino.rowcount())
+				ls_formula     = ads_matriz_det.Object.formula 		[ll_imatriz]
+				ls_glosa_texto	= ads_matriz_det.Object.glosa_texto [ll_imatriz]
+				ls_glosa_campo	= ads_matriz_det.Object.glosa_campo [ll_imatriz]
+
+				/*funcion de llenado de datastore*/
+				f_generacion_glosa_financiamiento(adw_master,adw_origen,ads_data_glosa_fin,ll_inicio,ls_cnta_ctbl,ls_desc_cnta)
+				/**/
+				
+				/*Verifica Flag de Cnta Contable*/
+				lb_flag = f_verifica_flag_cntbl_cnta(ls_cnta_ctbl)
+				/**/	
+				IF ll_found = 0 OR lb_flag THEN
+					/*Inserta Registro */
+					/*Extraer Glosa*/
+					ls_desc_glosa = lnv_asiento_glosa.of_set_glosa(ads_data_glosa_fin,1,ls_glosa_texto,ls_glosa_campo)
+
+					
+					ll_row_ins    = adw_destino.Insertrow(0)		
+					adw_destino.Object.item		     [ll_row_ins] = ll_row_ins
+					adw_destino.Object.cnta_ctbl    [ll_row_ins] = ls_cnta_ctbl
+					adw_destino.Object.flag_debhab  [ll_row_ins] = ls_flag_debhab
+					adw_destino.Object.det_glosa    [ll_row_ins] = ls_desc_glosa
+					
+					/***************************************************/
+					/*Asiganación de Información requerida x Cta Cntbl */
+					/***************************************************/
+					
+					IF f_cntbl_cnta(ls_cnta_ctbl,ls_flag_cta_bco,ls_flag_cencos,ls_flag_doc_ref, &
+										 ls_flag_cod_rel,ls_flag_cebef)  THEN
+										 
+						IF ls_flag_cta_bco = '1' THEN
+							adw_destino.Object.cod_ctabco [ll_row_ins] = as_cta_banco
+						END IF
+						
+						IF ls_flag_doc_ref = '1' THEN
+							adw_destino.Object.tipo_docref1 [ll_row_ins] = ls_tipo_doc
+							adw_destino.Object.nro_docref1 [ll_row_ins] = ls_nro_doc
+						END IF
+						
+						IF ls_flag_cod_rel = '1' THEN
+							adw_destino.Object.cod_relacion [ll_row_ins] = as_cod_relacion	
+						END IF
+						
+					END IF
+				
+					IF as_moneda = ls_soles THEN
+						adw_destino.Object.imp_movsol [ll_row_ins] = ldb_monto					
+						adw_destino.Object.imp_movdol [ll_row_ins] = Round(ldb_monto / adc_tasa_cambio,2)
+					ELSEIF as_moneda = ls_dolares THEN
+						adw_destino.Object.imp_movdol [ll_row_ins] = ldb_monto
+						adw_destino.Object.imp_movsol [ll_row_ins] = Round(ldb_monto * adc_tasa_cambio,2)					
+					END IF
+					
+				ELSE
+					IF as_moneda = ls_soles THEN
+						adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + ldb_monto					
+						adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + Round(ldb_monto / adc_tasa_cambio,2)
+					ELSEIF as_moneda = ls_dolares THEN
+						adw_destino.Object.imp_movdol [ll_found] = adw_destino.Object.imp_movdol [ll_found] + ldb_monto
+						adw_destino.Object.imp_movsol [ll_found] = adw_destino.Object.imp_movsol [ll_found] + Round(ldb_monto * adc_tasa_cambio,2)					
+					END IF
+				END IF	
+				
+		  NEXT
+	 END IF
+NEXT
+
+/*Inserto Pre Asiento de Cuenta de Banco*/
+ll_row_ins 	  = adw_destino.Insertrow(0)
+ldb_monto     = adw_master.Getitemnumber(1,'imp_capital')
+ls_desc_glosa = ls_desc_cnta_bco
+
+adw_destino.Object.item		     [ll_row_ins] = ll_row_ins
+adw_destino.Object.cnta_ctbl    [ll_row_ins] = ls_cnta_ctbl_bco
+adw_destino.Object.flag_debhab  [ll_row_ins] = 'D'
+adw_destino.Object.det_glosa    [ll_row_ins] = ls_desc_glosa
+
+IF as_moneda = ls_soles THEN
+	adw_destino.Object.imp_movsol [ll_row_ins] = ldb_monto					
+	adw_destino.Object.imp_movdol [ll_row_ins] = Round(ldb_monto / adc_tasa_cambio,2)
+ELSEIF as_moneda = ls_dolares THEN
+	adw_destino.Object.imp_movdol [ll_row_ins] = ldb_monto
+	adw_destino.Object.imp_movsol [ll_row_ins] = Round(ldb_monto * adc_tasa_cambio,2)					
+END IF
+
+
+Return lb_retorno 
+end function
+

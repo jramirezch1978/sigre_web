@@ -1,0 +1,67 @@
+﻿$PBExportHeader$d_aprob_parte_grid.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=parte_pesca dbname="fl_parte_de_pesca.parte_pesca" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="fl_parte_de_pesca.origen" )
+ column=(type=char(8) updatewhereclause=yes name=nave_real dbname="fl_parte_de_pesca.nave_real" )
+ column=(type=char(50) updatewhereclause=yes name=tg_naves_nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=char(1) updatewhereclause=yes name=tipo_flota dbname="tg_naves.flag_tipo_flota" values="Propia	P/Terceros	T/" )
+ column=(type=number updatewhereclause=yes name=compute_0006 dbname="compute_0006" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=zarpe_aprobado dbname="fl_parte_de_pesca.flag_zarpe_aprobado" values="	1/	0" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=arribo_aprobado dbname="fl_parte_de_pesca.flag_arribo_aprobado" values="	1/	0" )
+ column=(type=char(10) updatewhereclause=yes name=registro_zarpe dbname="fl_parte_de_pesca.registro_zarpe" )
+ column=(type=char(10) updatewhereclause=yes name=registro_arribo dbname="fl_parte_de_pesca.registro_arribo" )
+ column=(type=char(6) updatewhereclause=yes name=usr_aprob_datos dbname="fl_parte_de_pesca.usr_aprob_datos" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="fl_parte_de_pesca.flag_replicacion" )
+ retrieve="  SELECT FLPP.PARTE_PESCA,   
+         FLPP.ORIGEN,   
+         FLPP.NAVE_REAL,   
+         TG_NAVES.NOMB_NAVE,   
+         TG_NAVES.FLAG_TIPO_FLOTA,
+         usf_fl_pesca_arribo(FLPP.PARTE_PESCA),
+			FLPP.FLAG_ZARPE_APROBADO,
+			FLPP.FLAG_ARRIBO_APROBADO,
+			FLPP.Registro_zarpe,
+			FLPP.Registro_arribo,
+			FLPP.USR_APROB_DATOS,
+			FLPP.FLAG_REPLICACION
+    FROM FL_PARTE_DE_PESCA FLPP,   
+         TG_NAVES  
+   WHERE FLPP.NAVE_REAL = TG_NAVES.NAVE
+     and (( to_char(FLPP.fecha_hora_zarpe, 'yyyymmdd') >= to_char(:ad_fecha1, 'yyyymmdd') 
+       and to_char(FLPP.fecha_hora_zarpe, 'yyyymmdd') <= to_char(:ad_fecha2, 'yyyymmdd') )
+      or ( to_char(FLPP.fecha_hora_arribo, 'yyyymmdd') >= to_char(:ad_fecha1, 'yyyymmdd') 
+       and to_char(FLPP.fecha_hora_arribo, 'yyyymmdd') <= to_char(:ad_fecha2, 'yyyymmdd') ))
+       and FLPP.NAVE_REAL LIKE :as_naves
+ORDER BY FLPP.PARTE_PESCA ASC     
+
+" update="FL_PARTE_DE_PESCA" updatewhere=0 updatekeyinplace=no arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_naves", string)) )
+text(band=header alignment="2" text="Parte Pesca" border="2" color="33554432" x="9" y="8" height="56" width="329" html.valueishtml="0"  name=parte_pesca_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cod. Nave" border="2" color="33554432" x="347" y="8" height="56" width="311" html.valueishtml="0"  name=nave_real_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nombre de la Nave" border="2" color="0" x="667" y="8" height="56" width="699" html.valueishtml="0"  name=tg_naves_nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Pesca Total" border="2" color="0" x="2560" y="8" height="56" width="402" html.valueishtml="0"  name=compute_0006_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Aprobar Zarpe" border="2" color="33554432" x="1376" y="8" height="56" width="402" html.valueishtml="0"  name=zarpe_aprobado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Aprobar Arribo" border="2" color="33554432" x="1787" y="8" height="56" width="416" html.valueishtml="0"  name=arribo_aprobado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Registro Zarpe" border="2" color="33554432" x="2971" y="8" height="56" width="462" html.valueishtml="0"  name=registro_zarpe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Registro Arribo" border="2" color="33554432" x="3442" y="8" height="56" width="430" html.valueishtml="0"  name=registro_arribo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Usuario" border="2" color="0" x="3881" y="8" height="56" width="274" html.valueishtml="0"  name=usr_aprob_datos_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=7 alignment="2" tabsequence=10 border="2" color="33554432" x="1376" y="4" height="64" width="402" format="[general]" html.valueishtml="0"  name=zarpe_aprobado visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(  tipo_flota = 'P', RGB(255,255,255), RGB(192,192,192) )" )
+column(band=detail id=8 alignment="2" tabsequence=20 border="2" color="33554432" x="1787" y="4" height="64" width="416" format="[general]" html.valueishtml="0"  name=arribo_aprobado visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tif(  tipo_flota ='P' and  ( registro_arribo ='' or IsNull( registro_arribo ) ), RGB(192,192,192), RGB(255,255,255) )" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="329" format="[general]" html.valueishtml="0"  name=parte_pesca visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="347" y="4" height="64" width="311" format="[general]" html.valueishtml="0"  name=nave_real visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="667" y="4" height="64" width="699" format="[general]" html.valueishtml="0"  name=tg_naves_nomb_nave visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2565" y="4" height="64" width="398" format="###,###.0000" html.valueishtml="0"  name=compute_0006 visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="2971" y="4" height="64" width="462" format="[general]" html.valueishtml="0"  name=registro_zarpe visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="3442" y="4" height="64" width="430" format="[general]" html.valueishtml="0"  name=registro_arribo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="33554432" x="3881" y="4" height="64" width="274" format="[general]" html.valueishtml="0"  name=usr_aprob_datos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2213" y="4" height="64" width="338" format="[general]" html.valueishtml="0"  name=tipo_flota visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=foreground alignment="2" text="Pesca Total" border="2" color="0" x="2217" y="8" height="56" width="343" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

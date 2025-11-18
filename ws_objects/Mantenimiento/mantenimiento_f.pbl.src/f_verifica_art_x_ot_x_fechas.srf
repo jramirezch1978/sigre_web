@@ -1,0 +1,39 @@
+﻿$PBExportHeader$f_verifica_art_x_ot_x_fechas.srf
+global type f_verifica_art_x_ot_x_fechas from function_object
+end type
+
+forward prototypes
+global function boolean f_verifica_art_x_ot_x_fechas (string as_origen, string as_nro_orden, string as_fecha_inicio, string as_fecha_final)
+end prototypes
+
+global function boolean f_verifica_art_x_ot_x_fechas (string as_origen, string as_nro_orden, string as_fecha_inicio, string as_fecha_final);/*FUNCION DE VERIFICACION SI EXISTE ARTICULOS EN ORDEN DE TRABAJO*/
+Boolean lb_ret = TRUE
+Long    ll_count
+
+  SELECT Count(*)
+    INTO :ll_count
+    FROM orden_trabajo     ot,   
+         articulo_mov_proy am,   
+         articulo          ar,   
+         operaciones       op  
+   WHERE ( ot.nro_orden    = am.nro_doc     ) and  
+         ( ar.cod_art      = am.cod_art     ) and  
+         ( am.oper_sec     = op.oper_sec    ) and  
+         ( ( am.tipo_doc   = (SELECT doc_ot FROM prod_param WHERE reckey = '1') ) AND  
+         ( ot.cod_origen   = :as_origen     ) and
+         ( ot.nro_orden    = :as_nro_orden  ) and
+         ( to_char(op.fec_inicio,'yyyymmdd') >= :as_fecha_inicio ) AND  
+         ( to_char(op.fec_inicio,'yyyymmdd') <= :as_fecha_final ) )    ;
+			
+			
+IF ll_count = 0 THEN
+	lb_ret = FALSE /*NO EXISTE ARTICULOS*/
+ELSE
+	lb_ret = TRUE  /*EXISTE ARTICULOS*/
+END IF	
+
+RETURN lb_ret
+
+
+end function
+

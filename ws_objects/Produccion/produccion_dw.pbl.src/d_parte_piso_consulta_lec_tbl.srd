@@ -1,0 +1,56 @@
+﻿$PBExportHeader$d_parte_piso_consulta_lec_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=252 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=descripcion dbname="tg_fmt_med_act.descripcion" )
+ column=(type=datetime updatewhereclause=yes name=tg_parte_piso_fecha_parte dbname="tg_parte_piso.fecha_parte" )
+ column=(type=char(40) updatewhereclause=yes name=turno_descripcion dbname="turno.descripcion" )
+ column=(type=char(100) updatewhereclause=yes name=desc_maq dbname="maquina.desc_maq" )
+ column=(type=char(20) updatewhereclause=yes name=atributo_descripcion dbname="tg_med_act_atributo.descripcion" )
+ column=(type=char(40) updatewhereclause=yes name=valor_lectura dbname="valor_lectura" )
+ retrieve="SELECT DISTINCT    F.DESCRIPCION,
+                     PP.FECHA_PARTE,
+                     T.DESCRIPCION,
+                     M.DESC_MAQ,
+                     A.DESCRIPCION,
+                     TRIM(PPD.VALOR_LECTURA_TEXTO)||TRIM(TO_CHAR(PPD.VALOR_LECT_FEC_HORA,'HH24:MM:SS'))||TRIM(to_char(PPD.VALOR_LECT_NUMERICO, '999,999.000')) AS VALOR_LECTURA
+                    
+FROM       TG_PARTE_PISO_DET   PPD,
+           TG_MED_ACT_ATRIBUTO A,
+           MAQUINA             M,
+           TG_FMT_MED_ACT_DET  FD,
+           TG_FMT_MED_ACT      F,
+           TG_PARTE_PISO       PP,
+           TURNO               T
+           
+     WHERE PPD.NRO_PARTE      = PP.NRO_PARTE
+       AND PPD.FORMATO        = FD.FORMATO
+       AND PPD.NRO_ITEM       = FD.NRO_ITEM
+       AND FD.ATRIBUTO        = A.ATRIBUTO(+)
+       AND FD.COD_MAQUINA     = M.COD_MAQUINA(+)
+       AND PP.TURNO           = T.TURNO(+)
+       AND FD.FORMATO         = F.FORMATO
+       AND PPD.NRO_PARTE      = :as_nro_parte
+       AND PPD.NRO_CONTROL    = :an_control
+       AND PPD.NRO_LECTURA    = :an_lectura
+" arguments=(("as_nro_parte", string),("an_control", number),("an_lectura", number)) )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="4" color="33554432" x="430" y="8" height="44" width="224" format="[shortdate] [time]" html.valueishtml="0"  name=tg_parte_piso_fecha_parte visible="1" editmask.mask="mm/dd/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Fecha de Parte:" border="0" color="8388608" x="23" y="12" height="56" width="384" html.valueishtml="0"  name=tg_parte_piso_fecha_parte_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Formato:" border="0" color="8388608" x="23" y="72" height="48" width="384" html.valueishtml="0"  name=tg_fmt_med_act_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Turno:" border="0" color="8388608" x="27" y="136" height="56" width="384" html.valueishtml="0"  name=turno_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Maquina:" border="0" color="8388608" x="1737" y="16" height="56" width="347" html.valueishtml="0"  name=maquina_desc_maq_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Atributo:" border="0" color="8388608" x="1737" y="72" height="56" width="347" html.valueishtml="0"  name=tg_med_act_atributo_descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Valor Lectura" border="0" color="8388608" x="1737" y="136" height="56" width="347" html.valueishtml="0"  name=tg_parte_piso_det_valor_lectura_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="4" color="33554432" x="434" y="76" height="44" width="1006" format="[general]" html.valueishtml="0"  name=turno_descripcion visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="4" color="33554432" x="434" y="144" height="44" width="1289" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="4" color="33554432" x="2098" y="144" height="44" width="1289" format="[general]" html.valueishtml="0"  name=valor_lectura visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="4" color="33554432" x="2098" y="76" height="44" width="1289" format="[general]" html.valueishtml="0"  name=atributo_descripcion visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="4" color="33554432" x="2098" y="24" height="44" width="1289" format="[general]" html.valueishtml="0"  name=desc_maq visible="1" edit.limit=100 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=detail x1="5" y1="236" x2="3387" y2="236"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

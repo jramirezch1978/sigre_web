@@ -1,0 +1,66 @@
+﻿$PBExportHeader$f_s_numero3_a_letras4.srf
+global type f_s_numero3_a_letras4 from function_object
+end type
+
+forward prototypes
+global function string f_s_numero3_a_letras4 (string p_num)
+end prototypes
+
+global function string f_s_numero3_a_letras4 (string p_num);string centenas[9] = {"ONE HUNDRED", "TWO HUNDRED", "THREE HUNDRED", "FOUR HUNDRED", "FIVE HUNDRED", "SIX HUNDRED", "SEVEN HUNDRED", "EIGHT HUNDRED", "NINE HUNDRED"}
+string decenas1[9] = {"ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "SEVENTEEN", "EIGHTTEEN", "NINETEEN"}
+string decenas2[9] = {"TEN", "TWENTY", "THIRTY", "FORTY", "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY"}
+string unidades[9] = {"ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"}
+
+integer li_tmp
+string ls_tmp
+
+li_tmp = Integer(p_Num)
+
+If (li_tmp = 100) Then
+	return "ONE HUNDRED"
+ElseIf (li_tmp > 100) Then
+	ls_tmp = centenas[Integer(Left(p_Num, 1))]
+	li_tmp = li_tmp - (Integer(Left(p_Num, 1)) * 100)
+	If (li_tmp <> 0) Then ls_tmp = ls_tmp + " "
+End If
+
+If (li_tmp <> 0) Then
+	If (Mod(li_tmp, 10) = 0) Then
+		ls_tmp = ls_tmp + decenas2[Int(li_tmp / 10)] + " " 
+	else
+		If (li_tmp = 11) Then
+			ls_tmp = ls_tmp + decenas1[Int(li_tmp - 10)]
+		ElseIf (li_tmp = 12) Then
+			ls_tmp = ls_tmp + decenas1[Int(li_tmp - 10)]
+		ElseIf (li_tmp = 13) Then
+			ls_tmp = ls_tmp + decenas1[Int(li_tmp - 10)]
+		ElseIf (li_tmp = 14) Then
+			ls_tmp = ls_tmp + decenas1[Int(li_tmp - 10)]
+		ElseIf (li_tmp = 15) Then
+			ls_tmp = ls_tmp + decenas1[Int(li_tmp - 10)]
+		ElseIf (li_tmp = 16) Then
+			ls_tmp = ls_tmp + decenas1[Int(li_tmp - 10)]
+		ElseIf (li_tmp = 17) Then
+			ls_tmp = ls_tmp + decenas1[Int(li_tmp - 10)]
+		ElseIf (li_tmp = 18) Then
+			ls_tmp = ls_tmp + decenas1[Int(li_tmp - 10)]
+		ElseIf (li_tmp = 19) Then
+			ls_tmp = ls_tmp + decenas1[Int(li_tmp - 10)]
+		ElseIf (li_tmp > 19) Then
+			ls_tmp = ls_tmp + decenas2[Int(li_tmp / 10)]
+			li_tmp = li_tmp - (Int(li_tmp / 10) * 10)
+			If (li_tmp <> 0) Then
+				ls_tmp = ls_tmp + " " + unidades[li_tmp]
+			end if
+		else
+			If (li_tmp <> 0) Then
+				ls_tmp = ls_tmp + " " + unidades[li_tmp]
+			end if
+		End If
+		
+	end if
+End If
+return ls_tmp
+
+end function
+

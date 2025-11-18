@@ -1,0 +1,83 @@
+﻿$PBExportHeader$ds_list_doc_detrac_pen_grid.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="cntas_pagar.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="cntas_pagar.nro_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_detraccion dbname="detraccion.nro_detraccion" )
+ column=(type=char(15) updatewhereclause=yes name=nro_deposito dbname="detraccion.nro_deposito" )
+ column=(type=datetime updatewhereclause=yes name=fecha_deposito dbname="detraccion.fecha_deposito" )
+ column=(type=number updatewhereclause=yes name=sldo_sol dbname="doc_pendientes_cta_cte.sldo_sol" )
+ column=(type=number updatewhereclause=yes name=saldo_dol dbname="doc_pendientes_cta_cte.saldo_dol" )
+ column=(type=char(1) updatewhereclause=yes name=flag_debhab dbname="doc_pendientes_cta_cte.flag_debhab" values="Debe	D/Haber	H/" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="cntas_pagar.origen" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="doc_pendientes_cta_cte.cod_moneda" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tabla dbname="doc_pendientes_cta_cte.flag_tabla" )
+ retrieve="select cp.tipo_doc, 
+       cp.nro_doc, 
+       d.nro_detraccion, 
+       d.nro_deposito, 
+       d.fecha_deposito, 
+       dc.sldo_sol,
+       dc.saldo_dol,
+		 dc.flag_debhab, 
+		 cp.origen,
+		 dc.cod_moneda,
+		 dc.flag_tabla
+from cntas_pagar cp,
+     detraccion  d,
+     doc_pendientes_cta_cte dc
+where cp.nro_detraccion = d.nro_detraccion and
+      dc.nro_doc        = d.nro_detraccion and
+      dc.cod_relacion   = cp.cod_relacion  and
+      dc.tipo_doc       = :as_doc_det		 and
+		dc.cod_relacion	= :as_codrel		 and
+		trim(cp.tipo_doc) || trim(cp.nro_doc) in (:as_documentos)
+union  
+select cc.tipo_doc, 
+       cc.nro_doc, 
+       d.nro_detraccion, 
+       d.nro_deposito, 
+       d.fecha_deposito, 
+       dc.sldo_sol,
+       dc.saldo_dol,
+		 dc.flag_debhab,
+		 cc.origen,
+		 dc.cod_moneda,
+		 dc.flag_tabla
+from cntas_cobrar cc,
+     detraccion  d,
+     doc_pendientes_cta_cte dc
+where cc.nro_detraccion = d.nro_detraccion and
+      dc.nro_doc        = d.nro_detraccion and
+      dc.cod_relacion   = cc.cod_relacion  and
+      dc.tipo_doc       = :as_doc_det		 and
+		dc.cod_relacion	= :as_codrel	    and
+		trim(cc.tipo_doc) || trim(cc.nro_doc) in (:as_documentos)" arguments=(("as_doc_det", string),("as_codrel", string),("as_documentos", stringlist)) )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="33554432" x="215" y="8" height="56" width="329" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="33554432" x="553" y="8" height="56" width="329" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro Detraccion" border="2" color="33554432" x="891" y="8" height="56" width="393" html.valueishtml="0"  name=nro_detraccion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nro Deposito" border="2" color="33554432" x="1294" y="8" height="56" width="439" html.valueishtml="0"  name=nro_deposito_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="F. Deposito" border="2" color="33554432" x="1742" y="8" height="56" width="421" html.valueishtml="0"  name=fecha_deposito_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Sldo Sol" border="2" color="33554432" x="2171" y="8" height="56" width="407" html.valueishtml="0"  name=sldo_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Saldo Dol" border="2" color="33554432" x="2587" y="8" height="56" width="421" html.valueishtml="0"  name=saldo_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Flag Debhab" border="2" color="33554432" x="3017" y="8" height="56" width="416" html.valueishtml="0"  name=flag_debhab_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Origen" border="2" color="0" x="9" y="8" height="56" width="197" html.valueishtml="0"  name=origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="215" y="4" height="64" width="329" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="553" y="4" height="64" width="329" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="891" y="4" height="64" width="393" format="[general]" html.valueishtml="0"  name=nro_detraccion visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1294" y="4" height="64" width="439" format="[general]" html.valueishtml="0"  name=nro_deposito visible="1" edit.limit=15 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1742" y="4" height="64" width="421" format="dd/mm/yyyy" html.valueishtml="0"  name=fecha_deposito visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="33554432" x="2171" y="4" height="64" width="407" format="[general]" html.valueishtml="0"  name=sldo_sol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="2587" y="4" height="64" width="421" format="[general]" html.valueishtml="0"  name=saldo_dol visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="3017" y="4" height="64" width="416" format="[general]" html.valueishtml="0"  name=flag_debhab visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="197" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Doc Pendientes Cta Cte Cod Moneda" border="2" color="33554432" x="3442" y="4" height="56" width="347" html.valueishtml="0"  name=doc_pendientes_cta_cte_cod_moneda_t visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Doc Pendientes Cta Cte Flag Tabla" border="2" color="33554432" x="3799" y="4" height="56" width="389" html.valueishtml="0"  name=doc_pendientes_cta_cte_flag_tabla_t visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="33554432" x="3442" y="0" height="56" width="347" format="[general]" html.valueishtml="0"  name=cod_moneda visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="2" color="33554432" x="3799" y="0" height="56" width="389" format="[general]" html.valueishtml="0"  name=flag_tabla visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

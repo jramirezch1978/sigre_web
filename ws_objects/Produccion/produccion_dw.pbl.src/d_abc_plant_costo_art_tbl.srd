@@ -1,0 +1,39 @@
+﻿$PBExportHeader$d_abc_plant_costo_art_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=120 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cod_plantilla dbname="plant_costo_art.cod_plantilla" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=nro_item dbname="plant_costo_art.nro_item" )
+ column=(type=char(12) update=yes updatewhereclause=yes key=yes name=cod_art dbname="plant_costo_art.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="articulo.und" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=ratio_standard dbname="plant_costo_art.ratio_standard" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=costo_standard dbname="plant_costo_art.costo_standard" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_incluir_excluir dbname="plant_costo_art.flag_incluir_excluir" values="Incluir	I/Excluir	E/" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"plant_costo_art~" )  TABLE(NAME=~"articulo~" ) COLUMN(NAME=~"plant_costo_art.cod_plantilla~") COLUMN(NAME=~"plant_costo_art.nro_item~") COLUMN(NAME=~"plant_costo_art.cod_art~") COLUMN(NAME=~"articulo.desc_art~") COLUMN(NAME=~"articulo.und~") COLUMN(NAME=~"plant_costo_art.ratio_standard~") COLUMN(NAME=~"plant_costo_art.costo_standard~") COLUMN(NAME=~"plant_costo_art.flag_incluir_excluir~")    JOIN (LEFT=~"articulo.cod_art~"    OP =~"=~"RIGHT=~"plant_costo_art.cod_art~" )WHERE(    EXP1 =~"~~~"PLANT_COSTO_ART~~~".~~~"COD_PLANTILLA~~~"~"   OP =~"=~"    EXP2 =~":as_cod_plantilla~"    LOGIC =~"and~" ) WHERE(    EXP1 =~"~~~"PLANT_COSTO_ART~~~".~~~"NRO_ITEM~~~"~"   OP =~"=~"    EXP2 =~":an_nro_item~" ) ) ARG(NAME = ~"as_cod_plantilla~" TYPE = string)  ARG(NAME = ~"an_nro_item~" TYPE = number) " update="PLANT_COSTO_ART" updatewhere=0 updatekeyinplace=yes arguments=(("as_cod_plantilla", string),("an_nro_item", number)) )
+text(band=header alignment="2" text="Código
+Artículo" border="2" color="0" x="9" y="4" height="112" width="407" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Descripción
+Artículo" border="2" color="0" x="421" y="4" height="112" width="1600" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Und
+" border="2" color="0" x="2025" y="4" height="112" width="201" html.valueishtml="0"  name=und_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Ratio
+Standard" border="2" color="0" x="2231" y="4" height="112" width="302" html.valueishtml="0"  name=ratio_standard_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Costo
+Standard" border="2" color="0" x="2537" y="4" height="112" width="302" html.valueishtml="0"  name=costo_standard_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Incluir /
+Excluir" border="2" color="0" x="2843" y="4" height="112" width="302" html.valueishtml="0"  name=flag_incluir_excluir_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=3 alignment="0" tabsequence=10 border="2" color="33554432" x="9" y="4" height="60" width="407" format="[general]" html.valueishtml="0"  name=cod_art pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.required=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=20 border="2" color="33554432" x="2231" y="4" height="60" width="302" format="###,###.00" html.valueishtml="0"  name=ratio_standard visible="1" editmask.required=yes editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=30 border="2" color="33554432" x="2537" y="4" height="60" width="302" format="###,###.00" html.valueishtml="0"  name=costo_standard visible="1" editmask.required=yes editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=40 border="2" color="33554432" x="2843" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=flag_incluir_excluir visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.required=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="8388608" x="421" y="4" height="60" width="1600" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="8388608" x="2025" y="4" height="60" width="201" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

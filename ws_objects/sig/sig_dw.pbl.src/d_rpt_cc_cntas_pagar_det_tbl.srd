@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_rpt_cc_cntas_pagar_det_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=388 color="536870912" )
+summary(height=136 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="cntas_pagar.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="cntas_pagar.nro_doc" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntas_pagar.cod_relacion" )
+ column=(type=char(50) updatewhereclause=yes name=proveedor_nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_pagar.cod_moneda" )
+ column=(type=decimal(2) updatewhereclause=yes name=importe_doc dbname="cntas_pagar.importe_doc" )
+ column=(type=datetime updatewhereclause=yes name=vencimiento dbname="cntas_pagar.vencimiento" )
+ column=(type=datetime updatewhereclause=yes name=fecha_emision dbname="cntas_pagar.fecha_emision" )
+ column=(type=number updatewhereclause=yes name=tot_dolar dbname="tot_dolar" )
+ retrieve="select distinct cp.tipo_doc, cp.nro_doc, cp.cod_relacion, p.nom_proveedor, 
+       cp.cod_moneda, cp.importe_doc, cp.vencimiento, cp.fecha_emision,
+       decode(cp.cod_moneda, (select cod_soles from logparam where reckey='1'), 
+              cp.importe_doc / cp.tasa_cambio, cp.importe_doc ) as tot_dolar
+  from cntas_pagar cp, forma_pago fp, proveedor p
+ where (cp.cod_relacion = p.proveedor) and
+       (cp.tipo_doc = (select f.doc_fact_pagar from finparam f where reckey='1') or
+        cp.tipo_doc = (select doc_bol_pagar from finparam where reckey='1') ) and        
+       (cp.fecha_emision between :ad_fecha_ini and :ad_fecha_fin) and 
+       (cp.tipo_doc = (select f.doc_fact_pagar from finparam f where reckey='1') or
+        cp.tipo_doc = (select f.doc_bol_pagar from finparam f where reckey='1') ) and
+       cp.flag_estado <> '0' and
+       cp.cod_relacion not in (select gpr.proveedor 
+                                 from grupo_proveedor_rel gpr 
+                                where gpr.grupo=:as_grupo_codrel) AND                 
+       cp.forma_pago = fp.forma_pago and
+       fp.dias_vencimiento > 0 
+order by cp.cod_relacion" arguments=(("as_grupo_codrel", string),("ad_fecha_ini", date),("ad_fecha_fin", date)) )
+group(level=1 header.height=112 trailer.height=92 by=("cod_relacion" ) header.color="536870912" trailer.color="536870912" )
+bitmap(band=header filename="" x="18" y="16" height="180" width="352" border="0"  name=p_logo visible="1" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="2272" y="24" height="40" width="265" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="2272" y="148" height="40" width="265" html.valueishtml="0"  name=t_user visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="today()"border="0" color="33554432" x="2272" y="80" height="40" width="265" format="dd/mm/yyyy" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="" border="0" color="33554432" x="18" y="212" height="40" width="352" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Arial" font.height="-6" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Proveedor" border="2" color="33554432" x="151" y="316" height="64" width="270" html.valueishtml="0"  name=cod_relacion_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="TD" border="2" color="33554432" x="439" y="316" height="64" width="142" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Documento" border="2" color="33554432" x="594" y="316" height="64" width="361" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Mon." border="2" color="33554432" x="969" y="316" height="64" width="142" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Importe Original" border="2" color="33554432" x="1125" y="316" height="64" width="443" html.valueishtml="0"  name=importe_doc_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="Total US$" border="2" color="33554432" x="1947" y="316" height="64" width="443" html.valueishtml="0"  name=tot_dolar_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+text(band=header alignment="2" text="COMPRAS AL CREDITO" border="0" color="33554432" x="517" y="48" height="80" width="1559" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="33554432" x="517" y="152" height="64" width="1559" html.valueishtml="0"  name=t_texto visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="439" y="24" height="64" width="1353" format="[general]" html.valueishtml="0"  name=proveedor_nom_proveedor visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="151" y="24" height="64" width="270" format="[general]" html.valueishtml="0"  name=cod_relacion visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="439" y="12" height="64" width="142" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="594" y="12" height="64" width="361" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="969" y="12" height="64" width="142" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="1125" y="12" height="64" width="443" format="#,##0.00" html.valueishtml="0"  name=importe_doc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="1947" y="12" height="64" width="443" format="#,##0.00" html.valueishtml="0"  name=tot_dolar visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(tot_dolar for all)"border="0" color="33554432" x="1947" y="40" height="64" width="443" format="#,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Total General :" border="0" color="33554432" x="1161" y="40" height="64" width="709" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Fec.emisión" border="2" color="33554432" x="1582" y="316" height="64" width="352" html.valueishtml="0"  name=vencimiento_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="25746416" )
+column(band=detail id=8 alignment="0" tabsequence=0 border="0" color="33554432" x="1582" y="8" height="64" width="352" html.valueishtml="0"  name=fecha_emision visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(tot_dolar for group 1)"border="0" color="8388608" x="1947" y="16" height="64" width="443" format="#,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=trailer.1 alignment="1" text="Subtotal por proveedor :" border="0" color="8388608" x="1161" y="16" height="64" width="709" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

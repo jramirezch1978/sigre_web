@@ -1,0 +1,51 @@
+﻿$PBExportHeader$d_pesca_proy_grid.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=ano dbname="fl_pesca_proy.ano" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=mes dbname="fl_pesca_proy.mes" values="Enero	1/Febrero	2/Marzo	3/Abril	4/Mayo	5/Junio	6/Julio	7/Agosto	8/Setiembre	9/Octubre	10/Noviembre	11/Diciembre	12/" )
+ column=(type=char(8) update=yes updatewhereclause=yes key=yes name=nave dbname="fl_pesca_proy.nave" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=pesca_estim dbname="fl_pesca_proy.pesca_estim" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=pesca_real dbname="fl_pesca_proy.pesca_real" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=unid dbname="fl_pesca_proy.unid" )
+ column=(type=char(1) updatewhereclause=yes name=flag_aprobado dbname="fl_pesca_proy.flag_aprobado" values="	1/	0" )
+ column=(type=char(50) updatewhereclause=yes name=nomb_nave dbname="tg_naves.nomb_nave" )
+ column=(type=char(25) updatewhereclause=yes name=desc_unidad dbname="unidad.desc_unidad" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="fl_pesca_proy.flag_replicacion" )
+ retrieve="  SELECT FPP.ANO,   
+         FPP.MES,   
+         FPP.NAVE,   
+         FPP.PESCA_ESTIM,   
+         FPP.PESCA_REAL,   
+         FPP.UNID,   
+			FPP.FLAG_APROBADO,
+         TN.NOMB_NAVE,   
+         UN.DESC_UNIDAD,
+			FPP.FLAG_REPLICACION
+    FROM FL_PESCA_PROY FPP,   
+         TG_NAVES TN,   
+         UNIDAD UN  
+   WHERE FPP.NAVE = TN.NAVE
+	  AND UN.UND = FPP.UNID
+	  AND FPP.ANO = :an_ano
+	ORDER BY FPP.NAVE, FPP.MES
+" update="FL_PESCA_PROY" updatewhere=0 updatekeyinplace=no arguments=(("an_ano", number)) )
+text(band=header alignment="2" text="Mes" border="2" color="33554432" x="9" y="8" height="56" width="393" html.valueishtml="0"  name=mes_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nave" border="2" color="33554432" x="411" y="8" height="56" width="242" html.valueishtml="0"  name=nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Unidad" border="2" color="33554432" x="1472" y="8" height="56" width="197" html.valueishtml="0"  name=unid_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nomb Nave" border="2" color="33554432" x="663" y="8" height="56" width="800" html.valueishtml="0"  name=nomb_nave_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Pesca Estim" border="2" color="33554432" x="2158" y="8" height="56" width="347" html.valueishtml="0"  name=pesca_estim_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descr Unidad" border="2" color="33554432" x="1678" y="8" height="56" width="471" html.valueishtml="0"  name=desc_unidad_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Aprobado" border="2" color="0" x="2514" y="8" height="56" width="274" html.valueishtml="0"  name=flag_aprobado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="33554432" x="663" y="4" height="64" width="800" format="[general]" html.valueishtml="0"  name=nomb_nave visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="33554432" x="1678" y="4" height="64" width="471" format="[general]" html.valueishtml="0"  name=desc_unidad visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=2 alignment="0" tabsequence=10 border="2" color="33554432" x="9" y="4" height="64" width="393" format="##" html.valueishtml="0"  name=mes visible="1" ddlb.limit=5 ddlb.allowedit=no ddlb.case=any ddlb.vscrollbar=yes ddlb.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="2" color="33554432" x="411" y="4" height="64" width="242" format="[general]" html.valueishtml="0"  name=nave pointer="\SOURCE\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=30 border="2" color="33554432" x="1472" y="4" height="64" width="197" format="[general]" html.valueishtml="0"  name=unid pointer="\SOURCE\CUR\taladro.cur" visible="1" edit.limit=3 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="1" tabsequence=40 border="2" color="33554432" x="2158" y="4" height="64" width="347" format="###,###.00" html.valueishtml="0"  name=pesca_estim visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="0" x="2514" y="4" height="64" width="274" format="[general]" html.valueishtml="0"  name=flag_aprobado visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

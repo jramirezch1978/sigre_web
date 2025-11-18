@@ -1,0 +1,30 @@
+﻿$PBExportHeader$of_validar_cuenta.srf
+global type of_validar_cuenta from function_object
+end type
+
+forward prototypes
+global function boolean of_validar_cuenta (string as_cuenta)
+end prototypes
+
+global function boolean of_validar_cuenta (string as_cuenta);Integer li_len, li_reg
+String  ls_flag_permite_mov
+   If IsNull( as_cuenta ) Then
+		MessageBox("of_validar_cuenta","Argumento ingresado es Nulo",Exclamation!)
+		Return False
+	End if	
+   //Seleccionamos
+   Select count(*), max( nvl(flag_permite_mov, '0'))  
+	  Into :li_reg, :ls_flag_permite_mov 
+	  from cntbl_cnta
+     where cnta_ctbl = :as_cuenta;
+	IF li_reg >= 1 Then
+		if ls_flag_permite_mov = '0' then 
+			MessageBox('Título', 'La cuenta no permite movimiento' + '~n~r' + 'Es título' )
+			return false
+		end if 
+      Return TRUE
+	Else
+	   Return FALSE
+	End if  
+end function
+

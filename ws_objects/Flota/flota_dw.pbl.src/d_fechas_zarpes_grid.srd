@@ -1,0 +1,30 @@
+﻿$PBExportHeader$d_fechas_zarpes_grid.srd
+release 8;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=parte_pesca dbname="fl_parte_de_pesca.parte_pesca" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=registro_zarpe dbname="fl_parte_de_pesca.registro_zarpe" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_hora_zarpe dbname="fl_parte_de_pesca.fecha_hora_zarpe" )
+ column=(type=number update=yes updatewhereclause=yes name=tripulantes dbname="tripulantes" )
+ retrieve="select flpp.parte_pesca, flpp.registro_zarpe, flpp.fecha_hora_zarpe, 
+       (select count(*) from fl_tripulacion_zarpe fltz 
+               where fltz.parte_pesca = flpp.parte_pesca ) as tripulantes
+from fl_parte_de_pesca flpp
+where flpp.nave_real = :ls_cod_nave
+  and Trunc(flpp.fecha_hora_zarpe) >= :ld_fecha1
+  and Trunc(flpp.fecha_hora_zarpe) <= :ld_fecha2
+  and flpp.parte_pesca <> :ls_parte_pesca
+order by flpp.parte_pesca" update="fl_parte_de_pesca" updatewhere=1 updatekeyinplace=no arguments=(("ls_cod_nave", string),("ls_parte_pesca", string),("ld_fecha1", date),("ld_fecha2", date)) )
+text(band=header alignment="2" text="Parte Pesca" border="2" color="33554432" x="9" y="8" height="56" width="393" html.valueishtml="0"  name=parte_pesca_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Registro Zarpe" border="2" color="33554432" x="411" y="8" height="56" width="471" html.valueishtml="0"  name=registro_zarpe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha Hora Zarpe" border="2" color="33554432" x="891" y="8" height="56" width="603" html.valueishtml="0"  name=fecha_hora_zarpe_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Tripulantes" border="2" color="33554432" x="1504" y="8" height="56" width="329" html.valueishtml="0"  name=tripulantes_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="393" format="[general]" html.valueishtml="0"  name=parte_pesca visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="411" y="4" height="64" width="471" format="[general]" html.valueishtml="0"  name=registro_zarpe visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="891" y="4" height="64" width="603" format="dd/mm/yyyy hh:mm" html.valueishtml="0"  name=fecha_hora_zarpe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="1504" y="4" height="64" width="329" format="[general]" html.valueishtml="0"  name=tripulantes visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" netscapelayers="0" )

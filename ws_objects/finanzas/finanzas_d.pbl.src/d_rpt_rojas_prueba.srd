@@ -1,0 +1,86 @@
+﻿$PBExportHeader$d_rpt_rojas_prueba.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=704 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="cntas_cobrar.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="cntas_cobrar.nro_doc" )
+ column=(type=datetime updatewhereclause=yes name=fecha_documento dbname="cntas_cobrar.fecha_documento" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="cntas_cobrar.cod_relacion" )
+ column=(type=char(60) updatewhereclause=yes name=nombre dbname="codigo_relacion.nombre" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="cntas_cobrar.cod_moneda" )
+ column=(type=char(12) updatewhereclause=yes name=cntas_cobrar_det_cod_art dbname="cntas_cobrar_det.cod_art" )
+ column=(type=char(800) updatewhereclause=yes name=cntas_cobrar_det_descripcion dbname="cntas_cobrar_det.descripcion" )
+ column=(type=decimal(4) updatewhereclause=yes name=cantidad dbname="cntas_cobrar_det.cantidad" )
+ column=(type=decimal(6) updatewhereclause=yes name=precio_unitario dbname="cntas_cobrar_det.precio_unitario" )
+ column=(type=decimal(2) updatewhereclause=yes name=descuento dbname="cntas_cobrar_det.descuento" )
+ column=(type=decimal(2) updatewhereclause=yes name=redondeo_manual dbname="cntas_cobrar_det.redondeo_manual" )
+ column=(type=decimal(2) updatewhereclause=yes name=cc_doc_det_imp_importe dbname="cc_doc_det_imp.importe" )
+ retrieve="  SELECT ~"CNTAS_COBRAR~".~"TIPO_DOC~",   
+         ~"CNTAS_COBRAR~".~"NRO_DOC~",   
+         ~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~",   
+         ~"CNTAS_COBRAR~".~"COD_RELACION~",   
+         ~"CODIGO_RELACION~".~"NOMBRE~",   
+         ~"CNTAS_COBRAR~".~"COD_MONEDA~",   
+         ~"CNTAS_COBRAR_DET~".~"COD_ART~",   
+         ~"CNTAS_COBRAR_DET~".~"DESCRIPCION~",   
+         ~"CNTAS_COBRAR_DET~".~"CANTIDAD~",   
+         ~"CNTAS_COBRAR_DET~".~"PRECIO_UNITARIO~",   
+			~"CNTAS_COBRAR_DET~".~"DESCUENTO~",   
+			~"CNTAS_COBRAR_DET~".~"REDONDEO_MANUAL~",   
+         ~"CC_DOC_DET_IMP~".~"IMPORTE~"  
+    FROM ~"CNTAS_COBRAR~",   
+         ~"CNTAS_COBRAR_DET~",   
+         ~"CODIGO_RELACION~",   
+         ~"CC_DOC_DET_IMP~" 
+  WHERE (( ~"CNTAS_COBRAR_DET~".~"TIPO_DOC~"   = ~"CNTAS_COBRAR~".~"TIPO_DOC~"        )  and  
+         ( ~"CNTAS_COBRAR_DET~".~"NRO_DOC~"    = ~"CNTAS_COBRAR~".~"NRO_DOC~"         )  and  
+         ( ~"CNTAS_COBRAR~".~"COD_RELACION~"   = ~"CODIGO_RELACION~".~"COD_RELACION~" )) and  
+        (( ~"CNTAS_COBRAR~".~"FLAG_ESTADO~"    <> '0'                             )) and  
+        (( ~"CC_DOC_DET_IMP~".~"TIPO_DOC~" (+) = ~"CNTAS_COBRAR_DET~".~"TIPO_DOC~"    )  and  
+         ( ~"CC_DOC_DET_IMP~".~"NRO_DOC~"  (+) = ~"CNTAS_COBRAR_DET~".~"NRO_DOC~"     )  and  
+         ( ~"CC_DOC_DET_IMP~".~"ITEM~"     (+) = ~"CNTAS_COBRAR_DET~".~"ITEM~"        )) and
+        (( ~"CNTAS_COBRAR~".~"ORIGEN~"			 = :as_origen								)) and
+		  (( trunc(~"CNTAS_COBRAR~".~"FECHA_DOCUMENTO~") between :ad_fecha_inicio AND :ad_fecha_final ))
+" arguments=(("ad_fecha_inicio", date),("ad_fecha_final", date),("as_origen", string),("as_empresa", string),("as_user", string))  sort="cntas_cobrar_det_cod_art A fecha_documento A tipo_doc A " )
+group(level=1 header.height=68 trailer.height=0 by=("cntas_cobrar_det_cod_art" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="T. Doc." border="2" color="0" x="338" y="588" height="112" width="210"  name=cntas_cobrar_nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro de
+ Documento" border="2" color="0" x="553" y="588" height="112" width="302"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fecha
+Emision" border="2" color="0" x="14" y="588" height="112" width="320"  name=cntas_cobrar_fecha_documento_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="C   L   I   E   N   T   E" border="2" color="0" x="859" y="588" height="112" width="1106"  name=codigo_relacion_nombre_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Mon" border="2" color="0" x="1970" y="588" height="112" width="110"  name=cntas_cobrar_cod_moneda_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cantidad" border="2" color="0" x="2085" y="588" height="112" width="265"  name=cntas_cobrar_det_cantidad_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Precio" border="2" color="0" x="2354" y="588" height="112" width="265"  name=cntas_cobrar_det_precio_unitario_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total
+Neto" border="2" color="0" x="2624" y="588" height="112" width="265"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="IGV" border="2" color="0" x="2894" y="588" height="112" width="265"  name=cc_doc_det_imp_importe_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total" border="2" color="0" x="3163" y="588" height="112" width="279"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="RELACION DE VENTAS POR PRODUCTOS" border="0" color="0" x="992" y="52" height="64" width="1454"  name=t_4  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="H:\Source\BMP\blanco.bmp" x="32" y="24" height="164" width="466" border="0"  name=p_1 )
+compute(band=header alignment="0" expression=" as_empresa "border="0" color="0" x="32" y="204" height="64" width="466" format="[GENERAL]"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Pag :" border="0" color="0" x="3063" y="56" height="56" width="110"  name=t_6  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Usuario :" border="0" color="0" x="2976" y="192" height="56" width="197"  name=t_5  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Fecha :" border="0" color="0" x="3008" y="124" height="56" width="165"  name=t_7  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression=" as_user "border="0" color="0" x="3186" y="192" height="56" width="247" format="[GENERAL]"  name=compute_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="page() + ' de ' + pageCount()"border="0" color="0" x="3186" y="56" height="56" width="247" format="[general]"  name=page_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3186" y="124" height="56" width="247" format="dd/mm/yyyy"  name=date_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="2" expression="'Del '+String(ad_fecha_inicio,'dd/mm/yyyy') +' al '+ String(ad_fecha_final ,'dd/mm/yyyy')"border="0" color="0" x="1189" y="244" height="56" width="1134" format="[GENERAL]"  name=compute_3  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="0" color="0" x="393" y="4" height="56" width="1458" format="[general]"  name=cntas_cobrar_det_descripcion edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="0" color="0" x="14" y="4" height="56" width="357" format="[general]"  name=cntas_cobrar_det_cod_art edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="859" y="0" height="72" width="247" format="[general]"  name=cod_relacion edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="338" y="0" height="72" width="210" format="[general]"  name=tipo_doc edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="553" y="0" height="72" width="302" format="[general]"  name=nro_doc edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="0" x="14" y="0" height="72" width="320" format="[shortdate] [time]"  name=fecha_documento editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1111" y="0" height="72" width="855" format="[general]"  name=nombre edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1970" y="0" height="72" width="110" format="[general]"  name=cod_moneda edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="2085" y="0" height="72" width="265" format="[general]"  name=cantidad editmask.mask="###,###.0000" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="2354" y="0" height="72" width="265" format="[general]"  name=precio_unitario editmask.mask="###,###.000000" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="((( (if (isnull(cantidad),0,cantidad)) * (if (isnull(precio_unitario),0,precio_unitario))) - ((( (if (isnull(cantidad),0,cantidad)) * (if (isnull(precio_unitario),0,precio_unitario))) *   (if (isnull(descuento),0,descuento / 100)) ) )) + (if (isnull( redondeo_manual ) ,0, redondeo_manual )))"border="0" color="0" x="2624" y="0" height="72" width="265" format="###,###.00"  name=total_neto  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="0" x="2894" y="0" height="72" width="265" format="[general]"  name=cc_doc_det_imp_importe edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if (isnull( total_neto ),0, total_neto )+ if (isnull(cc_doc_det_imp_importe ),0, cc_doc_det_imp_importe )"border="0" color="0" x="3163" y="0" height="72" width="279" format="###,###.00"  name=total  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

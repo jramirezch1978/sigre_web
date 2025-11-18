@@ -1,0 +1,57 @@
+﻿$PBExportHeader$d_rpt_ventas_x_art_p1.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=64 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="articulo.cod_art" )
+ column=(type=char(400) updatewhereclause=yes name=desc_art dbname="articulo.desc_art" )
+ column=(type=number updatewhereclause=yes name=monto_contrato dbname="monto_contrato" )
+ column=(type=number updatewhereclause=yes name=monto_despachado dbname="monto_despachado" )
+ column=(type=number updatewhereclause=yes name=monto_facturado dbname="monto_facturado" )
+ retrieve="select a.cod_art, a.desc_Art, 
+       sum(amp.cant_proyect * usf_fl_conv_mon(amp.precio_unit, ov.cod_moneda, (select cod_dolares from logparam where reckey = '1'), sysdate)) as monto_contrato,
+       sum(amp.cant_procesada * usf_fl_conv_mon(amp.precio_unit, ov.cod_moneda, (select cod_dolares from logparam where reckey = '1'), sysdate)) as monto_despachado,
+       sum(amp.cant_facturada * usf_fl_conv_mon(amp.precio_unit, ov.cod_moneda, (select cod_dolares from logparam where reckey = '1'), sysdate)) as monto_facturado
+from articulo_mov_proy amp,
+     orden_Venta       ov,
+     articulo          a,
+	  tt_exp_Cencos	  tt
+where ov.nro_ov = amp.nro_doc
+  and a.cod_Art = amp.cod_Art
+  and amp.tipo_doc = (select doc_ov from logparam where reckey = '1')
+  and amp.flag_estado <> '0'
+  and ov.flag_estado <> '0'
+  and amp.cencos = tt.cencos
+  and amp.cencos is not null
+  and trunc(ov.fec_registro) between trunc(:ad_Fecha1) and trunc(:ad_fecha2)
+group by a.cod_Art, a.desc_art" arguments=(("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="2" text="Cod Art" border="2" color="33554432" x="5" y="4" height="56" width="265" html.valueishtml="0"  name=cod_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Desc Art" border="2" color="33554432" x="274" y="4" height="56" width="1362" html.valueishtml="0"  name=desc_art_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Contrato" border="2" color="33554432" x="1641" y="4" height="56" width="329" html.valueishtml="0"  name=monto_contrato_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="%" border="2" color="33554432" x="1975" y="4" height="56" width="174" html.valueishtml="0"  name=dato_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Despachado" border="2" color="33554432" x="2153" y="4" height="56" width="329" html.valueishtml="0"  name=monto_despachado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="%" border="2" color="33554432" x="2487" y="4" height="56" width="174" html.valueishtml="0"  name=dato2_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Facturado" border="2" color="33554432" x="2665" y="4" height="56" width="329" html.valueishtml="0"  name=monto_facturado_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="%" border="2" color="33554432" x="2999" y="4" height="56" width="174" html.valueishtml="0"  name=dato3_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="56" width="265" format="[general]" html.valueishtml="0"  name=cod_art visible="1" edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="274" y="4" height="56" width="1362" format="[general]" html.valueishtml="0"  name=desc_art visible="1" edit.limit=400 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="33554432" x="1641" y="4" height="56" width="329" format="###,##0.00" html.valueishtml="0"  name=monto_contrato visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" monto_contrato / sum( monto_contrato ) * 100"border="2" color="33554432" x="1975" y="4" height="56" width="174" format="###,##0.000" html.valueishtml="0"  name=dato visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="33554432" x="2153" y="4" height="56" width="329" format="###,##0.00" html.valueishtml="0"  name=monto_despachado visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="  monto_despachado / sum(  monto_despachado ) * 100"border="2" color="33554432" x="2487" y="4" height="56" width="174" format="###,##0.000" html.valueishtml="0"  name=dato2 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="2" color="33554432" x="2665" y="4" height="56" width="329" format="###,##0.00" html.valueishtml="0"  name=monto_facturado visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="  monto_facturado / sum(  monto_facturado ) * 100"border="2" color="33554432" x="2999" y="4" height="56" width="174" format="###,##0.000" html.valueishtml="0"  name=dato3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total" border="0" color="33554432" x="1239" y="8" height="56" width="370" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(monto_contrato for all)"border="2" color="33554432" x="1641" y="4" height="56" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum( dato )"border="2" color="33554432" x="1975" y="4" height="56" width="174" format="###,##0.000" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(monto_despachado for all)"border="2" color="33554432" x="2153" y="4" height="56" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum( dato2 )"border="2" color="33554432" x="2487" y="4" height="56" width="174" format="###,##0.000" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum(monto_facturado for all)"border="2" color="33554432" x="2665" y="4" height="56" width="329" format="###,##0.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=summary alignment="1" expression="sum( dato3 )"border="2" color="33554432" x="2999" y="4" height="56" width="174" format="###,##0.000" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,154 @@
+﻿$PBExportHeader$d_ap_parametros_generales_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=2592 color="536870912" )
+table(column=(type=char(6) update=yes updatewhereclause=yes name=tipo_mov dbname="ap_param.tipo_mov" )
+ column=(type=char(60) updatewhereclause=yes name=desc_tipo_mov dbname="articulo_mov_tipo.desc_tipo_mov" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=almacen dbname="ap_param.almacen" )
+ column=(type=char(60) updatewhereclause=yes name=desc_almacen dbname="almacen.desc_almacen" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=und_kg dbname="ap_param.und_kg" )
+ column=(type=char(25) updatewhereclause=yes name=desc_und_kg dbname="unidad.desc_unidad" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=und_tm dbname="ap_param.und_tm" )
+ column=(type=char(25) updatewhereclause=yes name=desc_und_tm dbname="unidad.desc_unidad" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=doc_guia_mp dbname="ap_param.doc_guia_mp" )
+ column=(type=char(25) updatewhereclause=yes name=desc_doc_gmp dbname="doc_tipo.desc_tipo_doc" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=doc_lc dbname="ap_param.doc_lc" )
+ column=(type=char(25) updatewhereclause=yes name=desc_doc_lc dbname="doc_tipo.desc_tipo_doc" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=confin_lc dbname="ap_param.confin_lc" )
+ column=(type=char(40) updatewhereclause=yes name=desc_confin_lc dbname="concepto_financiero.desc_confin_lc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos_lc dbname="ap_param.cencos_lc" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp_mp dbname="ap_param.cnta_prsp_mp" )
+ column=(type=char(50) updatewhereclause=yes name=desc_cnta_prsp_mp dbname="presupuesto_cuenta.desc_cnta_prsp_mp" )
+ column=(type=char(5) update=yes updatewhereclause=yes name=impuesto_lc dbname="ap_param.impuesto_lc" )
+ column=(type=char(40) updatewhereclause=yes name=desc_impt_lc dbname="impuestos_tipo.desc_impt_lc" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=mto_inafec_imp dbname="ap_param.mto_inafec_imp" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=porc_detraccion dbname="ap_param.porc_detraccion" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=porc_retencion dbname="ap_param.porc_retencion" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=planta_ritmo dbname="ap_param.planta_ritmo" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=planta_eficiencia dbname="ap_param.planta_eficiencia" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=ratio_descarga dbname="ap_param.ratio_descarga" )
+ column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen dbname="ap_param.origen" )
+ column=(type=char(50) updatewhereclause=yes name=nom_origen dbname="nom_origen" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=servicio_flete dbname="ap_param.servicio_flete" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_gen_ni_oc_os dbname="ap_param.flag_gen_ni_oc_os" values="	1/	0" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_grmp_aut dbname="ap_param.flag_grmp_aut" values="	1/	0" )
+ column=(type=char(2) update=yes updatewhereclause=yes name=trato_estable dbname="ap_param.trato_estable" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_gen_ni_aut dbname="ap_param.flag_gen_ni_aut" values="	1/	0" )
+ retrieve="SELECT  AP.TIPO_MOV, AMT.DESC_TIPO_MOV,
+        AP.ALMACEN,  ALM.DESC_ALMACEN,
+        AP.UND_KG,   UN.DESC_UNIDAD,
+        AP.UND_TM,   UNA.DESC_UNIDAD,
+        AP.DOC_GUIA_MP,  DT.DESC_TIPO_DOC,
+        AP.DOC_LC,       DTA.DESC_TIPO_DOC,
+        AP.CONFIN_LC,    CF.DESCRIPCION AS DESC_CONFIN_LC,
+        AP.CENCOS_LC,    CC.DESC_CENCOS,
+        AP.CNTA_PRSP_MP, PC.DESCRIPCION AS DESC_CNTA_PRSP_MP,
+        AP.IMPUESTO_LC,  IT.DESC_IMPUESTO AS DESC_IMPT_LC,
+        AP.MTO_INAFEC_IMP,
+        AP.PORC_DETRACCION,
+        AP.PORC_RETENCION,
+        AP.PLANTA_RITMO,
+        AP.PLANTA_EFICIENCIA,
+        AP.RATIO_DESCARGA,
+		  AP.ORIGEN,  DECODE(AP.ORIGEN, 'XX', 'TODOS', O.NOMBRE) AS NOM_ORIGEN,
+		  AP.SERVICIO_FLETE,
+		  AP.FLAG_GEN_NI_OC_OS,
+		  AP.FLAG_GRMP_AUT,	        
+        AP.TRATO_ESTABLE,
+		  AP.Flag_gen_ni_aut
+FROM    AP_PARAM             AP,
+        ARTICULO_MOV_TIPO    AMT,
+        ALMACEN              ALM,
+        UNIDAD               UN,
+        UNIDAD               UNA,
+        DOC_TIPO             DT,
+        DOC_TIPO             DTA,
+        CONCEPTO_FINANCIERO  CF,
+		  ORIGEN               O,
+        CENTROS_COSTO        CC,
+        PRESUPUESTO_CUENTA   PC,
+        IMPUESTOS_TIPO       IT
+ 
+WHERE   AP.ORIGEN       = 'XX'
+  AND   AP.TIPO_MOV     = AMT.TIPO_MOV (+)
+  AND   AP.ALMACEN      = ALM.ALMACEN  (+)
+  AND   AP.UND_KG       = UN.UND       (+)
+  AND   AP.UND_TM       = UNA.UND      (+)
+  AND   AP.DOC_GUIA_MP  = DT.TIPO_DOC  (+)
+  AND   AP.DOC_LC       = DTA.TIPO_DOC (+)
+  AND   AP.CONFIN_LC    = CF.CONFIN    (+)
+  AND   AP.ORIGEN       = O.COD_ORIGEN (+)
+  AND   AP.CENCOS_LC    = CC.CENCOS    (+)
+  AND   AP.CNTA_PRSP_MP = PC.CNTA_PRSP (+)
+  AND   AP.IMPUESTO_LC  = IT.TIPO_IMPUESTO (+)
+
+
+     
+" update="AP_PARAM" updatewhere=0 updatekeyinplace=yes )
+groupbox(band=detail text="Valores Generales"border="5" color="33554432" x="64" y="1396" height="488" width="1915"  name=gb_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+groupbox(band=detail text="Movimientos"border="5" color="33554432" x="59" y="16" height="256" width="1915"  name=gb_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Tipo Mov:" border="0" color="33554432" x="87" y="84" height="56" width="347" html.valueishtml="0"  name=ap_param_tipo_mov_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="33554432" x="480" y="84" height="60" width="192" format="[general]" html.valueishtml="0"  name=tipo_mov pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="5" color="0" x="722" y="84" height="60" width="1221" format="[general]" html.valueishtml="0"  name=desc_tipo_mov visible="1" edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=detail alignment="1" text="Almacen:" border="0" color="33554432" x="82" y="180" height="56" width="347" html.valueishtml="0"  name=ap_param_almacen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=20 border="5" color="33554432" x="480" y="180" height="60" width="192" format="[general]" html.valueishtml="0"  name=almacen pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=6 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="5" color="0" x="722" y="180" height="60" width="1221" format="[general]" html.valueishtml="0"  name=desc_almacen visible="1" edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+groupbox(band=detail text="Guia de Recepcion de Materia Prima"border="5" color="33554432" x="59" y="276" height="168" width="1915"  name=gb_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Documento:" border="0" color="33554432" x="96" y="352" height="56" width="347" html.valueishtml="0"  name=ap_param_doc_guia_mp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=30 border="5" color="33554432" x="489" y="352" height="60" width="192" format="[general]" html.valueishtml="0"  name=doc_guia_mp pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=4 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="5" color="0" x="722" y="352" height="60" width="1221" format="[general]" html.valueishtml="0"  name=desc_doc_gmp visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+groupbox(band=detail text="Liquidación de Compra"border="5" color="33554432" x="59" y="452" height="668" width="1915"  name=gb_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Documento:" border="0" color="33554432" x="69" y="536" height="56" width="375" html.valueishtml="0"  name=ap_param_doc_lc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="ConFin:" border="0" color="33554432" x="96" y="636" height="56" width="347" html.valueishtml="0"  name=ap_param_confin_lc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="CenCos" border="0" color="33554432" x="91" y="736" height="56" width="347" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Monto Inafecto de Impuesto" border="0" color="33554432" x="119" y="1036" height="56" width="709" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Tipo Impuesto" border="0" color="33554432" x="78" y="840" height="56" width="366" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Cnta Prsp" border="0" color="33554432" x="119" y="940" height="56" width="320" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="5" color="0" x="722" y="536" height="60" width="1221" format="[general]" html.valueishtml="0"  name=desc_doc_lc visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="5" color="33554432" x="722" y="636" height="60" width="1221" format="[general]" html.valueishtml="0"  name=desc_confin_lc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="5" color="33554432" x="722" y="736" height="60" width="1221" format="[general]" html.valueishtml="0"  name=desc_cencos visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=20 alignment="0" tabsequence=32766 border="5" color="33554432" x="722" y="836" height="60" width="1221" format="[general]" html.valueishtml="0"  name=desc_impt_lc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="5" color="33554432" x="887" y="936" height="60" width="1056" format="[general]" html.valueishtml="0"  name=desc_cnta_prsp_mp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=11 alignment="0" tabsequence=40 border="5" color="33554432" x="471" y="536" height="60" width="219" format="[general]" html.valueishtml="0"  name=doc_lc pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=4 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=50 border="5" color="33554432" x="471" y="636" height="60" width="219" format="[general]" html.valueishtml="0"  name=confin_lc pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=8 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=60 border="5" color="33554432" x="471" y="736" height="60" width="219" format="[general]" html.valueishtml="0"  name=cencos_lc pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=19 alignment="0" tabsequence=70 border="5" color="33554432" x="471" y="836" height="60" width="219" format="[general]" html.valueishtml="0"  name=impuesto_lc pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=5 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="0" tabsequence=80 border="5" color="33554432" x="471" y="936" height="60" width="379" format="[general]" html.valueishtml="0"  name=cnta_prsp_mp pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=21 alignment="1" tabsequence=90 border="5" color="33554432" x="887" y="1036" height="56" width="366" format="###,###.00" html.valueishtml="0"  name=mto_inafec_imp visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Servicio Flete:" border="0" color="33554432" x="1326" y="1036" height="56" width="352" html.valueishtml="0"  name=servicio_flete_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=29 alignment="0" tabsequence=170 border="5" color="33554432" x="1710" y="1036" height="56" width="224" format="[general]" html.valueishtml="0"  name=servicio_flete pointer="H:\SOURCE\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.required=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=22 alignment="1" tabsequence=120 border="5" color="33554432" x="1746" y="1204" height="60" width="197" format="#,##0.00" html.valueishtml="0"  name=porc_detraccion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=23 alignment="1" tabsequence=130 border="5" color="33554432" x="1746" y="1288" height="60" width="197" format="#,##0.00" html.valueishtml="0"  name=porc_retencion visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Und Kg:" border="0" color="33554432" x="91" y="1196" height="56" width="238" html.valueishtml="0"  name=ap_param_und_kg_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Und Tm:" border="0" color="33554432" x="91" y="1296" height="56" width="238" html.valueishtml="0"  name=ap_param_und_tm_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=110 border="5" color="33554432" x="366" y="1296" height="60" width="192" format="[general]" html.valueishtml="0"  name=und_tm pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=3 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=100 border="5" color="33554432" x="366" y="1196" height="60" width="192" format="[general]" html.valueishtml="0"  name=und_kg pointer="H:\source\CUR\taladro.cur" visible="1" edit.limit=3 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Retencion:" border="0" color="33554432" x="1403" y="1292" height="56" width="315" html.valueishtml="0"  name=ap_param_porc_retencion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Detraccion:" border="0" color="33554432" x="1403" y="1204" height="56" width="315" html.valueishtml="0"  name=ap_param_porc_detraccion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="5" color="0" x="594" y="1196" height="60" width="631" format="[general]" html.valueishtml="0"  name=desc_und_kg visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="5" color="0" x="594" y="1296" height="60" width="631" format="[general]" html.valueishtml="0"  name=desc_und_tm visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+groupbox(band=detail text="Unidades"border="5" color="33554432" x="64" y="1128" height="256" width="1198"  name=gb_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+groupbox(band=detail text="Porcentajes"border="5" color="33554432" x="1307" y="1124" height="264" width="667"  name=gb_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="Eficiencia:" border="0" color="33554432" x="1097" y="1480" height="56" width="398" html.valueishtml="0"  name=ap_param_planta_eficiencia_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=25 alignment="1" tabsequence=160 border="5" color="33554432" x="1550" y="1476" height="60" width="329" format="#,##0.00" html.valueishtml="0"  name=planta_eficiencia visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=24 alignment="1" tabsequence=140 border="5" color="33554432" x="549" y="1476" height="60" width="329" format="#,##0.00" html.valueishtml="0"  name=planta_ritmo visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=26 alignment="1" tabsequence=150 border="5" color="33554432" x="549" y="1576" height="60" width="329" format="#,##0.00" html.valueishtml="0"  name=ratio_descarga visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Origen:" border="0" color="33554432" x="1097" y="1580" height="56" width="206" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=27 alignment="0" tabsequence=32766 border="5" color="0" x="1330" y="1576" height="60" width="105" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+text(band=detail alignment="1" text="GRMP Automático:" border="0" color="33554432" x="1230" y="1680" height="56" width="457" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=32 alignment="0" tabsequence=200 border="5" color="33554432" x="549" y="1676" height="60" width="329" format="[general]" html.valueishtml="0"  name=trato_estable pointer="H:\SOURCE\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Ritmo:" border="0" color="33554432" x="105" y="1476" height="56" width="398" html.valueishtml="0"  name=ap_param_planta_ritmo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Ratio Descarga:" border="0" color="33554432" x="105" y="1580" height="56" width="398" html.valueishtml="0"  name=ap_param_ratio_descarga_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Trato Estable" border="0" color="33554432" x="105" y="1680" height="56" width="398" html.valueishtml="0"  name=trato_estable_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=28 alignment="0" tabsequence=32766 border="5" color="0" x="1463" y="1576" height="60" width="416" format="[general]" html.valueishtml="0"  name=nom_origen visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217747" )
+column(band=detail id=31 alignment="0" tabsequence=190 border="0" color="33554432" x="1733" y="1680" height="56" width="146" format="[general]" html.valueishtml="0"  name=flag_grmp_aut visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=33 alignment="0" tabsequence=210 border="0" color="33554432" x="1737" y="1780" height="56" width="146" html.valueishtml="0"  name=flag_gen_ni_aut visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Generar NI Auto:" border="0" color="33554432" x="1225" y="1780" height="56" width="457" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

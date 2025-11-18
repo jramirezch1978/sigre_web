@@ -1,0 +1,56 @@
+﻿$PBExportHeader$d_ot_nave_libres_grid.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 selected.mouse=no )
+header(height=128 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=nro_orden dbname="orden_trabajo.nro_orden" )
+ column=(type=char(2) updatewhereclause=yes name=cod_origen dbname="orden_trabajo.cod_origen" )
+ column=(type=datetime updatewhereclause=yes name=fec_solicitud dbname="orden_trabajo.fec_solicitud" )
+ column=(type=datetime updatewhereclause=yes name=fec_inicio dbname="orden_trabajo.fec_inicio" )
+ column=(type=char(800) updatewhereclause=yes name=descripcion dbname="orden_trabajo.descripcion" )
+ column=(type=char(10) updatewhereclause=yes name=cencos_slc dbname="orden_trabajo.cencos_slc" )
+ column=(type=char(8) updatewhereclause=yes name=cod_maquina dbname="orden_trabajo.cod_maquina" )
+ retrieve="select ot.nro_orden, 
+		 ot.cod_origen, 
+ 		 ot.fec_solicitud, 
+		 ot.fec_inicio, 
+		 ot.descripcion,
+		 ot.cencos_slc,
+		 ot.cod_maquina
+from 	orden_trabajo  ot,
+		ot_adm_usuario otu
+where otu.ot_adm = ot.ot_adm
+  and otu.cod_usr = :as_user
+  and ot.nro_orden not in (select nro_orden from fl_ot_nave)
+  and ( to_char(ot.fec_inicio, 'yyyymmdd' ) >= to_char(:ad_fecha1, 'yyyymmdd')
+    and to_char(ot.fec_inicio, 'yyyymmdd' ) <= to_char(:ad_fecha2, 'yyyymmdd') )
+order by ot.cod_origen, ot.fec_inicio, ot.nro_orden   
+" arguments=(("ad_fecha1", date),("ad_fecha2", date),("as_user", string)) )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="224" y="4" height="64" width="293" format="[general]" html.valueishtml="0"  name=nro_orden visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="206" format="[general]" html.valueishtml="0"  name=cod_origen visible="1" edit.limit=2 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="33554432" x="1166" y="4" height="64" width="334" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_solicitud visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="1509" y="4" height="64" width="311" format="dd/mm/yyyy" html.valueishtml="0"  name=fec_inicio visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1829" y="4" height="64" width="1225" format="[general]" html.valueishtml="0"  name=descripcion visible="1" edit.limit=800 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="526" y="4" height="64" width="288" format="[general]" html.valueishtml="0"  name=cencos_slc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="33554432" x="823" y="4" height="64" width="334" format="[general]" html.valueishtml="0"  name=cod_maquina visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Nro Orden
+Trabajo" border="2" color="33554432" x="224" y="8" height="112" width="293" html.valueishtml="0"  name=nro_orden_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Codigo
+Origen" border="2" color="33554432" x="9" y="8" height="112" width="206" html.valueishtml="0"  name=cod_origen_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha 
+Solicitud" border="2" color="33554432" x="1166" y="8" height="112" width="334" html.valueishtml="0"  name=fec_solicitud_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Fecha
+Inicio" border="2" color="33554432" x="1509" y="8" height="112" width="311" html.valueishtml="0"  name=fec_inicio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Descripcion
+Orden Trabajo" border="2" color="33554432" x="1829" y="8" height="112" width="1225" html.valueishtml="0"  name=descripcion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cencos
+Slc" border="2" color="33554432" x="526" y="8" height="112" width="293" html.valueishtml="0"  name=cencos_slc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Codigo
+Maquina" border="2" color="33554432" x="823" y="8" height="112" width="338" html.valueishtml="0"  name=cod_maquina_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

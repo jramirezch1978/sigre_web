@@ -1,0 +1,30 @@
+﻿$PBExportHeader$d_rpt_decjur_part5_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=300 color="536870912" )
+table(column=(type=number updatewhereclause=yes name=tasa_aport_cbssp dbname="tasa_aport_cbssp" )
+ column=(type=number updatewhereclause=yes name=obligacion_1 dbname="obligacion_1" )
+ column=(type=number updatewhereclause=yes name=obligacion_2 dbname="obligacion_2" )
+ retrieve="select 
+(select TASA_APORT_CBSSP from fl_param where reckey = '1') as TASA_APORT_CBSSP,
+round(round((select sum(importe) from tt_fl_dj_part4),2) * (select TASA_APORT_CBSSP from fl_param where reckey = '1' ) / 100 ,2) as obligacion_1,
+round(round((select sum(aport_adic) from tt_fl_dj_part4),2) * (select TASA_APORT_CBSSP from fl_param where reckey = '1' ) / 100 ,2) as obligacion_2
+from dual
+" )
+rectangle(band=detail x="32" y="12" height="264" width="585"  name=r_1 visible="1" brush.hatch="7" brush.color="553648127" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=detail alignment="2" text="APORTACION" border="0" color="33554432" x="64" y="24" height="56" width="517" html.valueishtml="0"  name=compute_0001_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="0" color="33554432" x="59" y="96" height="160" width="366" format="###,##0.00" html.valueishtml="0"  name=tasa_aport_cbssp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-25" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Obligacion al 100%:" border="0" color="33554432" x="654" y="48" height="56" width="530" html.valueishtml="0"  name=obligacion_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Obligacion al 24.99%:" border="0" color="33554432" x="654" y="116" height="56" width="530" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Total:" border="0" color="33554432" x="658" y="184" height="56" width="530" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="%" border="0" color="33554432" x="453" y="96" height="160" width="128" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-24" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="33554432" x="1207" y="48" height="56" width="320" format="###,##0.00" html.valueishtml="0"  name=obligacion_1 visible="1" edit.limit=0 edit.case=any edit.format="###,##0.00" edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="33554432" x="1207" y="116" height="56" width="320" format="###,##0.00" html.valueishtml="0"  name=obligacion_2 visible="1" edit.limit=0 edit.case=any edit.format="###,##0.00" edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="round(obligacion_1, 2) + round(obligacion_2, 2)"border="0" color="33554432" x="1207" y="184" height="56" width="320" format="###,##0.00" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

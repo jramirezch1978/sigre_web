@@ -1,0 +1,101 @@
+version: '3.8'
+
+# Docker Compose solo para infraestructura base
+# Útil para desarrollo local sin levantar todos los microservicios
+
+services:
+  # Oracle Database
+  oracle-db:
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    container_name: sigre-oracle-db
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    environment:
+      - ORACLE_PWD=${ORACLE_SYS_PASSWORD:-Oracle123}
+      - ORACLE_CHARACTERSET=AL32UTF8
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    networks:
+      - sigre-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: sigre-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - sigre-network
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: sigre-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin123
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - sigre-network
+
+  # MongoDB
+  mongodb:
+    image: mongo:7
+    container_name: sigre-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin123
+      - MONGO_INITDB_DATABASE=sigre_logs
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - sigre-network
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sigre-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - sigre-network
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sigre-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - sigre-network
+
+networks:
+  sigre-network:
+    driver: bridge
+
+volumes:
+  oracle-data:
+  redis-data:
+  rabbitmq-data:
+  mongodb-data:
+  prometheus-data:
+  grafana-data:
+

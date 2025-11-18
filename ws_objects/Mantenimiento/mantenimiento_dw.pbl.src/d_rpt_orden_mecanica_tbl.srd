@@ -1,0 +1,28 @@
+﻿$PBExportHeader$d_rpt_orden_mecanica_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=160 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=orden_mecanico_cod_trabajador dbname="orden_mecanico.cod_trabajador" )
+ column=(type=char(92) updatewhereclause=yes name=nombres dbname="nombres" )
+ column=(type=char(1) updatewhereclause=yes name=orden_mecanico_flag_funcion dbname="orden_mecanico.flag_funcion" values="Responsable	R/Mecanico	M/Electricista	E/Operador	O/Tecnico	T/" )
+ retrieve="  SELECT ~"ORDEN_MECANICO~".~"COD_TRABAJADOR~",   
+         ~"MAESTRO~".~"APEL_PATERNO~"||' '||~"MAESTRO~".~"APEL_MATERNO~"||' '||~"MAESTRO~".~"NOMBRE1~" AS NOMBRES,   
+         ~"ORDEN_MECANICO~".~"FLAG_FUNCION~"  
+    FROM ~"ORDEN_MECANICO~",   
+         ~"MAESTRO~"  
+   WHERE ( ~"ORDEN_MECANICO~".~"COD_TRABAJADOR~" = ~"MAESTRO~".~"COD_TRABAJADOR~" ) and  
+         ( ( ~"ORDEN_MECANICO~".~"COD_ORIGEN~" = :as_cod_origen ) AND  
+         ( ~"ORDEN_MECANICO~".~"NRO_ORDEN~" = :as_nro_orden ) )    
+" arguments=(("as_cod_origen", string),("as_nro_orden", string)) )
+text(band=header alignment="0" text="Personal Involucrado :" border="0" color="0" x="14" y="8" height="80" width="864"  name=t_1  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Función" border="2" color="0" x="1801" y="104" height="52" width="416"  name=orden_mecanico_flag_funcion_t  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Codigo Trabajador" border="2" color="0" x="14" y="104" height="52" width="544"  name=orden_mecanico_cod_trabajador_t  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=header alignment="2" text="Nombres" border="2" color="0" x="567" y="104" height="52" width="1225"  name=nombres_t  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="1801" y="0" height="52" width="416" format="[general]"  name=orden_mecanico_flag_funcion ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="14" y="0" height="52" width="544" format="[general]"  name=orden_mecanico_cod_trabajador edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="567" y="0" height="52" width="1225" format="[general]"  name=nombres edit.limit=92 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

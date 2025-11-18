@@ -1,0 +1,27 @@
+﻿$PBExportHeader$f_get_uit.srf
+global type f_get_uit from function_object
+end type
+
+forward prototypes
+global function decimal f_get_uit (integer ai_year)
+end prototypes
+
+global function decimal f_get_uit (integer ai_year);Decimal {2}		ldc_uit
+Date				ld_fecha
+
+if IsNull(ai_year) or ai_year = 0 then
+	MessageBox('Aviso', 'Debe indicar una fecha válida')
+	return 0
+end if
+
+ld_fecha = date(ai_year, 1,1) // Fecha 01/01/li_year
+
+select importe
+  into :ldc_uit
+  from uit
+ where trunc(fec_ini_vigen) <= trunc(:ld_fecha)
+order by fec_ini_vigen desc;
+
+return ldc_uit
+end function
+

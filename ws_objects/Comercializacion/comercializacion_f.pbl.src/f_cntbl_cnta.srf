@@ -1,0 +1,35 @@
+﻿$PBExportHeader$f_cntbl_cnta.srf
+global type f_cntbl_cnta from function_object
+end type
+
+forward prototypes
+global function boolean f_cntbl_cnta (string as_cnta_ctbl, ref string as_flag_ctabco, ref string as_flag_cencos, ref string as_flag_doc_ref, ref string as_flag_cod_rel, ref string as_flag_cebef)
+end prototypes
+
+global function boolean f_cntbl_cnta (string as_cnta_ctbl, ref string as_flag_ctabco, ref string as_flag_cencos, ref string as_flag_doc_ref, ref string as_flag_cod_rel, ref string as_flag_cebef);Boolean lb_retorno = TRUE
+
+SELECT flag_ctabco  ,
+       flag_cencos  ,
+       flag_doc_ref ,
+       flag_codrel  ,
+		 flag_centro_benef
+ INTO  :as_flag_ctabco,
+ 		 :as_flag_cencos,
+		 :as_flag_doc_ref,
+ 		 :as_flag_cod_rel,
+		 :as_flag_cebef
+ FROM  cntbl_cnta
+WHERE cnta_ctbl = :as_cnta_ctbl ;
+
+
+
+
+			
+IF SQLCA.SQLCode = -1 THEN 
+	MessageBox("SQL error  CNTBL_CNTA (Flag de Condicionamiento", SQLCA.SQLErrText)
+	lb_retorno = FALSE
+END IF
+
+Return lb_retorno
+end function
+

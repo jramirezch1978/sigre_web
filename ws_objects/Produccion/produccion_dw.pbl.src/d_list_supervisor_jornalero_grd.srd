@@ -1,0 +1,44 @@
+﻿$PBExportHeader$d_list_supervisor_jornalero_grd.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(8) updatewhereclause=yes name=supervisor dbname="superv_campo.supervisor" )
+ column=(type=char(95) updatewhereclause=yes name=nom_supervisor dbname="nom_supervisor" )
+ column=(type=char(8) updatewhereclause=yes name=cosechador1 dbname="superv_campo.cosechador1" )
+ column=(type=char(95) updatewhereclause=yes name=nom_cosechador1 dbname="nom_cosechador1" )
+ column=(type=char(8) updatewhereclause=yes name=cosechador2 dbname="superv_campo.cosechador2" )
+ column=(type=char(95) updatewhereclause=yes name=nom_cosechador2 dbname="nom_cosechador2" )
+ retrieve="select sc.supervisor, 
+       trim(m1.apel_paterno || ' ' || m1.apel_materno || ', ' || m1.nombre1 || ' ' || decode(m1.nombre2, null, '', substr(m1.nombre2,1,1))) as nom_supervisor,
+       sc.cosechador1, 
+       trim(m2.apel_paterno || ' ' || m2.apel_materno || ', ' || m2.nombre1 || ' ' || decode(m2.nombre2, null, '', substr(m2.nombre2,1,1))) as nom_cosechador1,
+       sc.cosechador2, 
+       trim(m3.apel_paterno || ' ' || m3.apel_materno || ', ' || m3.nombre1 || ' ' || decode(m3.nombre2, null, '', substr(m2.nombre2,1,1))) as nom_cosechador2
+from superv_campo sc,
+     maestro m1,
+     maestro m2,
+    maestro m3
+where sc.supervisor = m1.cod_trabajador
+  and sc.cosechador1 = m2.cod_trabajador
+  and sc.cosechador2 = m3.cod_trabajador
+order by sc.supervisor, sc.cosechador1" )
+text(band=header alignment="2" text="Nom Supervisor" border="2" color="33554432" x="402" y="8" height="56" width="777" html.valueishtml="0"  name=nom_supervisor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="Nom Cosechador1" border="2" color="33554432" x="1582" y="8" height="56" width="992" html.valueishtml="0"  name=nom_cosechador1_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="Nom Cosechador2" border="2" color="33554432" x="2976" y="8" height="56" width="777" html.valueishtml="0"  name=nom_cosechador2_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="Supervisor" border="2" color="33554432" x="9" y="8" height="56" width="384" html.valueishtml="0"  name=supervisor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="Cosechador1" border="2" color="33554432" x="1189" y="8" height="56" width="384" html.valueishtml="0"  name=cosechador1_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="Cosechador2" border="2" color="33554432" x="2583" y="8" height="56" width="384" html.valueishtml="0"  name=cosechador2_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="64" width="384" format="[general]" html.valueishtml="0"  name=supervisor visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="402" y="4" height="64" width="777" format="[general]" html.valueishtml="0"  name=nom_supervisor visible="1" edit.limit=95 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1189" y="4" height="64" width="384" format="[general]" html.valueishtml="0"  name=cosechador1 visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="33554432" x="1582" y="4" height="64" width="992" format="[general]" html.valueishtml="0"  name=nom_cosechador1 visible="1" edit.limit=95 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="2583" y="4" height="64" width="384" format="[general]" html.valueishtml="0"  name=cosechador2 visible="1" edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="2976" y="4" height="64" width="777" format="[general]" html.valueishtml="0"  name=nom_cosechador2 visible="1" edit.limit=95 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

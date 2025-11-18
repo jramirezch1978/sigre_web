@@ -1,0 +1,17 @@
+﻿$PBExportHeader$d_sel_mov_articulos_fecha.srd
+$PBExportComments$Movimiento de articulos segun rango de fecha
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(12) updatewhereclause=yes name=cod_art dbname="vw_alm_movimiento.cod_art" )
+ column=(type=char(40) updatewhereclause=yes name=nom_articulo dbname="articulo.nom_articulo" )
+ retrieve="PBSELECT( VERSION(400) DISTINCT ()TABLE(NAME=~"vw_alm_movimiento~" )  TABLE(NAME=~"articulo~" ) COLUMN(NAME=~"vw_alm_movimiento.cod_art~") COLUMN(NAME=~"articulo.nom_articulo~")    JOIN (LEFT=~"vw_alm_movimiento.cod_art~"    OP =~"=~"RIGHT=~"articulo.cod_art~" )WHERE(    EXP1 =~"~~~"VW_ALM_MOVIMIENTO~~~".~~~"FEC_REGISTRO~~~"~"   OP =~">=~"    EXP2 =~":ad_del~"    LOGIC =~"and~" ) WHERE(    EXP1 =~"~~~"VW_ALM_MOVIMIENTO~~~".~~~"FEC_REGISTRO~~~"~"   OP =~"<=~"    EXP2 =~":ad_al~"    LOGIC =~"and~" ) WHERE(    EXP1 =~"~~~"VW_ALM_MOVIMIENTO~~~".~~~"ALMACEN~~~"~"   OP =~"=~"    EXP2 =~":as_alm~" ) ) ARG(NAME = ~"ad_del~" TYPE = date)  ARG(NAME = ~"ad_al~" TYPE = date)  ARG(NAME = ~"as_alm~" TYPE = string) " arguments=(("ad_del", date),("ad_al", date),("as_alm", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="5" y="4" height="60" width="357" format="[general]"  name=cod_art edit.limit=12 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cod Art" border="2" color="0" x="5" y="4" height="56" width="357"  name=cod_art_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nom Articulo" border="2" color="0" x="366" y="4" height="56" width="1303"  name=nom_articulo_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="366" y="4" height="60" width="1303" format="[general]"  name=nom_articulo edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

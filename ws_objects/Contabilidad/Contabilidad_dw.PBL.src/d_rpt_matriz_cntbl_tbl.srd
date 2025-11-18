@@ -1,0 +1,53 @@
+﻿$PBExportHeader$d_rpt_matriz_cntbl_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=296 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=104 color="536870912" )
+table(column=(type=char(6) updatewhereclause=yes name=matriz_cntbl_oper_matriz_ctbl dbname="matriz_cntbl_oper.matriz_ctbl" )
+ column=(type=char(25) updatewhereclause=yes name=doc_tipo_desc_tipo_doc dbname="doc_tipo.desc_tipo_doc" )
+ column=(type=char(25) updatewhereclause=yes name=tipo_nota_cntbl_descripcion dbname="tipo_nota_cntbl.descripcion" )
+ column=(type=char(30) updatewhereclause=yes name=matriz_cntbl_oper_descripcion dbname="matriz_cntbl_oper.descripcion" )
+ column=(type=char(30) updatewhereclause=yes name=matriz_cntbl_oper_det_cnta_ctbl dbname="matriz_cntbl_oper_det.cnta_ctbl" )
+ column=(type=char(30) updatewhereclause=yes name=matriz_cntbl_oper_det_cnta_ctbl_sfl dbname="matriz_cntbl_oper_det.cnta_ctbl_sfl" )
+ column=(type=char(1) updatewhereclause=yes name=matriz_cntbl_oper_det_flag_debe_haber dbname="matriz_cntbl_oper_det.flag_debe_haber" )
+ column=(type=char(60) updatewhereclause=yes name=matriz_cntbl_oper_det_glosa_texto dbname="matriz_cntbl_oper_det.glosa_texto" )
+ retrieve="select mc.matriz_ctbl, td.desc_tipo_doc,tn.descripcion,mc.descripcion,
+     md.cnta_ctbl, md.cnta_ctbl_sfl, md.flag_debe_haber, md.glosa_texto
+from matriz_cntbl_oper mc, tipo_nota_cntbl tn, doc_tipo td,
+     matriz_cntbl_oper_det md
+where tn.tipo_nota = mc.tipo_nota
+      and td.tipo_doc = mc.tipo_doc
+      and md.matriz_ctbl = mc.matriz_ctbl
+
+" arguments=(("gs_empresa", string),("gs_user", string)) )
+group(level=1 header.height=56 trailer.height=0 by=("matriz_cntbl_oper_matriz_ctbl" , "doc_tipo_desc_tipo_doc" , "tipo_nota_cntbl_descripcion" , "matriz_cntbl_oper_descripcion" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Matriz" border="2" color="0" x="5" y="176" height="116" width="229"  name=matriz_cntbl_oper_matriz_ctbl_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Documento" border="2" color="0" x="238" y="176" height="116" width="398"  name=doc_tipo_desc_tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tipo" border="2" color="0" x="2907" y="176" height="56" width="91"  name=matriz_cntbl_oper_det_flag_debe_haber_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Glosa" border="2" color="0" x="1838" y="236" height="56" width="1161"  name=matriz_cntbl_oper_det_glosa_texto_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tipo Nota" border="2" color="0" x="640" y="176" height="116" width="398"  name=tipo_nota_cntbl_descripcion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="9" y="8" height="112" width="224" border="0"  name=p_1 )
+compute(band=header alignment="0" expression=" gs_empresa "border="0" color="0" x="9" y="124" height="48" width="224" format="[GENERAL]"  name=compute_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cuenta Contable - 1" border="2" color="0" x="1838" y="176" height="56" width="530"  name=matriz_cntbl_oper_det_cnta_ctbl_sfl_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Descripcion" border="2" color="0" x="1042" y="176" height="116" width="791"  name=matriz_cntbl_oper_descripcion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cuenta Contable - 2" border="2" color="0" x="2373" y="176" height="56" width="530"  name=matriz_cntbl_oper_det_cnta_ctbl_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Pag. ' + page() + ' de ' + pageCount()"border="0" color="0" x="2359" y="8" height="52" width="823" format="[general]"  name=page_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Usuario:" border="0" color="0" x="2359" y="64" height="48" width="183"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2546" y="116" height="48" width="453" format="dd/mm/yyyy hh:mm:ss"  name=date_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Fecha:" border="0" color="0" x="2359" y="116" height="48" width="183"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression=" gs_user "border="0" color="0" x="2546" y="64" height="48" width="453" format="[GENERAL]"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="MATRICES CONTABLES AUTOMATICAS" border="0" color="0" x="722" y="12" height="64" width="1138"  name=t_3  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Al:" border="0" color="0" x="1129" y="84" height="48" width="82"  name=t_4  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="1216" y="84" height="48" width="247" format="dd/mm/yyyy"  name=date_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="52" width="219" format="[general]"  name=matriz_cntbl_oper_matriz_ctbl edit.limit=6 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="0" x="233" y="4" height="52" width="402" format="[general]"  name=doc_tipo_desc_tipo_doc edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="0" x="640" y="4" height="52" width="398" format="[general]"  name=tipo_nota_cntbl_descripcion edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1042" y="4" height="52" width="786" format="[general]"  name=matriz_cntbl_oper_descripcion edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2377" y="0" height="48" width="526" format="[general]"  name=matriz_cntbl_oper_det_cnta_ctbl_sfl edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2930" y="0" height="48" width="55" format="[general]"  name=matriz_cntbl_oper_det_flag_debe_haber edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1833" y="52" height="48" width="1152" format="[general]"  name=matriz_cntbl_oper_det_glosa_texto edit.limit=60 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1833" y="0" height="48" width="539" format="[general]"  name=matriz_cntbl_oper_det_cnta_ctbl edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

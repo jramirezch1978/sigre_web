@@ -1,0 +1,64 @@
+﻿$PBExportHeader$d_abc_doc_x_cobrar_tbl.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(4) updatewhereclause=yes name=tipo_doc dbname="doc_pendientes_cta_cte.tipo_doc" )
+ column=(type=char(10) updatewhereclause=yes name=nro_doc dbname="doc_pendientes_cta_cte.nro_doc" )
+ column=(type=char(3) updatewhereclause=yes name=cod_moneda dbname="doc_pendientes_cta_cte.cod_moneda" )
+ column=(type=number updatewhereclause=yes name=total_pagar dbname="total_pagar" )
+ column=(type=char(8) updatewhereclause=yes name=cod_relacion dbname="doc_pendientes_cta_cte.cod_relacion" )
+ column=(type=char(1) updatewhereclause=yes name=flag_tabla dbname="doc_pendientes_cta_cte.flag_tabla" )
+ column=(type=char(1) updatewhereclause=yes name=flag_cxp dbname="flag_cxp" )
+ column=(type=number updatewhereclause=yes name=tasa_cambio dbname="vw_fin_doc_general.tasa_cambio" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="vw_fin_doc_general.origen" )
+ retrieve="SELECT  dp.tipo_doc	,        
+        dp.nro_doc	, 
+        dp.cod_moneda	,
+        decode(dp.cod_moneda,(SELECT cod_soles FROM logparam WHERE reckey = '1'),dp.sldo_sol,dp.saldo_dol) as total_pagar, 
+        dp.cod_relacion 	,
+        dp.flag_tabla	,  
+        decode(dp.flag_debhab,'D','+','-') as flag_cxp,
+		  vw.tasa_cambio,
+		  vw.origen
+   FROM doc_pendientes_cta_cte dp,
+		  vw_fin_doc_general		 vw
+  WHERE ((dp.tipo_doc 	  = vw.tipo_doc 	    )  AND
+			(dp.nro_doc 	  = vw.nro_doc 	    )  AND
+			(dp.cod_relacion = vw.cod_relacion   )) AND
+		  ((dp.flag_tabla   <> 'B'  			    )  AND
+         (dp.tipo_doc     <> (SELECT doc_sol_giro FROM finparam WHERE reckey = '1' ))) AND
+			(dp.cod_relacion =  :as_cod_relacion )
+UNION
+SELECT dp.tipo_doc     ,        
+       dp.nro_doc      , 
+       dp.cod_moneda   ,
+       DECODE(dp.cod_moneda,(SELECT cod_soles FROM logparam WHERE reckey = '1'),dp.sldo_sol,dp.saldo_dol) AS total_pagar, 
+       dp.cod_relacion ,
+ 		 dp.flag_tabla	  ,  
+		 Decode(dp.flag_debhab,'D','+','-') as flag_cxp,
+		 vw.tasa_cambio  ,
+       vw.origen	
+  FROM doc_pendientes_cta_cte dp,
+	    vw_fin_doc_general		vw
+ WHERE ((vw.tipo_doc 	 = dp.tipo_doc		  )  AND
+		  (vw.nro_doc  	 = dp.nro_doc		  )  AND
+		  (vw.cod_relacion = dp.cod_relacion  )) AND	
+		  (dp.cod_relacion = :as_cod_relacion )  AND
+		  (dp.tipo_doc		 = (SELECT doc_sol_giro FROM finparam WHERE reckey = '1' ))AND
+        (vw.flag_estado  = '5'              )	
+
+" arguments=(("as_cod_relacion", string)) )
+text(band=header alignment="2" text="Total Pagar" border="2" color="8388608" x="1230" y="8" height="56" width="302"  name=total_pagar_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Tipo Doc" border="2" color="8388608" x="9" y="8" height="56" width="526"  name=tipo_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="539" y="8" height="56" width="302"  name=nro_doc_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Moneda" border="2" color="8388608" x="846" y="8" height="56" width="379"  name=cod_moneda_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="9" y="0" height="56" width="526" format="[general]"  name=tipo_doc dddw.name=d_dddw_tipo_doc_tbl dddw.displaycolumn=desc_tipo_doc dddw.datacolumn=tipo_doc dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="539" y="0" height="56" width="302" format="[general]"  name=nro_doc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="2" color="0" x="846" y="0" height="56" width="379" format="[general]"  name=cod_moneda dddw.name=d_dddw_moneda_tbl dddw.displaycolumn=descripcion dddw.datacolumn=cod_moneda dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="2" color="0" x="1230" y="0" height="56" width="302" format="[general]"  name=total_pagar editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1682" y="4" height="52" width="233" format="[general]"  name=flag_cxp edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

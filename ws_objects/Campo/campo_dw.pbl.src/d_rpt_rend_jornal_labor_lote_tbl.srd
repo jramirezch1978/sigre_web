@@ -1,0 +1,75 @@
+﻿$PBExportHeader$d_rpt_rend_jornal_labor_lote_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=512 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=nro_lote dbname="lote_campo.nro_lote" )
+ column=(type=char(8) updatewhereclause=yes name=cod_labor dbname="pd_jornal_campo.cod_labor" )
+ column=(type=char(40) updatewhereclause=yes name=desc_labor dbname="labor.desc_labor" )
+ column=(type=char(3) updatewhereclause=yes name=und dbname="labor.und" )
+ column=(type=char(8) updatewhereclause=yes name=cod_trabajador dbname="maestro.cod_trabajador" )
+ column=(type=char(93) updatewhereclause=yes name=nom_trabajador dbname="nom_trabajador" )
+ column=(type=number updatewhereclause=yes name=rendimiento dbname="rendimiento" )
+ column=(type=number updatewhereclause=yes name=horas dbname="horas" )
+ column=(type=number updatewhereclause=yes name=promedio dbname="promedio" )
+ retrieve="select lc.nro_lote, p.cod_labor, l.desc_labor, l.und,
+       m.cod_trabajador, 
+       m.apel_paterno || ' ' || m.apel_materno || ', ' || m.nombre1 as nom_trabajador,
+       sum(p.rendimiento) as rendimiento,
+       sum(p.hrs_normales + p.hrs_extras_25 + p.hrs_extras_35 + p.hrs_noc_extras_35 + p.hrs_extras_100) as horas,
+       CASE  when sum(p.hrs_normales + p.hrs_extras_25 + p.hrs_extras_35 + p.hrs_noc_extras_35 + p.hrs_extras_100) <> 0 then
+             sum(p.rendimiento) / sum(p.hrs_normales + p.hrs_extras_25 + p.hrs_extras_35 + p.hrs_noc_extras_35 + p.hrs_extras_100) 
+       ELSE
+             0
+       END as promedio
+from pd_jornal_campo p,
+     pd_jornal_campo_lote pd,
+     labor                l,
+     lote_campo           lc,
+     maestro              m
+where p.fecha = pd.fecha
+  and p.cod_trabajador = pd.cod_trabajador     
+  and p.nro_item       = pd.nro_item
+  and p.cod_labor      = l.cod_labor
+  and pd.nro_lote      = lc.nro_lote
+  and p.cod_trabajador = m.cod_trabajador
+  and p.rendimiento    > 0
+  and p.cod_labor      = :as_labor
+  and lc.nro_lote      = :as_lote
+  and trunc(p.fecha)  between :ad_fecha1 and :ad_fecha2
+group by lc.nro_lote, p.cod_labor, l.desc_labor, l.und, m.cod_trabajador, 
+       m.apel_paterno || ' ' || m.apel_materno || ', ' || m.nombre1
+order by lc.nro_lote, p.cod_labor, promedio desc" arguments=(("as_lote", string),("as_labor", string),("ad_fecha1", date),("ad_fecha2", date)) )
+text(band=header alignment="0" text="" border="0" color="0" x="32" y="320" height="48" width="402" html.valueishtml="0"  name=t_objeto visible="1"  font.face="Garamond" font.height="-8" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="" x="27" y="20" height="216" width="407" border="0"  name=p_logo visible="1" )
+text(band=header alignment="2" text="" border="0" color="0" x="32" y="256" height="48" width="402" html.valueishtml="0"  name=t_empresa visible="1"  font.face="Garamond" font.height="-8" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Rendimiento de Personal x Labor y Lote" border="0" color="8388608" x="462" y="36" height="88" width="2208" html.valueishtml="0"  name=t_11 visible="1"  font.face="Bookman Old Style" font.height="-14" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="2793" y="48" height="60" width="398" format="dd/mm/yyyy" html.valueishtml="0"  name=compute_1 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="2793" y="120" height="52" width="398" html.valueishtml="0"  name=t_usuario visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Pag : ' + page() + ' de ' + pageCount()"border="0" color="0" x="2793" y="184" height="60" width="398" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="0" color="0" x="462" y="148" height="52" width="2208" html.valueishtml="0"  name=t_titulo1 visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="462" y="220" height="52" width="2208" html.valueishtml="0"  name=t_titulo2 visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="462" y="292" height="52" width="2208" html.valueishtml="0"  name=t_titulo3 visible="1"  font.face="Garamond" font.height="-9" font.weight="700"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Código
+Trabajador" border="2" color="33554432" x="78" y="396" height="112" width="398" html.valueishtml="0"  name=cod_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Nombre
+Trabajador" border="2" color="33554432" x="480" y="396" height="112" width="1449" html.valueishtml="0"  name=nom_trabajador_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Rendimiento
+" border="2" color="33554432" x="1934" y="396" height="112" width="443" html.valueishtml="0"  name=rendimiento_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Horas
+" border="2" color="33554432" x="2382" y="396" height="112" width="329" html.valueishtml="0"  name=horas_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Promedio
+x Hora" border="2" color="33554432" x="2715" y="396" height="112" width="329" html.valueishtml="0"  name=promedio_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="78" y="4" height="68" width="398" format="[general]" html.valueishtml="0"  name=cod_trabajador visible="1" edit.limit=8 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="480" y="4" height="68" width="1449" format="[general]" html.valueishtml="0"  name=nom_trabajador visible="1" edit.limit=93 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="2267" y="4" height="68" width="110" format="[general]" html.valueishtml="0"  name=und visible="1" edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="2" color="33554432" x="2715" y="4" height="68" width="329" format="###,##0.00" html.valueishtml="0"  name=promedio visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="33554432" x="2382" y="4" height="68" width="329" format="###,##0.00" html.valueishtml="0"  name=horas visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="33554432" x="1934" y="4" height="68" width="329" format="###,##0.00" html.valueishtml="0"  name=rendimiento visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

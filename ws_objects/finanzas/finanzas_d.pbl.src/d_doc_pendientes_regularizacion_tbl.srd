@@ -1,0 +1,163 @@
+﻿$PBExportHeader$d_doc_pendientes_regularizacion_tbl.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="doc_pendientes_cta_cte.cod_relacion" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=tipo_doc dbname="doc_pendientes_cta_cte.tipo_doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=nro_doc dbname="doc_pendientes_cta_cte.nro_doc" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_tabla dbname="doc_pendientes_cta_cte.flag_tabla" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_ctbl dbname="doc_pendientes_cta_cte.cnta_ctbl" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="doc_pendientes_cta_cte.cod_moneda" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_debhab dbname="doc_pendientes_cta_cte.flag_debhab" )
+ column=(type=number update=yes updatewhereclause=yes name=sldo_sol dbname="doc_pendientes_cta_cte.sldo_sol" )
+ column=(type=number update=yes updatewhereclause=yes name=saldo_dol dbname="doc_pendientes_cta_cte.saldo_dol" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_doc dbname="doc_pendientes_cta_cte.fecha_doc" )
+ column=(type=number update=yes updatewhereclause=yes name=factor dbname="doc_pendientes_cta_cte.factor" )
+ column=(type=char(2) updatewhereclause=yes name=origen dbname="cntas_cobrar.origen" )
+ column=(type=number updatewhereclause=yes name=importe dbname="importe" )
+ column=(type=char(1) updatewhereclause=yes name=flag_provisionado dbname="cntas_cobrar.flag_provisionado" )
+ column=(type=char(50) updatewhereclause=yes name=nom_proveedor dbname="proveedor.nom_proveedor" )
+ column=(type=number updatewhereclause=yes name=flag_pln dbname="flag_pln" )
+ column=(type=number updatewhereclause=yes name=tasa_cambio dbname="cntas_cobrar.tasa_cambio" )
+ column=(type=number updatewhereclause=yes name=saldo_aplicado_sol dbname="saldo_aplicado_sol" )
+ column=(type=number updatewhereclause=yes name=saldo_aplicado_dol dbname="saldo_aplicado_dol" )
+ retrieve="  SELECT ~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~",   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~"    ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"NRO_DOC~"     ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FLAG_TABLA~"  ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"CNTA_CTBL~"   ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"  ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FLAG_DEBHAB~" ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~"    ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~"   ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FECHA_DOC~"   ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FACTOR~"  		,	 
+			~"CNTAS_COBRAR~".~"ORIGEN~"						,
+			DECODE(~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~",(SELECT COD_SOLES FROM LOGPARAM WHERE RECKEY =1),~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~",(SELECT COD_DOLARES FROM LOGPARAM WHERE RECKEY =1),~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~") AS IMPORTE,
+			~"CNTAS_COBRAR~".~"FLAG_PROVISIONADO~"		,
+			~"PROVEEDOR~".~"NOM_PROVEEDOR~"				,
+			(SELECT Count(*) FROM pln_cobranza pln ,pln_cobranza_det pld WHERE (pln.nro_planilla 											  = pld.nro_planilla 						 ) AND
+																									 (decode(pld.flag_tabla,'1',doc_cxc    ,doc_cxp    ) = doc_pendientes_cta_cte.tipo_doc     ) AND
+				 											                               (decode(pld.flag_tabla,'1',nro_doc_cxc,nro_doc_cxp) = doc_pendientes_cta_cte.nro_doc      ) AND
+																       							 (pld.cod_rel_cxp                                    = doc_pendientes_cta_cte.cod_relacion ) ) as flag_pln,
+			
+			~"CNTAS_COBRAR~".~"TASA_CAMBIO~",
+			0.00 AS SALDO_APLICADO_SOL,
+			0.00 AS SALDO_APLICADO_DOL
+    FROM ~"DOC_PENDIENTES_CTA_CTE~"  ,
+			~"CNTAS_COBRAR~"				  ,
+			~"PROVEEDOR~"					  
+
+   WHERE (~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = ~"CNTAS_COBRAR~".~"COD_RELACION~"     ) AND
+			(~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~"     = ~"CNTAS_COBRAR~".~"TIPO_DOC~"         ) AND
+			(~"DOC_PENDIENTES_CTA_CTE~".~"NRO_DOC~"      = ~"CNTAS_COBRAR~".~"NRO_DOC~"          ) AND
+			(~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = ~"PROVEEDOR~".~"PROVEEDOR~"		     ) AND
+
+
+   ( ((~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"   =  (SELECT COD_SOLES FROM LOGPARAM WHERE RECKEY = '1')  )    AND  
+      (~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~"     >  0                                                    ))   OR  
+     ((~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"   =  (SELECT COD_DOLARES FROM LOGPARAM WHERE RECKEY = '1'))    AND  
+      (~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~"    >  0                                                    )) ) AND      
+			(~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = :as_cod_relacion              )
+   UNION
+  SELECT ~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~",   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~"    ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"NRO_DOC~"     ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FLAG_TABLA~"  ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"CNTA_CTBL~"   ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"  ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FLAG_DEBHAB~" ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~"    ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~"   ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FECHA_DOC~"   ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FACTOR~"      ,	 
+			~"CNTAS_PAGAR~".~"ORIGEN~"						,
+			DECODE(~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~",(SELECT COD_SOLES FROM LOGPARAM WHERE RECKEY =1),~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~",(SELECT COD_DOLARES FROM LOGPARAM WHERE RECKEY =1),~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~") AS IMPORTE,
+			~"CNTAS_PAGAR~".~"FLAG_PROVISIONADO~",
+			~"PROVEEDOR~".~"NOM_PROVEEDOR~"		,
+			(SELECT Count(*) FROM pln_cobranza pln ,pln_cobranza_det pld WHERE (pln.nro_planilla 											  = pld.nro_planilla 						 ) AND
+																									 (decode(pld.flag_tabla,'1',doc_cxc    ,doc_cxp    ) = doc_pendientes_cta_cte.tipo_doc     ) AND
+				 											                               (decode(pld.flag_tabla,'1',nro_doc_cxc,nro_doc_cxp) = doc_pendientes_cta_cte.nro_doc      ) AND
+																       							 (pld.cod_rel_cxp                                    = doc_pendientes_cta_cte.cod_relacion ) ) as flag_pln,
+			~"CNTAS_PAGAR~".~"TASA_CAMBIO~",
+			~"CNTAS_PAGAR~".~"SALDO_APLICADO_SOL~",
+			~"CNTAS_PAGAR~".~"SALDO_APLICADO_DOL~"
+    FROM ~"DOC_PENDIENTES_CTA_CTE~"  ,
+			~"CNTAS_PAGAR~"				  ,
+			~"PROVEEDOR~"					  
+   WHERE (~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = ~"CNTAS_PAGAR~".~"COD_RELACION~"      ) AND
+			(~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~"     = ~"CNTAS_PAGAR~".~"TIPO_DOC~"          ) AND
+			(~"DOC_PENDIENTES_CTA_CTE~".~"NRO_DOC~"      = ~"CNTAS_PAGAR~".~"NRO_DOC~"           ) AND
+			(~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = ~"PROVEEDOR~".~"PROVEEDOR~"		     ) AND
+
+   ( ((~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"   =  (SELECT COD_SOLES FROM LOGPARAM WHERE RECKEY = '1')  )    AND  
+      (~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~"     >  0                                                    ))   OR  
+     ((~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"   =  (SELECT COD_DOLARES FROM LOGPARAM WHERE RECKEY = '1'))    AND  
+      (~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~"    >  0                                                    )) ) AND      
+      
+			(~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = :as_cod_relacion             )
+   UNION
+  SELECT ~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~",   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~"    ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"NRO_DOC~"     ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FLAG_TABLA~"  ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"CNTA_CTBL~"   ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"  ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FLAG_DEBHAB~" ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~"    ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~"   ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FECHA_DOC~"   ,   
+         ~"DOC_PENDIENTES_CTA_CTE~".~"FACTOR~"      ,	 
+			~"SOLICITUD_GIRO~".~"ORIGEN~"						,
+			DECODE(~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~",(SELECT COD_SOLES FROM LOGPARAM WHERE RECKEY =1),~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~",(SELECT COD_DOLARES FROM LOGPARAM WHERE RECKEY =1),~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~") AS IMPORTE,
+			'O'												,
+			~"PROVEEDOR~".~"NOM_PROVEEDOR~"				,
+			(SELECT Count(*) FROM pln_cobranza pln ,pln_cobranza_det pld WHERE (pln.nro_planilla 											  = pld.nro_planilla 						 ) AND
+																									 (decode(pld.flag_tabla,'1',doc_cxc    ,doc_cxp    ) = doc_pendientes_cta_cte.tipo_doc     ) AND
+				 											                               (decode(pld.flag_tabla,'1',nro_doc_cxc,nro_doc_cxp) = doc_pendientes_cta_cte.nro_doc      ) AND
+																       							 (pld.cod_rel_cxp                                    = doc_pendientes_cta_cte.cod_relacion ) ) as flag_pln,
+			0.000 AS TASA_CAMBIO	,
+			0.00  AS SALDO_APLICADO_SOL,
+			0.00  AS SALDO_APLICADO_DOL
+    FROM ~"DOC_PENDIENTES_CTA_CTE~"  ,
+			~"SOLICITUD_GIRO~"			  ,
+			~"PROVEEDOR~"					  
+   WHERE (~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = ~"SOLICITUD_GIRO~".~"COD_RELACION~"   ) AND
+			(~"DOC_PENDIENTES_CTA_CTE~".~"TIPO_DOC~"     = (select doc_sol_giro from finparam where reckey = '1') ) AND
+			(~"DOC_PENDIENTES_CTA_CTE~".~"NRO_DOC~"      = ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~"  ) AND
+			(~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = ~"PROVEEDOR~".~"PROVEEDOR~"		     ) AND
+   ( ((~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"   =  (SELECT COD_SOLES FROM LOGPARAM WHERE RECKEY = '1')  )    AND  
+      (~"DOC_PENDIENTES_CTA_CTE~".~"SLDO_SOL~"     >  0                                                    ))   OR  
+     ((~"DOC_PENDIENTES_CTA_CTE~".~"COD_MONEDA~"   =  (SELECT COD_DOLARES FROM LOGPARAM WHERE RECKEY = '1'))    AND  
+      (~"DOC_PENDIENTES_CTA_CTE~".~"SALDO_DOL~"    >  0                                                    )) ) AND      
+      
+			(~"DOC_PENDIENTES_CTA_CTE~".~"COD_RELACION~" = :as_cod_relacion                )
+" arguments=(("as_cod_relacion", string)) )
+text(band=header alignment="2" text="Origen" border="2" color="8388608" x="9" y="8" height="56" width="219" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="T. Doc" border="2" color="8388608" x="233" y="8" height="56" width="142" html.valueishtml="0"  name=tipo_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Nro Doc" border="2" color="8388608" x="379" y="8" height="56" width="302" html.valueishtml="0"  name=nro_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Cnta Ctbl" border="2" color="8388608" x="686" y="8" height="56" width="293" html.valueishtml="0"  name=cnta_ctbl_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo Sol" border="2" color="8388608" x="1143" y="8" height="56" width="288" html.valueishtml="0"  name=sldo_sol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Saldo Dol" border="2" color="8388608" x="1435" y="8" height="56" width="288" html.valueishtml="0"  name=saldo_dol_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Mon." border="2" color="8388608" x="983" y="8" height="56" width="155" html.valueishtml="0"  name=cod_moneda_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Fecha Doc" border="2" color="8388608" x="1728" y="8" height="56" width="343" html.valueishtml="0"  name=fecha_doc_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Indicador" border="2" color="8388608" x="2075" y="8" height="56" width="494" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="2" color="0~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="9" y="0" height="64" width="219" format="[general]" html.valueishtml="0"  name=origen visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="379" y="0" height="64" width="302" format="[general]" html.valueishtml="0"  name=nro_doc visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=50 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="686" y="0" height="64" width="293" format="[general]" html.valueishtml="0"  name=cnta_ctbl visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=80 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="1143" y="0" height="64" width="288" format="[general]" html.valueishtml="0"  name=sldo_sol visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=90 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="1435" y="0" height="64" width="288" format="[general]" html.valueishtml="0"  name=saldo_dol visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=60 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="983" y="0" height="64" width="155" format="[general]" html.valueishtml="0"  name=cod_moneda visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="233" y="0" height="64" width="142" format="[general]" html.valueishtml="0"  name=tipo_doc visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=100 border="2" color="33554432~tIf (factor  = 1, RGB(0,0,128) , RGB(128,128,10) )" x="1728" y="0" height="64" width="343" format="[shortdate] [time]" html.valueishtml="0"  name=fecha_doc visible="1" editmask.mask="dd/mm/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="if ( flag_pln > 0 ,'Planilla Cobranza','')"border="2" color="255" x="2075" y="0" height="64" width="494" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=18 alignment="1" tabsequence=110 border="0" color="0" x="27" y="124" height="56" width="992" format="[general]" html.valueishtml="0"  name=saldo_aplicado_sol visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=19 alignment="1" tabsequence=120 border="0" color="0" x="27" y="208" height="56" width="992" format="[general]" html.valueishtml="0"  name=saldo_aplicado_dol visible="1" editmask.mask="###,###.00" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

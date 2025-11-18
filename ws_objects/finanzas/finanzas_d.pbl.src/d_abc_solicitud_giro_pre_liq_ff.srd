@@ -1,0 +1,79 @@
+﻿$PBExportHeader$d_abc_solicitud_giro_pre_liq_ff.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=848 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen dbname="solicitud_giro.origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=nro_solicitud dbname="solicitud_giro.nro_solicitud" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_registro dbname="solicitud_giro.fecha_registro" )
+ column=(type=datetime update=yes updatewhereclause=yes name=fecha_emision dbname="solicitud_giro.fecha_emision" )
+ column=(type=char(200) update=yes updatewhereclause=yes name=descripcion dbname="solicitud_giro.descripcion" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=importe dbname="solicitud_giro.importe" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=cod_moneda dbname="solicitud_giro.cod_moneda" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=usuario dbname="solicitud_giro.usuario" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_relacion dbname="solicitud_giro.cod_relacion" )
+ column=(type=char(6) update=yes updatewhereclause=yes name=aprobacion dbname="solicitud_giro.aprobacion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_estado dbname="solicitud_giro.flag_estado" values="Anulada	0/Generada	1/Aprobada	2/Pagada	3/Pre - Liquidación	4/Liquidación Total	5/" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=nro_reg_caja_banco dbname="solicitud_giro.nro_reg_caja_banco" )
+ column=(type=char(60) updatewhereclause=yes name=nombres dbname="codigo_relacion.nombres" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos dbname="solicitud_giro.cencos" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cnta_prsp dbname="solicitud_giro.cnta_prsp" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(50) updatewhereclause=yes name=cuenta_descripcion dbname="presupuesto_cuenta.descripcion" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_tipo_mvto dbname="solicitud_giro.flag_tipo_mvto" values="Fondo Fijo	F/Orden de Giro	G/" )
+ retrieve="  SELECT ~"SOLICITUD_GIRO~".~"ORIGEN~",   
+         ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~",   
+         ~"SOLICITUD_GIRO~".~"FECHA_REGISTRO~",   
+         ~"SOLICITUD_GIRO~".~"FECHA_EMISION~",   
+         ~"SOLICITUD_GIRO~".~"DESCRIPCION~",   
+         ~"SOLICITUD_GIRO~".~"IMPORTE~",   
+         ~"SOLICITUD_GIRO~".~"COD_MONEDA~",   
+         ~"SOLICITUD_GIRO~".~"USUARIO~",   
+         ~"SOLICITUD_GIRO~".~"COD_RELACION~",   
+         ~"SOLICITUD_GIRO~".~"APROBACION~",   
+         ~"SOLICITUD_GIRO~".~"FLAG_ESTADO~",   
+         ~"SOLICITUD_GIRO~".~"NRO_REG_CAJA_BANCO~",   
+         ~"CODIGO_RELACION~".~"NOMBRE~"  as nombres,   
+         ~"SOLICITUD_GIRO~".~"CENCOS~",   
+         ~"SOLICITUD_GIRO~".~"CNTA_PRSP~",   
+         ~"CENTROS_COSTO~".~"DESC_CENCOS~",   
+         ~"PRESUPUESTO_CUENTA~".~"DESCRIPCION~"  ,
+			~"SOLICITUD_GIRO~".~"FLAG_TIPO_MVTO~"
+    FROM ~"SOLICITUD_GIRO~" ,   
+			~"CODIGO_RELACION~",   
+         ~"CENTROS_COSTO~"  ,   
+         ~"PRESUPUESTO_CUENTA~"  
+   WHERE ( ~"SOLICITUD_GIRO~".~"COD_RELACION~" = ~"CODIGO_RELACION~".~"COD_RELACION~" ) and  
+         ( ~"SOLICITUD_GIRO~".~"CENCOS~" = ~"CENTROS_COSTO~".~"CENCOS~" (+)) and  
+         ( ~"SOLICITUD_GIRO~".~"CNTA_PRSP~" = ~"PRESUPUESTO_CUENTA~".~"CNTA_PRSP~" (+) ) and  
+         ( ( ~"SOLICITUD_GIRO~".~"ORIGEN~" = :as_cod_origen ) AND  
+         ( ~"SOLICITUD_GIRO~".~"NRO_SOLICITUD~" = :as_nro_solicitud ) )    
+" update="SOLICITUD_GIRO" updatewhere=0 updatekeyinplace=yes arguments=(("as_cod_origen", string),("as_nro_solicitud", string)) )
+text(band=detail alignment="1" text="Estado :" border="0" color="0" x="1029" y="108" height="56" width="494"  name=solicitud_giro_flag_estado_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Fecha :" border="0" color="0" x="1029" y="24" height="56" width="494"  name=solicitud_giro_fecha_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="5" color="8388608" x="1541" y="108" height="56" width="370" format="[general]"  name=flag_estado ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="5" color="8388608" x="1541" y="24" height="56" width="370" format="[shortdate] [time]"  name=fecha_emision editmask.mask="dd/mm/yyyy" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Origen :" border="0" color="0" x="41" y="24" height="56" width="334"  name=solicitud_giro_origen_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Nro Solicitud :" border="0" color="0" x="41" y="104" height="56" width="334"  name=solicitud_giro_nro_solicitud_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Solicitante :" border="0" color="0" x="41" y="184" height="56" width="334"  name=solicitud_giro_cod_relacion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="5" color="0" x="1541" y="432" height="56" width="370" format="[general]"  name=importe editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Importe :" border="0" color="0" x="1029" y="432" height="56" width="494"  name=solicitud_giro_importe_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="C.Costos :" border="0" color="0" x="41" y="268" height="56" width="334"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Cta. Presup. :" border="0" color="0" x="41" y="344" height="56" width="334"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="5" color="8388608" x="402" y="24" height="56" width="398" format="[general]"  name=origen dddw.name=d_dddw_origenes_tbl dddw.displaycolumn=nombre dddw.datacolumn=cod_origen dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="5" color="8388608" x="402" y="104" height="56" width="320" format="[general]"  name=nro_solicitud edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="5" color="0" x="402" y="184" height="56" width="320" format="[general]"  name=cod_relacion edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="5" color="0" x="402" y="344" height="56" width="320" format="[general]"  name=cnta_prsp edit.limit=0 edit.case=any edit.autoselect=yes edit.required=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="0" x="402" y="428" height="56" width="599" format="[general]"  name=cod_moneda dddw.name=d_dddw_moneda_tbl dddw.displaycolumn=descripcion dddw.datacolumn=cod_moneda dddw.percentwidth=250 dddw.lines=3 dddw.limit=0 dddw.allowedit=no dddw.useasborder=yes dddw.case=any dddw.required=yes dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="5" color="8388608" x="745" y="184" height="56" width="1166" format="[general]"  name=nombres edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="Descripcion :" border="0" color="0" x="41" y="592" height="56" width="334"  name=solicitud_giro_descripcion_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="5" color="0" x="402" y="596" height="228" width="1477" format="[general]"  name=descripcion edit.limit=200 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.autovscroll=yes edit.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Moneda :" border="0" color="0" x="41" y="428" height="56" width="334"  name=solicitud_giro_cod_moneda_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="8388608" x="402" y="516" height="56" width="919" format="[general]"  name=flag_tipo_mvto radiobuttons.columns=2 radiobuttons.scale=no radiobuttons.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=detail alignment="1" text="T. Mov. :" border="0" color="0" x="41" y="516" height="56" width="334"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="5" color="0" x="402" y="268" height="56" width="320" format="[general]"  name=cencos edit.limit=0 edit.case=any edit.autoselect=yes edit.required=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="5" color="8388608" x="745" y="344" height="56" width="1166" format="[general]"  name=cuenta_descripcion edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="5" color="8388608" x="745" y="268" height="56" width="1166" format="[general]"  name=desc_cencos edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

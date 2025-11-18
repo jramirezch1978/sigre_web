@@ -1,0 +1,36 @@
+﻿$PBExportHeader$d_guia_rec_firma_grid.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 selected.mouse=no )
+header(height=120 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=cod_guia_rec dbname="ap_guia_recepcion_firma.cod_guia_rec" )
+ column=(type=char(8) update=yes updatewhereclause=yes name=cod_cargo dbname="ap_guia_recepcion_firma.cod_cargo" )
+ column=(type=char(6) update=yes updatewhereclause=yes key=yes name=cod_usr dbname="ap_guia_recepcion_firma.cod_usr" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="ap_guia_recepcion_firma.flag_replicacion" )
+ column=(type=char(30) updatewhereclause=yes name=desc_cargo dbname="cargo.desc_cargo" )
+ column=(type=char(60) updatewhereclause=yes name=nom_usuario dbname="usuario.nom_usuario" )
+ retrieve="select   a.cod_guia_rec, a.cod_cargo, a.cod_usr, a.flag_replicacion,
+			c.desc_cargo, u.nombre as nom_usuario
+from 	ap_guia_recepcion_firma a,
+      cargo 						c,
+      usuario 						u
+where a.cod_cargo = c.cod_cargo
+  and a.cod_usr = u.cod_usr
+  and a.cod_guia_rec = :as_guia" update="ap_guia_recepcion_firma" updatewhere=0 updatekeyinplace=yes arguments=(("as_guia", string)) )
+text(band=header alignment="2" text="Codigo
+Usuario" border="2" color="16777215" x="9" y="4" height="112" width="265" html.valueishtml="0"  name=cod_usr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Nombre de Usuario" border="2" color="16777215" x="283" y="4" height="112" width="992" html.valueishtml="0"  name=usuario_nom_usuario_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Codigo
+Cargo" border="2" color="16777215" x="1285" y="4" height="112" width="302" html.valueishtml="0"  name=cod_cargo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+text(band=header alignment="2" text="Descripcion del Cargo" border="2" color="16777215" x="1595" y="4" height="112" width="750" html.valueishtml="0"  name=desc_cargo_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="8421376" )
+column(band=detail id=2 alignment="0" tabsequence=10 border="2" color="33554432" x="1285" y="4" height="52" width="302" format="[general]" html.valueishtml="0"  name=cod_cargo pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="283" y="4" height="52" width="992" format="[general]" html.valueishtml="0"  name=nom_usuario visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="9" y="4" height="52" width="265" format="[general]" html.valueishtml="0"  name=cod_usr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="33554432" x="1595" y="4" height="52" width="750" format="[general]" html.valueishtml="0"  name=desc_cargo visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

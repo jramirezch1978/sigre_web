@@ -1,0 +1,18 @@
+﻿$PBExportHeader$f_get_semana.srf
+global type f_get_semana from function_object
+end type
+
+forward prototypes
+global function boolean f_get_semana (date ad_fecha, ref integer ai_ano, ref integer ai_semana)
+end prototypes
+
+global function boolean f_get_semana (date ad_fecha, ref integer ai_ano, ref integer ai_semana);select ano, semana
+	into :ai_ano, :ai_semana
+from vw_pr_semanas_prod
+where to_char(fecha_inicio, 'yyyymmdd') <= to_char( :ad_fecha, 'yyyymmdd' )
+ and to_char(fecha_fin, 'yyyymmdd' ) 	 >= to_char( :ad_fecha, 'yyyymmdd' );
+ 
+return f_commit(SQLCA)
+
+end function
+

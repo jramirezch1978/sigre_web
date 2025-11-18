@@ -1,0 +1,22 @@
+﻿$PBExportHeader$f_valida_transaccion.srf
+global type f_valida_transaccion from function_object
+end type
+
+forward prototypes
+global function boolean f_valida_transaccion (transaction atr_transaccion)
+end prototypes
+
+global function boolean f_valida_transaccion (transaction atr_transaccion);String ls_mensaje
+
+if atr_transaccion.SQLCode = 0 then
+	return true
+else
+	ls_mensaje = gnvo_log.of_mensajedb( "Error al validar la transacción")
+	Rollback Using atr_transaccion;
+
+	gnvo_log.of_errorlog( ls_mensaje )
+	gnvo_app.of_showmessagedialog( ls_mensaje )
+	Return False
+END IF
+end function
+

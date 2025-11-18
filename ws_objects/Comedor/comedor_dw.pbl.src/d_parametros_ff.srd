@@ -1,0 +1,26 @@
+﻿$PBExportHeader$d_parametros_ff.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=224 color="536870912" )
+table(column=(type=char(2) update=yes updatewhereclause=yes key=yes name=origen dbname="tg_parametro.origen" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=cencos dbname="tg_parametro.cencos_comedor" )
+ column=(type=char(40) updatewhereclause=yes name=desc_cencos dbname="centros_costo.desc_cencos" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=flag_replicacion dbname="tg_parametro.flag_replicacion" )
+ retrieve="SELECT  	~"TG_PARAMETRO~".~"ORIGEN~" ,
+         ~"TG_PARAMETRO~".~"CENCOS_COMEDOR~" ,
+         ~"CENTROS_COSTO~".~"DESC_CENCOS~",
+			~"TG_PARAMETRO~".~"FLAG_REPLICACION~"
+    FROM ~"TG_PARAMETRO~" ,
+         ~"CENTROS_COSTO~"     
+   WHERE ~"TG_PARAMETRO~".~"CENCOS_COMEDOR~" = ~"CENTROS_COSTO~".~"CENCOS~" (+)
+     and ~"TG_PARAMETRO~".~"ORIGEN~" = :as_origen   " update="TG_PARAMETRO" updatewhere=0 updatekeyinplace=no arguments=(("as_origen", string)) )
+text(band=detail alignment="1" text="Cencos Comedor:" border="0" color="16777215" x="64" y="76" height="56" width="466" html.valueishtml="0"  name=cencos_comedor_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217729" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="818" y="72" height="64" width="919" format="[general]" html.valueishtml="0"  name=desc_cencos visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=2 alignment="0" tabsequence=40 border="5" color="33554432" x="549" y="76" height="56" width="247" format="[general]" html.valueishtml="0"  name=cencos pointer="H:\Source\CUR\taladro.cur" visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
