@@ -499,7 +499,7 @@ public class DashboardService {
         
         // Procesar resultados de la query
         for (Object[] resultado : resultados) {
-            LocalDate fecha = ((java.sql.Date) resultado[0]).toLocalDate();
+            LocalDate fecha = (LocalDate) resultado[0]; // fechaMovimiento ya es LocalDate
             Integer hora = ((Number) resultado[1]).intValue();
             Long cantidad = ((Number) resultado[2]).longValue();
             
@@ -569,7 +569,7 @@ public class DashboardService {
         
         // Procesar resultados de la query (IDÉNTICO al método exitoso)
         for (Object[] resultado : resultados) {
-            LocalDate fecha = ((java.sql.Date) resultado[0]).toLocalDate();
+            LocalDate fecha = (LocalDate) resultado[0]; // fechaMovimiento ya es LocalDate
             Integer hora = ((Number) resultado[1]).intValue();
             Long cantidad = ((Number) resultado[2]).longValue();
             

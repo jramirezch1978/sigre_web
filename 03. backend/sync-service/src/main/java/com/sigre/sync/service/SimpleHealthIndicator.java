@@ -42,7 +42,7 @@ public class SimpleHealthIndicator implements HealthIndicator {
                     .build();
 
         } catch (Exception e) {
-            log.warn("Error en health check personalizado: {}", e.getMessage());
+            log.warn("Error en health check personalizado: {}", e.getMessage(), e);
             return Health.down()
                     .withDetail("error", e.getMessage())
                     .build();

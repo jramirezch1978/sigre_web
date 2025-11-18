@@ -530,7 +530,7 @@ public class TicketAsistenciaService {
             return LocalDateTime.parse(fechaISO).toLocalDate();
             
         } catch (Exception e) {
-            log.warn("⚠️ Error parseando fecha ISO '{}', usando fecha actual: {}", fechaISO, e.getMessage());
+            log.warn("⚠️ Error parseando fecha ISO '{}', usando fecha actual: {}", fechaISO, e.getMessage(), e);
             return LocalDate.now();
         }
     }
@@ -769,7 +769,7 @@ public class TicketAsistenciaService {
                     
                 } catch (Exception e) {
                     log.error("❌ Error procesando auto-cierre para trabajador {}: {}", 
-                            ultimoMovimiento.getCodigo(), e.getMessage());
+                            ultimoMovimiento.getCodigo(), e.getMessage(), e);
                 }
             }
             
@@ -908,7 +908,7 @@ public class TicketAsistenciaService {
             
         } catch (Exception e) {
             log.error("❌ Error parseando fecha de marcación: '{}', usando fecha del servidor. Error: {}", 
-                     fechaMarcacionString, e.getMessage());
+                     fechaMarcacionString, e.getMessage(), e);
             return fechaPorDefecto;
         }
     }

@@ -286,7 +286,7 @@ public class LocalToRemoteSyncService {
         try {
             return jdbcTemplateRemote.queryForObject("SELECT SYSDATE FROM DUAL", LocalDateTime.class);
         } catch (Exception e) {
-            log.warn("⚠️ Error obteniendo SYSDATE de Oracle, usando fecha local: {}", e.getMessage());
+            log.warn("⚠️ Error obteniendo SYSDATE de Oracle, usando fecha local: {}", e.getMessage(), e);
             return LocalDateTime.now();
         }
     }
@@ -470,7 +470,7 @@ public class LocalToRemoteSyncService {
                     
                 } catch (Exception e) {
                     log.error("❌ FASE 2B: Error re-insertando registro {}: {}", 
-                            recordSinExternalId.getReckey(), e.getMessage());
+                            recordSinExternalId.getReckey(), e.getMessage(), e);
                     erroresSincronizacion.add("Error FASE 2B re-insert: " + recordSinExternalId.getReckey() + " - " + e.getMessage());
                     registrosErrores++;
                 }
@@ -507,7 +507,7 @@ public class LocalToRemoteSyncService {
                 try {
                     procesarRegistroHuerfano(oracleRecord);
                 } catch (Exception e) {
-                    log.warn("⚠️ Error procesando registro {} en FASE 3: {}", oracleRecord.getReckey(), e.getMessage());
+                    log.warn("⚠️ Error procesando registro {} en FASE 3: {}", oracleRecord.getReckey(), e.getMessage(), e);
                     // Continuar con el siguiente registro en lugar de fallar completamente
                 }
             }
@@ -627,7 +627,7 @@ public class LocalToRemoteSyncService {
                     contadorReseteados++;
                     
                 } catch (Exception e) {
-                    log.error("❌ Error reseteando registro {}: {}", registro.getReckey(), e.getMessage());
+                    log.error("❌ Error reseteando registro {}: {}", registro.getReckey(), e.getMessage(), e);
                 }
             }
             

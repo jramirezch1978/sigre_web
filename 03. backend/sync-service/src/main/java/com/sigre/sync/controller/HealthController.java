@@ -39,7 +39,7 @@ public class HealthController {
                     ));
 
         } catch (Exception e) {
-            log.error("Error en health check personalizado: {}", e.getMessage());
+            log.error("Error en health check personalizado: {}", e.getMessage(), e);
             return ResponseEntity.status(503)
                     .body(new HealthResponse("DOWN", System.currentTimeMillis(), e.getMessage(), "N/A"));
         }

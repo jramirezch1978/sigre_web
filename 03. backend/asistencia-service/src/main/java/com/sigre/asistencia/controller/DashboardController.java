@@ -172,7 +172,7 @@ public class DashboardController {
             return ResponseEntity.ok("Dashboard Service OK - Última actualización: " +
                 stats.getUltimaActualizacion());
         } catch (Exception e) {
-            log.error("❌ Health check falló: {}", e.getMessage());
+            log.error("❌ Health check falló: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError()
                 .body("Dashboard Service ERROR: " + e.getMessage());
         }

@@ -176,7 +176,7 @@ public class MarcacionController {
                             seProcesaAutoCierre = true;
                             log.info("✅ Auto-cierre completado | Trabajador: {}", codTrabajador);
                         } catch (Exception e) {
-                            log.error("❌ Error en auto-cierre | Trabajador: {}: {}", codTrabajador, e.getMessage());
+                            log.error("❌ Error en auto-cierre | Trabajador: {}: {}", codTrabajador, e.getMessage(), e);
                         }
                     } else {
                         // PASO 2b: Es ingreso pero < 13h - validar tiempo mínimo (usar FEC_MARCACION)
