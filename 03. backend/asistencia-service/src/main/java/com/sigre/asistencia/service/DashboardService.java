@@ -256,6 +256,9 @@ public class DashboardService {
             Long cantidad = ((Number) resultado[8]).longValue();
 
             String clave = tipoTrabajador + "|" + codArea + "|" + codSeccion;
+            
+            // Trim del flagInOut porque viene de CHAR(2) con espacios
+            String flagInOutTrimmed = flagInOut != null ? flagInOut.trim() : "";
 
             // Guardar descripciones
             descripcionesMap.putIfAbsent(clave, new String[]{
@@ -265,7 +268,7 @@ public class DashboardService {
                     descCentroCosto != null ? descCentroCosto : "CENTRO COSTO DESCONOCIDO"
             });
 
-            pivoteoMap.computeIfAbsent(clave, k -> new HashMap<>()).put(flagInOut, cantidad);
+            pivoteoMap.computeIfAbsent(clave, k -> new HashMap<>()).put(flagInOutTrimmed, cantidad);
         }
 
         return pivoteoMap.entrySet().stream()
@@ -335,6 +338,9 @@ public class DashboardService {
             Long cantidad = ((Number) resultado[6]).longValue();
 
             String clave = tipoTrabajador + "|" + codArea;
+            
+            // Trim del flagInOut porque viene de CHAR(2) con espacios
+            String flagInOutTrimmed = flagInOut != null ? flagInOut.trim() : "";
 
             // Guardar descripciones
             descripcionesMap.putIfAbsent(clave, new String[]{
@@ -343,7 +349,7 @@ public class DashboardService {
                     descCentroCosto != null ? descCentroCosto : "CENTRO COSTO DESCONOCIDO"
             });
 
-            pivoteoMap.computeIfAbsent(clave, k -> new HashMap<>()).put(flagInOut, cantidad);
+            pivoteoMap.computeIfAbsent(clave, k -> new HashMap<>()).put(flagInOutTrimmed, cantidad);
         }
 
         return pivoteoMap.entrySet().stream()
@@ -412,6 +418,9 @@ public class DashboardService {
             Long cantidad = ((Number) resultado[8]).longValue();
 
             String clave = tipoTrabajador + "|" + codArea + "|" + codSeccion;
+            
+            // Trim del flagInOut porque viene de CHAR(2) con espacios
+            String flagInOutTrimmed = flagInOut != null ? flagInOut.trim() : "";
 
             // Guardar descripciones
             descripcionesMap.putIfAbsent(clave, new String[]{
@@ -421,7 +430,7 @@ public class DashboardService {
                     descCentroCosto != null ? descCentroCosto : "CENTRO COSTO DESCONOCIDO"
             });
 
-            pivoteoMap.computeIfAbsent(clave, k -> new HashMap<>()).put(flagInOut, cantidad);
+            pivoteoMap.computeIfAbsent(clave, k -> new HashMap<>()).put(flagInOutTrimmed, cantidad);
         }
 
         return pivoteoMap.entrySet().stream()
@@ -645,6 +654,9 @@ public class DashboardService {
     }
     
     private String obtenerDescripcionMovimiento(String flagInOut) {
+        // Hacer trim porque el campo FLAG_IN_OUT es CHAR(2) y viene con espacios
+        String codigo = flagInOut != null ? flagInOut.trim() : "";
+        
         Map<String, String> descripciones = Map.of(
                 "1", "INGRESO A PLANTA",
                 "2", "SALIDA DE PLANTA", 
@@ -657,7 +669,7 @@ public class DashboardService {
                 "9", "SALIDA A CENAR",
                 "10", "REGRESO DE CENAR"
         );
-        return descripciones.getOrDefault(flagInOut, "MOVIMIENTO DESCONOCIDO");
+        return descripciones.getOrDefault(codigo, "MOVIMIENTO DESCONOCIDO");
     }
     
     private String obtenerDescripcionCentroCosto(String centroCosto) {
