@@ -1,347 +1,163 @@
-<!-- Gentelella Style Dashboard Layout -->
-<div class="container body">
-  <div class="main_container">
-    
-    <!-- Left Sidebar -->
-    <div class="col-md-3 left_col">
-      <div class="left_col scroll-view">
-        
-        <!-- Logo/Title -->
-        <div class="navbar nav_title">
-          <a [routerLink]="['/dashboard']" class="site_title">
-            <mat-icon class="logo-icon">business</mat-icon>
-            <span class="logo-text">SIGRE Admin</span>
-          </a>
-        </div>
-
-        <div class="clearfix"></div>
-
-        <!-- Profile Section -->
-        <div class="profile clearfix">
-          <div class="profile_pic">
-            <mat-icon class="profile-avatar">account_circle</mat-icon>
-          </div>
-          <div class="profile_info">
-            <span>Bienvenido,</span>
-            <h4>Administrador</h4>
-          </div>
-        </div>
-
-        <br />
-
-        <!-- Sidebar Menu -->
-        <div id="sidebar-menu" class="main_menu_side main_menu">
-          <div class="menu_section">
-            <h3>Panel Principal</h3>
-            <ul class="nav side-menu">
-              <li>
-                <a [routerLink]="['/dashboard']"><mat-icon>dashboard</mat-icon> Dashboard <mat-icon class="chevron">expand_more</mat-icon></a>
-              </li>
-              
-              <li class="active">
-                <a><mat-icon>people</mat-icon> Asistencia <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu" style="display: block;">
-                  <li class="current-page"><a href="#" (click)="volver()">Reporte de Asistencia</a></li>
-                  <li><a href="#" (click)="onRegistrosDiarios()">Registros Diarios</a></li>
-                  <li><a href="#" (click)="onReportesPorEmpleado()">Reportes por Empleado</a></li>
-                  <li><a href="#" (click)="onHorariosYTurnos()">Horarios y Turnos</a></li>
-                  <li><a href="#" (click)="onAusenciasPermisos()">Ausencias y Permisos</a></li>
-                </ul>
-              </li>
-
-              <li>
-                <a><mat-icon>restaurant</mat-icon> Comedores <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a href="#" (click)="onControlRaciones()">Control de Raciones</a></li>
-                  <li><a href="#" (click)="onMenusDiarios()">Menús Diarios</a></li>
-                  <li><a href="#" (click)="onReportesAlimentarios()">Reportes Alimentarios</a></li>
-                </ul>
-              </li>
-
-              <li>
-                <a><mat-icon>assessment</mat-icon> Reportes <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a href="#" (click)="onReportesSemanales()">Reportes Semanales</a></li>
-                  <li><a href="#" (click)="onReportesMensuales()">Reportes Mensuales</a></li>
-                  <li><a href="#" (click)="onAnalisisTendencias()">Análisis de Tendencias</a></li>
-                  <li><a href="#" (click)="onExportarDatos()">Exportar Datos</a></li>
-                </ul>
-              </li>
-
-              <li>
-                <a [routerLink]="['/centros-costo-dashboard']"><mat-icon>business</mat-icon> Centros de Costo <mat-icon class="chevron">expand_more</mat-icon></a>
-              </li>
-            </ul>
-          </div>
-
-          <div class="menu_section">
-            <h3>Sistema</h3>
-            <ul class="nav side-menu">
-              <li>
-                <a><mat-icon>settings</mat-icon> Configuración <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a href="#" (click)="onParametrosGenerales()">Parámetros Generales</a></li>
-                  <li><a href="#" (click)="onDispositivos()">Dispositivos</a></li>
-                  <li><a href="#" (click)="onSincronizacion()">Sincronización</a></li>
-                </ul>
-              </li>
-              
-              <li>
-                <a><mat-icon>security</mat-icon> Administración <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a href="#" (click)="onUsuariosSistema()">Usuarios del Sistema</a></li>
-                  <li><a href="#" (click)="onPermisosRoles()">Permisos y Roles</a></li>
-                  <li><a href="#" (click)="onLogsSistema()">Logs del Sistema</a></li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Footer Buttons -->
-        <div class="sidebar-footer">
-          <button mat-icon-button class="footer-btn" title="Configuración" (click)="onConfiguracion()">
-            <mat-icon>settings</mat-icon>
-          </button>
-          <button mat-icon-button class="footer-btn" title="Pantalla Completa" (click)="onPantallaCompleta()">
-            <mat-icon>fullscreen</mat-icon>
-          </button>
-          <button mat-icon-button class="footer-btn" title="Ayuda" (click)="onAyuda()">
-            <mat-icon>help</mat-icon>
-          </button>
-          <button mat-icon-button class="footer-btn" title="Cerrar Sesión" (click)="volverMenuPrincipal()">
-            <mat-icon>power_settings_new</mat-icon>
-          </button>
-        </div>
-
-      </div>
+<app-main-layout>
+  <!-- Page Header -->
+  <div class="page-title">
+    <div class="title_left">
+      <h3>
+        <mat-icon style="vertical-align: middle; margin-right: 10px;">assessment</mat-icon>
+        Reporte de Asistencia
+      </h3>
     </div>
-
-    <!-- Top Navigation -->
-    <div class="top_nav">
-      <div class="nav_menu">
-        <div class="nav toggle">
-          <button mat-icon-button id="menu_toggle" class="menu-toggle-btn">
-            <mat-icon>menu</mat-icon>
-          </button>
-        </div>
-
-        <nav class="nav navbar-nav">
-          <ul class="navbar-right">
-            <!-- Refresh Button -->
-            <li class="nav-item">
-              <button mat-icon-button (click)="cargarReporte()" [disabled]="cargando" 
-                      class="nav-action-btn" title="Actualizar Datos">
-                <mat-icon [class.spinning]="cargando">refresh</mat-icon>
-              </button>
-            </li>
-
-            <!-- Notifications -->
-            <li class="nav-item dropdown">
-              <button mat-icon-button [matMenuTriggerFor]="notificationsMenu" class="nav-action-btn">
-                <mat-icon>notifications</mat-icon>
-                <span class="badge bg-green">0</span>
-              </button>
-              <mat-menu #notificationsMenu="matMenu" class="notifications-menu">
-                <div class="menu-header">Notificaciones</div>
-                <div class="no-notifications">No hay notificaciones</div>
-              </mat-menu>
-            </li>
-
-            <!-- User Profile -->
-            <li class="nav-item dropdown">
-              <button mat-button [matMenuTriggerFor]="userMenu" class="user-profile-btn">
-                <mat-icon class="profile-icon">account_circle</mat-icon>
-                <span class="profile-name">Administrador</span>
-                <mat-icon class="dropdown-arrow">keyboard_arrow_down</mat-icon>
-              </button>
-              <mat-menu #userMenu="matMenu" class="user-menu">
-                <button mat-menu-item (click)="onMiPerfil()">
-                  <mat-icon>person</mat-icon>
-                  <span>Mi Perfil</span>
-                </button>
-                <button mat-menu-item (click)="onConfiguracionUsuario()">
-                  <mat-icon>settings</mat-icon>
-                  <span>Configuración</span>
-                </button>
-                <mat-divider></mat-divider>
-                <button mat-menu-item (click)="volverMenuPrincipal()">
-                  <mat-icon>exit_to_app</mat-icon>
-                  <span>Cerrar Sesión</span>
-                </button>
-              </mat-menu>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </div>
-
-    <!-- Main Content Area -->
-    <div class="right_col" role="main">
-      
-      <!-- Page Header -->
-      <div class="page-title">
-        <div class="title_left">
-          <h3>
-            <mat-icon style="vertical-align: middle; margin-right: 10px;">assessment</mat-icon>
-            Reporte de Asistencia
-          </h3>
-        </div>
-      </div>
-
-      <div class="clearfix"></div>
-
-      <!-- Reporte Content -->
-      <div class="row">
-        <div class="col-md-12">
-          <div class="x_panel">
-            <div class="x_title">
-              <h2>
-                <mat-icon class="panel-icon">filter_list</mat-icon>
-                Filtros de Búsqueda
-              </h2>
-              <div class="clearfix"></div>
-            </div>
-            <div class="x_content">
-              
-              <!-- Filtros -->
-              <div class="filter-row">
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Origen</mat-label>
-                  <mat-select [(ngModel)]="codOrigen" (selectionChange)="onFiltroChange()">
-                    <mat-option *ngFor="let origen of origenes" [value]="origen.codOrigen">
-                      {{ origen.codOrigen }} - {{ origen.nombre }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Fecha Inicio</mat-label>
-                  <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="fechaInicio" (dateChange)="onFiltroChange()">
-                  <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
-                  <mat-datepicker #pickerInicio></mat-datepicker>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Fecha Fin</mat-label>
-                  <input matInput [matDatepicker]="pickerFin" [(ngModel)]="fechaFin" (dateChange)="onFiltroChange()">
-                  <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
-                  <mat-datepicker #pickerFin></mat-datepicker>
-                </mat-form-field>
-
-                <button mat-raised-button color="primary" (click)="cargarReporte()" [disabled]="cargando">
-                  <mat-icon>refresh</mat-icon>
-                  Actualizar
-                </button>
-
-                <button mat-raised-button color="accent" (click)="exportarExcel()" [disabled]="cargando || registros.length === 0">
-                  <mat-icon>file_download</mat-icon>
-                  Excel
-                </button>
-
-                <button mat-raised-button (click)="exportarPDF()" [disabled]="cargando || registros.length === 0">
-                  <mat-icon>picture_as_pdf</mat-icon>
-                  PDF
-                </button>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      <div *ngIf="cargando" class="loading-container">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p>Generando reporte...</p>
-      </div>
-
-      <!-- Error State -->
-      <div *ngIf="error && !cargando" class="error-container">
-        <mat-icon>error_outline</mat-icon>
-        <p>{{ error }}</p>
-        <button mat-raised-button color="primary" (click)="cargarReporte()">
-          <mat-icon>refresh</mat-icon>
-          Reintentar
-        </button>
-      </div>
-
-      <!-- Tabla de resultados -->
-      <div *ngIf="!cargando && !error" class="row">
-        <div class="col-md-12">
-          <div class="x_panel">
-            <div class="x_title">
-              <h2>
-                <mat-icon class="panel-icon">table_chart</mat-icon>
-                Resultados: {{ registros.length }} registros
-              </h2>
-              <div class="clearfix"></div>
-            </div>
-            <div class="x_content">
-              
-              <div class="table-responsive">
-                <table class="table table-striped jambo_table bulk_action">
-                  <thead>
-                    <tr class="headings">
-                      <th class="column-title">Nro</th>
-                      <th class="column-title">Tipo</th>
-                      <th class="column-title">Código</th>
-                      <th class="column-title">DNI</th>
-                      <th class="column-title">Apellidos y Nombres</th>
-                      <th class="column-title">Área</th>
-                      <th class="column-title">Cargo</th>
-                      <th class="column-title">Turno</th>
-                      <th class="column-title">Fecha</th>
-                      <th class="column-title">Ingreso</th>
-                      <th class="column-title">Salida</th>
-                      <th class="column-title">Hrs. Trab.</th>
-                      <th class="column-title">Hrs. Extras</th>
-                      <th class="column-title">Tard.</th>
-                      <th class="column-title">Tot. Hrs Sem</th>
-                      <th class="column-title">Extras Sem</th>
-                      <th class="column-title">Días</th>
-                      <th class="column-title">Faltas</th>
-                      <th class="column-title">% Asis.</th>
-                      <th class="column-title">% Ausent.</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let row of registrosFiltrados" class="even pointer">
-                      <td>{{ row.nro }}</td>
-                      <td>{{ row.tipoTrabajador }}</td>
-                      <td>{{ row.codigoTrabajador }}</td>
-                      <td>{{ row.dni }}</td>
-                      <td>{{ row.apellidosNombres }}</td>
-                      <td>{{ row.area }}</td>
-                      <td>{{ row.cargoPuesto }}</td>
-                      <td>{{ row.turno }}</td>
-                      <td>{{ row.fecha | date: 'dd/MM/yyyy' }}</td>
-                      <td>{{ row.horaIngreso | date: 'HH:mm:ss' }}</td>
-                      <td>
-                        <span *ngIf="row.horaSalida">{{ row.horaSalida | date: 'HH:mm:ss' }}</span>
-                        <span *ngIf="!row.horaSalida" class="label label-warning">Pendiente</span>
-                      </td>
-                      <td>{{ row.horasTrabajadas }}</td>
-                      <td>{{ row.horasExtras | number: '1.2-2' }}</td>
-                      <td>{{ row.tardanzaMin }}</td>
-                      <td>{{ row.totalHorasTrabajadasSemana | number: '1.2-2' }}</td>
-                      <td>{{ row.totalHorasExtrasSemana | number: '1.2-2' }}</td>
-                      <td>{{ row.totalDiasAsistidos }}</td>
-                      <td>{{ row.totalFaltas }}</td>
-                      <td>{{ row.porcAsistencia | number: '1.2-2' }}%</td>
-                      <td>{{ row.porcAusentismo | number: '1.2-2' }}%</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-    <!-- /page content -->
-
   </div>
-</div>
+
+  <div class="clearfix"></div>
+
+  <!-- Reporte Content -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h2>
+            <mat-icon class="panel-icon">filter_list</mat-icon>
+            Filtros de Búsqueda
+          </h2>
+          <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+          
+          <!-- Filtros -->
+          <div class="filter-row">
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Origen</mat-label>
+              <mat-select [(ngModel)]="codOrigen" (selectionChange)="onFiltroChange()">
+                <mat-option *ngFor="let origen of origenes" [value]="origen.codOrigen">
+                  {{ origen.codOrigen }} - {{ origen.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Fecha Inicio</mat-label>
+              <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="fechaInicio" (dateChange)="onFiltroChange()">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Fecha Fin</mat-label>
+              <input matInput [matDatepicker]="pickerFin" [(ngModel)]="fechaFin" (dateChange)="onFiltroChange()">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin></mat-datepicker>
+            </mat-form-field>
+
+            <button mat-raised-button color="primary" (click)="cargarReporte()" [disabled]="cargando">
+              <mat-icon>refresh</mat-icon>
+              Actualizar
+            </button>
+
+            <button mat-raised-button color="accent" (click)="exportarExcel()" [disabled]="cargando || registros.length === 0">
+              <mat-icon>file_download</mat-icon>
+              Excel
+            </button>
+
+            <button mat-raised-button (click)="exportarPDF()" [disabled]="cargando || registros.length === 0">
+              <mat-icon>picture_as_pdf</mat-icon>
+              PDF
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="cargando" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Generando reporte...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !cargando" class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="cargarReporte()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Tabla de resultados -->
+  <div *ngIf="!cargando && !error" class="row">
+    <div class="col-md-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h2>
+            <mat-icon class="panel-icon">table_chart</mat-icon>
+            Resultados: {{ registros.length }} registros
+          </h2>
+          <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+          
+          <div class="table-responsive">
+            <table class="table table-striped jambo_table bulk_action">
+              <thead>
+                <tr class="headings">
+                  <th class="column-title">Nro</th>
+                  <th class="column-title">Tipo</th>
+                  <th class="column-title">Código</th>
+                  <th class="column-title">DNI</th>
+                  <th class="column-title">Apellidos y Nombres</th>
+                  <th class="column-title">Área</th>
+                  <th class="column-title">Cargo</th>
+                  <th class="column-title">Turno</th>
+                  <th class="column-title">Fecha</th>
+                  <th class="column-title">Ingreso</th>
+                  <th class="column-title">Salida</th>
+                  <th class="column-title">Hrs. Trab.</th>
+                  <th class="column-title">Hrs. Extras</th>
+                  <th class="column-title">Tard.</th>
+                  <th class="column-title">Tot. Hrs Sem</th>
+                  <th class="column-title">Extras Sem</th>
+                  <th class="column-title">Días</th>
+                  <th class="column-title">Faltas</th>
+                  <th class="column-title">% Asis.</th>
+                  <th class="column-title">% Ausent.</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of registrosFiltrados" class="even pointer">
+                  <td>{{ row.nro }}</td>
+                  <td>{{ row.tipoTrabajador }}</td>
+                  <td>{{ row.codigoTrabajador }}</td>
+                  <td>{{ row.dni }}</td>
+                  <td>{{ row.apellidosNombres }}</td>
+                  <td>{{ row.area }}</td>
+                  <td>{{ row.cargoPuesto }}</td>
+                  <td>{{ row.turno }}</td>
+                  <td>{{ row.fecha | date: 'dd/MM/yyyy' }}</td>
+                  <td>{{ row.horaIngreso | date: 'HH:mm:ss' }}</td>
+                  <td>
+                    <span *ngIf="row.horaSalida">{{ row.horaSalida | date: 'HH:mm:ss' }}</span>
+                    <span *ngIf="!row.horaSalida" class="label label-warning">Pendiente</span>
+                  </td>
+                  <td>{{ row.horasTrabajadas }}</td>
+                  <td>{{ row.horasExtras | number: '1.2-2' }}</td>
+                  <td>{{ row.tardanzaMin }}</td>
+                  <td>{{ row.totalHorasTrabajadasSemana | number: '1.2-2' }}</td>
+                  <td>{{ row.totalHorasExtrasSemana | number: '1.2-2' }}</td>
+                  <td>{{ row.totalDiasAsistidos }}</td>
+                  <td>{{ row.totalFaltas }}</td>
+                  <td>{{ row.porcAsistencia | number: '1.2-2' }}%</td>
+                  <td>{{ row.porcAusentismo | number: '1.2-2' }}%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</app-main-layout>

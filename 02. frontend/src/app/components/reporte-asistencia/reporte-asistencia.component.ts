@@ -18,7 +18,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { HttpClientModule } from '@angular/common/http';
 import { DashboardService, Origen } from '../../services/dashboard.service';
-import { NotImplementedService } from '../../services/not-implemented.service';
+import { MainLayoutComponent } from '../main-layout/main-layout.component';
 import * as XLSX from 'xlsx';
 
 // Adaptador personalizado para formato dd/MM/yyyy
@@ -103,7 +103,8 @@ export interface ReporteAsistencia {
     MatSelectModule,
     MatNativeDateModule,
     MatMenuModule,
-    MatDividerModule
+    MatDividerModule,
+    MainLayoutComponent
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es-PE' },
@@ -143,8 +144,7 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
   constructor(
     private dashboardService: DashboardService,
     private router: Router,
-    private snackBar: MatSnackBar,
-    private notImplementedService: NotImplementedService
+    private snackBar: MatSnackBar
   ) {
     // Inicializar fechas: primer y último día del mes actual
     const hoy = new Date();
@@ -257,10 +257,6 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
     // TODO: Implementar exportación a PDF
   }
 
-  volver(): void {
-    this.router.navigate(['/dashboard']);
-  }
-
   private formatearFechaParaApi(fecha: Date): string {
     const year = fecha.getFullYear();
     const month = (fecha.getMonth() + 1).toString().padStart(2, '0');
@@ -283,30 +279,5 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
       panelClass: tipo === 'success' ? 'snackbar-success' : tipo === 'error' ? 'snackbar-error' : 'snackbar-info'
     });
   }
-
-  // Métodos del menú lateral
-  onRegistrosDiarios() { this.notImplementedService.menuNotImplemented('Registros Diarios'); }
-  onReportesPorEmpleado() { this.notImplementedService.menuNotImplemented('Reportes por Empleado'); }
-  onHorariosYTurnos() { this.notImplementedService.menuNotImplemented('Horarios y Turnos'); }
-  onAusenciasPermisos() { this.notImplementedService.menuNotImplemented('Ausencias y Permisos'); }
-  onControlRaciones() { this.notImplementedService.menuNotImplemented('Control de Raciones'); }
-  onMenusDiarios() { this.notImplementedService.menuNotImplemented('Menús Diarios'); }
-  onReportesAlimentarios() { this.notImplementedService.menuNotImplemented('Reportes Alimentarios'); }
-  onReportesSemanales() { this.notImplementedService.reportNotImplemented('Reportes Semanales'); }
-  onReportesMensuales() { this.notImplementedService.reportNotImplemented('Reportes Mensuales'); }
-  onAnalisisTendencias() { this.notImplementedService.menuNotImplemented('Análisis de Tendencias'); }
-  onExportarDatos() { this.notImplementedService.menuNotImplemented('Exportar Datos'); }
-  onParametrosGenerales() { this.notImplementedService.menuNotImplemented('Parámetros Generales'); }
-  onDispositivos() { this.notImplementedService.menuNotImplemented('Dispositivos'); }
-  onSincronizacion() { this.notImplementedService.menuNotImplemented('Sincronización'); }
-  onUsuariosSistema() { this.notImplementedService.menuNotImplemented('Usuarios del Sistema'); }
-  onPermisosRoles() { this.notImplementedService.menuNotImplemented('Permisos y Roles'); }
-  onLogsSistema() { this.notImplementedService.menuNotImplemented('Logs del Sistema'); }
-  onConfiguracion() { this.notImplementedService.actionNotImplemented('Configuración'); }
-  onPantallaCompleta() { this.notImplementedService.actionNotImplemented('Pantalla Completa'); }
-  onAyuda() { this.notImplementedService.actionNotImplemented('Ayuda'); }
-  volverMenuPrincipal() { this.router.navigate(['/']); }
-  onMiPerfil() { this.notImplementedService.actionNotImplemented('Mi Perfil'); }
-  onConfiguracionUsuario() { this.notImplementedService.actionNotImplemented('Configuración de Usuario'); }
 }
 
