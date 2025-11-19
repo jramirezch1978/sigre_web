@@ -156,36 +156,17 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
      * ACTUALIZADO: Agrupa por fechaMovimiento, extrae HOUR de fecMarcacion, excluye AUTO-CLOSE
      */
     @Query("SELECT " +
-           "a.fechaMovimiento as fecha, " +
            "EXTRACT(HOUR FROM a.fecMarcacion) as hora, " +
-           "COUNT(a) as cantidad, " +
-           "MIN(a.fecMarcacion) as primerMarcaje, " +
-           "MAX(a.fecMarcacion) as ultimoMarcaje " +
+           "SUM(CASE WHEN EXTRACT(HOUR FROM a.fecMarcacion) <= 6 THEN 1 ELSE 0 END) as cnt_0_6, " +
+           "SUM(CASE WHEN EXTRACT(HOUR FROM a.fecMarcacion) BETWEEN 7 AND 12 THEN 1 ELSE 0 END) as cnt_7_12, " +
+           "SUM(CASE WHEN EXTRACT(HOUR FROM a.fecMarcacion) >= 13 THEN 1 ELSE 0 END) as cnt_13_23, " +
+           "COUNT(a) as total " +
            "FROM AsistenciaHt580 a " +
            "WHERE a.fechaMovimiento = CURRENT_DATE " +
            "AND a.direccionIp <> 'AUTO-CLOSE' " +
-           "GROUP BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion) " +
+           "GROUP BY EXTRACT(HOUR FROM a.fecMarcacion) " +
            "ORDER BY hora")
-    List<Object[]> countMarcajesDetalladosHoy();
-    
-    /**
-     * Obtener marcajes agrupados por hora de las últimas 24 horas
-     * CORREGIDO: Distingue entre horas del día actual vs día anterior
-     * ACTUALIZADO: Agrupa por fechaMovimiento, extrae HOUR de fecMarcacion, excluye AUTO-CLOSE
-     */
-    @Query("SELECT " +
-           "CASE " +
-           "    WHEN a.fechaMovimiento = CURRENT_DATE THEN EXTRACT(HOUR FROM a.fecMarcacion) " +
-           "    ELSE -(EXTRACT(HOUR FROM a.fecMarcacion)) " +
-           "END as horaConFecha, " +
-           "COUNT(a) as cantidad, " +
-           "a.fechaMovimiento as fecha " +
-           "FROM AsistenciaHt580 a " +
-           "WHERE a.fecMarcacion >= :fechaInicio " +
-           "AND a.direccionIp <> 'AUTO-CLOSE' " +
-           "GROUP BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion) " +
-           "ORDER BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion)")
-    List<Object[]> countMarcajesPorHoraUltimas24h(@Param("fechaInicio") LocalDateTime fechaInicio);
+    List<Object[]> countMarcajesConDetalleHoy();
     
     /**
      * Obtener marcajes de las últimas 24 horas con información detallada por fecha y hora
@@ -248,6 +229,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
                            @Param("flagInOut") String flagInOut,
                            @Param("fechaMovimiento") LocalDate fechaMovimiento,
                            @Param("turno") String turno);
+
 
     /**
      * Obtener indicadores de centros de costo con movimientos pivoteados por fecha
@@ -339,8 +321,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     
     /**
      * Reporte de asistencia con cálculo de horas trabajadas, extras, tardanzas, etc.
-     * Consulta SQL con parámetros preparados para evitar SQL injection
-     * VERSIÓN CORREGIDA: Usa nombres explícitos de columnas y JOINs actualizados
+     * Consulta SQL con parámetros preparados - VERSIÓN EXACTA que funciona en PostgreSQL
      */
     @Query(value = """
         WITH marcaciones_base AS (
