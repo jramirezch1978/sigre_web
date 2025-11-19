@@ -21,7 +21,7 @@ public class CargoRemote {
     @Column(name = "DESC_CARGO", length = 100)
     private String descCargo;
 
-    @Column(name = "CATEGORIA", length = 4)
+    @Column(name = "CATEGORIA", length = 10)
     private String categoria;
 
     @Column(name = "FLAG_REPLICACION", length = 1)
