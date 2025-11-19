@@ -1,6 +1,7 @@
 package com.sigre.asistencia.controller;
 
 import com.sigre.asistencia.dto.dashboard.*;
+import com.sigre.asistencia.dto.ReporteAsistenciaDto;
 import com.sigre.asistencia.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
