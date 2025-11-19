@@ -75,6 +75,12 @@ export interface ReporteAsistencia {
   porcAusentismo: number;
 }
 
+export interface Origen {
+  codOrigen: string;
+  nombre: string;
+  ubicacion: string;
+}
+
 export interface IndicadorCentroCosto {
   tipoTrabajador: string;
   descTipoTrabajador: string;
@@ -329,5 +335,14 @@ export class DashboardService {
     const url = `${this.baseUrl}/reporte-asistencia?codOrigen=${codOrigen}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
     console.log('📊 Llamando reporte de asistencia:', url);
     return this.http.get<ReporteAsistencia[]>(url);
+  }
+
+  /**
+   * Obtener lista de orígenes/plantas
+   */
+  obtenerOrigenes(): Observable<Origen[]> {
+    const url = `${this.baseUrl}/origenes`;
+    console.log('📍 Llamando lista de orígenes:', url);
+    return this.http.get<Origen[]>(url);
   }
 }

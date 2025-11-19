@@ -17,7 +17,7 @@ import { MatNativeDateModule, MAT_DATE_LOCALE, MAT_DATE_FORMATS, NativeDateAdapt
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { HttpClientModule } from '@angular/common/http';
-import { DashboardService } from '../../services/dashboard.service';
+import { DashboardService, Origen } from '../../services/dashboard.service';
 import { NotImplementedService } from '../../services/not-implemented.service';
 import * as XLSX from 'xlsx';
 
@@ -124,13 +124,8 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
   fechaInicio: Date = new Date();
   fechaFin: Date = new Date();
   
-  // Opciones de origen
-  origenes = [
-    { value: 'SE', label: 'SE - Sistema Entrada' },
-    { value: 'WE', label: 'WE - Web/Escritorio' },
-    { value: 'MO', label: 'MO - Móvil' },
-    { value: 'KI', label: 'KI - Kiosco' }
-  ];
+  // Opciones de origen (se cargan desde el backend)
+  origenes: Origen[] = [];
   
   // Estados
   cargando: boolean = false;
@@ -159,7 +154,26 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log('📊 Iniciando Reporte de Asistencia');
+    this.cargarOrigenes();
     this.cargarReporte();
+  }
+
+  cargarOrigenes(): void {
+    console.log('📍 Cargando orígenes desde backend...');
+    this.dashboardService.obtenerOrigenes().subscribe({
+      next: (data) => {
+        console.log('✅ Orígenes cargados:', data);
+        this.origenes = data;
+        if (data.length > 0 && !this.codOrigen) {
+          this.codOrigen = data[0].codOrigen;
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error cargando orígenes:', error);
+        // Fallback: usar origen por defecto
+        this.origenes = [{ codOrigen: 'SE', nombre: 'SECHURA', ubicacion: 'SECHURA, PIURA' }];
+      }
+    });
   }
 
   ngOnDestroy(): void {
