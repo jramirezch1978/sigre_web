@@ -231,4 +231,25 @@ public class DashboardController {
             return ResponseEntity.internalServerError().build();
         }
     }
+    
+    /**
+     * Generar reporte de asistencia con cálculos de horas trabajadas
+     */
+    @GetMapping("/reporte-asistencia")
+    public ResponseEntity<List<ReporteAsistenciaDto>> generarReporteAsistencia(
+            @RequestParam(required = false, defaultValue = "SE") String codOrigen,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin
+    ) {
+        log.info("📊 Solicitando reporte de asistencia | Origen: {} | Rango: {} a {}", 
+                codOrigen, fechaInicio, fechaFin);
+        try {
+            List<ReporteAsistenciaDto> reporte = dashboardService.generarReporteAsistencia(codOrigen, fechaInicio, fechaFin);
+            log.info("✅ Reporte generado exitosamente: {} registros", reporte.size());
+            return ResponseEntity.ok(reporte);
+        } catch (Exception e) {
+            log.error("❌ Error generando reporte de asistencia: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

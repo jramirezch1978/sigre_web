@@ -4,6 +4,7 @@ import { AsistenciaComponent } from './components/asistencia/asistencia.componen
 import { RacionSelectionComponent } from './components/racion-selection/racion-selection.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { CentrosCostoDashboardComponent } from './components/centros-costo-dashboard/centros-costo-dashboard.component';
+import { ReporteAsistenciaComponent } from './components/reporte-asistencia/reporte-asistencia.component';
 
 export const routes: Routes = [
   { path: '', component: MenuInicialComponent },
@@ -11,5 +12,6 @@ export const routes: Routes = [
   { path: 'racion-selection', component: RacionSelectionComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'centros-costo-dashboard', component: CentrosCostoDashboardComponent },
+  { path: 'reporte-asistencia', component: ReporteAsistenciaComponent },
   { path: '**', redirectTo: '' }
 ];

@@ -336,4 +336,209 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
            "         m.codSeccion, s.descripcionSeccion, cc.descripcionCencos, a.flagInOut " +
            "ORDER BY m.tipoTrabajador, m.codArea, m.codSeccion")
     List<Object[]> findIndicadoresSeccionesPorFecha(@Param("fecha") LocalDate fecha);
+    
+    /**
+     * Reporte de asistencia con cálculo de horas trabajadas, extras, tardanzas, etc.
+     * Adaptado de Oracle a PostgreSQL
+     */
+    @Query(value = """
+        WITH marcaciones_base AS (
+            SELECT 
+                a.RECKEY,
+                a.CODIGO,
+                a.FEC_MOVIMIENTO,
+                a.FEC_MARCACION AS hora_entrada,
+                a.TURNO
+            FROM asistencia_ht580 a
+            WHERE TRIM(a.FLAG_IN_OUT) = '1'  
+              AND a.COD_ORIGEN = :codOrigen
+              AND a.FEC_MOVIMIENTO BETWEEN :fechaInicio AND :fechaFin
+        ),
+        marcaciones_completas AS (
+            SELECT 
+                mb.RECKEY,
+                mb.CODIGO,
+                mb.FEC_MOVIMIENTO,
+                mb.TURNO,
+                mb.hora_entrada,
+                
+                (SELECT a2.FEC_MARCACION 
+                 FROM asistencia_ht580 a2 
+                 WHERE a2.RECKEY_REF = mb.RECKEY 
+                   AND TRIM(a2.FLAG_IN_OUT) = '2'
+                 LIMIT 1) AS hora_salida,
+                
+                (SELECT a3.FEC_MARCACION 
+                 FROM asistencia_ht580 a3 
+                 WHERE a3.RECKEY_REF = mb.RECKEY 
+                   AND TRIM(a3.FLAG_IN_OUT) = '3'
+                 LIMIT 1) AS salida_almuerzo,
+                
+                (SELECT a3.RECKEY 
+                 FROM asistencia_ht580 a3 
+                 WHERE a3.RECKEY_REF = mb.RECKEY 
+                   AND TRIM(a3.FLAG_IN_OUT) = '3'
+                 LIMIT 1) AS reckey_salida_almuerzo,
+                
+                (SELECT a5.FEC_MARCACION 
+                 FROM asistencia_ht580 a5 
+                 WHERE a5.RECKEY_REF = mb.RECKEY 
+                   AND TRIM(a5.FLAG_IN_OUT) = '5'
+                 LIMIT 1) AS salida_comision,
+                   
+                (SELECT a5.RECKEY 
+                 FROM asistencia_ht580 a5 
+                 WHERE a5.RECKEY_REF = mb.RECKEY 
+                   AND TRIM(a5.FLAG_IN_OUT) = '5'
+                 LIMIT 1) AS reckey_salida_comision
+                   
+            FROM marcaciones_base mb
+        ),
+        marcaciones_detalle AS (
+            SELECT 
+                mc.*,
+                
+                (SELECT a4.FEC_MARCACION 
+                 FROM asistencia_ht580 a4 
+                 WHERE a4.RECKEY_REF = mc.reckey_salida_almuerzo
+                   AND TRIM(a4.FLAG_IN_OUT) = '4'
+                 LIMIT 1) AS regreso_almuerzo,
+                
+                (SELECT a6.FEC_MARCACION 
+                 FROM asistencia_ht580 a6 
+                 WHERE a6.RECKEY_REF = mc.reckey_salida_comision
+                   AND TRIM(a6.FLAG_IN_OUT) = '6'
+                 LIMIT 1) AS retorno_comision
+                   
+            FROM marcaciones_completas mc
+        ),
+        calculos AS (
+            SELECT 
+                md.*,
+                tt.desc_tipo_tra AS tipo_trabajador,
+                m.COD_TRABAJADOR,
+                m.NOM_TRABAJADOR,
+                m.TIPO_DOC_IDENT_RTPS,
+                m.NRO_DOC_IDENT_RTPS,
+                m.DESC_AREA,
+                c.DESC_CARGO,
+                tu.DESCRIPCION AS desc_turno,
+                tu.HORA_INICIO_NORM,
+                tu.HORA_FINAL_NORM,
+                tu.TOLERANCIA,
+                
+                EXTRACT(WEEK FROM md.FEC_MOVIMIENTO) AS num_semana,
+                EXTRACT(YEAR FROM md.FEC_MOVIMIENTO) AS anio,
+                
+                CASE 
+                    WHEN md.hora_entrada IS NOT NULL THEN
+                        GREATEST(0, 
+                            ROUND(
+                                EXTRACT(EPOCH FROM (md.hora_entrada - 
+                                 (DATE_TRUNC('day', md.FEC_MOVIMIENTO) + 
+                                  (tu.HORA_INICIO_NORM - DATE_TRUNC('day', tu.HORA_INICIO_NORM)) + 
+                                  INTERVAL '1 minute' * tu.TOLERANCIA))
+                                ) / 60
+                            )
+                        )
+                    ELSE 0
+                END AS tardanza_min,
+                
+                CASE 
+                    WHEN md.salida_almuerzo IS NOT NULL AND md.regreso_almuerzo IS NOT NULL THEN
+                        ROUND(EXTRACT(EPOCH FROM (md.regreso_almuerzo - md.salida_almuerzo)) / 60)
+                    ELSE 0
+                END AS tiempo_almuerzo_min,
+                
+                CASE 
+                    WHEN md.salida_comision IS NOT NULL AND md.retorno_comision IS NOT NULL THEN
+                        ROUND(EXTRACT(EPOCH FROM (md.retorno_comision - md.salida_comision)) / 60)
+                    ELSE 0
+                END AS tiempo_comision_min,
+                
+                CASE 
+                    WHEN md.hora_entrada IS NOT NULL AND md.hora_salida IS NOT NULL THEN
+                        ROUND(CAST(EXTRACT(EPOCH FROM (md.hora_salida - md.hora_entrada)) / 3600 AS NUMERIC), 2)
+                    ELSE 0
+                END AS horas_brutas,
+                
+                ROUND(
+                    CAST((EXTRACT(EPOCH FROM (tu.HORA_FINAL_NORM - tu.HORA_INICIO_NORM)) / 3600) - 
+                    (EXTRACT(EPOCH FROM (tu.REFRIG_FINAL_NORM - tu.REFRIG_INICIO_NORM)) / 3600) AS NUMERIC),
+                    2
+                ) AS jornada_normal
+                
+            FROM marcaciones_detalle md
+            INNER JOIN vw_pr_trabajador m ON md.CODIGO = m.COD_TRABAJADOR
+            LEFT JOIN CARGO c ON m.COD_CARGO = c.COD_CARGO
+            INNER JOIN turno tu ON md.TURNO = tu.TURNO
+            INNER JOIN tipo_trabajador tt ON m.TIPO_TRABAJADOR = tt.tipo_trabajador
+            WHERE m.FLAG_ESTADO = '1'
+        ),
+        calculos_finales AS (
+            SELECT 
+                c.*,
+                ROUND(CAST(c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0) AS NUMERIC), 2) AS horas_netas,
+                
+                CASE 
+                    WHEN (c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0)) > 8 THEN
+                        ROUND(CAST((c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0)) - 8 AS NUMERIC), 2)
+                    ELSE 0
+                END AS horas_extras_dia,
+                
+                SUM(ROUND(CAST(c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0) AS NUMERIC), 2)) 
+                    OVER (PARTITION BY c.COD_TRABAJADOR, EXTRACT(YEAR FROM c.FEC_MOVIMIENTO), EXTRACT(WEEK FROM c.FEC_MOVIMIENTO)) 
+                    AS total_horas_semana,
+                
+                SUM(CASE 
+                        WHEN (c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0)) > 8 THEN
+                            ROUND(CAST((c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0)) - 8 AS NUMERIC), 2)
+                        ELSE 0
+                    END) 
+                    OVER (PARTITION BY c.COD_TRABAJADOR, EXTRACT(YEAR FROM c.FEC_MOVIMIENTO), EXTRACT(WEEK FROM c.FEC_MOVIMIENTO)) 
+                    AS total_extras_semana,
+                
+                COUNT(DISTINCT c.FEC_MOVIMIENTO) 
+                    OVER (PARTITION BY c.COD_TRABAJADOR, EXTRACT(YEAR FROM c.FEC_MOVIMIENTO), EXTRACT(WEEK FROM c.FEC_MOVIMIENTO)) 
+                    AS dias_asistidos_semana
+                
+            FROM calculos c
+        )
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY cf.DESC_AREA, cf.NOM_TRABAJADOR, cf.FEC_MOVIMIENTO) AS nro,
+            cf.tipo_trabajador,
+            cf.COD_TRABAJADOR AS codigo_trabajador,
+            cf.NRO_DOC_IDENT_RTPS AS dni,
+            cf.NOM_TRABAJADOR AS apellidos_nombres,
+            cf.DESC_AREA AS area,
+            cf.DESC_CARGO AS cargo_puesto,
+            cf.desc_turno AS turno,
+            cf.FEC_MOVIMIENTO AS fecha,
+            cf.hora_entrada AS hora_ingreso,
+            cf.hora_salida AS hora_salida,
+            
+            CONCAT(
+                LPAD(CAST(TRUNC(cf.horas_netas) AS TEXT), 2, '0'), 
+                ':', 
+                LPAD(CAST(MOD(ROUND(cf.horas_netas * 60), 60) AS TEXT), 2, '0')
+            ) AS horas_trabajadas,
+            
+            cf.horas_extras_dia AS horas_extras,
+            cf.tardanza_min,
+            ROUND(CAST(cf.total_horas_semana AS NUMERIC), 2) AS total_horas_trabajadas_semana,
+            ROUND(CAST(cf.total_extras_semana AS NUMERIC), 2) AS total_horas_extras_semana,
+            cf.dias_asistidos_semana AS total_dias_asistidos,
+            (6 - cf.dias_asistidos_semana) AS total_faltas,
+            ROUND(CAST((cf.dias_asistidos_semana / 6.0) * 100 AS NUMERIC), 2) AS porc_asistencia,
+            ROUND(CAST(((6 - cf.dias_asistidos_semana) / 6.0) * 100 AS NUMERIC), 2) AS porc_ausentismo
+            
+        FROM calculos_finales cf
+        ORDER BY cf.DESC_AREA, cf.NOM_TRABAJADOR, cf.FEC_MOVIMIENTO
+        """, 
+        nativeQuery = true)
+    List<Object[]> generarReporteAsistencia(
+        @Param("codOrigen") String codOrigen,
+        @Param("fechaInicio") LocalDate fechaInicio,
+        @Param("fechaFin") LocalDate fechaFin
+    );
 }

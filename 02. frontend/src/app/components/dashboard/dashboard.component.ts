@@ -691,6 +691,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // 📋 MENU LATERAL - Opciones no implementadas
   onMetricasTiempoReal() { this.notImplementedService.menuNotImplemented('Métricas Tiempo Real'); }
+  onReporteAsistencia() {
+    console.log('📊 Navegando a Reporte de Asistencia');
+    this.router.navigate(['/reporte-asistencia']);
+  }
   onRegistrosDiarios() { this.notImplementedService.menuNotImplemented('Registros Diarios'); }
   onReportesPorEmpleado() { this.notImplementedService.menuNotImplemented('Reportes por Empleado'); }
   onHorariosYTurnos() { this.notImplementedService.menuNotImplemented('Horarios y Turnos'); }
@@ -724,7 +728,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // 📊 BOTONES MAIN CONTENT - Opciones no implementadas
   onFiltrarFechas() { this.notImplementedService.actionNotImplemented('Filtrar por Fechas'); }
   onExportar() { this.notImplementedService.actionNotImplemented('Exportar Datos'); }
-  onVerTodosRegistros() { this.notImplementedService.actionNotImplemented('Ver Todos los Registros'); }
+  onVerTodosRegistros() {
+    console.log('📊 Navegando a Reporte de Asistencia');
+    this.router.navigate(['/reporte-asistencia']);
+  }
   onVerAnalisisDetallado() { this.notImplementedService.actionNotImplemented('Análisis Detallado'); }
   onPanelActions() { this.notImplementedService.actionNotImplemented('Opciones del Panel'); }
 

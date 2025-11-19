@@ -1,6 +1,7 @@
 package com.sigre.asistencia.service;
 
 import com.sigre.asistencia.dto.dashboard.*;
+import com.sigre.asistencia.dto.ReporteAsistenciaDto;
 import com.sigre.asistencia.entity.AsistenciaHt580;
 import com.sigre.asistencia.entity.Area;
 import com.sigre.asistencia.entity.Maestro;
@@ -751,5 +752,75 @@ public class DashboardService {
         // Aquí podríamos implementar lógica más compleja si hay secciones específicas por área
         // Por ahora devolvemos una descripción genérica
         return "SECCIÓN " + codSeccion;
+    }
+    
+    /**
+     * Generar reporte de asistencia con cálculo de horas trabajadas
+     */
+    public List<ReporteAsistenciaDto> generarReporteAsistencia(String codOrigen, LocalDate fechaInicio, LocalDate fechaFin) {
+        log.info("Generando reporte de asistencia | Origen: {} | Rango: {} a {}", 
+                codOrigen, fechaInicio, fechaFin);
+        
+        List<Object[]> resultados = asistenciaRepository.generarReporteAsistencia(codOrigen, fechaInicio, fechaFin);
+        
+        log.info("Reporte generado: {} registros", resultados.size());
+        
+        return resultados.stream()
+                .map(this::convertirAReporteDto)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Convertir Object[] a ReporteAsistenciaDto
+     */
+    private ReporteAsistenciaDto convertirAReporteDto(Object[] row) {
+        return ReporteAsistenciaDto.builder()
+                .nro(((Number) row[0]).intValue())
+                .tipoTrabajador((String) row[1])
+                .codigoTrabajador((String) row[2])
+                .dni((String) row[3])
+                .apellidosNombres((String) row[4])
+                .area((String) row[5])
+                .cargoPuesto((String) row[6])
+                .turno((String) row[7])
+                .fecha(convertirALocalDate(row[8]))
+                .horaIngreso(convertirALocalDateTime(row[9]))
+                .horaSalida(convertirALocalDateTime(row[10]))
+                .horasTrabajadas((String) row[11])
+                .horasExtras(convertirADouble(row[12]))
+                .tardanzaMin(convertirAInteger(row[13]))
+                .totalHorasTrabajadasSemana(convertirADouble(row[14]))
+                .totalHorasExtrasSemana(convertirADouble(row[15]))
+                .totalDiasAsistidos(convertirAInteger(row[16]))
+                .totalFaltas(convertirAInteger(row[17]))
+                .porcAsistencia(convertirADouble(row[18]))
+                .porcAusentismo(convertirADouble(row[19]))
+                .build();
+    }
+    
+    private LocalDate convertirALocalDate(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof LocalDate) return (LocalDate) obj;
+        if (obj instanceof java.sql.Date) return ((java.sql.Date) obj).toLocalDate();
+        return null;
+    }
+    
+    private LocalDateTime convertirALocalDateTime(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof LocalDateTime) return (LocalDateTime) obj;
+        if (obj instanceof java.sql.Timestamp) return ((java.sql.Timestamp) obj).toLocalDateTime();
+        return null;
+    }
+    
+    private Double convertirADouble(Object obj) {
+        if (obj == null) return 0.0;
+        if (obj instanceof Number) return ((Number) obj).doubleValue();
+        return 0.0;
+    }
+    
+    private Integer convertirAInteger(Object obj) {
+        if (obj == null) return 0;
+        if (obj instanceof Number) return ((Number) obj).intValue();
+        return 0;
     }
 }

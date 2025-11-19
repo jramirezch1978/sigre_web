@@ -1,0 +1,219 @@
+<div class="reporte-container">
+  
+  <!-- Header -->
+  <div class="reporte-header">
+    <div class="header-title">
+      <button mat-icon-button (click)="volver()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <mat-icon class="header-icon">assessment</mat-icon>
+      <h1>Reporte de Asistencia</h1>
+    </div>
+
+    <!-- Filtros -->
+    <div class="header-filters">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Origen</mat-label>
+        <mat-select [(ngModel)]="codOrigen" (selectionChange)="onFiltroChange()">
+          <mat-option *ngFor="let origen of origenes" [value]="origen.value">
+            {{ origen.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Fecha Inicio</mat-label>
+        <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="fechaInicio" (dateChange)="onFiltroChange()">
+        <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+        <mat-datepicker #pickerInicio></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Fecha Fin</mat-label>
+        <input matInput [matDatepicker]="pickerFin" [(ngModel)]="fechaFin" (dateChange)="onFiltroChange()">
+        <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+        <mat-datepicker #pickerFin></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="cargarReporte()" [disabled]="cargando">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
+
+    <!-- Botones de exportación -->
+    <div class="header-actions">
+      <button mat-raised-button color="accent" (click)="exportarExcel()" [disabled]="cargando || registros.length === 0">
+        <mat-icon>file_download</mat-icon>
+        Exportar Excel
+      </button>
+      <button mat-raised-button (click)="exportarPDF()" [disabled]="cargando || registros.length === 0">
+        <mat-icon>picture_as_pdf</mat-icon>
+        Exportar PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="cargando" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Generando reporte...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !cargando" class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="cargarReporte()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Tabla de resultados -->
+  <div *ngIf="!cargando && !error" class="reporte-content">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>table_chart</mat-icon>
+          Resultados: {{ registros.length }} registros
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="registrosFiltrados" class="reporte-table">
+
+            <!-- Columna Nro -->
+            <ng-container matColumnDef="nro">
+              <th mat-header-cell *matHeaderCellDef>Nro</th>
+              <td mat-cell *matCellDef="let row">{{ row.nro }}</td>
+            </ng-container>
+
+            <!-- Columna Tipo Trabajador -->
+            <ng-container matColumnDef="tipoTrabajador">
+              <th mat-header-cell *matHeaderCellDef>Tipo</th>
+              <td mat-cell *matCellDef="let row">{{ row.tipoTrabajador }}</td>
+            </ng-container>
+
+            <!-- Columna Código -->
+            <ng-container matColumnDef="codigoTrabajador">
+              <th mat-header-cell *matHeaderCellDef>Código</th>
+              <td mat-cell *matCellDef="let row">{{ row.codigoTrabajador }}</td>
+            </ng-container>
+
+            <!-- Columna DNI -->
+            <ng-container matColumnDef="dni">
+              <th mat-header-cell *matHeaderCellDef>DNI</th>
+              <td mat-cell *matCellDef="let row">{{ row.dni }}</td>
+            </ng-container>
+
+            <!-- Columna Apellidos y Nombres -->
+            <ng-container matColumnDef="apellidosNombres">
+              <th mat-header-cell *matHeaderCellDef>Apellidos y Nombres</th>
+              <td mat-cell *matCellDef="let row">{{ row.apellidosNombres }}</td>
+            </ng-container>
+
+            <!-- Columna Área -->
+            <ng-container matColumnDef="area">
+              <th mat-header-cell *matHeaderCellDef>Área</th>
+              <td mat-cell *matCellDef="let row">{{ row.area }}</td>
+            </ng-container>
+
+            <!-- Columna Cargo -->
+            <ng-container matColumnDef="cargoPuesto">
+              <th mat-header-cell *matHeaderCellDef>Cargo</th>
+              <td mat-cell *matCellDef="let row">{{ row.cargoPuesto }}</td>
+            </ng-container>
+
+            <!-- Columna Turno -->
+            <ng-container matColumnDef="turno">
+              <th mat-header-cell *matHeaderCellDef>Turno</th>
+              <td mat-cell *matCellDef="let row">{{ row.turno }}</td>
+            </ng-container>
+
+            <!-- Columna Fecha -->
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef>Fecha</th>
+              <td mat-cell *matCellDef="let row">{{ row.fecha | date: 'dd/MM/yyyy' }}</td>
+            </ng-container>
+
+            <!-- Columna Hora Ingreso -->
+            <ng-container matColumnDef="horaIngreso">
+              <th mat-header-cell *matHeaderCellDef>Ingreso</th>
+              <td mat-cell *matCellDef="let row">{{ row.horaIngreso | date: 'HH:mm:ss' }}</td>
+            </ng-container>
+
+            <!-- Columna Hora Salida -->
+            <ng-container matColumnDef="horaSalida">
+              <th mat-header-cell *matHeaderCellDef>Salida</th>
+              <td mat-cell *matCellDef="let row">
+                <span *ngIf="row.horaSalida">{{ row.horaSalida | date: 'HH:mm:ss' }}</span>
+                <span *ngIf="!row.horaSalida" class="sin-salida">-</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Horas Trabajadas -->
+            <ng-container matColumnDef="horasTrabajadas">
+              <th mat-header-cell *matHeaderCellDef>Hrs. Trab.</th>
+              <td mat-cell *matCellDef="let row">{{ row.horasTrabajadas }}</td>
+            </ng-container>
+
+            <!-- Columna Horas Extras -->
+            <ng-container matColumnDef="horasExtras">
+              <th mat-header-cell *matHeaderCellDef>Hrs. Extras</th>
+              <td mat-cell *matCellDef="let row">{{ row.horasExtras | number: '1.2-2' }}</td>
+            </ng-container>
+
+            <!-- Columna Tardanza -->
+            <ng-container matColumnDef="tardanzaMin">
+              <th mat-header-cell *matHeaderCellDef>Tard. (min)</th>
+              <td mat-cell *matCellDef="let row">{{ row.tardanzaMin }}</td>
+            </ng-container>
+
+            <!-- Columna Total Hrs Semana -->
+            <ng-container matColumnDef="totalHorasTrabajadasSemana">
+              <th mat-header-cell *matHeaderCellDef>Tot. Hrs Sem</th>
+              <td mat-cell *matCellDef="let row">{{ row.totalHorasTrabajadasSemana | number: '1.2-2' }}</td>
+            </ng-container>
+
+            <!-- Columna Total Extras Semana -->
+            <ng-container matColumnDef="totalHorasExtrasSemana">
+              <th mat-header-cell *matHeaderCellDef>Extras Sem</th>
+              <td mat-cell *matCellDef="let row">{{ row.totalHorasExtrasSemana | number: '1.2-2' }}</td>
+            </ng-container>
+
+            <!-- Columna Días Asistidos -->
+            <ng-container matColumnDef="totalDiasAsistidos">
+              <th mat-header-cell *matHeaderCellDef>Días Asis.</th>
+              <td mat-cell *matCellDef="let row">{{ row.totalDiasAsistidos }}</td>
+            </ng-container>
+
+            <!-- Columna Faltas -->
+            <ng-container matColumnDef="totalFaltas">
+              <th mat-header-cell *matHeaderCellDef>Faltas</th>
+              <td mat-cell *matCellDef="let row">{{ row.totalFaltas }}</td>
+            </ng-container>
+
+            <!-- Columna % Asistencia -->
+            <ng-container matColumnDef="porcAsistencia">
+              <th mat-header-cell *matHeaderCellDef>% Asist.</th>
+              <td mat-cell *matCellDef="let row">{{ row.porcAsistencia | number: '1.2-2' }}%</td>
+            </ng-container>
+
+            <!-- Columna % Ausentismo -->
+            <ng-container matColumnDef="porcAusentismo">
+              <th mat-header-cell *matHeaderCellDef>% Ausent.</th>
+              <td mat-cell *matCellDef="let row">{{ row.porcAusentismo | number: '1.2-2' }}%</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnasVisibles; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnasVisibles;"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>
+

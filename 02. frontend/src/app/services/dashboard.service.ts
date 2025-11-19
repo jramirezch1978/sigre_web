@@ -52,6 +52,29 @@ export interface RacionesPorTipo {
   fecha: string;
 }
 
+export interface ReporteAsistencia {
+  nro: number;
+  tipoTrabajador: string;
+  codigoTrabajador: string;
+  dni: string;
+  apellidosNombres: string;
+  area: string;
+  cargoPuesto: string;
+  turno: string;
+  fecha: string;
+  horaIngreso: string;
+  horaSalida: string;
+  horasTrabajadas: string;
+  horasExtras: number;
+  tardanzaMin: number;
+  totalHorasTrabajadasSemana: number;
+  totalHorasExtrasSemana: number;
+  totalDiasAsistidos: number;
+  totalFaltas: number;
+  porcAsistencia: number;
+  porcAusentismo: number;
+}
+
 export interface IndicadorCentroCosto {
   tipoTrabajador: string;
   descTipoTrabajador: string;
@@ -297,5 +320,14 @@ export class DashboardService {
     }
     console.log('📍 Llamando indicadores secciones:', url);
     return this.http.get<IndicadorSeccion[]>(url);
+  }
+
+  /**
+   * Obtener reporte de asistencia con cálculo de horas trabajadas
+   */
+  obtenerReporteAsistencia(codOrigen: string, fechaInicio: string, fechaFin: string): Observable<ReporteAsistencia[]> {
+    const url = `${this.baseUrl}/reporte-asistencia?codOrigen=${codOrigen}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+    console.log('📊 Llamando reporte de asistencia:', url);
+    return this.http.get<ReporteAsistencia[]>(url);
   }
 }
