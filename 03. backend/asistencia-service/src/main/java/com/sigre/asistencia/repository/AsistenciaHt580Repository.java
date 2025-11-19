@@ -418,10 +418,10 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
                 md.*,
                 tt.desc_tipo_tra AS tipo_trabajador,
                 m.COD_TRABAJADOR,
-                m.NOM_TRABAJADOR,
+                (m.APEL_PATERNO || ' ' || m.APEL_MATERNO || ', ' || m.NOMBRE1) AS NOM_TRABAJADOR,
                 m.TIPO_DOC_IDENT_RTPS,
                 m.NRO_DOC_IDENT_RTPS,
-                m.DESC_AREA,
+                a.DESC_AREA,
                 c.DESC_CARGO,
                 tu.DESCRIPCION AS desc_turno,
                 tu.HORA_INICIO_NORM,
@@ -470,8 +470,9 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
                 ) AS jornada_normal
                 
             FROM marcaciones_detalle md
-            INNER JOIN vw_pr_trabajador m ON md.CODIGO = m.COD_TRABAJADOR
-            LEFT JOIN CARGO c ON m.COD_CARGO = c.COD_CARGO
+            INNER JOIN maestro m ON md.CODIGO = m.COD_TRABAJADOR
+            LEFT JOIN cargo c ON TRIM(m.COD_CARGO) = TRIM(c.COD_CARGO)
+            LEFT JOIN area a ON m.COD_AREA = a.COD_AREA
             INNER JOIN turno tu ON md.TURNO = tu.TURNO
             INNER JOIN tipo_trabajador tt ON m.TIPO_TRABAJADOR = tt.tipo_trabajador
             WHERE m.FLAG_ESTADO = '1'
