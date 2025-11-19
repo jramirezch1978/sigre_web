@@ -35,6 +35,8 @@ public class RemoteToLocalSyncService {
     private final TurnoLocalRepository turnoLocalRepository;
     private final OrigenRemoteRepository origenRemoteRepository;
     private final OrigenLocalRepository origenLocalRepository;
+    private final CargoRemoteRepository cargoRemoteRepository;
+    private final CargoLocalRepository cargoLocalRepository;
     
     // Contadores para cada tabla
     private final Map<String, Integer> insertados = new HashMap<>();
@@ -1345,6 +1347,90 @@ public class RemoteToLocalSyncService {
         local.setCencosIgv(remote.getCencosIgv());
         local.setCntaPrspIgv(remote.getCntaPrspIgv());
         local.setFlagPrspIgv(remote.getFlagPrspIgv());
+        local.setFechaSync(LocalDate.now());
+        local.setEstadoSync("S"); // S=Sincronizado
+    }
+    
+    /**
+     * Sincronizar tabla cargo de Oracle → PostgreSQL
+     * Tabla de solo lectura: solo sincronización remota → local
+     */
+    @Transactional("localTransactionManager")
+    public boolean sincronizarCargo() {
+        log.info("🔥 Iniciando sincronización de tabla CARGO (Remote → Local)");
+        String tabla = "cargo";
+        resetearContadores(tabla);
+        
+        try {
+            // Obtener todos los cargos de la base remota
+            List<CargoRemote> cargosRemote = cargoRemoteRepository.findAll();
+            log.info("📊 Encontrados {} cargos en bd_remota", cargosRemote.size());
+            
+            // Obtener cargos locales existentes
+            List<CargoLocal> cargosLocal = cargoLocalRepository.findAll();
+            Map<String, CargoLocal> cargosLocalMap = cargosLocal.stream()
+                    .collect(Collectors.toMap(CargoLocal::getCodCargo, c -> c));
+            log.info("📊 Encontrados {} cargos en bd_local", cargosLocal.size());
+            
+            // Procesar cada cargo remoto
+            for (CargoRemote remote : cargosRemote) {
+                try {
+                    CargoLocal local = cargosLocalMap.get(remote.getCodCargo());
+                    
+                    if (local == null) {
+                        // INSERTAR nuevo cargo
+                        local = mapearCargoRemoteALocal(remote);
+                        cargoLocalRepository.save(local);
+                        insertados.merge(tabla, 1, Integer::sum);
+                        log.info("➕ INSERTADO cargo: {} - {}", remote.getCodCargo(), remote.getDescCargo());
+                    } else {
+                        // ACTUALIZAR cargo existente
+                        actualizarCargoLocal(local, remote);
+                        cargoLocalRepository.save(local);
+                        actualizados.merge(tabla, 1, Integer::sum);
+                        log.info("🔄 ACTUALIZADO cargo: {} - {}", remote.getCodCargo(), remote.getDescCargo());
+                    }
+                    
+                } catch (Exception e) {
+                    errores.merge(tabla, 1, Integer::sum);
+                    erroresSincronizacion.add("Error procesando cargo " + remote.getCodCargo() + ": " + e.getMessage());
+                    log.error("❌ Error procesando cargo: {}", remote.getCodCargo(), e);
+                }
+            }
+            
+            log.info("✅ Sincronización de CARGO completada: {} insertados, {} actualizados, {} errores", 
+                    getInsertados(tabla), getActualizados(tabla), getErrores(tabla));
+            
+            return getErrores(tabla) == 0;
+            
+        } catch (Exception e) {
+            log.error("❌ Error crítico en sincronización de CARGO", e);
+            erroresSincronizacion.add("Error crítico en sincronización de CARGO: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Mapear CargoRemote a CargoLocal
+     */
+    private CargoLocal mapearCargoRemoteALocal(CargoRemote remote) {
+        return CargoLocal.builder()
+                .codCargo(remote.getCodCargo())
+                .descCargo(remote.getDescCargo())
+                .flagReplicacion(remote.getFlagReplicacion())
+                .flagEstado(remote.getFlagEstado())
+                .fechaSync(LocalDate.now())
+                .estadoSync("S") // S=Sincronizado
+                .build();
+    }
+    
+    /**
+     * Actualizar CargoLocal con datos de CargoRemote
+     */
+    private void actualizarCargoLocal(CargoLocal local, CargoRemote remote) {
+        local.setDescCargo(remote.getDescCargo());
+        local.setFlagReplicacion(remote.getFlagReplicacion());
+        local.setFlagEstado(remote.getFlagEstado());
         local.setFechaSync(LocalDate.now());
         local.setEstadoSync("S"); // S=Sincronizado
     }

@@ -278,7 +278,7 @@ public class SyncSchedulerService {
         
         try {
             // PASO 0: Sincronizar ORIGEN primero (no tiene dependencias, tabla de configuración)
-            log.info("📍 [HILO 1] PASO 0/8: Sincronizando ORIGEN...");
+            log.info("📍 [HILO 1] PASO 0/9: Sincronizando ORIGEN...");
             boolean origenOk = remoteToLocalSync.sincronizarOrigen();
             if (!origenOk && maxRetries > 0) {
                 origenOk = manejarErrorConReintento("origen", () -> remoteToLocalSync.sincronizarOrigen());
@@ -288,8 +288,19 @@ public class SyncSchedulerService {
                 log.warn("⚠️ [HILO 1] Fallo en ORIGEN - No es crítico, continuando");
             }
             
+            // PASO 0.5: Sincronizar CARGO (no tiene dependencias, catálogo)
+            log.info("📍 [HILO 1] PASO 0.5/9: Sincronizando CARGO...");
+            boolean cargoOk = remoteToLocalSync.sincronizarCargo();
+            if (!cargoOk && maxRetries > 0) {
+                cargoOk = manejarErrorConReintento("cargo", () -> remoteToLocalSync.sincronizarCargo());
+            }
+            
+            if (!cargoOk) {
+                log.warn("⚠️ [HILO 1] Fallo en CARGO - No es crítico, continuando");
+            }
+            
             // PASO 1: Sincronizar CENTROS DE COSTO (no tiene dependencias)
-            log.info("📍 [HILO 1] PASO 1/8: Sincronizando CENTROS_COSTO...");
+            log.info("📍 [HILO 1] PASO 1/9: Sincronizando CENTROS_COSTO...");
             boolean centrosOk = remoteToLocalSync.sincronizarCentrosCosto();
             if (!centrosOk && maxRetries > 0) {
                 centrosOk = manejarErrorConReintento("centros_costo", () -> remoteToLocalSync.sincronizarCentrosCosto());
@@ -366,7 +377,7 @@ public class SyncSchedulerService {
                 log.error("❌ [HILO 1] Fallo en TURNO - No crítico para asistencia");
             }
             
-            boolean todoOk = origenOk && centrosOk && maestroOk && areaOk && seccionOk && tipoTrabajadorOk && tarjetasOk && turnoOk;
+            boolean todoOk = origenOk && cargoOk && centrosOk && maestroOk && areaOk && seccionOk && tipoTrabajadorOk && tarjetasOk && turnoOk;
             log.info("✅ [HILO 1] Sincronización Remote → Local completada - Resultado: {}", todoOk ? "ÉXITO TOTAL" : "CON ERRORES");
             return todoOk;
             
@@ -495,6 +506,18 @@ public class SyncSchedulerService {
                     .baseOrigen("bd_remota")
                     .baseDestino("bd_local")
                     .exitoso(remoteToLocalSync.getErrores("origen") == 0)
+                    .build());
+            
+            estadisticasDetalladas.put("cargo", EmailNotificationServiceHTML.SyncTableStats.builder()
+                    .nombreTabla("cargo")
+                    .registrosInsertados(remoteToLocalSync.getInsertados("cargo"))
+                    .registrosActualizados(remoteToLocalSync.getActualizados("cargo"))
+                    .registrosEliminados(remoteToLocalSync.getEliminados("cargo"))
+                    .registrosErrores(remoteToLocalSync.getErrores("cargo"))
+                    .direccion("REMOTE_TO_LOCAL")
+                    .baseOrigen("bd_remota")
+                    .baseDestino("bd_local")
+                    .exitoso(remoteToLocalSync.getErrores("cargo") == 0)
                     .build());
             
             estadisticasDetalladas.put("centros_costo", EmailNotificationServiceHTML.SyncTableStats.builder()
