@@ -637,7 +637,10 @@ public class RemoteToLocalSyncService {
                !equals(remote.getFechaCese(), local.getFechaCese()) ||
                !equals(remote.getTipoTrabajador(), local.getTipoTrabajador()) ||
                !equals(remote.getCodSeccion(), local.getCodSeccion()) ||
-               !equals(remote.getCodArea(), local.getCodArea());
+               !equals(remote.getCodArea(), local.getCodArea()) ||
+               !equals(remote.getCodCargo(), local.getCodCargo()) ||
+               !equals(remote.getTipoDocIdentRtps(), local.getTipoDocIdentRtps()) ||
+               !equals(remote.getNroDocIdentRtps(), local.getNroDocIdentRtps());
     }
     
     private boolean hayDiferenciasCentro(CentrosCostoRemote remote, CentrosCostoLocal local) {

@@ -339,7 +339,8 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     
     /**
      * Reporte de asistencia con cálculo de horas trabajadas, extras, tardanzas, etc.
-     * Adaptado de Oracle a PostgreSQL
+     * Consulta SQL con parámetros preparados para evitar SQL injection
+     * VERSIÓN CORREGIDA: Usa nombres explícitos de columnas y JOINs actualizados
      */
     @Query(value = """
         WITH marcaciones_base AS (
