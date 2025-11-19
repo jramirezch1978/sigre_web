@@ -342,7 +342,18 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
      * Usa parámetros posicionales ?1, ?2, ?3 para evitar conflicto con :: de casting
      */
     @Query(value = """
-        WITH marcaciones_base AS (
+        WITH parametros AS (
+            SELECT 
+                ?1 AS cod_origen_param,
+                ?2 AS fecha_inicio_param,
+                ?3 AS fecha_fin_param,
+                (
+                    SELECT COUNT(*)
+                    FROM generate_series(?2::date, ?3::date, '1 day'::interval) AS dia
+                    WHERE EXTRACT(DOW FROM dia) BETWEEN 1 AND 6
+                ) AS dias_laborables_rango
+        ),
+        marcaciones_base AS (
             SELECT 
                 a.RECKEY,
                 a.CODIGO,
@@ -390,7 +401,19 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
                  FROM asistencia_ht580 a5 
                  WHERE a5.RECKEY_REF = mb.RECKEY 
                    AND a5.FLAG_IN_OUT = '5'
-                 LIMIT 1) AS reckey_salida_comision
+                 LIMIT 1) AS reckey_salida_comision,
+                   
+                (SELECT a9.FEC_MARCACION 
+                 FROM asistencia_ht580 a9 
+                 WHERE a9.RECKEY_REF = mb.RECKEY 
+                   AND a9.FLAG_IN_OUT = '9'
+                 LIMIT 1) AS salida_cena,
+                   
+                (SELECT a9.RECKEY 
+                 FROM asistencia_ht580 a9 
+                 WHERE a9.RECKEY_REF = mb.RECKEY 
+                   AND a9.FLAG_IN_OUT = '9'
+                 LIMIT 1) AS reckey_salida_cena
                    
             FROM marcaciones_base mb
         ),
@@ -408,7 +431,13 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
                  FROM asistencia_ht580 a6 
                  WHERE a6.RECKEY_REF = mc.reckey_salida_comision
                    AND a6.FLAG_IN_OUT = '6'
-                 LIMIT 1) AS retorno_comision
+                 LIMIT 1) AS retorno_comision,
+                   
+                (SELECT a10.FEC_MARCACION 
+                 FROM asistencia_ht580 a10 
+                 WHERE a10.RECKEY_REF = mc.reckey_salida_cena
+                   AND a10.FLAG_IN_OUT = '10'
+                 LIMIT 1) AS regreso_cena
                    
             FROM marcaciones_completas mc
         ),
@@ -457,6 +486,12 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
                 END AS tiempo_comision_min,
                 
                 CASE 
+                    WHEN md.salida_cena IS NOT NULL AND md.regreso_cena IS NOT NULL THEN
+                        ROUND(EXTRACT(EPOCH FROM (md.regreso_cena - md.salida_cena)) / 60)
+                    ELSE 0
+                END AS tiempo_cena_min,
+                
+                CASE 
                     WHEN md.hora_entrada IS NOT NULL AND md.hora_salida IS NOT NULL THEN
                         ROUND(CAST(EXTRACT(EPOCH FROM (md.hora_salida - md.hora_entrada)) / 3600 AS NUMERIC), 2)
                     ELSE 0
@@ -479,7 +514,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
         calculos_con_horas AS (
             SELECT 
                 c.*,
-                ROUND(CAST(c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0) AS NUMERIC), 2) AS horas_netas
+                ROUND(CAST(c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0) - (c.tiempo_cena_min / 60.0) AS NUMERIC), 2) AS horas_netas
             FROM calculos c
         ),
         calculos_finales AS (
@@ -538,11 +573,12 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
             ROUND(CAST(cf.total_horas_semana AS NUMERIC), 2) AS total_horas_trabajadas_semana,
             ROUND(CAST(cf.total_extras_semana AS NUMERIC), 2) AS total_horas_extras_semana,
             cf.dias_asistidos_semana AS total_dias_asistidos,
-            (6 - cf.dias_asistidos_semana) AS total_faltas,
-            ROUND(CAST((cf.dias_asistidos_semana / 6.0) * 100 AS NUMERIC), 2) AS porc_asistencia,
-            ROUND(CAST(((6 - cf.dias_asistidos_semana) / 6.0) * 100 AS NUMERIC), 2) AS porc_ausentismo
+            (p.dias_laborables_rango - cf.dias_asistidos_semana) AS total_faltas,
+            ROUND((CAST(cf.dias_asistidos_semana AS numeric) / NULLIF(p.dias_laborables_rango, 0)) * 100, 2) AS porc_asistencia,
+            ROUND((CAST((p.dias_laborables_rango - cf.dias_asistidos_semana) AS numeric) / NULLIF(p.dias_laborables_rango, 0)) * 100, 2) AS porc_ausentismo
             
         FROM calculos_finales cf
+        CROSS JOIN parametros p
         ORDER BY cf.DESC_AREA, cf.NOM_TRABAJADOR, cf.FEC_MOVIMIENTO
         """, 
         nativeQuery = true)
