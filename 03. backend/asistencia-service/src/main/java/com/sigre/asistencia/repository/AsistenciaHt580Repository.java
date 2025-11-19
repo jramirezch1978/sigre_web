@@ -439,7 +439,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
                                   (tu.HORA_INICIO_NORM - DATE_TRUNC('day', tu.HORA_INICIO_NORM)) + 
                                   INTERVAL '1 minute' * tu.TOLERANCIA))
                                 ) / 60
-                            )
+                            ) - 15
                         )
                     ELSE 0
                 END AS tardanza_min,
