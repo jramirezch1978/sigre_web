@@ -476,38 +476,43 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
             INNER JOIN tipo_trabajador tt ON m.TIPO_TRABAJADOR = tt.tipo_trabajador
             WHERE m.FLAG_ESTADO = '1'
         ),
-        calculos_finales AS (
+        calculos_con_horas AS (
             SELECT 
                 c.*,
-                ROUND(CAST(c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0) AS NUMERIC), 2) AS horas_netas,
+                ROUND(CAST(c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0) AS NUMERIC), 2) AS horas_netas
+            FROM calculos c
+        ),
+        calculos_finales AS (
+            SELECT 
+                ch.*,
                 
                 CASE 
-                    WHEN (c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0)) > 8 THEN
-                        ROUND(CAST((c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0)) - 8 AS NUMERIC), 2)
+                    WHEN ch.horas_netas > 8 THEN
+                        ROUND(CAST(ch.horas_netas - 8 AS NUMERIC), 2)
                     ELSE 0
                 END AS horas_extras_dia,
                 
-                SUM(ROUND(CAST(c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0) AS NUMERIC), 2)) 
-                    OVER (PARTITION BY c.COD_TRABAJADOR, EXTRACT(YEAR FROM c.FEC_MOVIMIENTO), EXTRACT(WEEK FROM c.FEC_MOVIMIENTO)) 
+                SUM(ch.horas_netas) 
+                    OVER (PARTITION BY ch.COD_TRABAJADOR, EXTRACT(YEAR FROM ch.FEC_MOVIMIENTO), EXTRACT(WEEK FROM ch.FEC_MOVIMIENTO)) 
                     AS total_horas_semana,
                 
                 SUM(CASE 
-                        WHEN (c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0)) > 8 THEN
-                            ROUND(CAST((c.horas_brutas - (c.tiempo_almuerzo_min / 60.0) - (c.tiempo_comision_min / 60.0)) - 8 AS NUMERIC), 2)
+                        WHEN ch.horas_netas > 8 THEN
+                            ROUND(CAST(ch.horas_netas - 8 AS NUMERIC), 2)
                         ELSE 0
                     END) 
-                    OVER (PARTITION BY c.COD_TRABAJADOR, EXTRACT(YEAR FROM c.FEC_MOVIMIENTO), EXTRACT(WEEK FROM c.FEC_MOVIMIENTO)) 
+                    OVER (PARTITION BY ch.COD_TRABAJADOR, EXTRACT(YEAR FROM ch.FEC_MOVIMIENTO), EXTRACT(WEEK FROM ch.FEC_MOVIMIENTO)) 
                     AS total_extras_semana,
                 
-                COUNT(c.FEC_MOVIMIENTO) OVER (
+                SUM(CASE WHEN ch.horas_netas >= 4 THEN 1 ELSE 0 END) OVER (
                     PARTITION BY 
-                        c.COD_TRABAJADOR, 
-                        EXTRACT(YEAR FROM c.FEC_MOVIMIENTO), 
-                        EXTRACT(WEEK FROM c.FEC_MOVIMIENTO)
+                        ch.COD_TRABAJADOR, 
+                        EXTRACT(YEAR FROM ch.FEC_MOVIMIENTO), 
+                        EXTRACT(WEEK FROM ch.FEC_MOVIMIENTO)
                 ) 
                     AS dias_asistidos_semana
                 
-            FROM calculos c
+            FROM calculos_con_horas ch
         )
         SELECT 
             ROW_NUMBER() OVER (ORDER BY cf.DESC_AREA, cf.NOM_TRABAJADOR, cf.FEC_MOVIMIENTO) AS nro,
