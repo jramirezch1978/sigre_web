@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,8 +14,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatNativeDateModule, MAT_DATE_LOCALE, MAT_DATE_FORMATS, NativeDateAdapter, DateAdapter } from '@angular/material/core';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import { HttpClientModule } from '@angular/common/http';
 import { DashboardService } from '../../services/dashboard.service';
+import { NotImplementedService } from '../../services/not-implemented.service';
 import * as XLSX from 'xlsx';
 
 // Adaptador personalizado para formato dd/MM/yyyy
@@ -84,6 +87,7 @@ export interface ReporteAsistencia {
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     HttpClientModule,
     FormsModule,
     MatCardModule,
@@ -97,7 +101,9 @@ export interface ReporteAsistencia {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatMenuModule,
+    MatDividerModule
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es-PE' },
@@ -142,7 +148,8 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
   constructor(
     private dashboardService: DashboardService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private notImplementedService: NotImplementedService
   ) {
     // Inicializar fechas: primer y último día del mes actual
     const hoy = new Date();
@@ -262,5 +269,30 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
       panelClass: tipo === 'success' ? 'snackbar-success' : tipo === 'error' ? 'snackbar-error' : 'snackbar-info'
     });
   }
+
+  // Métodos del menú lateral
+  onRegistrosDiarios() { this.notImplementedService.menuNotImplemented('Registros Diarios'); }
+  onReportesPorEmpleado() { this.notImplementedService.menuNotImplemented('Reportes por Empleado'); }
+  onHorariosYTurnos() { this.notImplementedService.menuNotImplemented('Horarios y Turnos'); }
+  onAusenciasPermisos() { this.notImplementedService.menuNotImplemented('Ausencias y Permisos'); }
+  onControlRaciones() { this.notImplementedService.menuNotImplemented('Control de Raciones'); }
+  onMenusDiarios() { this.notImplementedService.menuNotImplemented('Menús Diarios'); }
+  onReportesAlimentarios() { this.notImplementedService.menuNotImplemented('Reportes Alimentarios'); }
+  onReportesSemanales() { this.notImplementedService.reportNotImplemented('Reportes Semanales'); }
+  onReportesMensuales() { this.notImplementedService.reportNotImplemented('Reportes Mensuales'); }
+  onAnalisisTendencias() { this.notImplementedService.menuNotImplemented('Análisis de Tendencias'); }
+  onExportarDatos() { this.notImplementedService.menuNotImplemented('Exportar Datos'); }
+  onParametrosGenerales() { this.notImplementedService.menuNotImplemented('Parámetros Generales'); }
+  onDispositivos() { this.notImplementedService.menuNotImplemented('Dispositivos'); }
+  onSincronizacion() { this.notImplementedService.menuNotImplemented('Sincronización'); }
+  onUsuariosSistema() { this.notImplementedService.menuNotImplemented('Usuarios del Sistema'); }
+  onPermisosRoles() { this.notImplementedService.menuNotImplemented('Permisos y Roles'); }
+  onLogsSistema() { this.notImplementedService.menuNotImplemented('Logs del Sistema'); }
+  onConfiguracion() { this.notImplementedService.actionNotImplemented('Configuración'); }
+  onPantallaCompleta() { this.notImplementedService.actionNotImplemented('Pantalla Completa'); }
+  onAyuda() { this.notImplementedService.actionNotImplemented('Ayuda'); }
+  volverMenuPrincipal() { this.router.navigate(['/']); }
+  onMiPerfil() { this.notImplementedService.actionNotImplemented('Mi Perfil'); }
+  onConfiguracionUsuario() { this.notImplementedService.actionNotImplemented('Configuración de Usuario'); }
 }
 

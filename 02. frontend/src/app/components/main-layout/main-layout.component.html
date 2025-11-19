@@ -1,0 +1,178 @@
+<!-- Gentelella Style Dashboard Layout -->
+<div class="container body">
+  <div class="main_container">
+    
+    <!-- Left Sidebar -->
+    <div class="col-md-3 left_col">
+      <div class="left_col scroll-view">
+        
+        <!-- Logo/Title -->
+        <div class="navbar nav_title">
+          <a [routerLink]="['/dashboard']" class="site_title">
+            <mat-icon class="logo-icon">business</mat-icon>
+            <span class="logo-text">SIGRE Admin</span>
+          </a>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <!-- Profile Section -->
+        <div class="profile clearfix">
+          <div class="profile_pic">
+            <mat-icon class="profile-avatar">account_circle</mat-icon>
+          </div>
+          <div class="profile_info">
+            <span>Bienvenido,</span>
+            <h4>Administrador</h4>
+          </div>
+        </div>
+
+        <br />
+
+        <!-- Sidebar Menu -->
+        <div id="sidebar-menu" class="main_menu_side main_menu">
+          <div class="menu_section">
+            <h3>Panel Principal</h3>
+            <ul class="nav side-menu">
+              <li [routerLinkActive]="'active'">
+                <a [routerLink]="['/dashboard']"><mat-icon>dashboard</mat-icon> Dashboard</a>
+              </li>
+              
+              <li [routerLinkActive]="'active'">
+                <a><mat-icon>people</mat-icon> Asistencia <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a [routerLink]="['/reporte-asistencia']">Reporte de Asistencia</a></li>
+                  <li><a href="#" (click)="onRegistrosDiarios()">Registros Diarios</a></li>
+                  <li><a href="#" (click)="onReportesPorEmpleado()">Reportes por Empleado</a></li>
+                  <li><a href="#" (click)="onHorariosYTurnos()">Horarios y Turnos</a></li>
+                  <li><a href="#" (click)="onAusenciasPermisos()">Ausencias y Permisos</a></li>
+                </ul>
+              </li>
+
+              <li>
+                <a><mat-icon>restaurant</mat-icon> Comedores <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a href="#" (click)="onControlRaciones()">Control de Raciones</a></li>
+                  <li><a href="#" (click)="onMenusDiarios()">Menús Diarios</a></li>
+                  <li><a href="#" (click)="onReportesAlimentarios()">Reportes Alimentarios</a></li>
+                </ul>
+              </li>
+
+              <li>
+                <a><mat-icon>assessment</mat-icon> Reportes <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a href="#" (click)="onReportesSemanales()">Reportes Semanales</a></li>
+                  <li><a href="#" (click)="onReportesMensuales()">Reportes Mensuales</a></li>
+                  <li><a href="#" (click)="onAnalisisTendencias()">Análisis de Tendencias</a></li>
+                  <li><a href="#" (click)="onExportarDatos()">Exportar Datos</a></li>
+                </ul>
+              </li>
+
+              <li [routerLinkActive]="'active'">
+                <a [routerLink]="['/centros-costo-dashboard']"><mat-icon>business</mat-icon> Centros de Costo</a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="menu_section">
+            <h3>Sistema</h3>
+            <ul class="nav side-menu">
+              <li>
+                <a><mat-icon>settings</mat-icon> Configuración <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a href="#" (click)="onParametrosGenerales()">Parámetros Generales</a></li>
+                  <li><a href="#" (click)="onDispositivos()">Dispositivos</a></li>
+                  <li><a href="#" (click)="onSincronizacion()">Sincronización</a></li>
+                </ul>
+              </li>
+              
+              <li>
+                <a><mat-icon>security</mat-icon> Administración <mat-icon class="chevron">expand_more</mat-icon></a>
+                <ul class="nav child_menu">
+                  <li><a href="#" (click)="onUsuariosSistema()">Usuarios del Sistema</a></li>
+                  <li><a href="#" (click)="onPermisosRoles()">Permisos y Roles</a></li>
+                  <li><a href="#" (click)="onLogsSistema()">Logs del Sistema</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="sidebar-footer">
+          <button mat-icon-button class="footer-btn" title="Configuración" (click)="onConfiguracion()">
+            <mat-icon>settings</mat-icon>
+          </button>
+          <button mat-icon-button class="footer-btn" title="Pantalla Completa" (click)="onPantallaCompleta()">
+            <mat-icon>fullscreen</mat-icon>
+          </button>
+          <button mat-icon-button class="footer-btn" title="Ayuda" (click)="onAyuda()">
+            <mat-icon>help</mat-icon>
+          </button>
+          <button mat-icon-button class="footer-btn" title="Cerrar Sesión" (click)="volverMenuPrincipal()">
+            <mat-icon>power_settings_new</mat-icon>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Top Navigation -->
+    <div class="top_nav">
+      <div class="nav_menu">
+        <div class="nav toggle">
+          <button mat-icon-button id="menu_toggle" class="menu-toggle-btn">
+            <mat-icon>menu</mat-icon>
+          </button>
+        </div>
+
+        <nav class="nav navbar-nav">
+          <ul class="navbar-right">
+            <!-- Notifications -->
+            <li class="nav-item dropdown">
+              <button mat-icon-button [matMenuTriggerFor]="notificationsMenu" class="nav-action-btn">
+                <mat-icon>notifications</mat-icon>
+                <span class="badge bg-green">0</span>
+              </button>
+              <mat-menu #notificationsMenu="matMenu" class="notifications-menu">
+                <div class="menu-header">Notificaciones</div>
+                <div class="no-notifications">No hay notificaciones</div>
+              </mat-menu>
+            </li>
+
+            <!-- User Profile -->
+            <li class="nav-item dropdown">
+              <button mat-button [matMenuTriggerFor]="userMenu" class="user-profile-btn">
+                <mat-icon class="profile-icon">account_circle</mat-icon>
+                <span class="profile-name">Administrador</span>
+                <mat-icon class="dropdown-arrow">keyboard_arrow_down</mat-icon>
+              </button>
+              <mat-menu #userMenu="matMenu" class="user-menu">
+                <button mat-menu-item (click)="onMiPerfil()">
+                  <mat-icon>person</mat-icon>
+                  <span>Mi Perfil</span>
+                </button>
+                <button mat-menu-item (click)="onConfiguracionUsuario()">
+                  <mat-icon>settings</mat-icon>
+                  <span>Configuración</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="volverMenuPrincipal()">
+                  <mat-icon>exit_to_app</mat-icon>
+                  <span>Cerrar Sesión</span>
+                </button>
+              </mat-menu>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content Area (Proyectado) -->
+    <div class="right_col" role="main">
+      <ng-content></ng-content>
+    </div>
+
+  </div>
+</div>
+

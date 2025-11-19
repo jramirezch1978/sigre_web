@@ -2,6 +2,7 @@ package com.sigre.asistencia.controller;
 
 import com.sigre.asistencia.dto.dashboard.*;
 import com.sigre.asistencia.dto.ReporteAsistenciaDto;
+import com.sigre.asistencia.dto.OrigenDto;
 import com.sigre.asistencia.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -250,6 +251,22 @@ public class DashboardController {
             return ResponseEntity.ok(reporte);
         } catch (Exception e) {
             log.error("❌ Error generando reporte de asistencia: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Obtener lista de orígenes/plantas activos
+     */
+    @GetMapping("/origenes")
+    public ResponseEntity<List<OrigenDto>> obtenerOrigenes() {
+        log.info("📍 Solicitando lista de orígenes");
+        try {
+            List<OrigenDto> origenes = dashboardService.obtenerOrigenes();
+            log.info("✅ Orígenes obtenidos: {} registros", origenes.size());
+            return ResponseEntity.ok(origenes);
+        } catch (Exception e) {
+            log.error("❌ Error obteniendo orígenes: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }

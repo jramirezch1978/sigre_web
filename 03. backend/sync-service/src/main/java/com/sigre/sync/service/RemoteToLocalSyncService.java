@@ -33,6 +33,8 @@ public class RemoteToLocalSyncService {
     private final RrhhAsignaTrjtRelojLocalRepository rrhhAsignaTrjtRelojLocalRepository;
     private final TurnoRemoteRepository turnoRemoteRepository;
     private final TurnoLocalRepository turnoLocalRepository;
+    private final OrigenRemoteRepository origenRemoteRepository;
+    private final OrigenLocalRepository origenLocalRepository;
     
     // Contadores para cada tabla
     private final Map<String, Integer> insertados = new HashMap<>();
@@ -1225,6 +1227,128 @@ public class RemoteToLocalSyncService {
         local.setEstadoSync("S");
     }
 
+    /**
+     * Sincronizar tabla origen de Oracle → PostgreSQL
+     * Tabla de solo lectura: solo sincronización remota → local
+     */
+    @Transactional("localTransactionManager")
+    public boolean sincronizarOrigen() {
+        log.info("🔥 Iniciando sincronización de tabla ORIGEN (Remote → Local)");
+        String tabla = "origen";
+        resetearContadores(tabla);
+        
+        try {
+            // Obtener todos los orígenes de la base remota
+            List<OrigenRemote> origenesRemote = origenRemoteRepository.findAll();
+            log.info("📊 Encontrados {} orígenes en bd_remota", origenesRemote.size());
+            
+            // Obtener orígenes locales existentes
+            List<OrigenLocal> origenesLocal = origenLocalRepository.findAll();
+            Map<String, OrigenLocal> origenesLocalMap = origenesLocal.stream()
+                    .collect(Collectors.toMap(OrigenLocal::getCodOrigen, o -> o));
+            log.info("📊 Encontrados {} orígenes en bd_local", origenesLocal.size());
+            
+            // Procesar cada origen remoto
+            for (OrigenRemote remote : origenesRemote) {
+                try {
+                    OrigenLocal local = origenesLocalMap.get(remote.getCodOrigen());
+                    
+                    if (local == null) {
+                        // INSERTAR nuevo origen
+                        local = mapearOrigenRemoteALocal(remote);
+                        origenLocalRepository.save(local);
+                        insertados.merge(tabla, 1, Integer::sum);
+                        log.info("➕ INSERTADO origen: {} - {}", remote.getCodOrigen(), remote.getNombre());
+                    } else {
+                        // ACTUALIZAR origen existente
+                        actualizarOrigenLocal(local, remote);
+                        origenLocalRepository.save(local);
+                        actualizados.merge(tabla, 1, Integer::sum);
+                        log.info("🔄 ACTUALIZADO origen: {} - {}", remote.getCodOrigen(), remote.getNombre());
+                    }
+                    
+                } catch (Exception e) {
+                    errores.merge(tabla, 1, Integer::sum);
+                    erroresSincronizacion.add("Error procesando origen " + remote.getCodOrigen() + ": " + e.getMessage());
+                    log.error("❌ Error procesando origen: {}", remote.getCodOrigen(), e);
+                }
+            }
+            
+            log.info("✅ Sincronización de ORIGEN completada: {} insertados, {} actualizados, {} errores", 
+                    getInsertados(tabla), getActualizados(tabla), getErrores(tabla));
+            
+            return getErrores(tabla) == 0;
+            
+        } catch (Exception e) {
+            log.error("❌ Error crítico en sincronización de ORIGEN", e);
+            erroresSincronizacion.add("Error crítico en sincronización de ORIGEN: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Mapear OrigenRemote a OrigenLocal
+     */
+    private OrigenLocal mapearOrigenRemoteALocal(OrigenRemote remote) {
+        return OrigenLocal.builder()
+                .codOrigen(remote.getCodOrigen())
+                .nombre(remote.getNombre())
+                .dirCalle(remote.getDirCalle())
+                .dirNumero(remote.getDirNumero())
+                .dirLote(remote.getDirLote())
+                .dirMnz(remote.getDirMnz())
+                .dirUrbanizacion(remote.getDirUrbanizacion())
+                .dirDistrito(remote.getDirDistrito())
+                .dirDepartamento(remote.getDirDepartamento())
+                .dirProvincia(remote.getDirProvincia())
+                .dirCodPostal(remote.getDirCodPostal())
+                .telefono(remote.getTelefono())
+                .fax(remote.getFax())
+                .email(remote.getEmail())
+                .flagReplicacion(remote.getFlagReplicacion())
+                .flagEstado(remote.getFlagEstado())
+                .cenBefGenOc(remote.getCenBefGenOc())
+                .cenBefGenVtas(remote.getCenBefGenVtas())
+                .cencosOc(remote.getCencosOc())
+                .cntaPrspOc(remote.getCntaPrspOc())
+                .cencosIgv(remote.getCencosIgv())
+                .cntaPrspIgv(remote.getCntaPrspIgv())
+                .flagPrspIgv(remote.getFlagPrspIgv())
+                .fechaSync(LocalDate.now())
+                .estadoSync("S") // S=Sincronizado
+                .build();
+    }
+    
+    /**
+     * Actualizar OrigenLocal con datos de OrigenRemote
+     */
+    private void actualizarOrigenLocal(OrigenLocal local, OrigenRemote remote) {
+        local.setNombre(remote.getNombre());
+        local.setDirCalle(remote.getDirCalle());
+        local.setDirNumero(remote.getDirNumero());
+        local.setDirLote(remote.getDirLote());
+        local.setDirMnz(remote.getDirMnz());
+        local.setDirUrbanizacion(remote.getDirUrbanizacion());
+        local.setDirDistrito(remote.getDirDistrito());
+        local.setDirDepartamento(remote.getDirDepartamento());
+        local.setDirProvincia(remote.getDirProvincia());
+        local.setDirCodPostal(remote.getDirCodPostal());
+        local.setTelefono(remote.getTelefono());
+        local.setFax(remote.getFax());
+        local.setEmail(remote.getEmail());
+        local.setFlagReplicacion(remote.getFlagReplicacion());
+        local.setFlagEstado(remote.getFlagEstado());
+        local.setCenBefGenOc(remote.getCenBefGenOc());
+        local.setCenBefGenVtas(remote.getCenBefGenVtas());
+        local.setCencosOc(remote.getCencosOc());
+        local.setCntaPrspOc(remote.getCntaPrspOc());
+        local.setCencosIgv(remote.getCencosIgv());
+        local.setCntaPrspIgv(remote.getCntaPrspIgv());
+        local.setFlagPrspIgv(remote.getFlagPrspIgv());
+        local.setFechaSync(LocalDate.now());
+        local.setEstadoSync("S"); // S=Sincronizado
+    }
+    
     public int getInsertados(String tabla) {
         return insertados.getOrDefault(tabla, 0);
     }

@@ -277,8 +277,19 @@ public class SyncSchedulerService {
         log.info("🔥 [HILO 1] Iniciando sincronización Remote → Local con ORDEN CORRECTO");
         
         try {
-            // PASO 1: Sincronizar CENTROS DE COSTO primero (no tiene dependencias)
-            log.info("📍 [HILO 1] PASO 1/3: Sincronizando CENTROS_COSTO...");
+            // PASO 0: Sincronizar ORIGEN primero (no tiene dependencias, tabla de configuración)
+            log.info("📍 [HILO 1] PASO 0/8: Sincronizando ORIGEN...");
+            boolean origenOk = remoteToLocalSync.sincronizarOrigen();
+            if (!origenOk && maxRetries > 0) {
+                origenOk = manejarErrorConReintento("origen", () -> remoteToLocalSync.sincronizarOrigen());
+            }
+            
+            if (!origenOk) {
+                log.warn("⚠️ [HILO 1] Fallo en ORIGEN - No es crítico, continuando");
+            }
+            
+            // PASO 1: Sincronizar CENTROS DE COSTO (no tiene dependencias)
+            log.info("📍 [HILO 1] PASO 1/8: Sincronizando CENTROS_COSTO...");
             boolean centrosOk = remoteToLocalSync.sincronizarCentrosCosto();
             if (!centrosOk && maxRetries > 0) {
                 centrosOk = manejarErrorConReintento("centros_costo", () -> remoteToLocalSync.sincronizarCentrosCosto());
@@ -355,7 +366,7 @@ public class SyncSchedulerService {
                 log.error("❌ [HILO 1] Fallo en TURNO - No crítico para asistencia");
             }
             
-            boolean todoOk = centrosOk && maestroOk && areaOk && seccionOk && tipoTrabajadorOk && tarjetasOk && turnoOk;
+            boolean todoOk = origenOk && centrosOk && maestroOk && areaOk && seccionOk && tipoTrabajadorOk && tarjetasOk && turnoOk;
             log.info("✅ [HILO 1] Sincronización Remote → Local completada - Resultado: {}", todoOk ? "ÉXITO TOTAL" : "CON ERRORES");
             return todoOk;
             
@@ -474,6 +485,18 @@ public class SyncSchedulerService {
             Map<String, EmailNotificationServiceHTML.SyncTableStats> estadisticasDetalladas = new HashMap<>();
             
             // Estadísticas de Remote → Local
+            estadisticasDetalladas.put("origen", EmailNotificationServiceHTML.SyncTableStats.builder()
+                    .nombreTabla("origen")
+                    .registrosInsertados(remoteToLocalSync.getInsertados("origen"))
+                    .registrosActualizados(remoteToLocalSync.getActualizados("origen"))
+                    .registrosEliminados(remoteToLocalSync.getEliminados("origen"))
+                    .registrosErrores(remoteToLocalSync.getErrores("origen"))
+                    .direccion("REMOTE_TO_LOCAL")
+                    .baseOrigen("bd_remota")
+                    .baseDestino("bd_local")
+                    .exitoso(remoteToLocalSync.getErrores("origen") == 0)
+                    .build());
+            
             estadisticasDetalladas.put("centros_costo", EmailNotificationServiceHTML.SyncTableStats.builder()
                     .nombreTabla("centros_costo")
                     .registrosInsertados(remoteToLocalSync.getInsertados("centros_costo"))

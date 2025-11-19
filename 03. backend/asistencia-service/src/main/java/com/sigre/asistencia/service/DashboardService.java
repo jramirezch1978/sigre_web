@@ -2,17 +2,20 @@ package com.sigre.asistencia.service;
 
 import com.sigre.asistencia.dto.dashboard.*;
 import com.sigre.asistencia.dto.ReporteAsistenciaDto;
+import com.sigre.asistencia.dto.OrigenDto;
 import com.sigre.asistencia.entity.AsistenciaHt580;
 import com.sigre.asistencia.entity.Area;
 import com.sigre.asistencia.entity.Maestro;
 import com.sigre.asistencia.entity.Seccion;
 import com.sigre.asistencia.entity.SeccionId;
+import com.sigre.asistencia.entity.Origen;
 import com.sigre.asistencia.repository.AsistenciaHt580Repository;
 import com.sigre.asistencia.repository.AreaRepository;
 import com.sigre.asistencia.repository.MaestroRepository;
 import com.sigre.asistencia.repository.SeccionRepository;
 import com.sigre.asistencia.repository.TicketAsistenciaRepository;
 import com.sigre.asistencia.repository.RacionesSeleccionadasRepository;
+import com.sigre.asistencia.repository.OrigenRepository;
 import org.springframework.data.repository.query.Param;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +42,7 @@ public class DashboardService {
     private final TicketAsistenciaRepository ticketRepository;
     private final MaestroRepository maestroRepository;
     private final AreaRepository areaRepository;
+    private final OrigenRepository origenRepository;
     private final SeccionRepository seccionRepository;
     private final RacionesSeleccionadasRepository racionesRepository;
     
@@ -767,6 +771,26 @@ public class DashboardService {
         
         return resultados.stream()
                 .map(this::convertirAReporteDto)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Obtener lista de orígenes activos
+     */
+    public List<OrigenDto> obtenerOrigenes() {
+        log.info("Obteniendo lista de orígenes activos");
+        
+        List<Origen> origenes = origenRepository.findAllActivos();
+        
+        return origenes.stream()
+                .map(o -> OrigenDto.builder()
+                        .codOrigen(o.getCodOrigen())
+                        .nombre(o.getNombre())
+                        .ubicacion(String.format("%s, %s - %s", 
+                                o.getDirDistrito() != null ? o.getDirDistrito() : "",
+                                o.getDirProvincia() != null ? o.getDirProvincia() : "",
+                                o.getDirDepartamento() != null ? o.getDirDepartamento() : ""))
+                        .build())
                 .collect(Collectors.toList());
     }
     
