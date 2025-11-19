@@ -34,22 +34,32 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     AsistenciaHt580 findUltimaAsistenciaByTrabajador(@Param("codigo") String codigo);
     
     /**
-     * Buscar última asistencia de un trabajador por código Y origen
+     * Buscar última asistencia de un trabajador por código Y origen (solo tipo 1 y 2)
+     * SOLO movimientos tipo 1 (Ingreso) o 2 (Salida) - IGNORAR movimientos intermedios (3-10)
      * ORDENADO POR FECHA DE REGISTRO
      */
-    Optional<AsistenciaHt580> findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(String codigo, String codOrigen);
+    @Query(value = "SELECT * FROM asistencia_ht580 " +
+           "WHERE codigo = :codigo " +
+           "AND cod_origen = :codOrigen " +
+           "AND TRIM(flag_in_out) IN ('1', '2') " +
+           "ORDER BY fec_registro DESC " +
+           "LIMIT 1", 
+           nativeQuery = true)
+    Optional<AsistenciaHt580> findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(@Param("codigo") String codigo, 
+                                                                                   @Param("codOrigen") String codOrigen);
     
     /**
      * ✅ NUEVA LÓGICA DE TURNOS - OPTIMIZADA CON ÍNDICES
-     * Buscar última marcación INGRESO_PLANTA (tipo 01) de un trabajador por código Y origen
+     * Buscar última marcación INGRESO/SALIDA PLANTA (tipo 1 o 2) de un trabajador por código Y origen
      * Esta es la marcación "raíz" de donde se heredan turno y reckey_ref
+     * IGNORAR movimientos intermedios (3-10): almuerzo, cena, comisión, producción
      * 
      * OPTIMIZACIÓN: Usa índice en (codigo, flag_in_out, fec_registro)
      */
     @Query(value = "SELECT * FROM asistencia_ht580 " 
             + "WHERE codigo = :codigo " 
             + "AND cod_origen = :codOrigen " 
-            + "AND flag_in_out not in ('3','4','5','6','7','8','9','10')" 
+            + "AND TRIM(flag_in_out) IN ('1', '2') " 
             + "ORDER BY fec_registro DESC " 
             + "LIMIT 1", 
            nativeQuery = true)
@@ -92,16 +102,20 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     boolean existsByReckey(String reckey);
     
     /**
-     * Obtener ÚLTIMOS movimientos de TODOS los trabajadores
+     * Obtener ÚLTIMOS movimientos de TODOS los trabajadores (solo tipo 1 y 2)
      * Para proceso de auto-cierre masivo cada 30 minutos
+     * SOLO movimientos tipo 1 (Ingreso) o 2 (Salida) - IGNORAR movimientos intermedios (3-10)
      * ORDENADO POR FECHA DE REGISTRO (no fecha de movimiento)
      */
-    @Query("SELECT a FROM AsistenciaHt580 a " +
-           "WHERE a.fechaRegistro = (" +
-           "    SELECT MAX(a2.fechaRegistro) FROM AsistenciaHt580 a2 " +
-           "    WHERE a2.codigo = a.codigo" +
+    @Query(value = "SELECT a.* FROM asistencia_ht580 a " +
+           "WHERE TRIM(a.flag_in_out) IN ('1', '2') " +
+           "AND a.fec_registro = (" +
+           "    SELECT MAX(a2.fec_registro) FROM asistencia_ht580 a2 " +
+           "    WHERE a2.codigo = a.codigo " +
+           "    AND TRIM(a2.flag_in_out) IN ('1', '2')" +
            ") " +
-           "ORDER BY a.codigo ASC")
+           "ORDER BY a.codigo ASC", 
+           nativeQuery = true)
     List<AsistenciaHt580> findUltimosMovimientosPorTrabajador();
     
     // ===== MÉTODOS PARA DASHBOARD =====
