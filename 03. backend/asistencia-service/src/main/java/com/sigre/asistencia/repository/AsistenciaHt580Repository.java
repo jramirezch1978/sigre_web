@@ -500,9 +500,12 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
                     OVER (PARTITION BY c.COD_TRABAJADOR, EXTRACT(YEAR FROM c.FEC_MOVIMIENTO), EXTRACT(WEEK FROM c.FEC_MOVIMIENTO)) 
                     AS total_extras_semana,
                 
-                COUNT(DISTINCT c.FEC_MOVIMIENTO) 
-                    OVER (PARTITION BY c.COD_TRABAJADOR, EXTRACT(YEAR FROM c.FEC_MOVIMIENTO), EXTRACT(WEEK FROM c.FEC_MOVIMIENTO)) 
-                    AS dias_asistidos_semana
+                COUNT(c.FEC_MOVIMIENTO) OVER (
+                    PARTITION BY 
+                        c.COD_TRABAJADOR, 
+                        EXTRACT(YEAR FROM c.FEC_MOVIMIENTO), 
+                        EXTRACT(WEEK FROM c.FEC_MOVIMIENTO)
+                ) AS dias_asistidos_semana
                 
             FROM calculos c
         )
