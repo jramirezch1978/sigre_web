@@ -575,6 +575,7 @@ public class RemoteToLocalSyncService {
                 .flagMarcaReloj(remote.getFlagMarcaReloj())
                 .flagEstadoCivil(remote.getFlagEstadoCivil())
                 .flagSexo(remote.getFlagSexo())
+                .codCargo(remote.getCodCargo())
                 .tipoTrabajador(remote.getTipoTrabajador())
                 .codSeccion(remote.getCodSeccion())
                 .codArea(remote.getCodArea())
@@ -679,6 +680,7 @@ public class RemoteToLocalSyncService {
         local.setFlagMarcaReloj(remote.getFlagMarcaReloj());
         local.setFlagEstadoCivil(remote.getFlagEstadoCivil());
         local.setFlagSexo(remote.getFlagSexo());
+        local.setCodCargo(remote.getCodCargo());
         local.setTipoTrabajador(remote.getTipoTrabajador());
         local.setCodSeccion(remote.getCodSeccion());
         local.setCodArea(remote.getCodArea());
@@ -1417,8 +1419,13 @@ public class RemoteToLocalSyncService {
         return CargoLocal.builder()
                 .codCargo(remote.getCodCargo())
                 .descCargo(remote.getDescCargo())
+                .categoria(remote.getCategoria())
                 .flagReplicacion(remote.getFlagReplicacion())
+                .perfilRuta(remote.getPerfilRuta())
                 .flagEstado(remote.getFlagEstado())
+                .nivel(remote.getNivel())
+                .codOcupacionRtps(remote.getCodOcupacionRtps())
+                .manualMof(remote.getManualMof())
                 .fechaSync(LocalDate.now())
                 .estadoSync("S") // S=Sincronizado
                 .build();
@@ -1429,8 +1436,13 @@ public class RemoteToLocalSyncService {
      */
     private void actualizarCargoLocal(CargoLocal local, CargoRemote remote) {
         local.setDescCargo(remote.getDescCargo());
+        local.setCategoria(remote.getCategoria());
         local.setFlagReplicacion(remote.getFlagReplicacion());
+        local.setPerfilRuta(remote.getPerfilRuta());
         local.setFlagEstado(remote.getFlagEstado());
+        local.setNivel(remote.getNivel());
+        local.setCodOcupacionRtps(remote.getCodOcupacionRtps());
+        local.setManualMof(remote.getManualMof());
         local.setFechaSync(LocalDate.now());
         local.setEstadoSync("S"); // S=Sincronizado
     }

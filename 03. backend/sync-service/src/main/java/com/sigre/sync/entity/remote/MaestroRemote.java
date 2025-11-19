@@ -79,6 +79,9 @@ public class MaestroRemote {
     @Column(name = "FLAG_SEXO", length = 1)
     private String flagSexo;
 
+    @Column(name = "COD_CARGO", length = 8)
+    private String codCargo;
+
     @Column(name = "TIPO_TRABAJADOR", length = 3)
     private String tipoTrabajador;
 
