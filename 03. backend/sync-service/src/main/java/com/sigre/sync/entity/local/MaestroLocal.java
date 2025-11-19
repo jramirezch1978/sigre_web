@@ -91,6 +91,12 @@ public class MaestroLocal {
     @Column(name = "COD_AREA", length = 1)
     private String codArea;
 
+    @Column(name = "TIPO_DOC_IDENT_RTPS", length = 2)
+    private String tipoDocIdentRtps;
+
+    @Column(name = "NRO_DOC_IDENT_RTPS", length = 20)
+    private String nroDocIdentRtps;
+
     @Column(name = "FULL_NAME_TRABAJADOR", insertable = false, updatable = false)
     private String fullNameTrabajador;
 

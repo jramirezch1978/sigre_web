@@ -91,6 +91,12 @@ public class MaestroRemote {
     @Column(name = "COD_AREA", length = 1)
     private String codArea;
 
+    @Column(name = "TIPO_DOC_IDENT_RTPS", length = 2)
+    private String tipoDocIdentRtps;
+
+    @Column(name = "NRO_DOC_IDENT_RTPS", length = 20)
+    private String nroDocIdentRtps;
+
     // Método helper para obtener nombre completo
     public String getNombreCompleto() {
         StringBuilder nombre = new StringBuilder();

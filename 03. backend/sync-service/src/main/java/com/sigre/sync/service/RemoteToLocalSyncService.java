@@ -48,7 +48,7 @@ public class RemoteToLocalSyncService {
     /**
      * Sincronizar tabla maestro de Oracle → PostgreSQL
      */
-    @Transactional("localTransactionManager")
+    @Transactional(value = "localTransactionManager", propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public boolean sincronizarMaestro() {
         log.info("🔥 Iniciando sincronización de tabla MAESTRO (Remote → Local)");
         String tabla = "maestro";
@@ -114,7 +114,7 @@ public class RemoteToLocalSyncService {
     /**
      * Sincronizar centros de costo
      */
-    @Transactional("localTransactionManager")
+    @Transactional(value = "localTransactionManager", propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public boolean sincronizarCentrosCosto() {
         log.info("🔥 Iniciando sincronización de tabla CENTROS_COSTO (Remote → Local)");
         String tabla = "centros_costo";
@@ -180,7 +180,7 @@ public class RemoteToLocalSyncService {
     /**
      * Sincronizar tabla tipo_trabajador de Oracle → PostgreSQL
      */
-    @Transactional("localTransactionManager")
+    @Transactional(value = "localTransactionManager", propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public boolean sincronizarTipoTrabajador() {
         log.info("🔥 Iniciando sincronización de tabla TIPO_TRABAJADOR (Remote → Local)");
         String tabla = "tipo_trabajador";
@@ -246,7 +246,7 @@ public class RemoteToLocalSyncService {
     /**
      * Sincronizar tabla area de Oracle → PostgreSQL
      */
-    @Transactional("localTransactionManager")
+    @Transactional(value = "localTransactionManager", propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public boolean sincronizarArea() {
         log.info("🔥 Iniciando sincronización de tabla AREA (Remote → Local)");
         String tabla = "area";
@@ -312,7 +312,7 @@ public class RemoteToLocalSyncService {
     /**
      * Sincronizar tabla seccion de Oracle → PostgreSQL
      */
-    @Transactional("localTransactionManager")
+    @Transactional(value = "localTransactionManager", propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public boolean sincronizarSeccion() {
         log.info("🔥 Iniciando sincronización de tabla SECCION (Remote → Local)");
         String tabla = "seccion";
@@ -408,7 +408,7 @@ public class RemoteToLocalSyncService {
     /**
      * Sincronizar tarjetas de reloj
      */
-    @Transactional("localTransactionManager")
+    @Transactional(value = "localTransactionManager", propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public boolean sincronizarTarjetasReloj() {
         log.info("🔥 Iniciando sincronización de tabla RRHH_ASIGNA_TRJT_RELOJ (Remote → Local)");
         String tabla = "rrhh_asigna_trjt_reloj";
@@ -579,6 +579,8 @@ public class RemoteToLocalSyncService {
                 .tipoTrabajador(remote.getTipoTrabajador())
                 .codSeccion(remote.getCodSeccion())
                 .codArea(remote.getCodArea())
+                .tipoDocIdentRtps(remote.getTipoDocIdentRtps())
+                .nroDocIdentRtps(remote.getNroDocIdentRtps())
                 .fechaSync(LocalDate.now())
                 .estadoSync("S")
                 .build();
@@ -684,6 +686,8 @@ public class RemoteToLocalSyncService {
         local.setTipoTrabajador(remote.getTipoTrabajador());
         local.setCodSeccion(remote.getCodSeccion());
         local.setCodArea(remote.getCodArea());
+        local.setTipoDocIdentRtps(remote.getTipoDocIdentRtps());
+        local.setNroDocIdentRtps(remote.getNroDocIdentRtps());
         local.setFechaSync(LocalDate.now());
         local.setEstadoSync("S");
     }
@@ -731,7 +735,7 @@ public class RemoteToLocalSyncService {
     /**
      * Sincronizar tabla turno de Oracle → PostgreSQL
      */
-    @Transactional("localTransactionManager")
+    @Transactional(value = "localTransactionManager", propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public boolean sincronizarTurno() {
         log.info("🔥 Iniciando sincronización de tabla TURNO (Remote → Local)");
         String tabla = "turno";
@@ -1235,7 +1239,7 @@ public class RemoteToLocalSyncService {
      * Sincronizar tabla origen de Oracle → PostgreSQL
      * Tabla de solo lectura: solo sincronización remota → local
      */
-    @Transactional("localTransactionManager")
+    @Transactional(value = "localTransactionManager", propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public boolean sincronizarOrigen() {
         log.info("🔥 Iniciando sincronización de tabla ORIGEN (Remote → Local)");
         String tabla = "origen";
@@ -1357,7 +1361,7 @@ public class RemoteToLocalSyncService {
      * Sincronizar tabla cargo de Oracle → PostgreSQL
      * Tabla de solo lectura: solo sincronización remota → local
      */
-    @Transactional("localTransactionManager")
+    @Transactional(value = "localTransactionManager", propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public boolean sincronizarCargo() {
         log.info("🔥 Iniciando sincronización de tabla CARGO (Remote → Local)");
         String tabla = "cargo";
