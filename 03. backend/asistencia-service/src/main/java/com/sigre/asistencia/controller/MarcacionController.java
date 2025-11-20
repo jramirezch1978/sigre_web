@@ -204,28 +204,32 @@ public class MarcacionController {
                         }
                     }
                 } else {
-                    // PASO 2c: NO es ingreso - validar tiempo mínimo siempre
-                    long minutosTranscurridos = java.time.Duration.between(
-                            ultimaAsistencia.getFechaRegistro(), 
-                            LocalDateTime.now()
-                    ).toMinutes();
-                    
-                    log.info("⏰ Último movimiento NO es ingreso (tipo {}) | Trabajador: {} | Validando tiempo mínimo: {} min", 
-                            flagInOut, codTrabajador, minutosTranscurridos);
-                    
-                    if (minutosTranscurridos < tiempoMinimoMinutos) {
-                        long minutosRestantes = tiempoMinimoMinutos - minutosTranscurridos;
+                    // PASO 2c: NO es ingreso - validar tiempo mínimo (EXCEPTO tipo 7 - Ingreso a Producción)
+                    if (!"7".equals(flagInOut)) {
+                        long minutosTranscurridos = java.time.Duration.between(
+                                ultimaAsistencia.getFechaRegistro(), 
+                                LocalDateTime.now()
+                        ).toMinutes();
                         
-                        String mensajeTiempoMinimo = String.format(
-                            "TIEMPO_MINIMO_ERROR|%s|%s|%d|%s|%d", 
-                            codTrabajador, resultado.getTrabajador().getNombreCompleto(),
-                            tiempoMinimoMinutos, ultimaAsistencia.getFechaRegistro().toString(), minutosRestantes
-                        );
+                        log.info("⏰ Último movimiento NO es ingreso (tipo {}) | Trabajador: {} | Validando tiempo mínimo: {} min", 
+                                flagInOut, codTrabajador, minutosTranscurridos);
                         
-                        return ResponseEntity.ok(ValidarCodigoResponse.builder()
-                                .valido(false)
-                                .mensajeError(mensajeTiempoMinimo)
-                                .build());
+                        if (minutosTranscurridos < tiempoMinimoMinutos) {
+                            long minutosRestantes = tiempoMinimoMinutos - minutosTranscurridos;
+                            
+                            String mensajeTiempoMinimo = String.format(
+                                "TIEMPO_MINIMO_ERROR|%s|%s|%d|%s|%d", 
+                                codTrabajador, resultado.getTrabajador().getNombreCompleto(),
+                                tiempoMinimoMinutos, ultimaAsistencia.getFechaRegistro().toString(), minutosRestantes
+                            );
+                            
+                            return ResponseEntity.ok(ValidarCodigoResponse.builder()
+                                    .valido(false)
+                                    .mensajeError(mensajeTiempoMinimo)
+                                    .build());
+                        }
+                    } else {
+                        log.info("✅ Tipo 7 (INGRESO_PRODUCCION) - Sin validación de tiempo mínimo");
                     }
                 }
             } else {
