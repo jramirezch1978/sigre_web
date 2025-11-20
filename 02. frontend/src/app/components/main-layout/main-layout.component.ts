@@ -27,6 +27,13 @@ import { NotImplementedService } from '../../services/not-implemented.service';
 export class MainLayoutComponent {
 
   menuCollapsed = false;
+  submenusAbiertos: { [key: string]: boolean } = {
+    asistencia: false,
+    comedores: false,
+    reportes: false,
+    configuracion: false,
+    administracion: false
+  };
 
   constructor(
     private router: Router,
@@ -35,6 +42,10 @@ export class MainLayoutComponent {
 
   toggleMenu() {
     this.menuCollapsed = !this.menuCollapsed;
+  }
+
+  toggleSubmenu(menu: string) {
+    this.submenusAbiertos[menu] = !this.submenusAbiertos[menu];
   }
 
   // Navegación

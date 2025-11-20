@@ -38,10 +38,13 @@
                 <a [routerLink]="['/dashboard']"><mat-icon>dashboard</mat-icon> Dashboard</a>
               </li>
               
-              <li [routerLinkActive]="'active'">
-                <a><mat-icon>people</mat-icon> Asistencia <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a [routerLink]="['/reporte-asistencia']">Reporte de Asistencia</a></li>
+              <li [class.active]="submenusAbiertos['asistencia']">
+                <a (click)="toggleSubmenu('asistencia')">
+                  <mat-icon>people</mat-icon> Asistencia 
+                  <mat-icon class="chevron">{{ submenusAbiertos['asistencia'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </a>
+                <ul class="nav child_menu" [style.display]="submenusAbiertos['asistencia'] ? 'block' : 'none'">
+                  <li [routerLinkActive]="'active'"><a [routerLink]="['/reporte-asistencia']">Reporte de Asistencia</a></li>
                   <li><a href="#" (click)="onRegistrosDiarios()">Registros Diarios</a></li>
                   <li><a href="#" (click)="onReportesPorEmpleado()">Reportes por Empleado</a></li>
                   <li><a href="#" (click)="onHorariosYTurnos()">Horarios y Turnos</a></li>
@@ -49,18 +52,24 @@
                 </ul>
               </li>
 
-              <li>
-                <a><mat-icon>restaurant</mat-icon> Comedores <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
+              <li [class.active]="submenusAbiertos['comedores']">
+                <a (click)="toggleSubmenu('comedores')">
+                  <mat-icon>restaurant</mat-icon> Comedores 
+                  <mat-icon class="chevron">{{ submenusAbiertos['comedores'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </a>
+                <ul class="nav child_menu" [style.display]="submenusAbiertos['comedores'] ? 'block' : 'none'">
                   <li><a href="#" (click)="onControlRaciones()">Control de Raciones</a></li>
                   <li><a href="#" (click)="onMenusDiarios()">Menús Diarios</a></li>
                   <li><a href="#" (click)="onReportesAlimentarios()">Reportes Alimentarios</a></li>
                 </ul>
               </li>
 
-              <li>
-                <a><mat-icon>assessment</mat-icon> Reportes <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
+              <li [class.active]="submenusAbiertos['reportes']">
+                <a (click)="toggleSubmenu('reportes')">
+                  <mat-icon>assessment</mat-icon> Reportes 
+                  <mat-icon class="chevron">{{ submenusAbiertos['reportes'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </a>
+                <ul class="nav child_menu" [style.display]="submenusAbiertos['reportes'] ? 'block' : 'none'">
                   <li><a href="#" (click)="onReportesSemanales()">Reportes Semanales</a></li>
                   <li><a href="#" (click)="onReportesMensuales()">Reportes Mensuales</a></li>
                   <li><a href="#" (click)="onAnalisisTendencias()">Análisis de Tendencias</a></li>
@@ -77,18 +86,24 @@
           <div class="menu_section">
             <h3>Sistema</h3>
             <ul class="nav side-menu">
-              <li>
-                <a><mat-icon>settings</mat-icon> Configuración <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
+              <li [class.active]="submenusAbiertos['configuracion']">
+                <a (click)="toggleSubmenu('configuracion')">
+                  <mat-icon>settings</mat-icon> Configuración 
+                  <mat-icon class="chevron">{{ submenusAbiertos['configuracion'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </a>
+                <ul class="nav child_menu" [style.display]="submenusAbiertos['configuracion'] ? 'block' : 'none'">
                   <li><a href="#" (click)="onParametrosGenerales()">Parámetros Generales</a></li>
                   <li><a href="#" (click)="onDispositivos()">Dispositivos</a></li>
                   <li><a href="#" (click)="onSincronizacion()">Sincronización</a></li>
                 </ul>
               </li>
               
-              <li>
-                <a><mat-icon>security</mat-icon> Administración <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
+              <li [class.active]="submenusAbiertos['administracion']">
+                <a (click)="toggleSubmenu('administracion')">
+                  <mat-icon>security</mat-icon> Administración 
+                  <mat-icon class="chevron">{{ submenusAbiertos['administracion'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </a>
+                <ul class="nav child_menu" [style.display]="submenusAbiertos['administracion'] ? 'block' : 'none'">
                   <li><a href="#" (click)="onUsuariosSistema()">Usuarios del Sistema</a></li>
                   <li><a href="#" (click)="onPermisosRoles()">Permisos y Roles</a></li>
                   <li><a href="#" (click)="onLogsSistema()">Logs del Sistema</a></li>
