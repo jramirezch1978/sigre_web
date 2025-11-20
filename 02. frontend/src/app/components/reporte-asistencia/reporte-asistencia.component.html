@@ -25,46 +25,69 @@
         </div>
         <div class="x_content">
           
-          <!-- Filtros -->
-          <div class="filter-row">
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Origen</mat-label>
-              <mat-select [(ngModel)]="codOrigen" (selectionChange)="onFiltroChange()">
-                <mat-option *ngFor="let origen of origenes" [value]="origen.codOrigen">
-                  {{ origen.codOrigen }} - {{ origen.nombre }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+              <!-- Filtros Principales -->
+              <div class="filter-row">
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Origen</mat-label>
+                  <mat-select [(ngModel)]="codOrigen" (selectionChange)="onFiltroChange()">
+                    <mat-option *ngFor="let origen of origenes" [value]="origen.codOrigen">
+                      {{ origen.codOrigen }} - {{ origen.nombre }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
 
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Fecha Inicio</mat-label>
-              <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="fechaInicio" (dateChange)="onFiltroChange()">
-              <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
-              <mat-datepicker #pickerInicio></mat-datepicker>
-            </mat-form-field>
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Fecha Inicio</mat-label>
+                  <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="fechaInicio" (dateChange)="onFiltroChange()">
+                  <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerInicio></mat-datepicker>
+                </mat-form-field>
 
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Fecha Fin</mat-label>
-              <input matInput [matDatepicker]="pickerFin" [(ngModel)]="fechaFin" (dateChange)="onFiltroChange()">
-              <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
-              <mat-datepicker #pickerFin></mat-datepicker>
-            </mat-form-field>
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Fecha Fin</mat-label>
+                  <input matInput [matDatepicker]="pickerFin" [(ngModel)]="fechaFin" (dateChange)="onFiltroChange()">
+                  <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerFin></mat-datepicker>
+                </mat-form-field>
 
-            <button mat-raised-button color="primary" (click)="cargarReporte()" [disabled]="cargando">
-              <mat-icon>refresh</mat-icon>
-              Actualizar
-            </button>
+                <button mat-raised-button color="primary" (click)="cargarReporte()" [disabled]="cargando">
+                  <mat-icon>refresh</mat-icon>
+                  Actualizar
+                </button>
 
-            <button mat-raised-button color="accent" (click)="exportarExcel()" [disabled]="cargando || registros.length === 0">
-              <mat-icon>file_download</mat-icon>
-              Excel
-            </button>
+                <button mat-raised-button color="accent" (click)="exportarExcel()" [disabled]="cargando || registros.length === 0">
+                  <mat-icon>file_download</mat-icon>
+                  Excel
+                </button>
 
-            <button mat-raised-button (click)="exportarPDF()" [disabled]="cargando || registros.length === 0">
-              <mat-icon>picture_as_pdf</mat-icon>
-              PDF
-            </button>
-          </div>
+                <button mat-raised-button (click)="exportarPDF()" [disabled]="cargando || registros.length === 0">
+                  <mat-icon>picture_as_pdf</mat-icon>
+                  PDF
+                </button>
+              </div>
+
+              <!-- Filtros de Búsqueda -->
+              <div class="filter-row" style="margin-top: 15px;">
+                <mat-form-field appearance="outline" class="filter-field-search">
+                  <mat-label>Buscar por Nombre, Código o DNI</mat-label>
+                  <input matInput [(ngModel)]="busquedaNombre" (ngModelChange)="onFiltroBusqueda()" placeholder="Búsqueda contextual...">
+                  <mat-icon matPrefix>search</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Tipo de Trabajador</mat-label>
+                  <mat-select [(ngModel)]="tipoTrabajadorFiltro" (selectionChange)="onFiltroBusqueda()">
+                    <mat-option *ngFor="let tipo of tiposTrabajador" [value]="tipo">
+                      {{ tipo }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <div class="results-info">
+                  <mat-icon>info</mat-icon>
+                  <span>Mostrando {{ registrosFiltrados.length }} de {{ registros.length }} registros</span>
+                </div>
+              </div>
 
         </div>
       </div>
@@ -104,26 +127,56 @@
             <table class="table table-striped jambo_table bulk_action">
               <thead>
                 <tr class="headings">
-                  <th class="column-title">N°</th>
-                  <th class="column-title">Tipo de<br>Trabajador</th>
-                  <th class="column-title">Código<br>Trabajador</th>
-                  <th class="column-title">DNI</th>
-                  <th class="column-title">Apellidos y<br>Nombres</th>
-                  <th class="column-title">Área</th>
-                  <th class="column-title">Cargo /<br>Puesto</th>
-                  <th class="column-title">Turno</th>
-                  <th class="column-title">Fecha</th>
-                  <th class="column-title">Hora de<br>Ingreso</th>
-                  <th class="column-title">Hora de<br>Salida</th>
-                  <th class="column-title">Horas<br>Trabajadas</th>
-                  <th class="column-title">Horas<br>Extras</th>
-                  <th class="column-title">Tardanza<br>(min)</th>
-                  <th class="column-title">Total Horas<br>Trabajadas<br>(Semana)</th>
-                  <th class="column-title">Total Horas<br>Extras<br>(Semana)</th>
-                  <th class="column-title">Total Días<br>Asistidos</th>
-                  <th class="column-title">Total<br>Faltas</th>
-                  <th class="column-title">%<br>Asistencia</th>
-                  <th class="column-title">%<br>Ausentismo</th>
+                  <th class="column-title sortable" (click)="ordenarPor('nro')">
+                    N°
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'nro'">
+                      {{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}
+                    </mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('tipoTrabajador')">
+                    Tipo de<br>Trabajador
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'tipoTrabajador'">
+                      {{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}
+                    </mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('codigoTrabajador')">Código<br>Trabajador</th>
+                  <th class="column-title sortable" (click)="ordenarPor('dni')">DNI</th>
+                  <th class="column-title sortable" (click)="ordenarPor('apellidosNombres')">
+                    Apellidos y<br>Nombres
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'apellidosNombres'">
+                      {{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}
+                    </mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('area')">Área</th>
+                  <th class="column-title sortable" (click)="ordenarPor('cargoPuesto')">Cargo /<br>Puesto</th>
+                  <th class="column-title sortable" (click)="ordenarPor('turno')">Turno</th>
+                  <th class="column-title sortable" (click)="ordenarPor('fecha')">
+                    Fecha
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'fecha'">
+                      {{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}
+                    </mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('horaIngreso')">Hora de<br>Ingreso</th>
+                  <th class="column-title sortable" (click)="ordenarPor('horaSalida')">Hora de<br>Salida</th>
+                  <th class="column-title sortable" (click)="ordenarPor('horasTrabajadas')">
+                    Horas<br>Trabajadas
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'horasTrabajadas'">
+                      {{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}
+                    </mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('horasExtras')">Horas<br>Extras</th>
+                  <th class="column-title sortable" (click)="ordenarPor('tardanzaMin')">
+                    Tardanza<br>(min)
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'tardanzaMin'">
+                      {{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}
+                    </mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('totalHorasTrabajadasSemana')">Total Horas<br>Trabajadas<br>(Semana)</th>
+                  <th class="column-title sortable" (click)="ordenarPor('totalHorasExtrasSemana')">Total Horas<br>Extras<br>(Semana)</th>
+                  <th class="column-title sortable" (click)="ordenarPor('totalDiasAsistidos')">Total Días<br>Asistidos</th>
+                  <th class="column-title sortable" (click)="ordenarPor('totalFaltas')">Total<br>Faltas</th>
+                  <th class="column-title sortable" (click)="ordenarPor('porcAsistencia')">%<br>Asistencia</th>
+                  <th class="column-title sortable" (click)="ordenarPor('porcAusentismo')">%<br>Ausentismo</th>
                 </tr>
               </thead>
               <tbody>

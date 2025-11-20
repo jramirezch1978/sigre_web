@@ -124,9 +124,16 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
   codOrigen: string = 'SE';
   fechaInicio: Date = new Date();
   fechaFin: Date = new Date();
+  busquedaNombre: string = '';
+  tipoTrabajadorFiltro: string = 'TODOS';
   
   // Opciones de origen (se cargan desde el backend)
   origenes: Origen[] = [];
+  tiposTrabajador: string[] = [];
+  
+  // Ordenamiento
+  columnaOrdenada: string = '';
+  ordenAscendente: boolean = true;
   
   // Estados
   cargando: boolean = false;
@@ -198,7 +205,8 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
         next: (data) => {
           console.log('✅ Reporte cargado:', data.length, 'registros');
           this.registros = data;
-          this.registrosFiltrados = data;
+          this.extraerTiposTrabajador();
+          this.aplicarFiltros();
           this.cargando = false;
           this.mostrarMensaje(`Reporte generado: ${data.length} registros`, 'success');
         },
@@ -213,6 +221,63 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
 
   onFiltroChange(): void {
     this.cargarReporte();
+  }
+
+  onFiltroBusqueda(): void {
+    console.log('🔍 Aplicando filtros de búsqueda');
+    this.aplicarFiltros();
+  }
+
+  extraerTiposTrabajador(): void {
+    const tipos = new Set<string>();
+    this.registros.forEach(r => tipos.add(r.tipoTrabajador));
+    this.tiposTrabajador = ['TODOS', ...Array.from(tipos).sort()];
+  }
+
+  aplicarFiltros(): void {
+    let filtrados = [...this.registros];
+
+    // Filtro por nombre (búsqueda contextual)
+    if (this.busquedaNombre.trim()) {
+      const busqueda = this.busquedaNombre.toLowerCase();
+      filtrados = filtrados.filter(r => 
+        r.apellidosNombres.toLowerCase().includes(busqueda) ||
+        r.codigoTrabajador.includes(busqueda) ||
+        r.dni.includes(busqueda)
+      );
+    }
+
+    // Filtro por tipo de trabajador
+    if (this.tipoTrabajadorFiltro && this.tipoTrabajadorFiltro !== 'TODOS') {
+      filtrados = filtrados.filter(r => r.tipoTrabajador === this.tipoTrabajadorFiltro);
+    }
+
+    this.registrosFiltrados = filtrados;
+    console.log('📊 Registros filtrados:', this.registrosFiltrados.length, 'de', this.registros.length);
+  }
+
+  ordenarPor(columna: string): void {
+    if (this.columnaOrdenada === columna) {
+      this.ordenAscendente = !this.ordenAscendente;
+    } else {
+      this.columnaOrdenada = columna;
+      this.ordenAscendente = true;
+    }
+
+    this.registrosFiltrados.sort((a: any, b: any) => {
+      const valorA = a[columna];
+      const valorB = b[columna];
+      
+      let comparacion = 0;
+      if (valorA == null) comparacion = -1;
+      else if (valorB == null) comparacion = 1;
+      else if (valorA < valorB) comparacion = -1;
+      else if (valorA > valorB) comparacion = 1;
+      
+      return this.ordenAscendente ? comparacion : -comparacion;
+    });
+
+    console.log('📊 Ordenado por:', columna, this.ordenAscendente ? 'ASC' : 'DESC');
   }
 
   exportarExcel(): void {
