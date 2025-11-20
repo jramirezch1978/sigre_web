@@ -100,10 +100,10 @@ public class ReportePDFService {
                 table.addCell(createCell(row.getArea(), TextAlignment.LEFT, bgColor));
                 table.addCell(createCell(row.getCargoPuesto(), TextAlignment.LEFT, bgColor));
                 table.addCell(createCell(row.getTurno(), TextAlignment.CENTER, bgColor));
-                table.addCell(createCell(row.getFecha(), TextAlignment.CENTER, bgColor));
-                table.addCell(createCell(row.getHoraIngreso(), TextAlignment.CENTER, bgColor));
-                table.addCell(createCell(row.getHoraSalida() != null ? row.getHoraSalida() : "Pendiente", TextAlignment.CENTER, bgColor));
-                table.addCell(createCell(row.getHorasTrabajadas(), TextAlignment.RIGHT, bgColor));
+                table.addCell(createCell(row.getFecha() != null ? row.getFecha().format(DATE_FORMATTER) : "", TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(row.getHoraIngreso() != null ? row.getHoraIngreso().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")) : "", TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(row.getHoraSalida() != null ? row.getHoraSalida().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")) : "Pendiente", TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(String.format("%.2f", row.getHorasTrabajadas()), TextAlignment.RIGHT, bgColor));
                 table.addCell(createCell(String.format("%.2f", row.getHorasExtras()), TextAlignment.RIGHT, bgColor));
                 table.addCell(createCell(String.valueOf(row.getTardanzaMin()), TextAlignment.RIGHT, bgColor));
                 table.addCell(createCell(String.format("%.2f", row.getTotalHorasTrabajadasSemana()), TextAlignment.RIGHT, bgColor));

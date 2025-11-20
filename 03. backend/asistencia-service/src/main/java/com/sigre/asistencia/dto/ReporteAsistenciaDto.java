@@ -28,8 +28,8 @@ public class ReporteAsistenciaDto {
     private LocalDate fecha;
     private LocalDateTime horaIngreso;
     private LocalDateTime horaSalida;
-    private String horasTrabajadas;      // Formato HH:MM
-    private Double horasExtras;           // Formato decimal
+    private Double horasTrabajadas;      // Formato decimal (horas netas)
+    private Double horasExtras;          // Formato decimal
     private Integer tardanzaMin;
     private Double totalHorasTrabajadasSemana;
     private Double totalHorasExtrasSemana;

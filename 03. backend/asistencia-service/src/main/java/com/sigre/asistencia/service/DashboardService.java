@@ -810,7 +810,7 @@ public class DashboardService {
                 .fecha(convertirALocalDate(row[8]))
                 .horaIngreso(convertirALocalDateTime(row[9]))
                 .horaSalida(convertirALocalDateTime(row[10]))
-                .horasTrabajadas((String) row[11])
+                .horasTrabajadas(convertirADouble(row[11]))
                 .horasExtras(convertirADouble(row[12]))
                 .tardanzaMin(convertirAInteger(row[13]))
                 .totalHorasTrabajadasSemana(convertirADouble(row[14]))
