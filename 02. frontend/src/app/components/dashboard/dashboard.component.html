@@ -42,44 +42,47 @@
                 </ul>
               </li>
               
-              <li>
-                <a (click)="onAsistenciaMenu()"><mat-icon>people</mat-icon> Asistencia <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a href="#" (click)="onReporteAsistencia()">Reporte de Asistencia</a></li>
-                  <li><a href="#" (click)="onRegistrosDiarios()">Registros Diarios</a></li>
-                  <li><a href="#" (click)="onReportesPorEmpleado()">Reportes por Empleado</a></li>
-                  <li><a href="#" (click)="onHorariosYTurnos()">Horarios y Turnos</a></li>
-                  <li><a href="#" (click)="onAusenciasPermisos()">Ausencias y Permisos</a></li>
+              <li [class.active]="submenusAbiertos['asistencia']">
+                <a (click)="onAsistenciaMenu()">
+                  <mat-icon>people</mat-icon> Asistencia 
+                  <mat-icon class="chevron">{{ submenusAbiertos['asistencia'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </a>
+                <ul class="nav child_menu" [style.display]="submenusAbiertos['asistencia'] ? 'block' : 'none'">
+                  <li><a href="#" (click)="onReporteAsistencia(); $event.preventDefault()">Reporte de Asistencia</a></li>
+                  <li><a href="#" (click)="onRegistrosDiarios(); $event.preventDefault()">Registros Diarios</a></li>
+                  <li><a href="#" (click)="onReportesPorEmpleado(); $event.preventDefault()">Reportes por Empleado</a></li>
+                  <li><a href="#" (click)="onHorariosYTurnos(); $event.preventDefault()">Horarios y Turnos</a></li>
+                  <li><a href="#" (click)="onAusenciasPermisos(); $event.preventDefault()">Ausencias y Permisos</a></li>
                 </ul>
               </li>
 
-              <li>
-                <a (click)="onComedoresMenu()"><mat-icon>restaurant</mat-icon> Comedores <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a href="#" (click)="onControlRaciones()">Control de Raciones</a></li>
-                  <li><a href="#" (click)="onMenusDiarios()">Menús Diarios</a></li>
-                  <li><a href="#" (click)="onReportesAlimentarios()">Reportes Alimentarios</a></li>
+              <li [class.active]="submenusAbiertos['comedores']">
+                <a (click)="onComedoresMenu()">
+                  <mat-icon>restaurant</mat-icon> Comedores 
+                  <mat-icon class="chevron">{{ submenusAbiertos['comedores'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </a>
+                <ul class="nav child_menu" [style.display]="submenusAbiertos['comedores'] ? 'block' : 'none'">
+                  <li><a href="#" (click)="onControlRaciones(); $event.preventDefault()">Control de Raciones</a></li>
+                  <li><a href="#" (click)="onMenusDiarios(); $event.preventDefault()">Menús Diarios</a></li>
+                  <li><a href="#" (click)="onReportesAlimentarios(); $event.preventDefault()">Reportes Alimentarios</a></li>
                 </ul>
               </li>
 
-              <li>
-                <a (click)="onReportesMenu()"><mat-icon>assessment</mat-icon> Reportes <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a href="#" (click)="onReportesSemanales()">Reportes Semanales</a></li>
-                  <li><a href="#" (click)="onReportesMensuales()">Reportes Mensuales</a></li>
-                  <li><a href="#" (click)="onAnalisisTendencias()">Análisis de Tendencias</a></li>
-                  <li><a href="#" (click)="onExportarDatos()">Exportar Datos</a></li>
+              <li [class.active]="submenusAbiertos['reportes']">
+                <a (click)="onReportesMenu()">
+                  <mat-icon>assessment</mat-icon> Reportes 
+                  <mat-icon class="chevron">{{ submenusAbiertos['reportes'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </a>
+                <ul class="nav child_menu" [style.display]="submenusAbiertos['reportes'] ? 'block' : 'none'">
+                  <li><a href="#" (click)="onReportesSemanales(); $event.preventDefault()">Reportes Semanales</a></li>
+                  <li><a href="#" (click)="onReportesMensuales(); $event.preventDefault()">Reportes Mensuales</a></li>
+                  <li><a href="#" (click)="onAnalisisTendencias(); $event.preventDefault()">Análisis de Tendencias</a></li>
+                  <li><a href="#" (click)="onExportarDatos(); $event.preventDefault()">Exportar Datos</a></li>
                 </ul>
               </li>
 
-              <li>
-                <a (click)="onCentrosCostoMenu()"><mat-icon>business</mat-icon> Centros de Costo <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a href="#" (click)="onResumenPorArea()">Resumen por Área</a></li>
-                  <li><a href="#" (click)="onProductividad()">Productividad</a></li>
-                  <li><a href="#" (click)="onCostosOperativos()">Costos Operativos</a></li>
-                  <li><a href="#" (click)="onIndicadoresCentrosCosto()">Indicadores Detallados</a></li>
-                </ul>
+              <li [routerLinkActive]="'active'">
+                <a [routerLink]="['/centros-costo-dashboard']"><mat-icon>business</mat-icon> Centros de Costo</a>
               </li>
             </ul>
           </div>
@@ -87,21 +90,27 @@
           <div class="menu_section">
             <h3>Sistema</h3>
             <ul class="nav side-menu">
-              <li>
-                <a (click)="onConfiguracionMenu()"><mat-icon>settings</mat-icon> Configuración <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a href="#" (click)="onParametrosGenerales()">Parámetros Generales</a></li>
-                  <li><a href="#" (click)="onDispositivos()">Dispositivos</a></li>
-                  <li><a href="#" (click)="onSincronizacion()">Sincronización</a></li>
+              <li [class.active]="submenusAbiertos['configuracion']">
+                <a (click)="onConfiguracionMenu()">
+                  <mat-icon>settings</mat-icon> Configuración 
+                  <mat-icon class="chevron">{{ submenusAbiertos['configuracion'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </a>
+                <ul class="nav child_menu" [style.display]="submenusAbiertos['configuracion'] ? 'block' : 'none'">
+                  <li><a href="#" (click)="onParametrosGenerales(); $event.preventDefault()">Parámetros Generales</a></li>
+                  <li><a href="#" (click)="onDispositivos(); $event.preventDefault()">Dispositivos</a></li>
+                  <li><a href="#" (click)="onSincronizacion(); $event.preventDefault()">Sincronización</a></li>
                 </ul>
               </li>
               
-              <li>
-                <a (click)="onAdministracionMenu()"><mat-icon>security</mat-icon> Administración <mat-icon class="chevron">expand_more</mat-icon></a>
-                <ul class="nav child_menu">
-                  <li><a href="#" (click)="onUsuariosSistema()">Usuarios del Sistema</a></li>
-                  <li><a href="#" (click)="onPermisosRoles()">Permisos y Roles</a></li>
-                  <li><a href="#" (click)="onLogsSistema()">Logs del Sistema</a></li>
+              <li [class.active]="submenusAbiertos['administracion']">
+                <a (click)="onAdministracionMenu()">
+                  <mat-icon>security</mat-icon> Administración 
+                  <mat-icon class="chevron">{{ submenusAbiertos['administracion'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </a>
+                <ul class="nav child_menu" [style.display]="submenusAbiertos['administracion'] ? 'block' : 'none'">
+                  <li><a href="#" (click)="onUsuariosSistema(); $event.preventDefault()">Usuarios del Sistema</a></li>
+                  <li><a href="#" (click)="onPermisosRoles(); $event.preventDefault()">Permisos y Roles</a></li>
+                  <li><a href="#" (click)="onLogsSistema(); $event.preventDefault()">Logs del Sistema</a></li>
                 </ul>
               </li>
             </ul>

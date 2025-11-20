@@ -126,6 +126,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   fechaSeleccionada: Date = new Date();
   maxDate: Date = new Date();
 
+  // Estado de submenús
+  submenusAbiertos: { [key: string]: boolean } = {
+    asistencia: false,
+    comedores: false,
+    reportes: false,
+    configuracion: false,
+    administracion: false
+  };
+
   // Ya no necesitamos configuraciones de columnas porque están hardcodeadas en el HTML
 
   // Charts
@@ -681,13 +690,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // 📋 MENU LATERAL - Títulos principales
   onAsistenciaMenu() { this.notImplementedService.menuNotImplemented('Módulo de Asistencia'); }
-  onComedoresMenu() { this.notImplementedService.menuNotImplemented('Módulo de Comedores'); }
-  onReportesMenu() { this.notImplementedService.menuNotImplemented('Módulo de Reportes'); }
+  onComedoresMenu() { this.toggleSubmenu('comedores'); }
+  onReportesMenu() { this.toggleSubmenu('reportes'); }
   onCentrosCostoMenu() { this.notImplementedService.menuNotImplemented('Módulo de Centros de Costo'); }
   onIndicadoresCentrosCosto() {
     this.router.navigate(['/centros-costo-dashboard']);
   }
-  onConfiguracionMenu() { this.notImplementedService.menuNotImplemented('Módulo de Configuración'); }
+  onConfiguracionMenu() { this.toggleSubmenu('configuracion'); }
+  onAdministracionMenu() { this.toggleSubmenu('administracion'); }
   onAdministracionMenu() { this.notImplementedService.menuNotImplemented('Módulo de Administración'); }
 
   // 📋 MENU LATERAL - Opciones no implementadas
@@ -696,6 +706,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     console.log('📊 Navegando a Reporte de Asistencia');
     this.router.navigate(['/reporte-asistencia']);
   }
+  toggleSubmenu(menu: string) {
+    this.submenusAbiertos[menu] = !this.submenusAbiertos[menu];
+  }
+
+  onAsistenciaMenu() { this.toggleSubmenu('asistencia'); }
+  onReporteAsistencia() { this.router.navigate(['/reporte-asistencia']); }
   onRegistrosDiarios() { this.notImplementedService.menuNotImplemented('Registros Diarios'); }
   onReportesPorEmpleado() { this.notImplementedService.menuNotImplemented('Reportes por Empleado'); }
   onHorariosYTurnos() { this.notImplementedService.menuNotImplemented('Horarios y Turnos'); }
