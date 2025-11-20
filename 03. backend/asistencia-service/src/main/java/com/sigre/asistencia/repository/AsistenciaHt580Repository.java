@@ -344,12 +344,12 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     @Query(value = """
         WITH parametros AS (
             SELECT 
-                ?1 AS cod_origen_param,
-                ?2 AS fecha_inicio_param,
-                ?3 AS fecha_fin_param,
+                :codOrigen AS cod_origen_param,
+                :fechaInicio AS fecha_inicio_param,
+                :fechaFin AS fecha_fin_param,
                 (
                     SELECT COUNT(*)
-                    FROM generate_series(?2::date, ?3::date, '1 day'::interval) AS dia
+                    FROM generate_series(CAST(:fechaInicio AS date), CAST(:fechaFin AS date), CAST('1 day' AS interval)) AS dia
                     WHERE EXTRACT(DOW FROM dia) BETWEEN 1 AND 6
                 ) AS dias_laborables_rango
         ),
@@ -362,8 +362,8 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
                 a.TURNO
             FROM asistencia_ht580 a
             WHERE a.FLAG_IN_OUT = '1'  
-              AND a.COD_ORIGEN = ?1
-              AND a.FEC_MOVIMIENTO BETWEEN ?2 AND ?3
+              AND a.COD_ORIGEN = :codOrigen
+              AND a.FEC_MOVIMIENTO BETWEEN :fechaInicio AND :fechaFin
         ),
         marcaciones_completas AS (
             SELECT 
@@ -583,8 +583,8 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
         """, 
         nativeQuery = true)
     List<Object[]> generarReporteAsistencia(
-        String codOrigen,
-        LocalDate fechaInicio,
-        LocalDate fechaFin
+        @Param("codOrigen") String codOrigen,
+        @Param("fechaInicio") LocalDate fechaInicio,
+        @Param("fechaFin") LocalDate fechaFin
     );
 }

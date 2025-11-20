@@ -26,10 +26,16 @@ import { NotImplementedService } from '../../services/not-implemented.service';
 })
 export class MainLayoutComponent {
 
+  menuCollapsed = false;
+
   constructor(
     private router: Router,
     private notImplementedService: NotImplementedService
   ) {}
+
+  toggleMenu() {
+    this.menuCollapsed = !this.menuCollapsed;
+  }
 
   // Navegación
   irADashboard() { this.router.navigate(['/dashboard']); }
