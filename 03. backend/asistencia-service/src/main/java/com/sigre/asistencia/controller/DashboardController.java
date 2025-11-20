@@ -4,6 +4,9 @@ import com.sigre.asistencia.dto.dashboard.*;
 import com.sigre.asistencia.dto.ReporteAsistenciaDto;
 import com.sigre.asistencia.dto.OrigenDto;
 import com.sigre.asistencia.service.DashboardService;
+import com.sigre.asistencia.service.ReportePDFService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,6 +27,7 @@ import java.util.List;
 public class DashboardController {
     
     private final DashboardService dashboardService;
+    private final ReportePDFService reportePDFService;
     
     /**
      * Obtener dashboard completo con todas las estadísticas
@@ -267,6 +271,40 @@ public class DashboardController {
             return ResponseEntity.ok(origenes);
         } catch (Exception e) {
             log.error("❌ Error obteniendo orígenes: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Descargar reporte de asistencia en formato PDF
+     */
+    @GetMapping("/reporte-asistencia/pdf")
+    public ResponseEntity<byte[]> descargarReportePDF(
+            @RequestParam(required = false, defaultValue = "SE") String codOrigen,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin
+    ) {
+        log.info("📄 Solicitando reporte PDF | Origen: {} | Rango: {} a {}", 
+                codOrigen, fechaInicio, fechaFin);
+        try {
+            List<ReporteAsistenciaDto> reporte = dashboardService.generarReporteAsistencia(codOrigen, fechaInicio, fechaFin);
+            byte[] pdfBytes = reportePDFService.generarReporteAsistenciaPDF(reporte, codOrigen, fechaInicio, fechaFin);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", 
+                    String.format("Reporte_Asistencia_%s_%s_%s.pdf", 
+                            codOrigen, 
+                            fechaInicio.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")),
+                            fechaFin.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"))));
+            
+            log.info("✅ PDF generado: {} bytes", pdfBytes.length);
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
+                    
+        } catch (Exception e) {
+            log.error("❌ Error generando PDF: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }

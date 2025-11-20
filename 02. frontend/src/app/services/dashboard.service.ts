@@ -345,4 +345,13 @@ export class DashboardService {
     console.log('📍 Llamando lista de orígenes:', url);
     return this.http.get<Origen[]>(url);
   }
+
+  /**
+   * Descargar reporte de asistencia en PDF
+   */
+  descargarReportePDF(codOrigen: string, fechaInicio: string, fechaFin: string): Observable<Blob> {
+    const url = `${this.baseUrl}/reporte-asistencia/pdf?codOrigen=${codOrigen}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+    console.log('📄 Descargando PDF:', url);
+    return this.http.get(url, { responseType: 'blob' });
+  }
 }
