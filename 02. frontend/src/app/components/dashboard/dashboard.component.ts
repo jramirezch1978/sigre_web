@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -77,6 +77,7 @@ export const MY_DATE_FORMATS = {
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     HttpClientModule,
     FormsModule,
     MatCardModule,
@@ -688,30 +689,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // 🚧 MÉTODOS PARA OPCIONES NO IMPLEMENTADAS - POPUP PROFESIONAL
   // =====================================================================================
 
-  // 📋 MENU LATERAL - Títulos principales
-  onAsistenciaMenu() { this.notImplementedService.menuNotImplemented('Módulo de Asistencia'); }
-  onComedoresMenu() { this.toggleSubmenu('comedores'); }
-  onReportesMenu() { this.toggleSubmenu('reportes'); }
-  onCentrosCostoMenu() { this.notImplementedService.menuNotImplemented('Módulo de Centros de Costo'); }
-  onIndicadoresCentrosCosto() {
-    this.router.navigate(['/centros-costo-dashboard']);
-  }
-  onConfiguracionMenu() { this.toggleSubmenu('configuracion'); }
-  onAdministracionMenu() { this.toggleSubmenu('administracion'); }
-  onAdministracionMenu() { this.notImplementedService.menuNotImplemented('Módulo de Administración'); }
-
-  // 📋 MENU LATERAL - Opciones no implementadas
-  onMetricasTiempoReal() { this.notImplementedService.menuNotImplemented('Métricas Tiempo Real'); }
-  onReporteAsistencia() {
-    console.log('📊 Navegando a Reporte de Asistencia');
-    this.router.navigate(['/reporte-asistencia']);
-  }
+  // 📋 MENU LATERAL - Control de submenús
   toggleSubmenu(menu: string) {
     this.submenusAbiertos[menu] = !this.submenusAbiertos[menu];
   }
 
+  // 📋 MENU LATERAL - Títulos principales
   onAsistenciaMenu() { this.toggleSubmenu('asistencia'); }
-  onReporteAsistencia() { this.router.navigate(['/reporte-asistencia']); }
+  onComedoresMenu() { this.toggleSubmenu('comedores'); }
+  onReportesMenu() { this.toggleSubmenu('reportes'); }
+  onConfiguracionMenu() { this.toggleSubmenu('configuracion'); }
+  onAdministracionMenu() { this.toggleSubmenu('administracion'); }
+  
+  onIndicadoresCentrosCosto() {
+    this.router.navigate(['/centros-costo-dashboard']);
+  }
+
+  // 📋 MENU LATERAL - Navegación
+  onReporteAsistencia() {
+    console.log('📊 Navegando a Reporte de Asistencia');
+    this.router.navigate(['/reporte-asistencia']);
+  }
+  
+  // 📋 MENU LATERAL - Opciones no implementadas
+  onMetricasTiempoReal() { this.notImplementedService.menuNotImplemented('Métricas Tiempo Real'); }
   onRegistrosDiarios() { this.notImplementedService.menuNotImplemented('Registros Diarios'); }
   onReportesPorEmpleado() { this.notImplementedService.menuNotImplemented('Reportes por Empleado'); }
   onHorariosYTurnos() { this.notImplementedService.menuNotImplemented('Horarios y Turnos'); }
