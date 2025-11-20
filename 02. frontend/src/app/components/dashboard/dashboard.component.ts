@@ -28,6 +28,7 @@ import {
   ResumenCentroCosto 
 } from '../../services/dashboard.service';
 import { FloatingClockComponent } from '../floating-clock/floating-clock.component';
+import { MainLayoutComponent } from '../main-layout/main-layout.component';
 import { NotImplementedService } from '../../services/not-implemented.service';
 
 declare var Chart: any; // Para Chart.js
