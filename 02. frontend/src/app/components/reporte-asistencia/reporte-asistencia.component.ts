@@ -20,6 +20,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { DashboardService, Origen } from '../../services/dashboard.service';
 import { MainLayoutComponent } from '../main-layout/main-layout.component';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 // Adaptador personalizado para formato dd/MM/yyyy
 export class CustomDateAdapter extends NativeDateAdapter {
@@ -253,8 +255,142 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
 
   exportarPDF(): void {
     console.log('📄 Exportando a PDF...');
-    this.mostrarMensaje('Función de exportación a PDF en desarrollo', 'info');
-    // TODO: Implementar exportación a PDF
+    
+    if (this.registros.length === 0) {
+      this.mostrarMensaje('No hay datos para exportar', 'info');
+      return;
+    }
+
+    try {
+      const doc = new jsPDF('landscape', 'mm', 'a4');
+      
+      // Título
+      doc.setFontSize(16);
+      doc.setTextColor(40, 63, 84);
+      doc.text('Reporte de Asistencia', 14, 15);
+      
+      // Subtítulo
+      doc.setFontSize(10);
+      doc.setTextColor(115, 135, 156);
+      doc.text('Análisis detallado de horas trabajadas, tardanzas y asistencia del personal', 14, 22);
+      
+      // Filtros aplicados
+      doc.setFontSize(9);
+      doc.setTextColor(60, 60, 60);
+      const origenSeleccionado = this.origenes.find(o => o.codOrigen === this.codOrigen);
+      const origenTexto = origenSeleccionado ? `${origenSeleccionado.codOrigen} - ${origenSeleccionado.nombre}` : this.codOrigen;
+      doc.text(`Origen: ${origenTexto} | Período: ${this.formatearFechaParaArchivo(this.fechaInicio)} - ${this.formatearFechaParaArchivo(this.fechaFin)}`, 14, 28);
+      
+      // Preparar datos para la tabla
+      const headers = [
+        ['N°', 'Tipo', 'Código', 'DNI', 'Apellidos y Nombres', 'Área', 'Cargo/Puesto', 'Turno', 
+         'Fecha', 'Ingreso', 'Salida', 'Hrs.Trab.', 'Hrs.Extras', 'Tard.(min)', 
+         'Tot.Hrs.Sem', 'Extras Sem', 'Días', 'Faltas', '%Asis.', '%Ausent.']
+      ];
+      
+      const data = this.registros.map(row => [
+        row.nro,
+        row.tipoTrabajador,
+        row.codigoTrabajador,
+        row.dni,
+        row.apellidosNombres,
+        row.area,
+        row.cargoPuesto,
+        row.turno,
+        this.formatearFecha(row.fecha),
+        this.formatearHora(row.horaIngreso),
+        row.horaSalida ? this.formatearHora(row.horaSalida) : 'Pendiente',
+        row.horasTrabajadas,
+        row.horasExtras?.toFixed(2) || '0.00',
+        row.tardanzaMin || 0,
+        row.totalHorasTrabajadasSemana?.toFixed(2) || '0.00',
+        row.totalHorasExtrasSemana?.toFixed(2) || '0.00',
+        row.totalDiasAsistidos || 0,
+        row.totalFaltas || 0,
+        row.porcAsistencia?.toFixed(2) || '0.00',
+        row.porcAusentismo?.toFixed(2) || '0.00'
+      ]);
+      
+      // Generar tabla con autoTable
+      autoTable(doc, {
+        head: headers,
+        body: data,
+        startY: 32,
+        theme: 'grid',
+        styles: {
+          fontSize: 7,
+          cellPadding: 2,
+          overflow: 'linebreak',
+          halign: 'center'
+        },
+        headStyles: {
+          fillColor: [102, 126, 234],
+          textColor: 255,
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle'
+        },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 8 },   // N°
+          1: { halign: 'left', cellWidth: 20 },    // Tipo
+          2: { halign: 'center', cellWidth: 12 },  // Código
+          3: { halign: 'center', cellWidth: 12 },  // DNI
+          4: { halign: 'left', cellWidth: 35 },    // Nombres
+          5: { halign: 'left', cellWidth: 25 },    // Área
+          6: { halign: 'left', cellWidth: 28 },    // Cargo
+          7: { halign: 'center', cellWidth: 15 },  // Turno
+          8: { halign: 'center', cellWidth: 15 },  // Fecha
+          9: { halign: 'center', cellWidth: 12 },  // Ingreso
+          10: { halign: 'center', cellWidth: 12 }, // Salida
+          11: { halign: 'right', cellWidth: 10 },  // Hrs Trab
+          12: { halign: 'right', cellWidth: 10 },  // Hrs Extras
+          13: { halign: 'right', cellWidth: 10 },  // Tard
+          14: { halign: 'right', cellWidth: 12 },  // Tot Hrs Sem
+          15: { halign: 'right', cellWidth: 12 },  // Extras Sem
+          16: { halign: 'right', cellWidth: 8 },   // Días
+          17: { halign: 'right', cellWidth: 8 },   // Faltas
+          18: { halign: 'right', cellWidth: 10 },  // %Asis
+          19: { halign: 'right', cellWidth: 10 }   // %Ausent
+        },
+        alternateRowStyles: {
+          fillColor: [249, 250, 251]
+        },
+        margin: { top: 32, left: 10, right: 10 }
+      });
+      
+      // Pie de página
+      const pageCount = (doc as any).internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+        doc.text(`Generado: ${new Date().toLocaleString('es-PE')}`, 14, doc.internal.pageSize.height - 10);
+      }
+      
+      // Descargar PDF
+      const nombreArchivo = `Reporte_Asistencia_${this.codOrigen}_${this.formatearFechaParaArchivo(this.fechaInicio)}_${this.formatearFechaParaArchivo(this.fechaFin)}.pdf`;
+      doc.save(nombreArchivo);
+      
+      this.mostrarMensaje('PDF generado exitosamente', 'success');
+      console.log('✅ PDF exportado:', nombreArchivo);
+      
+    } catch (error) {
+      console.error('❌ Error exportando PDF:', error);
+      this.mostrarMensaje('Error al generar el PDF', 'error');
+    }
+  }
+
+  private formatearFecha(fecha: string): string {
+    if (!fecha) return '';
+    const f = new Date(fecha);
+    return f.toLocaleDateString('es-PE');
+  }
+
+  private formatearHora(hora: string): string {
+    if (!hora) return '';
+    const h = new Date(hora);
+    return h.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
   private formatearFechaParaApi(fecha: Date): string {
