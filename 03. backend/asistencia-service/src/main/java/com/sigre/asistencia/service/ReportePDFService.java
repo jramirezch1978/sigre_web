@@ -38,7 +38,7 @@ public class ReportePDFService {
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf, PageSize.A4.rotate());
-            document.setMargins(20, 10, 20, 10);
+            document.setMargins(15, 10, 15, 10);
             
             // Título
             Paragraph titulo = new Paragraph("Reporte de Asistencia")
@@ -64,11 +64,34 @@ public class ReportePDFService {
                     .setMarginBottom(10);
             document.add(filtros);
             
-            // Tabla con 20 columnas
-            float[] columnWidths = {20f, 40f, 30f, 25f, 70f, 50f, 60f, 35f, 28f, 28f, 28f, 30f, 30f, 25f, 35f, 35f, 20f, 25f, 25f, 30f};
-            Table table = new Table(UnitValue.createPointArray(columnWidths));
+            // Tabla con 20 columnas optimizadas para A4 landscape (100% ancho página)
+            // A4 landscape: 842pt - márgenes 20pt = 822pt disponibles
+            float[] columnWidths = {
+                1.5f,  // N° 
+                4.5f,  // Tipo Trabajador
+                2.5f,  // Código
+                2.5f,  // DNI
+                8.0f,  // Apellidos y Nombres
+                5.0f,  // Área
+                6.5f,  // Cargo/Puesto
+                4.0f,  // Turno
+                2.5f,  // Fecha
+                2.5f,  // Hora Ingreso
+                2.5f,  // Hora Salida
+                3.0f,  // Horas Trabajadas
+                3.0f,  // Horas Extras
+                2.5f,  // Tardanza
+                3.5f,  // Tot Hrs Sem
+                3.5f,  // Extras Sem
+                2.0f,  // Total Días
+                2.5f,  // Total Faltas
+                2.5f,  // % Asistencia
+                3.0f   // % Ausentismo
+            }; // Total: 70 unidades → distribuidas proporcionalmente
+            
+            Table table = new Table(columnWidths);
             table.setWidth(UnitValue.createPercentValue(100));
-            table.setFontSize(7);
+            table.setFontSize(6);
             
             // Headers
             String[] headers = {"N°", "Tipo de\nTrabajador", "Código\nTrabajador", "DNI", "Apellidos y Nombres", 
