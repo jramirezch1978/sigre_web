@@ -127,7 +127,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let row of registrosFiltrados" class="even pointer">
+                <tr *ngFor="let row of registrosFiltrados" class="even pointer" [class.tardanza-alta]="row.tardanzaMin > 15">
                   <td>{{ row.nro }}</td>
                   <td>{{ row.tipoTrabajador }}</td>
                   <td>{{ row.codigoTrabajador }}</td>
@@ -142,9 +142,9 @@
                     <span *ngIf="row.horaSalida">{{ row.horaSalida | date: 'HH:mm:ss' }}</span>
                     <span *ngIf="!row.horaSalida" class="label label-warning">Pendiente</span>
                   </td>
-                  <td>{{ row.horasTrabajadas }}</td>
+                  <td>{{ row.horasTrabajadas | number: '1.2-2' }}</td>
                   <td>{{ row.horasExtras | number: '1.2-2' }}</td>
-                  <td>{{ row.tardanzaMin }}</td>
+                  <td [class.tardanza-warning]="row.tardanzaMin > 15">{{ row.tardanzaMin }}</td>
                   <td>{{ row.totalHorasTrabajadasSemana | number: '1.2-2' }}</td>
                   <td>{{ row.totalHorasExtrasSemana | number: '1.2-2' }}</td>
                   <td>{{ row.totalDiasAsistidos }}</td>

@@ -562,11 +562,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
             cf.hora_entrada AS hora_ingreso,
             cf.hora_salida AS hora_salida,
             
-            CONCAT(
-                LPAD(CAST(TRUNC(cf.horas_netas) AS TEXT), 2, '0'), 
-                ':', 
-                LPAD(CAST(MOD(ROUND(cf.horas_netas * 60), 60) AS TEXT), 2, '0')
-            ) AS horas_trabajadas,
+            ROUND(cf.horas_netas, 2) AS horas_trabajadas,
             
             cf.horas_extras_dia AS horas_extras,
             cf.tardanza_min,
