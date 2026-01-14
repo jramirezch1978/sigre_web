@@ -19,23 +19,31 @@
     
     <!-- 
         SOAP Endpoints: JBoss 7.1.1 detecta automaticamente los @WebService
-        No se necesita configuracion manual de JAX-WS servlet
         El endpoint SOAP se expone en: /ImplConsultaRUC
+        
+        REST Endpoints: JBoss 7.1.1 usa RESTEasy (incluido)
+        Los endpoints REST se exponen en: /api/*
     -->
     
-    <!-- Jersey REST API Servlet -->
+    <!-- RESTEasy Configuration (usa el que viene con JBoss) -->
+    <context-param>
+        <param-name>resteasy.scan</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <context-param>
+        <param-name>resteasy.servlet.mapping.prefix</param-name>
+        <param-value>/api</param-value>
+    </context-param>
+    
+    <!-- RESTEasy Servlet -->
     <servlet>
-        <servlet-name>JerseyRESTService</servlet-name>
-        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-        <init-param>
-            <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>pe.sunat.web.rest.infrastructure.controller,pe.sunat.web.rest.infrastructure.config</param-value>
-        </init-param>
+        <servlet-name>RESTEasyServlet</servlet-name>
+        <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     
     <servlet-mapping>
-        <servlet-name>JerseyRESTService</servlet-name>
+        <servlet-name>RESTEasyServlet</servlet-name>
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
     
