@@ -14,6 +14,7 @@ public class SettingINI {
     
     public static String fileINI = "config.ini";
     private static Map<String, Map<String, String>> sections = null;
+    private static String loadedFile = null;
     
     /**
      * Obtiene el valor de una clave del archivo INI
@@ -46,7 +47,13 @@ public class SettingINI {
      * Carga las propiedades del archivo INI
      */
     private static void loadProperties() {
+        // Recargar si el archivo INI cambio
+        if (sections != null && loadedFile != null && !loadedFile.equals(fileINI)) {
+            sections = null;
+        }
+        
         if (sections == null) {
+            loadedFile = fileINI;
             sections = new HashMap<String, Map<String, String>>();
             BufferedReader reader = null;
             
