@@ -213,12 +213,12 @@ String ls_destinatarios, ls_nombres, ls_adjuntos
 String ls_filename
 Integer li_idx, li_max
 Boolean lb_html
-n_cst_api lnvo_api
+n_cst_api_sigre_dll lnvo_api
 
 try
     SetPointer(HourGlass!)
 	
-	lnvo_api = create n_cst_api
+	lnvo_api = create n_cst_api_sigre_dll
     
     // *** Validaciones ***
     If sle_send_email.text = "" Then
@@ -288,6 +288,7 @@ catch ( Exception ex )
     gnvo_app.of_Catch_exception(ex, 'Error en of_send_dll')
     
 finally
+	destroy lnvo_api
     SetPointer(Arrow!)
 end try
 end subroutine

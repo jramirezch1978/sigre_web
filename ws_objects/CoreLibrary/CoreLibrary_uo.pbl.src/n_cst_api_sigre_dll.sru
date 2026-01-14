@@ -1,5 +1,4 @@
-$PBExportHeader$n_cst_api_sigre_dll.sru
-$PBExportComments$Funciones API para SigreWebServiceWrapper DLL
+﻿$PBExportHeader$n_cst_api_sigre_dll.sru
 forward
 global type n_cst_api_sigre_dll from nonvisualobject
 end type
@@ -10,7 +9,6 @@ end type
 global n_cst_api_sigre_dll n_cst_api_sigre_dll
 
 type prototypes
-
 // === CONSULTA RUC ===
 FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, &
     string empresa) LIBRARY "SigreWebServiceWrapper.dll"
@@ -31,7 +29,6 @@ FUNCTION string EnviarCorreoAvanzado(string destinatarios, string nombres, &
 
 // === UTILIDADES (opcional) ===
 FUNCTION string ObtenerVersion() LIBRARY "SigreWebServiceWrapper.dll"
-
 end prototypes
 
 on n_cst_api_sigre_dll.create

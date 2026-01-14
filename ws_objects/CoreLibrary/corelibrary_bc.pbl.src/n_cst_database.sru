@@ -126,13 +126,18 @@ end try
 end function
 
 public function boolean of_add_column (string as_tabla, string as_columna, string as_type_data);Long		ll_count
-String	ls_cmd, ls_mensaje
+String	ls_cmd, ls_mensaje, ls_tabla, ls_columna
+
+// Usar variables locales para evitar ORA-24333
+ls_tabla = upper(trim(as_tabla))
+ls_columna = upper(trim(as_columna))
+ll_count = 0
 
 select count(*)
 	into :ll_count
 from user_tab_cols t
-where t.TABLE_NAME 	= upper(:as_tabla)
-  and t.COLUMN_NAME 	= upper(:as_columna);
+where t.TABLE_NAME 	= :ls_tabla
+  and t.COLUMN_NAME 	= :ls_columna;
   
 if SQLCA.SQLCode < 0 then
 	ls_mensaje = SQLCA.SQLErrText
@@ -161,13 +166,18 @@ end if
 end function
 
 public function boolean of_add_column (string as_tabla, string as_columna, string as_type_data, string as_default_value, boolean ab_not_null);Long		ll_count
-String	ls_cmd, ls_mensaje
+String	ls_cmd, ls_mensaje, ls_tabla, ls_columna
+
+// Usar variables locales para evitar ORA-24333
+ls_tabla = upper(trim(as_tabla))
+ls_columna = upper(trim(as_columna))
+ll_count = 0
 
 select count(*)
 	into :ll_count
 from user_tab_cols t
-where t.TABLE_NAME 	= upper(:as_tabla)
-  and t.COLUMN_NAME 	= upper(:as_columna);
+where t.TABLE_NAME 	= :ls_tabla
+  and t.COLUMN_NAME 	= :ls_columna;
   
 if SQLCA.SQLCode < 0 then
 	ls_mensaje = SQLCA.SQLErrText
