@@ -22,17 +22,36 @@ end variables
 
 global type activo from application
 string appname = "activo"
-long richtextedittype = 0
-long richtexteditversion = 0
-string richtexteditkey = ""
 integer highdpimode = 0
+string themepath = "C:\Program Files (x86)\Appeon\PowerBuilder 25.0\IDE\theme"
+string themename = "Do Not Use Themes"
+boolean nativepdfvalid = false
+boolean nativepdfincludecustomfont = false
+string nativepdfappname = ""
+long richtextedittype = 5
+long richtexteditx64type = 5
+long richtexteditversion = 3
+string richtexteditkey = ""
+string appicon = "C:\SIGRE\resources\ICO\activofijo.ico"
 string appruntimeversion = "25.0.0.3711"
+boolean manualsession = false
+boolean unsupportedapierror = false
+boolean ultrafast = false
+boolean bignoreservercertificate = false
+uint ignoreservercertificate = 0
+long webview2distribution = 0
+boolean webview2checkx86 = false
+boolean webview2checkx64 = false
+string webview2url = "https://developer.microsoft.com/en-us/microsoft-edge/webview2/"
 end type
 global activo activo
 
 type prototypes
 Function int _lopen(ref string str, int num) Library "KERNEL32.DLL" alias for "_lopen;Ansi"
 Function ulong WinExec(ref string str, uint num) Library "KERNEL32.DLL" alias for "WinExec;Ansi"
+
+
+
 end prototypes
 
 on activo.create

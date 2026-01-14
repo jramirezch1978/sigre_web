@@ -74,6 +74,224 @@ n_cst_serversmtp 	invo_email
 n_smtp				invo_smtp
 end variables
 
+forward prototypes
+public subroutine of_send_old ()
+public subroutine of_send ()
+end prototypes
+
+public subroutine of_send_old ();String 	ls_body, ls_server, ls_uid, ls_pwd
+String 	ls_filename, ls_port, ls_encrypt, ls_errormsg
+Integer 	li_idx, li_max
+Boolean 	lb_html, lb_Return
+UInt 		lui_port
+
+try 
+	SetPointer(HourGlass!)
+
+	invo_email.of_load()
+	
+	ls_server = invo_email.is_server
+	
+	If ls_server = "" Then
+		MessageBox("Edit Error", &
+			"You must specify Server on the Settings tab first!", StopSign!)
+		Return
+	End If
+	
+	If sle_send_email.text = "" Then
+		sle_send_email.SetFocus()
+		MessageBox("Edit Error", &
+			"To Email is a required field!", StopSign!)
+		Return
+	End If
+	
+	If sle_from_email.text = "" Then
+		sle_from_email.SetFocus()
+		MessageBox("Edit Error", &
+			"From Email is a required field!", StopSign!)
+		Return
+	End If
+	
+	If sle_subject.text = "" Then
+		sle_subject.SetFocus()
+		MessageBox("Edit Error", &
+			"Subject is a required field!", StopSign!)
+		Return
+	End If
+	
+	If mle_body.text = "" Then
+		mle_body.SetFocus()
+		MessageBox("Edit Error", &
+			"Body is a required field!", StopSign!)
+		Return
+	End If
+	
+	If Not invo_smtp.of_ValidEmail(sle_from_email.text, ls_errormsg) Then
+		sle_from_email.SetFocus()
+		MessageBox("Edit Error", ls_errormsg, StopSign!)
+		Return
+	End If
+	
+	If Not invo_smtp.of_ValidEmail(sle_send_email.text, ls_errormsg) Then
+		sle_send_email.SetFocus()
+		MessageBox("Edit Error", ls_errormsg, StopSign!)
+		Return
+	End If
+	
+	If cbx_sendhtml.Checked Then
+		ls_body  = "<html><body bgcolor='#FFFFFF' topmargin=8 leftmargin=8><h2>"
+		ls_body += of_replaceall(mle_body.text, "~r~n", "<br>") + "</h2>"
+		ls_body += "</body></html>"
+		lb_html = True
+	Else
+		ls_body = mle_body.text
+		lb_html = False
+	End If
+	
+	lui_port = invo_email.iui_port
+	
+	// *** set email properties *********************
+	invo_smtp.of_ResetAll()
+	invo_smtp.of_SetPort(lui_port)
+	invo_smtp.of_SetServer(ls_server)
+	invo_smtp.of_SetLogFile(cbx_logfile.Checked, "smtp_logfile8.txt")
+	invo_smtp.of_SetDebugViewer(cbx_debugviewer.Checked)
+	invo_smtp.of_SetSubject(sle_subject.text)
+	invo_smtp.of_SetBody(ls_body, lb_html)
+	invo_smtp.of_SetFrom(sle_from_email.text, sle_from_name.text)
+	invo_smtp.of_AddAddress(sle_send_email.text, sle_send_name.text)
+	
+	// *** set Userid/Password if required **********
+	If invo_email.is_AuthSMTP = "Y" Then
+		ls_uid = invo_email.is_uid
+		ls_pwd = invo_email.is_pwd
+		invo_smtp.of_SetLogin(ls_uid, ls_pwd)
+	End If
+	
+	// *** add any attachments **********************
+	li_max = lb_attachments.TotalItems()
+	For li_idx = 1 To li_max
+		ls_filename = lb_attachments.Text(li_idx)
+		invo_smtp.of_AddAttachment(ls_filename)
+	Next
+	
+	// *** send the message *************************
+	ls_encrypt = invo_email.is_encrypt
+	choose case ls_encrypt
+		case "SSL"
+			lb_Return = invo_smtp.of_SendSSLMail()
+		case "TLS"
+			lb_Return = invo_smtp.of_SendTLSMail()
+		case else
+			lb_Return = invo_smtp.of_SendMail()
+	end choose
+	
+	If lb_Return Then
+		MessageBox("SendMail", "Mail successfully sent!")
+	Else
+		MessageBox("SendMail Error", invo_smtp.of_GetLastError())
+	End If
+
+catch ( Exception ex )
+	gnvo_app.of_Catch_exception(ex, 'Error en cb_send')
+	
+finally
+	SetPointer(Arrow!)
+end try
+
+
+
+end subroutine
+
+public subroutine of_send ();// =========================================================================
+// FUNCION: of_send_dll
+// DESCRIPCION: Envía correo usando el DLL SigreWebServiceWrapper
+// =========================================================================
+
+String ls_body, ls_errormsg, ls_resultado
+String ls_destinatarios, ls_nombres, ls_adjuntos
+String ls_filename
+Integer li_idx, li_max
+Boolean lb_html
+n_cst_api lnvo_api
+
+try
+    SetPointer(HourGlass!)
+	
+	lnvo_api = create n_cst_api
+    
+    // *** Validaciones ***
+    If sle_send_email.text = "" Then
+        sle_send_email.SetFocus()
+        MessageBox("Edit Error", "To Email is a required field!", StopSign!)
+        Return
+    End If
+    
+    If sle_subject.text = "" Then
+        sle_subject.SetFocus()
+        MessageBox("Edit Error", "Subject is a required field!", StopSign!)
+        Return
+    End If
+    
+    If mle_body.text = "" Then
+        mle_body.SetFocus()
+        MessageBox("Edit Error", "Body is a required field!", StopSign!)
+        Return
+    End If
+    
+    // *** Preparar el cuerpo del mensaje ***
+    If cbx_sendhtml.Checked Then
+        ls_body  = "<html><body bgcolor='#FFFFFF' topmargin=8 leftmargin=8><h2>"
+        ls_body += of_replaceall(mle_body.text, "~r~n", "<br>") + "</h2>"
+        ls_body += "</body></html>"
+        lb_html = True
+    Else
+        ls_body = mle_body.text
+        lb_html = False
+    End If
+    
+    // *** Preparar destinatarios ***
+    ls_destinatarios = sle_send_email.text
+    ls_nombres = sle_send_name.text
+    
+    // *** Preparar adjuntos (separados por |) ***
+    ls_adjuntos = ""
+    li_max = lb_attachments.TotalItems()
+    For li_idx = 1 To li_max
+        ls_filename = lb_attachments.Text(li_idx)
+        If li_idx > 1 Then
+            ls_adjuntos += "|"
+        End If
+        ls_adjuntos += ls_filename
+    Next
+    
+    // *** Enviar usando el DLL ***
+    ls_resultado = lnvo_api.EnviarCorreo( &
+        ls_destinatarios, &
+        ls_nombres, &
+        sle_subject.text, &
+        ls_body, &
+        lb_html, &
+        ls_adjuntos)
+    
+    // *** Procesar resultado (JSON) ***
+    // El resultado es: {"exitoso":true,"mensaje":"..."} o {"exitoso":false,"mensaje":"..."}
+    If Pos(ls_resultado, '"exitoso":true') > 0 Then
+        MessageBox("SendMail", "Mail successfully sent!")
+    Else
+        // Extraer mensaje de error del JSON
+        ls_errormsg = ls_resultado
+        MessageBox("SendMail Error", ls_errormsg)
+    End If
+
+catch ( Exception ex )
+    gnvo_app.of_Catch_exception(ex, 'Error en of_send_dll')
+    
+finally
+    SetPointer(Arrow!)
+end try
+end subroutine
+
 on u_tabpg_smtp.create
 int iCurrent
 call super::create
@@ -498,128 +716,7 @@ string facename = "Tahoma"
 string text = "Send"
 end type
 
-event clicked;String 	ls_body, ls_server, ls_uid, ls_pwd
-String 	ls_filename, ls_port, ls_encrypt, ls_errormsg
-Integer 	li_idx, li_max
-Boolean 	lb_html, lb_Return
-UInt 		lui_port
-
-try 
-	SetPointer(HourGlass!)
-
-	invo_email.of_load()
-	
-	ls_server = invo_email.is_server
-	
-	If ls_server = "" Then
-		MessageBox("Edit Error", &
-			"You must specify Server on the Settings tab first!", StopSign!)
-		Return
-	End If
-	
-	If sle_send_email.text = "" Then
-		sle_send_email.SetFocus()
-		MessageBox("Edit Error", &
-			"To Email is a required field!", StopSign!)
-		Return
-	End If
-	
-	If sle_from_email.text = "" Then
-		sle_from_email.SetFocus()
-		MessageBox("Edit Error", &
-			"From Email is a required field!", StopSign!)
-		Return
-	End If
-	
-	If sle_subject.text = "" Then
-		sle_subject.SetFocus()
-		MessageBox("Edit Error", &
-			"Subject is a required field!", StopSign!)
-		Return
-	End If
-	
-	If mle_body.text = "" Then
-		mle_body.SetFocus()
-		MessageBox("Edit Error", &
-			"Body is a required field!", StopSign!)
-		Return
-	End If
-	
-	If Not invo_smtp.of_ValidEmail(sle_from_email.text, ls_errormsg) Then
-		sle_from_email.SetFocus()
-		MessageBox("Edit Error", ls_errormsg, StopSign!)
-		Return
-	End If
-	
-	If Not invo_smtp.of_ValidEmail(sle_send_email.text, ls_errormsg) Then
-		sle_send_email.SetFocus()
-		MessageBox("Edit Error", ls_errormsg, StopSign!)
-		Return
-	End If
-	
-	If cbx_sendhtml.Checked Then
-		ls_body  = "<html><body bgcolor='#FFFFFF' topmargin=8 leftmargin=8><h2>"
-		ls_body += of_replaceall(mle_body.text, "~r~n", "<br>") + "</h2>"
-		ls_body += "</body></html>"
-		lb_html = True
-	Else
-		ls_body = mle_body.text
-		lb_html = False
-	End If
-	
-	lui_port = invo_email.iui_port
-	
-	// *** set email properties *********************
-	invo_smtp.of_ResetAll()
-	invo_smtp.of_SetPort(lui_port)
-	invo_smtp.of_SetServer(ls_server)
-	invo_smtp.of_SetLogFile(cbx_logfile.Checked, "smtp_logfile8.txt")
-	invo_smtp.of_SetDebugViewer(cbx_debugviewer.Checked)
-	invo_smtp.of_SetSubject(sle_subject.text)
-	invo_smtp.of_SetBody(ls_body, lb_html)
-	invo_smtp.of_SetFrom(sle_from_email.text, sle_from_name.text)
-	invo_smtp.of_AddAddress(sle_send_email.text, sle_send_name.text)
-	
-	// *** set Userid/Password if required **********
-	If invo_email.is_AuthSMTP = "Y" Then
-		ls_uid = invo_email.is_uid
-		ls_pwd = invo_email.is_pwd
-		invo_smtp.of_SetLogin(ls_uid, ls_pwd)
-	End If
-	
-	// *** add any attachments **********************
-	li_max = lb_attachments.TotalItems()
-	For li_idx = 1 To li_max
-		ls_filename = lb_attachments.Text(li_idx)
-		invo_smtp.of_AddAttachment(ls_filename)
-	Next
-	
-	// *** send the message *************************
-	ls_encrypt = invo_email.is_encrypt
-	choose case ls_encrypt
-		case "SSL"
-			lb_Return = invo_smtp.of_SendSSLMail()
-		case "TLS"
-			lb_Return = invo_smtp.of_SendTLSMail()
-		case else
-			lb_Return = invo_smtp.of_SendMail()
-	end choose
-	
-	If lb_Return Then
-		MessageBox("SendMail", "Mail successfully sent!")
-	Else
-		MessageBox("SendMail Error", invo_smtp.of_GetLastError())
-	End If
-
-catch ( Exception ex )
-	gnvo_app.of_Catch_exception(ex, 'Error en cb_send')
-	
-finally
-	SetPointer(Arrow!)
-end try
-
-
-
+event clicked;of_send()
 end event
 
 type sle_subject from singlelineedit within u_tabpg_smtp
