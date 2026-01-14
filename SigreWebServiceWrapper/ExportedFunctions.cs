@@ -246,7 +246,7 @@ namespace SigreWebServiceWrapper
         }
 
         /// <summary>
-        /// Obtiene la ruta del archivo de log
+        /// Obtiene la ruta del archivo de log actual
         /// PowerBuilder: FUNCTION string ObtenerRutaLog() LIBRARY "SigreWebServiceWrapper.dll"
         /// </summary>
         [DllExport("ObtenerRutaLog", CallingConvention = CallingConvention.StdCall)]
@@ -254,6 +254,28 @@ namespace SigreWebServiceWrapper
         public static string ObtenerRutaLog()
         {
             return Logger.GetLogPath();
+        }
+
+        /// <summary>
+        /// Obtiene la ruta de la carpeta de logs
+        /// PowerBuilder: FUNCTION string ObtenerCarpetaLog() LIBRARY "SigreWebServiceWrapper.dll"
+        /// </summary>
+        [DllExport("ObtenerCarpetaLog", CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        public static string ObtenerCarpetaLog()
+        {
+            return Logger.GetLogDir();
+        }
+
+        /// <summary>
+        /// Obtiene la ruta de la carpeta de logs históricos
+        /// PowerBuilder: FUNCTION string ObtenerCarpetaLogHistorico() LIBRARY "SigreWebServiceWrapper.dll"
+        /// </summary>
+        [DllExport("ObtenerCarpetaLogHistorico", CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        public static string ObtenerCarpetaLogHistorico()
+        {
+            return Logger.GetHistoricoDir();
         }
 
         /// <summary>
@@ -267,13 +289,23 @@ namespace SigreWebServiceWrapper
         }
 
         /// <summary>
-        /// Limpia el archivo de log
+        /// Limpia el archivo de log actual
         /// PowerBuilder: SUBROUTINE LimpiarLog() LIBRARY "SigreWebServiceWrapper.dll"
         /// </summary>
         [DllExport("LimpiarLog", CallingConvention = CallingConvention.StdCall)]
         public static void LimpiarLog()
         {
             Logger.Clear();
+        }
+
+        /// <summary>
+        /// Limpia todos los logs históricos
+        /// PowerBuilder: SUBROUTINE LimpiarLogHistorico() LIBRARY "SigreWebServiceWrapper.dll"
+        /// </summary>
+        [DllExport("LimpiarLogHistorico", CallingConvention = CallingConvention.StdCall)]
+        public static void LimpiarLogHistorico()
+        {
+            Logger.ClearHistorico();
         }
 
         // ============================================================
