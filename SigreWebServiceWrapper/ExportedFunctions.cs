@@ -29,6 +29,7 @@ namespace SigreWebServiceWrapper
             [MarshalAs(UnmanagedType.Bool)] bool esHtml,
             [MarshalAs(UnmanagedType.LPWStr)] string adjuntos)
         {
+            Logger.Info("EnviarCorreo: destinatarios=" + (destinatarios ?? "null") + ", asunto=" + (asunto ?? "null"));
             try
             {
                 var emailService = new EmailService();
@@ -42,10 +43,20 @@ namespace SigreWebServiceWrapper
                     esHtml,
                     adjuntos ?? "");
 
+                if (resultado.Exitoso)
+                {
+                    Logger.Info("EnviarCorreo: " + resultado.Mensaje);
+                }
+                else
+                {
+                    Logger.Error("EnviarCorreo: " + resultado.Mensaje);
+                }
+
                 return FormatResult(resultado.Exitoso, resultado.Mensaje);
             }
             catch (Exception ex)
             {
+                Logger.Error("EnviarCorreo exception", ex);
                 return FormatResult(false, "Error: " + ex.Message);
             }
         }
@@ -103,6 +114,7 @@ namespace SigreWebServiceWrapper
             [MarshalAs(UnmanagedType.LPWStr)] string clave,
             [MarshalAs(UnmanagedType.LPWStr)] string empresa)
         {
+            Logger.Info("ObtenerTokenRest: usuario=" + (usuario ?? "null") + ", empresa=" + (empresa ?? "null"));
             try
             {
                 if (_restClient == null)
@@ -111,10 +123,21 @@ namespace SigreWebServiceWrapper
                 }
 
                 string token = _restClient.ObtenerToken(usuario ?? "", clave ?? "", empresa ?? "");
+                
+                if (token != null && !token.StartsWith("ERROR:"))
+                {
+                    Logger.Info("ObtenerTokenRest: Token obtenido exitosamente");
+                }
+                else
+                {
+                    Logger.Error("ObtenerTokenRest: " + (token ?? "null"));
+                }
+                
                 return token ?? "ERROR: Token nulo";
             }
             catch (Exception ex)
             {
+                Logger.Error("ObtenerTokenRest exception", ex);
                 return "ERROR: " + ex.Message;
             }
         }
@@ -220,6 +243,37 @@ namespace SigreWebServiceWrapper
         public static string ObtenerVersion()
         {
             return "1.0.0";
+        }
+
+        /// <summary>
+        /// Obtiene la ruta del archivo de log
+        /// PowerBuilder: FUNCTION string ObtenerRutaLog() LIBRARY "SigreWebServiceWrapper.dll"
+        /// </summary>
+        [DllExport("ObtenerRutaLog", CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        public static string ObtenerRutaLog()
+        {
+            return Logger.GetLogPath();
+        }
+
+        /// <summary>
+        /// Habilita o deshabilita el logging
+        /// PowerBuilder: SUBROUTINE HabilitarLog(long habilitado) LIBRARY "SigreWebServiceWrapper.dll"
+        /// </summary>
+        [DllExport("HabilitarLog", CallingConvention = CallingConvention.StdCall)]
+        public static void HabilitarLog(int habilitado)
+        {
+            Logger.Enabled = (habilitado == 1);
+        }
+
+        /// <summary>
+        /// Limpia el archivo de log
+        /// PowerBuilder: SUBROUTINE LimpiarLog() LIBRARY "SigreWebServiceWrapper.dll"
+        /// </summary>
+        [DllExport("LimpiarLog", CallingConvention = CallingConvention.StdCall)]
+        public static void LimpiarLog()
+        {
+            Logger.Clear();
         }
 
         // ============================================================
