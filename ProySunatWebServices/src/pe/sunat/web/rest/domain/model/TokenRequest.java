@@ -2,12 +2,13 @@ package pe.sunat.web.rest.domain.model;
 
 /**
  * Modelo para solicitud de token
+ * Parametros: pUsuario, pClave, pEmpresa
  */
 public class TokenRequest {
     
-    private String usuario;
-    private String clave;
-    private String empresa;
+    private String usuario;   // pUsuario
+    private String clave;     // pClave
+    private String empresa;   // pEmpresa
     
     public TokenRequest() {}
     

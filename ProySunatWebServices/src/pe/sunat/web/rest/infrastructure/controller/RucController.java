@@ -1,13 +1,10 @@
 package pe.sunat.web.rest.infrastructure.controller;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -22,6 +19,14 @@ import pe.sunat.web.rest.domain.port.AuthPort.TokenClaims;
  * Controlador REST para consulta de RUC
  * Endpoint: /api/ruc
  * Requiere autenticacion JWT
+ * 
+ * Parametros SOAP equivalentes:
+ * - pRucConsulta  -> rucConsulta (body)
+ * - pRucOrigen    -> rucOrigen (body)
+ * - pComputerName -> computerName (body)
+ * - pUsuario      -> en JWT (token)
+ * - pClave        -> validado al generar token
+ * - pEmpresa      -> en JWT (token)
  */
 @Path("/ruc")
 public class RucController {
@@ -35,47 +40,22 @@ public class RucController {
     }
     
     /**
-     * Consulta un RUC por GET
-     * GET /api/ruc/{ruc}
-     * Header: Authorization: Bearer {token}
-     */
-    @GET
-    @Path("/{ruc}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response consultarRucGet(
-            @PathParam("ruc") String ruc,
-            @QueryParam("rucOrigen") String rucOrigen,
-            @QueryParam("computerName") String computerName,
-            @HeaderParam("Authorization") String authHeader) {
-        
-        // Validar token
-        TokenClaims claims = validarAutorizacion(authHeader);
-        if (!claims.isValid()) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                .entity(RucResponse.error(claims.getError()))
-                .build();
-        }
-        
-        return procesarConsulta(ruc, rucOrigen, computerName, claims);
-    }
-    
-    /**
-     * Consulta un RUC por POST
+     * Consulta un RUC
      * POST /api/ruc/consultar
      * Header: Authorization: Bearer {token}
      * 
      * Request Body:
      * {
      *   "rucConsulta": "20123456789",
-     *   "rucOrigen": "20100000001",
-     *   "computerName": "PC-01"
+     *   "rucOrigen": "20100070970",
+     *   "computerName": "PC-COMPRAS01"
      * }
      */
     @POST
     @Path("/consultar")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response consultarRucPost(
+    public Response consultarRuc(
             RucRequest request,
             @HeaderParam("Authorization") String authHeader) {
         
@@ -88,41 +68,45 @@ public class RucController {
         }
         
         // Validar request
-        if (request.getRucConsulta() == null || request.getRucConsulta().trim().isEmpty()) {
+        if (request == null) {
             return Response.status(Response.Status.BAD_REQUEST)
-                .entity(RucResponse.error("El RUC a consultar es requerido"))
+                .entity(RucResponse.error("Request body es requerido"))
                 .build();
         }
         
-        return procesarConsulta(
-            request.getRucConsulta(), 
-            request.getRucOrigen(), 
-            request.getComputerName(), 
-            claims
-        );
-    }
-    
-    /**
-     * Procesa la consulta de RUC
-     */
-    private Response procesarConsulta(String ruc, String rucOrigen, 
-                                       String computerName, TokenClaims claims) {
+        if (request.getRucConsulta() == null || request.getRucConsulta().trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(RucResponse.error("El campo rucConsulta es requerido"))
+                .build();
+        }
+        
+        if (request.getRucOrigen() == null || request.getRucOrigen().trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(RucResponse.error("El campo rucOrigen es requerido"))
+                .build();
+        }
+        
+        if (request.getComputerName() == null || request.getComputerName().trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(RucResponse.error("El campo computerName es requerido"))
+                .build();
+        }
+        
         try {
             // Consultar RUC
-            RucData data = rucService.consultarRuc(ruc);
+            RucData data = rucService.consultarRuc(request.getRucConsulta());
             
-            // Registrar consulta
+            // Registrar consulta exitosa
             try {
                 rucService.registrarConsulta(
-                    ruc, 
-                    rucOrigen != null ? rucOrigen : "", 
+                    request.getRucConsulta(), 
+                    request.getRucOrigen(), 
                     claims.getEmpresa(), 
-                    computerName != null ? computerName : "REST-API", 
+                    request.getComputerName(), 
                     claims.getUsuario(), 
                     true
                 );
             } catch (Exception e) {
-                // No fallar si el registro falla
                 System.err.println("Error registrando consulta: " + e.getMessage());
             }
             
@@ -132,10 +116,10 @@ public class RucController {
             // Registrar consulta fallida
             try {
                 rucService.registrarConsulta(
-                    ruc, 
-                    rucOrigen != null ? rucOrigen : "", 
+                    request.getRucConsulta(), 
+                    request.getRucOrigen(), 
                     claims.getEmpresa(), 
-                    computerName != null ? computerName : "REST-API", 
+                    request.getComputerName(), 
                     claims.getUsuario(), 
                     false
                 );
