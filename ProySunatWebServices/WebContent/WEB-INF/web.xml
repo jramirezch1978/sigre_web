@@ -21,31 +21,20 @@
         SOAP Endpoints: JBoss 7.1.1 detecta automaticamente los @WebService
         El endpoint SOAP se expone en: /ImplConsultaRUC
         
-        REST Endpoints: JBoss 7.1.1 usa RESTEasy (incluido)
+        REST Endpoints: Se usa @ApplicationPath("/api") en RestApplication
         Los endpoints REST se exponen en: /api/*
     -->
     
-    <!-- RESTEasy Configuration (usa el que viene con JBoss) -->
-    <context-param>
-        <param-name>resteasy.scan</param-name>
-        <param-value>true</param-value>
-    </context-param>
-    <context-param>
-        <param-name>resteasy.servlet.mapping.prefix</param-name>
-        <param-value>/api</param-value>
-    </context-param>
+    <!-- CORS Filter -->
+    <filter>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>pe.sunat.web.rest.infrastructure.config.CorsFilter</filter-class>
+    </filter>
     
-    <!-- RESTEasy Servlet -->
-    <servlet>
-        <servlet-name>RESTEasyServlet</servlet-name>
-        <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    
-    <servlet-mapping>
-        <servlet-name>RESTEasyServlet</servlet-name>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
         <url-pattern>/api/*</url-pattern>
-    </servlet-mapping>
+    </filter-mapping>
     
     <distributable/>
 </web-app>
