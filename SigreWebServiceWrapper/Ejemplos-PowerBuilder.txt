@@ -1,10 +1,304 @@
 =========================================================================
   EJEMPLOS DE USO DESDE POWERBUILDER 2025
-  SigreWebServiceWrapper - Servicio de Consulta RUC SUNAT
+  SigreWebServiceWrapper - Servicios COM para PowerBuilder
 =========================================================================
 
-EJEMPLO 1: Consulta Básica de RUC
-----------------------------------
+El DLL ofrece TRES servicios:
+
+  1. ConsultaRUC (SOAP)     - Servicio Web SOAP tradicional
+  2. ConsultaRUCRest (REST) - API REST con autenticación JWT (RECOMENDADO)
+  3. EmailService (SMTP)    - Envío de correos electrónicos
+
+=========================================================================
+=========================================================================
+
+                    API REST CON JWT (RECOMENDADO)
+                    
+=========================================================================
+=========================================================================
+
+EJEMPLO REST 1: Consulta Básica con Token
+-----------------------------------------
+
+// Declarar variables
+OLEObject lole_service
+OLEObject lole_respuesta
+integer li_ret
+string ls_token, ls_ruc_consultar
+
+TRY
+    // Crear el objeto COM (REST)
+    lole_service = CREATE OLEObject
+    li_ret = lole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUCRest")
+    
+    IF li_ret <> 0 THEN
+        MessageBox("Error", "No se pudo crear el objeto COM REST. Código: " + String(li_ret), StopSign!)
+        RETURN
+    END IF
+    
+    // PASO 1: Obtener token JWT (válido 15 minutos)
+    ls_token = lole_service.ObtenerToken("sigre", "sigre1234", "TRANSMARINA")
+    
+    IF Left(ls_token, 6) = "ERROR:" THEN
+        MessageBox("Error", "No se pudo obtener token: " + ls_token, StopSign!)
+        RETURN
+    END IF
+    
+    // PASO 2: Consultar RUC usando el token
+    ls_ruc_consultar = "20100070970"
+    lole_respuesta = lole_service.ConsultarRUC( &
+        ls_ruc_consultar,           // RUC a consultar
+        "20123456789",              // RUC de tu empresa
+        "ESTACION01")               // Nombre del computador
+    
+    // Procesar respuesta
+    IF lole_respuesta.IsOk THEN
+        MessageBox("RUC Encontrado", &
+            "RUC: " + lole_respuesta.Ruc + "~r~n" + &
+            "Razón Social: " + lole_respuesta.RazonSocial + "~r~n" + &
+            "Estado: " + lole_respuesta.Estado + "~r~n" + &
+            "Condición: " + lole_respuesta.Condicion, Information!)
+    ELSE
+        MessageBox("Error", lole_respuesta.Mensaje, StopSign!)
+    END IF
+    
+CATCH (RuntimeError er)
+    MessageBox("Error", "Error: " + er.getMessage(), StopSign!)
+    
+FINALLY
+    IF NOT IsNull(lole_service) THEN
+        lole_service.InvalidarToken()
+        lole_service.DisconnectObject()
+    END IF
+    DESTROY lole_service
+END TRY
+
+
+=========================================================================
+
+EJEMPLO REST 2: Consulta Completa en Un Solo Paso
+-------------------------------------------------
+
+// Para consultas individuales sin reutilizar token
+OLEObject lole_service
+OLEObject lole_respuesta
+integer li_ret
+
+TRY
+    lole_service = CREATE OLEObject
+    li_ret = lole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUCRest")
+    
+    IF li_ret <> 0 THEN
+        MessageBox("Error", "No se pudo crear objeto COM", StopSign!)
+        RETURN
+    END IF
+    
+    // Consulta completa en un solo paso (obtiene token internamente)
+    lole_respuesta = lole_service.ConsultarRUCCompleto( &
+        "10056450608",              // RUC a consultar
+        "20123456789",              // RUC de tu empresa
+        "sigre",                    // Usuario
+        "sigre1234",                // Clave
+        "TRANSMARINA",              // Empresa
+        "PC-COMPRAS01")             // Nombre del computador
+    
+    IF lole_respuesta.IsOk THEN
+        MessageBox("Éxito", lole_respuesta.RazonSocial + " - " + lole_respuesta.Estado)
+    ELSE
+        MessageBox("Error", lole_respuesta.Mensaje, StopSign!)
+    END IF
+    
+CATCH (RuntimeError er)
+    MessageBox("Error", er.getMessage(), StopSign!)
+FINALLY
+    DESTROY lole_service
+END TRY
+
+
+=========================================================================
+
+EJEMPLO REST 3: Reutilizar Token para Múltiples Consultas
+---------------------------------------------------------
+
+// Ideal para consultas en lote o ventanas con múltiples búsquedas
+OLEObject lole_service
+OLEObject lole_respuesta
+integer li_ret, li_i
+string ls_token
+string ls_rucs[]
+
+// Lista de RUCs a consultar
+ls_rucs[1] = "20100070970"
+ls_rucs[2] = "20123456789"
+ls_rucs[3] = "10056450608"
+
+TRY
+    lole_service = CREATE OLEObject
+    li_ret = lole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUCRest")
+    
+    IF li_ret <> 0 THEN RETURN
+    
+    // Obtener token UNA sola vez
+    ls_token = lole_service.ObtenerToken("sigre", "sigre1234", "TRANSMARINA")
+    
+    IF Left(ls_token, 6) = "ERROR:" THEN
+        MessageBox("Error", ls_token, StopSign!)
+        RETURN
+    END IF
+    
+    // Consultar múltiples RUCs con el mismo token
+    FOR li_i = 1 TO UpperBound(ls_rucs)
+        
+        // Verificar si el token sigue válido
+        IF NOT lole_service.TieneTokenValido() THEN
+            // Renovar token si expiró
+            ls_token = lole_service.ObtenerToken("sigre", "sigre1234", "TRANSMARINA")
+        END IF
+        
+        lole_respuesta = lole_service.ConsultarRUC( &
+            ls_rucs[li_i], "20123456789", "ESTACION01")
+        
+        IF lole_respuesta.IsOk THEN
+            // Procesar resultado...
+            // Insertar en DataWindow, actualizar BD, etc.
+        END IF
+        
+    NEXT
+    
+CATCH (RuntimeError er)
+    MessageBox("Error", er.getMessage(), StopSign!)
+FINALLY
+    IF NOT IsNull(lole_service) THEN
+        lole_service.InvalidarToken()
+    END IF
+    DESTROY lole_service
+END TRY
+
+
+=========================================================================
+
+EJEMPLO REST 4: Objeto No Visual Encapsulado (Recomendado)
+----------------------------------------------------------
+
+Crear objeto no visual: n_cst_consulta_ruc_rest.sru
+
+// Variables de instancia
+type variables
+    OLEObject iole_service
+    boolean ib_inicializado = false
+    string is_usuario = "sigre"
+    string is_clave = "sigre1234"
+    string is_empresa = "TRANSMARINA"
+end variables
+
+// Función: of_inicializar()
+public function boolean of_inicializar();
+integer li_ret
+
+TRY
+    IF ib_inicializado THEN RETURN TRUE
+    
+    iole_service = CREATE OLEObject
+    li_ret = iole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUCRest")
+    
+    IF li_ret <> 0 THEN
+        MessageBox("Error", "No se pudo inicializar servicio REST. Código: " + String(li_ret), StopSign!)
+        RETURN FALSE
+    END IF
+    
+    ib_inicializado = TRUE
+    RETURN TRUE
+    
+CATCH (RuntimeError er)
+    MessageBox("Error", er.getMessage(), StopSign!)
+    RETURN FALSE
+END TRY
+
+end function
+
+// Función: of_asegurar_token()
+private function boolean of_asegurar_token();
+string ls_token
+
+IF NOT ib_inicializado THEN
+    IF NOT of_inicializar() THEN RETURN FALSE
+END IF
+
+// Si ya tiene token válido, no hacer nada
+IF iole_service.TieneTokenValido() THEN RETURN TRUE
+
+// Obtener nuevo token
+ls_token = iole_service.ObtenerToken(is_usuario, is_clave, is_empresa)
+
+IF Left(ls_token, 6) = "ERROR:" THEN
+    MessageBox("Error Token", ls_token, StopSign!)
+    RETURN FALSE
+END IF
+
+RETURN TRUE
+
+end function
+
+// Función: of_consultar_ruc()
+public function st_padron_ruc of_consultar_ruc(string as_ruc);
+st_padron_ruc lstr_resultado
+OLEObject lole_respuesta
+
+TRY
+    // Asegurar que hay token válido
+    IF NOT of_asegurar_token() THEN
+        lstr_resultado.is_ok = FALSE
+        lstr_resultado.mensaje = "No se pudo obtener token"
+        RETURN lstr_resultado
+    END IF
+    
+    // Consultar RUC
+    lole_respuesta = iole_service.ConsultarRUC( &
+        as_ruc, gs_ruc_empresa, gs_estacion)
+    
+    // Convertir respuesta
+    lstr_resultado.is_ok = lole_respuesta.IsOk
+    lstr_resultado.mensaje = lole_respuesta.Mensaje
+    lstr_resultado.ruc = lole_respuesta.Ruc
+    lstr_resultado.razon_social = lole_respuesta.RazonSocial
+    lstr_resultado.estado = lole_respuesta.Estado
+    lstr_resultado.condicion = lole_respuesta.Condicion
+    lstr_resultado.direccion_completa = lole_respuesta.ObtenerDireccionCompleta()
+    lstr_resultado.ubicacion_completa = lole_respuesta.ObtenerUbicacionCompleta()
+    
+    RETURN lstr_resultado
+    
+CATCH (RuntimeError er)
+    lstr_resultado.is_ok = FALSE
+    lstr_resultado.mensaje = er.getMessage()
+    RETURN lstr_resultado
+END TRY
+
+end function
+
+// Destructor
+on destroy
+TRY
+    IF ib_inicializado AND NOT IsNull(iole_service) THEN
+        iole_service.InvalidarToken()
+        iole_service.DisconnectObject()
+    END IF
+CATCH (RuntimeError er)
+END TRY
+call super::destroy
+end on
+
+
+=========================================================================
+=========================================================================
+
+                         API SOAP (LEGADO)
+                    
+=========================================================================
+=========================================================================
+
+EJEMPLO SOAP 1: Consulta Básica de RUC
+--------------------------------------
 
 // Declarar variables
 OLEObject lole_service
@@ -13,7 +307,7 @@ integer li_ret
 string ls_ruc_consultar, ls_mensaje
 
 TRY
-    // Crear el objeto COM
+    // Crear el objeto COM (SOAP)
     lole_service = CREATE OLEObject
     li_ret = lole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUC")
     
@@ -24,9 +318,9 @@ TRY
     END IF
     
     // RUC a consultar
-    ls_ruc_consultar = "20100070970"  // Ejemplo: SUPERMERCADOS PERUANOS S.A.
+    ls_ruc_consultar = "20100070970"
     
-    // Llamar al servicio
+    // Llamar al servicio SOAP
     lole_respuesta = lole_service.ConsultarRUC( &
         ls_ruc_consultar,           // RUC a consultar
         "20123456789",              // RUC de tu empresa
@@ -53,165 +347,32 @@ CATCH (RuntimeError er)
     MessageBox("Error", "Error al consultar RUC: " + er.getMessage(), StopSign!)
     
 FINALLY
-    // Limpiar objetos
     IF NOT IsNull(lole_service) THEN
         lole_service.Dispose()
         lole_service.DisconnectObject()
     END IF
-    
     DESTROY lole_service
 END TRY
 
 
 =========================================================================
 
-EJEMPLO 2: Función Encapsulada (Recomendado)
----------------------------------------------
+COMPARACIÓN SOAP vs REST
+------------------------
 
-Crear un objeto no visual: n_cst_consulta_ruc_sunat.sru
-
-// Variables de instancia
-type variables
-    OLEObject iole_service
-    boolean ib_inicializado = false
-end variables
-
-// Función: of_inicializar()
-public function boolean of_inicializar();
-integer li_ret
-
-TRY
-    IF ib_inicializado THEN RETURN TRUE
-    
-    iole_service = CREATE OLEObject
-    li_ret = iole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUC")
-    
-    IF li_ret <> 0 THEN
-        MessageBox("Error", "No se pudo inicializar el servicio de consulta RUC. Código: " + String(li_ret), StopSign!)
-        RETURN FALSE
-    END IF
-    
-    ib_inicializado = TRUE
-    RETURN TRUE
-    
-CATCH (RuntimeError er)
-    MessageBox("Error", "Error al inicializar servicio: " + er.getMessage(), StopSign!)
-    RETURN FALSE
-END TRY
-
-end function
-
-// Función: of_consultar_ruc()
-public function st_padron_ruc of_consultar_ruc(string as_ruc);
-st_padron_ruc lstr_resultado
-OLEObject lole_respuesta
-string ls_usuario, ls_clave
-
-TRY
-    // Inicializar si no está inicializado
-    IF NOT ib_inicializado THEN
-        IF NOT of_inicializar() THEN
-            lstr_resultado.is_ok = FALSE
-            lstr_resultado.mensaje = "No se pudo inicializar el servicio"
-            RETURN lstr_resultado
-        END IF
-    END IF
-    
-    // Obtener credenciales (puedes ajustar según tu aplicación)
-    ls_usuario = "usuario_servicio"  // Obtener de parámetros
-    ls_clave = "clave_servicio"      // Obtener de parámetros
-    
-    // Llamar al servicio
-    lole_respuesta = iole_service.ConsultarRUC( &
-        as_ruc, &
-        gs_ruc_empresa, &  // Variable global con RUC de tu empresa
-        ls_usuario, &
-        ls_clave, &
-        gs_empresa, &      // Variable global con código de empresa
-        gs_estacion)       // Variable global con nombre de estación
-    
-    // Convertir respuesta a estructura PowerBuilder
-    lstr_resultado.is_ok = lole_respuesta.IsOk
-    lstr_resultado.mensaje = lole_respuesta.Mensaje
-    lstr_resultado.ruc = lole_respuesta.Ruc
-    lstr_resultado.razon_social = lole_respuesta.RazonSocial
-    lstr_resultado.estado = lole_respuesta.Estado
-    lstr_resultado.condicion = lole_respuesta.Condicion
-    lstr_resultado.ubigeo = lole_respuesta.Ubigeo
-    lstr_resultado.tipo_via = lole_respuesta.TipoVia
-    lstr_resultado.nombre_via = lole_respuesta.NombreVia
-    lstr_resultado.numero = lole_respuesta.Numero
-    lstr_resultado.interior = lole_respuesta.Interior
-    lstr_resultado.tipo_zona = lole_respuesta.TipoZona
-    lstr_resultado.codigo_zona = lole_respuesta.CodigoZona
-    lstr_resultado.lote = lole_respuesta.Lote
-    lstr_resultado.manzana = lole_respuesta.Manzana
-    lstr_resultado.kilometro = lole_respuesta.Kilometro
-    lstr_resultado.departamento = lole_respuesta.Departamento
-    lstr_resultado.provincia = lole_respuesta.DescProvincia
-    lstr_resultado.distrito = lole_respuesta.DescDistrito
-    lstr_resultado.direccion_completa = lole_respuesta.ObtenerDireccionCompleta()
-    lstr_resultado.ubicacion_completa = lole_respuesta.ObtenerUbicacionCompleta()
-    
-    RETURN lstr_resultado
-    
-CATCH (RuntimeError er)
-    lstr_resultado.is_ok = FALSE
-    lstr_resultado.mensaje = "Error: " + er.getMessage()
-    RETURN lstr_resultado
-END TRY
-
-end function
-
-// Destructor
-on destroy
-TRY
-    IF ib_inicializado AND NOT IsNull(iole_service) THEN
-        iole_service.Dispose()
-        iole_service.DisconnectObject()
-    END IF
-CATCH (RuntimeError er)
-    // Ignorar errores al destruir
-END TRY
-
-call super::destroy
-end on
+| Característica     | SOAP                      | REST (JWT)                |
+|--------------------|---------------------------|---------------------------|
+| ProgId             | ConsultaRUC               | ConsultaRUCRest           |
+| Autenticación      | Por cada llamada          | Token JWT (15 min)        |
+| Seguridad          | Básica                    | JWT con expiración        |
+| Rendimiento        | Una conexión por consulta | Reutiliza token           |
+| Recomendado        | Sistemas legados          | Nuevos desarrollos        |
 
 
 =========================================================================
 
-EJEMPLO 3: Uso desde una Ventana o DataWindow
-----------------------------------------------
-
-// En un botón o evento de validación
-n_cst_consulta_ruc_sunat lnvo_consulta
-st_padron_ruc lstr_resultado
-
-lnvo_consulta = CREATE n_cst_consulta_ruc_sunat
-
-// Consultar RUC
-lstr_resultado = lnvo_consulta.of_consultar_ruc(sle_ruc.text)
-
-IF lstr_resultado.is_ok THEN
-    // Llenar controles con la información
-    sle_razon_social.text = lstr_resultado.razon_social
-    sle_estado.text = lstr_resultado.estado
-    sle_condicion.text = lstr_resultado.condicion
-    sle_direccion.text = lstr_resultado.direccion_completa
-    sle_ubigeo.text = lstr_resultado.ubicacion_completa
-ELSE
-    MessageBox("Error", lstr_resultado.mensaje, StopSign!)
-END IF
-
-DESTROY lnvo_consulta
-
-
-=========================================================================
-
-ESTRUCTURA RECOMENDADA: st_padron_ruc
---------------------------------------
-
-Create la siguiente estructura en PowerBuilder:
+ESTRUCTURA st_padron_ruc (Igual para SOAP y REST)
+-------------------------------------------------
 
 boolean is_ok
 string mensaje
@@ -238,46 +399,62 @@ string ubicacion_completa
 
 =========================================================================
 
-PROPIEDADES DISPONIBLES EN LA RESPUESTA
-----------------------------------------
+MÉTODOS DISPONIBLES
+-------------------
 
-IsOk             - boolean - Indica si la consulta fue exitosa
-Mensaje          - string  - Mensaje de respuesta o error
-Ruc              - string  - Número de RUC consultado
-RazonSocial      - string  - Razón social o nombre de la empresa
-Estado           - string  - Estado del RUC (ACTIVO, BAJA, etc.)
-Condicion        - string  - Condición del RUC (HABIDO, NO HABIDO, etc.)
-Ubigeo           - string  - Código de ubigeo
-TipoVia          - string  - Tipo de vía (CALLE, AVENIDA, etc.)
-NombreVia        - string  - Nombre de la vía
-Numero           - string  - Número de la dirección
-Interior         - string  - Interior (dpto, oficina, etc.)
-TipoZona         - string  - Tipo de zona (URBANIZACIÓN, etc.)
-CodigoZona       - string  - Código de zona
-Lote             - string  - Número de lote
-Manzana          - string  - Número de manzana
-Kilometro        - string  - Kilómetro (para carreteras)
-Departamento     - string  - Departamento del domicilio
-DescProvincia    - string  - Provincia
-DescDistrito     - string  - Distrito
-CodDepartamento  - string  - Código de departamento
-CodProvincia     - string  - Código de provincia
+ConsultaRUCRest (REST con JWT):
+  - ObtenerToken(usuario, clave, empresa) -> string
+  - ConsultarRUC(rucConsulta, rucOrigen, computerName) -> PadronRUC
+  - ConsultarRUCCompleto(rucConsulta, rucOrigen, usuario, clave, empresa, computerName) -> PadronRUC
+  - TieneTokenValido() -> boolean
+  - SegundosRestantesToken() -> integer
+  - InvalidarToken()
+  - ConfigurarUrl(baseUrl)
+  - GetToken() -> string
 
-MÉTODOS ADICIONALES:
-ObtenerDireccionCompleta() - string - Retorna dirección formateada
-ObtenerUbicacionCompleta() - string - Retorna ubicación formateada
+ConsultaRUC (SOAP):
+  - ConsultarRUC(rucConsulta, rucOrigen, usuario, clave, empresa, computerName) -> PadronRUC
+  - Test(ruc) -> string
+  - Dispose()
 
 
 =========================================================================
 
-MANEJO DE ERRORES
------------------
+PROPIEDADES DE PadronRUC (Respuesta)
+------------------------------------
 
-Siempre verificar el código de retorno al crear el objeto:
+IsOk             - boolean - Indica si la consulta fue exitosa
+Mensaje          - string  - Mensaje de respuesta o error
+Ruc              - string  - Número de RUC consultado
+RazonSocial      - string  - Razón social o nombre
+Estado           - string  - ACTIVO, BAJA, etc.
+Condicion        - string  - HABIDO, NO HABIDO, etc.
+Ubigeo           - string  - Código de ubigeo
+TipoVia          - string  - CALLE, AVENIDA, etc.
+NombreVia        - string  - Nombre de la vía
+Numero           - string  - Número de la dirección
+Interior         - string  - Interior
+TipoZona         - string  - URBANIZACIÓN, etc.
+CodigoZona       - string  - Código de zona
+Lote             - string  - Número de lote
+Manzana          - string  - Número de manzana
+Kilometro        - string  - Kilómetro
+Departamento     - string  - Departamento
+DescProvincia    - string  - Provincia
+DescDistrito     - string  - Distrito
+CodDepartamento  - string  - Código departamento
+CodProvincia     - string  - Código provincia
 
-li_ret = lole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUC")
+MÉTODOS de PadronRUC:
+  - ObtenerDireccionCompleta() -> string
+  - ObtenerUbicacionCompleta() -> string
 
-Códigos de retorno comunes:
+
+=========================================================================
+
+CÓDIGOS DE ERROR ConnectToNewObject
+-----------------------------------
+
   0  = Éxito
  -1  = Error genérico
  -4  = Clase no registrada (ejecutar Registrar-COM.ps1)
@@ -290,20 +467,242 @@ TROUBLESHOOTING
 ---------------
 
 1. Error: "Clase no registrada"
-   - Ejecutar Registrar-COM.ps1 como Administrador
+   - Ejecutar Compilar-y-Registrar.ps1 como Administrador
    - Verificar que el DLL existe en bin\Release\net48\
 
-2. Error: "No se puede encontrar el punto de conexión"
-   - Verificar conectividad al servidor SUNAT
-   - URL: http://pegazus.serveftp.com:9080/SunatWebServices/
+2. REST: "No hay token de autenticación"
+   - Llamar primero a ObtenerToken() antes de ConsultarRUC()
+   - O usar ConsultarRUCCompleto() que obtiene el token automáticamente
 
-3. Error: "Tiempo de espera agotado"
+3. REST: "Token inválido o expirado"
+   - El token JWT dura 15 minutos
+   - Usar TieneTokenValido() para verificar antes de consultar
+   - Llamar nuevamente a ObtenerToken() para renovar
+
+4. Error: "No se puede encontrar el punto de conexión"
+   - Verificar conectividad al servidor
+   - URL SOAP: http://pegazus.serveftp.com:9080/SunatWebServices/ImplConsultaRUC
+   - URL REST: http://pegazus.serveftp.com:9080/SunatWebServices/api/
+
+5. Error: "Tiempo de espera agotado"
    - El servicio puede estar lento o no disponible
-   - Implementar reintento con delay
+   - Timeout por defecto: 30 segundos
 
-4. Mensaje: "RUC no encontrado"
-   - El RUC consultado no existe o está mal escrito
-   - Validar formato de RUC (11 dígitos numéricos)
+
+=========================================================================
+
+=========================================================================
+=========================================================================
+
+                    SERVICIO DE EMAIL (SMTP)
+                    
+=========================================================================
+=========================================================================
+
+EJEMPLO EMAIL 1: Envío Simple de Correo
+---------------------------------------
+
+OLEObject lole_email
+OLEObject lole_resultado
+integer li_ret
+
+TRY
+    // Crear el objeto COM (Email)
+    lole_email = CREATE OLEObject
+    li_ret = lole_email.ConnectToNewObject("SigreWebServiceWrapper.EmailService")
+    
+    IF li_ret <> 0 THEN
+        MessageBox("Error", "No se pudo crear el objeto COM Email. Código: " + String(li_ret), StopSign!)
+        RETURN
+    END IF
+    
+    // Enviar correo simple
+    lole_resultado = lole_email.Enviar( &
+        "destinatario@empresa.com", &   // Destinatario
+        "Prueba desde PowerBuilder", &  // Asunto
+        "Este es un mensaje de prueba enviado desde PowerBuilder 2025.")  // Mensaje
+    
+    IF lole_resultado.Exitoso THEN
+        MessageBox("Éxito", lole_resultado.Mensaje, Information!)
+    ELSE
+        MessageBox("Error", lole_resultado.Mensaje, StopSign!)
+    END IF
+    
+CATCH (RuntimeError er)
+    MessageBox("Error", er.getMessage(), StopSign!)
+FINALLY
+    DESTROY lole_email
+END TRY
+
+
+=========================================================================
+
+EJEMPLO EMAIL 2: Envío de Correo HTML
+-------------------------------------
+
+OLEObject lole_email
+OLEObject lole_resultado
+string ls_html
+
+TRY
+    lole_email = CREATE OLEObject
+    lole_email.ConnectToNewObject("SigreWebServiceWrapper.EmailService")
+    
+    // Construir mensaje HTML
+    ls_html = "<html><body>"
+    ls_html += "<h1 style='color: #2196F3;'>Notificación del Sistema SIGRE</h1>"
+    ls_html += "<p>Estimado usuario,</p>"
+    ls_html += "<p>Se ha procesado su solicitud exitosamente.</p>"
+    ls_html += "<table border='1' style='border-collapse: collapse;'>"
+    ls_html += "<tr><th>Campo</th><th>Valor</th></tr>"
+    ls_html += "<tr><td>Número</td><td>12345</td></tr>"
+    ls_html += "<tr><td>Fecha</td><td>" + String(Today(), "dd/mm/yyyy") + "</td></tr>"
+    ls_html += "</table>"
+    ls_html += "<p>Saludos,<br>Sistema SIGRE</p>"
+    ls_html += "</body></html>"
+    
+    // Enviar correo HTML
+    lole_resultado = lole_email.EnviarHtml( &
+        "usuario@empresa.com", &
+        "Notificación - Solicitud Procesada", &
+        ls_html)
+    
+    IF lole_resultado.Exitoso THEN
+        MessageBox("Éxito", "Correo HTML enviado")
+    ELSE
+        MessageBox("Error", lole_resultado.Mensaje, StopSign!)
+    END IF
+    
+CATCH (RuntimeError er)
+    MessageBox("Error", er.getMessage(), StopSign!)
+FINALLY
+    DESTROY lole_email
+END TRY
+
+
+=========================================================================
+
+EJEMPLO EMAIL 3: Envío Avanzado con CC, CCO y Adjuntos
+------------------------------------------------------
+
+OLEObject lole_email
+OLEObject lole_resultado
+string ls_destinatarios, ls_cc, ls_cco, ls_adjuntos
+
+TRY
+    lole_email = CREATE OLEObject
+    lole_email.ConnectToNewObject("SigreWebServiceWrapper.EmailService")
+    
+    // Múltiples destinatarios separados por ;
+    ls_destinatarios = "usuario1@empresa.com;usuario2@empresa.com"
+    
+    // Copias
+    ls_cc = "jefe@empresa.com"
+    ls_cco = "auditoria@empresa.com"
+    
+    // Adjuntos separados por |
+    ls_adjuntos = "C:\Reportes\informe.pdf|C:\Reportes\datos.xlsx"
+    
+    // Enviar correo avanzado
+    lole_resultado = lole_email.EnviarAvanzado( &
+        ls_destinatarios, &          // Destinatarios
+        ls_cc, &                     // Con copia
+        ls_cco, &                    // Con copia oculta
+        "Informe Mensual - " + String(Today(), "mmmm yyyy"), &  // Asunto
+        "Adjunto encontrará el informe mensual.", &  // Mensaje
+        false, &                     // Es HTML?
+        ls_adjuntos)                 // Archivos adjuntos
+    
+    IF lole_resultado.Exitoso THEN
+        MessageBox("Éxito", "Correo enviado con adjuntos")
+    ELSE
+        MessageBox("Error", lole_resultado.Mensaje, StopSign!)
+    END IF
+    
+CATCH (RuntimeError er)
+    MessageBox("Error", er.getMessage(), StopSign!)
+FINALLY
+    DESTROY lole_email
+END TRY
+
+
+=========================================================================
+
+EJEMPLO EMAIL 4: Configuración Manual de SMTP
+---------------------------------------------
+
+// Si necesita usar un servidor SMTP diferente al del .config
+OLEObject lole_email
+OLEObject lole_resultado
+
+TRY
+    lole_email = CREATE OLEObject
+    lole_email.ConnectToNewObject("SigreWebServiceWrapper.EmailService")
+    
+    // Configurar SMTP manualmente (sobrescribe el .config)
+    lole_email.ConfigurarSMTP( &
+        "smtp.office365.com", &  // Servidor SMTP
+        587, &                   // Puerto
+        "usuario@empresa.com", & // Usuario
+        "mi_password", &         // Password
+        true)                    // Usar SSL
+    
+    // Ahora enviar
+    lole_resultado = lole_email.Enviar( &
+        "destino@empresa.com", &
+        "Prueba Office 365", &
+        "Correo enviado usando SMTP de Office 365")
+    
+    IF lole_resultado.Exitoso THEN
+        MessageBox("Éxito", lole_resultado.Mensaje)
+    END IF
+    
+CATCH (RuntimeError er)
+    MessageBox("Error", er.getMessage(), StopSign!)
+FINALLY
+    DESTROY lole_email
+END TRY
+
+
+=========================================================================
+
+MÉTODOS DE EmailService
+-----------------------
+
+  - Enviar(destinatario, asunto, mensaje) -> EmailResult
+  - EnviarHtml(destinatario, asunto, mensajeHtml) -> EmailResult
+  - EnviarAvanzado(destinatario, cc, cco, asunto, mensaje, esHtml, adjuntos) -> EmailResult
+  - ConfigurarSMTP(servidor, puerto, usuario, password, usarSSL)
+  - ProbarConexion() -> EmailResult
+  - ObtenerConfiguracion() -> string
+  - ObtenerUltimoError() -> string
+
+PROPIEDADES DE EmailResult:
+  - Exitoso : boolean
+  - Mensaje : string
+
+
+=========================================================================
+
+REGISTRO DEL DLL
+----------------
+
+Para compilar y registrar el DLL:
+
+1. Ejecutar build.bat para compilar
+2. Abrir PowerShell como Administrador
+3. Navegar a la carpeta del proyecto:
+   cd E:\Work\sigre_web\SigreWebServiceWrapper\scripts
+4. Ejecutar el script:
+   .\Registrar-COM.ps1
+
+O manualmente:
+   C:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe /codebase dll\SigreWebServiceWrapper.dll
+
+ARCHIVOS GENERADOS EN CARPETA dll:
+  - SigreWebServiceWrapper.dll
+  - SigreWebServiceWrapper.dll.config
+  - Newtonsoft.Json.dll
 
 
 =========================================================================

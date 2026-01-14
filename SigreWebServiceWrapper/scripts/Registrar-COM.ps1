@@ -1,88 +1,94 @@
-# Script para registrar el DLL como componente COM
-# IMPORTANTE: Ejecutar PowerShell como Administrador
+# ============================================================
+#   REGISTRAR DLL COMO COMPONENTE COM
+#   SigreWebServiceWrapper para PowerBuilder 2025
+# ============================================================
+#
+# IMPORTANTE: Ejecutar como Administrador
+#
+# ============================================================
 
-param(
-    [string]$Platform = "x64"  # Puede ser "x64" o "x86"
-)
+$ErrorActionPreference = "Stop"
 
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Registrando SigreWebServiceWrapper" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host "  REGISTRAR SIGRE WEB SERVICE WRAPPER COMO COM" -ForegroundColor Cyan
+Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Determinar la ruta de RegAsm según la plataforma
-if ($Platform -eq "x64") {
-    $regasm = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe"
-    Write-Host "Plataforma: x64 (64-bit)" -ForegroundColor Yellow
-} else {
-    $regasm = "C:\Windows\Microsoft.NET\Framework\v4.0.30319\regasm.exe"
-    Write-Host "Plataforma: x86 (32-bit)" -ForegroundColor Yellow
-}
-
-# Verificar que RegAsm existe
-if (-not (Test-Path $regasm)) {
-    Write-Host "ERROR: No se encuentra RegAsm.exe en: $regasm" -ForegroundColor Red
-    Write-Host "Asegúrese de que .NET Framework 4.8 esté instalado." -ForegroundColor Red
-    exit 1
-}
-
-# Ruta del DLL (subir un nivel desde scripts/ a la raíz del proyecto)
-$projectRoot = Split-Path -Parent $PSScriptRoot
-$dllPath = Join-Path $projectRoot "bin\Release\net48\SigreWebServiceWrapper.dll"
-
-# Verificar que el DLL existe
-if (-not (Test-Path $dllPath)) {
-    Write-Host "ERROR: No se encuentra el DLL en: $dllPath" -ForegroundColor Red
-    Write-Host "Asegúrese de compilar el proyecto primero con: dotnet build -c Release" -ForegroundColor Red
-    exit 1
-}
-
-Write-Host "DLL: $dllPath" -ForegroundColor White
-Write-Host ""
-
-# Verificar que se está ejecutando como Administrador
+# Verificar si se ejecuta como Administrador
 $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if (-not $isAdmin) {
-    Write-Host "ADVERTENCIA: Este script debe ejecutarse como Administrador" -ForegroundColor Red
-    Write-Host "Clic derecho en PowerShell -> Ejecutar como Administrador" -ForegroundColor Yellow
+    Write-Host "ERROR: Este script debe ejecutarse como Administrador" -ForegroundColor Red
     Write-Host ""
-    Read-Host "Presione Enter para salir"
+    Write-Host "Haga clic derecho en PowerShell y seleccione 'Ejecutar como administrador'" -ForegroundColor Yellow
+    Write-Host ""
+    pause
     exit 1
 }
 
-# Registrar el DLL
-Write-Host "Registrando componente COM..." -ForegroundColor Green
+# Rutas
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$projectDir = Split-Path -Parent $scriptDir
+$dllDir = Join-Path $projectDir "dll"
+$dllPath = Join-Path $dllDir "SigreWebServiceWrapper.dll"
 
-try {
-    & $regasm $dllPath /tlb /codebase /verbose
-    
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host ""
-        Write-Host "========================================" -ForegroundColor Green
-        Write-Host "✓ Registro completado exitosamente" -ForegroundColor Green
-        Write-Host "========================================" -ForegroundColor Green
-        Write-Host ""
-        Write-Host "El componente está listo para usarse desde PowerBuilder 2025" -ForegroundColor Cyan
-        Write-Host ""
-        Write-Host "ProgID registrado:" -ForegroundColor Yellow
-        Write-Host "  - SigreWebServiceWrapper.ConsultaRUC" -ForegroundColor White
-        Write-Host ""
-        Write-Host "Uso en PowerBuilder:" -ForegroundColor Yellow
-        Write-Host '  OLEObject lole_service' -ForegroundColor Gray
-        Write-Host '  lole_service = CREATE OLEObject' -ForegroundColor Gray
-        Write-Host '  lole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUC")' -ForegroundColor Gray
-        Write-Host ""
-    } else {
-        Write-Host ""
-        Write-Host "ERROR: Falló el registro del componente" -ForegroundColor Red
-        Write-Host "Código de salida: $LASTEXITCODE" -ForegroundColor Red
-    }
-} catch {
+# Verificar si existe el DLL
+if (-not (Test-Path $dllPath)) {
+    Write-Host "ERROR: No se encontro el DLL en: $dllPath" -ForegroundColor Red
     Write-Host ""
-    Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "Ejecute primero build.bat para compilar el proyecto" -ForegroundColor Yellow
+    Write-Host ""
+    pause
+    exit 1
+}
+
+Write-Host "DLL encontrado: $dllPath" -ForegroundColor Green
+Write-Host ""
+
+# Buscar RegAsm
+$regasm64 = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe"
+$regasm32 = "C:\Windows\Microsoft.NET\Framework\v4.0.30319\RegAsm.exe"
+
+if (Test-Path $regasm64) {
+    $regasm = $regasm64
+    Write-Host "Usando RegAsm 64-bit" -ForegroundColor Gray
+} elseif (Test-Path $regasm32) {
+    $regasm = $regasm32
+    Write-Host "Usando RegAsm 32-bit" -ForegroundColor Gray
+} else {
+    Write-Host "ERROR: No se encontro RegAsm.exe" -ForegroundColor Red
+    Write-Host "Instale .NET Framework 4.8" -ForegroundColor Yellow
+    pause
+    exit 1
 }
 
 Write-Host ""
-Read-Host "Presione Enter para salir"
+Write-Host "Registrando componente COM..." -ForegroundColor Yellow
+Write-Host ""
 
+try {
+    # Registrar con /codebase para que funcione sin GAC
+    $output = & $regasm /codebase $dllPath 2>&1
+    
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "============================================================" -ForegroundColor Green
+        Write-Host "  REGISTRO EXITOSO" -ForegroundColor Green
+        Write-Host "============================================================" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "Componentes COM registrados:" -ForegroundColor White
+        Write-Host "  - SigreWebServiceWrapper.ConsultaRUC (SOAP)" -ForegroundColor Gray
+        Write-Host "  - SigreWebServiceWrapper.ConsultaRUCRest (REST + JWT)" -ForegroundColor Gray
+        Write-Host "  - SigreWebServiceWrapper.EmailService (Email SMTP)" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "Ahora puede usar estos componentes desde PowerBuilder 2025" -ForegroundColor Cyan
+    } else {
+        Write-Host "ERROR durante el registro:" -ForegroundColor Red
+        Write-Host $output -ForegroundColor Red
+    }
+} catch {
+    Write-Host "ERROR: $_" -ForegroundColor Red
+}
+
+Write-Host ""
+pause
