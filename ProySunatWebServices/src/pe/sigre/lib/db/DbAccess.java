@@ -15,17 +15,12 @@ import com.sun.rowset.CachedRowSetImpl;
 
 /**
  * Clase para acceso a base de datos Oracle
+ * Lee configuracion del archivo SunatWebServices.ini
  */
 public class DbAccess {
     
     private Connection connection = null;
     private static DbAccess instance = null;
-    
-    private static final String DEFAULT_HOST = "localhost";
-    private static final String DEFAULT_PORT = "1521";
-    private static final String DEFAULT_SERVICE = "ORCL";
-    private static final String DEFAULT_USER = "system";
-    private static final String DEFAULT_PASSWORD = "oracle";
     
     private DbAccess() throws SQLException {
         connect();
@@ -40,21 +35,21 @@ public class DbAccess {
     
     private void connect() throws SQLException {
         try {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+            // Leer configuracion del INI
+            String empresaDefault = SettingINI.getValue("General", "EMPRESA_DEFAULT", "DEFAULT");
+            String environment = SettingINI.getValue(empresaDefault, "ENVIRONMENT", "PROD");
+            String seccionBD = empresaDefault + "_" + environment;
             
-            String host = SettingINI.getValue("database", "host", DEFAULT_HOST);
-            String port = SettingINI.getValue("database", "port", DEFAULT_PORT);
-            String service = SettingINI.getValue("database", "service", DEFAULT_SERVICE);
-            String user = SettingINI.getValue("database", "user", DEFAULT_USER);
-            String password = SettingINI.getValue("database", "password", DEFAULT_PASSWORD);
+            String driver = SettingINI.getValue(empresaDefault, "DRIVER_JDBC", "oracle.jdbc.driver.OracleDriver");
+            String host = SettingINI.getValue(seccionBD, "HOST", "localhost");
+            String port = SettingINI.getValue(seccionBD, "PORT", "1521");
+            String sid = SettingINI.getValue(seccionBD, "SID", "ORCL");
+            String user = SettingINI.getValue(seccionBD, "USER", "system");
+            String password = SettingINI.getValue(seccionBD, "CLAVE", "oracle");
             
-            if (System.getenv("DB_HOST") != null) host = System.getenv("DB_HOST");
-            if (System.getenv("DB_PORT") != null) port = System.getenv("DB_PORT");
-            if (System.getenv("DB_SERVICE") != null) service = System.getenv("DB_SERVICE");
-            if (System.getenv("DB_USER") != null) user = System.getenv("DB_USER");
-            if (System.getenv("DB_PASSWORD") != null) password = System.getenv("DB_PASSWORD");
+            Class.forName(driver);
             
-            String url = "jdbc:oracle:thin:@" + host + ":" + port + ":" + service;
+            String url = "jdbc:oracle:thin:@" + host + ":" + port + ":" + sid;
             
             connection = DriverManager.getConnection(url, user, password);
             connection.setAutoCommit(true);

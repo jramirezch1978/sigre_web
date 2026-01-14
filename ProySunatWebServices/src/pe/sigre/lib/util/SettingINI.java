@@ -1,33 +1,38 @@
 package pe.sigre.lib.util;
 
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Clase utilitaria para manejo de archivos de configuración INI
+ * Clase utilitaria para manejo de archivos de configuracion INI
+ * Soporta secciones como [General], [DEFAULT], [DEFAULT_PROD], etc.
  */
 public class SettingINI {
     
     public static String fileINI = "config.ini";
-    private static Properties properties = null;
+    private static Map<String, Map<String, String>> sections = null;
     
     /**
      * Obtiene el valor de una clave del archivo INI
-     * @param section Sección del archivo INI
+     * @param section Seccion del archivo INI
      * @param key Clave a buscar
      * @return Valor de la clave o null si no existe
      */
     public static String getValue(String section, String key) {
         loadProperties();
-        String fullKey = section + "." + key;
-        return properties.getProperty(fullKey, properties.getProperty(key));
+        Map<String, String> sectionMap = sections.get(section.toUpperCase());
+        if (sectionMap != null) {
+            return sectionMap.get(key.toUpperCase());
+        }
+        return null;
     }
     
     /**
      * Obtiene el valor de una clave del archivo INI con valor por defecto
-     * @param section Sección del archivo INI
+     * @param section Seccion del archivo INI
      * @param key Clave a buscar
      * @param defaultValue Valor por defecto
      * @return Valor de la clave o el valor por defecto
@@ -41,52 +46,66 @@ public class SettingINI {
      * Carga las propiedades del archivo INI
      */
     private static void loadProperties() {
-        if (properties == null) {
-            properties = new Properties();
-            try (InputStream input = new FileInputStream(fileINI)) {
-                properties.load(input);
-            } catch (IOException e) {
-                // Si no se puede cargar el archivo, usar propiedades del sistema
-                properties = new Properties(System.getProperties());
+        if (sections == null) {
+            sections = new HashMap<String, Map<String, String>>();
+            BufferedReader reader = null;
+            
+            try {
+                reader = new BufferedReader(new FileReader(fileINI));
+                String line;
+                String currentSection = "GENERAL";
                 
-                // Cargar valores por defecto para conexión a BD
-                loadDefaultDatabaseProperties();
+                while ((line = reader.readLine()) != null) {
+                    line = line.trim();
+                    
+                    // Ignorar lineas vacias y comentarios
+                    if (line.isEmpty() || line.startsWith(";") || line.startsWith("#")) {
+                        continue;
+                    }
+                    
+                    // Detectar seccion [NombreSeccion]
+                    if (line.startsWith("[") && line.endsWith("]")) {
+                        currentSection = line.substring(1, line.length() - 1).toUpperCase();
+                        if (!sections.containsKey(currentSection)) {
+                            sections.put(currentSection, new HashMap<String, String>());
+                        }
+                        continue;
+                    }
+                    
+                    // Leer clave = valor
+                    int equalsPos = line.indexOf('=');
+                    if (equalsPos > 0) {
+                        String key = line.substring(0, equalsPos).trim().toUpperCase();
+                        String value = line.substring(equalsPos + 1).trim();
+                        
+                        if (!sections.containsKey(currentSection)) {
+                            sections.put(currentSection, new HashMap<String, String>());
+                        }
+                        sections.get(currentSection).put(key, value);
+                    }
+                }
+                
+            } catch (IOException e) {
+                System.err.println("Error leyendo archivo INI [" + fileINI + "]: " + e.getMessage());
+                // Crear secciones vacias por defecto
+                sections.put("GENERAL", new HashMap<String, String>());
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        // Ignorar
+                    }
+                }
             }
         }
-    }
-    
-    /**
-     * Carga propiedades por defecto para la base de datos
-     */
-    private static void loadDefaultDatabaseProperties() {
-        // Intentar cargar desde variables de entorno
-        String dbHost = System.getenv("DB_HOST");
-        String dbPort = System.getenv("DB_PORT");
-        String dbService = System.getenv("DB_SERVICE");
-        String dbUser = System.getenv("DB_USER");
-        String dbPassword = System.getenv("DB_PASSWORD");
-        
-        if (dbHost != null) properties.setProperty("database.host", dbHost);
-        if (dbPort != null) properties.setProperty("database.port", dbPort);
-        if (dbService != null) properties.setProperty("database.service", dbService);
-        if (dbUser != null) properties.setProperty("database.user", dbUser);
-        if (dbPassword != null) properties.setProperty("database.password", dbPassword);
     }
     
     /**
      * Recarga las propiedades del archivo INI
      */
     public static void reload() {
-        properties = null;
+        sections = null;
         loadProperties();
-    }
-    
-    /**
-     * Obtiene todas las propiedades cargadas
-     * @return Properties con todas las configuraciones
-     */
-    public static Properties getProperties() {
-        loadProperties();
-        return properties;
     }
 }
