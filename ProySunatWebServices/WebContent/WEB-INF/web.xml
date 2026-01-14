@@ -7,7 +7,7 @@
          version="3.0">
          
     <display-name>SunatWebServices</display-name>
-    <description>Servicio Web SOAP para consulta de RUC en SUNAT</description>
+    <description>Servicio Web SOAP y REST para consulta de RUC en SUNAT</description>
     
     <session-config>
         <session-timeout>20</session-timeout>
@@ -17,21 +17,26 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
     
-    <!-- JAX-WS Servlet Listener -->
-    <listener>
-        <listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class>
-    </listener>
+    <!-- 
+        SOAP Endpoints: JBoss 7.1.1 detecta automaticamente los @WebService
+        No se necesita configuracion manual de JAX-WS servlet
+        El endpoint SOAP se expone en: /ImplConsultaRUC
+    -->
     
-    <!-- JAX-WS Servlet -->
+    <!-- Jersey REST API Servlet -->
     <servlet>
-        <servlet-name>ConsultaRUCService</servlet-name>
-        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
+        <servlet-name>JerseyRESTService</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>pe.sunat.web.rest.infrastructure.controller,pe.sunat.web.rest.infrastructure.config</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     
     <servlet-mapping>
-        <servlet-name>ConsultaRUCService</servlet-name>
-        <url-pattern>/ImplConsultaRUC</url-pattern>
+        <servlet-name>JerseyRESTService</servlet-name>
+        <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
     
     <distributable/>
