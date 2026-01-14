@@ -9,8 +9,10 @@ echo.
 
 REM Configurar variables
 set "PROJECT_DIR=%~dp0"
-set "OUTPUT_DIR=%PROJECT_DIR%dll"
-set "RELEASE_DIR=%PROJECT_DIR%bin\x64\Release\net48"
+set "OUTPUT_DIR_X86=%PROJECT_DIR%dll\x86"
+set "OUTPUT_DIR_X64=%PROJECT_DIR%dll\x64"
+set "RELEASE_DIR_X86=%PROJECT_DIR%bin\x86\Release\net48"
+set "RELEASE_DIR_X64=%PROJECT_DIR%bin\x64\Release\net48"
 
 REM Verificar que dotnet está disponible
 where dotnet >nul 2>&1
@@ -21,7 +23,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [1/4] Restaurando paquetes NuGet...
+echo [1/6] Restaurando paquetes NuGet...
 echo ------------------------------------------------------------
 dotnet restore
 if errorlevel 1 (
@@ -31,90 +33,108 @@ if errorlevel 1 (
 )
 echo.
 
-echo [2/4] Compilando proyecto en modo Release (x64)...
+echo [2/6] Compilando para x86 (32 bits - PowerBuilder)...
+echo ------------------------------------------------------------
+dotnet build -c Release -p:Platform=x86
+if errorlevel 1 (
+    echo ERROR: Fallo la compilacion x86
+    pause
+    exit /b 1
+)
+echo.
+
+echo [3/6] Compilando para x64 (64 bits)...
 echo ------------------------------------------------------------
 dotnet build -c Release -p:Platform=x64
 if errorlevel 1 (
-    echo ERROR: Fallo la compilacion
+    echo ERROR: Fallo la compilacion x64
     pause
     exit /b 1
 )
 echo.
 
-echo [3/4] Creando carpeta de salida...
+echo [4/6] Creando carpetas de salida...
 echo ------------------------------------------------------------
-if not exist "%OUTPUT_DIR%" (
-    mkdir "%OUTPUT_DIR%"
-    echo Carpeta dll creada.
+if not exist "%OUTPUT_DIR_X86%" mkdir "%OUTPUT_DIR_X86%"
+if not exist "%OUTPUT_DIR_X64%" mkdir "%OUTPUT_DIR_X64%"
+echo Carpetas creadas.
+echo.
+
+echo [5/6] Copiando archivos x86 (32 bits)...
+echo ------------------------------------------------------------
+
+if exist "%RELEASE_DIR_X86%\SigreWebServiceWrapper.dll" (
+    copy /Y "%RELEASE_DIR_X86%\SigreWebServiceWrapper.dll" "%OUTPUT_DIR_X86%\"
+    echo [OK] x86\SigreWebServiceWrapper.dll
 ) else (
-    echo Carpeta dll ya existe.
+    echo [ERROR] No se encontro SigreWebServiceWrapper.dll x86
+)
+
+if exist "%RELEASE_DIR_X86%\SigreWebServiceWrapper.dll.config" (
+    copy /Y "%RELEASE_DIR_X86%\SigreWebServiceWrapper.dll.config" "%OUTPUT_DIR_X86%\"
+    echo [OK] x86\SigreWebServiceWrapper.dll.config
+)
+
+if exist "%RELEASE_DIR_X86%\Newtonsoft.Json.dll" (
+    copy /Y "%RELEASE_DIR_X86%\Newtonsoft.Json.dll" "%OUTPUT_DIR_X86%\"
+    echo [OK] x86\Newtonsoft.Json.dll
+)
+
+if exist "%RELEASE_DIR_X86%\SigreWebServiceWrapper.pdb" (
+    copy /Y "%RELEASE_DIR_X86%\SigreWebServiceWrapper.pdb" "%OUTPUT_DIR_X86%\"
+    echo [OK] x86\SigreWebServiceWrapper.pdb
 )
 echo.
 
-echo [4/4] Copiando archivos a carpeta dll...
+echo [6/6] Copiando archivos x64 (64 bits)...
 echo ------------------------------------------------------------
 
-REM Copiar DLL principal
-if exist "%RELEASE_DIR%\SigreWebServiceWrapper.dll" (
-    copy /Y "%RELEASE_DIR%\SigreWebServiceWrapper.dll" "%OUTPUT_DIR%\"
-    echo [OK] SigreWebServiceWrapper.dll
+if exist "%RELEASE_DIR_X64%\SigreWebServiceWrapper.dll" (
+    copy /Y "%RELEASE_DIR_X64%\SigreWebServiceWrapper.dll" "%OUTPUT_DIR_X64%\"
+    echo [OK] x64\SigreWebServiceWrapper.dll
 ) else (
-    echo [ERROR] No se encontro SigreWebServiceWrapper.dll
-    echo Buscando en: %RELEASE_DIR%
-    pause
-    exit /b 1
+    echo [ERROR] No se encontro SigreWebServiceWrapper.dll x64
 )
 
-REM Copiar archivo de configuracion
-if exist "%RELEASE_DIR%\SigreWebServiceWrapper.dll.config" (
-    copy /Y "%RELEASE_DIR%\SigreWebServiceWrapper.dll.config" "%OUTPUT_DIR%\"
-    echo [OK] SigreWebServiceWrapper.dll.config
-) else (
-    echo [WARN] No se encontro SigreWebServiceWrapper.dll.config
+if exist "%RELEASE_DIR_X64%\SigreWebServiceWrapper.dll.config" (
+    copy /Y "%RELEASE_DIR_X64%\SigreWebServiceWrapper.dll.config" "%OUTPUT_DIR_X64%\"
+    echo [OK] x64\SigreWebServiceWrapper.dll.config
 )
 
-REM Copiar dependencia Newtonsoft.Json
-if exist "%RELEASE_DIR%\Newtonsoft.Json.dll" (
-    copy /Y "%RELEASE_DIR%\Newtonsoft.Json.dll" "%OUTPUT_DIR%\"
-    echo [OK] Newtonsoft.Json.dll
-) else (
-    echo [WARN] No se encontro Newtonsoft.Json.dll
+if exist "%RELEASE_DIR_X64%\Newtonsoft.Json.dll" (
+    copy /Y "%RELEASE_DIR_X64%\Newtonsoft.Json.dll" "%OUTPUT_DIR_X64%\"
+    echo [OK] x64\Newtonsoft.Json.dll
 )
 
-REM Copiar archivo PDB (simbolos de debug, opcional)
-if exist "%RELEASE_DIR%\SigreWebServiceWrapper.pdb" (
-    copy /Y "%RELEASE_DIR%\SigreWebServiceWrapper.pdb" "%OUTPUT_DIR%\"
-    echo [OK] SigreWebServiceWrapper.pdb
+if exist "%RELEASE_DIR_X64%\SigreWebServiceWrapper.pdb" (
+    copy /Y "%RELEASE_DIR_X64%\SigreWebServiceWrapper.pdb" "%OUTPUT_DIR_X64%\"
+    echo [OK] x64\SigreWebServiceWrapper.pdb
 )
-
 echo.
+
 echo ============================================================
 echo   COMPILACION COMPLETADA EXITOSAMENTE
 echo ============================================================
 echo.
-echo Archivos generados en: %OUTPUT_DIR%
+echo Archivos generados:
 echo.
-dir "%OUTPUT_DIR%" /B
+echo   [32 bits - PARA POWERBUILDER]
+echo   %OUTPUT_DIR_X86%
+dir "%OUTPUT_DIR_X86%" /B 2>nul
+echo.
+echo   [64 bits]
+echo   %OUTPUT_DIR_X64%
+dir "%OUTPUT_DIR_X64%" /B 2>nul
 echo.
 echo ------------------------------------------------------------
-echo USO DESDE POWERBUILDER:
+echo IMPORTANTE PARA POWERBUILDER (32 bits):
 echo.
-echo 1. Copie estos archivos a la carpeta de su aplicacion:
-echo    - SigreWebServiceWrapper.dll
-echo    - SigreWebServiceWrapper.dll.config
-echo    - Newtonsoft.Json.dll
+echo Copie los archivos de la carpeta dll\x86 a la carpeta
+echo donde esta el ejecutable de PowerBuilder:
 echo.
-echo 2. Declare las funciones externas:
-echo.
-echo    FUNCTION string EnviarCorreo(string dest, string nombres, ^
-echo        string asunto, string msg, boolean html, string adj) ^
-echo        LIBRARY "SigreWebServiceWrapper.dll"
-echo.
-echo    FUNCTION string ObtenerTokenRest(string usuario, string clave, ^
-echo        string empresa) LIBRARY "SigreWebServiceWrapper.dll"
-echo.
-echo    FUNCTION string ConsultarRucRest(string ruc, string rucOrigen, ^
-echo        string computerName) LIBRARY "SigreWebServiceWrapper.dll"
+echo   - SigreWebServiceWrapper.dll
+echo   - SigreWebServiceWrapper.dll.config
+echo   - Newtonsoft.Json.dll
 echo.
 echo ------------------------------------------------------------
 echo.
