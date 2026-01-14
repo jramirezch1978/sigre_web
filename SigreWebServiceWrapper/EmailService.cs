@@ -117,7 +117,151 @@ namespace SigreWebServiceWrapper
         }
 
         /// <summary>
-        /// Método interno para enviar correos
+        /// Envía un correo con nombres de destinatarios
+        /// </summary>
+        /// <param name="destinatarios">Emails separados por ;</param>
+        /// <param name="nombresDestinatarios">Nombres separados por ; (mismo orden que emails)</param>
+        /// <param name="cc">Emails en copia separados por ;</param>
+        /// <param name="cco">Emails en copia oculta separados por ;</param>
+        /// <param name="asunto">Asunto del correo</param>
+        /// <param name="mensaje">Cuerpo del mensaje</param>
+        /// <param name="esHtml">true si el mensaje es HTML</param>
+        /// <param name="adjuntos">Rutas de archivos separadas por |</param>
+        /// <returns>Resultado del envío</returns>
+        public EmailResult EnviarCorreoCompleto(
+            string destinatarios,
+            string nombresDestinatarios,
+            string cc,
+            string cco,
+            string asunto,
+            string mensaje,
+            bool esHtml,
+            string adjuntos)
+        {
+            var resultado = new EmailResult();
+
+            try
+            {
+                // Validaciones
+                if (string.IsNullOrEmpty(_smtpUser))
+                {
+                    resultado.Exitoso = false;
+                    resultado.Mensaje = "No se ha configurado el usuario SMTP. Verifique el archivo .config";
+                    return resultado;
+                }
+
+                if (string.IsNullOrEmpty(destinatarios))
+                {
+                    resultado.Exitoso = false;
+                    resultado.Mensaje = "Los destinatarios no pueden estar vacíos";
+                    return resultado;
+                }
+
+                // Parsear destinatarios y nombres
+                string[] emails = destinatarios.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] nombres = string.IsNullOrEmpty(nombresDestinatarios) 
+                    ? new string[0] 
+                    : nombresDestinatarios.Split(new[] { ';' }, StringSplitOptions.None);
+
+                // Crear mensaje
+                using (var mail = new MailMessage())
+                {
+                    mail.From = new MailAddress(_smtpUser);
+                    
+                    // Agregar destinatarios con nombres
+                    for (int i = 0; i < emails.Length; i++)
+                    {
+                        string email = emails[i].Trim();
+                        string nombre = (i < nombres.Length && !string.IsNullOrEmpty(nombres[i])) 
+                            ? nombres[i].Trim() 
+                            : "";
+                        
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            if (!string.IsNullOrEmpty(nombre))
+                            {
+                                mail.To.Add(new MailAddress(email, nombre));
+                            }
+                            else
+                            {
+                                mail.To.Add(new MailAddress(email));
+                            }
+                        }
+                    }
+
+                    // Agregar CC
+                    if (!string.IsNullOrEmpty(cc))
+                    {
+                        foreach (var email in cc.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            mail.CC.Add(email.Trim());
+                        }
+                    }
+
+                    // Agregar CCO
+                    if (!string.IsNullOrEmpty(cco))
+                    {
+                        foreach (var email in cco.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            mail.Bcc.Add(email.Trim());
+                        }
+                    }
+
+                    mail.Subject = asunto ?? "";
+                    mail.Body = mensaje ?? "";
+                    mail.IsBodyHtml = esHtml;
+
+                    // Agregar adjuntos
+                    if (!string.IsNullOrEmpty(adjuntos))
+                    {
+                        foreach (var archivo in adjuntos.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            string rutaArchivo = archivo.Trim();
+                            if (System.IO.File.Exists(rutaArchivo))
+                            {
+                                mail.Attachments.Add(new Attachment(rutaArchivo));
+                            }
+                        }
+                    }
+
+                    // Configurar cliente SMTP
+                    using (var smtp = new SmtpClient(_smtpServer, _smtpPort))
+                    {
+                        smtp.EnableSsl = _enableSsl;
+                        smtp.UseDefaultCredentials = false;
+                        smtp.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
+                        smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+                        smtp.Timeout = 30000; // 30 segundos
+
+                        // Enviar
+                        smtp.Send(mail);
+                    }
+                }
+
+                resultado.Exitoso = true;
+                resultado.Mensaje = "Correo enviado exitosamente a " + emails.Length + " destinatario(s)";
+                return resultado;
+            }
+            catch (SmtpException smtpEx)
+            {
+                resultado.Exitoso = false;
+                resultado.Mensaje = "Error SMTP: " + smtpEx.Message;
+                if (smtpEx.InnerException != null)
+                {
+                    resultado.Mensaje += " - " + smtpEx.InnerException.Message;
+                }
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                resultado.Exitoso = false;
+                resultado.Mensaje = "Error al enviar correo: " + ex.Message;
+                return resultado;
+            }
+        }
+
+        /// <summary>
+        /// Método interno para enviar correos (compatibilidad)
         /// </summary>
         private EmailResult EnviarCorreo(
             string destinatario,

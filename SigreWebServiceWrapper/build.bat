@@ -3,14 +3,14 @@ setlocal
 
 echo ============================================================
 echo   COMPILACION SIGRE WEB SERVICE WRAPPER
-echo   DLL COM para PowerBuilder 2025
+echo   DLL para PowerBuilder 2025 (External Functions)
 echo ============================================================
 echo.
 
 REM Configurar variables
 set "PROJECT_DIR=%~dp0"
 set "OUTPUT_DIR=%PROJECT_DIR%dll"
-set "RELEASE_DIR=%PROJECT_DIR%bin\Release\net48"
+set "RELEASE_DIR=%PROJECT_DIR%bin\x64\Release\net48"
 
 REM Verificar que dotnet está disponible
 where dotnet >nul 2>&1
@@ -31,9 +31,9 @@ if errorlevel 1 (
 )
 echo.
 
-echo [2/4] Compilando proyecto en modo Release...
+echo [2/4] Compilando proyecto en modo Release (x64)...
 echo ------------------------------------------------------------
-dotnet build -c Release
+dotnet build -c Release -p:Platform=x64
 if errorlevel 1 (
     echo ERROR: Fallo la compilacion
     pause
@@ -60,6 +60,9 @@ if exist "%RELEASE_DIR%\SigreWebServiceWrapper.dll" (
     echo [OK] SigreWebServiceWrapper.dll
 ) else (
     echo [ERROR] No se encontro SigreWebServiceWrapper.dll
+    echo Buscando en: %RELEASE_DIR%
+    pause
+    exit /b 1
 )
 
 REM Copiar archivo de configuracion
@@ -94,13 +97,25 @@ echo.
 dir "%OUTPUT_DIR%" /B
 echo.
 echo ------------------------------------------------------------
-echo IMPORTANTE: Para usar desde PowerBuilder, registre el DLL:
+echo USO DESDE POWERBUILDER:
 echo.
-echo   1. Abra PowerShell como Administrador
-echo   2. Ejecute: .\Registrar-COM.ps1
+echo 1. Copie estos archivos a la carpeta de su aplicacion:
+echo    - SigreWebServiceWrapper.dll
+echo    - SigreWebServiceWrapper.dll.config
+echo    - Newtonsoft.Json.dll
 echo.
-echo O manualmente:
-echo   C:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe /codebase "%OUTPUT_DIR%\SigreWebServiceWrapper.dll"
+echo 2. Declare las funciones externas:
+echo.
+echo    FUNCTION string EnviarCorreo(string dest, string nombres, ^
+echo        string asunto, string msg, boolean html, string adj) ^
+echo        LIBRARY "SigreWebServiceWrapper.dll"
+echo.
+echo    FUNCTION string ObtenerTokenRest(string usuario, string clave, ^
+echo        string empresa) LIBRARY "SigreWebServiceWrapper.dll"
+echo.
+echo    FUNCTION string ConsultarRucRest(string ruc, string rucOrigen, ^
+echo        string computerName) LIBRARY "SigreWebServiceWrapper.dll"
+echo.
 echo ------------------------------------------------------------
 echo.
 pause
