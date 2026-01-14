@@ -1,395 +1,224 @@
 =========================================================================
-  USO DESDE POWERBUILDER 2025 - EXTERNAL FUNCTIONS
-  SigreWebServiceWrapper.dll
+  EJEMPLOS DE USO DESDE POWERBUILDER 2025
+  SigreWebServiceWrapper v1.1.0 - DLL con Funciones Externas
 =========================================================================
 
-ARCHIVOS REQUERIDOS (copiar junto al ejecutable):
-  - SigreWebServiceWrapper.dll
-  - SigreWebServiceWrapper.dll.config
-  - Newtonsoft.Json.dll
+// -----------------------------------------------------------------------
+// ARCHIVOS NECESARIOS (copiar de dll\x86 a carpeta del EXE):
+// -----------------------------------------------------------------------
+//   - SigreWebServiceWrapper.dll
+//   - SigreWebServiceWrapper.dll.config
+//   - Newtonsoft.Json.dll
+//
+// ARCHIVOS GENERADOS AUTOMATICAMENTE:
+//   - log\SigreWebServiceWrapper.log          <- Log actual
+//   - log\historico\*.log                     <- Logs >2MB
+//   - token.json                              <- Token JWT guardado
+//
+// -----------------------------------------------------------------------
+// DECLARACIONES DE FUNCIONES EXTERNAS
+// (Copiar en la sección "External Functions" del objeto PB)
+// -----------------------------------------------------------------------
 
-=========================================================================
-                    DECLARACIÓN DE FUNCIONES EXTERNAS
-=========================================================================
+// === CONSULTA RUC (RECOMENDADO) ===
+// Flujo: 1) ConfigurarCredencialesRuc (una vez) + 2) ConsultarRuc (cada consulta)
+// El token se maneja AUTOMATICAMENTE (obtiene, guarda y renueva)
 
-En el objeto o ventana, declarar las funciones externas:
+FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, &
+    string empresa) LIBRARY "SigreWebServiceWrapper.dll"
 
-// ==================== EMAIL ====================
-FUNCTION string EnviarCorreo( &
-    string destinatarios, &
-    string nombresDestinatarios, &
-    string asunto, &
-    string mensaje, &
-    boolean esHtml, &
-    string adjuntos &
-) LIBRARY "SigreWebServiceWrapper.dll"
+FUNCTION string ConsultarRuc(string ruc, string rucOrigen, &
+    string computerName) LIBRARY "SigreWebServiceWrapper.dll"
 
-FUNCTION string EnviarCorreoAvanzado( &
-    string destinatarios, &
-    string nombresDestinatarios, &
-    string cc, &
-    string cco, &
-    string asunto, &
-    string mensaje, &
-    boolean esHtml, &
-    string adjuntos &
-) LIBRARY "SigreWebServiceWrapper.dll"
+FUNCTION string ObtenerInfoToken() LIBRARY "SigreWebServiceWrapper.dll"
 
-// ==================== REST API RUC ====================
-FUNCTION string ObtenerTokenRest( &
-    string usuario, &
-    string clave, &
-    string empresa &
-) LIBRARY "SigreWebServiceWrapper.dll"
+SUBROUTINE ForzarRenovacionToken() LIBRARY "SigreWebServiceWrapper.dll"
 
-FUNCTION string ConsultarRucRest( &
-    string rucConsulta, &
-    string rucOrigen, &
-    string computerName &
-) LIBRARY "SigreWebServiceWrapper.dll"
 
-FUNCTION string ConsultarRucCompleto( &
-    string rucConsulta, &
-    string rucOrigen, &
-    string usuario, &
-    string clave, &
-    string empresa, &
-    string computerName &
-) LIBRARY "SigreWebServiceWrapper.dll"
+// === CONSULTA RUC (LEGACY - compatible con versión anterior) ===
+FUNCTION string ObtenerTokenRest(string usuario, string clave, &
+    string empresa) LIBRARY "SigreWebServiceWrapper.dll"
 
-FUNCTION long TieneTokenValido() LIBRARY "SigreWebServiceWrapper.dll"
+FUNCTION string ConsultarRucCompleto(string ruc, string rucOrigen, &
+    string usuario, string clave, string empresa, string computerName) &
+    LIBRARY "SigreWebServiceWrapper.dll"
 
-SUBROUTINE InvalidarToken() LIBRARY "SigreWebServiceWrapper.dll"
 
+// === ENVIO DE CORREO ===
+FUNCTION string EnviarCorreo(string destinatarios, string nombres, &
+    string asunto, string mensaje, boolean esHtml, string adjuntos) &
+    LIBRARY "SigreWebServiceWrapper.dll"
+
+FUNCTION string EnviarCorreoAvanzado(string destinatarios, string nombres, &
+    string cc, string cco, string asunto, string mensaje, boolean esHtml, &
+    string adjuntos) LIBRARY "SigreWebServiceWrapper.dll"
+
+
+// === UTILIDADES ===
 FUNCTION string ObtenerVersion() LIBRARY "SigreWebServiceWrapper.dll"
+FUNCTION string ObtenerRutaLog() LIBRARY "SigreWebServiceWrapper.dll"
+FUNCTION string ObtenerCarpetaLog() LIBRARY "SigreWebServiceWrapper.dll"
+FUNCTION string ObtenerCarpetaLogHistorico() LIBRARY "SigreWebServiceWrapper.dll"
+SUBROUTINE HabilitarLog(long habilitado) LIBRARY "SigreWebServiceWrapper.dll"
+SUBROUTINE LimpiarLog() LIBRARY "SigreWebServiceWrapper.dll"
+SUBROUTINE LimpiarLogHistorico() LIBRARY "SigreWebServiceWrapper.dll"
 
 
-=========================================================================
-                    EJEMPLOS DE USO - EMAIL
-=========================================================================
+// =======================================================================
+//                    EJEMPLO A: CONSULTA RUC (RECOMENDADO)
+// =======================================================================
+// Este es el método más eficiente:
+// - Configura credenciales UNA VEZ al iniciar la aplicación
+// - El token se guarda en disco y se renueva automáticamente
+// - Cada consulta solo necesita el RUC a buscar
+// =======================================================================
 
-EJEMPLO 1: Envío simple de correo
----------------------------------
+// --- En el evento Open de la aplicación o ventana principal ---
 
-string ls_resultado, ls_mensaje
-boolean lb_exitoso
+string ls_resultado
 
-// Enviar correo simple
-ls_resultado = EnviarCorreo( &
-    "usuario@empresa.com", &           // Destinatario
-    "Juan Pérez", &                    // Nombre del destinatario
-    "Prueba desde PowerBuilder", &     // Asunto
-    "Este es el mensaje de prueba.", & // Mensaje
-    false, &                           // false = texto plano
-    "")                                // Sin adjuntos
+// Configurar credenciales (solo una vez)
+ls_resultado = ConfigurarCredencialesRuc("sigre", "sigre1234", "TRANSMARINA")
 
-// Parsear resultado JSON: {"exitoso":true,"mensaje":"..."}
-// Usar una función para parsear o verificar directamente
-IF Pos(ls_resultado, '"exitoso":true') > 0 THEN
-    MessageBox("Éxito", "Correo enviado correctamente")
-ELSE
-    MessageBox("Error", ls_resultado)
-END IF
+// Opcional: verificar resultado
+// El JSON será: {"exitoso":true,"mensaje":"Credenciales configuradas correctamente"}
 
 
-=========================================================================
+// --- En cualquier parte de la aplicación donde necesites consultar RUC ---
 
-EJEMPLO 2: Envío a múltiples destinatarios con adjuntos
--------------------------------------------------------
+string ls_ruc_resultado
+string ls_ruc = "20100070970"
+string ls_ruc_origen = "20123456789"
+string ls_computer = "PC-VENTAS-01"
 
-string ls_destinatarios, ls_nombres, ls_adjuntos, ls_resultado
+ls_ruc_resultado = ConsultarRuc(ls_ruc, ls_ruc_origen, ls_computer)
 
-// Múltiples destinatarios (separados por ;)
-ls_destinatarios = "user1@empresa.com;user2@empresa.com;user3@empresa.com"
+// El resultado es un JSON como:
+// {
+//   "exitoso": true,
+//   "mensaje": "OK",
+//   "ruc": "20100070970",
+//   "razonSocial": "EMPRESA EJEMPLO S.A.C.",
+//   "estado": "ACTIVO",
+//   "condicion": "HABIDO",
+//   "ubigeo": "150101",
+//   "direccionCompleta": "AV. PRINCIPAL NRO. 123",
+//   "ubicacionCompleta": "LIMA - LIMA - LIMA"
+// }
 
-// Nombres correspondientes (mismo orden, separados por ;)
-ls_nombres = "Juan Pérez;María García;Carlos López"
+MessageBox("Consulta RUC", ls_ruc_resultado)
 
-// Múltiples adjuntos (separados por |)
-ls_adjuntos = "C:\Reportes\informe.pdf|C:\Datos\resumen.xlsx"
 
-ls_resultado = EnviarCorreo( &
+// =======================================================================
+//                    EJEMPLO B: VER ESTADO DEL TOKEN
+// =======================================================================
+
+string ls_info_token
+ls_info_token = ObtenerInfoToken()
+
+// El resultado es un JSON como:
+// {
+//   "existe": true,
+//   "usuario": "sigre",
+//   "empresa": "TRANSMARINA",
+//   "expira": "2026-01-14 12:30:00",
+//   "expirado": false,
+//   "minutosRestantes": 12
+// }
+
+MessageBox("Info Token", ls_info_token)
+
+
+// =======================================================================
+//                    EJEMPLO C: FORZAR RENOVACION DE TOKEN
+// =======================================================================
+// Usar si hay problemas de autenticación
+
+ForzarRenovacionToken()  // Elimina el token guardado
+
+// La próxima llamada a ConsultarRuc obtendrá un nuevo token automáticamente
+
+
+// =======================================================================
+//                    EJEMPLO D: ENVIO DE CORREO
+// =======================================================================
+
+string ls_email_resultado
+string ls_destinatarios = "usuario1@ejemplo.com;usuario2@ejemplo.com"
+string ls_nombres = "Usuario Uno;Usuario Dos"
+string ls_asunto = "Reporte Mensual de Ventas"
+string ls_mensaje = "<h1>Estimado cliente</h1><p>Adjunto el reporte.</p>"
+boolean lb_es_html = TRUE
+string ls_adjuntos = "C:\Reportes\ventas.pdf|C:\Reportes\anexo.xlsx"
+
+ls_email_resultado = EnviarCorreo( &
     ls_destinatarios, &
     ls_nombres, &
-    "Informe Mensual - " + String(Today(), "mmmm yyyy"), &
-    "Estimados, adjunto el informe mensual.", &
-    false, &
+    ls_asunto, &
+    ls_mensaje, &
+    lb_es_html, &
     ls_adjuntos)
 
-IF Pos(ls_resultado, '"exitoso":true') > 0 THEN
-    MessageBox("Éxito", "Correo enviado a 3 destinatarios")
-END IF
-
-
-=========================================================================
-
-EJEMPLO 3: Envío de correo HTML
--------------------------------
-
-string ls_html, ls_resultado
-
-// Construir mensaje HTML
-ls_html = "<html><body>"
-ls_html += "<h1 style='color:#2196F3;'>Sistema SIGRE</h1>"
-ls_html += "<p>Estimado usuario,</p>"
-ls_html += "<table border='1' cellpadding='5'>"
-ls_html += "<tr><th>Campo</th><th>Valor</th></tr>"
-ls_html += "<tr><td>Número</td><td>12345</td></tr>"
-ls_html += "<tr><td>Fecha</td><td>" + String(Today(), "dd/mm/yyyy") + "</td></tr>"
-ls_html += "</table>"
-ls_html += "<p>Saludos cordiales</p>"
-ls_html += "</body></html>"
-
-ls_resultado = EnviarCorreo( &
-    "usuario@empresa.com", &
-    "Usuario Destino", &
-    "Notificación del Sistema", &
-    ls_html, &
-    true, &    // true = es HTML
-    "")
-
-IF Pos(ls_resultado, '"exitoso":true') > 0 THEN
-    MessageBox("Éxito", "Correo HTML enviado")
-END IF
-
-
-=========================================================================
-
-EJEMPLO 4: Envío con CC y CCO
------------------------------
-
-string ls_resultado
-
-ls_resultado = EnviarCorreoAvanzado( &
-    "destinatario@empresa.com", &      // Destinatarios
-    "Juan Pérez", &                    // Nombres
-    "jefe@empresa.com", &              // CC (con copia)
-    "auditoria@empresa.com", &         // CCO (copia oculta)
-    "Informe Importante", &            // Asunto
-    "Adjunto informe para revisión.", &
-    false, &
-    "C:\docs\informe.pdf")
-
-IF Pos(ls_resultado, '"exitoso":true') > 0 THEN
-    MessageBox("Éxito", "Correo enviado con copias")
-END IF
-
-
-=========================================================================
-                    EJEMPLOS DE USO - CONSULTA RUC REST
-=========================================================================
-
-EJEMPLO 5: Consulta de RUC (dos pasos)
---------------------------------------
-
-string ls_token, ls_resultado
-
-// Paso 1: Obtener token JWT (válido 15 minutos)
-ls_token = ObtenerTokenRest("sigre", "sigre1234", "TRANSMARINA")
-
-IF Left(ls_token, 6) = "ERROR:" THEN
-    MessageBox("Error", ls_token)
-    RETURN
-END IF
-
-// Paso 2: Consultar RUC
-ls_resultado = ConsultarRucRest( &
-    "20100070970", &      // RUC a consultar
-    "20123456789", &      // RUC de tu empresa
-    "PC-COMPRAS01")       // Nombre del equipo
-
-// El resultado es JSON con todos los datos del RUC
-// {"exitoso":true,"ruc":"...","razonSocial":"...","estado":"ACTIVO",...}
-IF Pos(ls_resultado, '"exitoso":true') > 0 THEN
-    // Parsear el JSON para obtener los campos
-    // razonSocial, estado, condicion, direccionCompleta, etc.
-    MessageBox("Resultado", ls_resultado)
-ELSE
-    MessageBox("Error", ls_resultado)
-END IF
-
-
-=========================================================================
-
-EJEMPLO 6: Consulta de RUC (un solo paso)
------------------------------------------
-
-string ls_resultado
-
-// Consulta completa: obtiene token y consulta en un solo paso
-ls_resultado = ConsultarRucCompleto( &
-    "10056450608", &      // RUC a consultar
-    "20123456789", &      // RUC de tu empresa
-    "sigre", &            // Usuario
-    "sigre1234", &        // Clave
-    "TRANSMARINA", &      // Empresa
-    "PC-COMPRAS01")       // Nombre del equipo
-
-IF Pos(ls_resultado, '"exitoso":true') > 0 THEN
-    MessageBox("RUC Encontrado", ls_resultado)
-END IF
-
-
-=========================================================================
-
-EJEMPLO 7: Reutilizar token para múltiples consultas
-----------------------------------------------------
-
-string ls_token, ls_resultado
-string ls_rucs[]
-integer li_i
-
-// RUCs a consultar
-ls_rucs[1] = "20100070970"
-ls_rucs[2] = "20123456789"
-ls_rucs[3] = "10056450608"
-
-// Obtener token UNA sola vez
-ls_token = ObtenerTokenRest("sigre", "sigre1234", "TRANSMARINA")
-
-IF Left(ls_token, 6) = "ERROR:" THEN
-    MessageBox("Error", ls_token)
-    RETURN
-END IF
-
-// Consultar múltiples RUCs con el mismo token
-FOR li_i = 1 TO UpperBound(ls_rucs)
-    
-    // Verificar si el token sigue válido
-    IF TieneTokenValido() = 0 THEN
-        // Renovar token
-        ls_token = ObtenerTokenRest("sigre", "sigre1234", "TRANSMARINA")
-    END IF
-    
-    ls_resultado = ConsultarRucRest( &
-        ls_rucs[li_i], "20123456789", "ESTACION01")
-    
-    IF Pos(ls_resultado, '"exitoso":true') > 0 THEN
-        // Procesar resultado...
-    END IF
-    
-NEXT
-
-// Al finalizar, invalidar el token
-InvalidarToken()
-
-
-=========================================================================
-                    FUNCIÓN AUXILIAR PARA PARSEAR JSON
-=========================================================================
-
-Crear una función global: gf_obtener_valor_json(string, string) returns string
-
-// Función simple para obtener un valor de un JSON
-// Uso: ls_razon = gf_obtener_valor_json(ls_json, "razonSocial")
-
-string ls_json, ls_campo
-string ls_valor
-long ll_inicio, ll_fin
-
-ls_json = as_json
-ls_campo = '"' + as_campo + '":'
-
-ll_inicio = Pos(ls_json, ls_campo)
-IF ll_inicio = 0 THEN RETURN ""
-
-ll_inicio = ll_inicio + Len(ls_campo)
-
-// Verificar si el valor es string (empieza con ")
-IF Mid(ls_json, ll_inicio, 1) = '"' THEN
-    ll_inicio = ll_inicio + 1
-    ll_fin = Pos(ls_json, '"', ll_inicio)
-    IF ll_fin > 0 THEN
-        ls_valor = Mid(ls_json, ll_inicio, ll_fin - ll_inicio)
-    END IF
-ELSE
-    // Valor no string (número o boolean)
-    ll_fin = Pos(ls_json, ',', ll_inicio)
-    IF ll_fin = 0 THEN ll_fin = Pos(ls_json, '}', ll_inicio)
-    IF ll_fin > 0 THEN
-        ls_valor = Mid(ls_json, ll_inicio, ll_fin - ll_inicio)
-    END IF
-END IF
-
-RETURN ls_valor
-
-
-// Ejemplo de uso:
-string ls_resultado, ls_razon, ls_estado
-
-ls_resultado = ConsultarRucCompleto("20100070970", ...)
-
-ls_razon = gf_obtener_valor_json(ls_resultado, "razonSocial")
-ls_estado = gf_obtener_valor_json(ls_resultado, "estado")
-
-sle_razon_social.text = ls_razon
-sle_estado.text = ls_estado
-
-
-=========================================================================
-                    CONFIGURACIÓN SMTP
-=========================================================================
-
-El archivo SigreWebServiceWrapper.dll.config contiene la configuración:
-
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <appSettings>
-    <add key="SmtpServer" value="smtp.gmail.com" />
-    <add key="SmtpPort" value="587" />
-    <add key="SmtpUser" value="no-reply@npssac.com.pe" />
-    <add key="SmtpPassword" value="uzcvurxlusoswmmu" />
-    <add key="SmtpEnableSSL" value="true" />
-  </appSettings>
-</configuration>
-
-Modifique este archivo para cambiar el servidor SMTP.
-
-
-=========================================================================
-                    ESTRUCTURA DE RESPUESTAS JSON
-=========================================================================
-
-RESPUESTA DE EnviarCorreo:
-{
-    "exitoso": true|false,
-    "mensaje": "Correo enviado exitosamente a N destinatario(s)"
-}
-
-RESPUESTA DE ConsultarRuc:
-{
-    "exitoso": true|false,
-    "mensaje": "...",
-    "ruc": "20100070970",
-    "razonSocial": "EMPRESA S.A.C.",
-    "estado": "ACTIVO",
-    "condicion": "HABIDO",
-    "ubigeo": "150101",
-    "direccionCompleta": "AV. PRINCIPAL 123 URB. CENTRO",
-    "ubicacionCompleta": "LIMA - LIMA - LIMA"
-}
-
-
-=========================================================================
-                    TROUBLESHOOTING
-=========================================================================
-
-1. Error: "No se puede encontrar el DLL"
-   - Verificar que los 3 archivos estén en la misma carpeta del .exe
-   - Verificar que sea la versión x64 del DLL
-
-2. Error: "Debe llamar primero a ObtenerTokenRest"
-   - Llamar a ObtenerTokenRest() antes de ConsultarRucRest()
-   - O usar ConsultarRucCompleto() que no requiere token previo
-
-3. Error SMTP
-   - Verificar la configuración en SigreWebServiceWrapper.dll.config
-   - Para Gmail, usar contraseñas de aplicación
-
-4. Token expirado
-   - El token dura 15 minutos
-   - Verificar con TieneTokenValido() antes de consultar
-   - Obtener nuevo token si es necesario
-
-
-=========================================================================
+// El resultado es un JSON como:
+// {"exitoso":true,"mensaje":"Correo enviado exitosamente a 2 destinatario(s)"}
+
+MessageBox("Envio de Correo", ls_email_resultado)
+
+
+// =======================================================================
+//                    EJEMPLO E: VER RUTA DEL LOG
+// =======================================================================
+
+string ls_ruta_log
+ls_ruta_log = ObtenerRutaLog()
+
+// Resultado ejemplo: C:\MiApp\log\SigreWebServiceWrapper.log
+
+MessageBox("Ruta del Log", ls_ruta_log)
+
+
+// =======================================================================
+//                    EJEMPLO F: CONSULTA RUC LEGACY (un solo paso)
+// =======================================================================
+// Este método obtiene un nuevo token en CADA llamada
+// Es menos eficiente pero más simple para pruebas
+
+string ls_resultado_legacy
+
+ls_resultado_legacy = ConsultarRucCompleto( &
+    "20100070970", &    // RUC a consultar
+    "20123456789", &    // RUC origen
+    "sigre", &          // Usuario
+    "sigre1234", &      // Clave
+    "TRANSMARINA", &    // Empresa
+    "PC-TEST")          // Computer name
+
+MessageBox("Consulta RUC Legacy", ls_resultado_legacy)
+
+
+// =======================================================================
+//                    NOTAS IMPORTANTES
+// =======================================================================
+//
+// 1. SEPARADORES:
+//    - Destinatarios email: separar con punto y coma (;)
+//    - Archivos adjuntos: separar con pipe (|)
+//
+// 2. TOKEN JWT:
+//    - Se guarda en: [Carpeta EXE]\token.json
+//    - Válido por 15 minutos, se renueva automáticamente
+//    - Si hay problemas, usar ForzarRenovacionToken()
+//
+// 3. LOGS:
+//    - Log actual: [Carpeta EXE]\log\SigreWebServiceWrapper.log
+//    - Históricos: [Carpeta EXE]\log\historico\*.log (cuando supera 2MB)
+//
+// 4. CONFIGURACION SMTP:
+//    - Editar: SigreWebServiceWrapper.dll.config
+//    - Claves: SmtpServer, SmtpPort, SmtpUser, SmtpPassword, SmtpEnableSSL
+//
+// 5. ERRORES:
+//    - Revisar el archivo de log para diagnóstico
+//    - Los errores siempre retornan: {"exitoso":false,"mensaje":"..."}
+//
+// =======================================================================

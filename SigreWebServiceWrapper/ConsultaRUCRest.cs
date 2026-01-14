@@ -312,6 +312,17 @@ namespace SigreWebServiceWrapper
         {
             return _token ?? "";
         }
+
+        /// <summary>
+        /// Establece un token externo (usado por TokenManager)
+        /// </summary>
+        /// <param name="token">Token JWT</param>
+        /// <param name="expiracionMinutos">Minutos de validez (default 14)</param>
+        public void EstablecerToken(string token, int expiracionMinutos = 14)
+        {
+            _token = token;
+            _tokenExpiration = DateTime.Now.AddMinutes(expiracionMinutos);
+        }
     }
 
     #region Clases de respuesta JSON

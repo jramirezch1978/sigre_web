@@ -8,6 +8,13 @@ namespace SigreWebServiceWrapper
     /// <summary>
     /// Funciones exportadas para uso directo desde PowerBuilder
     /// Usar con: FUNCTION string NombreFuncion(...) LIBRARY "SigreWebServiceWrapper.dll"
+    /// 
+    /// FLUJO RECOMENDADO PARA CONSULTA RUC:
+    /// 1. Al iniciar la aplicación: ConfigurarCredencialesRuc(usuario, clave, empresa)
+    /// 2. Cada consulta: ConsultarRuc(ruc, rucOrigen, computerName)
+    ///    - El DLL maneja automáticamente el token JWT
+    ///    - Si el token expiró, lo renueva automáticamente
+    ///    - El token se guarda en disco para persistir entre sesiones
     /// </summary>
     public static class ExportedFunctions
     {
@@ -100,12 +107,163 @@ namespace SigreWebServiceWrapper
         // ============================================================
         //                    SERVICIO REST RUC
         // ============================================================
+        //
+        // FLUJO AUTOMÁTICO:
+        // 1. ConfigurarCredencialesRuc() - Una vez al iniciar app
+        // 2. ConsultarRuc() - El DLL maneja token automáticamente
+        //
+        // El token se guarda en: [Carpeta DLL]\token.json
+        // Se renueva automáticamente cuando expira (cada 15 min)
+        //
+        // ============================================================
 
         private static ConsultaRUCRest _restClient = null;
 
         /// <summary>
-        /// Obtiene un token JWT
-        /// PowerBuilder: FUNCTION string ObtenerTokenRest(string usuario, string clave, string empresa) LIBRARY "SigreWebServiceWrapper.dll"
+        /// Configura las credenciales para consultas RUC REST.
+        /// Llamar UNA VEZ al iniciar la aplicación.
+        /// Las credenciales se guardan y el token se renueva automáticamente.
+        /// 
+        /// PowerBuilder: FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, string empresa) LIBRARY "SigreWebServiceWrapper.dll"
+        /// 
+        /// Retorna: {"exitoso":true} o {"exitoso":false,"mensaje":"..."}
+        /// </summary>
+        [DllExport("ConfigurarCredencialesRuc", CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        public static string ConfigurarCredencialesRuc(
+            [MarshalAs(UnmanagedType.LPWStr)] string usuario,
+            [MarshalAs(UnmanagedType.LPWStr)] string clave,
+            [MarshalAs(UnmanagedType.LPWStr)] string empresa)
+        {
+            Logger.Info("ConfigurarCredencialesRuc: usuario=" + (usuario ?? "null") + ", empresa=" + (empresa ?? "null"));
+            try
+            {
+                if (string.IsNullOrEmpty(usuario) || string.IsNullOrEmpty(clave) || string.IsNullOrEmpty(empresa))
+                {
+                    return FormatResult(false, "Usuario, clave y empresa son requeridos");
+                }
+
+                // Configurar TokenManager
+                TokenManager.Configurar(usuario, clave, empresa);
+
+                // Inicializar cliente REST
+                if (_restClient == null)
+                {
+                    _restClient = new ConsultaRUCRest();
+                }
+
+                Logger.Info("ConfigurarCredencialesRuc: Credenciales configuradas correctamente");
+                return FormatResult(true, "Credenciales configuradas correctamente");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("ConfigurarCredencialesRuc exception", ex);
+                return FormatResult(false, "Error: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Consulta RUC usando el servicio REST.
+        /// El token se maneja AUTOMÁTICAMENTE:
+        /// - Si no hay token, lo obtiene
+        /// - Si el token expiró, lo renueva
+        /// - El token se guarda en disco
+        /// 
+        /// REQUISITO: Llamar ConfigurarCredencialesRuc() primero (una vez al iniciar app)
+        /// 
+        /// PowerBuilder: FUNCTION string ConsultarRuc(string ruc, string rucOrigen, string computerName) LIBRARY "SigreWebServiceWrapper.dll"
+        /// </summary>
+        [DllExport("ConsultarRuc", CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        public static string ConsultarRuc(
+            [MarshalAs(UnmanagedType.LPWStr)] string rucConsulta,
+            [MarshalAs(UnmanagedType.LPWStr)] string rucOrigen,
+            [MarshalAs(UnmanagedType.LPWStr)] string computerName)
+        {
+            Logger.Info("ConsultarRuc: ruc=" + (rucConsulta ?? "null"));
+            try
+            {
+                // Obtener token válido (automáticamente renueva si expiró)
+                string token = TokenManager.ObtenerTokenValido();
+                
+                if (string.IsNullOrEmpty(token))
+                {
+                    Logger.Error("ConsultarRuc: No hay token válido. Llame ConfigurarCredencialesRuc primero.");
+                    return FormatResult(false, "No hay token válido. Configure las credenciales con ConfigurarCredencialesRuc");
+                }
+
+                if (_restClient == null)
+                {
+                    _restClient = new ConsultaRUCRest();
+                }
+
+                // Establecer el token en el cliente
+                _restClient.EstablecerToken(token);
+
+                var resultado = _restClient.ConsultarRUC(
+                    rucConsulta ?? "",
+                    rucOrigen ?? "",
+                    computerName ?? "");
+
+                if (resultado.IsOk)
+                {
+                    Logger.Info("ConsultarRuc: RUC encontrado - " + resultado.RazonSocial);
+                }
+                else
+                {
+                    Logger.Warn("ConsultarRuc: " + resultado.Mensaje);
+                }
+
+                return PadronRucToJson(resultado);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("ConsultarRuc exception", ex);
+                return FormatResult(false, "Error: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Obtiene información del estado actual del token (para debug/diagnóstico)
+        /// 
+        /// PowerBuilder: FUNCTION string ObtenerInfoToken() LIBRARY "SigreWebServiceWrapper.dll"
+        /// 
+        /// Retorna JSON:
+        /// {
+        ///   "existe": true/false,
+        ///   "usuario": "sigre",
+        ///   "empresa": "TRANSMARINA",
+        ///   "expira": "2026-01-14 12:30:00",
+        ///   "expirado": false,
+        ///   "minutosRestantes": 12
+        /// }
+        /// </summary>
+        [DllExport("ObtenerInfoToken", CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        public static string ObtenerInfoToken()
+        {
+            return TokenManager.ObtenerInfoToken();
+        }
+
+        /// <summary>
+        /// Fuerza renovación del token (útil si hay problemas de autenticación)
+        /// 
+        /// PowerBuilder: SUBROUTINE ForzarRenovacionToken() LIBRARY "SigreWebServiceWrapper.dll"
+        /// </summary>
+        [DllExport("ForzarRenovacionToken", CallingConvention = CallingConvention.StdCall)]
+        public static void ForzarRenovacionToken()
+        {
+            Logger.Info("ForzarRenovacionToken: Invalidando token actual");
+            TokenManager.Invalidar();
+        }
+
+        // ============================================================
+        //           FUNCIONES LEGACY (para compatibilidad)
+        // ============================================================
+
+        /// <summary>
+        /// [LEGACY] Obtiene un token JWT manualmente
+        /// NOTA: Usar ConfigurarCredencialesRuc + ConsultarRuc es más fácil
         /// </summary>
         [DllExport("ObtenerTokenRest", CallingConvention = CallingConvention.StdCall)]
         [return: MarshalAs(UnmanagedType.LPWStr)]
@@ -114,9 +272,12 @@ namespace SigreWebServiceWrapper
             [MarshalAs(UnmanagedType.LPWStr)] string clave,
             [MarshalAs(UnmanagedType.LPWStr)] string empresa)
         {
-            Logger.Info("ObtenerTokenRest: usuario=" + (usuario ?? "null") + ", empresa=" + (empresa ?? "null"));
+            Logger.Info("ObtenerTokenRest: usuario=" + (usuario ?? "null"));
             try
             {
+                // También configuramos TokenManager para futuras consultas
+                TokenManager.Configurar(usuario ?? "", clave ?? "", empresa ?? "");
+                
                 if (_restClient == null)
                 {
                     _restClient = new ConsultaRUCRest();
@@ -143,39 +304,8 @@ namespace SigreWebServiceWrapper
         }
 
         /// <summary>
-        /// Consulta RUC usando token previamente obtenido
-        /// PowerBuilder: FUNCTION string ConsultarRucRest(string ruc, string rucOrigen, string computerName) LIBRARY "SigreWebServiceWrapper.dll"
-        /// </summary>
-        [DllExport("ConsultarRucRest", CallingConvention = CallingConvention.StdCall)]
-        [return: MarshalAs(UnmanagedType.LPWStr)]
-        public static string ConsultarRucRest(
-            [MarshalAs(UnmanagedType.LPWStr)] string rucConsulta,
-            [MarshalAs(UnmanagedType.LPWStr)] string rucOrigen,
-            [MarshalAs(UnmanagedType.LPWStr)] string computerName)
-        {
-            try
-            {
-                if (_restClient == null)
-                {
-                    return "{\"exitoso\":false,\"mensaje\":\"Debe llamar primero a ObtenerTokenRest\"}";
-                }
-
-                var resultado = _restClient.ConsultarRUC(
-                    rucConsulta ?? "",
-                    rucOrigen ?? "",
-                    computerName ?? "");
-
-                return PadronRucToJson(resultado);
-            }
-            catch (Exception ex)
-            {
-                return FormatResult(false, "Error: " + ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// Consulta RUC en un solo paso
-        /// PowerBuilder: FUNCTION string ConsultarRucCompleto(string ruc, string rucOrigen, string usuario, string clave, string empresa, string computer) LIBRARY "SigreWebServiceWrapper.dll"
+        /// [LEGACY] Consulta RUC en un solo paso (obtiene token + consulta)
+        /// NOTA: Usar ConfigurarCredencialesRuc + ConsultarRuc es más eficiente
         /// </summary>
         [DllExport("ConsultarRucCompleto", CallingConvention = CallingConvention.StdCall)]
         [return: MarshalAs(UnmanagedType.LPWStr)]
@@ -189,6 +319,9 @@ namespace SigreWebServiceWrapper
         {
             try
             {
+                // Configurar credenciales
+                TokenManager.Configurar(usuario ?? "", clave ?? "", empresa ?? "");
+                
                 if (_restClient == null)
                 {
                     _restClient = new ConsultaRUCRest();
@@ -210,30 +343,9 @@ namespace SigreWebServiceWrapper
             }
         }
 
-        /// <summary>
-        /// Verifica si hay token válido
-        /// PowerBuilder: FUNCTION long TieneTokenValido() LIBRARY "SigreWebServiceWrapper.dll"
-        /// Retorna: 1 = válido, 0 = no válido
-        /// </summary>
-        [DllExport("TieneTokenValido", CallingConvention = CallingConvention.StdCall)]
-        public static int TieneTokenValido()
-        {
-            if (_restClient == null) return 0;
-            return _restClient.TieneTokenValido() ? 1 : 0;
-        }
-
-        /// <summary>
-        /// Invalida el token actual
-        /// PowerBuilder: SUBROUTINE InvalidarToken() LIBRARY "SigreWebServiceWrapper.dll"
-        /// </summary>
-        [DllExport("InvalidarToken", CallingConvention = CallingConvention.StdCall)]
-        public static void InvalidarToken()
-        {
-            if (_restClient != null)
-            {
-                _restClient.InvalidarToken();
-            }
-        }
+        // ============================================================
+        //                    UTILIDADES
+        // ============================================================
 
         /// <summary>
         /// Versión del DLL
@@ -242,12 +354,11 @@ namespace SigreWebServiceWrapper
         [return: MarshalAs(UnmanagedType.LPWStr)]
         public static string ObtenerVersion()
         {
-            return "1.0.0";
+            return "1.1.0";
         }
 
         /// <summary>
         /// Obtiene la ruta del archivo de log actual
-        /// PowerBuilder: FUNCTION string ObtenerRutaLog() LIBRARY "SigreWebServiceWrapper.dll"
         /// </summary>
         [DllExport("ObtenerRutaLog", CallingConvention = CallingConvention.StdCall)]
         [return: MarshalAs(UnmanagedType.LPWStr)]
@@ -258,7 +369,6 @@ namespace SigreWebServiceWrapper
 
         /// <summary>
         /// Obtiene la ruta de la carpeta de logs
-        /// PowerBuilder: FUNCTION string ObtenerCarpetaLog() LIBRARY "SigreWebServiceWrapper.dll"
         /// </summary>
         [DllExport("ObtenerCarpetaLog", CallingConvention = CallingConvention.StdCall)]
         [return: MarshalAs(UnmanagedType.LPWStr)]
@@ -269,7 +379,6 @@ namespace SigreWebServiceWrapper
 
         /// <summary>
         /// Obtiene la ruta de la carpeta de logs históricos
-        /// PowerBuilder: FUNCTION string ObtenerCarpetaLogHistorico() LIBRARY "SigreWebServiceWrapper.dll"
         /// </summary>
         [DllExport("ObtenerCarpetaLogHistorico", CallingConvention = CallingConvention.StdCall)]
         [return: MarshalAs(UnmanagedType.LPWStr)]
@@ -280,7 +389,6 @@ namespace SigreWebServiceWrapper
 
         /// <summary>
         /// Habilita o deshabilita el logging
-        /// PowerBuilder: SUBROUTINE HabilitarLog(long habilitado) LIBRARY "SigreWebServiceWrapper.dll"
         /// </summary>
         [DllExport("HabilitarLog", CallingConvention = CallingConvention.StdCall)]
         public static void HabilitarLog(int habilitado)
@@ -290,7 +398,6 @@ namespace SigreWebServiceWrapper
 
         /// <summary>
         /// Limpia el archivo de log actual
-        /// PowerBuilder: SUBROUTINE LimpiarLog() LIBRARY "SigreWebServiceWrapper.dll"
         /// </summary>
         [DllExport("LimpiarLog", CallingConvention = CallingConvention.StdCall)]
         public static void LimpiarLog()
@@ -300,7 +407,6 @@ namespace SigreWebServiceWrapper
 
         /// <summary>
         /// Limpia todos los logs históricos
-        /// PowerBuilder: SUBROUTINE LimpiarLogHistorico() LIBRARY "SigreWebServiceWrapper.dll"
         /// </summary>
         [DllExport("LimpiarLogHistorico", CallingConvention = CallingConvention.StdCall)]
         public static void LimpiarLogHistorico()
