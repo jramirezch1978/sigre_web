@@ -14,12 +14,47 @@ namespace SigreWebServiceWrapper
     {
         private static readonly object _lock = new object();
         private static TokenData _cachedToken = null;
+        private static string _tokenDir = null;
         private static string _tokenFile = null;
 
         // Credenciales guardadas para renovación automática
         private static string _usuario = null;
         private static string _clave = null;
         private static string _empresa = null;
+
+        /// <summary>
+        /// Ruta de la carpeta de tokens
+        /// </summary>
+        private static string TokenDir
+        {
+            get
+            {
+                if (_tokenDir == null)
+                {
+                    try
+                    {
+                        string dllPath = typeof(TokenManager).Assembly.Location;
+                        string dllDir = Path.GetDirectoryName(dllPath);
+                        _tokenDir = Path.Combine(dllDir, "tokens");
+                        
+                        // Crear carpeta si no existe
+                        if (!Directory.Exists(_tokenDir))
+                        {
+                            Directory.CreateDirectory(_tokenDir);
+                        }
+                    }
+                    catch
+                    {
+                        _tokenDir = Path.Combine(Path.GetTempPath(), "SigreWebServiceWrapper", "tokens");
+                        if (!Directory.Exists(_tokenDir))
+                        {
+                            Directory.CreateDirectory(_tokenDir);
+                        }
+                    }
+                }
+                return _tokenDir;
+            }
+        }
 
         /// <summary>
         /// Ruta del archivo donde se guarda el token
@@ -30,16 +65,7 @@ namespace SigreWebServiceWrapper
             {
                 if (_tokenFile == null)
                 {
-                    try
-                    {
-                        string dllPath = typeof(TokenManager).Assembly.Location;
-                        string dllDir = Path.GetDirectoryName(dllPath);
-                        _tokenFile = Path.Combine(dllDir, "token.json");
-                    }
-                    catch
-                    {
-                        _tokenFile = Path.Combine(Path.GetTempPath(), "SigreWebServiceWrapper_token.json");
-                    }
+                    _tokenFile = Path.Combine(TokenDir, "token.json");
                 }
                 return _tokenFile;
             }
