@@ -12,36 +12,20 @@
 //
 // ARCHIVOS GENERADOS AUTOMATICAMENTE:
 //   - log\SigreWebServiceWrapper.log          <- Log actual
-//   - log\historico\*.log                     <- Logs >2MB
-//   - token.json                              <- Token JWT guardado
+//   - log\historico\*.log                     <- Logs >2MB (rotación automática)
+//   - token.json                              <- Token JWT (renovación automática)
 //
 // -----------------------------------------------------------------------
 // DECLARACIONES DE FUNCIONES EXTERNAS
 // (Copiar en la sección "External Functions" del objeto PB)
 // -----------------------------------------------------------------------
 
-// === CONSULTA RUC (RECOMENDADO) ===
-// Flujo: 1) ConfigurarCredencialesRuc (una vez) + 2) ConsultarRuc (cada consulta)
-// El token se maneja AUTOMATICAMENTE (obtiene, guarda y renueva)
-
+// === CONSULTA RUC ===
 FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, &
     string empresa) LIBRARY "SigreWebServiceWrapper.dll"
 
 FUNCTION string ConsultarRuc(string ruc, string rucOrigen, &
     string computerName) LIBRARY "SigreWebServiceWrapper.dll"
-
-FUNCTION string ObtenerInfoToken() LIBRARY "SigreWebServiceWrapper.dll"
-
-SUBROUTINE ForzarRenovacionToken() LIBRARY "SigreWebServiceWrapper.dll"
-
-
-// === CONSULTA RUC (LEGACY - compatible con versión anterior) ===
-FUNCTION string ObtenerTokenRest(string usuario, string clave, &
-    string empresa) LIBRARY "SigreWebServiceWrapper.dll"
-
-FUNCTION string ConsultarRucCompleto(string ruc, string rucOrigen, &
-    string usuario, string clave, string empresa, string computerName) &
-    LIBRARY "SigreWebServiceWrapper.dll"
 
 
 // === ENVIO DE CORREO ===
@@ -54,46 +38,39 @@ FUNCTION string EnviarCorreoAvanzado(string destinatarios, string nombres, &
     string adjuntos) LIBRARY "SigreWebServiceWrapper.dll"
 
 
-// === UTILIDADES ===
+// === UTILIDADES (opcional) ===
 FUNCTION string ObtenerVersion() LIBRARY "SigreWebServiceWrapper.dll"
-FUNCTION string ObtenerRutaLog() LIBRARY "SigreWebServiceWrapper.dll"
-FUNCTION string ObtenerCarpetaLog() LIBRARY "SigreWebServiceWrapper.dll"
-FUNCTION string ObtenerCarpetaLogHistorico() LIBRARY "SigreWebServiceWrapper.dll"
-SUBROUTINE HabilitarLog(long habilitado) LIBRARY "SigreWebServiceWrapper.dll"
-SUBROUTINE LimpiarLog() LIBRARY "SigreWebServiceWrapper.dll"
-SUBROUTINE LimpiarLogHistorico() LIBRARY "SigreWebServiceWrapper.dll"
 
 
 // =======================================================================
-//                    EJEMPLO A: CONSULTA RUC (RECOMENDADO)
+//                    EJEMPLO A: CONSULTA RUC
 // =======================================================================
-// Este es el método más eficiente:
-// - Configura credenciales UNA VEZ al iniciar la aplicación
-// - El token se guarda en disco y se renueva automáticamente
-// - Cada consulta solo necesita el RUC a buscar
+// Flujo:
+// 1. ConfigurarCredencialesRuc() - UNA VEZ al iniciar la aplicación
+// 2. ConsultarRuc() - Cada vez que necesites consultar
+//
+// El token JWT se maneja AUTOMATICAMENTE:
+// - Se obtiene cuando es necesario
+// - Se guarda en disco (token.json)
+// - Se renueva automáticamente cuando expira
 // =======================================================================
 
-// --- En el evento Open de la aplicación o ventana principal ---
+// --- En el evento Open de la aplicación ---
 
 string ls_resultado
 
-// Configurar credenciales (solo una vez)
 ls_resultado = ConfigurarCredencialesRuc("sigre", "sigre1234", "TRANSMARINA")
 
-// Opcional: verificar resultado
-// El JSON será: {"exitoso":true,"mensaje":"Credenciales configuradas correctamente"}
+// Resultado: {"exitoso":true,"mensaje":"Credenciales configuradas correctamente"}
 
 
-// --- En cualquier parte de la aplicación donde necesites consultar RUC ---
+// --- Donde necesites consultar RUC ---
 
 string ls_ruc_resultado
-string ls_ruc = "20100070970"
-string ls_ruc_origen = "20123456789"
-string ls_computer = "PC-VENTAS-01"
 
-ls_ruc_resultado = ConsultarRuc(ls_ruc, ls_ruc_origen, ls_computer)
+ls_ruc_resultado = ConsultarRuc("20100070970", "20123456789", "PC-VENTAS-01")
 
-// El resultado es un JSON como:
+// Resultado exitoso:
 // {
 //   "exitoso": true,
 //   "mensaje": "OK",
@@ -106,94 +83,29 @@ ls_ruc_resultado = ConsultarRuc(ls_ruc, ls_ruc_origen, ls_computer)
 //   "ubicacionCompleta": "LIMA - LIMA - LIMA"
 // }
 
+// Resultado con error:
+// {"exitoso":false,"mensaje":"RUC no encontrado"}
+
 MessageBox("Consulta RUC", ls_ruc_resultado)
 
 
 // =======================================================================
-//                    EJEMPLO B: VER ESTADO DEL TOKEN
-// =======================================================================
-
-string ls_info_token
-ls_info_token = ObtenerInfoToken()
-
-// El resultado es un JSON como:
-// {
-//   "existe": true,
-//   "usuario": "sigre",
-//   "empresa": "TRANSMARINA",
-//   "expira": "2026-01-14 12:30:00",
-//   "expirado": false,
-//   "minutosRestantes": 12
-// }
-
-MessageBox("Info Token", ls_info_token)
-
-
-// =======================================================================
-//                    EJEMPLO C: FORZAR RENOVACION DE TOKEN
-// =======================================================================
-// Usar si hay problemas de autenticación
-
-ForzarRenovacionToken()  // Elimina el token guardado
-
-// La próxima llamada a ConsultarRuc obtendrá un nuevo token automáticamente
-
-
-// =======================================================================
-//                    EJEMPLO D: ENVIO DE CORREO
+//                    EJEMPLO B: ENVIO DE CORREO
 // =======================================================================
 
 string ls_email_resultado
-string ls_destinatarios = "usuario1@ejemplo.com;usuario2@ejemplo.com"
-string ls_nombres = "Usuario Uno;Usuario Dos"
-string ls_asunto = "Reporte Mensual de Ventas"
-string ls_mensaje = "<h1>Estimado cliente</h1><p>Adjunto el reporte.</p>"
-boolean lb_es_html = TRUE
-string ls_adjuntos = "C:\Reportes\ventas.pdf|C:\Reportes\anexo.xlsx"
 
 ls_email_resultado = EnviarCorreo( &
-    ls_destinatarios, &
-    ls_nombres, &
-    ls_asunto, &
-    ls_mensaje, &
-    lb_es_html, &
-    ls_adjuntos)
+    "usuario1@ejemplo.com;usuario2@ejemplo.com", &   // Destinatarios (;)
+    "Usuario Uno;Usuario Dos", &                     // Nombres (;)
+    "Reporte Mensual de Ventas", &                   // Asunto
+    "<h1>Estimado cliente</h1><p>Adjunto reporte.</p>", & // Mensaje
+    TRUE, &                                          // Es HTML
+    "C:\Reportes\ventas.pdf|C:\Reportes\anexo.xlsx") // Adjuntos (|)
 
-// El resultado es un JSON como:
-// {"exitoso":true,"mensaje":"Correo enviado exitosamente a 2 destinatario(s)"}
+// Resultado: {"exitoso":true,"mensaje":"Correo enviado exitosamente a 2 destinatario(s)"}
 
 MessageBox("Envio de Correo", ls_email_resultado)
-
-
-// =======================================================================
-//                    EJEMPLO E: VER RUTA DEL LOG
-// =======================================================================
-
-string ls_ruta_log
-ls_ruta_log = ObtenerRutaLog()
-
-// Resultado ejemplo: C:\MiApp\log\SigreWebServiceWrapper.log
-
-MessageBox("Ruta del Log", ls_ruta_log)
-
-
-// =======================================================================
-//                    EJEMPLO F: CONSULTA RUC LEGACY (un solo paso)
-// =======================================================================
-// Este método obtiene un nuevo token en CADA llamada
-// Es menos eficiente pero más simple para pruebas
-
-string ls_resultado_legacy
-
-ls_resultado_legacy = ConsultarRucCompleto( &
-    "20100070970", &    // RUC a consultar
-    "20123456789", &    // RUC origen
-    "sigre", &          // Usuario
-    "sigre1234", &      // Clave
-    "TRANSMARINA", &    // Empresa
-    "PC-TEST")          // Computer name
-
-MessageBox("Consulta RUC Legacy", ls_resultado_legacy)
 
 
 // =======================================================================
@@ -201,24 +113,25 @@ MessageBox("Consulta RUC Legacy", ls_resultado_legacy)
 // =======================================================================
 //
 // 1. SEPARADORES:
-//    - Destinatarios email: separar con punto y coma (;)
-//    - Archivos adjuntos: separar con pipe (|)
+//    - Destinatarios email: punto y coma (;)
+//    - Archivos adjuntos: pipe (|)
 //
-// 2. TOKEN JWT:
-//    - Se guarda en: [Carpeta EXE]\token.json
-//    - Válido por 15 minutos, se renueva automáticamente
-//    - Si hay problemas, usar ForzarRenovacionToken()
+// 2. TOKEN JWT (automático):
+//    - Archivo: [Carpeta EXE]\token.json
+//    - Válido por 15 minutos
+//    - Se renueva automáticamente
 //
-// 3. LOGS:
-//    - Log actual: [Carpeta EXE]\log\SigreWebServiceWrapper.log
-//    - Históricos: [Carpeta EXE]\log\historico\*.log (cuando supera 2MB)
+// 3. LOGS (automático):
+//    - Archivo: [Carpeta EXE]\log\SigreWebServiceWrapper.log
+//    - Rotación automática cuando supera 2MB
+//    - Históricos en: log\historico\
 //
 // 4. CONFIGURACION SMTP:
-//    - Editar: SigreWebServiceWrapper.dll.config
-//    - Claves: SmtpServer, SmtpPort, SmtpUser, SmtpPassword, SmtpEnableSSL
+//    - Archivo: SigreWebServiceWrapper.dll.config
+//    - Editar: SmtpServer, SmtpPort, SmtpUser, SmtpPassword, SmtpEnableSSL
 //
 // 5. ERRORES:
-//    - Revisar el archivo de log para diagnóstico
-//    - Los errores siempre retornan: {"exitoso":false,"mensaje":"..."}
+//    - Revisar el log para diagnóstico
+//    - Siempre retornan: {"exitoso":false,"mensaje":"..."}
 //
 // =======================================================================

@@ -357,62 +357,6 @@ namespace SigreWebServiceWrapper
             return "1.1.0";
         }
 
-        /// <summary>
-        /// Obtiene la ruta del archivo de log actual
-        /// </summary>
-        [DllExport("ObtenerRutaLog", CallingConvention = CallingConvention.StdCall)]
-        [return: MarshalAs(UnmanagedType.LPWStr)]
-        public static string ObtenerRutaLog()
-        {
-            return Logger.GetLogPath();
-        }
-
-        /// <summary>
-        /// Obtiene la ruta de la carpeta de logs
-        /// </summary>
-        [DllExport("ObtenerCarpetaLog", CallingConvention = CallingConvention.StdCall)]
-        [return: MarshalAs(UnmanagedType.LPWStr)]
-        public static string ObtenerCarpetaLog()
-        {
-            return Logger.GetLogDir();
-        }
-
-        /// <summary>
-        /// Obtiene la ruta de la carpeta de logs históricos
-        /// </summary>
-        [DllExport("ObtenerCarpetaLogHistorico", CallingConvention = CallingConvention.StdCall)]
-        [return: MarshalAs(UnmanagedType.LPWStr)]
-        public static string ObtenerCarpetaLogHistorico()
-        {
-            return Logger.GetHistoricoDir();
-        }
-
-        /// <summary>
-        /// Habilita o deshabilita el logging
-        /// </summary>
-        [DllExport("HabilitarLog", CallingConvention = CallingConvention.StdCall)]
-        public static void HabilitarLog(int habilitado)
-        {
-            Logger.Enabled = (habilitado == 1);
-        }
-
-        /// <summary>
-        /// Limpia el archivo de log actual
-        /// </summary>
-        [DllExport("LimpiarLog", CallingConvention = CallingConvention.StdCall)]
-        public static void LimpiarLog()
-        {
-            Logger.Clear();
-        }
-
-        /// <summary>
-        /// Limpia todos los logs históricos
-        /// </summary>
-        [DllExport("LimpiarLogHistorico", CallingConvention = CallingConvention.StdCall)]
-        public static void LimpiarLogHistorico()
-        {
-            Logger.ClearHistorico();
-        }
 
         // ============================================================
         //                    HELPERS
