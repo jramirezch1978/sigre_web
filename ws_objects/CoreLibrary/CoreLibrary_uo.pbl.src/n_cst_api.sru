@@ -29,27 +29,6 @@ function ulong MapVirtualKeyA(ulong uCode, ulong uMapType ) library 'user32.dll'
 function ulong CreateMutexA(ulong lpMutexAttributes,int bInitialOwner,ref string lpName) library "kernel32.dll" alias for "CreateMutexA;Ansi"
 function ulong GetLastError() library "kernel32.dll"
 
-// === CONSULTA RUC ===
-FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, &
-    string empresa) LIBRARY "SigreWebServiceWrapper.dll"
-
-FUNCTION string ConsultarRuc(string ruc, string rucOrigen, &
-    string computerName) LIBRARY "SigreWebServiceWrapper.dll"
-
-
-// === ENVIO DE CORREO ===
-FUNCTION string EnviarCorreo(string destinatarios, string nombres, &
-    string asunto, string mensaje, boolean esHtml, string adjuntos) &
-    LIBRARY "SigreWebServiceWrapper.dll"
-
-FUNCTION string EnviarCorreoAvanzado(string destinatarios, string nombres, &
-    string cc, string cco, string asunto, string mensaje, boolean esHtml, &
-    string adjuntos) LIBRARY "SigreWebServiceWrapper.dll"
-
-
-// === UTILIDADES (opcional) ===
-FUNCTION string ObtenerVersion() LIBRARY "SigreWebServiceWrapper.dll"
-
 end prototypes
 
 forward prototypes

@@ -128,18 +128,18 @@ end function
 public function boolean of_add_column (string as_tabla, string as_columna, string as_type_data);Long		ll_count
 String	ls_cmd, ls_mensaje
 
-ll_count = 0
-
 select count(*)
 	into :ll_count
 from user_tab_cols t
 where t.TABLE_NAME 	= upper(:as_tabla)
   and t.COLUMN_NAME 	= upper(:as_columna);
-
-// Verificar que el SELECT fue exitoso
-if SQLCA.SQLCode <> 0 then
-	MessageBox('Aviso', 'Error al verificar columna ' + as_columna + ' en tabla ' + as_tabla &
-							+ '. Error: ' + SQLCA.SQLErrText, StopSign!)
+  
+if SQLCA.SQLCode < 0 then
+	ls_mensaje = SQLCA.SQLErrText
+	ROLLBACK;
+	MessageBox('Aviso', 'function of_add_column_01(): Error consulta la tabla ' + as_columna + ' en la tabla ' + as_tabla &
+							+ '. Mensaje: ' + ls_mensaje &
+							+ '~r~nComando: ' + ls_cmd, StopSign!)
 	return false
 end if
 
@@ -163,20 +163,20 @@ end function
 public function boolean of_add_column (string as_tabla, string as_columna, string as_type_data, string as_default_value, boolean ab_not_null);Long		ll_count
 String	ls_cmd, ls_mensaje
 
-ll_count = 0
-
 select count(*)
 	into :ll_count
 from user_tab_cols t
 where t.TABLE_NAME 	= upper(:as_tabla)
   and t.COLUMN_NAME 	= upper(:as_columna);
-
-// Verificar que el SELECT fue exitoso
-if SQLCA.SQLCode <> 0 then
-	MessageBox('Aviso', 'Error al verificar columna ' + as_columna + ' en tabla ' + as_tabla &
-							+ '. Error: ' + SQLCA.SQLErrText, StopSign!)
+  
+if SQLCA.SQLCode < 0 then
+	ls_mensaje = SQLCA.SQLErrText
+	ROLLBACK;
+	MessageBox('Aviso', 'Funcion of_add_column_02(): Error consulta la tabla ' + as_columna + ' en la tabla ' + as_tabla &
+							+ '. Mensaje: ' + ls_mensaje &
+							+ '~r~nComando: ' + ls_cmd, StopSign!)
 	return false
-end if
+end if  
 
 if ll_count = 0 then
 	ls_cmd = "alter table " + upper(as_tabla) + " add " + upper(as_columna) &
