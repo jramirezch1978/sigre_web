@@ -1,0 +1,310 @@
+=========================================================================
+  EJEMPLOS DE USO DESDE POWERBUILDER 2025
+  SigreWebServiceWrapper - Servicio de Consulta RUC SUNAT
+=========================================================================
+
+EJEMPLO 1: Consulta Básica de RUC
+----------------------------------
+
+// Declarar variables
+OLEObject lole_service
+OLEObject lole_respuesta
+integer li_ret
+string ls_ruc_consultar, ls_mensaje
+
+TRY
+    // Crear el objeto COM
+    lole_service = CREATE OLEObject
+    li_ret = lole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUC")
+    
+    IF li_ret <> 0 THEN
+        MessageBox("Error", "No se pudo crear el objeto COM. Código: " + String(li_ret) + &
+                   "~r~n~r~nAsegúrese de que el DLL esté registrado con RegAsm.", StopSign!)
+        RETURN
+    END IF
+    
+    // RUC a consultar
+    ls_ruc_consultar = "20100070970"  // Ejemplo: SUPERMERCADOS PERUANOS S.A.
+    
+    // Llamar al servicio
+    lole_respuesta = lole_service.ConsultarRUC( &
+        ls_ruc_consultar,           // RUC a consultar
+        "20123456789",              // RUC de tu empresa
+        "usuario_servicio",         // Usuario del servicio
+        "clave_servicio",           // Clave del servicio
+        "EMPRESA01",                // Código de empresa
+        "ESTACION01")               // Nombre del computador
+    
+    // Procesar respuesta
+    IF lole_respuesta.IsOk THEN
+        ls_mensaje = "RUC: " + lole_respuesta.Ruc + "~r~n"
+        ls_mensaje += "Razón Social: " + lole_respuesta.RazonSocial + "~r~n"
+        ls_mensaje += "Estado: " + lole_respuesta.Estado + "~r~n"
+        ls_mensaje += "Condición: " + lole_respuesta.Condicion + "~r~n"
+        ls_mensaje += "Dirección: " + lole_respuesta.ObtenerDireccionCompleta() + "~r~n"
+        ls_mensaje += "Ubicación: " + lole_respuesta.ObtenerUbicacionCompleta()
+        
+        MessageBox("Información del RUC", ls_mensaje, Information!)
+    ELSE
+        MessageBox("Error", "No se pudo consultar el RUC: " + lole_respuesta.Mensaje, StopSign!)
+    END IF
+    
+CATCH (RuntimeError er)
+    MessageBox("Error", "Error al consultar RUC: " + er.getMessage(), StopSign!)
+    
+FINALLY
+    // Limpiar objetos
+    IF NOT IsNull(lole_service) THEN
+        lole_service.Dispose()
+        lole_service.DisconnectObject()
+    END IF
+    
+    DESTROY lole_service
+END TRY
+
+
+=========================================================================
+
+EJEMPLO 2: Función Encapsulada (Recomendado)
+---------------------------------------------
+
+Crear un objeto no visual: n_cst_consulta_ruc_sunat.sru
+
+// Variables de instancia
+type variables
+    OLEObject iole_service
+    boolean ib_inicializado = false
+end variables
+
+// Función: of_inicializar()
+public function boolean of_inicializar();
+integer li_ret
+
+TRY
+    IF ib_inicializado THEN RETURN TRUE
+    
+    iole_service = CREATE OLEObject
+    li_ret = iole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUC")
+    
+    IF li_ret <> 0 THEN
+        MessageBox("Error", "No se pudo inicializar el servicio de consulta RUC. Código: " + String(li_ret), StopSign!)
+        RETURN FALSE
+    END IF
+    
+    ib_inicializado = TRUE
+    RETURN TRUE
+    
+CATCH (RuntimeError er)
+    MessageBox("Error", "Error al inicializar servicio: " + er.getMessage(), StopSign!)
+    RETURN FALSE
+END TRY
+
+end function
+
+// Función: of_consultar_ruc()
+public function st_padron_ruc of_consultar_ruc(string as_ruc);
+st_padron_ruc lstr_resultado
+OLEObject lole_respuesta
+string ls_usuario, ls_clave
+
+TRY
+    // Inicializar si no está inicializado
+    IF NOT ib_inicializado THEN
+        IF NOT of_inicializar() THEN
+            lstr_resultado.is_ok = FALSE
+            lstr_resultado.mensaje = "No se pudo inicializar el servicio"
+            RETURN lstr_resultado
+        END IF
+    END IF
+    
+    // Obtener credenciales (puedes ajustar según tu aplicación)
+    ls_usuario = "usuario_servicio"  // Obtener de parámetros
+    ls_clave = "clave_servicio"      // Obtener de parámetros
+    
+    // Llamar al servicio
+    lole_respuesta = iole_service.ConsultarRUC( &
+        as_ruc, &
+        gs_ruc_empresa, &  // Variable global con RUC de tu empresa
+        ls_usuario, &
+        ls_clave, &
+        gs_empresa, &      // Variable global con código de empresa
+        gs_estacion)       // Variable global con nombre de estación
+    
+    // Convertir respuesta a estructura PowerBuilder
+    lstr_resultado.is_ok = lole_respuesta.IsOk
+    lstr_resultado.mensaje = lole_respuesta.Mensaje
+    lstr_resultado.ruc = lole_respuesta.Ruc
+    lstr_resultado.razon_social = lole_respuesta.RazonSocial
+    lstr_resultado.estado = lole_respuesta.Estado
+    lstr_resultado.condicion = lole_respuesta.Condicion
+    lstr_resultado.ubigeo = lole_respuesta.Ubigeo
+    lstr_resultado.tipo_via = lole_respuesta.TipoVia
+    lstr_resultado.nombre_via = lole_respuesta.NombreVia
+    lstr_resultado.numero = lole_respuesta.Numero
+    lstr_resultado.interior = lole_respuesta.Interior
+    lstr_resultado.tipo_zona = lole_respuesta.TipoZona
+    lstr_resultado.codigo_zona = lole_respuesta.CodigoZona
+    lstr_resultado.lote = lole_respuesta.Lote
+    lstr_resultado.manzana = lole_respuesta.Manzana
+    lstr_resultado.kilometro = lole_respuesta.Kilometro
+    lstr_resultado.departamento = lole_respuesta.Departamento
+    lstr_resultado.provincia = lole_respuesta.DescProvincia
+    lstr_resultado.distrito = lole_respuesta.DescDistrito
+    lstr_resultado.direccion_completa = lole_respuesta.ObtenerDireccionCompleta()
+    lstr_resultado.ubicacion_completa = lole_respuesta.ObtenerUbicacionCompleta()
+    
+    RETURN lstr_resultado
+    
+CATCH (RuntimeError er)
+    lstr_resultado.is_ok = FALSE
+    lstr_resultado.mensaje = "Error: " + er.getMessage()
+    RETURN lstr_resultado
+END TRY
+
+end function
+
+// Destructor
+on destroy
+TRY
+    IF ib_inicializado AND NOT IsNull(iole_service) THEN
+        iole_service.Dispose()
+        iole_service.DisconnectObject()
+    END IF
+CATCH (RuntimeError er)
+    // Ignorar errores al destruir
+END TRY
+
+call super::destroy
+end on
+
+
+=========================================================================
+
+EJEMPLO 3: Uso desde una Ventana o DataWindow
+----------------------------------------------
+
+// En un botón o evento de validación
+n_cst_consulta_ruc_sunat lnvo_consulta
+st_padron_ruc lstr_resultado
+
+lnvo_consulta = CREATE n_cst_consulta_ruc_sunat
+
+// Consultar RUC
+lstr_resultado = lnvo_consulta.of_consultar_ruc(sle_ruc.text)
+
+IF lstr_resultado.is_ok THEN
+    // Llenar controles con la información
+    sle_razon_social.text = lstr_resultado.razon_social
+    sle_estado.text = lstr_resultado.estado
+    sle_condicion.text = lstr_resultado.condicion
+    sle_direccion.text = lstr_resultado.direccion_completa
+    sle_ubigeo.text = lstr_resultado.ubicacion_completa
+ELSE
+    MessageBox("Error", lstr_resultado.mensaje, StopSign!)
+END IF
+
+DESTROY lnvo_consulta
+
+
+=========================================================================
+
+ESTRUCTURA RECOMENDADA: st_padron_ruc
+--------------------------------------
+
+Create la siguiente estructura en PowerBuilder:
+
+boolean is_ok
+string mensaje
+string ruc
+string razon_social
+string estado
+string condicion
+string ubigeo
+string tipo_via
+string nombre_via
+string numero
+string interior
+string tipo_zona
+string codigo_zona
+string lote
+string manzana
+string kilometro
+string departamento
+string provincia
+string distrito
+string direccion_completa
+string ubicacion_completa
+
+
+=========================================================================
+
+PROPIEDADES DISPONIBLES EN LA RESPUESTA
+----------------------------------------
+
+IsOk             - boolean - Indica si la consulta fue exitosa
+Mensaje          - string  - Mensaje de respuesta o error
+Ruc              - string  - Número de RUC consultado
+RazonSocial      - string  - Razón social o nombre de la empresa
+Estado           - string  - Estado del RUC (ACTIVO, BAJA, etc.)
+Condicion        - string  - Condición del RUC (HABIDO, NO HABIDO, etc.)
+Ubigeo           - string  - Código de ubigeo
+TipoVia          - string  - Tipo de vía (CALLE, AVENIDA, etc.)
+NombreVia        - string  - Nombre de la vía
+Numero           - string  - Número de la dirección
+Interior         - string  - Interior (dpto, oficina, etc.)
+TipoZona         - string  - Tipo de zona (URBANIZACIÓN, etc.)
+CodigoZona       - string  - Código de zona
+Lote             - string  - Número de lote
+Manzana          - string  - Número de manzana
+Kilometro        - string  - Kilómetro (para carreteras)
+Departamento     - string  - Departamento del domicilio
+DescProvincia    - string  - Provincia
+DescDistrito     - string  - Distrito
+CodDepartamento  - string  - Código de departamento
+CodProvincia     - string  - Código de provincia
+
+MÉTODOS ADICIONALES:
+ObtenerDireccionCompleta() - string - Retorna dirección formateada
+ObtenerUbicacionCompleta() - string - Retorna ubicación formateada
+
+
+=========================================================================
+
+MANEJO DE ERRORES
+-----------------
+
+Siempre verificar el código de retorno al crear el objeto:
+
+li_ret = lole_service.ConnectToNewObject("SigreWebServiceWrapper.ConsultaRUC")
+
+Códigos de retorno comunes:
+  0  = Éxito
+ -1  = Error genérico
+ -4  = Clase no registrada (ejecutar Registrar-COM.ps1)
+ -9  = Objeto no válido
+
+
+=========================================================================
+
+TROUBLESHOOTING
+---------------
+
+1. Error: "Clase no registrada"
+   - Ejecutar Registrar-COM.ps1 como Administrador
+   - Verificar que el DLL existe en bin\Release\net48\
+
+2. Error: "No se puede encontrar el punto de conexión"
+   - Verificar conectividad al servidor SUNAT
+   - URL: http://pegazus.serveftp.com:9080/SunatWebServices/
+
+3. Error: "Tiempo de espera agotado"
+   - El servicio puede estar lento o no disponible
+   - Implementar reintento con delay
+
+4. Mensaje: "RUC no encontrado"
+   - El RUC consultado no existe o está mal escrito
+   - Validar formato de RUC (11 dígitos numéricos)
+
+
+=========================================================================
+
