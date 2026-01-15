@@ -1,7 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using RGiesecke.DllExport;
+// DllExport de 3F (https://github.com/3F/DllExport)
+// El atributo [DllExport] está en System.Runtime.InteropServices
 
 namespace SigreWebServiceWrapper
 {

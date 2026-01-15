@@ -46,6 +46,9 @@ u_ds_base 	ids_ticket, ids_despacho, ids_boletas
 //NOmbre de la impresora de despacho
 String		is_name_printer_desp 
 
+//Nombre de la impresora de tickets (boleta/factura)
+String		is_name_printer_ticket 
+
 //Flag que indica si valida o no la fecha de emisión de la factura
 String		is_valida_fec_emision_fac
 
@@ -208,7 +211,8 @@ public function boolean of_load ();try
 	il_height_despacho	= gnvo_app.of_get_parametro( "HEIGHT_DESPACHO", 130)		//Altura 130 mm
 	il_header_row_alm		= gnvo_app.of_get_parametro( "HEIGHT_ROW_ALMACEN", 12)		//Altura 130 mm
 	is_name_printer_desp = gnvo_app.of_get_parametro( "NAME_PRINTER_DESPACHO", "DESPACHO")		//Nombre de la impresora de despacho
-	il_header_row_desp	= gnvo_app.of_get_parametro( "HEIGHT_ROW_DESPACHO", 12)		//Nombre de la impresora de despacho
+	il_header_row_desp	= gnvo_app.of_get_parametro( "HEIGHT_ROW_DESPACHO", 12)		//Altura de fila de despacho
+	is_name_printer_ticket = gnvo_app.of_get_parametro( "NAME_PRINTER_TICKET", "")		//Nombre de la impresora de tickets (vacio = impresora por defecto)
 
 	//Texto para la devolución
 	is_texto_devolucion 	= gnvo_app.of_get_parametro( "TEXTO_DEVOLUCION", "Estimado Cliente. " &
@@ -817,6 +821,16 @@ try
 	end if
 	
 	invo_wait.of_mensaje("Imprimiendo el comprobante")
+	
+	//Limpiar la impresora embebida en el DataWindow y usar la del sistema
+	if trim(is_name_printer_ticket) <> "" then
+		//Si hay impresora configurada, usarla
+		ids_ticket.Modify("Datawindow.Printer='" + is_name_printer_ticket + "'" )
+	else
+		//Forzar que use la impresora predeterminada del sistema (limpiar la del DataWindow)
+		ids_ticket.Modify("Datawindow.Printer=''" )
+	end if
+	
 	if trim(ls_tipo_doc_cxc) = 'NVC' then
 		if gnvo_app.of_get_parametro( "VTA_PRINT_NOTA_VENTA", "0") = "1" then
 			ids_ticket.Print()
@@ -1111,6 +1125,13 @@ if ll_rpta = 1 then
 		ids_ticket.object.p_logo.filename = gs_logo
 	end if	
 	
+	//Limpiar la impresora embebida en el DataWindow y usar la del sistema
+	if trim(is_name_printer_ticket) <> "" then
+		ids_ticket.Modify("Datawindow.Printer='" + is_name_printer_ticket + "'" )
+	else
+		ids_ticket.Modify("Datawindow.Printer=''" )
+	end if
+	
 	//Imprimo el ticket
 	ids_ticket.Print()
 	
@@ -1284,6 +1305,15 @@ try
 		end if
 		
 		//Imprimo el ticket
+		//Limpiar la impresora embebida en el DataWindow y usar la del sistema
+		if trim(is_name_printer_ticket) <> "" then
+			//Si hay impresora configurada, usarla
+			ids_ticket.Modify("Datawindow.Printer='" + is_name_printer_ticket + "'" )
+		else
+			//Forzar que use la impresora predeterminada del sistema (limpiar la del DataWindow)
+			ids_ticket.Modify("Datawindow.Printer=''" )
+		end if
+		
 		if trim(as_tipo_Doc) = 'NVC' then
 			if gnvo_app.of_get_parametro( "VTA_PRINT_NOTA_VENTA", "0") = "1" then
 				ids_ticket.Print()
@@ -3585,6 +3615,13 @@ try
 			
 			//Genero el archivo PDF
 			if not this.of_generar_pdf( lstr_qrcode ) then return false
+		end if
+		
+		//Limpiar la impresora embebida en el DataWindow y usar la del sistema
+		if trim(is_name_printer_ticket) <> "" then
+			ids_ticket.Modify("Datawindow.Printer='" + is_name_printer_ticket + "'" )
+		else
+			ids_ticket.Modify("Datawindow.Printer=''" )
 		end if
 		
 		//Imprimo el ticket
@@ -12467,6 +12504,16 @@ try
 	end if
 	
 	invo_wait.of_mensaje("Imprimiendo el comprobante")
+	
+	//Limpiar la impresora embebida en el DataWindow y usar la del sistema
+	if trim(is_name_printer_ticket) <> "" then
+		//Si hay impresora configurada, usarla
+		ids_ticket.Modify("Datawindow.Printer='" + is_name_printer_ticket + "'" )
+	else
+		//Forzar que use la impresora predeterminada del sistema (limpiar la del DataWindow)
+		ids_ticket.Modify("Datawindow.Printer=''" )
+	end if
+	
 	if trim(ls_tipo_doc_cxc) = 'NVC' then
 		if gnvo_app.of_get_parametro( "VTA_PRINT_NOTA_VENTA", "0") = "1" then
 			ids_ticket.Print()

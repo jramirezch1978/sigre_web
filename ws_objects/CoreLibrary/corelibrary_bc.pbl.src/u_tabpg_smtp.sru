@@ -204,15 +204,16 @@ end try
 end subroutine
 
 public subroutine of_send ();// =========================================================================
-// FUNCION: of_send_dll
+// FUNCION: of_send
 // DESCRIPCION: Envía correo usando el DLL SigreWebServiceWrapper
+// Usa la función EnviarEmail con formato unificado
 // =========================================================================
 
 String ls_body, ls_errormsg, ls_resultado
-String ls_destinatarios, ls_nombres, ls_adjuntos
+String ls_remitente, ls_destinatarios, ls_adjuntos
 String ls_filename
 Integer li_idx, li_max
-Boolean lb_html
+Integer li_esHtml
 n_cst_api_sigre_dll lnvo_api
 
 try
@@ -224,6 +225,12 @@ try
     If sle_send_email.text = "" Then
         sle_send_email.SetFocus()
         MessageBox("Edit Error", "To Email is a required field!", StopSign!)
+        Return
+    End If
+    
+    If sle_from_email.text = "" Then
+        sle_from_email.SetFocus()
+        MessageBox("Edit Error", "From Email is a required field!", StopSign!)
         Return
     End If
     
@@ -244,15 +251,17 @@ try
         ls_body  = "<html><body bgcolor='#FFFFFF' topmargin=8 leftmargin=8><h2>"
         ls_body += of_replaceall(mle_body.text, "~r~n", "<br>") + "</h2>"
         ls_body += "</body></html>"
-        lb_html = True
+        li_esHtml = 1
     Else
         ls_body = mle_body.text
-        lb_html = False
+        li_esHtml = 0
     End If
     
-    // *** Preparar destinatarios ***
-    ls_destinatarios = sle_send_email.text
-    ls_nombres = sle_send_name.text
+    // *** Preparar remitente: "email, nombre" ***
+    ls_remitente = trim(sle_from_email.text) + ", " + trim(sle_from_name.text)
+    
+    // *** Preparar destinatarios: "email, nombre;" ***
+    ls_destinatarios = trim(sle_send_email.text) + ", " + trim(sle_send_name.text) + ";"
     
     // *** Preparar adjuntos (separados por |) ***
     ls_adjuntos = ""
@@ -265,13 +274,15 @@ try
         ls_adjuntos += ls_filename
     Next
     
-    // *** Enviar usando el DLL ***
-    ls_resultado = lnvo_api.EnviarCorreo( &
+    // *** Enviar usando el DLL con formato unificado ***
+    ls_resultado = lnvo_api.EnviarEmail( &
+        ls_remitente, &
         ls_destinatarios, &
-        ls_nombres, &
+        "", &
+        "", &
         sle_subject.text, &
         ls_body, &
-        lb_html, &
+        li_esHtml, &
         ls_adjuntos)
     
     // *** Procesar resultado (JSON) ***
@@ -285,7 +296,7 @@ try
     End If
 
 catch ( Exception ex )
-    gnvo_app.of_Catch_exception(ex, 'Error en of_send_dll')
+    gnvo_app.of_Catch_exception(ex, 'Error en of_send')
     
 finally
 	destroy lnvo_api
