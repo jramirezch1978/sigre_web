@@ -223,8 +223,11 @@ TriggerEvent( this, "constructor" )
 end on
 
 on n_cst_email_dll.destroy
-// Liberar el DLL antes de destruir el objeto
-of_liberar_dll()
+// NOTA: NO liberar el DLL automaticamente porque PowerBuilder
+// mantiene una referencia interna. Si se libera, las siguientes
+// instancias no podran usar el DLL.
+// Use of_liberar_dll() manualmente solo cuando necesite
+// actualizar el archivo DLL (antes de cerrar la aplicacion).
 TriggerEvent( this, "destructor" )
 call super::destroy
 end on
