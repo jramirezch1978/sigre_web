@@ -1,5 +1,4 @@
-﻿$PBExportHeader$n_cst_printer.sru
-$PBExportComments$Clase para gestionar la impresora por defecto del usuario
+$PBExportHeader$n_cst_printer.sru
 forward
 global type n_cst_printer from nonvisualobject
 end type
@@ -46,15 +45,15 @@ Return this.of_get_printer_default(ls_param_name)
 end function
 
 public function string of_get_printer_default (string as_param_name);/********************************************************************
-   FunciÃ³n: of_get_printer_default (con nombre de parÃ¡metro personalizado)
-   PropÃ³sito: Obtiene la impresora por defecto usando un nombre de parÃ¡metro especÃ­fico
+   Funcion: of_get_printer_default (con nombre de parametro personalizado)
+   Proposito: Obtiene la impresora por defecto usando un nombre de parametro especifico
    
-   ParÃ¡metros:
-      - as_param_name: Nombre del parÃ¡metro a usar (ej: "NAME_PRINTER_TICKET_JPEREZ")
+   Parametros:
+      - as_param_name: Nombre del parametro a usar (ej: "NAME_PRINTER_TICKET_JPEREZ")
    
    Retorno: 
       - String con el nombre de la impresora seleccionada
-      - VacÃ­o si el usuario cancela la selecciÃ³n
+      - Vacio si el usuario cancela la seleccion
 ********************************************************************/
 String 	ls_printer, ls_selected_printer
 String 	ls_impresoras[]
@@ -62,10 +61,10 @@ Integer li_rtn, li_i, li_nbImpresoras, li_selected
 Boolean lb_exists
 
 try 
-	//Obtener la impresora guardada en configuraciÃ³n
+	//Obtener la impresora guardada en configuracion
 	ls_printer = gnvo_app.of_get_parametro(as_param_name, "")
 	
-	//Si ya existe una impresora configurada, verificar que aÃºn exista en el sistema
+	//Si ya existe una impresora configurada, verificar que aun exista en el sistema
 	if len(trim(ls_printer)) > 0 then
 		//Verificar que la impresora siga instalada en el sistema
 		li_rtn = RegistryKeys("HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Print\Printers", ls_impresoras) 
@@ -80,9 +79,9 @@ try
 			end if
 		next
 		
-		//Si la impresora ya no existe, forzar selecciÃ³n
+		//Si la impresora ya no existe, forzar seleccion
 		if not lb_exists then
-			MessageBox("Aviso", "La impresora '" + ls_printer + "' ya no estÃ¡ disponible en el sistema.~r~n" &
+			MessageBox("Aviso", "La impresora '" + ls_printer + "' ya no esta disponible en el sistema.~r~n" &
 						+ "Por favor seleccione una nueva impresora.", Information!)
 			ls_printer = ""
 		end if
@@ -92,26 +91,29 @@ try
 	if len(trim(ls_printer)) = 0 then
 		ls_selected_printer = this.of_get_printers()
 		
-		//Si el usuario seleccionÃ³ una impresora
+		//Si el usuario selecciono una impresora
 		if len(trim(ls_selected_printer)) > 0 then
-			//Guardar la impresora seleccionada
+			//Guardar la impresora seleccionada (of_set_printer_default ya llama a PrintSetPrinter)
 			if this.of_set_printer_default(as_param_name, ls_selected_printer) then
-				MessageBox("ConfiguraciÃ³n Guardada", &
+				MessageBox("Configuracion Guardada", &
 							"Se ha configurado la impresora: " + ls_selected_printer + "~r~n~r~n" &
-							+ "Esta impresora se usarÃ¡ por defecto para el usuario actual.~r~n" &
-							+ "Puede cambiarla desde la configuraciÃ³n del sistema.", Information!)
+							+ "Esta impresora se usara por defecto para el usuario actual.~r~n" &
+							+ "Puede cambiarla desde la configuracion del sistema.", Information!)
 				ls_printer = ls_selected_printer
 			else
-				MessageBox("Error", "No se pudo guardar la configuraciÃ³n de la impresora.~r~n" &
+				MessageBox("Error", "No se pudo guardar la configuracion de la impresora.~r~n" &
 							+ "Por favor intente nuevamente.", StopSign!)
 			end if
 		end if
+	else
+		//Si la impresora existe, establecerla como impresora actual con PrintSetPrinter
+		PrintSetPrinter(ls_printer)
 	end if
 	
 	return ls_printer
 	
 catch (Exception ex)
-	MessageBox("Error", "Ha ocurrido una excepciÃ³n en of_get_printer_default: " &
+	MessageBox("Error", "Ha ocurrido una excepcion en of_get_printer_default: " &
 					+ "~r~n" + ex.getMessage(), StopSign!)
 	return ""
 end try
@@ -188,18 +190,29 @@ Return this.of_set_printer_default(ls_param_name, as_printer)
 end function
 
 public function boolean of_set_printer_default (string as_param_name, string as_printer);/********************************************************************
-   FunciÃ³n: of_set_printer_default (con nombre de parÃ¡metro personalizado)
-   PropÃ³sito: Guarda la impresora por defecto con un nombre de parÃ¡metro especÃ­fico
+   Funcion: of_set_printer_default (con nombre de parametro personalizado)
+   Proposito: Guarda la impresora por defecto con un nombre de parametro especifico
    
-   ParÃ¡metros:
-      - as_param_name: Nombre del parÃ¡metro (ej: "PRINTER_DEFAULT_JPEREZ")
+   Parametros:
+      - as_param_name: Nombre del parametro (ej: "PRINTER_DEFAULT_JPEREZ")
       - as_printer: Nombre de la impresora a guardar
    
    Retorno: 
-      - True si se guardÃ³ correctamente
+      - True si se guardo correctamente
       - False si hubo error
 ********************************************************************/
+Integer li_rc
+
 try
+	//Establecer la impresora como impresora actual del sistema PowerBuilder
+	li_rc = PrintSetPrinter(as_printer)
+	
+	if li_rc <> 1 then
+		MessageBox("Advertencia", "No se pudo establecer la impresora '" + as_printer + "' como impresora actual.~r~n" &
+						+ "Verifique que la impresora exista y esté disponible.", Information!)
+	end if
+	
+	//Guardar en la configuración de la aplicación
 	gnvo_app.of_set_parametro(as_param_name, as_printer)
 	COMMIT;
 	return true

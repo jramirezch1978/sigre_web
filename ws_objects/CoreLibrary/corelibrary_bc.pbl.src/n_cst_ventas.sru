@@ -1,4 +1,4 @@
-﻿$PBExportHeader$n_cst_ventas.sru
+$PBExportHeader$n_cst_ventas.sru
 forward
 global type n_cst_ventas from nonvisualobject
 end type
@@ -85,6 +85,7 @@ n_cst_serversmtp	invo_email
 n_cst_wait			invo_wait
 n_smtp				invo_smtp
 n_cst_inifile		invo_inifile
+n_cst_printer		invo_printer		//Clase para obtener la impresora por defecto del usuario
 
 end variables
 
@@ -724,10 +725,21 @@ end function
 public function boolean of_print_efact (string as_nro_registro);Long 		ll_height, ll_rows_fp
 Date		ld_fecha
 String	ls_origen, ls_direccion, ls_fono, ls_tipo_doc_cxc, ls_nro_doc_cxc, ls_serie, &
-			ls_flag_tipo_impresion
+			ls_flag_tipo_impresion, ls_printer_default
 Long		ll_i
 
 try 
+	
+	//Obtengo la impresora por defecto del usuario
+	if IsNull(invo_printer) then
+		invo_printer = create n_cst_printer
+	end if
+	ls_printer_default = invo_printer.of_get_printer_default()
+	
+	if len(trim(ls_printer_default)) = 0 then
+		MessageBox("Aviso", "No se ha seleccionado ninguna impresora. La impresión ha sido cancelada.", Information!)
+		return false
+	end if
 	
 	invo_wait.of_mensaje("Obteniendo la Serie")
 	//Obtengo la serie
@@ -824,6 +836,10 @@ try
 	
 	invo_wait.of_mensaje("Imprimiendo el comprobante")
 	
+	//Asigno la impresora por defecto del usuario
+	if len(trim(ls_printer_default)) > 0 then
+		ids_ticket.Modify("DataWindow.Print.PrinterName='" + ls_printer_default + "'")
+	end if
 	
 	if trim(ls_tipo_doc_cxc) = 'NVC' then
 		if gnvo_app.of_get_parametro( "VTA_PRINT_NOTA_VENTA", "0") = "1" then
@@ -12536,5 +12552,9 @@ destroy invo_numlet
 destroy invo_wait
 
 destroy invo_inifile
+
+if not IsNull(invo_printer) then
+	destroy invo_printer
+end if
 end event
 

@@ -2,7 +2,9 @@ using System;
 using System.Configuration;
 using System.Net;
 using System.Net.Mail;
+using System.Net.Security;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SigreWebServiceWrapper
 {
@@ -224,6 +226,13 @@ namespace SigreWebServiceWrapper
                         }
                     }
 
+                    // Configurar TLS 1.2 para Gmail y otros servidores modernos
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                    
+                    // Aceptar certificados SSL (necesario para algunos servidores)
+                    ServicePointManager.ServerCertificateValidationCallback = 
+                        delegate(object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
+
                     // Configurar cliente SMTP
                     using (var smtp = new SmtpClient(_smtpServer, _smtpPort))
                     {
@@ -248,14 +257,19 @@ namespace SigreWebServiceWrapper
                 resultado.Mensaje = "Error SMTP: " + smtpEx.Message;
                 if (smtpEx.InnerException != null)
                 {
-                    resultado.Mensaje += " - " + smtpEx.InnerException.Message;
+                    resultado.Mensaje += " - Detalle: " + smtpEx.InnerException.Message;
                 }
+                resultado.Mensaje += " | Servidor: " + _smtpServer + ":" + _smtpPort + " | SSL: " + _enableSsl;
                 return resultado;
             }
             catch (Exception ex)
             {
                 resultado.Exitoso = false;
                 resultado.Mensaje = "Error al enviar correo: " + ex.Message;
+                if (ex.InnerException != null)
+                {
+                    resultado.Mensaje += " - Detalle: " + ex.InnerException.Message;
+                }
                 return resultado;
             }
         }
@@ -336,6 +350,13 @@ namespace SigreWebServiceWrapper
                         }
                     }
 
+                    // Configurar TLS 1.2 para Gmail y otros servidores modernos
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                    
+                    // Aceptar certificados SSL (necesario para algunos servidores)
+                    ServicePointManager.ServerCertificateValidationCallback = 
+                        delegate(object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
+
                     // Configurar cliente SMTP
                     using (var smtp = new SmtpClient(_smtpServer, _smtpPort))
                     {
@@ -360,14 +381,19 @@ namespace SigreWebServiceWrapper
                 resultado.Mensaje = "Error SMTP: " + smtpEx.Message;
                 if (smtpEx.InnerException != null)
                 {
-                    resultado.Mensaje += " - " + smtpEx.InnerException.Message;
+                    resultado.Mensaje += " - Detalle: " + smtpEx.InnerException.Message;
                 }
+                resultado.Mensaje += " | Servidor: " + _smtpServer + ":" + _smtpPort + " | SSL: " + _enableSsl;
                 return resultado;
             }
             catch (Exception ex)
             {
                 resultado.Exitoso = false;
                 resultado.Mensaje = "Error al enviar correo: " + ex.Message;
+                if (ex.InnerException != null)
+                {
+                    resultado.Mensaje += " - Detalle: " + ex.InnerException.Message;
+                }
                 return resultado;
             }
         }

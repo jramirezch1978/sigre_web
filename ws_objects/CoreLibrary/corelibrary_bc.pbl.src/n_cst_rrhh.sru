@@ -1,4 +1,4 @@
-﻿$PBExportHeader$n_cst_rrhh.sru
+$PBExportHeader$n_cst_rrhh.sru
 forward
 global type n_cst_rrhh from nonvisualobject
 end type
@@ -384,12 +384,12 @@ public function boolean of_enviar_correo (string as_filename_pdf, string as_emai
    
    Retorno: True si se envió correctamente, False si hubo error
 ********************************************************************/
-String 					ls_email_soporte, ls_resultado, ls_adjuntos
+String 					ls_resultado, ls_adjuntos
 String					ls_mensaje, ls_body_html, ls_subject
 String					ls_separador, ls_sub_email
 Long					ll_pos, ll_inicio, ll_idx_to, ll_idx_cco
 str_email_address		lstr_from
-str_email_address		lstr_to[], lstr_cc[], lstr_cco[]		//CC vacío, CCO para soporte
+str_email_address		lstr_to[], lstr_cc[], lstr_cco[]		//CC vacío, CCO para copia oculta
 
 try 
 	invo_wait.of_mensaje("Validando inputs")
@@ -462,63 +462,46 @@ try
 		return false
 	end try
 	
-	//Añadir emails de soporte como CCO (copia oculta)
-	invo_wait.of_mensaje("Adicionando email de soporte")
-	ls_email_soporte = gnvo_app.of_get_parametro("EMAIL_SOPORTE_RRHH", "")
+	//Añadir emails CCO desde parámetro RRHH_EMAIL_CCO
+	//Formato: "email1@dominio.com; email2@dominio.com" o un solo email
+	invo_wait.of_mensaje("Adicionando emails CCO")
+	String ls_emails_cco, ls_email_cco
+	ls_emails_cco = gnvo_app.of_get_parametro("RRHH_EMAIL_CCO", "")
 	
-	if not IsNull(ls_email_soporte) and trim(ls_email_soporte) <> '' then
-		//Parsear emails de soporte (formato: "nombre, email; nombre2, email2;")
-		ll_inicio = 1
-		ll_pos = Pos(ls_email_soporte, ';', ll_inicio)
-		
-		do while ll_pos > 0
-			String ls_sub_cadena, ls_nombre_cco, ls_email_cco
-			Long ll_pos_coma
+	if not IsNull(ls_emails_cco) and trim(ls_emails_cco) <> '' then
+		//Verificar si hay múltiples emails (separados por ;)
+		if pos(ls_emails_cco, ';') > 0 then
+			//Parsear múltiples emails CCO
+			ll_inicio = 1
+			ll_pos = Pos(ls_emails_cco, ';', ll_inicio)
 			
-			ls_sub_cadena = trim(mid(ls_email_soporte, ll_inicio, ll_pos - ll_inicio))
-			
-			if len(ls_sub_cadena) > 0 then
-				ll_pos_coma = pos(ls_sub_cadena, ',')
+			do while ll_pos > 0
+				ls_email_cco = trim(mid(ls_emails_cco, ll_inicio, ll_pos - ll_inicio))
 				
-				if ll_pos_coma > 0 then
-					ls_nombre_cco = trim(mid(ls_sub_cadena, 1, ll_pos_coma - 1))
-					ls_email_cco = trim(mid(ls_sub_cadena, ll_pos_coma + 1))
-				else
-					ls_nombre_cco = ls_sub_cadena
-					ls_email_cco = ls_sub_cadena
-				end if
-				
-				if pos(ls_email_cco, '@') > 0 then
+				if len(ls_email_cco) > 0 and pos(ls_email_cco, '@') > 0 then
 					ll_idx_cco ++
 					lstr_cco[ll_idx_cco].email = ls_email_cco
-					lstr_cco[ll_idx_cco].nombre = ls_nombre_cco
+					lstr_cco[ll_idx_cco].nombre = ""
 				end if
-			end if
+				
+				ll_inicio = ll_pos + 1
+				ll_pos = Pos(ls_emails_cco, ';', ll_inicio)
+			loop
 			
-			ll_inicio = ll_pos + 1
-			ll_pos = Pos(ls_email_soporte, ';', ll_inicio)
-		loop
-		
-		//Último email de soporte
-		String ls_sub_cadena_final
-		ls_sub_cadena_final = trim(mid(ls_email_soporte, ll_inicio))
-		if len(ls_sub_cadena_final) > 0 then
-			Long ll_pos_coma_final
-			String ls_nombre_final, ls_email_final
-			
-			ll_pos_coma_final = pos(ls_sub_cadena_final, ',')
-			if ll_pos_coma_final > 0 then
-				ls_nombre_final = trim(mid(ls_sub_cadena_final, 1, ll_pos_coma_final - 1))
-				ls_email_final = trim(mid(ls_sub_cadena_final, ll_pos_coma_final + 1))
-			else
-				ls_nombre_final = ls_sub_cadena_final
-				ls_email_final = ls_sub_cadena_final
-			end if
-			
-			if pos(ls_email_final, '@') > 0 then
+			//Último email después del separador
+			ls_email_cco = trim(mid(ls_emails_cco, ll_inicio))
+			if len(ls_email_cco) > 0 and pos(ls_email_cco, '@') > 0 then
 				ll_idx_cco ++
-				lstr_cco[ll_idx_cco].email = ls_email_final
-				lstr_cco[ll_idx_cco].nombre = ls_nombre_final
+				lstr_cco[ll_idx_cco].email = ls_email_cco
+				lstr_cco[ll_idx_cco].nombre = ""
+			end if
+		else
+			//Email único CCO
+			ls_email_cco = trim(ls_emails_cco)
+			if pos(ls_email_cco, '@') > 0 then
+				ll_idx_cco ++
+				lstr_cco[ll_idx_cco].email = ls_email_cco
+				lstr_cco[ll_idx_cco].nombre = ""
 			end if
 		end if
 	end if
