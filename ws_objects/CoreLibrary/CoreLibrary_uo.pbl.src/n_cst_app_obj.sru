@@ -145,6 +145,7 @@ public subroutine of_mensaje_sql (string as_mensaje, string as_sql)
 public function boolean of_valida_sistema (string as_sistema, string as_user)
 public function decimal of_tasa_cambio_vta (date ad_fecha)
 public function decimal of_get_icbper (date adi_fec_emision) throws exception
+public subroutine of_set_minidump_path (string as_path)
 end prototypes
 
 public function integer of_set_login_log ();DateTime		ldt_fecha
@@ -1852,6 +1853,58 @@ end if
 return ldc_icbper
 end function
 
+public subroutine of_set_minidump_path (string as_path);/********************************************************************
+   Subrutina: of_set_minidump_path
+   Propósito: Configura la ruta donde PowerBuilder guardará los minidumps
+   
+   Parámetros:
+      - as_path: Ruta donde se guardarán los minidumps (ej: "i:\sigre_exe")
+   
+   Notas:
+      - Configura el registro de Windows para PowerBuilder 25.0 y 12.6
+      - Crea el directorio si no existe
+      - Los minidumps son archivos de diagnóstico generados cuando hay crashes
+********************************************************************/
+String 	ls_regkey_pb25, ls_regkey_pb12, ls_regkey_sybase
+String 	ls_path
+Integer li_rtn
+
+//Asegurar que la ruta no tenga barra al final
+ls_path = trim(as_path)
+if Right(ls_path, 1) = '\' then
+	ls_path = Left(ls_path, Len(ls_path) - 1)
+end if
+
+//Crear el directorio si no existe
+if not DirectoryExists(ls_path) then
+	li_rtn = CreateDirectory(ls_path)
+end if
+
+//Crear subdirectorio para minidumps
+String ls_minidump_path
+ls_minidump_path = ls_path + "\minidumps"
+
+if not DirectoryExists(ls_minidump_path) then
+	li_rtn = CreateDirectory(ls_minidump_path)
+end if
+
+//Configurar registro para PowerBuilder 25.0 (Appeon) - Clave principal usada por PB 25
+ls_regkey_pb25 = "HKEY_CURRENT_USER\Software\Appeon\PowerBuilder 25.0\Debug"
+RegistrySet(ls_regkey_pb25, "MiniDumpPath", ls_minidump_path)
+RegistrySet(ls_regkey_pb25, "MiniDumpEnabled", "1")
+
+//Configurar registro para PowerBuilder 25.0 bajo Sybase (compatibilidad)
+ls_regkey_pb12 = "HKEY_CURRENT_USER\Software\Sybase\PowerBuilder\25.0\Debug"
+RegistrySet(ls_regkey_pb12, "MiniDumpPath", ls_minidump_path)
+RegistrySet(ls_regkey_pb12, "MiniDumpEnabled", "1")
+
+//Configurar registro genérico de Sybase (fallback para versiones anteriores)
+ls_regkey_sybase = "HKEY_CURRENT_USER\Software\Sybase\PowerBuilder\Debug"
+RegistrySet(ls_regkey_sybase, "MiniDumpPath", ls_minidump_path)
+RegistrySet(ls_regkey_sybase, "MiniDumpEnabled", "1")
+
+end subroutine
+
 on n_cst_app_obj.create
 call super::create
 TriggerEvent( this, "constructor" )
@@ -1869,7 +1922,7 @@ SetNull(id_null)
 SetNull(idt_null)
 SetNull(idc_null)
 
-empresa 			= CREATE n_cst_empresa
+empresa 		= CREATE n_cst_empresa
 finparam 		= CREATE n_cst_finanzas
 rrhhparam 		= CREATE n_cst_rrhh
 this.almacen 	= CREATE n_cst_almacen
@@ -1882,6 +1935,8 @@ invo_flota		= create n_cst_flota
 
 invo_inifile	= create n_cst_inifile		
 
+//Configurar la ruta de los minidumps para evitar que se generen en el escritorio
+this.of_set_minidump_path("i:\sigre_exe")
 
 end event
 

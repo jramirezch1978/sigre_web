@@ -23,6 +23,7 @@ n_cst_pdf			invo_pdf
 n_cst_inifile		invo_inifile
 n_smtp				invo_smtp
 n_cst_serversmtp	invo_email
+n_cst_email_dll		invo_email_dll		//Nueva clase para envio de correos via DLL
 end variables
 
 forward prototypes
@@ -367,60 +368,162 @@ as_subject = 'BOLETA DE PAGOS DEL TRABAJADOR : '+ as_cod_trabajador + '-' + as_n
 return true
 end function
 
-public function boolean of_enviar_correo (string as_filename_pdf, string as_email, string as_cod_trabajador, string as_nom_trabajador, string as_tipo_trabajador, date ad_fec_proceso, string as_tipo_planilla, string as_origen);String 					ls_email_soporte
+public function boolean of_enviar_correo (string as_filename_pdf, string as_email, string as_cod_trabajador, string as_nom_trabajador, string as_tipo_trabajador, date ad_fec_proceso, string as_tipo_planilla, string as_origen);/********************************************************************
+   Función: of_enviar_correo
+   Propósito: Envía boleta de pago por email usando n_cst_email_dll
+   
+   Parámetros:
+      - as_filename_pdf: Ruta del archivo PDF a adjuntar
+      - as_email: Email(s) del trabajador (puede tener separadores ; o /)
+      - as_cod_trabajador: Código del trabajador
+      - as_nom_trabajador: Nombre del trabajador
+      - as_tipo_trabajador: Tipo de trabajador
+      - ad_fec_proceso: Fecha del proceso de planilla
+      - as_tipo_planilla: Tipo de planilla
+      - as_origen: Origen del proceso
+   
+   Retorno: True si se envió correctamente, False si hubo error
+********************************************************************/
+String 					ls_email_soporte, ls_resultado, ls_adjuntos
 String					ls_mensaje, ls_body_html, ls_subject
-Long						ll_len
-n_cst_emailMessage	lnvo_msg
+String					ls_separador, ls_sub_email
+Long					ll_pos, ll_inicio, ll_idx_to, ll_idx_cco
+str_email_address		lstr_from
+str_email_address		lstr_to[], lstr_cc[], lstr_cco[]		//CC vacío, CCO para soporte
 
 try 
 	invo_wait.of_mensaje("Validando inputs")
 	
-	//Si el email del cliente es valido entonces lo agrego
+	//Configurar el remitente (FROM)
+	lstr_from.email = gnvo_app.of_get_parametro("EMAIL_FROM_RRHH", "rrhh@empresa.pe")
+	lstr_from.nombre = gnvo_app.of_get_parametro("NOMBRE_FROM_RRHH", "Recursos Humanos")
+	
+	ll_idx_to = 0
+	ll_idx_cco = 0
+	
+	//Si el email del trabajador es valido entonces lo agrego a destinatarios (TO)
 	try
 		if trim(as_email) <> '' and pos(as_email, '@', 1) > 0 then
 			
+			//Verificar si hay múltiples emails (separados por ; o /)
 			if pos(as_email, '/', 1) > 0 or pos(as_email, ';', 1) > 0 then
-			
-				//Si el email tiene ';' o '/' entonces son mas de un cuenta de correo a la vez
-				if not lnvo_msg.of_add_emails_client_from_string(as_nom_trabajador, as_email) then return false
 				
-			else
-				//Si no solamente adiciono el email del cliente como un unico email
-				if not invo_smtp.of_ValidEmail(as_email, ls_mensaje) then
-				
-						
-					yield()
-					invo_wait.of_mensaje("Error al validar: " + ls_mensaje)
-					sleep(2)
-					yield()
-	
-					//invo_wait.of_close()
-					
-					//return false
+				//Determinar el separador
+				if pos(as_email, ';', 1) > 0 then
+					ls_separador = ';'
+				else
+					ls_separador = '/'
 				end if
 				
-				invo_wait.of_mensaje("Adicionando Email del cliente")
-				if not lnvo_msg.of_add_email_to(as_nom_trabajador, as_email) then return false
-	
+				//Parsear múltiples emails
+				ll_inicio = 1
+				ll_pos = Pos(as_email, ls_separador, ll_inicio)
+				
+				do while ll_pos > 0
+					ls_sub_email = trim(mid(as_email, ll_inicio, ll_pos - ll_inicio))
+					
+					if len(ls_sub_email) > 0 and pos(ls_sub_email, '@') > 0 then
+						ll_idx_to ++
+						lstr_to[ll_idx_to].email = ls_sub_email
+						lstr_to[ll_idx_to].nombre = as_nom_trabajador
+					end if
+					
+					ll_inicio = ll_pos + 1
+					ll_pos = Pos(as_email, ls_separador, ll_inicio)
+				loop
+				
+				//Último email después del separador
+				ls_sub_email = trim(mid(as_email, ll_inicio))
+				if len(ls_sub_email) > 0 and pos(ls_sub_email, '@') > 0 then
+					ll_idx_to ++
+					lstr_to[ll_idx_to].email = ls_sub_email
+					lstr_to[ll_idx_to].nombre = as_nom_trabajador
+				end if
+				
+			else
+				//Email único del trabajador
+				if not invo_smtp.of_ValidEmail(as_email, ls_mensaje) then
+					yield()
+					invo_wait.of_mensaje("Advertencia al validar email: " + ls_mensaje)
+					sleep(1)
+					yield()
+					//Continuamos aunque haya advertencia
+				end if
+				
+				invo_wait.of_mensaje("Adicionando Email del trabajador")
+				ll_idx_to ++
+				lstr_to[ll_idx_to].email = trim(as_email)
+				lstr_to[ll_idx_to].nombre = as_nom_trabajador
 			end if
-			
-		else
-			//if this.is_send_email_only_cliente = '1' then return false
 		end if
+		
 	catch(Exception e)
-		invo_wait.of_mensaje("Error en el correo del cliente: " + e.getMessage())
+		invo_wait.of_mensaje("Error en el correo del trabajador: " + e.getMessage())
 		return false
 	end try
 	
-	// Ahora añado el email de soporte al cual va a ir con copia
+	//Añadir emails de soporte como CCO (copia oculta)
 	invo_wait.of_mensaje("Adicionando email de soporte")
-	ls_email_soporte = gnvo_app.of_get_parametro("EMAIL_SOPORTE_RRHH", "MI EMPRESA, miemail@miempresa.pe; Jhonny Ramirez Chiroque, jramirez@npssac.com.pe;")
+	ls_email_soporte = gnvo_app.of_get_parametro("EMAIL_SOPORTE_RRHH", "")
 	
 	if not IsNull(ls_email_soporte) and trim(ls_email_soporte) <> '' then
-		lnvo_msg.of_add_emails_from_string(ls_email_soporte)
+		//Parsear emails de soporte (formato: "nombre, email; nombre2, email2;")
+		ll_inicio = 1
+		ll_pos = Pos(ls_email_soporte, ';', ll_inicio)
+		
+		do while ll_pos > 0
+			String ls_sub_cadena, ls_nombre_cco, ls_email_cco
+			Long ll_pos_coma
+			
+			ls_sub_cadena = trim(mid(ls_email_soporte, ll_inicio, ll_pos - ll_inicio))
+			
+			if len(ls_sub_cadena) > 0 then
+				ll_pos_coma = pos(ls_sub_cadena, ',')
+				
+				if ll_pos_coma > 0 then
+					ls_nombre_cco = trim(mid(ls_sub_cadena, 1, ll_pos_coma - 1))
+					ls_email_cco = trim(mid(ls_sub_cadena, ll_pos_coma + 1))
+				else
+					ls_nombre_cco = ls_sub_cadena
+					ls_email_cco = ls_sub_cadena
+				end if
+				
+				if pos(ls_email_cco, '@') > 0 then
+					ll_idx_cco ++
+					lstr_cco[ll_idx_cco].email = ls_email_cco
+					lstr_cco[ll_idx_cco].nombre = ls_nombre_cco
+				end if
+			end if
+			
+			ll_inicio = ll_pos + 1
+			ll_pos = Pos(ls_email_soporte, ';', ll_inicio)
+		loop
+		
+		//Último email de soporte
+		String ls_sub_cadena_final
+		ls_sub_cadena_final = trim(mid(ls_email_soporte, ll_inicio))
+		if len(ls_sub_cadena_final) > 0 then
+			Long ll_pos_coma_final
+			String ls_nombre_final, ls_email_final
+			
+			ll_pos_coma_final = pos(ls_sub_cadena_final, ',')
+			if ll_pos_coma_final > 0 then
+				ls_nombre_final = trim(mid(ls_sub_cadena_final, 1, ll_pos_coma_final - 1))
+				ls_email_final = trim(mid(ls_sub_cadena_final, ll_pos_coma_final + 1))
+			else
+				ls_nombre_final = ls_sub_cadena_final
+				ls_email_final = ls_sub_cadena_final
+			end if
+			
+			if pos(ls_email_final, '@') > 0 then
+				ll_idx_cco ++
+				lstr_cco[ll_idx_cco].email = ls_email_final
+				lstr_cco[ll_idx_cco].nombre = ls_nombre_final
+			end if
+		end if
 	end if
 	
-	//Ahora genero el mensaje que sería HTML
+	//Generar el cuerpo HTML y asunto del email
 	invo_wait.of_mensaje("Obteniendo el CUERPO y ASUNTO del email")
 	if not this.of_get_body_subject(as_cod_trabajador, &
 											  as_nom_Trabajador, &
@@ -430,40 +533,51 @@ try
 											  as_origen, & 
 											  ls_body_html, &
 											  ls_subject) then return false
-	
-	//Poner Body y Subject (Asunto)
-	lnvo_msg.of_set_Body(ls_body_html)
-	lnvo_msg.of_set_Subject(ls_subject)
 
-	invo_wait.of_mensaje("Adicionando Archivos")
-	//Adiciono ambos archivos al email
+	//Preparar adjuntos (separados por |)
+	invo_wait.of_mensaje("Preparando Archivos Adjuntos")
+	ls_adjuntos = ""
 	if trim(as_filename_pdf) <> '' then 
-		lnvo_msg.of_add_attach(as_filename_pdf)
+		if FileExists(as_filename_pdf) then
+			ls_adjuntos = as_filename_pdf
+		else
+			invo_wait.of_mensaje("Archivo PDF no encontrado: " + as_filename_pdf)
+		end if
 	end if
 	
-	//Cargo los parametros
-	invo_wait.of_mensaje("Caragando Parametros")
-	invo_email.of_load()
-	
-	//Sin no han emails en ITR_EMAIL_TO agrego uno por defecto
-	if UpperBound(lnvo_msg.istr_email_to) = 0 then
-		if not lnvo_msg.of_add_email_to('NO REPLY', 'no-reply@npssac.com.pe') then return false
+	//Si no hay destinatarios, agregar uno por defecto
+	if ll_idx_to = 0 then
+		invo_wait.of_mensaje("No hay destinatarios, usando email por defecto")
+		ll_idx_to = 1
+		lstr_to[1].email = 'no-reply@npssac.com.pe'
+		lstr_to[1].nombre = 'NO REPLY'
 	end if
 	
-	//envio el email
-	if UpperBound(lnvo_msg.istr_email_to) > 0 or UpperBound(lnvo_msg.istr_email_bcc) > 0 then
-		invo_wait.of_mensaje("Enviando Mensaje")
-		if not invo_email.of_Send(lnvo_msg) then return false
-		invo_wait.of_mensaje("Email Enviado Satisfactoriamente")
+	//Enviar el email usando la nueva clase n_cst_email_dll
+	if ll_idx_to > 0 or ll_idx_cco > 0 then
+		invo_wait.of_mensaje("Enviando Mensaje via DLL...")
+		
+		//Crear instancia del objeto si no existe
+		if IsNull(invo_email_dll) then
+			invo_email_dll = create n_cst_email_dll
+		end if
+		
+		//Llamar al método de envío (lstr_cc vacío, lstr_cco para emails de soporte)
+		ls_resultado = invo_email_dll.of_send_email(lstr_from, lstr_to, lstr_cc, lstr_cco, ls_subject, ls_body_html, true, ls_adjuntos)
+		
+		//Verificar resultado (el DLL retorna JSON: {"exitoso":true/false,"mensaje":"..."})
+		if pos(lower(ls_resultado), '"exitoso":true') > 0 or pos(lower(ls_resultado), '"exitoso": true') > 0 then
+			invo_wait.of_mensaje("Email Enviado Satisfactoriamente")
+		else
+			invo_wait.of_mensaje("Error al enviar email: " + ls_resultado)
+			sleep(2)
+			return false
+		end if
 	end if
 	
 	return true
-		
-
 	
 catch ( Exception ex )
-	
-	//gnvo_app.of_catch_exception(ex, 'Error al enviar por email el comprobante')
 	yield()
 	invo_wait.of_mensaje("Ha ocurrido una exception: " + ex.getMessage())
 	sleep(2)
@@ -472,10 +586,118 @@ catch ( Exception ex )
 	return false
 
 finally
-	
-	//destroy lnvo_msg
 	invo_wait.of_close()
 end try
+
+//String 					ls_email_soporte
+//String					ls_mensaje, ls_body_html, ls_subject
+//Long						ll_len
+//n_cst_emailMessage	lnvo_msg
+
+//try 
+//	invo_wait.of_mensaje("Validando inputs")
+	
+//	//Si el email del cliente es valido entonces lo agrego
+//	try
+//		if trim(as_email) <> '' and pos(as_email, '@', 1) > 0 then
+			
+//			if pos(as_email, '/', 1) > 0 or pos(as_email, ';', 1) > 0 then
+			
+//				//Si el email tiene ';' o '/' entonces son mas de un cuenta de correo a la vez
+//				if not lnvo_msg.of_add_emails_client_from_string(as_nom_trabajador, as_email) then return false
+				
+//			else
+//				//Si no solamente adiciono el email del cliente como un unico email
+//				if not invo_smtp.of_ValidEmail(as_email, ls_mensaje) then
+				
+						
+//					yield()
+//					invo_wait.of_mensaje("Error al validar: " + ls_mensaje)
+//					sleep(2)
+//					yield()
+	
+//					//invo_wait.of_close()
+					
+//					//return false
+//				end if
+				
+//				invo_wait.of_mensaje("Adicionando Email del cliente")
+//				if not lnvo_msg.of_add_email_to(as_nom_trabajador, as_email) then return false
+	
+//			end if
+			
+//		else
+//			//if this.is_send_email_only_cliente = '1' then return false
+//		end if
+//	catch(Exception e)
+//		invo_wait.of_mensaje("Error en el correo del cliente: " + e.getMessage())
+//		return false
+//	end try
+	
+//	// Ahora añado el email de soporte al cual va a ir con copia
+//	invo_wait.of_mensaje("Adicionando email de soporte")
+//	ls_email_soporte = gnvo_app.of_get_parametro("EMAIL_SOPORTE_RRHH", "MI EMPRESA, miemail@miempresa.pe; Jhonny Ramirez Chiroque, jramirez@npssac.com.pe;")
+	
+//	if not IsNull(ls_email_soporte) and trim(ls_email_soporte) <> '' then
+//		lnvo_msg.of_add_emails_from_string(ls_email_soporte)
+//	end if
+	
+//	//Ahora genero el mensaje que sería HTML
+//	invo_wait.of_mensaje("Obteniendo el CUERPO y ASUNTO del email")
+//	if not this.of_get_body_subject(as_cod_trabajador, &
+//											  as_nom_Trabajador, &
+//											  as_tipo_trabajador, &
+//											  ad_fec_proceso, &
+//											  as_tipo_planilla, &
+//											  as_origen, & 
+//											  ls_body_html, &
+//											  ls_subject) then return false
+	
+//	//Poner Body y Subject (Asunto)
+//	lnvo_msg.of_set_Body(ls_body_html)
+//	lnvo_msg.of_set_Subject(ls_subject)
+
+//	invo_wait.of_mensaje("Adicionando Archivos")
+//	//Adiciono ambos archivos al email
+//	if trim(as_filename_pdf) <> '' then 
+//		lnvo_msg.of_add_attach(as_filename_pdf)
+//	end if
+	
+//	//Cargo los parametros
+//	invo_wait.of_mensaje("Caragando Parametros")
+//	invo_email.of_load()
+	
+//	//Sin no han emails en ITR_EMAIL_TO agrego uno por defecto
+//	if UpperBound(lnvo_msg.istr_email_to) = 0 then
+//		if not lnvo_msg.of_add_email_to('NO REPLY', 'no-reply@npssac.com.pe') then return false
+//	end if
+	
+//	//envio el email
+//	if UpperBound(lnvo_msg.istr_email_to) > 0 or UpperBound(lnvo_msg.istr_email_bcc) > 0 then
+//		invo_wait.of_mensaje("Enviando Mensaje")
+//		if not invo_email.of_Send(lnvo_msg) then return false
+//		invo_wait.of_mensaje("Email Enviado Satisfactoriamente")
+//	end if
+	
+//	return true
+		
+
+	
+//catch ( Exception ex )
+	
+//	//gnvo_app.of_catch_exception(ex, 'Error al enviar por email el comprobante')
+//	yield()
+//	invo_wait.of_mensaje("Ha ocurrido una exception: " + ex.getMessage())
+//	sleep(2)
+//	yield()
+	
+//	return false
+
+//finally
+	
+//	//destroy lnvo_msg
+//	invo_wait.of_close()
+//end try
 
 
 end function

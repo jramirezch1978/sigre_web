@@ -1,14 +1,8 @@
-$PBExportHeader$n_cst_email_dll.sru
-$PBExportComments$Clase para envio de correos via DLL SigreWebServiceWrapper
+﻿$PBExportHeader$n_cst_email_dll.sru
 forward
 global type n_cst_email_dll from nonvisualobject
 end type
 end forward
-
-// ============================================================
-// NOTA: Usa la estructura global str_email_address
-// definida en str_email_address.srs
-// ============================================================
 
 global type n_cst_email_dll from nonvisualobject
 end type
@@ -41,26 +35,24 @@ FUNCTION string EnviarEmail(string remitente, string destinatarios, &
 // Obtener configuracion actual del DLL
 FUNCTION string ObtenerConfiguracion() &
     LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ObtenerConfiguracion"
-
 end prototypes
 
 forward prototypes
 public subroutine of_liberar_dll ()
+public function string of_format_address (str_email_address astr_addr)
+public function string of_format_address_list (str_email_address astr_addrs[])
+public function string of_get_version ()
+public function string of_get_config ()
 public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], str_email_address astr_cc[], str_email_address astr_cco[], string as_subject, string as_body, boolean ab_html, string as_attachments)
 public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], str_email_address astr_cc[], string as_subject, string as_body, boolean ab_html, string as_attachments)
 public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], string as_subject, string as_body, boolean ab_html, string as_attachments)
 public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], string as_subject, string as_body, boolean ab_html)
 public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], string as_subject, string as_body)
-private function string of_format_address (str_email_address astr_addr)
-private function string of_format_address_list (str_email_address astr_addrs[])
-public function string of_get_version ()
-public function string of_get_config ()
 end prototypes
 
-// ============================================================
+public subroutine of_liberar_dll ();// ============================================================
 // of_liberar_dll: Libera el DLL de memoria para permitir actualizaciones
 // ============================================================
-public subroutine of_liberar_dll ();
 ulong lul_handle
 
 lul_handle = GetModuleHandleW("SigreWebServiceWrapper.dll")
@@ -70,10 +62,9 @@ if lul_handle > 0 then
 end if
 end subroutine
 
-// ============================================================
+public function string of_format_address (str_email_address astr_addr);// ============================================================
 // of_format_address: Formatea una direccion como "email, nombre"
 // ============================================================
-private function string of_format_address (str_email_address astr_addr);
 string ls_result
 
 if IsNull(astr_addr.email) or Trim(astr_addr.email) = "" then
@@ -89,11 +80,10 @@ end if
 return ls_result
 end function
 
-// ============================================================
+public function string of_format_address_list (str_email_address astr_addrs[]);// ============================================================
 // of_format_address_list: Formatea lista de direcciones
 // Formato: "email1, nombre1; email2, nombre2;"
 // ============================================================
-private function string of_format_address_list (str_email_address astr_addrs[]);
 string ls_result
 integer li_idx, li_max
 string ls_addr
@@ -111,21 +101,16 @@ next
 return ls_result
 end function
 
-// ============================================================
-// of_get_version: Obtiene la version del DLL
-// ============================================================
-public function string of_get_version ();
-return ObtenerVersion()
+public function string of_get_version ();return ObtenerVersion()
 end function
 
-// ============================================================
+public function string of_get_config ();// ============================================================
 // of_get_config: Obtiene la configuracion actual del DLL
 // ============================================================
-public function string of_get_config ();
 return ObtenerConfiguracion()
 end function
 
-// ============================================================
+public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], str_email_address astr_cc[], str_email_address astr_cco[], string as_subject, string as_body, boolean ab_html, string as_attachments);// ============================================================
 // of_send_email: Envia correo electronico (version completa)
 // 
 // Argumentos:
@@ -141,7 +126,7 @@ end function
 // Retorna:
 //   JSON con resultado: {"exitoso":true/false,"mensaje":"..."}
 // ============================================================
-public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], str_email_address astr_cc[], str_email_address astr_cco[], string as_subject, string as_body, boolean ab_html, string as_attachments);
+
 string ls_from, ls_to, ls_cc, ls_cco
 string ls_resultado
 integer li_esHtml
@@ -181,37 +166,39 @@ ls_resultado = EnviarEmail(ls_from, ls_to, ls_cc, ls_cco, as_subject, as_body, l
 return ls_resultado
 end function
 
-// ============================================================
+public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], str_email_address astr_cc[], string as_subject, string as_body, boolean ab_html, string as_attachments);// ============================================================
 // of_send_email: Version con CC, sin CCO
 // ============================================================
-public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], str_email_address astr_cc[], string as_subject, string as_body, boolean ab_html, string as_attachments);
+
 str_email_address lstr_empty[]
 
 return of_send_email(astr_from, astr_to, astr_cc, lstr_empty, as_subject, as_body, ab_html, as_attachments)
 end function
 
+public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], string as_subject, string as_body, boolean ab_html, string as_attachments);
 // ============================================================
 // of_send_email: Version sin CC ni CCO, con adjuntos
 // ============================================================
-public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], string as_subject, string as_body, boolean ab_html, string as_attachments);
+
 str_email_address lstr_empty[]
 
 return of_send_email(astr_from, astr_to, lstr_empty, lstr_empty, as_subject, as_body, ab_html, as_attachments)
 end function
 
+public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], string as_subject, string as_body, boolean ab_html);
 // ============================================================
 // of_send_email: Version simple sin CC, CCO ni adjuntos
 // ============================================================
-public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], string as_subject, string as_body, boolean ab_html);
+
 str_email_address lstr_empty[]
 
 return of_send_email(astr_from, astr_to, lstr_empty, lstr_empty, as_subject, as_body, ab_html, "")
 end function
 
-// ============================================================
+public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], string as_subject, string as_body);// ============================================================
 // of_send_email: Version minima (sin HTML)
 // ============================================================
-public function string of_send_email (str_email_address astr_from, str_email_address astr_to[], string as_subject, string as_body);
+
 str_email_address lstr_empty[]
 
 return of_send_email(astr_from, astr_to, lstr_empty, lstr_empty, as_subject, as_body, false, "")
@@ -223,11 +210,7 @@ TriggerEvent( this, "constructor" )
 end on
 
 on n_cst_email_dll.destroy
-// NOTA: NO liberar el DLL automaticamente porque PowerBuilder
-// mantiene una referencia interna. Si se libera, las siguientes
-// instancias no podran usar el DLL.
-// Use of_liberar_dll() manualmente solo cuando necesite
-// actualizar el archivo DLL (antes de cerrar la aplicacion).
 TriggerEvent( this, "destructor" )
 call super::destroy
 end on
+

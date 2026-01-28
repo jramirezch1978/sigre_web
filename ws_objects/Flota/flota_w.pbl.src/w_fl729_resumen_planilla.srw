@@ -18,12 +18,14 @@ type sle_semana from singlelineedit within w_fl729_resumen_planilla
 end type
 type gb_1 from groupbox within w_fl729_resumen_planilla
 end type
+type dw_consolidado from u_dw_rpt within w_fl729_resumen_planilla
+end type
 end forward
 
 global type w_fl729_resumen_planilla from w_report_smpl
 boolean visible = false
-integer width = 2939
-integer height = 2252
+integer width = 3977
+integer height = 2588
 string title = "[FL729] Resumen Calculo de Participación"
 string menuname = "m_impresion"
 pb_reporte pb_reporte
@@ -34,8 +36,16 @@ st_2 st_2
 sle_year sle_year
 sle_semana sle_semana
 gb_1 gb_1
+dw_consolidado dw_consolidado
 end type
 global w_fl729_resumen_planilla w_fl729_resumen_planilla
+
+type variables
+String   is_nave_retrieve
+Date     id_fecha1_retrieve
+Date     id_fecha2_retrieve
+
+end variables
 
 on w_fl729_resumen_planilla.create
 int iCurrent
@@ -49,6 +59,7 @@ this.st_2=create st_2
 this.sle_year=create sle_year
 this.sle_semana=create sle_semana
 this.gb_1=create gb_1
+this.dw_consolidado=create dw_consolidado
 iCurrent=UpperBound(this.Control)
 this.Control[iCurrent+1]=this.pb_reporte
 this.Control[iCurrent+2]=this.st_nomb_nave
@@ -58,6 +69,7 @@ this.Control[iCurrent+5]=this.st_2
 this.Control[iCurrent+6]=this.sle_year
 this.Control[iCurrent+7]=this.sle_semana
 this.Control[iCurrent+8]=this.gb_1
+this.Control[iCurrent+9]=this.dw_consolidado
 end on
 
 on w_fl729_resumen_planilla.destroy
@@ -71,6 +83,7 @@ destroy(this.st_2)
 destroy(this.sle_year)
 destroy(this.sle_semana)
 destroy(this.gb_1)
+destroy(this.dw_consolidado)
 end on
 
 event ue_open_pre;call super::ue_open_pre;Date ld_hoy
@@ -102,6 +115,7 @@ String	ls_nave
 
 //rango de fechas
 dw_report.Settransobject(sqlca)
+dw_consolidado.Settransobject(sqlca)
 
 ib_preview = true
 event ue_preview( )
@@ -122,8 +136,16 @@ select fecha_inicio, fecha_fin
 from semanas
 where ano = :li_year
   and semana = :li_semana;
+  
+// Guardar los parámetros para exportar
+is_nave_retrieve    = ls_nave
+id_fecha1_retrieve  = ld_fecha1
+id_fecha2_retrieve  = ld_fecha2
+
 
 dw_report.Retrieve(ls_nave, ld_fecha1, ld_fecha2)
+dw_consolidado.Retrieve(ls_nave, ld_fecha1, ld_fecha2)
+
 dw_report.object.datawindow.print.orientation = 1
 //dw_report.object.datawindow.print.paper.size = 8
 
@@ -132,6 +154,43 @@ dw_report.Object.t_user.text 	= gs_user
 dw_report.Object.t_empresa.text 	= gs_empresa
 dw_report.Object.t_ventana.text 	= this.ClassName()
 dw_report.object.t_stitulo1.text = 'Desde ' + string(ld_fecha1, 'dd/mm/yyyy') + ' hasta ' + string(ld_fecha2, 'dd/mm/yyyy')
+
+end event
+
+event ue_saveas_excel;//Override
+//'d_rpt_consolidado_pesca2_crt'
+
+// Exportar el nested CROSSTAB a Excel
+
+string ls_path, ls_file
+int li_rc
+
+try
+    // ✅ Validar que primero se haya ejecutado el reporte
+    if dw_consolidado.RowCount() = 0 then
+        MessageBox('Aviso', 'No hay datos para exportar', Information!)
+        return
+    end if
+    
+    li_rc = GetFileSaveName("Guardar Reporte Excel", ls_path, ls_file, "XLS", &
+                            "Hoja de Excel (*.xls),*.xls", "", 32770)
+    
+    IF li_rc = 1 Then
+        SetPointer(HourGlass!)
+        uf_save_dw_as_excel(dw_consolidado, ls_file)
+        MessageBox('Éxito', 'Archivo guardado correctamente')
+        SetPointer(Arrow!)
+    End If
+    
+catch (exception ex)
+    MessageBox('Error', 'Ocurrió un error: ' + ex.getMessage(), StopSign!)
+    
+
+end try
+
+
+
+
 
 end event
 
@@ -357,5 +416,15 @@ string facename = "Arial"
 long textcolor = 33554432
 long backcolor = 67108864
 string text = "Filtros de Busqueda"
+end type
+
+type dw_consolidado from u_dw_rpt within w_fl729_resumen_planilla
+boolean visible = false
+integer x = 2761
+integer y = 792
+integer width = 919
+integer height = 716
+integer taborder = 20
+string dataobject = "d_rpt_consolidado_pesca2_crt"
 end type
 

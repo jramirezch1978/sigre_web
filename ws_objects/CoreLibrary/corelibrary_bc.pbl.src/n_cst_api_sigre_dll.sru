@@ -47,17 +47,12 @@ FUNCTION string EnviarEmail(string remitente, string destinatarios, &
 // Obtener configuracion actual del DLL
 FUNCTION string ObtenerConfiguracion() &
     LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ObtenerConfiguracion"
-
 end prototypes
 
 forward prototypes
 public subroutine of_liberar_dll ()
 end prototypes
 
-// ============================================================
-// of_liberar_dll: Libera el DLL de memoria para permitir actualizaciones
-// Llamar antes de destroy si necesitas reemplazar el DLL
-// ============================================================
 public subroutine of_liberar_dll ();
 ulong lul_handle
 
@@ -76,11 +71,9 @@ TriggerEvent( this, "constructor" )
 end on
 
 on n_cst_api_sigre_dll.destroy
-// NOTA: NO liberar el DLL automaticamente porque PowerBuilder
-// mantiene una referencia interna. Si se libera, las siguientes
-// instancias no podran usar el DLL.
-// Use of_liberar_dll() manualmente solo cuando necesite
-// actualizar el archivo DLL (antes de cerrar la aplicacion).
+// Liberar el DLL antes de destruir el objeto
+of_liberar_dll()
 TriggerEvent( this, "destructor" )
 call super::destroy
 end on
+
