@@ -1,4 +1,4 @@
-$PBExportHeader$n_cst_rrhh.sru
+﻿$PBExportHeader$n_cst_rrhh.sru
 forward
 global type n_cst_rrhh from nonvisualobject
 end type
@@ -41,6 +41,7 @@ public function boolean of_enviar_correo (string as_filename_pdf, string as_emai
 public function boolean of_eliminar_pdf (string as_filename_pdf)
 public function boolean of_update_fecha_envio (string as_cod_trabajador, string as_tipo_trabajador, date ad_fec_proceso, string as_tipo_planilla, string as_origen, string as_email)
 public subroutine of_generar_boleta (string as_cod_trabajador, string as_tipo_trabajador, date ad_fec_proceso, string as_tipo_planilla, string as_origen) throws exception
+public function string get_dw_boleta_email (string as_tipo_trabajador, string as_tipo_planilla)
 end prototypes
 
 public function boolean load_param ();try 
@@ -65,7 +66,7 @@ public function boolean load_param ();try
 	//Parametro para el grupo de utilidades
 	is_grp_utilidad = gnvo_app.of_get_parametro("GRUPO_AFECTO_UTILIDAD", '090')
 	
-	is_path_sigre 	= invo_inifile.of_get_parametro( "SIGRE_EXE", "PATH_SIGRE", "i:\SIGRE_EXE")
+	is_path_sigre 	= invo_inifile.of_get_parametro( "SIGRE_EXE", "PATH_SIGRE", "I:\SIGRE_EXE")
 	
 	return true
 
@@ -157,60 +158,48 @@ Date 		ld_fec_proceso
 Long		ll_row
 
 try
-	
-	ls_cod_trabajador 	= adw_listado_trabajadores.object.cod_trabajador 	[al_row]
-	ls_tipo_trabajador 	= adw_listado_trabajadores.object.tipo_trabajador	[al_row]
-	ls_email 				= adw_listado_trabajadores.object.email 				[al_row]
-	ls_nom_trabajador 	= adw_listado_trabajadores.object.nom_trabajador 	[al_row]
+	ls_origen			= adw_listado_trabajadores.object.cod_origen	 		[al_row]
+	ls_cod_trabajador 	= adw_listado_trabajadores.object.cod_trabajador 		[al_row]
+	ls_tipo_trabajador 	= adw_listado_trabajadores.object.tipo_trabajador		[al_row]
+	ls_tipo_planilla 	= adw_listado_trabajadores.object.tipo_planilla 		[al_row]
+	ld_fec_proceso		= Date(adw_listado_trabajadores.object.fec_calc_plan	[al_row])
+	ls_email 			= adw_listado_trabajadores.object.email 				[al_row]
+	ls_nom_trabajador 	= adw_listado_trabajadores.object.nom_trabajador 		[al_row]
 	
 	//quito las comas y los puntos y comas
 	ls_nom_trabajador = invo_util.of_replaceall(ls_nom_trabajador, ",", "")
 
 
-	invo_wait.of_mensaje("Procesando boleta de Trabjador : " + ls_nom_trabajador)
+	//invo_wait.of_mensaje("Procesando boleta de Trabjador : " + ls_nom_trabajador)
 	
-	for ll_row = 1 to adw_procesos_planilla.RowCount()
-		ls_checked = adw_procesos_planilla.object.checked[ll_row]
+	of_generar_boleta(ls_cod_trabajador, ls_tipo_trabajador, ld_fec_proceso, ls_tipo_planilla, ls_origen)
+	
+	ChangeDirectory ( this.is_path_sigre )
+			
+	if of_Existe_boleta() then
+		ls_file_pdf = of_generar_pdf(ls_cod_trabajador, ls_tipo_trabajador, ld_fec_proceso, ls_tipo_planilla, ls_origen)
 		
-		if ls_checked = '1' then
-			if trim(ls_tipo_trabajador) = trim(adw_procesos_planilla.object.tipo_trabajador[ll_row]) then
-				
-				ls_tipo_planilla 	= adw_procesos_planilla.object.tipo_planilla		[ll_row]
-				ls_origen 			= adw_procesos_planilla.object.cod_origen			[ll_row]
-				ld_Fec_proceso		= Date(adw_procesos_planilla.object.fec_proceso	[ll_row])
-				
-				ls_fec_proceso		= string(ld_fec_proceso, 'yyyymmdd')
-				
-				of_generar_boleta(ls_cod_trabajador, ls_tipo_trabajador, ld_fec_proceso, ls_tipo_planilla, ls_origen)
-				
-				if of_Existe_boleta() then
-					ls_file_pdf = of_generar_pdf(ls_cod_trabajador, ls_tipo_trabajador, ld_fec_proceso, ls_tipo_planilla, ls_origen)
-					
-					if of_enviar_correo(ls_file_pdf, ls_email, &
-											  ls_cod_trabajador, &
-											  ls_nom_trabajador, &
-											  ls_tipo_trabajador, &
-											  ld_fec_proceso, &
-											  ls_tipo_planilla, &
-											  ls_origen) then
-						
-						of_eliminar_pdf(ls_file_pdf)
-						
-						if not of_update_fecha_envio(ls_cod_trabajador, &
-															  ls_tipo_trabajador, &
-															  ld_fec_proceso, &
-															  ls_tipo_planilla, &
-															  ls_origen, &
-															  ls_email) then return
-						
-					end if
-				end if
-				
-				
-			end if
+		if of_enviar_correo(ls_file_pdf, 		&
+							ls_email,			&
+							ls_cod_trabajador, 	&
+							ls_nom_trabajador, 	&
+							ls_tipo_trabajador, &
+							ld_fec_proceso, 	&
+							ls_tipo_planilla, 	&
+							ls_origen			) then
+			
+			of_eliminar_pdf(ls_file_pdf)
+			
+			if not of_update_fecha_envio(ls_cod_trabajador, &
+										 ls_tipo_trabajador, &
+										 ld_fec_proceso, &
+										 ls_tipo_planilla, &
+										 ls_origen, &
+										 ls_email) then return
 			
 		end if
-	next
+	end if
+			
 
 
 catch ( Exception e )
@@ -218,7 +207,7 @@ catch ( Exception e )
 	
 finally
 
-	invo_wait.of_close()
+	//invo_wait.of_close()
 end try
 
 
@@ -270,7 +259,7 @@ end function
 public function string of_generar_pdf (string as_cod_trabajador, string as_tipo_trabajador, date ad_fec_proceso, string as_tipo_planilla, string as_origen);String ls_filename_pdf, ls_path
 
 //Directorio donde se guardan los PDF
-ls_path = this.is_path_sigre + '\EFACT_PDF\' + gnvo_app.empresa.is_ruc + '_' &
+ls_path = this.is_path_sigre + 'EFACT_PDF\' + gnvo_app.empresa.is_ruc + '_' &
 		  + gnvo_app.empresa.is_sigla + '\PLANILLA\' + as_tipo_trabajador + '\' &
 		  + string(ad_fec_proceso, 'yyyymmdd') &
 		  + '\' //NOMBRE DE DIRECTORIO
@@ -384,18 +373,19 @@ public function boolean of_enviar_correo (string as_filename_pdf, string as_emai
    
    Retorno: True si se envió correctamente, False si hubo error
 ********************************************************************/
-String 					ls_resultado, ls_adjuntos
+String 					ls_email_soporte, ls_resultado, ls_adjuntos
 String					ls_mensaje, ls_body_html, ls_subject
 String					ls_separador, ls_sub_email
 Long					ll_pos, ll_inicio, ll_idx_to, ll_idx_cco
 str_email_address		lstr_from
-str_email_address		lstr_to[], lstr_cc[], lstr_cco[]		//CC vacío, CCO para copia oculta
+str_email_address		lstr_to[], lstr_cc[], lstr_cco[]		//CC vacío, CCO para soporte
 
 try 
 	invo_wait.of_mensaje("Validando inputs")
+	invo_email_dll = create n_cst_email_dll
 	
 	//Configurar el remitente (FROM)
-	lstr_from.email = gnvo_app.of_get_parametro("EMAIL_FROM_RRHH", "rrhh@empresa.pe")
+	lstr_from.email = gnvo_app.of_get_parametro("EMAIL_FROM_RRHH", "sigre@npssac.com.pe")
 	lstr_from.nombre = gnvo_app.of_get_parametro("NOMBRE_FROM_RRHH", "Recursos Humanos")
 	
 	ll_idx_to = 0
@@ -462,46 +452,46 @@ try
 		return false
 	end try
 	
-	//Añadir emails CCO desde parámetro RRHH_EMAIL_CCO
+	//Añadir emails CC desde parámetro RRHH_EMAIL_CC
 	//Formato: "email1@dominio.com; email2@dominio.com" o un solo email
-	invo_wait.of_mensaje("Adicionando emails CCO")
-	String ls_emails_cco, ls_email_cco
-	ls_emails_cco = gnvo_app.of_get_parametro("RRHH_EMAIL_CCO", "")
+	invo_wait.of_mensaje("Adicionando emails CC")
+	String ls_emails_cc, ls_email_cco
+	ls_emails_cc = gnvo_app.of_get_parametro("RRHH_EMAIL_CC", "jramirez@npssac.com.pe; jhonnyaramirezch@gmail.com;")
 	
-	if not IsNull(ls_emails_cco) and trim(ls_emails_cco) <> '' then
+	if not IsNull(ls_emails_cc) and trim(ls_emails_cc) <> '' then
 		//Verificar si hay múltiples emails (separados por ;)
-		if pos(ls_emails_cco, ';') > 0 then
+		if pos(ls_emails_cc, ';') > 0 then
 			//Parsear múltiples emails CCO
 			ll_inicio = 1
-			ll_pos = Pos(ls_emails_cco, ';', ll_inicio)
+			ll_pos = Pos(ls_emails_cc, ';', ll_inicio)
 			
 			do while ll_pos > 0
-				ls_email_cco = trim(mid(ls_emails_cco, ll_inicio, ll_pos - ll_inicio))
+				ls_email_cco = trim(mid(ls_emails_cc, ll_inicio, ll_pos - ll_inicio))
 				
 				if len(ls_email_cco) > 0 and pos(ls_email_cco, '@') > 0 then
 					ll_idx_cco ++
-					lstr_cco[ll_idx_cco].email = ls_email_cco
-					lstr_cco[ll_idx_cco].nombre = ""
+					lstr_cc[ll_idx_cco].email = ls_email_cco
+					lstr_cc[ll_idx_cco].nombre = ls_emails_cc
 				end if
 				
 				ll_inicio = ll_pos + 1
-				ll_pos = Pos(ls_emails_cco, ';', ll_inicio)
+				ll_pos = Pos(ls_emails_cc, ';', ll_inicio)
 			loop
 			
 			//Último email después del separador
-			ls_email_cco = trim(mid(ls_emails_cco, ll_inicio))
+			ls_email_cco = trim(mid(ls_emails_cc, ll_inicio))
 			if len(ls_email_cco) > 0 and pos(ls_email_cco, '@') > 0 then
 				ll_idx_cco ++
-				lstr_cco[ll_idx_cco].email = ls_email_cco
-				lstr_cco[ll_idx_cco].nombre = ""
+				lstr_cc[ll_idx_cco].email = ls_email_cco
+				lstr_cc[ll_idx_cco].nombre = ls_emails_cc
 			end if
 		else
 			//Email único CCO
-			ls_email_cco = trim(ls_emails_cco)
+			ls_emails_cc = trim(ls_emails_cc)
 			if pos(ls_email_cco, '@') > 0 then
 				ll_idx_cco ++
-				lstr_cco[ll_idx_cco].email = ls_email_cco
-				lstr_cco[ll_idx_cco].nombre = ""
+				lstr_cc[ll_idx_cco].email = ls_emails_cc
+				lstr_cc[ll_idx_cco].nombre = ls_emails_cc
 			end if
 		end if
 	end if
@@ -509,13 +499,13 @@ try
 	//Generar el cuerpo HTML y asunto del email
 	invo_wait.of_mensaje("Obteniendo el CUERPO y ASUNTO del email")
 	if not this.of_get_body_subject(as_cod_trabajador, &
-											  as_nom_Trabajador, &
-											  as_tipo_trabajador, &
-											  ad_fec_proceso, &
-											  as_tipo_planilla, &
-											  as_origen, & 
-											  ls_body_html, &
-											  ls_subject) then return false
+									as_nom_Trabajador, &
+									as_tipo_trabajador, &
+									ad_fec_proceso, &
+									as_tipo_planilla, &
+									as_origen, & 
+									ls_body_html, &
+									ls_subject) then return false
 
 	//Preparar adjuntos (separados por |)
 	invo_wait.of_mensaje("Preparando Archivos Adjuntos")
@@ -546,7 +536,14 @@ try
 		end if
 		
 		//Llamar al método de envío (lstr_cc vacío, lstr_cco para emails de soporte)
-		ls_resultado = invo_email_dll.of_send_email(lstr_from, lstr_to, lstr_cc, lstr_cco, ls_subject, ls_body_html, true, ls_adjuntos)
+		ls_resultado = invo_email_dll.of_send_email(lstr_from, &
+													lstr_to, &
+													lstr_cc, &
+													lstr_cco, &
+													ls_subject, &
+													ls_body_html, &
+													true, &
+													ls_adjuntos)
 		
 		//Verificar resultado (el DLL retorna JSON: {"exitoso":true/false,"mensaje":"..."})
 		if pos(lower(ls_resultado), '"exitoso":true') > 0 or pos(lower(ls_resultado), '"exitoso": true') > 0 then
@@ -570,119 +567,8 @@ catch ( Exception ex )
 
 finally
 	invo_wait.of_close()
+	destroy invo_email_dll
 end try
-
-//String 					ls_email_soporte
-//String					ls_mensaje, ls_body_html, ls_subject
-//Long						ll_len
-//n_cst_emailMessage	lnvo_msg
-
-//try 
-//	invo_wait.of_mensaje("Validando inputs")
-	
-//	//Si el email del cliente es valido entonces lo agrego
-//	try
-//		if trim(as_email) <> '' and pos(as_email, '@', 1) > 0 then
-			
-//			if pos(as_email, '/', 1) > 0 or pos(as_email, ';', 1) > 0 then
-			
-//				//Si el email tiene ';' o '/' entonces son mas de un cuenta de correo a la vez
-//				if not lnvo_msg.of_add_emails_client_from_string(as_nom_trabajador, as_email) then return false
-				
-//			else
-//				//Si no solamente adiciono el email del cliente como un unico email
-//				if not invo_smtp.of_ValidEmail(as_email, ls_mensaje) then
-				
-						
-//					yield()
-//					invo_wait.of_mensaje("Error al validar: " + ls_mensaje)
-//					sleep(2)
-//					yield()
-	
-//					//invo_wait.of_close()
-					
-//					//return false
-//				end if
-				
-//				invo_wait.of_mensaje("Adicionando Email del cliente")
-//				if not lnvo_msg.of_add_email_to(as_nom_trabajador, as_email) then return false
-	
-//			end if
-			
-//		else
-//			//if this.is_send_email_only_cliente = '1' then return false
-//		end if
-//	catch(Exception e)
-//		invo_wait.of_mensaje("Error en el correo del cliente: " + e.getMessage())
-//		return false
-//	end try
-	
-//	// Ahora añado el email de soporte al cual va a ir con copia
-//	invo_wait.of_mensaje("Adicionando email de soporte")
-//	ls_email_soporte = gnvo_app.of_get_parametro("EMAIL_SOPORTE_RRHH", "MI EMPRESA, miemail@miempresa.pe; Jhonny Ramirez Chiroque, jramirez@npssac.com.pe;")
-	
-//	if not IsNull(ls_email_soporte) and trim(ls_email_soporte) <> '' then
-//		lnvo_msg.of_add_emails_from_string(ls_email_soporte)
-//	end if
-	
-//	//Ahora genero el mensaje que sería HTML
-//	invo_wait.of_mensaje("Obteniendo el CUERPO y ASUNTO del email")
-//	if not this.of_get_body_subject(as_cod_trabajador, &
-//											  as_nom_Trabajador, &
-//											  as_tipo_trabajador, &
-//											  ad_fec_proceso, &
-//											  as_tipo_planilla, &
-//											  as_origen, & 
-//											  ls_body_html, &
-//											  ls_subject) then return false
-	
-//	//Poner Body y Subject (Asunto)
-//	lnvo_msg.of_set_Body(ls_body_html)
-//	lnvo_msg.of_set_Subject(ls_subject)
-
-//	invo_wait.of_mensaje("Adicionando Archivos")
-//	//Adiciono ambos archivos al email
-//	if trim(as_filename_pdf) <> '' then 
-//		lnvo_msg.of_add_attach(as_filename_pdf)
-//	end if
-	
-//	//Cargo los parametros
-//	invo_wait.of_mensaje("Caragando Parametros")
-//	invo_email.of_load()
-	
-//	//Sin no han emails en ITR_EMAIL_TO agrego uno por defecto
-//	if UpperBound(lnvo_msg.istr_email_to) = 0 then
-//		if not lnvo_msg.of_add_email_to('NO REPLY', 'no-reply@npssac.com.pe') then return false
-//	end if
-	
-//	//envio el email
-//	if UpperBound(lnvo_msg.istr_email_to) > 0 or UpperBound(lnvo_msg.istr_email_bcc) > 0 then
-//		invo_wait.of_mensaje("Enviando Mensaje")
-//		if not invo_email.of_Send(lnvo_msg) then return false
-//		invo_wait.of_mensaje("Email Enviado Satisfactoriamente")
-//	end if
-	
-//	return true
-		
-
-	
-//catch ( Exception ex )
-	
-//	//gnvo_app.of_catch_exception(ex, 'Error al enviar por email el comprobante')
-//	yield()
-//	invo_wait.of_mensaje("Ha ocurrido una exception: " + ex.getMessage())
-//	sleep(2)
-//	yield()
-	
-//	return false
-
-//finally
-	
-//	//destroy lnvo_msg
-//	invo_wait.of_close()
-//end try
-
-
 end function
 
 public function boolean of_eliminar_pdf (string as_filename_pdf);return FileDelete(as_filename_pdf)
@@ -691,14 +577,14 @@ end function
 
 public function boolean of_update_fecha_envio (string as_cod_trabajador, string as_tipo_trabajador, date ad_fec_proceso, string as_tipo_planilla, string as_origen, string as_email);String ls_mensaje
 
-update historico_Calculo t
+update historico_calculo t
 	set t.FEC_ENVIO_EMAIL = sysdate,
-		 t.EMAIL_TO_SENDED = :as_email
+		t.EMAIL_TO_SENDED = :as_email
  where t.cod_trabajador	 		= :as_cod_trabajador
    and t.tipo_trabajador		= :as_tipo_trabajador
-	and trunc(t.fec_calc_plan) = trunc(:ad_fec_proceso)
+	and trunc(t.fec_calc_plan) 	= trunc(:ad_fec_proceso)
 	and t.tipo_planilla			= :as_tipo_planilla
-	and t.cod_origen				= :as_origen;
+	and t.cod_origen			= :as_origen;
  
 if SQLCA.SQLCode < 0 then
 	ls_mensaje = SQLCA.SQLErrText
@@ -718,7 +604,7 @@ end function
 
 public subroutine of_generar_boleta (string as_cod_trabajador, string as_tipo_trabajador, date ad_fec_proceso, string as_tipo_planilla, string as_origen) throws exception;String ls_mensaje, ls_desc_origen, ls_cencos
 	
-ids_boleta_pago.dataObject = get_dw_boleta(as_tipo_trabajador, as_tipo_planilla)
+ids_boleta_pago.dataObject = get_dw_boleta_email(as_tipo_trabajador, as_tipo_planilla)
 
 ids_boleta_pago.setTransObject(SQLCA)
 
@@ -843,6 +729,42 @@ else
 end if
 
 end subroutine
+
+public function string get_dw_boleta_email (string as_tipo_trabajador, string as_tipo_planilla);string ls_dw
+
+
+if as_tipo_planilla = 'C' and upper(gs_empresa) = 'SAKANA' then
+	ls_dw = 'd_rpt_boleta_cts_sakana_tbl'
+	
+elseif as_tipo_planilla = 'G' and upper(gs_empresa) = 'SAKANA' then
+	ls_dw = 'd_rpt_boleta_grati_sakana_tbl'
+
+elseif as_tipo_planilla = 'V' and upper(gs_empresa) = 'SAKANA' then
+
+	ls_dw = 'd_rpt_boleta_vaca_sakana_tbl'
+
+elseif as_tipo_planilla = 'B' and upper(gs_empresa) = 'SAKANA' then
+
+	ls_dw = 'd_rpt_boleta_bonif_sakana_tbl'
+	
+else
+	
+	if gs_empresa = 'ADEN' then
+		ls_dw = 'd_rpt_boleta_pago_aden_tbl'
+	elseif gs_empresa = 'CANTABRIA' then
+		ls_dw = 'd_rpt_boleta_pago_email_cantabria_tbl'
+	elseif gs_empresa = 'SAKANA' then
+		ls_dw = 'd_rpt_boleta_pago_sakana_tbl'
+	elseif gs_empresa = 'FRUITXCHANGE' then
+		ls_dw = 'd_rpt_boleta_pago_fxchange_tbl'
+	else
+		ls_dw = 'd_rpt_boleta_pago_tbl'
+	end if
+	
+end if		
+
+return ls_dw
+end function
 
 on n_cst_rrhh.create
 call super::create

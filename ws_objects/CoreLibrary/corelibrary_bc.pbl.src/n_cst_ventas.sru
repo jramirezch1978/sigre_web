@@ -1,4 +1,4 @@
-$PBExportHeader$n_cst_ventas.sru
+﻿$PBExportHeader$n_cst_ventas.sru
 forward
 global type n_cst_ventas from nonvisualobject
 end type
@@ -731,9 +731,8 @@ Long		ll_i
 try 
 	
 	//Obtengo la impresora por defecto del usuario
-	if IsNull(invo_printer) then
-		invo_printer = create n_cst_printer
-	end if
+	invo_wait.of_mensaje("Obteniendo la impresora por defecto")
+	invo_printer = create n_cst_printer
 	ls_printer_default = invo_printer.of_get_printer_default()
 	
 	if len(trim(ls_printer_default)) = 0 then
@@ -838,7 +837,7 @@ try
 	
 	//Asigno la impresora por defecto del usuario
 	if len(trim(ls_printer_default)) > 0 then
-		ids_ticket.Modify("DataWindow.Print.PrinterName='" + ls_printer_default + "'")
+		ids_ticket.Object.DataWindow.Print.PrinterName = ls_printer_default
 	end if
 	
 	if trim(ls_tipo_doc_cxc) = 'NVC' then
@@ -846,7 +845,7 @@ try
 			ids_ticket.Print()
 		end if
 	else
-		//MessageBox('Aviso of_print_efact()', 'Datawindow.printer: ' + ids_ticket.Describe("DataWindow.Printer") , Information!)
+		//MessageBox('Aviso of_print_efact()', 'Datawindow.printer: ' + ids_ticket.Describe("DataWindow.Print.PrinterName") , Information!)
 		ids_ticket.Print()
 		//MessageBox('Aviso of_print_efact()', 'Impresión completa', Information!)
 	end if
@@ -869,12 +868,8 @@ catch ( Exception ex )
 
 finally
 	invo_wait.of_close()
+	destroy invo_printer
 end try
-
-
-
-
-
 end function
 
 public function boolean of_generar_qrcode (date ad_fecha);String 	ls_ruc_emisor, ls_serie_cxc, ls_nro_cxc, ls_tipo_doc_ident, ls_nro_doc_ident, &
@@ -12552,9 +12547,5 @@ destroy invo_numlet
 destroy invo_wait
 
 destroy invo_inifile
-
-if not IsNull(invo_printer) then
-	destroy invo_printer
-end if
 end event
 

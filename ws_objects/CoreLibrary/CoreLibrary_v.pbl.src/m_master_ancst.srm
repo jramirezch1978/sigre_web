@@ -1,4 +1,4 @@
-$PBExportHeader$m_master_ancst.srm
+﻿$PBExportHeader$m_master_ancst.srm
 $PBExportComments$Ejemplo de m_master para aplicaciones nuevas
 forward
 global type m_master_ancst from menu
@@ -1586,39 +1586,47 @@ this.toolbargradient = true
 this.bitmapgradient = true
 end on
 
-event clicked;String 			ls_printer, ls_fullstring
-Long				ll_place
+event clicked;//PrintSetup ()
+
+String 			ls_printer, ls_fullstring
+Long			ll_place
 n_cst_printer 	lnvo_printer
 
-//Abrir el diálogo estándar de configuración de impresora
-PrintSetup()
-
-//Obtener la impresora seleccionada usando PrintGetPrinter()
-//Formato: printername ~t drivername ~t port
-ls_fullstring = PrintGetPrinter()
-
-if len(trim(ls_fullstring)) > 0 then
-	//Extraer solo el nombre de la impresora (antes del primer tab)
-	ll_place = Pos(ls_fullstring, "~t")
-	if ll_place > 0 then
-		ls_printer = Left(ls_fullstring, ll_place - 1)
-	else
-		ls_printer = ls_fullstring
-	end if
+try 
+	lnvo_printer = create n_cst_printer
+	//Abrir el diálogo estándar de configuración de impresora
+	PrintSetup()
 	
-	//Guardar como impresora por defecto del usuario
-	if len(trim(ls_printer)) > 0 then
-		lnvo_printer = create n_cst_printer
-		
-		if lnvo_printer.of_set_printer_default(ls_printer) then
-			MessageBox("Configuración Guardada", &
-						"La impresora '" + ls_printer + "' se ha configurado como impresora por defecto.~r~n" &
-						+ "Se usará esta impresora para las impresiones del usuario actual.", Information!)
+	//Obtener la impresora seleccionada usando PrintGetPrinter()
+	//Formato: printername ~t drivername ~t port
+	ls_fullstring = PrintGetPrinter()
+	
+	if len(trim(ls_fullstring)) > 0 then
+		//Extraer solo el nombre de la impresora (antes del primer tab)
+		ll_place = Pos(ls_fullstring, "~t")
+		if ll_place > 0 then
+			ls_printer = Left(ls_fullstring, ll_place - 1)
+		else
+			ls_printer = ls_fullstring
 		end if
 		
-		destroy lnvo_printer
+		//Guardar como impresora por defecto del usuario
+		if len(trim(ls_printer)) > 0 then
+			
+			if lnvo_printer.of_set_printer_default(ls_printer) then
+				MessageBox("Configuración Guardada", &
+							"La impresora '" + ls_printer + "' se ha configurado como impresora por defecto.~r~n" &
+							+ "Se usará esta impresora para las impresiones del usuario actual.", Information!)
+			end if
+			
+		end if
 	end if
-end if
+catch ( Exception ex )
+	/*statementblock*/
+finally
+	destroy lnvo_printer
+end try
+
 end event
 
 type m_print1 from menu within m_printer

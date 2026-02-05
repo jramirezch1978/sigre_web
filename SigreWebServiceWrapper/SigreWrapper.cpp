@@ -836,10 +836,16 @@ static BOOL SendEmailNative(
     WideCharToMultiByte(CP_UTF8, 0, g_smtpUser, -1, smtpUser, 256, NULL, NULL);
     WideCharToMultiByte(CP_UTF8, 0, g_smtpPass, -1, smtpPass, 256, NULL, NULL);
     
-    char toAddr[256], subjectUtf8[1024], bodyUtf8[32768];
-    WideCharToMultiByte(CP_UTF8, 0, to, -1, toAddr, 256, NULL, NULL);
+    char toAddr[2048], subjectUtf8[1024], bodyUtf8[32768];
+    WideCharToMultiByte(CP_UTF8, 0, to, -1, toAddr, 2048, NULL, NULL);
     WideCharToMultiByte(CP_UTF8, 0, subject, -1, subjectUtf8, 1024, NULL, NULL);
     WideCharToMultiByte(CP_UTF8, 0, body, -1, bodyUtf8, 32768, NULL, NULL);
+    
+    // Limpiar espacios y punto y coma al final de toAddr
+    size_t toLen = strlen(toAddr);
+    while (toLen > 0 && (toAddr[toLen-1] == ' ' || toAddr[toLen-1] == ';' || toAddr[toLen-1] == '\t')) {
+        toAddr[--toLen] = '\0';
+    }
     
     // Conectar
     TlsContext ctx = {0};
@@ -933,30 +939,87 @@ static BOOL SendEmailNative(
     }
     LogInfo(L"SMTP: MAIL FROM OK");
     
-    // RCPT TO
+    // RCPT TO - soporta múltiples destinatarios separados por ;
     LogInfo(L"SMTP: Enviando RCPT TO...");
     char rcptTo[512];
-    sprintf_s(rcptTo, sizeof(rcptTo), "RCPT TO:<%s>\r\n", toAddr);
-    if (!SmtpCommand(&ctx, rcptTo, response, sizeof(response), 250)) {
-        wcscpy_s(errorMsg, errorSize, L"Error en RCPT TO");
+    char toAddrCopy[2048];
+    strcpy_s(toAddrCopy, sizeof(toAddrCopy), toAddr);
+    
+    char* toContext = NULL;
+    char* toToken = strtok_s(toAddrCopy, ";", &toContext);
+    BOOL firstRcpt = TRUE;
+    
+    while (toToken) {
+        // Limpiar espacios al inicio y final del email
+        while (*toToken == ' ' || *toToken == '\t') toToken++;
+        size_t tokenLen = strlen(toToken);
+        while (tokenLen > 0 && (toToken[tokenLen-1] == ' ' || toToken[tokenLen-1] == '\t')) {
+            toToken[--tokenLen] = '\0';
+        }
+        
+        // Solo enviar si el email no está vacío y contiene @
+        if (strlen(toToken) > 0 && strchr(toToken, '@') != NULL) {
+            sprintf_s(rcptTo, sizeof(rcptTo), "RCPT TO:<%s>\r\n", toToken);
+            if (!SmtpCommand(&ctx, rcptTo, response, sizeof(response), 250)) {
+                if (firstRcpt) {
+                    // Solo falla si el primer RCPT TO falla
+                    wcscpy_s(errorMsg, errorSize, L"Error en RCPT TO");
+                    goto cleanup;
+                }
+                // Si falla un RCPT TO secundario, continuar con los demás
+            }
+            firstRcpt = FALSE;
+        }
+        toToken = strtok_s(NULL, ";", &toContext);
+    }
+    
+    if (firstRcpt) {
+        // No se envió ningún RCPT TO válido
+        wcscpy_s(errorMsg, errorSize, L"Error: No hay destinatarios validos");
         goto cleanup;
     }
     LogInfo(L"SMTP: RCPT TO OK");
     
-    // CC
+    // CC - soporta múltiples emails separados por ;
     if (cc && wcslen(cc) > 0) {
-        char ccAddr[256];
-        WideCharToMultiByte(CP_UTF8, 0, cc, -1, ccAddr, 256, NULL, NULL);
-        sprintf_s(rcptTo, sizeof(rcptTo), "RCPT TO:<%s>\r\n", ccAddr);
-        SmtpCommand(&ctx, rcptTo, response, sizeof(response), 250);
+        char ccAddr[2048];
+        WideCharToMultiByte(CP_UTF8, 0, cc, -1, ccAddr, 2048, NULL, NULL);
+        
+        char* ccContext = NULL;
+        char* ccToken = strtok_s(ccAddr, ";", &ccContext);
+        while (ccToken) {
+            while (*ccToken == ' ' || *ccToken == '\t') ccToken++;
+            size_t ccLen = strlen(ccToken);
+            while (ccLen > 0 && (ccToken[ccLen-1] == ' ' || ccToken[ccLen-1] == '\t')) {
+                ccToken[--ccLen] = '\0';
+            }
+            if (strlen(ccToken) > 0 && strchr(ccToken, '@') != NULL) {
+                sprintf_s(rcptTo, sizeof(rcptTo), "RCPT TO:<%s>\r\n", ccToken);
+                SmtpCommand(&ctx, rcptTo, response, sizeof(response), 250);
+            }
+            ccToken = strtok_s(NULL, ";", &ccContext);
+        }
     }
     
-    // BCC
+    // BCC - soporta múltiples emails separados por ;
     if (bcc && wcslen(bcc) > 0) {
-        char bccAddr[256];
-        WideCharToMultiByte(CP_UTF8, 0, bcc, -1, bccAddr, 256, NULL, NULL);
-        sprintf_s(rcptTo, sizeof(rcptTo), "RCPT TO:<%s>\r\n", bccAddr);
-        SmtpCommand(&ctx, rcptTo, response, sizeof(response), 250);
+        char bccAddr[2048];
+        WideCharToMultiByte(CP_UTF8, 0, bcc, -1, bccAddr, 2048, NULL, NULL);
+        
+        char* bccContext = NULL;
+        char* bccToken = strtok_s(bccAddr, ";", &bccContext);
+        while (bccToken) {
+            while (*bccToken == ' ' || *bccToken == '\t') bccToken++;
+            size_t bccLen = strlen(bccToken);
+            while (bccLen > 0 && (bccToken[bccLen-1] == ' ' || bccToken[bccLen-1] == '\t')) {
+                bccToken[--bccLen] = '\0';
+            }
+            if (strlen(bccToken) > 0 && strchr(bccToken, '@') != NULL) {
+                sprintf_s(rcptTo, sizeof(rcptTo), "RCPT TO:<%s>\r\n", bccToken);
+                SmtpCommand(&ctx, rcptTo, response, sizeof(response), 250);
+            }
+            bccToken = strtok_s(NULL, ";", &bccContext);
+        }
     }
     
     // DATA
