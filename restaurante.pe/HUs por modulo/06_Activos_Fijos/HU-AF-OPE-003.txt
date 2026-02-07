@@ -1,0 +1,203 @@
+﻿HU-AF-OPE-003 - Workflow de Autorización para Traslados Pendientes - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Operaciones
+3. Subproceso
+Aprobación de Traslados
+4. Nombre de la Historia de Usuario
+Workflow de Autorización para Traslados Pendientes
+5. Descripción / Propósito
+Como Supervisor o Administrador Contable de Activos Fijos, quiero revisar, aprobar o rechazar solicitudes de traslado de activos fijos, para controlar de forma centralizada el flujo de aprobación, validar los traslados pendientes y asegurar que cada movimiento cuente con autorización formal, garantizando la trazabilidad y cumplimiento de los controles internos en el sistema Restaurant.pe.
+6. Alcance
+La funcionalidad permite a los usuarios con perfil autorizado acceder a una interfaz de workflow de aprobación, que muestra todas las solicitudes de traslado en estado “Pendiente” o “En Revisión”, provenientes del proceso de Gestión de Movimientos Físicos de Activos (HU-AF-OPE-002).
+Desde esta vista, los usuarios podrán:
+* Filtrar solicitudes por fecha, origen, destino, responsable o tipo de traslado.
+
+* Aprobar o rechazar solicitudes de forma individual o masiva.
+
+* Registrar comentarios u observaciones sobre la decisión tomada.
+
+* Generar notificaciones automáticas al solicitante y responsable del activo.
+
+* Mantener un registro histórico de aprobaciones y rechazos.
+
+El workflow se ajusta a la estructura jerárquica definida por razón social y país, y los permisos se basan en los roles configurados en el sistema.
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Operaciones → Aprobación de Traslados → Workflow de Autorización
+8. Campos del Formulario / Interfaz
+Filtros de Búsqueda
+Campo
+	Descripción
+	Fecha de Solicitud (Desde/Hasta)
+	Permite filtrar por rango de fechas.
+	Origen
+	Ubicación o centro de costo de origen del activo.
+	Destino
+	Ubicación o centro de costo de destino.
+	Responsable del Activo
+	Usuario responsable actual.
+	Solicitante
+	Usuario que registró la solicitud.
+	Estado
+	Pendiente / En Revisión / Aprobado / Rechazado.
+	Listado de Solicitudes
+Campo
+	Descripción
+	N° Documento de Traslado
+	Número generado automáticamente (HU-AF-TAB-008).
+	Fecha de Solicitud
+	Fecha en la que se creó la solicitud.
+	Activo(s) Asociado(s)
+	Código(s) del activo involucrado.
+	Origen
+	Ubicación inicial del activo.
+	Destino
+	Ubicación propuesta.
+	Motivo del Traslado
+	Justificación registrada.
+	Solicitante
+	Usuario que inició la solicitud.
+	Estado Actual
+	Muestra el estado de la solicitud.
+	Selección
+	Casilla para aprobación o rechazo masivo.
+	Panel de Decisión (Modal / Popup)
+Campo
+	Descripción
+	Acción
+	Aprobación / Rechazo.
+	Comentarios del Aprobador
+	Campo obligatorio al rechazar.
+	Fecha y Hora de Decisión
+	Automática.
+	Usuario Aprobador
+	Usuario en sesión.
+	9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Aprobar (Individual)
+	Aprueba una solicitud seleccionada.
+	Estado cambia a “Aprobado”, se notifica al solicitante.
+	Rechazar (Individual)
+	Rechaza la solicitud seleccionada.
+	Estado cambia a “Rechazado”, se guarda comentario.
+	Aprobar Masivo
+	Aprueba múltiples solicitudes filtradas.
+	Todas las seleccionadas pasan a “Aprobado”.
+	Rechazar Masivo
+	Rechaza múltiples solicitudes.
+	Estado cambia y se registra motivo común.
+	Ver Detalle
+	Visualiza los datos completos del traslado.
+	Muestra datos del activo, motivo y origen/destino.
+	Filtrar / Buscar
+	Permite localizar solicitudes específicas.
+	Actualiza la grilla de resultados.
+	Exportar
+	Exporta listado filtrado (Excel o PDF).
+	Incluye campos y estados.
+	10. Reglas de Negocio
+   1. Solo usuarios con rol “Aprobador de Traslados” o “Administrador de Activos” pueden autorizar movimientos.
+
+   2. No se permite aprobar traslados cuyo origen o destino estén inactivos.
+
+   3. Toda acción de aprobación o rechazo debe registrarse en el Log de Auditoría Contable (usuario, fecha, hora, decisión, comentario).
+
+   4. Las solicitudes aprobadas se integran automáticamente con la HU HU-AF-OPE-002 (Gestión de Movimientos Físicos) para su ejecución.
+
+   5. El sistema debe impedir decisiones duplicadas sobre la misma solicitud (bloqueo de concurrencia).
+
+   6. Las aprobaciones masivas solo son válidas si todas las solicitudes seleccionadas pertenecen al mismo periodo contable.
+
+   7. Los comentarios son obligatorios para rechazos y opcionales para aprobaciones.
+
+   8. Al aprobar una solicitud, el sistema debe generar una notificación automática al solicitante y responsable de la ubicación destino.
+
+   9. Las solicitudes rechazadas deben permanecer visibles en el historial, con su motivo registrado.
+
+   10. El sistema debe permitir reaprobar solicitudes corregidas, conservando el registro original.
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Gestión de Movimientos Físicos (HU-AF-OPE-002)
+	Recibe las aprobaciones para ejecutar traslados.
+	Numeradores de Traslados (HU-AF-TAB-008)
+	Asocia numeración del documento de traslado aprobado.
+	Ubicaciones Físicas (HU-AF-TAB-005)
+	Valida ubicaciones origen/destino.
+	Notificaciones del Sistema
+	Envía correos o alertas internas a los usuarios involucrados.
+	Log de Auditoría Contable
+	Registra las decisiones de aprobación/rechazo.
+	Configuración Global (HU-AF-TAB-006)
+	Determina niveles jerárquicos de autorización y flujos automáticos.
+	12. Consideraciones Técnicas
+      * Desarrollado en interfaz web responsiva, con vistas de tabla y modales de decisión.
+
+      * Implementación mediante servicios RESTful para:
+
+         * Consulta de solicitudes pendientes.
+
+         * Aprobación/Rechazo (individual o masivo).
+
+         * Registro automático en logs y envío de notificaciones.
+
+            * Tablas involucradas:
+
+               * AF_MOV_TRASLADOS (estado de traslado).
+
+               * AF_HIS_APROBACIONES (historial de decisiones).
+
+                  * Envío de notificaciones automáticas vía correo o sistema interno.
+
+                  * Soporte para exportación masiva de solicitudes.
+
+                  * Control de concurrencia y roles en tiempo real.
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Autenticación por roles; acceso exclusivo para aprobadores designados.
+	Performance
+	Aprobaciones masivas procesadas en ≤ 3 segundos por lote.
+	Usabilidad
+	Interfaz intuitiva con colores por estado y filtros dinámicos.
+	Disponibilidad
+	99.5% durante horario operativo.
+	Auditoría
+	Registro detallado de decisiones con trazabilidad de usuario.
+	Escalabilidad
+	Capacidad para manejar más de 10.000 solicitudes mensuales.
+	14. Criterios de Aceptación
+                     1. El usuario puede filtrar solicitudes por fecha, origen o responsable.
+
+                     2. Se permite aprobar o rechazar solicitudes de forma individual o masiva.
+
+                     3. El sistema exige comentarios obligatorios para rechazos.
+
+                     4. Las solicitudes aprobadas cambian de estado y generan notificación.
+
+                     5. Las acciones quedan registradas correctamente en el Log Contable.
+
+                     6. La interfaz refleja cambios de estado en tiempo real.
+
+                     7. El proceso de aprobación masiva no supera los 3 segundos por lote.
+
+                     8. El reporte exportado incluye comentarios y estados actualizados.
+15. Comentarios / Observaciones
+                        * Esta HU constituye el componente de control y supervisión del proceso de traslados, complementando la HU HU-AF-OPE-002 (Gestión de Movimientos Físicos de Activos).
+
+                        * Permite garantizar la validación previa a todo movimiento físico, reduciendo riesgos de extravío o traslado no autorizado.
+
+                        * Debe incorporar alertas visuales (colores o íconos) que identifiquen solicitudes con demora o pendientes de revisión.
+
+                        * Se recomienda habilitar una opción de “recordatorio automático” para solicitudes con más de X días sin resolución.
+
+                        * El flujo de aprobación debe ser configurable por nivel jerárquico, tipo de activo o monto del valor contable.
+
+                        * Esta funcionalidad consolida el cumplimiento de las políticas internas de control de activos, auditoría y segregación de funciones.

@@ -1,0 +1,229 @@
+﻿HU-AF-TAB-003-Estructura Jerárquica para Categorización de Activos - v1.1 
+
+
+1. Módulo
+Activos Fijos
+2. Proceso
+Tablas
+3. Subproceso
+Clasificación de Activos (Clases y Subclases)
+4. Nombre de la Historia de Usuario
+Estructura Jerárquica para Categorización de Activos
+5. Descripción / Propósito
+Como Administrador Contable de Activos Fijos, quiero definir y mantener una estructura jerárquica de clasificación de activos en dos niveles (Clase y Subclase), para establecer una taxonomía contable y operativa uniforme que determine las cuentas contables, parámetros de depreciación, y políticas de gestión diferenciadas según el tipo de activo, con el fin de garantizar la consistencia en la contabilización, reportería y control patrimonial del sistema Restaurant.pe.
+6. Alcance
+Esta funcionalidad permitirá configurar la estructura jerárquica de clasificación de activos, compuesta por Clases (nivel 1) y Subclases (nivel 2).
+Cada subclase estará asociada a una cuenta contable, parámetros de depreciación y políticas de control, asegurando la correcta integración con los módulos contables y financieros.
+El catálogo será multipaís y multi-razón social, permitiendo adaptar la estructura contable a las normativas locales (por ejemplo, PCGE en Perú, PUC en Colombia, NICSP en otros países).
+La información registrada será utilizada por los procesos de alta, depreciación, baja, pólizas y reportes contables de activos fijos.
+
+
+7. Navegabilidad
+Ruta de acceso:
+Activos Fijos → Tablas → Clasificación de Activos → Estructura Jerárquica (Clases y Subclases)
+8. Campos del Formulario
+Campos para Nivel 1 – CLASE DE ACTIVO
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Código de Clase
+	Alfanumérico (6)
+	Identificador único de la clase.
+	No duplicado. Campo obligatorio.
+	Nombre de Clase
+	Texto (100)
+	Denominación contable principal del activo.
+	Campo obligatorio. No duplicado.
+	Descripción
+	Texto largo
+	Detalle funcional y contable de la clase.
+	Campo obligatorio.
+	Cuenta Contable Principal
+	Numérico (12)
+	Código de cuenta contable del activo (según plan contable local).
+	Validación con catálogo contable activo.
+	Método de Depreciación
+	Lista
+	Lineal / Suma de Dígitos / Otro.
+	Obligatorio.
+	Tasa de Depreciación Anual (%)
+	Numérico (5,2)
+	Porcentaje anual de depreciación.
+	Rango válido 0–100.
+	Vida Útil Estándar (Años)
+	Numérico (3)
+	Años de vida útil promedio de la clase.
+	Mayor a 0.
+	Estado
+	Lista
+	Activo / Inactivo.
+	Por defecto “Activo”.
+	
+
+
+
+
+
+Campos para Nivel 2 – SUBCLASE DE ACTIVO
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Código de Subclase
+	Alfanumérico (8)
+	Identificador único dentro de la clase.
+	No duplicado por clase.
+	Nombre de Subclase
+	Texto (100)
+	Descripción específica del activo dentro de la clase.
+	Obligatorio.
+	Descripción
+	Texto largo
+	Detalle adicional de la subclase.
+	—
+	Cuenta Contable Asociada
+	Numérico (12)
+	Cuenta contable específica de la subclase.
+	Validación con catálogo contable activo.
+	Porcentaje de Depreciación
+	Numérico (5,2)
+	Porcentaje particular para la subclase.
+	Si no se indica, hereda la tasa de la clase.
+	Vida Útil Específica (Años)
+	Numérico (3)
+	Vida útil particular para la subclase.
+	Opcional.
+	Estado
+	Lista
+	Activo / Inactivo.
+	Por defecto “Activo”.
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo (Clase/Subclase)
+	Permite crear una nueva clase o subclase de activo.
+	Registro guardado en el catálogo jerárquico.
+	Editar
+	Modifica datos descriptivos o parámetros contables.
+	Cambios reflejados en la jerarquía y log contable.
+	Consultar
+	Muestra información completa sin permitir edición.
+	—
+	Desactivar
+	Cambia el estado de la clase o subclase a Inactivo.
+	No puede usarse en nuevos activos.
+	Buscar / Filtrar
+	Búsqueda por código, nombre o cuenta contable.
+	Lista filtrada con jerarquía visual.
+	Exportar
+	Exporta el catálogo jerárquico a Excel o PDF.
+	Incluye clases, subclases y parámetros.
+	
+
+10. Reglas de Negocio
+1. Toda Subclase debe pertenecer obligatoriamente a una Clase activa.
+
+2. No se permite eliminar registros, únicamente desactivar, preservando la trazabilidad.
+
+3. No pueden existir códigos o nombres duplicados dentro de la misma Razón Social.
+
+4. Una Clase Inactiva desactiva automáticamente todas sus subclases.
+
+5. Si una Clase o Subclase tiene activos registrados, no podrá modificarse su tasa de depreciación sin autorización del perfil “Administrador Contable”.
+
+6. Cada Clase/Subclase debe tener asociada al menos una Cuenta Contable válida del catálogo del país correspondiente.
+
+7. El método y tasa de depreciación definidos servirán como parámetros base para el cálculo automático de la depreciación mensual.
+
+8. Toda creación, modificación o desactivación se registrará en el Log de Auditoría Contable (usuario, fecha, hora, acción).
+
+9. Las estructuras jerárquicas serán utilizadas por los reportes financieros, balances y estados de resultados.
+
+10. Se debe permitir importar y actualizar masivamente las estructuras mediante archivo Excel validado.
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Módulo de Activos Fijos (Altas, Bajas y Depreciación)
+	Utiliza la estructura jerárquica para clasificar y contabilizar activos.
+	Módulo Contable General
+	Asocia las cuentas contables para asientos automáticos.
+	Módulo de Reportes Financieros
+	Usa la jerarquía para consolidación y análisis de activos.
+	Catálogo de Cuentas Contables
+	Fuente de validación de las cuentas asociadas.
+	Log de Auditoría Contable
+	Registro de todas las operaciones realizadas sobre clases y subclases.
+	
+
+12. Consideraciones Técnicas
+   * Implementación mediante servicio RESTful con estructura jerárquica (JSON anidado).
+
+   * Tablas sugeridas:
+
+      * AF_MA_CLASE_ACTIVO
+
+      * AF_MA_SUBCLASE_ACTIVO
+
+         * Integración bidireccional con tablas contables (CO_MA_CUENTAS_CONTABLES).
+
+         * Debe soportar importación/exportación masiva en formato Excel.
+
+         * Interfaz con visualización jerárquica tipo árbol (Tree View).
+
+         * Validaciones de depreciación y cuentas en tiempo real.
+
+         * Registro automático en el Log de Auditoría Contable.
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles con permisos de mantenimiento de tablas de activos.
+	Performance
+	Tiempo de respuesta ≤ 3 segundos en consultas jerárquicas.
+	Usabilidad
+	Visualización jerárquica (clase/subclase) con colapsado/expandido.
+	Auditoría
+	Registro automático de todas las operaciones.
+	Disponibilidad
+	99.5% durante el horario operativo.
+	Escalabilidad
+	Soporte para más de 10.000 registros jerárquicos por país.
+	
+
+14. Criterios de Aceptación
+            1. El usuario puede crear una nueva Clase de activo con todos los campos obligatorios.
+
+            2. El sistema permite agregar una o más subclases asociadas a una Clase activa.
+
+            3. Se valida la unicidad de códigos y nombres de clase/subclase.
+
+            4. Al desactivar una Clase, las Subclases asociadas pasan automáticamente a inactivas.
+
+            5. No se pueden modificar parámetros contables si existen activos asignados a la clase/subclase.
+
+            6. Los cambios quedan registrados en el Log Contable.
+
+            7. Los datos son visibles y exportables a Excel y PDF.
+
+            8. El tiempo de respuesta de las consultas no supera los 3 segundos.
+
+            9. La jerarquía se muestra correctamente en la vista tipo árbol.
+
+________________
+
+
+15. Comentarios / Observaciones
+               * Esta HU constituye la base estructural del módulo de Activos Fijos, siendo esencial para la correcta clasificación, depreciación y contabilización de los activos.
+
+               * La definición de clases y subclases permitirá configurar políticas de depreciación diferenciadas por tipo de bien, alineadas con las Normas Internacionales de Contabilidad (NIC 16) y los planes contables locales de cada país.
+
+               * Debe asegurarse que los cambios en la estructura jerárquica se reflejen automáticamente en los reportes contables y de gestión.
+
+               * Se recomienda definir un control de versiones para el catálogo de clases y subclases, a fin de garantizar trazabilidad histórica.

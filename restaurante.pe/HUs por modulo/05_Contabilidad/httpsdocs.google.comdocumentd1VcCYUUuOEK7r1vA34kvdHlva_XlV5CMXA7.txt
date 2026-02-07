@@ -1,0 +1,269 @@
+﻿HU-CON-023 - Reportes de Validación / Estado de Cambios en el Patrimonio Neto - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-023
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Reportes de Validación
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Estado de Cambios en el Patrimonio Neto
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la generación del reporte de Estado de Cambios en el Patrimonio Neto, mostrando las variaciones en las cuentas patrimoniales (capital social, resultados acumulados, reservas, utilidades del ejercicio, aportes y otros componentes del patrimonio) durante un periodo contable determinado.
+El reporte debe obtener la información de los asientos contables validados y cerrados, y reflejar las operaciones que impactan directamente en el patrimonio neto, como resultados del ejercicio, distribución de utilidades, aportes de socios, ajustes por revaluación, dividendos, reservas legales, entre otros.
+El sistema debe permitir comparar periodos (por ejemplo, año actual vs año anterior) y ofrecer exportación a formatos Excel (.xlsx) y PDF (.pdf), manteniendo la estructura contable jerárquica, subtotales y totales de las variaciones patrimoniales.
+________________
+
+
+3. Actor(es)
+   * Contador General: Genera el reporte oficial para cierres anuales.
+
+   * Jefe de Contabilidad: Supervisa la consistencia y validación de las variaciones patrimoniales.
+
+   * Gerente Financiero: Evalúa los movimientos de capital y reservas.
+
+   * Auditor Interno o Externo: Verifica la coherencia de los cambios en el patrimonio neto.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos para acceder a Contabilidad → Reportes → Estado de Cambios en el Patrimonio Neto.
+
+      * Deben existir asientos contables cerrados y validados correspondientes al periodo seleccionado.
+
+      * Las cuentas contables deben estar clasificadas en la categoría Patrimonio Neto.
+
+      * El periodo contable debe estar correctamente definido en el sistema.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Estado de Cambios en el Patrimonio Neto
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar el reporte de Estado de Cambios en el Patrimonio Neto,
+para visualizar las variaciones en las cuentas patrimoniales y analizar los movimientos del capital, reservas y resultados acumulados durante un periodo contable.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable o rango de fechas.
+	El sistema muestra las variaciones del patrimonio en el periodo seleccionado.
+	2
+	Mostrar las cuentas agrupadas por tipo patrimonial (Capital, Reservas, Resultados, Aportes, etc.).
+	Estructura jerárquica según plan contable.
+	3
+	Calcular automáticamente las variaciones entre periodos (saldo inicial, movimientos y saldo final).
+	Muestra el cambio total del patrimonio neto.
+	4
+	
+
+	
+
+	5
+	Mostrar el saldo inicial y final de cada cuenta patrimonial.
+	Estructura clara y conciliada.
+	6
+	Permitir exportar el reporte en formatos Excel (.xlsx) y PDF (.pdf).
+	Archivos generados correctamente con estructura jerárquica. Agregar Botón de Exportar.
+	7
+	Registrar en bitácora contable la generación del reporte (usuario, fecha, filtros).
+	Registro automático en auditoría.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Reporte jerárquico agrupado por tipo de cuenta patrimonial.
+Naturaleza: Reporte contable de validación (solo lectura).
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Define el periodo del reporte.
+	Fecha Desde / Hasta
+	Fecha
+	No
+	Rango de fechas opcional.
+	Comparar con Periodo
+	Lista
+	No
+	Permite comparar con otro periodo contable.
+	Moneda
+	Lista
+	No
+	Moneda de presentación (local o extranjera).
+	Nivel de Detalle
+	Lista
+	No
+	Nivel del plan contable (1 a 5).
+	Incluir Cuentas sin Movimiento
+	Checkbox
+	No
+	Incluye o excluye cuentas sin cambios.
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Código de Cuenta
+	Código del plan contable.
+	Descripción de Cuenta
+	Nombre de la cuenta patrimonial.
+	Tipo Patrimonial
+	Capital, Reservas, Resultados, Aportes, etc.
+	Saldo Inicial
+	Saldo de apertura del periodo.
+	Aumentos
+	Movimientos positivos registrados.
+	Disminuciones
+	Movimientos negativos registrados.
+	Saldo Final
+	Resultado neto de las variaciones.
+	Variación Neta
+	Diferencia entre saldo inicial y final.
+	Moneda
+	Local / Extranjera.
+	8.3 Totales y Subtotales
+         * Total Capital Social
+         * Total Capital Adicional
+         * Total Reservas
+         * Total Resultados del Ejercicio
+         * Total Resultados Acumulados
+         * Total Ajustes al Patrimonio
+         * Variación Total del Patrimonio Neto
+
+________________
+
+
+
+
+
+
+
+
+9. Reglas de Negocio
+            1. Clasificación patrimonial: Las cuentas deben estar correctamente clasificadas como parte del patrimonio neto.
+
+            2. Integridad contable: Los movimientos se obtienen exclusivamente de asientos contabilizados y cerrados.
+
+            3. Comparativo: Permitir comparar variaciones entre periodos consecutivos o específicos.
+
+            4. Validación de saldos: El saldo final del periodo anterior debe ser igual al saldo inicial del periodo actual.
+
+            5. Conversión de moneda: Aplicar tipo de cambio promedio del periodo cuando corresponda.
+
+            6. Auditoría: Registrar cada ejecución del reporte en la bitácora LOG_REPORTE_PATRIMONIO.
+
+            7. Jerarquía contable: El reporte debe respetar la estructura del plan contable (niveles y subcuentas).
+
+            8. Cierre contable: Solo se consideran periodos con cierre contable confirmado.
+
+________________
+
+
+10. Integraciones
+               * Módulo de Contabilidad General: Fuente principal de asientos y saldos.
+
+               * Módulo de Plan de Cuentas: Clasificación de las cuentas patrimoniales.
+
+               * Módulo de Monedas y Tipo de Cambio: Conversión de saldos para reportes en moneda extranjera.
+
+               * Módulo de Auditoría: Registro de acciones de generación de reportes.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Tipo de Componente: Reporte contable estructurado (solo lectura).
+
+                  * Tablas Fuente:
+
+                     * CNTBL_ASIENTO (cabecera de asientos contables).
+
+                     * CNTBL_ASIENTO_DET (detalle de movimientos).
+
+                     * CNTBL_CUENTA_CONTABLE (plan contable con tipo patrimonial).
+
+                     * CNTBL_TIPO_CAMBIO (valores de conversión monetaria).
+
+Consulta Base (referencial):
+
+ SELECT 
+    c.cnta_ctbl,
+    c.desc_cta,
+    c.tipo_patrimonio,
+    NVL(SUM(d.debe - d.haber), 0) AS variacion,
+    NVL(SUM(d.saldo_inicial), 0) AS saldo_inicial,
+    NVL(SUM(d.saldo_final), 0) AS saldo_final
+FROM cntbl_asiento_det d
+JOIN cntbl_cuenta_contable c ON d.cnta_ctbl = c.cnta_ctbl
+WHERE d.fecha_cntbl BETWEEN :fecha_inicio AND :fecha_fin
+  AND c.tipo_patrimonio IS NOT NULL
+GROUP BY c.cnta_ctbl, c.desc_cta, c.tipo_patrimonio
+ORDER BY c.tipo_patrimonio, c.cnta_ctbl;
+                        *                         * Exportaciones: .xlsx y .pdf
+
+                        * Bitácora: LOG_REPORTE_PATRIMONIO (usuario, fecha, filtros aplicados, totales).
+
+                        * Performance: Indexar campos CNTA_CTBL, FECHA_CNTBL, TIPO_PATRIMONIO.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Reportes → Estado de Cambios en el Patrimonio Neto.
+
+                           2. Selecciona el periodo contable o rango de fechas.
+
+                           3. Define filtros adicionales (moneda, nivel de detalle, periodo comparativo).
+
+                           4. Presiona “Generar Reporte”.
+
+                           5. El sistema procesa los movimientos contables clasificados como patrimonio neto.
+
+                           6. Se muestran los resultados con saldos iniciales, aumentos, disminuciones y saldo final.
+
+                           7. El usuario puede exportar el reporte en Excel o PDF.
+
+                           8. El sistema registra la ejecución en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un periodo contable o rango de fechas.”
+
+                              * “No existen movimientos patrimoniales registrados en el periodo seleccionado.”
+
+                              * “El saldo final no coincide con el saldo inicial del periodo siguiente.”
+
+                              * “Reporte generado correctamente.”
+
+                              * “Error al procesar el reporte. Contacte al administrador del sistema.”

@@ -1,0 +1,112 @@
+﻿HU-FIN-OP-CP-002 - Reprogramación del Vencimiento del Documento por Pagar y Aplicación de Canje CxC vs CxP - v1.0
+1. Título
+ Reprogramación del Vencimiento del Documento por Pagar y Aplicación de Canje CxC vs CxP
+2. Descripción
+ Como usuario del sistema contable de Restaurant.pe, quiero poder reprogramar la fecha o pasar a cuotas de vencimiento un documento por pagar y/o aplicar un canje entre cuentas por cobrar (CxC) y cuentas por pagar (CxP) de un mismo tercero, para mantener actualizados los plazos de pago, reflejar compensaciones financieras y asegurar la integridad contable en las operaciones con proveedores y clientes vinculados.
+3. Proceso
+ Proceso: Operaciones
+Subproceso: Cuentas por Pagar
+Módulo: Finanzas
+4. Narrativa de Usuario
+ Quiero: Reprogramar vencimientos de facturas por pagar y registrar canjes entre CxC y CxP cuando un mismo tercero sea proveedor y cliente.
+Para: Gestionar adecuadamente los plazos de pago, registrar compensaciones y mantener actualizados los saldos contables.
+De manera que: Se refleje una contabilidad coherente, se reduzcan riesgos de pagos duplicados y se optimicen los flujos financieros de la empresa.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Finanzas > Operaciones > Cuentas por Pagar > Reprogramación y Canje CxC vs CxP
+6. Criterios de Aceptación
+ El sistema debe permitir reprogramar la fecha de vencimiento de facturas por pagar seleccionadas que se encuentren en estado “Aprobada” o “Pendiente de Pago”.
+Al ejecutar la reprogramación, el usuario deberá registrar la nueva fecha de vencimiento, el motivo de la modificación y el documento de sustento (por ejemplo, acuerdo o correo autorizado).
+Toda reprogramación debe registrarse en el log de auditoría contable indicando: Usuario, Fecha, Hora, Acción, IP, Documento, Fecha Anterior y Nueva Fecha.
+El sistema debe permitir aplicar un canje entre CxC y CxP cuando un tercero (cliente/proveedor) tenga documentos pendientes en ambos módulos, siempre que la moneda y la razón social sean las mismas.
+Debe verificarse que los montos coincidan total o parcialmente. En caso de canje parcial, el sistema debe ajustar los saldos pendientes en ambos documentos.
+El canje debe generar automáticamente los asientos contables:
+* Débito: Cuentas por Pagar
+
+* Crédito: Cuentas por Cobrar
+
+Una vez aplicado el canje, los documentos involucrados deben quedar con estado “Compensado” y no podrán ser modificados ni eliminados.
+El sistema debe permitir visualizar el historial de reprogramaciones y canjes asociados a cada proveedor o cliente.
+Solo se mostrarán los datos correspondientes a la Razón Social y País activos en la sesión del usuario (campos de solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+ Campos principales:
+
+   * Tipo de Documento
+
+   * N° de Documento
+
+   * Proveedor 
+
+   * Fecha de Emisión
+
+   * Fecha de Vencimiento Actual
+
+   * Nueva Fecha de Vencimiento
+
+   * Motivo de Reprogramación
+
+   * Documento de Sustento (opcional, adjunto PDF o imagen)
+
+   * Monto Original
+
+   * Monto Pendiente
+
+   * Moneda
+
+   * Estado del Documento (Pendiente, Aprobado, Compensado, Anulado)
+
+   * Usuario de Registro
+
+   * Fecha y Hora de Modificación
+
+Campos adicionales para Canje CxC vs CxP:
+      * Tipo de Operación (Canje Total / Parcial)
+
+      * Documento CxC Asociado
+
+      * Monto Aplicado
+
+      * Saldo Remanente CxC
+
+      * Saldo Remanente CxP
+
+      * Fecha de Canje
+
+Filtros disponibles:
+         * Proveedor / Cliente
+
+         * Tipo de Documento
+
+         * Estado del Documento
+
+         * Rango de Fechas (Emisión/vencimiento)
+
+         * Moneda
+
+         * Sucursal
+
+Acciones disponibles:
+            * Reprogramar Vencimiento
+
+            * Aplicar Canje CxC vs CxP
+
+            * Ver Historial de Reprogramaciones
+
+            * Exportar (Excel / PDF)
+
+8. Detalle de Integración (opcional)
+ Integración con Cuentas por Cobrar: Permite identificar los documentos pendientes del mismo tercero para aplicar el canje.
+Integración con Contabilidad: Genera automáticamente los asientos contables por reprogramación o compensación.
+Integración con Tesorería: Actualiza el calendario de pagos según las nuevas fechas de vencimiento o canjes aplicados.
+Integración con Reportes Financieros: Refleja los ajustes de vencimientos y compensaciones en los reportes de flujo de efectivo y antigüedad de saldos.
+9. Consideraciones Técnicas
+ El sistema debe validar que solo los usuarios con rol Analista Financiero o Supervisor Financiero puedan ejecutar reprogramaciones y canjes.
+Debe garantizar que las transacciones de canje sean irreversibles una vez confirmadas.
+Los cambios deben registrarse en el log de auditoría contable con los siguientes datos: Usuario, Fecha, Hora, IP, Acción, Documentos Afectados y Valores Anteriores/Nuevos.
+El sistema debe evitar canjes entre documentos con monedas diferentes o de razones sociales distintas.
+Las operaciones deben cumplir con las normas NIC 1, NIC 32 y NIC 37 relacionadas con presentación y compensación de activos y pasivos financieros.
+Los documentos resultantes del canje deben conservar trazabilidad bidireccional (link entre CxC y CxP involucrados).
+10. Comentarios
+ Esta funcionalidad permite mayor flexibilidad y control financiero al manejar obligaciones y derechos con un mismo tercero, evitando pagos innecesarios o duplicados.
+Favorece una gestión contable más precisa y eficiente, optimizando el flujo de caja y la conciliación de cuentas.
+Se recomienda habilitar alertas automáticas cuando existan saldos compensables entre CxC y CxP.
+En entornos multipaís, las validaciones de moneda y plan contable deben ajustarse al país y razón social activa.

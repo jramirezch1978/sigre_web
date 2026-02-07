@@ -1,0 +1,138 @@
+﻿Historia de Usuario
+Código HU: HU-VEN-OPR-FAC-001 – Facturación de Regalías – v1.1
+Módulo: Ventas
+Proceso: Operaciones
+Subproceso: Facturación
+Título
+Facturación de Regalías por porcentaje establecido a franquicias
+Descripción
+Como Franquiciante
+Quiero emitir facturas de cobro por regalías a cada franquicia, en base a un porcentaje previamente establecido sobre sus ventas declaradas o registradas en el sistema
+ Para garantizar el cumplimiento contractual, la automatización en la liquidación de regalías y la integración contable y fiscal multipaís.
+Actores
+* Franquiciante (usuario emisor): Responsable de generar las facturas de las regalías.
+
+* Franquicia (cliente): Receptor de la factura y responsable del pago.
+
+* Sistema Contable Restaurant.pe: Encargado del cálculo automático, emisión de facturas y registro contable.
+
+* Entidades Tributarias Locales: SUNAT (Perú), DIAN (Colombia), SII (Chile), SAT (Centroamérica), etc., según el país de operación.
+
+Precondiciones
+   1. El porcentaje de regalías debe estar previamente configurado en el maestro de franquicias.
+
+   2. La franquicia debe tener ventas registradas y validadas en el periodo de facturación.
+
+   3. El sistema debe tener configurada la serie y numeración fiscal autorizada para facturación electrónica en el país de operación.
+
+   4. El usuario debe tener permisos de acceso al subproceso de facturación de regalías.
+
+Flujo de Navegación
+📌 Ventas > Operaciones > Facturación > Facturación de Regalías
+Campos en Formulario de Generación de Factura de Regalías
+Campo
+	Tipo
+	Obligatorio
+	Descripción / Validación
+	Franquicia
+	Selector desplegable
+	Sí
+	Selección de la franquicia a facturar
+	Periodo de Facturación
+	Mes/Año
+	Sí
+	Rango válido, no permitir duplicidad
+	Base de Cálculo
+	Automático / Configurable
+	Sí
+	Ventas brutas o netas según contrato
+	Porcentaje de Regalía
+	Automático (informativo)
+	Sí
+	Traído desde la configuración de la franquicia[a]
+	Moneda
+	Selector desplegable
+	Sí
+	Soles/Dólares/COP
+	Monto Base
+	Numérico (calculado)
+	Sí
+	Ventas declaradas/registradas en el periodo
+	Monto de Regalía
+	Numérico (calculado)
+	Sí
+	(Monto base x % Regalía)
+	Impuestos Aplicables
+	Automático
+	Sí
+	IVA/IGV/ITBIS según normativa fiscal
+	Total Factura
+	Numérico (calculado)
+	Sí
+	Regalía + impuestos
+	Observaciones
+	Texto libre
+	No
+	Campo para comentarios adicionales
+	Criterios de Aceptación
+      1. El sistema debe calcular automáticamente la regalía en base al porcentaje configurado y el monto de ventas.
+
+      2. No debe permitir generar facturas de regalía si no existen ventas registradas en el periodo seleccionado.
+
+      3. No debe permitir duplicidad de facturas para la misma franquicia en el mismo periodo.
+
+      4. La factura debe generarse en formatos PDF y XML (según normativa local) y quedar disponible para descarga y envío por correo electrónico.[b]
+
+      5. Toda acción de creación, modificación, anulación o envío debe registrarse en el log de auditoría (usuario, fecha, hora, acción).
+
+      6. La integración debe realizarse automáticamente con:
+
+         * Contabilidad: generación de asiento contable.
+
+         * Finanzas: registro en cuentas por cobrar.
+
+         * Reportes de Ventas: consolidado de regalías cobradas.
+
+Reglas de Negocio
+            * El porcentaje de regalías se define en el contrato con cada franquicia y se registra en el maestro de franquicias.
+
+            * El cálculo puede aplicarse sobre ventas netas o brutas, según la configuración establecida.
+
+            * Las facturas deben cumplir con la legislación tributaria del país de operación.
+
+            * En caso de anulación de una factura, debe generarse automáticamente una nota de crédito siguiendo la normativa fiscal correspondiente.
+
+Validaciones
+               * Validar que la serie y numeración de facturas esté vigente y autorizada.
+
+               * Validar que la franquicia tenga ventas registradas en el periodo seleccionado.
+
+               * Validar que exista un % de regalía configurado en el sistema.
+
+               * Validar que el monto de regalía no sea negativo ni cero.
+
+               * Validar que no existan facturas duplicadas para el mismo periodo y franquicia.
+
+Impacto Contable y Financiero
+El asiento contable generado automáticamente será:
+                  * Débito: Cuentas por cobrar – Franquicia
+
+                  * Crédito: Ingresos por Regalías
+
+                  * Crédito adicional: Impuesto por pagar (según país)
+
+Observaciones Técnicas
+                     * El sistema debe soportar multipaís y multimoneda.
+
+                     * La generación de facturas debe estar integrada con los servicios web de facturación electrónica de cada país.
+
+                     * Los reportes deben permitir filtrar por razón social, franquicia, período y país.
+
+                     * Debe integrarse con el módulo de Tesorería para conciliación de pagos.
+
+
+
+[a]@igarcia@restaurant.pe  indicar el código de la HU donde se brinda mayor detalle de la configuración de la franquicia.
+_Asignada a igarcia@restaurant.pe_
+[b]@igarcia@restaurant.pe brindar mayor detalle del envío por E-mail, el envío sería a demanda a través de una acción alterna o automático, si es automático, el E-mail será parte de la config. de la franquicia o donde se guardará el E-mail para el envío?
+_Asignada a igarcia@restaurant.pe_

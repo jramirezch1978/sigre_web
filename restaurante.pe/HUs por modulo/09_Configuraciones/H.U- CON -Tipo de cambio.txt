@@ -1,0 +1,194 @@
+﻿HU-CON-031 – Registro y Configuración del Tipo de Cambio Diario
+________________
+
+
+1.Identificación General
+Código HU: HU-CON-031
+Versión: 1.0
+Fecha de creación: 21/11/2025
+Módulo: Contabilidad
+Subproceso: Tablas
+Proceso: Contabilidad General
+Nombre de la Funcionalidad: Registro Diario del Tipo de Cambio
+Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+________________
+
+
+2. Descripción General
+El sistema debe permitir el registro, actualización y control diario del tipo de cambio de compra y venta, utilizado para la conversión de operaciones en moneda extranjera.
+El cliente debe ingresar cada día la tasa oficial vigente, y el sistema aplicará este valor automáticamente en documentos, asientos y procesos contables.
+Asimismo, el sistema debe mantener un historial completo y no editable de cada versión del tipo de cambio registrada, Solo se puede crear un nuevo tipo de cambio si no existe uno activo para la misma fecha y moneda.
+________________
+
+
+3. Actor(es)
+* Usuario Contable: Registra y actualiza el tipo de cambio.
+* Jefe de Contabilidad: Supervisa las actualizaciones y consulta el histórico.
+* Administrador del Sistema: Configura permisos y fuentes de tipo de cambio.
+________________
+
+
+4. Precondiciones
+* El usuario debe tener permisos de acceso a Contabilidad → Tablas → Tipo de cambio
+* Moneda local configurada.
+* Monedas extranjeras habilitadas (USD, EUR).
+* El periodo contable debe estar abierto y disponible para registrar movimientos 
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Tablas → Tipo de Cambio
+________________
+
+
+6. Historia de Usuario
+Como usuario contable, quiero registrar diariamente el tipo de cambio de compra y venta, para que todas las operaciones en moneda extranjera se conviertan correctamente y exista un historial confiable para auditoría.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir registrar el tipo de cambio de compra y venta por fecha
+	El sistema guarda el TC del día
+	2
+	Validar que no exista otro registro activo con la misma fecha y moneda.
+	Se bloquea registro duplicado
+	3
+	Permitir actualizar el tipo de cambio del día actual
+	Se genera un registro histórico
+	4
+	No permitir modificar TC de fechas cerradas
+	Mensaje de validación
+	5
+	Mostrar el historial completo del tipo de cambio
+	Tabla con todas las versiones
+	6
+	Registrar automáticamente usuario, fecha, hora y valores anteriores
+	Histórico inalterable
+	7
+	Aplicar el TC automáticamente en documentos contables
+	Conversión correcta
+	8
+	Integrar el TC con ajustes automáticos por diferencia de cambio
+	Ajustes usan la tasa registrada
+	________________
+
+
+8. Estructura del Proceso
+8.1. Pestaña: Datos Generales
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Fecha de registro
+	Fecha
+	Fecha exacta de creación del registro.
+	No editable. Se registra automáticamente.
+	Fecha/hora de vigencia
+	Fecha/Hora
+	Momento exacto al que corresponde la tasa registrada
+	Editable
+	Moneda
+	Texto
+	Moneda extranjera configurada (USD, EUR).
+	Obligatorio. Debe estar activa en parámetros. No puede repetirse por fecha.
+	TC Compra
+	Numérico (15,6)
+	Tasa de compra del día.
+	Obligatorio. Mayor a 0. Formato decimal válido.
+	TC Venta
+	Numérico (15,6)
+	Tasa de venta del día.
+	Obligatorio. Mayor a 0. Formato decimal válido.
+	Fuente
+	Lista (SUNAT/  Externa)
+	Origen de la información del tipo de cambio.
+	Obligatorio. 
+	Estado
+	Lista (Activo / Inactivo)
+	Indica si la tasa está habilitada para documentos contables.
+	Solo puede haber un TC activo por fecha/moneda. No puede inactivarse si ya fue usada.
+	Usuario Registro
+	Automático (CHAR / Usuario del Sistema)
+	Usuario que creó el registro del tipo de cambio.
+	No editable. Se registra automáticamente.
+	
+
+8.2. Vista de tipo de cambios registrados
+* Fecha de registro
+* Fecha/Hora vigencia
+* Moneda
+* TC Compra 
+* TC Venta 
+* Usuario
+* Estado (Activo/inactivo)
+________________
+
+
+9. Reglas de Negocio
+* Solo puede existir un tipo de cambio por fecha por moneda mientas este activa.
+* Las modificaciones generan nuevas versiones históricas, nunca sobrescriben.
+* El TC solo se puede modificar si el periodo está abierto.
+* Los documentos deben tomar el TC de su fecha contable.
+* Los ajustes automáticos por diferencia de cambio deben usar esta tasa.
+* Los documentos ya emitidos pueden recalcularse solo según reglas del sistema.
+* Registro automático en el Log Contable.
+________________
+
+
+10. Flujo Principal del Proceso
+1. Selección de la funcionalidad
+Usuario ingresa a:
+Contabilidad → Tablas → Tipo de Cambio
+2. Registro de un nuevo tipo de cambio
+El usuario hace clic en “Nuevo Registro” e ingresa:
+* Fecha
+* Moneda
+* TC Compra
+* TC Venta
+El sistema valida duplicados.
+3. Guardado del TC
+El sistema guarda el registro como versión 1 para esa fecha.
+4. Actualización del TC
+Si el usuario modifica el mismo día:
+* Se genera automáticamente una nueva versión (versión 2, 3, etc.)
+* Se guarda el valor anterior en el histórico
+* Se registra la acción en auditoría
+5. Consulta del Log
+El usuario puede ver el listado completo:
+* Versiones por fecha
+* Usuarios
+* Cambios realizados
+* Valores antiguos y nuevos
+6. Uso automático del TC
+El sistema aplica el TC:
+* En documentos contables
+* En facturas
+* En asientos manuales
+* En asientos automáticos por diferencia de cambio
+* En reportes contables y financieros
+________________
+
+
+11. Integraciones
+* Contabilidad: conversión de moneda, ajustes por TC
+* Tesorería: pagos y cobranzas en moneda extranjera
+* Compras/Ventas: cálculo automático en documentos
+* Auditoría: registro del histórico
+________________
+
+
+12. Mensajes de Validación
+* “Ya existe un tipo de cambio registrado para esta fecha.”
+* “Debe ingresar la tasa de cambio.”
+* “No puede modificar este registro: el periodo está cerrado.”
+* “Tipo de cambio registrado correctamente.”
+* “Actualización realizada. Se generó un nuevo registro histórico.”[a][b][c]
+
+
+[a]se va a poder editar una tasa de cambio registrada?
+[b]No, se puede eliminar pero luego de ser registrada no se debe editar
+[c]Se va a colocar un botón que permita editar o modificar el tipo de cambio, siempre que el periodo contable no se encuentre cerrado.

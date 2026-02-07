@@ -1,0 +1,288 @@
+﻿HU-CON-028 - Procesos / Importación de Asientos Contables - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-028
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Procesos
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Procesos / Importación de Asientos Contables
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la importación masiva de asientos contables desde un archivo externo (por ejemplo, formato Excel o CSV), con el fin de agilizar el registro de grandes volúmenes de información contable provenientes de otros sistemas o módulos operativos.
+El archivo de importación debe incluir información esencial como fecha contable, tipo de comprobante, número de documento, cuentas contables, descripción, montos en debe y haber, centro de costo, moneda y glosa general.
+El sistema deberá validar que cada asiento importado cumpla con la igualdad contable (Débito = Crédito), y que las cuentas contables y centros de costo existan y estén activos.
+Si se detectan errores o inconsistencias, estos deben mostrarse en un reporte de validación previo a la carga definitiva, indicando el motivo del rechazo.
+Una vez aprobada la importación, los asientos se registran automáticamente en la base de datos, quedando pendientes de contabilización o contabilizados según la configuración del proceso.
+________________
+
+
+3. Actor(es)
+   * Contador General: Ejecuta la importación y valida los asientos antes de su contabilización.
+
+   * Jefe de Contabilidad: Supervisa y aprueba las cargas contables masivas.
+
+   * Administrador del Sistema: Configura las plantillas y valida permisos para importación.
+
+   * Auditor Interno: Revisa los registros importados y su trazabilidad.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos para acceder a Contabilidad → Procesos → Importación de Asientos Contables.
+
+      * Debe existir una plantilla de importación predefinida con estructura validada.
+
+      * Las cuentas contables y centros de costo deben estar configurados y activos.
+
+      * El periodo contable debe estar abierto.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Procesos → Importación de Asientos Contables
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero importar asientos contables desde un archivo Excel,
+para agilizar el registro contable masivo de operaciones recurrentes, integraciones u otras fuentes externas, asegurando el balance entre débitos y créditos.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir la carga de un archivo Excel o CSV según una plantilla predefinida.
+	El sistema muestra vista previa de los datos.
+	2
+	Validar que todas las cuentas contables y centros de costo existan y estén activos.
+	Los registros inválidos se marcan con observaciones.
+	3
+	Verificar que Débito = Crédito por cada asiento importado.
+	No se permite importar asientos descuadrados.
+	4
+	Validar el periodo contable y la fecha de cada asiento.
+	Se alerta si el periodo está cerrado o inválido.
+	5
+	Permitir corregir y volver a cargar archivos con errores.
+	El sistema admite múltiples intentos de carga.
+	6
+	Generar reporte de validación previo a la importación definitiva.
+	Se puede exportar el reporte en Excel o PDF.
+	7
+	Registrar cada importación en la bitácora contable.
+	Guarda usuario, fecha, archivo y cantidad de registros.
+	8
+	Permitir definir si los asientos importados quedan Pendientes o Contabilizados.
+	Configurable según parámetro del proceso.
+	________________
+
+
+8. Estructura del Proceso
+Tipo: Proceso contable automatizado.
+Naturaleza: Importación masiva y validación de datos contables.
+8.1 Parámetros del Proceso
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Archivo de Importación
+	Archivo (Excel / CSV)
+	Sí
+	Archivo con la estructura predefinida.
+	Plantilla
+	Lista
+	Sí
+	Plantilla contable aprobada por el área.
+	Periodo Contable
+	Numérico
+	Sí
+	Periodo destino de los asientos importados.
+	Fecha de Importación
+	Fecha
+	Sí
+	Fecha del proceso de carga.
+	Estado Inicial
+	Lista
+	Sí
+	Pendiente / Contabilizado.
+	Observaciones
+	Texto
+	No
+	Comentario general sobre la importación.
+	8.2 Estructura del Archivo de Importación
+Campo
+	Descripción
+	Tipo
+	Obligatorio
+	Fecha Contable
+	Fecha del registro contable.
+	Fecha
+	Sí
+	Tipo de Comprobante
+	Código del comprobante.
+	Texto
+	Sí
+	N° Documento
+	Identificador de referencia.
+	Texto
+	No
+	Cuenta Contable
+	Código de la cuenta contable.
+	Texto
+	Sí
+	Descripción de Cuenta
+	Nombre de la cuenta contable.
+	Texto
+	Automático
+	Centro de Costo
+	Código del centro de costo.
+	Texto
+	No
+	Moneda
+	Código de la moneda (PEN/USD, etc.).
+	Texto
+	Sí
+	Débito
+	Importe en debe.
+	Numérico
+	Sí
+	Crédito
+	Importe en haber.
+	Numérico
+	Sí
+	Glosa / Descripción
+	Descripción o motivo de la transacción.
+	Texto
+	No
+	________________
+
+
+9. Reglas de Negocio
+         1. Estructura fija: Solo se aceptan archivos con el formato establecido en la plantilla oficial.
+
+         2. Integridad contable: Cada asiento importado debe cumplir con la igualdad ΣDébito = ΣCrédito.
+
+         3. Validación previa: Ningún asiento se carga sin pasar por la validación.
+
+         4. Errores críticos: Los registros con errores no se importan y deben corregirse.
+
+         5. Periodos abiertos: Solo se permiten importaciones en periodos contables abiertos.
+
+         6. Control de duplicidad: No se deben importar dos veces asientos con mismo código y fecha.
+
+         7. Bitácora obligatoria: Toda importación se registra con usuario, archivo y hora.
+
+         8. Seguridad: Solo usuarios con rol contable pueden ejecutar el proceso.
+
+________________
+
+
+10. Integraciones
+            * Módulo de Contabilidad General: Inserta los asientos importados en el Libro Diario.
+
+            * Módulo de Centros de Costo: Valida imputaciones de gasto o ingreso.
+
+            * Módulo de Plan de Cuentas: Verifica la existencia y estado de las cuentas contables.
+
+            * Módulo de Auditoría: Registra la trazabilidad de la importación.
+
+            * Módulo de Monedas: Determina el tipo de cambio si aplica.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tipo de Componente: Proceso contable automatizado con validación de estructura.
+
+               * Tablas Involucradas:
+
+                  * CNTBL_ASIENTO_TMP (asientos importados temporalmente).
+
+                  * CNTBL_ASIENTO (cabecera definitiva).
+
+                  * CNTBL_ASIENTO_DET (detalle contable).
+
+                  * LOG_IMPORTACION_ASIENTOS (registro de importaciones).
+
+                     * Formatos Aceptados: .xlsx, .csv.
+
+                     * Exportaciones: .xlsx, .pdf (reporte de errores o resultado).
+
+                     * Validaciones automáticas:
+
+                        * Estructura de columnas.
+
+                        * Formato de fecha.
+
+                        * Existencia de cuentas.
+
+                        * Igualdad de débitos y créditos.
+
+Consulta referencial (detección de asientos descuadrados):
+SELECT nro_importacion, nro_asiento, 
+       SUM(debe) AS total_debito, 
+       SUM(haber) AS total_credito,
+       (SUM(debe) - SUM(haber)) AS diferencia
+FROM cntbl_asiento_tmp
+GROUP BY nro_importacion, nro_asiento
+HAVING SUM(debe) <> SUM(haber);
+
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Procesos → Importación de Asientos Contables.
+
+                           2. Selecciona la plantilla de importación y el archivo Excel o CSV.
+
+                           3. Presiona “Validar Archivo”.
+
+                           4. El sistema valida la estructura y muestra una vista previa con observaciones.
+
+                           5. Si no hay errores, el usuario presiona “Importar Asientos”.
+
+                           6. El sistema crea los registros contables y genera un resumen de resultados.
+
+                           7. Se registra la operación en la bitácora contable.
+
+                           8. Los asientos quedan en estado Pendiente o Contabilizado, según configuración.
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un archivo de importación.”
+
+                              * “El archivo no cumple con la estructura de la plantilla.”
+
+                              * “Existen asientos descuadrados. Revise el reporte de errores.”
+
+                              * “Importación completada exitosamente. Se registraron [N] asientos.”
+
+                              * “Error en la importación. Contacte al administrador del sistema.”
+
+                              * “No tiene permisos para ejecutar este proceso.”

@@ -1,0 +1,292 @@
+﻿HU-AF-OPE-001 - Registro Principal de Activos Fijos con Gestión Integral - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Operaciones
+3. Subproceso
+Maestro de Activo Fijo
+4. Nombre de la Historia de Usuario
+Registro Principal de Activos Fijos con Gestión Integral
+5. Descripción / Propósito
+Como Administrador Contable de Activos Fijos, quiero registrar, consultar y mantener la información integral de cada activo fijo, para gestionar su ciclo de vida completo desde la adquisición hasta su baja, incluyendo sus datos generales, ubicación, depreciación, traslados, incidencias y adaptaciones, asegurando la trazabilidad contable, física y operativa del activo dentro del sistema Restaurant.pe.
+6. Alcance
+Esta funcionalidad constituye la ventana principal del Módulo de Activos Fijos, estructurada con una interfaz de pestañas múltiples (multi-tab) que centraliza toda la información y operaciones relacionadas con cada activo fijo.
+El registro incluye la gestión integral de:
+* Datos Generales: información básica, económica y contable.
+
+* Datos Complementarios: ubicación, usuario asignado, tasaciones, estado operativo.
+
+* Accesorios: componentes o partes asociadas al activo principal.
+
+* Depreciación: configuración de método, tasa, fechas y valores residuales.
+
+* Incidencias: registro histórico de eventos o siniestros.
+
+* Adaptaciones: mejoras o modificaciones al activo.
+
+* Traslados: movimientos físicos o entre centros de costo.
+
+* Asignaciones: control de responsables y áreas usuarias.
+
+La gestión se realizará a nivel de razón social, integrando información contable, tributaria y física, conforme a los parámetros definidos en las configuraciones del módulo.
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Operaciones → Maestro de Activo Fijo → Registro Principal
+8. Estructura del Formulario y Pestañas
+8.1. Pestaña: Datos Generales
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Código de Activo
+	Alfanumérico (20)
+	Código único del activo (generado automáticamente).
+	No duplicado. Según numerador configurado (HU-AF-TAB-007).
+	Descripción del Activo
+	Texto (150)
+	Nombre o detalle del activo.
+	Obligatorio.
+	Clasificación (Clase / Subclase)
+	Lista jerárquica
+	Clasificación contable y operativa.
+	Obligatorio. Validar con catálogo (HU-AF-TAB-003).
+	Marca / Modelo / Serie
+	Texto
+	Identificación física del activo.
+	—
+	Proveedor
+	Lista
+	Seleccionado del módulo de compras.
+	Validar integración.
+	Fecha de Adquisición
+	Fecha
+	Fecha de compra o alta.
+	Obligatoria.
+	Moneda
+	Lista
+	Moneda de adquisición (Soles / Dólares).
+	—
+	Valor de Adquisición
+	Numérico (15,2)
+	Valor de compra o costo inicial.
+	Obligatorio.
+	Valor en Soles / Dólares
+	Numérico (15,2)
+	Valor convertido a moneda local y extranjera.
+	Calculado según tipo de cambio.
+	Estado del Activo
+	Lista
+	Activo / En reparación / Dado de baja.
+	—
+	Vida Útil (Años)
+	Numérico (3)
+	Vida útil estimada.
+	Obligatoria.
+	8.2. Pestaña: Datos Complementarios
+Campo
+	Descripción
+	Garantías (inicio/fin, proveedor)
+	Registro de garantías vigentes.
+	Ubicación Física
+	Seleccionada desde el maestro de ubicaciones (HU-AF-TAB-005).
+	Usuario Asignado
+	Persona responsable del activo.
+	Tasaciones / Valor Actualizado
+	Valores referenciales según evaluación técnica.
+	Estado Operativo
+	Activo / Deteriorado / En reparación.
+	Observaciones
+	Notas de control interno.
+	8.3. Pestaña: Accesorios
+Campo
+	Descripción
+	Código / Descripción
+	Identifica los componentes adicionales asociados.
+	Valor Individual
+	Valor del accesorio.
+	Relación con Activo Principal[a]
+	Asociación jerárquica.
+	8.4. Pestaña: Depreciación
+Campo
+	Descripción
+	Método de Depreciación
+	Lineal / Suma de Dígitos / Otro.
+	Tasa Anual (%)
+	Porcentaje según clase o subclase.
+	Fecha de Inicio de Depreciación
+	Determina desde cuándo se calcula.
+	Valor Residual
+	Valor no depreciable.
+	Depreciación Acumulada
+	Calculada automáticamente.
+	Valor Neto en Libros
+	Valor contable actual.
+	8.5. Pestaña: Incidencias
+Campo
+	Descripción
+	Fecha de Incidencia
+	Fecha del evento.
+	Tipo de Incidencia
+	Daño, siniestro, pérdida, otro.
+	Descripción / Acción Correctiva[b]
+	Detalle del evento.
+	Costo Asociado
+	Valor del impacto.
+	Estado
+	Abierto / Cerrado.
+	8.6. Pestaña: Adaptaciones
+Campo
+	Descripción
+	Fecha de Adaptación
+	Fecha de la mejora.
+	Descripción
+	Detalle técnico de la mejora o modificación.
+	Valor Incremental
+	Valor agregado al activo.
+	Responsable
+	Usuario que registró la modificación.
+	8.7. Pestaña: Traslados
+Campo
+	Descripción
+	Documento de Traslado
+	Número generado automáticamente (HU-AF-TAB-008).
+	Fecha
+	Fecha del movimiento.
+	Origen / Destino
+	Ubicaciones o centros de costo involucrados.
+	Responsable
+	Usuario autorizado.
+	8.8. Pestaña: Asignaciones
+Campo
+	Descripción
+	Responsable del Activo
+	Persona asignada.
+	Centro de Costo
+	Centro contable asociado.
+	Fecha de Asignación
+	Fecha de vigencia.
+	Observaciones
+	Notas adicionales.
+	9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo
+	Crea un nuevo activo fijo con todos los datos requeridos.
+	Registro completo con código automático.
+	Editar
+	Modifica información general o complementaria.
+	Actualización registrada en log.
+	Consultar
+	Visualiza toda la información sin editar.
+	—
+	Dar de Baja
+	Marca el activo como dado de baja.
+	Genera asiento contable correspondiente.
+	Transferir / Trasladar
+	Registra movimiento interno.
+	Genera documento de traslado automático.
+	Revalorizar / Adaptar
+	Registra mejora o incremento en valor.
+	Actualiza valor neto y depreciación.
+	Exportar / Imprimir
+	Genera ficha técnica o reporte PDF.
+	Incluye todas las pestañas.
+	10. Reglas de Negocio
+   1. Todo activo debe tener un código único generado según la configuración del numerador (HU-AF-TAB-007).
+
+   2. No se puede registrar un activo sin una clasificación válida (Clase/Subclase).
+
+   3. Los activos con estado “En Baja” no podrán ser depreciados ni trasladados.
+
+   4. Las modificaciones de valor, depreciación o ubicación deben registrarse en el Log de Auditoría Contable.
+
+   5. Los cálculos de depreciación se realizarán conforme al método y tasa definidos en la pestaña Depreciación.
+
+   6. Si el activo tiene accesorios, los valores individuales deben sumar al valor total del activo.
+
+   7. Las adaptaciones incrementan el valor neto y actualizan la base de depreciación.
+
+   8. Las incidencias con impacto financiero deben reflejarse en la contabilidad del periodo.
+
+   9. El sistema debe validar que la ubicación física esté activa al momento del registro.
+
+   10. La baja de activos requerirá autorización del perfil “Administrador Contable” y registro de motivo.
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Módulo de Compras
+	Permite registrar activos a partir de facturas u órdenes de compra.
+	Módulo Contable General
+	Genera asientos automáticos por altas, depreciaciones, bajas y adaptaciones.
+	Módulo de Seguros
+	Asocia pólizas a activos (HU-AF-TAB-001 y HU-AF-TAB-002).
+	Módulo de Ubicaciones
+	Asigna ubicaciones físicas (HU-AF-TAB-005).
+	Módulo de Numeradores
+	Controla la numeración de activos y traslados.
+	Log de Auditoría Contable
+	Registra todas las acciones y modificaciones.
+	12. Consideraciones Técnicas
+      * Interfaz desarrollada en web responsive con estructura de pestañas (multi-tab).
+
+      * Integración con servicios RESTful y base de datos relacional (SQL).
+
+      * Tablas principales:
+
+         * AF_MA_ACTIVOS (maestro principal).
+
+         * AF_DET_ADAPTACIONES, AF_DET_INCIDENCIAS, AF_DET_TRASLADOS, AF_DET_ASIGNACIONES, AF_DET_ACCESORIOS.
+
+            * Cálculos de depreciación automáticos basados en HU-AF-TAB-004 (Matriz Contable).
+
+            * Soporte para importación masiva y exportación PDF/Excel.
+
+            * Registro automático en el Log Contable.
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles con permiso “Administrador de Activos” o “Auditor Contable”.
+	Performance
+	Tiempo de carga ≤ 4 segundos por activo.
+	Usabilidad
+	Interfaz intuitiva con pestañas, búsqueda dinámica y filtros por estado, clase o ubicación.
+	Auditoría
+	Registro detallado de todas las operaciones CRUD y cambios de valor.
+	Disponibilidad
+	99.5% en horario operativo.
+	Escalabilidad
+	Soporte para más de 100.000 activos por razón social.
+	14. Criterios de Aceptación
+               1. El usuario puede registrar un nuevo activo completo con todos los campos obligatorios.
+
+               2. El sistema genera el código automáticamente según la secuencia configurada.
+
+               3. Las pestañas permiten navegación fluida y guardado por secciones.
+
+               4. Las modificaciones de valor o depreciación quedan registradas en el log.
+
+               5. Los reportes de ficha técnica incluyen toda la información del activo.
+
+               6. El sistema bloquea operaciones de depreciación o traslado sobre activos dados de baja.
+
+               7. Los cálculos contables se integran correctamente al módulo contable.
+
+               8. Los tiempos de carga y consulta cumplen con los parámetros de performance.
+15. Comentarios / Observaciones
+                  * Esta HU constituye el núcleo operativo del Módulo de Activos Fijos, integrando todos los subprocesos de gestión del ciclo de vida del activo.
+
+                  * Permite la gestión unificada, contable y física de los bienes de la empresa, cumpliendo con las NIC 16 – Propiedades, Planta y Equipo.
+
+                  * Su implementación debe garantizar la trazabilidad completa de cada activo, desde su adquisición hasta su baja definitiva.
+
+                  * Debe mantener coherencia visual y funcional con las HU anteriores del módulo (HU-AF-TAB-003, HU-AF-TAB-004, HU-AF-TAB-005, HU-AF-TAB-007 y HU-AF-TAB-008).
+
+                  * Se recomienda incluir una función de historial consolidado que permita visualizar todas las acciones sobre el activo en una línea de tiempo.
+
+
+
+[a]A que se refiere?
+[b]Consultar

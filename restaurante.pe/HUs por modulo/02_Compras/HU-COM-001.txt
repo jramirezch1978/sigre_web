@@ -1,0 +1,128 @@
+﻿HU-COM-001 - Gestión de Proveedores - v1.0
+1. Título
+Gestión de Proveedores
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero registrar, consultar, modificar e inactivar proveedores, para poder mantener un maestro único de proveedores actualizado, que sirva de base para las compras, cuentas por pagar e integración contable.
+3. Proceso
+* Proceso: Tablas
+
+* Subproceso: Proveedores
+
+* Módulo: Compras
+
+4. Narrativa de Usuario
+   * Quiero: Administrar el registro maestro de proveedores.
+
+   * Para: Contar con información consolidada, confiable y actualizada de cada proveedor.
+
+   * De manera que: Se asegure la correcta integración con compras, pagos y contabilidad.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Compras > Tablas > Proveedores
+6. Criterios de Aceptación
+      1. El sistema debe permitir alta, modificación, consulta e inactivación de proveedores.
+
+      2. El sistema debe validar que el Número de Identificación Fiscal (RUC/NIT/RNC/NIF) sea único en el país para proveedores nacionales. En caso de proveedores extranjeros, el sistema debe permitir registrar su número de identificación fiscal respetando el formato propio de su país[a][b][c], validando únicamente que no se repita dentro del mismo país de origen registrado. (Anexo 1)
+
+      3. El sistema debe impedir la eliminación de proveedores con movimientos asociados (compras, facturas, pagos), permitiendo sólo su inactivación.
+
+      4. Todos los cambios deben registrarse en el log de auditoría contable (usuario, fecha, hora, acción).
+
+      5. El formulario debe mostrar cómo informativos (solo lectura) los campos: Razón Social activa y País.
+
+      6. El listado debe permitir búsqueda y filtros por Razón Social, Identificación Fiscal, Estado y País.
+
+      7. La información debe integrarse con Órdenes de Compra, Cuentas por Pagar y Contabilidad.
+
+7. Campos del Formulario
+Datos Generales
+         * Código interno (autogenerado).
+
+         * Razón Social (obligatorio, texto).
+
+         * Nombre Comercial (opcional, texto).
+
+         * Tipo de Identificación (lista desplegable: RUC, NIT, RNC, NIF, RUT, [d][e][f][g][h][i][j][k]CUIT, CPF, CIF, RTN, RFC, RIF y Otros).
+
+         * Número de Identificación Fiscal (obligatorio, único por país).
+
+         * Dirección Fiscal (obligatorio, texto).
+
+         * Teléfono (numérico, opcional).
+
+         * Correo electrónico (opcional, validación formato).
+
+         * Estado (Activo/Inactivo).
+
+         * Proveedor Nacional o Extranjero
+
+Datos Bancarios
+            * Banco (lista desplegable mantenida en catálogo de bancos por país).
+            * Número de cuenta y Código Interbancario (obligatorio si se registra banco). 
+            * Tipo de Cuenta (corriente/ahorros/maestra).
+            * Moneda (lista desplegable, debe dar la opción de multimoneda pagos en soles y dólares).
+            * Cuenta de detracción del Banco de la Nación, registrada para servicios/compras sujetas a detracción.
+
+Datos Comerciales
+               * Nombre de Contacto (texto).
+
+               * Teléfono de Contacto (numérico).
+
+               * Email de Contacto (validación formato).
+
+               * Condiciones de Pago (lista desplegable: contado, crédito, anticipo, mixto).
+
+               * Plazo de Crédito (numérico en días, requerido si aplica crédito).[l][m]
+
+8. Listado de Proveedores (Vista Tabla)
+Columnas:
+                  * Código interno
+
+                  * Razón Social
+
+                  * Nombre Comercial
+
+                  * RUC/NIT/RNC/NIF
+
+                  * País
+
+                  * Teléfono
+
+                  * Estado
+
+                  * Condiciones de Pago
+
+Acciones disponibles: Ver | Editar | Inactivar | Exportar (Excel/PDF)
+Filtros disponibles: Razón Social | Identificación Fiscal | Estado | País
+9. Consideraciones Técnicas
+                     * El maestro de proveedores será único por razón social.
+
+                     * Integración obligatoria con módulo de Finanzas (Cuentas por Pagar) y Contabilidad.
+
+                     * Validación de integridad referencial con documentos de compras.
+
+                     * Registro obligatorio en el log de auditoría contable.
+
+                     * El sistema debe permitir carga masiva de proveedores vía Excel, con validación de duplicados y campos obligatorios.
+
+10. Comentarios
+                        * Se debe contemplar la posibilidad de registrar múltiples cuentas bancarias por proveedor.
+
+                        * En países con sistemas tributarios en línea, se debe habilitar integración para validación automática del Número de Identificación Fiscal (ejemplo: SUNAT en Perú, DIAN en Colombia, DGII en R. Dominicana).
+
+                        * El catálogo de proveedores será un maestro centralizado, accesible desde todas las sucursales de la misma razón social.
+[a]@igarcia@restaurant.pe @consultorexterno1@restaurant.pe se debe colocar en una sección de Anexo, la respetiva validación del formato del tipo de identificación según el país. Ejemplo. RUC de Perú, 11 dígitos, etc. Ref. https://es.stackoverflow.com/questions/42957/c%C3%B3mo-validar-un-ruc-de-per%C3%BA
+_Asignada a igarcia@restaurant.pe_
+[b]Esa opción debe ser configurable al momento de la implementación del sistema
+[c]Detallar en el anexo el formato y/o validaciones que debe tener determinado Número de identificación, según país.
+[d]@igarcia@restaurant.pe @consultorexterno1@restaurant.pe se debe definir la lista de los tipos de identificación a soportar, evitar dejar temas abiertos con término como: etc, otros. ya que el alcance para la implementación debe estar cerrado en la HU.
+_Asignada a igarcia@restaurant.pe_
+[e]_Marcada como completada_
+[f]_Reabierto_
+[g]Se añadió a la lista los tipos de identificación fiscal principales, sin embargo, también debería ser configurable al momento de la implementación del sistema
+[h]_Marcada como completada_
+[i]_Reabierto_
+[j]Entiendo que estos tipos de identificación deben mostraste según el tipo de país donde pertenezca la razón. Si es así, se debería colocar una tabla como anexo, donde clasifique los tipos de identificación por país.
+[k]@igarcia@restaurant.pe Me ayudas con lo solicitado. Entiendo que algunos paises ya han enviado esta informacion.
+[l]Este dato es inncecesario para el registro del proveedor.
+[m]si es necesario porque define la politica comercial con la que se operara con el proveedor, no obligatorio puede ser.

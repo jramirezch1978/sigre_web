@@ -1,0 +1,156 @@
+﻿HU-FIN-OP-CP-001 - Registro de Facturas por Pagar que no corresponden a Compras - v1.0
+
+
+1. Título
+
+
+ Registro de Facturas por Pagar que no corresponden a Compras
+2. Descripción
+
+
+ Como usuario del sistema contable de Restaurant.pe, quiero registrar facturas por pagar que no se originan en procesos de compras o recepción de artículos (por ejemplo, servicios, arrendamientos, asesorías, licencias, suministros no inventariables), para garantizar el correcto reconocimiento contable y financiero de las obligaciones con terceros, así como su integración automática al módulo de contabilidad y tesorería.
+
+
+3. Proceso
+
+
+ Proceso: Operaciones
+Subproceso: Cuentas por Pagar
+Módulo: Finanzas
+
+
+4. Narrativa de Usuario
+
+
+ Quiero: Registrar facturas que no están vinculadas a órdenes de compra, pero que generan una obligación de pago (gastos o servicios).
+Para: Mantener actualizadas las cuentas por pagar y reflejar correctamente los pasivos financieros del restaurante.
+De manera que: Se logre una conciliación exacta con proveedores, control de obligaciones pendientes y se cumpla con los principios contables de devengo y reconocimiento de pasivos.
+
+
+5. Regla de Navegabilidad
+
+
+ Ruta: Menú Principal > Finanzas > Operaciones > Cuentas por Pagar > Registro de Facturas No Asociadas a Compras
+
+
+6. Criterios de Aceptación
+
+
+ El sistema debe permitir el registro de facturas que no estén vinculadas a órdenes o documentos del módulo de Compras.
+Debe validar los siguientes campos obligatorios:
+* N° de Factura
+
+* Proveedor
+
+* Fecha de Emisión
+
+* Fecha de Vencimiento
+
+* Monto Total
+
+* Moneda
+
+* Tipo de Gasto
+
+* Centro de Costo
+
+* Cuenta Contable Asociada
+
+Si el número de factura ya existe para el mismo proveedor dentro del periodo fiscal activo, el sistema debe mostrar el mensaje: “La factura ya se encuentra registrada para este proveedor.”
+El sistema debe permitir guardar el registro con estado “Pendiente de Validación”, y solo los usuarios con rol Supervisor Financiero podrán cambiarlo a “Aprobada”.
+Al aprobar la factura, el sistema debe generar automáticamente el asiento contable correspondiente (Crédito a Cuentas por Pagar / Débito a Gasto o Activo).
+Debe registrarse automáticamente en el log de auditoría contable toda acción de alta, modificación, eliminación o aprobación (Usuario, Fecha, Hora, IP, Acción).
+El usuario podrá consultar, editar o anular facturas según permisos asignados.
+Solo se mostrarán los datos de la Razón Social y País activos en la sesión del usuario (campos de solo lectura).
+
+
+7. Campos del Formulario / Columnas de Vista Tabla
+
+
+ Campos principales:
+   * Razón Social (solo lectura)
+
+   * País (solo lectura)
+
+   * N° de Factura
+
+   * Proveedor
+
+   * Fecha de Emisión
+
+   * Fecha de Vencimiento
+
+   * Moneda
+
+   * Tipo de Gasto
+
+   * Centro de Costo
+
+   * Monto Total
+
+   * Descripción / Detalle
+
+   * Cuenta Contable Asociada
+
+   * Estado ( Pendiente/ Registrada o Aprobada / /Anulada)
+
+   * Usuario de Registro
+
+   * Fecha y Hora de Registro
+
+Filtros disponibles:
+      * Rango de Fechas
+
+      * Proveedor
+
+      * Estado de Factura
+
+      * Tipo de Gasto
+
+      * Centro de Costo
+
+      * Moneda
+
+      * País / Sucursal
+
+Acciones disponibles:
+         * Registrar Nueva Factura
+
+         * Ver Detalle
+
+         * Editar
+
+         * Anular (si no está aprobada)
+
+         * Exportar (Excel / PDF)
+
+         * Aprobar Factura (solo para Supervisor Financiero)
+
+8. Detalle de Integración (opcional)
+
+
+ Integración con Contabilidad: Genera automáticamente el asiento contable al aprobar la factura.
+Integración con Tesorería: Permite enlazar las facturas registradas para su programación de pagos.
+Integración con Proveedores: Obtiene los datos del proveedor, moneda y condiciones de pago registradas en el maestro de proveedores.
+Integración con Reportes Financieros: Actualiza el flujo de efectivo proyectado y los reportes de cuentas por pagar.
+
+
+9. Consideraciones Técnicas
+
+
+ El sistema debe validar duplicados utilizando la combinación: Razón Social + Proveedor + N° de Factura + Año Fiscal.
+Los registros deben almacenarse en el log de auditoría contable ante cualquier acción de creación, modificación o eliminación.
+El sistema debe permitir registrar facturas en moneda local y corporativa (USD) para entornos multipaís o multimoneda.
+La fecha de vencimiento no puede ser anterior a la fecha de emisión.
+Las cuentas contables asociadas deben estar activas en el plan contable del país correspondiente.
+El estado “Aprobada” bloquea la edición o eliminación del registro (solo puede anularse mediante nota de crédito).
+Cumplimiento con NIC 1 y NIC 37 sobre reconocimiento de pasivos.
+
+
+10. Comentarios
+
+
+ Esta funcionalidad permitirá registrar pasivos que no provienen del proceso de compras, asegurando la trazabilidad y control de todas las obligaciones financieras del restaurante.
+Contribuye a una contabilidad más precisa y oportuna, especialmente en servicios recurrentes o contratos externos.
+Se recomienda incorporar alertas automáticas de vencimiento y paneles de indicadores para facturas próximas a vencer.
+Permite un mejor control del flujo de efectivo y facilita la conciliación contable con proveedores.

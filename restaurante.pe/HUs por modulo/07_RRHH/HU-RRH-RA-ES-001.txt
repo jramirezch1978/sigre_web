@@ -1,0 +1,168 @@
+﻿HU-RRH-RA-ES-001 – Emisión de Boletas/Recibos y Planillas por Periodo, Sede o Empresa
+Versión: 1.0
+________________
+
+
+1. Título
+Emite boletas/recibos individuales y planillas consolidadas por periodo, sede o empresa.
+________________
+
+
+2. Descripción
+Como analista de nómina o responsable de RR.HH., quiero emitir boletas o recibos individuales y planillas completas de cada periodo de pago, filtrando por sede, empresa o grupo de trabajadores, de forma que pueda entregar comprobantes de pago legales y consolidados, cumpliendo con las normas laborales y fiscales vigentes.
+________________
+
+
+3. Proceso
+Módulo: RR.HH.
+Proceso: Reportes y Analítica
+Subproceso: Estándar
+________________
+
+
+4. Narrativa de Usuario
+Quiero: Que el sistema permite generar y visualizar las boletas individuales de pago y las planillas completas por periodo.
+Para: Entregar los comprobantes oficiales a los trabajadores y reportes consolidados a las áreas contables y administrativas.
+De manera que: Se cumplan los requisitos legales de documentación y trazabilidad de los pagos efectuados.
+________________
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > RR.HH > Reportes y Analítica > Estándar > Emisión de Boletas y Planillas
+________________
+
+
+6. Criterios de Aceptación
+* El sistema debe permitir emitir boletas/recibos individuales en formato PDF por trabajador.
+
+* Debe permitir generar planillas consolidadas agrupadas por empresa, sede o centro de costo.
+
+* Las boletas deben mostrar:
+
+   * Datos del trabajador, puesto, periodo y fecha de emisión.
+
+   * Detalle de ingresos, descuentos, aportes y neto a pagar.
+
+      * Las planillas deben incluir:
+
+         * Totales por concepto y por trabajador.
+
+         * Totales consolidados por centro de costo, sede y empresa.
+
+            * Debe permitir filtros por: empresa, sede, grupo de cálculo, tipo de planilla, periodo.
+
+            * Incluir opciones para exportar en PDF, Excel o XML.
+
+            * Los usuarios con rol RR.HH. / Nómina / Auditoría pueden generar y revisar los documentos.
+
+            * Cada emisión debe quedar registrada en el sistema (fecha, usuario, tipo de documento, periodo).
+
+            * Las boletas deben contar con un código único de identificación (número de recibo).
+
+            * Integración con el módulo de seguridad para garantizar que solo el trabajador o personal autorizado pueda acceder a su boleta.
+
+________________
+
+
+7. Campos del Formulario / Tabla de Vista
+Campo
+	Tipo de Campo
+	Descripción
+	Ejemplo
+	Validaciones / Consideraciones UX/UI
+	Periodo de Pago
+	Lista desplegable
+	Selecciona el periodo de nómina a emitir.
+	Septiembre 2025
+	Obligatorio, solo periodos cerrados.
+	Empresa
+	Lista desplegable
+	Permite filtrar por empresa emisora.
+	Corporación Andina S.A.
+	Carga automática según permisos del usuario.
+	Sede / Centro de Costo
+	Selector múltiple
+	Filtra los reportes por sede o área.
+	Lima / Cocina / Ventas
+	Permite selección múltiple.
+	Tipo de Planilla
+	Lista desplegable
+	Define el tipo de planilla (mensual, semanal, bonificación, etc.).
+	Mensual
+	Obligatorio.
+	Trabajador
+	Búsqueda / Autocompletar
+	Permite emitir boleta individual.
+	“Carlos Gómez Pérez”
+	Opcional, búsqueda con autocompletado.
+	Tipo de Emisión
+	Radio button
+	Selecciona si se emiten boletas o planillas.
+	Boleta Individual / Planilla Consolidada
+	Requerido para ejecutar el proceso.
+	Fecha de Emisión
+	Fecha automática
+	Fecha en la que se genera el documento.
+	08/10/2025
+	Automático.
+	Estado de Emisión
+	Etiqueta / Estado
+	Indica si la emisión fue exitosa o con errores.
+	Emitido / Error
+	Automático. Código de color visual.
+	Formato de Exportación
+	Lista desplegable
+	Define el formato de salida.
+	PDF / Excel / XML
+	Obligatorio.
+	Usuario Responsable
+	Texto / Etiqueta
+	Usuario que ejecuta la emisión.
+	rh_analista01
+	Automático.
+	Número de Boleta / Recibo
+	Campo numérico
+	Código correlativo único por trabajador y periodo.
+	2025-09-000123
+	Automático. Visible solo en boletas individuales.
+	________________
+
+
+8. Detalle de Integración
+               * Módulo de Nómina: Obtiene la información de ingresos, descuentos y netos.
+
+               * Módulo de Seguridad: Controla permisos y acceso a las boletas.
+
+               * Módulo de Contabilidad: Enlaza las planillas con asientos contables asociados.
+
+               * Módulo de Empresa / Sedes: Obtiene los nombres y códigos de las unidades organizativas.
+
+               * Módulo de Reportes: Exporta los documentos en los formatos configurados (PDF, Excel, XML).
+
+________________
+
+
+9. Consideraciones Técnicas
+                  * El sistema debe permitir emisión masiva de boletas y planillas sin afectar el rendimiento.
+
+                  * Las boletas deben generarse con firma digital y código de verificación QR.
+
+                  * Se debe conservar el histórico de boletas emitidas por trabajador y periodo.
+
+                  * El diseño de las boletas y planillas debe ser parametrizable por país o empresa, adaptando logos, encabezados y formato de moneda.
+
+                  * Permitir reimpresión controlada con registro en log de auditoría.
+
+                  * Las planillas deben poder agruparse por tipo de trabajador, sede o grupo de cálculo.
+
+________________
+
+
+10. Comentarios
+Esta funcionalidad es fundamental para la trazabilidad documental y cumplimiento legal en la gestión de RR.HH., ya que garantiza que cada colaborador reciba su comprobante oficial de pago y que la empresa cuente con reportes consolidados por sede o empresa.
+Se recomienda incorporar:
+                     * Diseño responsivo y accesible para visualización desde portal del empleado.
+
+                     * Opción de envío automático por correo electrónico al generar la boleta.
+
+                     * Indicador de estado de entrega (enviado, recibido, pendiente).

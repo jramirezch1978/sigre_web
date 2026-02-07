@@ -1,0 +1,242 @@
+﻿HU-CON-007 – Gestión de Monedas
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-007
+
+* Versión: 1.0
+
+* Fecha de creación: 17/12/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Tablas
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Gestión de Monedas
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la creación, configuración, activación e inactivación de las monedas que serán utilizadas en los distintos procesos contables y operativos del sistema.
+La gestión de monedas es un catálogo maestro, transversal a todos los módulos, y constituye la base para el registro de operaciones en moneda local y moneda extranjera.
+La funcionalidad no incluye el registro de tipos de cambio, los cuales se gestionan en una historia de usuario independiente.
+El sistema debe garantizar:
+   * Existencia de una única moneda base ó funcional
+
+   * Control de unicidad por código
+
+   * No eliminación física de monedas utilizadas
+
+   * Trazabilidad y consistencia contable para auditoría
+
+________________
+
+
+3. Actor(es)
+      * Usuario Contable: Consulta monedas habilitadas.
+
+      * Jefe de Contabilidad: Define moneda base ó funcional y válida la configuración.
+
+      * Administrador del Sistema: Crea, edita, activa e inactiva monedas.
+
+________________
+
+
+4. Precondiciones
+         * El usuario debe tener permisos de acceso a:
+Contabilidad → Tablas → Gestión de monedas
+
+         * El sistema debe encontrarse en fase de configuración inicial o permitir edición controlada.
+
+         * No debe existir conflicto con moneda base previamente definida.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Tablas → Monedas
+________________
+
+
+6. Historia de Usuario
+Como administrador del sistema,
+quiero registrar y administrar las monedas del sistema contable,
+para asegurar que las operaciones se realicen únicamente con monedas válidas, controladas y relacionadas con la configuración contable de la empresa.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir registrar monedas con código único
+	Moneda creada correctamente
+	2
+	Permitir definir una moneda base o funcional
+	Solo una moneda base activa
+	3
+	No permitir duplicidad de código de moneda
+	Mensaje de validación
+	4
+	Permitir activar e inactivar monedas
+	Cambio de estado exitoso
+	5
+	No permitir eliminar monedas con uso histórico
+	Bloqueo del sistema
+	6
+	No permitir desactivar la moneda base
+	Mensaje de advertencia
+	7
+	Mostrar monedas activas en documentos
+	Listado filtrado correctamente
+	8
+	Mantener trazabilidad del registro
+	Datos automáticos visibles
+	________________
+
+
+8. Estructura del Proceso
+8.1. Pestaña: Datos Generales
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Código de moneda
+	Texto (3)
+	Código ISO de la moneda (PEN, USD, EUR)
+	Obligatorio, único
+	Nombre de moneda
+	Texto
+	Nombre completo de la moneda
+	Obligatorio
+	Símbolo
+	Texto corto
+	Símbolo monetario (S/, $, €)
+	Opcional
+	Precisión decimal
+	Numérico
+	Número de decimales permitidos
+	≥ 0
+	Moneda base
+	Booleano
+	Indica si es moneda principal
+	Solo una puede estar activa
+	Estado
+	Lista (Activo / Inactivo)
+	Habilitación de la moneda
+	Base no puede inactivarse
+	Fecha Registro
+	Fecha/Hora
+	Fecha de creación
+	No editable
+	________________
+
+
+8.2. Vista de monedas registradas
+            * Código
+
+            * Nombre
+
+            * Símbolo
+
+            * Precisión
+
+            * Moneda base o funcional (Sí/No)
+
+            * Estado (Activo/Inactivo)
+
+            * Usuario registro
+
+            * Fecha registro (Automática)
+
+________________
+
+
+9. Reglas de Negocio
+               * Solo puede existir una moneda base activa en el sistema.
+
+               * El código de moneda debe ser único.
+
+               * Las monedas utilizadas en documentos:
+
+                  * No pueden eliminarse
+
+                  * Solo pueden activarse
+
+                     * La moneda base:
+
+                        * No puede eliminarse
+
+                        * No puede inactivarse
+
+                        * No puede modificarse si existen movimientos contables
+
+                           * Las monedas inactivas:
+
+                              * No aparecen en nuevas operaciones
+
+                              * Mantienen su histórico
+
+
+
+
+
+________________
+
+
+10. Flujo Principal del Proceso
+                                 1. Acceso a la funcionalidad
+ Usuario ingresa a:
+Contabilidad → Tablas → Monedas
+
+                                 2. Registro de moneda
+ El usuario selecciona “Nueva Moneda” e ingresa los datos requeridos.
+
+                                 3. Definición de moneda base (si aplica)
+ El sistema valida que no exista otra moneda base activa.
+
+                                 4. Guardado del registro
+ El sistema almacena la moneda y registra usuario y fecha.
+
+                                 5. Activación / Inactivación
+ El usuario puede cambiar el estado según reglas del sistema.
+
+                                 6. Uso en módulos
+ Las monedas activas quedan disponibles para documentos contables y operativos.
+
+________________
+
+
+11. Integraciones
+                                    * Contabilidad: Validación de moneda en asientos
+
+                                    * Compras: Selección de moneda en órdenes y facturas
+
+                                    * Ventas: Emisión de comprobantes
+
+                                    * Tesorería: Pagos y cobranzas
+
+                                    * Auditoría: Revisión de configuración base
+
+________________
+
+
+12. Mensajes de Validación
+                                       * “El código de moneda ya se encuentra registrado.”
+
+                                       * “No puede existir más de una moneda base.”
+
+                                       * “No se puede desactivar la moneda base.”
+
+                                       * “No se puede eliminar una moneda con movimientos asociados.”
+
+                                       * “Moneda registrada correctamente.”
+
+                                       * “Estado de la moneda actualizado.”

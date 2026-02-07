@@ -1,0 +1,141 @@
+﻿HU-AF-002 - Catalogación de Tipos de Incidencias que Pueden Afectar a los Activos - v1.0
+Módulo:
+Activos Fijos
+Proceso:
+Tablas
+Subproceso:
+Incidencias de los Activos
+1. Título:
+Catalogación de Tipos de Incidencias que Pueden Afectar a los Activos
+2. Descripción:
+Como Administrador Contable o Gestor de Activos, quiero registrar y mantener una tabla maestra de tipos de incidencias que pueden afectar los activos, para que el sistema clasifique y trace los eventos que impacten su estado físico, valor contable o ubicación (por ejemplo: robos, daños, siniestros, obsolescencia), garantizando la trazabilidad y el control histórico para fines de auditoría y reportes de gestión.
+3. Navegabilidad:
+Menú principal: Activos Fijos → Tablas → Incidencias de los Activos → Tipos de Incidencias
+4. Reglas de Negocio:
+Código
+	Descripción de la Regla
+	RN-AF-009
+	Cada tipo de incidencia debe tener un código único en cada razón social.
+	RN-AF-010
+	Los campos código y descripción son obligatorios y deben validarse antes de guardar.
+	RN-AF-011
+	El sistema debe permitir clasificar las incidencias por tipo de impacto: Físico, Contable o Ubicación.
+	RN-AF-012
+	Las incidencias clasificadas como “Contables” deben asociarse a una cuenta contable de ajuste o pérdida.
+	RN-AF-013
+	No se podrán eliminar registros de tipos de incidencias que ya hayan sido utilizados en transacciones o reportes históricos.
+	RN-AF-014
+	Cualquier modificación debe registrarse en el log de auditoría contable (usuario, fecha, hora, acción, campo modificado).
+	RN-AF-015
+	Los campos Razón Social y País se mostrarán en modo informativo (solo lectura), determinados por la sesión activa.
+	RN-AF-016
+	Las incidencias con estado “Inactivo” no podrán seleccionarse en nuevos registros de eventos de activos.
+	RN-AF-017
+	La tabla debe soportar auditoría y trazabilidad para fines de control interno y cumplimiento NIIF.
+	
+
+5. Campos del Formulario:
+Campo
+	Tipo
+	Obligatorio
+	Validación / Descripción
+	Código de Incidencia
+	Texto (máx. 10)
+	Sí
+	Único por razón social, sin espacios ni caracteres especiales.
+	Descripción
+	Texto (máx. 150)
+	Sí
+	Descripción detallada de la incidencia.
+	Tipo de Impacto
+	Lista desplegable
+	Sí
+	Opciones: Físico / Contable / Ubicación.
+	Gravedad
+	Lista desplegable
+	No
+	Opciones: Leve, Moderada, Grave, Crítica.
+	Cuenta Contable Asociada
+	Selección (Catálogo de Cuentas)
+	Condicional
+	Obligatoria solo si el tipo de impacto es “Contable”.
+	Requiere Aval de Auditoría
+	Checkbox
+	No
+	Determina si requiere validación por el área de auditoría interna.
+	Estado
+	Lista desplegable
+	Sí
+	Activo / Inactivo.
+	Observaciones
+	Texto largo
+	No
+	Comentarios adicionales.
+	
+
+6. Validaciones Funcionales:
+* No se podrá registrar una incidencia con código duplicado.
+
+* Si se intenta eliminar un tipo de incidencia en uso, el sistema mostrará:
+“No es posible eliminar este tipo de incidencia porque se encuentra asociada a movimientos históricos de activos.”
+
+* Si el tipo de impacto es “Contable” y no se asocia una cuenta contable, el sistema mostrará:
+“Debe asignar una cuenta contable asociada para incidencias contables.”
+
+* Toda modificación en los datos principales (código, descripción, cuenta) generará una entrada en el log de auditoría contable.
+
+* La lista de tipos de incidencias debe mostrarse en orden alfabético y con opción de filtrado por tipo de impacto y estado.
+
+7. Vistas del Sistema:
+a. Vista de Listado:
+   * Columnas: Código, Descripción, Tipo de Impacto, Gravedad, Cuenta Contable Asociada, Estado.
+
+   * Botones: Nuevo, Editar, Eliminar, Exportar (Excel/PDF), Buscar, Filtrar por Tipo / Estado.
+
+b. Vista de Detalle / Edición:
+      * Formulario con los campos definidos en la sección anterior.
+
+      * Botones: Guardar, Cancelar, Volver al Listado.
+8. Requerimientos Técnicos y de Integración:
+         * Tabla maestra integrada con los módulos de Movimientos de Activos y Auditoría de Activos.
+
+         * Registro de toda acción en log de auditoría contable: usuario, fecha, hora, acción, campo modificado.
+
+         * Validación de integridad referencial con las tablas de Historial de Incidencias y Activos Fijos.
+
+         * API REST disponible para operaciones de consulta y mantenimiento (GET, POST, PUT, DELETE).
+
+         * Sincronización automática con el plan contable y catálogo de cuentas cuando se trate de incidencias contables.
+
+9. Criterios de Aceptación:
+ID
+	Criterio
+	Resultado Esperado
+	CA-AF-007
+	Registrar nueva incidencia con todos los campos obligatorios completos.
+	Registro creado y visible en el listado.
+	CA-AF-008
+	Intentar crear un código duplicado.
+	Sistema muestra un mensaje de error y no guarda el registro.
+	CA-AF-009
+	Eliminar incidencia en uso.
+	Sistema impide la eliminación y muestra advertencia.
+	CA-AF-010
+	Asociar cuenta contable solo a incidencias de tipo “Contable”.
+	Sistema valida y guarda correctamente.
+	CA-AF-011
+	Consultar listado de incidencias filtrando por tipo de impacto.
+	Se muestra listado filtrado correctamente.
+	CA-AF-012
+	Exportar listado.
+	Se genera archivo Excel o PDF con el formato predefinido.
+	
+
+10. Observaciones Técnicas:
+            * Este maestro sirve de base para el registro histórico de eventos que afectan a los activos.
+
+            * Los tipos de incidencia definidos aquí se utilizarán en los submódulos de Mantenimiento, Depreciación, Revaluación y Bajas.
+
+            * Toda modificación requiere perfil con permisos de Administrador de Activos o Contabilidad.
+
+            * Compatible con las normas NIIF y las legislaciones nacionales de los países soportados.

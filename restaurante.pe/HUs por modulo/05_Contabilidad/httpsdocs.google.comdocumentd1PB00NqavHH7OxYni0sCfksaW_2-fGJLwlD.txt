@@ -1,0 +1,267 @@
+﻿HU-CON-030 - Procesos / Ejecutar Cierre Contable Anual - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-030
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Procesos
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Procesos / Ejecutar Cierre Contable Anual
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la ejecución del cierre contable anual, consolidando los resultados financieros del ejercicio y trasladando automáticamente los saldos de las cuentas de ingresos y gastos hacia la cuenta de resultados del ejercicio (utilidad o pérdida), conforme a las normas contables y fiscales vigentes.
+El proceso debe generar automáticamente los asientos de cierre, calculando el resultado neto (ingresos - gastos), y preparar los estados financieros finales (Balance General, Estado de Resultados, Estado de Cambios en el Patrimonio Neto y Flujo de Efectivo).
+Una vez ejecutado el cierre, el sistema debe bloquear toda modificación contable del ejercicio cerrado, garantizando la integridad de la información. Además, se debe inicializar el nuevo ejercicio contable, trasladando los saldos de cuentas de balance (activos, pasivos y patrimonio) como saldos iniciales del nuevo periodo.
+La operación quedará registrada en la bitácora contable, indicando el usuario responsable, la fecha, hora y los resultados obtenidos.
+________________
+
+
+3. Actor(es)
+   * Contador General: Ejecuta el proceso de cierre contable anual.
+
+   * Jefe de Contabilidad: Supervisa la ejecución y valida los resultados del cierre.
+
+   * Administrador del Sistema: Configura los permisos y gestiona reaperturas de ejercicios.
+
+   * Auditor Interno o Externo: Revisa la trazabilidad y los estados financieros generados.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos para acceder a Contabilidad → Procesos → Ejecutar Cierre Contable Anual.
+
+      * Todos los periodos mensuales del ejercicio deben estar cerrados.
+
+      * No deben existir asientos pendientes, descuadrados o sin contabilizar.
+
+      * Se deben haber generado los reportes finales del ejercicio (diario, mayor, balance de comprobación).
+
+      * El ejercicio contable a cerrar debe estar en estado “Abierto”.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Procesos → Ejecutar Cierre Contable Anual
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero ejecutar el cierre contable anual,
+para consolidar los resultados del ejercicio, trasladar automáticamente los saldos de ingresos y gastos al resultado del ejercicio, y generar los estados financieros finales.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar el ejercicio contable a cerrar.
+	Se muestran los ejercicios disponibles en estado “Abierto”.
+	2
+	Validar que todos los periodos mensuales estén cerrados.
+	No se permite el cierre anual si algún mes está pendiente.
+	3
+	Generar automáticamente los asientos de cierre trasladando ingresos y gastos al resultado del ejercicio.
+	El sistema crea los asientos de cierre con referencia automática.
+	4
+	Calcular y registrar el resultado neto (utilidad o pérdida) del ejercicio.
+	Se genera asiento resumen con saldo final en la cuenta de resultados.
+	5
+	Bloquear las modificaciones contables del ejercicio cerrado.
+	Las tablas del ejercicio quedan en modo solo lectura.
+	6
+	Generar automáticamente los estados financieros finales.
+	Se emiten y almacenan los reportes correspondientes.
+	7
+	Crear los saldos iniciales del nuevo ejercicio contable.
+	Las cuentas de balance se trasladan al año siguiente.
+	8
+	Registrar el cierre en la bitácora contable.
+	Se guarda usuario, fecha y resultados del cierre.
+	9
+	Mostrar mensaje de confirmación.
+	“Cierre contable anual ejecutado exitosamente.”
+	________________
+
+
+8. Estructura del Proceso
+Tipo: Proceso contable automatizado de consolidación anual.
+Naturaleza: Generación automática de asientos y actualización de estados financieros.
+8.1 Parámetros del Proceso
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Ejercicio Contable
+	Numérico
+	Sí
+	Año contable que se desea cerrar.
+	Fecha de Cierre
+	Fecha
+	Sí
+	Fecha efectiva de ejecución del cierre.
+	Generar Reportes Finales
+	Checkbox
+	No
+	Indica si se deben generar automáticamente los estados financieros.
+	Trasladar Saldos al Nuevo Ejercicio
+	Checkbox
+	Sí
+	Crea los saldos iniciales del nuevo año.
+	Observaciones
+	Texto
+	No
+	Comentarios o justificación del cierre.
+	8.2 Resultados del Proceso
+Resultado
+	Descripción
+	Asientos de Cierre Generados
+	Se consolidan cuentas de resultados y utilidad neta.
+	Estados Financieros Emitidos
+	Se generan los reportes de cierre (Balance, Resultados, Flujo, Cambios Patrimoniales).
+	Ejercicio Cerrado
+	El estado del año contable pasa a “Cerrado”.
+	Nuevo Ejercicio Abierto
+	Se crean saldos iniciales automáticos para el siguiente año.
+	Registro en Bitácora
+	Se documenta el cierre y usuario responsable.
+	________________
+
+
+9. Reglas de Negocio
+         1. Integridad contable: Todos los asientos del ejercicio deben estar contabilizados y cuadrar (Débito = Crédito).
+
+         2. Secuencia lógica: No se puede cerrar el ejercicio si existen meses abiertos.
+
+         3. Resultado automático: Las cuentas de ingresos y gastos deben trasladarse al resultado del ejercicio (cuenta de patrimonio).
+
+         4. Bloqueo posterior: Una vez cerrado, el ejercicio no puede modificarse sin autorización de reapertura.
+
+         5. Reapertura restringida: Solo el usuario con rol “Administrador Contable” puede reabrir un ejercicio.
+
+         6. Reportes obligatorios: El sistema debe emitir automáticamente los estados financieros finales.
+
+         7. Bitácora de control: Toda ejecución o reversión del cierre anual debe quedar registrada.
+
+         8. Normativa contable: Se deben aplicar las reglas del país y las NIIF (NIC 1, NIC 8).
+
+________________
+
+
+10. Integraciones
+            * Módulo de Contabilidad General: Genera y bloquea los asientos del ejercicio.
+
+            * Módulo de Reportes Financieros: Produce los estados finales.
+
+            * Módulo de Auditoría: Registra la trazabilidad del proceso.
+
+            * Módulo de Periodos Contables: Cambia los estados de los ejercicios.
+
+            * Módulo de Centros de Costo: Permite generar análisis por centro al cierre.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tipo de Componente: Proceso contable automatizado con ejecución única anual.
+
+               * Tablas Involucradas:
+
+                  * CNTBL_PERIODO_CONTABLE (control del estado anual).
+
+                  * CNTBL_ASIENTO (asientos del cierre y traslado de resultados).
+
+                  * CNTBL_ASIENTO_DET (detalle contable del cierre).
+
+                  * CNTBL_SALDOS_INICIALES (saldos generados para el nuevo ejercicio).
+
+                  * LOG_CIERRE_ANUAL (registro de ejecución del cierre anual).
+
+                     * Reportes Generados:
+
+                        * Balance General.
+
+                        * Estado de Resultados.
+
+                        * Estado de Cambios en el Patrimonio Neto.
+
+                        * Estado de Flujos de Efectivo.
+
+Consulta referencial (generación del asiento de cierre):
+INSERT INTO cntbl_asiento (nro_asiento, fecha, tipo_asiento, glosa)
+SELECT SEQ_ASIENTO.NEXTVAL, SYSDATE, 'CIERRE_ANUAL', 'Cierre de cuentas de resultados'
+FROM dual;
+
+
+INSERT INTO cntbl_asiento_det (nro_asiento, cuenta, debe, haber)
+SELECT SEQ_ASIENTO.CURRVAL,
+       cuenta,
+       CASE WHEN saldo > 0 THEN saldo ELSE 0 END AS debe,
+       CASE WHEN saldo < 0 THEN ABS(saldo) ELSE 0 END AS haber
+FROM vista_saldos_ingresos_gastos;
+
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Procesos → Ejecutar Cierre Contable Anual.
+
+                           2. Selecciona el ejercicio contable que desea cerrar.
+
+                           3. Presiona “Validar Ejercicio”.
+
+                           4. El sistema revisa que todos los periodos estén cerrados y asientos cuadren.
+
+                           5. Si la validación es correcta, el usuario presiona “Ejecutar Cierre Anual”.
+
+                           6. El sistema genera los asientos automáticos de cierre.
+
+                           7. Se trasladan los saldos de ingresos y gastos a la cuenta de resultado del ejercicio.
+
+                           8. Se generan los estados financieros finales y se guarda la documentación.
+
+                           9. El ejercicio pasa a estado “Cerrado” y se bloquean las operaciones.
+
+                           10. Se inicia el nuevo ejercicio con saldos de apertura.
+
+                           11. Se registra todo el proceso en la bitácora contable.
+
+                           12. El sistema muestra mensaje final:
+
+“Cierre contable anual ejecutado exitosamente. Resultado del ejercicio: [Utilidad/Pérdida].”
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un ejercicio contable válido para cerrar.”
+
+                              * “Existen periodos mensuales abiertos. No se puede ejecutar el cierre anual.”
+
+                              * “Asientos descuadrados detectados. Revise los reportes de validación.”
+
+                              * “Cierre contable anual ejecutado exitosamente.”
+
+                              * “Error durante el cierre. Contacte al administrador.”
+
+                              * “Solo un administrador puede reabrir ejercicios cerrados.”

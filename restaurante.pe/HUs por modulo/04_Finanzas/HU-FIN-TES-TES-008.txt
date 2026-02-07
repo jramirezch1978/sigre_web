@@ -1,0 +1,124 @@
+﻿HU-FIN-TES-TES--008 - Asignación de Fondo Fijo de Caja por Punto de Venta - v1. Título
+Asignación de Fondo Fijo de Caja por Punto de Venta
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero registrar y controlar el dinero asignado como fondo fijo a cada punto de venta, con el propósito de disponer de efectivo para dar cambio a los clientes, garantizando que dicho fondo no sea utilizado para gastos menores ni otras operaciones ajenas a la atención diaria.
+3. Proceso
+Proceso: Tesorería
+Subproceso: Tesorería
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Asignar un monto fijo de efectivo a cada caja o punto de venta.
+Para: Asegurar que cada caja cuente con fondos suficientes para brindar cambio a los clientes durante la jornada.
+De manera que: Se mantenga el control sobre los fondos fijos asignados, evitando su uso indebido y asegurando la conciliación diaria de efectivo.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tesorería > Fondo Fijo de Caja por Punto de Venta
+6. Criterios de Aceptación
+El sistema debe permitir:
+* Registrar Fondos Fijos de Caja por punto de venta o sucursal.
+
+* Asignar un monto inicial en moneda local o extranjera.
+
+* Definir el responsable de la caja (usuario o cajero asignado).
+
+* Bloquear el uso del fondo fijo para gastos menores, retiros o pagos no autorizados.
+
+* Consultar el historial de asignaciones, ajustes y reposiciones.
+
+* Generar asientos contables automáticos por la asignación y devolución del fondo.
+
+
+
+El sistema debe permitir controlar:
+   * Fecha de asignación del fondo.
+
+   * Monto autorizado.
+
+   * Responsable o cajero asignado.
+
+   * Estado del fondo (Activo / Reintegrado).
+
+   * Diferencias detectadas en arqueos de caja.
+
+Toda acción de creación, modificación o reintegro del fondo debe quedar registrada en el log de auditoría contable (Usuario, Fecha, Hora, Acción, Monto, Caja, Punto de Venta, Estado).
+Solo se podrá asignar un fondo fijo por caja activa dentro de la razón social y país actuales (solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos principales:
+
+      * Sucursal / Punto de Venta
+
+      * Caja
+
+      * Fecha de Asignación
+
+      * Monto Asignado
+
+      * Moneda
+
+      * Tipo de Cambio (si aplica)
+
+      * Responsable / Cajero
+
+      * Estado (Activo / Reintegrado)
+
+      * Observaciones
+
+      * Usuario de Registro
+
+Filtros disponibles:
+         * Sucursal / Punto de Venta
+
+         * Responsable / Cajero
+
+         * Estado del Fondo
+
+         * Fecha de Asignación
+
+         * Moneda
+
+Acciones disponibles:
+            * Registrar Asignación
+
+            * Editar Asignación
+
+            * Reintegrar Fondo
+
+            * Ver Asiento Contable
+
+            * Consultar Historial
+
+            * Exportar (Excel / PDF)
+
+            * Filtrar / Limpiar Filtros
+
+8. Detalle de Integración (opcional)
+Integración con Tesorería - Cajas: Para vincular la asignación del fondo con las cajas operativas.
+Integración con Contabilidad: Para registrar los asientos contables automáticos de asignación y reintegro del fondo fijo.
+Integración con Recursos Humanos: Para identificar al cajero o responsable designado.
+Integración con Auditoría Contable: Para registrar las acciones realizadas sobre los fondos fijos.
+9. Consideraciones Técnicas
+El sistema debe generar automáticamente el asiento contable al momento de la asignación:
+               * Débito: Cuenta de Caja Punto de Venta
+
+               * Crédito: Cuenta de Fondo Fijo Tesorería
+
+Y el asiento inverso al momento del reintegro:
+                  * Débito: Fondo Fijo Tesorería
+
+                  * Crédito: Caja Punto de Venta
+
+El sistema debe impedir movimientos de egresos o pagos con cargo al fondo fijo.
+Debe generar alertas en caso de detectar movimientos no autorizados o diferencias en el arqueo de caja.
+Debe cumplir con las normas NIC 1 (Presentación de Estados Financieros) y NIC 7 (Flujos de Efectivo).
+10. Comentarios
+Esta funcionalidad permite controlar de forma precisa los fondos asignados a cada punto de venta, asegurando transparencia y disciplina en la gestión de efectivo.
+Contribuye a una mejor conciliación diaria entre lo recaudado y el fondo asignado, evitando desvíos de dinero o uso indebido.
+Se recomienda incluir indicadores de control, tales como:
+                     * Total de fondos asignados por sucursal o país.
+
+                     * Diferencias detectadas en arqueos de caja.
+
+                     * Tiempos promedio de reintegro o ajuste del fondo.
+
+                     * Cumplimiento del uso exclusivo del fondo fijo para cambio.
+
+Asimismo, se sugiere permitir la configuración de alertas automáticas para montos fuera del rango autorizado y auditorías automáticas de arqueo al cierre de turno.

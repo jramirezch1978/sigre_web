@@ -1,0 +1,166 @@
+﻿HU-RRHH-NOM-LIQ-001 - Liquidación de vacaciones, indemnizaciones y beneficios legales
+ Versión: 1.0
+________________
+
+
+1. Título
+Liquidación de vacaciones pendientes, indemnizaciones y otros beneficios legales
+________________
+
+
+2. Descripción
+Como analista de recursos humanos, quiero que el sistema calcule y registre automáticamente la liquidación de vacaciones no gozadas, indemnizaciones y demás beneficios legales al cese o desvinculación del trabajador, de acuerdo con las leyes laborales de cada país, para garantizar el cumplimiento normativo y evitar errores en los pagos finales.
+________________
+
+
+3. Proceso
+Proceso: Procesos de Nómina
+Subproceso: Liquidaciones
+Módulo: RR.HH
+________________
+
+
+4. Narrativa de Usuario
+Quiero: Que el sistema genere automáticamente la liquidación laboral al momento del cese o baja del trabajador.
+Para: Cumplir con las normativas laborales de cada país y asegurar una liquidación correcta y oportuna.
+De manera que: Se reduzcan errores manuales, se agilice la entrega de beneficios al trabajador y se mantenga la trazabilidad contable.
+________________
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > RR.HH > Procesos de Nómina > Liquidaciones > Cálculo de Liquidación de Beneficios
+________________
+
+
+6. Criterios de Aceptación
+* El sistema debe permitir seleccionar al trabajador a liquidar y generar automáticamente los conceptos aplicables según el tipo de cese (renuncia, despido, jubilación, fallecimiento, etc.).
+
+* Debe incluir el cálculo de:
+
+   * Vacaciones pendientes y proporcionales.
+
+   * Indemnización por despido, según ley vigente del país.
+
+   * Gratificaciones, bonificaciones o CTS pendientes (según país).
+
+   * Retenciones legales o descuentos por préstamos, anticipos, u otros.
+
+      * Debe permitir parametrizar las tasas, topes y fórmulas de cálculo por país.
+
+      * El sistema debe generar el comprobante de liquidación en formato PDF y XML.
+
+      * Debe generar los
+      *       * El sistema debe permitir registrar aprobaciones digitales del cálculo antes del pago.
+
+      * Toda liquidación debe quedar registrada en el log de auditoría (usuario, fecha, hora, acción).
+
+      * Los resultados deben poder visualizarse en moneda local y corporativa.
+
+________________
+
+
+7. Campos del Formulario / Tabla de Vista
+Campo
+	Tipo de Campo
+	Descripción
+	Ejemplo
+	Validaciones / Consideraciones UX/UI
+	Trabajador
+	Lista desplegable
+	Selección del empleado a liquidar.
+	Luis Ramírez
+	Solo trabajadores activos o en cese.
+	Tipo de Cese
+	Lista desplegable
+	Causa del cese según normativa.
+	Renuncia voluntaria
+	Determina fórmulas aplicables.
+	Fecha de Ingreso
+	Fecha
+	Fecha inicial de vínculo laboral.
+	01/02/2020
+	Campo informativo.
+	Fecha de Cese
+	Fecha
+	Fecha efectiva del término laboral.
+	30/09/2025
+	Campo obligatorio.
+	Vacaciones Pendientes
+	Numérico (calculado)
+	Días no gozados acumulados.
+	15
+	Cálculo automático según asistencia.
+	Indemnización
+	Numérico (calculado)
+	Monto de compensación legal.
+	2,500.00
+	Según tipo de cese y ley aplicable.
+	CTS / Fondo Equivalente
+	Numérico (calculado)
+	Compensación por tiempo de servicio o similar.
+	1,200.00
+	Calculado según país.
+	Otros Beneficios
+	Numérico
+	Bonos o pagos extraordinarios.
+	500.00
+	Campo editable según permisos.
+	Deducciones / Retenciones
+	Numérico
+	Préstamos, anticipos u otras deducciones.
+	300.00
+	Debe validarse con cuentas corrientes.
+	Total a Pagar
+	Numérico (calculado)
+	Resultado final de la liquidación.
+	3,900.00
+	Cálculo automático.
+	Observaciones
+	Texto libre
+	Notas o justificaciones.
+	Cese por reestructuración
+	Opcional.
+	Estado del Proceso
+	Selección
+	Fase de la liquidación.
+	Calculada / En revisión / Aprobada
+	Control de flujo.
+	________________
+
+
+8. Detalle de Integración (opcional)
+         * Integración con Nómina: El monto liquidado debe excluirse de futuros procesos de pago.
+
+         * Integración con Contabilidad: Generación automática de asientos contables por concepto.
+
+         * Integración con Bancos: Posibilidad de generar orden de pago automática.
+
+         * Integración con Auditoría: Registro de usuario, fecha, y versión del cálculo.
+
+________________
+
+
+9. Consideraciones Técnicas
+            * Los cálculos deben basarse en las normas laborales del país de la razón social activa.
+
+            * Los parámetros (tasas, topes, conceptos) deben ser configurables sin intervención técnica.
+
+            * La liquidación debe ser reproducible y auditable (histórico de cálculos por trabajador).
+
+            * Permitir impresión de constancia de liquidación con firma digital.
+
+            * Los datos deben almacenarse en moneda local y corporativa.
+
+            * Soporta proceso multipaís, adaptando conceptos legales por nación.
+
+________________
+
+
+10. Comentarios
+Esta funcionalidad permite automatizar la liquidación de trabajadores de forma precisa y conforme a ley, reduciendo tiempos administrativos y errores de cálculo.
+Se recomienda incluir indicadores de control como:
+               * Promedio de días pendientes por trabajador.
+
+               * Costo promedio de liquidación por tipo de cese.
+
+               * Monto total de beneficios legales pagados por periodo.

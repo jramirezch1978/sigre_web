@@ -1,0 +1,169 @@
+﻿HU-FIN-ADL-003 - Liquidación de Órdenes de Giro[a] - v1.0
+1. Título
+ Liquidación de Solicitudes de Adelantos
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero registrar la liquidación de las solicitudes de adelantos previamente aprobadas y desembolsadas, para rendir cuentas sobre el uso del dinero asignado, registrar los gastos asociados, calcular saldos pendientes o devoluciones, y mantener la contabilidad actualizada de los movimientos financieros y presupuestales.
+3. Proceso
+ Proceso: Adelantos
+Subproceso: Solicitud de Adelantos
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Registrar la liquidación de una solicitud de adelanto ya desembolsada.[b]
+Para: Dejar constancia de los gastos realizados, documentos de respaldo y saldos a devolver o por pagar.
+De manera que: Se asegure la trazabilidad contable y financiera del adelanto, y se mantenga actualizado el control presupuestal del centro de costo correspondiente.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Finanzas > Adelantos > Solicitud de Adelantos > Liquidación
+6. Criterios de Aceptación
+* El sistema debe mostrar todas las solicitudes de adelantos con estado “Desembolsado” o “En Proceso de Liquidación”.[c]
+
+* El usuario podrá seleccionar una solicitud y visualizar el detalle de la misma (monto aprobado, monto desembolsado, beneficiario, centro de costo, etc.).
+
+* El sistema debe permitir ingresar los gastos efectuados vinculados a la solicitud, detallando: tipo de gasto, fecha, documento de respaldo (boleta, factura, recibo), número de documento, proveedor, monto, moneda y descripción.
+
+* El sistema debe calcular automáticamente:
+
+   * Total Gastado.
+
+   * Saldo a Devolver (si el gasto < monto del adelanto).
+
+   * Saldo a Regularizar (si el gasto > monto del adelanto).
+
+      * Debe permitir adjuntar comprobantes digitalizados en formato PDF o imagen (una o varias por gasto).
+
+      * El usuario podrá guardar la liquidación en estado “Borrador” o “Enviada para Revisi[d][e][f]ón”
+
+      * Los usuarios con perfil Aprobador Financiero podrán revisar la liquidación y aprobarla, cambiando su estado a “Liquidada”.
+
+      * Si se detectan diferencias o gastos no válidos, la liquidación podrá ser rechazada, quedando en estado “Observada”, con registro obligatorio de la observación.
+
+      * Una vez aprobada la liquidación, el sistema generará automáticamente el asiento contable correspondiente, afectando cuentas de gastos, anticipos y caja/banco.
+
+      * Toda acción (registro, modificación, aprobación, rechazo, exportación) debe registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción).
+
+      * El usuario podrá exportar el detalle de la liquidación a Excel o PDF.
+
+      * La información de Razón Social y País debe mostrarse siempre en modo solo lectura.
+
+7. Campos del Formulario / Vista de Tabla
+Campos principales del formulario de liquidación:
+         * Razón Social (solo lectura)
+
+         * País (solo lectura)
+
+         * N° de Solicitud de Adelanto(Orden de giro)
+
+         * Fecha de Desembolso
+
+         * Beneficiario
+
+         * Tipo de Adelanto (Proveedor / Colaborador)Beneficiario
+
+         * Centro de Costo
+
+         * Monto del Adelanto
+
+         * Moneda
+
+         * Tipo de Cambio (informativo)
+
+         * Total Gastado (calculado)
+
+         * Saldo a Devolver / Regularizar (calculado)
+
+         * Estado de la Liquidación (Borrador / Enviada / Liquidada / Observada)
+
+         * Observaciones
+         * Usuario Responsable / Usuario Aprobador
+         * Tipo de Gasto (Alimentación, Transporte, Materiales, Viáticos, Otros)
+         * Detalle de gastos (tabla general de la liquidación):[g]
+            * Fecha del Gasto
+
+            * Adjuntos (ícono de documento / enlace de descarga)
+            * Serie y Número de Documento
+
+            * Proveedor
+
+            * Descripción
+
+            * Monto
+
+            * Moneda
+
+
+
+
+Filtros disponibles (en listado general de liquidaciones):
+               * Estado de la Liquidación (Pendiente / Enviada / Liquidada / Observada)
+
+               * Rango de Fechas (Desembolso / Liquidación)
+
+               * Beneficiario
+
+               * Tipo de Adelanto
+
+               * Centro de Costo
+
+               * Moneda
+
+               * Sucursal / Local
+
+Acciones disponibles:
+                  * Registrar Nueva Liquidación
+
+                  * Editar Liquidación
+
+                  * Ver Detalle
+
+                  * Enviar para Revisión
+
+                  * Aprobar Liquidación
+
+                  * Rechazar / Observar Liquidación
+[h]
+                  * Exportar (Excel / PDF)
+
+                  * Filtrar / Limpiar Filtros
+
+                  * Actualizar Información
+
+8. Detalle de Integración (opcional)
+                     * Integración con Contabilidad: Genera automáticamente los asientos contables de cierre del adelanto, reconociendo gastos y regularizaciones.
+
+                     * Integración con Tesorería: Actualiza los saldos de caja y flujo de efectivo (devoluciones o pagos complementarios).
+
+                     * Integración con RRHH: Permite reflejar liquidaciones de adelantos a colaboradores en sus cuentas individuales.
+
+                     * Integración con Auditoría: Registra toda acción con trazabilidad completa, permitiendo seguimiento por usuario y fecha.
+
+9. Consideraciones Técnicas
+                        * La liquidación sólo puede crearse sobre solicitudes aprobadas y desembolsadas.
+
+                        * El sistema debe validar que los montos liquidados correspondan a documentos fiscales válidos.
+
+                        * Cada gasto deberá tener documento de respaldo adjunto (PDF o imagen).
+
+                        * El sistema debe permitir subir múltiples archivos asociados a una liquidación, con límite de tamaño parametrizable.
+
+                        * El cálculo de saldos debe realizarse en tiempo real.
+
+                        * Todas las acciones deben registrarse en el log de auditoría contable, incluyendo Usuario, Fecha, Hora, IP, Acción y Observación.
+
+                        * Los asientos contables se generarán con base en las cuentas parametrizadas según tipo de gasto y centro de costo.
+
+                        * Debe cumplir con las normas NIC 7 (Flujo de Efectivo), NIC 1 (Presentación de Estados Financieros) y NIC 8 (Políticas Contables, Cambios en Estimaciones y Errores).
+
+                        * Compatible con esquema multipaís y multimoneda, utilizando tipo de cambio oficial según fecha de liquidación.
+
+10. Comentarios
+Esta funcionalidad completa el ciclo del proceso de adelantos, permitiendo rendir cuentas de manera transparente, ágil y auditada.
+Optimiza el control interno al vincular los gastos reales con los montos adelantados, y facilita la conciliación contable y presupuestal.
+Se recomienda habilitar alertas automáticas para liquidaciones pendientes de presentación y recordatorios por correo electrónico al beneficiario o responsable.
+También se sugiere permitir la liquidación parcial cuando existan gastos progresivos dentro de un mismo adelanto.
+[a]Se refiere a ¨Liquidación de Rendición de Gastos
+[b]¿Aquí sería orden de giro aprobadas? Porque no hay solicitudes de adelanto desembolsadas
+[c]Si es una orden de adelanto, cómo llega a tener esos estados. En la HU anterior solo se tienen los estados Pendiente, aprobada, rechazada.
+[d]quién gestiona esa revisión?
+[e]Los usuarios con perfil Aprobador Financiero podrán revisar la liquidación y aprobarla, cambiando su estado a “Liquidada”.
+[f]Me refiero a que no se ha considerado un apartado para realizar la aprobación de las liquidaciones generadas.
+[g]Se contempla agregar el campo de nº de liquidación
+[h]Considero que esstas dos opciones deberían estar en una HU diferente.

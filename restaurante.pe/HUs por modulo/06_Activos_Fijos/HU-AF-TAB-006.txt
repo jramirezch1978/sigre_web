@@ -1,0 +1,227 @@
+﻿HU-AF-TAB-006 - Configuración Global de Parámetros del Módulo - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Tablas
+3. Subproceso
+Parámetros de Operaciones
+4. Nombre de la Historia de Usuario
+Configuración Global de Parámetros del Módulo
+5. Descripción / Propósito
+Como Administrador Contable del Módulo de Activos Fijos, quiero definir y mantener los parámetros globales de configuración del módulo, para establecer las condiciones operativas, contables y de integración necesarias para el correcto funcionamiento de los procesos de registro, depreciación, contabilización y control patrimonial, garantizando uniformidad y consistencia entre todas las razones sociales y países donde opera el sistema Restaurant.pe.
+6. Alcance
+Esta funcionalidad permite gestionar el Centro de Control Global del módulo de Activos Fijos, desde el cual se parametrizan los elementos fundamentales de operación contable, depreciación, integración y numeración de documentos.
+La configuración afecta transversalmente a todos los procesos del módulo, asegurando que las reglas y parámetros contables se apliquen de forma estandarizada en todas las razones sociales o, en su caso, a nivel individual según configuración local.
+Los parámetros definidos se almacenan de forma centralizada y serán consumidos por los submódulos de Altas de Activos, Depreciación, Bajas, Pólizas de Seguros, Matrices Contables y Reportes Financieros.
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Tablas → Parámetros de Operaciones → Configuración Global del Módulo
+8. Campos del Formulario
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada automáticamente por la sesión del usuario.
+	País
+	Determinado por la razón social activa.
+	Fecha de Última Actualización
+	Fecha y hora de la última modificación de los parámetros.
+	Campos Obligatorios:
+Grupo
+	Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Depreciación
+	Operación de Depreciación por Defecto
+	Lista
+	Define el método por defecto (Lineal, Suma de Dígitos, Otro).
+	Obligatorio. Afecta los activos nuevos.
+	Depreciación
+	Libro Contable de Depreciación
+	Lista
+	Define el libro contable base (Financiero, Tributario, NIIF, Otro).
+	Debe existir en catálogo contable.
+	Contabilidad General
+	Cuenta Global de Activo Fijo
+	Numérico (12)
+	Cuenta contable genérica por defecto.
+	Validar existencia en catálogo contable.
+	Contabilidad General
+	Cuenta Global de Depreciación
+	Numérico (12)
+	Cuenta contable por defecto para depreciación acumulada.
+	Validar existencia.
+	Contabilidad General
+	Cuenta de Gasto de Depreciación Global
+	Numérico (12)
+	Cuenta de gasto general para depreciaciones automáticas.
+	Obligatoria.
+	Contabilidad General
+	Centro de Costo por Defecto
+	Lista
+	Centro de costo base si no se especifica en el activo.
+	Validar en catálogo de centros de costo.
+	Numeración
+	Formato de Numeración de Activos
+	Texto (20)
+	Define la estructura del código de activo (ej. AF-{AÑO}-{SECUENCIA}).
+	Validar duplicidad.
+	Integración
+	Integración con Módulo Contable
+	Check
+	Determina si las operaciones generan asientos automáticos.
+	Por defecto activado.
+	Integración
+	Integración con Módulo de Compras
+	Check
+	Permite registrar activos desde órdenes de compra.
+	—
+	Integración
+	Integración con Módulo de Inventarios
+	Check
+	Permite controlar traslados físicos.
+	—
+	Control Operativo
+	Días Previos a Cierre de Depreciación
+	Numérico (2)
+	Define límite de días previos al cierre contable mensual.
+	Rango 0–31.
+	Control Operativo
+	Permitir Modificación Post Cierre
+	Check
+	Define si pueden editarse activos tras cierre contable.
+	Por defecto desactivado.
+	Campos Opcionales:
+Campo
+	Descripción
+	Correlativo Manual para Activos
+	Permite habilitar ingreso manual de código.
+	Observaciones Generales
+	Notas o comentarios administrativos sobre la configuración.
+	
+
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo / Crear Configuración
+	Crea la configuración inicial del módulo (solo una por razón social).
+	Los parámetros quedan activos y disponibles globalmente.
+	Editar
+	Modifica parámetros globales existentes.
+	Se actualizan y registran en el log contable.
+	Consultar
+	Visualiza todos los parámetros definidos.
+	Solo lectura.
+	Duplicar Configuración
+	Permite copiar parámetros de otra razón social.
+	Aplica parámetros similares.
+	Restablecer Valores por Defecto
+	Restaura la configuración inicial del sistema.
+	Se mantienen registros históricos.
+	
+
+10. Reglas de Negocio
+1. Solo puede existir una configuración activa por razón social.
+
+2. Los cambios de cuentas contables, libros o numeración deben registrarse automáticamente en el Log de Auditoría Contable.
+
+3. Si no se define una cuenta global, el sistema utilizará la configurada en la matriz contable de subclase (HU-AF-TAB-004).
+
+4. La modificación del libro contable de depreciación impacta en los procesos de cálculo y reportes asociados.
+
+5. La integración contable debe estar activa para permitir la contabilización automática.
+
+6. Las numeraciones definidas deben mantener unicidad y secuencia por año fiscal.
+
+7. La modificación de parámetros en cierre contable requiere perfil de Administrador Global.
+
+8. Cada actualización debe incluir usuario, fecha y descripción de cambio en el log.
+
+9. Los parámetros globales no pueden eliminarse; solo editarse o inactivarse.
+
+10. El sistema debe alertar al usuario cuando existan dependencias (por ejemplo: cambio de libro con depreciaciones en curso).
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Módulo Contable General
+	Para integración automática de asientos de depreciación, alta y baja.
+	Módulo de Compras
+	Para alta de activos desde facturas o órdenes de compra.
+	Módulo de Inventarios / Traslados
+	Para trazabilidad física de activos.
+	Módulo de Reportes Financieros
+	Utiliza parámetros para reportes contables y tributarios.
+	Log de Auditoría Contable
+	Registro de todas las modificaciones realizadas.
+	Catálogo de Cuentas Contables
+	Fuente de validación de las cuentas globales asignadas.
+	
+
+12. Consideraciones Técnicas
+   * Implementación mediante API RESTful centralizada.
+
+   * Tabla principal: AF_CFG_PARAMETROS_GLOBALES.
+
+   * Integración directa con tablas maestras: CO_MA_CUENTAS_CONTABLES, CO_CFG_LIBROS_CONTABLES, CO_MA_CENTROS_COSTO.
+
+   * Validaciones en tiempo real para evitar inconsistencias contables.
+
+   * Registro automático en Log Contable y Log Técnico de Sistema.
+
+   * Soporte para exportación e importación de parámetros (Excel o JSON).
+
+   * Debe existir control de versión de parámetros (vinculado a periodo contable).
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a perfiles “Administrador de Activos” o “Contador General”.
+	Performance
+	Respuesta en consultas y actualizaciones ≤ 3 segundos.
+	Usabilidad
+	Interfaz tabular con pestañas por grupo de configuración.
+	Disponibilidad
+	99.5% en horario operativo.
+	Auditoría
+	Registro automático en log de todas las operaciones CRUD.
+	Escalabilidad
+	Soporte para múltiples razones sociales y países.
+	
+
+14. Criterios de Aceptación
+      1. El usuario puede registrar una configuración global completa para una razón social.
+
+      2. El sistema valida que solo exista una configuración activa por empresa.
+
+      3. Los cambios en cuentas contables o libros quedan registrados en el log.
+
+      4. El sistema alerta si los cambios impactan procesos abiertos (depreciaciones en curso).
+
+      5. Los parámetros globales se aplican automáticamente en los procesos operativos.
+
+      6. Los reportes de configuración pueden exportarse en Excel y PDF.
+
+      7. Los valores se cargan correctamente en menos de 3 segundos.
+
+15. Comentarios / Observaciones
+         * Esta HU constituye el núcleo de control funcional del módulo de Activos Fijos, ya que define las políticas y condiciones bajo las cuales operan todos los subprocesos contables y patrimoniales.
+
+         * La configuración global permite alinear el comportamiento contable entre países y razones sociales, garantizando cumplimiento con normas locales (PCGE, PUC, NIIF).
+
+         * Debe garantizarse trazabilidad total de modificaciones mediante logs y versiones históricas.
+
+         * Su diseño debe mantener coherencia con las HU:
+
+            * HU-AF-TAB-004 (Matriz Contable por Subclases)
+
+            * HU-AF-TAB-003 (Clasificación Jerárquica de Activos)
+
+            * HU-AF-TAB-002 (Tipos de Seguros).
+
+               * Se recomienda incluir funcionalidad de “simulación de impacto” antes de aplicar cambios globales, para prevenir inconsistencias contables.

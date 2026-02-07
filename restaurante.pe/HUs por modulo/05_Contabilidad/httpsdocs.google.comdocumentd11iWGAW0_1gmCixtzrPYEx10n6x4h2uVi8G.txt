@@ -1,0 +1,269 @@
+﻿HU-CON-009 - Consulta de Saldos de Cuenta Corriente - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-009
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Cuentas Corrientes
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Consultar Saldos de Cuenta Corriente
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir consultar los saldos y movimientos de las cuentas corrientes, tanto de cuentas por cobrar (CxC) como de cuentas por pagar (CxP), vinculadas con la contabilidad.
+La funcionalidad mostrará la información consolidada por tercero (cliente/proveedor), documento, cuenta contable, y periodo contable, ofreciendo opciones de filtro, agrupación y exportación.
+La consulta debe incluir los movimientos contables registrados en los libros auxiliares y su correspondencia con los asientos del libro diario, garantizando que los saldos coincidan con los balances contables generales.
+
+
+________________
+
+
+3. Actor(es)
+   * Usuario Contable: Consulta los saldos de cuentas corrientes.
+
+   * Analista de Cuentas: Realiza análisis de antigüedad de saldos, cruces o conciliaciones.
+
+   * Jefe de Contabilidad: Supervisa los saldos y valida su correspondencia con estados financieros.
+
+   * Auditor Interno: Revisa la trazabilidad de saldos y movimientos contables.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe contar con permisos de acceso al módulo de Contabilidad – Cuentas Corrientes.
+
+      * Deben existir asientos contables registrados y transferidos que afecten cuentas de tipo corriente.
+
+      * Los catálogos de terceros, cuentas contables y documentos deben estar actualizados.
+
+      * El periodo contable debe estar abierto o en estado de consulta.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Cuentas Corrientes → Consulta de Saldos y Movimientos
+________________
+
+
+6. Historia de Usuario
+Como usuario contable,
+quiero consultar los saldos y movimientos de las cuentas corrientes de clientes y proveedores,
+para analizar su situación contable, realizar conciliaciones y asegurar la correcta correspondencia con los registros de contabilidad general.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar el tipo de cuenta corriente: CxC o CxP.
+	Muestra los saldos correspondientes al tipo elegido.
+	2
+	Filtrar por razón social, cuenta contable, tercero, documento o periodo.
+	Se muestran solo los registros que cumplan los filtros aplicados.
+	3
+	Mostrar saldo inicial, movimientos (débitos y créditos) y saldo final por cuenta/tercero/documento.
+	Totales coherentes con el libro mayor.
+	4
+	Permitir visualizar detalle de movimientos contables (número de asiento, fecha, glosa, importe).
+	Acceso mediante doble clic o botón “Ver detalle”.
+	5
+	Permitir exportar la consulta a formatos Excel y PDF.
+	Archivo descargable con los mismos datos visualizados.
+	6
+	Mostrar antigüedad de saldos (0-30, 31-60, 61-90, >90 días).
+	Reporte agrupado por rango de días.
+	7
+	Los saldos deben coincidir con el plan contable y con el balance general.
+	Validación automática del sistema.
+	8
+	Permitir acceder al asiento contable origen del movimiento.
+	Enlace al módulo de “Registro de Asientos”.
+	9
+	Registrar en bitácora la fecha, usuario y filtros utilizados.
+	Auditoría de consultas.
+	________________
+
+
+8. Formulario de Consulta
+Vista: Pantalla de consulta con filtros superiores y tabla de resultados.
+Origen de datos: Tablas CNTBL_ASIENTO, CNTBL_ASIENTO_DET, CNTBL_ASIENTO_DET_AUX, y maestros de terceros, documentos y cuentas contables.
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Tipo de Cuenta Corriente
+	Lista desplegable
+	Sí
+	Cuentas por Cobrar / Cuentas por Pagar.
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Periodo en consulta.
+	Cuenta Contable
+	Lista desplegable (Plan de Cuentas)
+	No
+	Filtra movimientos por cuenta.
+	Descripción
+	Texto
+	No
+	Nombre de la cuenta contable
+	Tercero (Cliente/Proveedor)
+	Lista desplegable
+	No
+	Muestra movimientos del tercero seleccionado.
+	Tipo de Documento
+	Lista desplegable
+	No
+	Filtra por factura, nota de crédito, recibo, etc.
+	Número de Documento
+	Texto
+	No
+	Coincide parcial o exactamente.
+	Estado
+	Lista desplegable
+	No
+	Activo / Cancelado / Pendiente.
+	Rango de Fechas
+	Fecha
+	No
+	Desde / Hasta fecha de asiento.
+	8.2 Resultados de la Consulta
+Campo
+	Descripción
+	Razón Social
+	Nombre del tercero (cliente o proveedor).
+	Cuenta Contable
+	Código y descripción de la cuenta.
+	Documento Ref.
+	Tipo y número de documento contable.
+	Fecha
+	Fecha del asiento contable.
+	Glosa
+	Descripción del movimiento.
+	Débito
+	Importe cargado.
+	Crédito
+	Importe abonado.
+	Saldo
+	Saldo acumulado por movimiento.
+	Antigüedad
+	Días transcurridos desde la fecha del documento.
+	Moneda
+	Moneda de registro (S/ o USD).
+	N° Asiento
+	Identificador contable del movimiento (con acceso directo).
+
+
+
+
+
+
+	________________
+
+
+9. Reglas de Negocio
+         1. Clasificación automática: El sistema identifica si la cuenta contable es de tipo CxC o CxP según el plan de cuentas.
+
+         2. Saldos acumulados: Se calcula saldo inicial, movimientos y saldo final en base a los asientos contables.
+
+         3. Conversión de moneda: Si existen movimientos en moneda extranjera, el sistema mostrará equivalentes en moneda local al tipo de cambio vigente.
+
+         4. Antigüedad: Se calcula en base a la fecha del documento o del asiento contable.
+
+         5. Cierre de periodo: En periodos cerrados, la consulta es solo de lectura.
+
+         6. Integridad contable: Los movimientos deben provenir de asientos con estado activo (FLAG_ESTADO='1').
+
+         7. Auditoría: Toda consulta genera registro en bitácora con usuario, fecha, filtros y cantidad de resultados.
+
+         8. Permisos: Solo usuarios con perfil contable o auditor pueden acceder a los detalles de los asientos.
+
+________________
+
+
+10. Integraciones
+            * Módulo de Cuentas por Cobrar y Pagar: Fuente primaria de documentos y saldos.
+
+            * Libro Diario y Mayor: Para trazabilidad de asientos contables.
+
+            * Plan de Cuentas: Para identificar naturaleza y tipo de cuenta corriente.
+
+            * Monedas y Tipo de Cambio: Para conversión de saldos.
+
+            * Auditoría del Sistema: Registro de consultas y exportaciones.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tablas Principales: CNTBL_ASIENTO, CNTBL_ASIENTO_DET, CNTBL_ASIENTO_DET_AUX, CLIENTES, PROVEEDORES, DOC_TIPO.
+
+               * Consultas SQL Base:
+
+                  * Consolidación por cuenta, tercero, documento, periodo.
+
+                  * Cálculo de saldo inicial + movimientos = saldo final.
+
+                     * Performance: Consultas optimizadas por índices en CNTA_CTBL, COD_RELACION, TIPO_DOCREF1, NRO_DOCREF1.
+
+                     * Exportaciones: Formatos Excel (.xlsx) y PDF con encabezados institucionales.
+
+                     * Vista Detalle: Consulta enlazada al asiento contable origen con lectura completa del diario.
+
+                     * Seguridad: Encriptación de datos sensibles y logs de auditoría.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                        1. Usuario accede al menú Contabilidad → Cuentas Corrientes → Consulta de Saldos.
+
+                        2. Selecciona filtros: tipo de cuenta, periodo, cuenta, tercero, documento.
+
+                        3. Presiona “Buscar” → el sistema procesa la consulta.
+
+                        4. El sistema muestra tabla de resultados con saldos y movimientos.
+
+                        5. El usuario puede:
+
+                           * Ver detalle del asiento contable.
+
+                           * Exportar el resultado a Excel o PDF.
+
+                           * Filtrar nuevamente o limpiar búsqueda.
+
+                              6. El sistema registra en bitácora los filtros y el usuario que realizó la consulta.
+
+________________
+
+
+13. Mensajes de Validación
+                                 * “Debe seleccionar al menos un filtro de búsqueda.”
+
+                                 * “No existen movimientos para los parámetros indicados.”
+
+                                 * “El periodo contable seleccionado está cerrado; la consulta es de solo lectura.”
+
+                                 * “Error al recuperar información. Verifique conexión contable.”
+
+                                 * “Exportación generada exitosamente.”

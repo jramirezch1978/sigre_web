@@ -1,0 +1,129 @@
+﻿HU-FIN-OP-CP-005 - Relación de Facturas y Documentos por Proveedor - v1.0
+1. Título
+Relación de Facturas y Documentos por Proveedor
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero obtener una relación detallada de todas las facturas y documentos asociados a cada proveedor (notas de crédito, débito, retenciones, pagos, entre otros), para analizar el estado de cuenta, verificar saldos pendientes y facilitar la conciliación de cuentas por pagar.
+3. Proceso
+Proceso: Operaciones
+Subproceso: Cuentas por Pagar
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Consultar de forma consolidada todas las facturas, notas y pagos vinculados a un proveedor.
+Para: Tener una visión completa de las obligaciones, documentos compensados y saldos pendientes con cada proveedor.
+De manera que: Se facilite la conciliación contable, la gestión de pagos y el control financiero de las relaciones con los proveedores.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Operaciones > Cuentas por Pagar > Relación de Facturas y Documentos por Proveedor
+6. Criterios de Aceptación
+El sistema debe permitir consultar, por proveedor, todos los documentos registrados en cuentas por pagar:
+* Facturas
+
+* Notas de Crédito
+
+* Notas de Débito
+
+* Retenciones
+
+* Pagos realizados o pendientes
+
+* Canjes CxC vs CxP
+
+El usuario podrá filtrar la información por rango de fechas, tipo de documento, estado, sucursal y moneda.
+El sistema debe mostrar la información agrupada por proveedor, con subtotales por tipo de documento y saldo general del proveedor.
+El listado debe incluir totales por columna (Monto Total, Pagado, Pendiente, Retenido).
+El usuario podrá visualizar el detalle del documento y su asiento contable asociado haciendo clic sobre el número de documento.
+El sistema debe permitir exportar la información a Excel y PDF, conservando el formato de agrupación por proveedor.
+Toda consulta o exportación debe registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción, Parámetros de Búsqueda).
+Sólo se mostrarán los datos de la Razón Social y País activos en la sesión del usuario (campos de solo lectura).
+7. Campos del Reporte / Columnas de Vista Tabla
+Campos principales:
+
+   * Código del Proveedor
+
+   * Nombre del Proveedor
+
+   * Tipo de Documento (Factura, Nota de Crédito, Nota de Débito, Retención, Pago)
+
+   * N° de Documento
+
+   * Fecha de Emisión
+
+   * Fecha de Vencimiento
+
+   * Moneda
+
+   * Monto Total
+
+   * Monto Pagado
+
+   * Monto Pendiente
+
+   * Estado (Pendiente / Pagado / Compensado / Anulado)
+
+   * N° de Asiento Contable
+
+   * Fecha del Asiento
+
+   * Centro de Costo
+
+   * Sucursal / Local[a]
+
+   * Usuario de Registro
+
+Filtros disponibles:
+      * Proveedor
+
+      * Tipo de Documento
+
+      * Estado del Documento
+
+      * Fecha de Emisión
+
+      * Fecha de Vencimiento
+
+      * Moneda
+
+      * Sucursal / Local
+
+      * País
+
+Acciones disponibles:
+         * Ver Detalle del Documento (Individual)
+
+         * Ver Asiento Contable(Individual)
+
+         * Exportar (Excel / PDF) (Individual/ general)
+
+         * Imprimir Relación (general)
+
+         * Actualizar Vista (general)
+
+8. Detalle de Integración (opcional)
+Integración con Contabilidad: Permite acceder al asiento contable de cada documento registrado.
+Integración con Tesorería: Muestra pagos asociados a cada factura o documento.
+Integración con Proveedores: Sincroniza la información del maestro de proveedores (nombre, identificación, condiciones de pago).
+Integración con Reportes Financieros: Alimenta los reportes de antigüedad de saldos y cuentas por pagar consolidadas.
+9. Consideraciones Técnicas
+El sistema debe realizar el cálculo del saldo pendiente de forma dinámica:
+ Saldo Pendiente = Monto Total - (Pagos Aplicados + Notas de Crédito + Canjes)
+Debe garantizar la consistencia contable entre los módulos de Cuentas por Pagar, Contabilidad y Tesorería.
+Los datos deben actualizarse en tiempo real con base en los registros aprobados.
+El sistema debe permitir agrupar o expandir por proveedor y tipo de documento.
+Las acciones (consultas, exportaciones, vistas de asiento) deben registrarse en el log de auditoría contable.
+Debe cumplir con los lineamientos de las normas NIC 1 y NIC 37, sobre presentación de estados financieros y reconocimiento de pasivos.
+Debe ser compatible con entornos multipaís y multimoneda, mostrando montos en moneda local y corporativa (USD).
+10. Comentarios
+Esta funcionalidad es esencial para la gestión integral de proveedores, permitiendo controlar de forma centralizada todas las obligaciones y documentos relacionados.
+Facilita la conciliación contable, auditorías internas y revisiones fiscales, garantizando transparencia y trazabilidad completa.
+Se recomienda incorporar indicadores de control, tales como:
+            * Total de documentos por proveedor.
+
+            * Total de saldos pendientes por proveedor y sucursal.
+
+            * Porcentaje de documentos conciliados o compensados.
+
+Asimismo, puede integrarse un botón de “Estado de Cuenta del Proveedor” para generar un reporte consolidado con todos los movimientos y saldos a una fecha determinada.
+
+
+[a]@consultorexterno1@restaurant.pe @igarcia@restaurant.pe 
+La Sucursal y Local son conceptos diferentes o similares? Si hacen referencia a lo mismo, se debe estandarizar el término en la elaboración de de HU (es decir, hacer referencia solo a uno de los dos términos) para no generar confusión.
+_Asignada a consultorexterno1@restaurant.pe_

@@ -1,0 +1,250 @@
+﻿HU-CON-031 – Matrices de Almacenes – v1.0
+________________
+
+
+1. Identificación General
+Código HU: HU-CON-031
+Versión: 1.0
+Fecha: 30/10/2025
+Módulo: Contabilidad
+Subproceso: Maestros Contables
+Proceso: Contabilidad General
+Nombre de la Funcionalidad: Matrices de Almacenes
+Tipo: Mantenimiento de Tabla Maestra
+Autor: Redactor de HU – Sistema Contable Multipaís
+________________
+
+
+2. Descripción General
+El sistema debe permitir registrar, consultar, modificar y desactivar Matrices Contables de Almacén, las cuales permiten relacionar parámetros clave de los movimientos de inventarios con las cuentas contables correspondientes.
+Cada matriz contable debe relacionar los siguientes tres parámetros operativos del almacén:
+1. Tipo de movimiento de almacén (Ingreso, Salida, Transferencia, Ajuste, etc.).
+
+2. Subcategoría del artículo (insumos, bebidas, suministros, activos, etc.).
+
+3. Grupo contable (clasificación contable definida por la empresa).
+
+A partir de esta combinación, el sistema debe identificar automáticamente la matriz contable aplicable, definiendo las cuentas para generar los asientos contables automáticos asociados a las operaciones del módulo de Almacén.
+El mantenimiento debe incluir una vista Maestro (encabezado) y un Detalle donde se registren las cuentas contables asociadas a la matriz.
+________________
+
+
+3. Actor(es)
+   * Contador General
+
+   * Asistente Contable
+
+   * Administrador del Sistema
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos sobre el menú
+Contabilidad → Maestros → Matrices Contables de Almacén.
+
+      * Deben existir registros vigentes de:
+
+         * Tipos de movimientos de almacén
+
+         * Subcategorías de artículos
+
+         * Grupos contables
+
+         * Cuentas contables del Plan Contable vigente
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Maestros → Matrices Contables de Almacén
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero mantener las matrices contables de almacén, definidas por tipo de movimiento, subcategoría del artículo y grupo contable,
+para que el sistema seleccione automáticamente la cuenta contable correcta al generar asientos automáticos en los movimientos de almacén.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado esperado
+	1
+	Mostrar listado de matrices contables existentes
+	La vista lista todas las matrices con filtros por movimiento, subcategoría y estado.
+	2
+	Permitir crear nuevas matrices contables
+	El usuario registra los 3 parámetros y las cuentas contables asociadas.
+	3
+	Validar que no existan duplicados de combinación (Movimiento + Subcategoría + Grupo Contable)
+	El sistema impide duplicidad mostrando mensaje de advertencia.
+	4
+	Permitir editar matrices existentes
+	Se pueden modificar cuentas contables asociadas sin alterar la llave principal.
+	5
+	Permitir desactivar matrices
+	El estado cambia a “Inactivo” impidiendo su uso operativo.
+	6
+	Registrar auditoría
+	Guardar usuario, fecha, hora y acción para altas, modificaciones y bajas.
+	7
+	Integrar con procesos de almacén
+	Cuando ocurre un movimiento, el sistema identifica automáticamente la matriz aplicable.
+	8
+	Validar obligatoriedad de campos clave
+	Ningún parámetro de la matriz puede quedar vacío.
+	________________
+
+
+8. Requisitos Funcionales
+8.1 Vista Maestro – Encabezado de Matrices Contables
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Código de Matriz
+	Autonumérico
+	No
+	Generado automáticamente.
+	Tipo de Movimiento
+	Lista desplegable
+	Sí
+	Se selecciona del catálogo de movimientos de almacén.
+	Subcategoría del Artículo
+	Lista desplegable
+	Sí
+	Proviene del catálogo de artículos.
+	Grupo Contable
+	Lista desplegable
+	Sí
+	Grupo contable asociado.
+	Descripción
+	Texto 200
+	No
+	Descripción libre.
+	Estado
+	Lista (Activo / Inactivo)
+	Sí
+	Estado de la matriz.
+	Validaciones
+            * Los campos obligatorios deben completarse.
+
+            * Combinación única: Movimiento + Subcategoría + Grupo Contable.
+
+            * No se permite desactivar una matriz si existen movimientos en proceso que la utilizan.
+
+________________
+
+
+8.2 Vista Detalle – Cuentas Contables Asociadas
+El detalle contiene las cuentas contables necesarias para contabilizar el movimiento.
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Ítem
+	Autonumérico
+	No
+	Orden de registro.
+	Cuenta Contable
+	Lista desplegable
+	Sí
+	Selección del PCGE/Plan de Cuentas local.
+	Naturaleza
+	Lista (Debe / Haber)
+	Sí
+	Indica cómo se aplicará el asiento.
+	Glosa asociada
+	Texto
+	No
+	Texto que se transfiere al asiento contable.
+	Validación:
+ Debe existir por lo menos una cuenta en el detalle.
+________________
+
+
+8.3 Operaciones Permitidas
+               * Crear matriz contable.
+
+               * Editar matriz contable.
+
+               * Desactivar / Activar matriz contable.
+
+               * Consultar matrices existentes.
+
+               * Registrar detalle y modificarlo.
+
+________________
+
+
+9. Reglas de Negocio
+                  1. La combinación de Tipo Movimiento + Subcategoría + Grupo Contable debe ser única.
+
+                  2. La cuenta contable seleccionada debe pertenecer al plan contable vigente para la Razón Social activa.
+
+                  3. El sistema debe usar automáticamente la matriz contable cuando se genera un movimiento en el módulo de Almacén.
+
+                  4. Las matrices inactivas no pueden ser escogidas por los procesos automáticos.
+
+                  5. Todo cambio debe registrarse en el Log Contable.
+
+                  6. El sistema debe validar que la matriz contenga por lo menos una cuenta en detalle.
+
+________________
+
+
+10. Integraciones
+                     * Módulo de Almacén: Movimientos de stock utilizan estas matrices para generar asientos.
+
+                     * Módulo de Compras: Subcategorías de artículos provienen de su catálogo.
+
+                     * Plan Contable (Contabilidad): Para selección de cuentas.
+
+                     * Auditoría: Registro de modificaciones y acciones.
+
+________________
+
+
+11. Aspectos Técnicos
+Tablas tentativas a utilizar
+                        * CNTBL_MATRIZ_ALM (maestro)
+
+                        * CNTBL_MATRIZ_ALM_DET (detalle)
+
+                        * Relaciones con:
+
+                           * ALM_MOV_TIPO
+
+                           * ARTICULO_SUB_CATEG
+
+                           * CNTBL_GRUPO_CONTABLE
+
+                           * CNTBL_CUENTA
+
+Operaciones en el Log
+                              * usuario
+
+                              * fecha
+
+                              * hora
+
+                              * acción (crear, modificar, desactivar)
+
+________________
+
+
+12. Mensajes del Sistema
+                                 * “Debe completar todos los campos obligatorios.”
+
+                                 * “La combinación seleccionada ya existe en otra matriz contable.”
+
+                                 * “Matriz registrada correctamente.”
+
+                                 * “Matriz actualizada correctamente.”
+
+                                 * “No puede desactivar una matriz utilizada en movimientos pendientes.”
+
+                                 * “Operación registrada en bitácora.”

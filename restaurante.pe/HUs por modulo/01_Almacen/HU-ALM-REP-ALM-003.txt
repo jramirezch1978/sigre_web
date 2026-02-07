@@ -1,0 +1,118 @@
+﻿HU-ALM-REP-ALM-003 - Identificación de Artículos con Stock Igual o Inferior al Nivel Mínimo - v1.0
+1. Título
+ Identificar los artículos cuyo stock actual se encuentra igual o por debajo del nivel mínimo definido en el maestro de artículos
+2. Descripción
+ Como usuario del sistema Restaurant.pe, quiero generar un reporte que identifique los artículos cuyo stock actual esté igual o por debajo del nivel mínimo configurado en el maestro de artículos, para tomar decisiones oportunas de reposición de inventario y evitar quiebres de stock que afecten la operación del negocio.
+3. Proceso
+ Proceso: Reportes
+Subproceso: Reporte de Almacén
+Módulo: Almacén
+4. Narrativa de Usuario
+ Quiero: Obtener un reporte con los artículos que tienen el stock en o por debajo del nivel mínimo establecido.
+Para: Anticipar la falta de inventario y gestionar la reposición de manera eficiente.
+De manera que: Se asegure la continuidad de las operaciones y la disponibilidad de los productos necesarios para el servicio.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Almacén > Reportes > Artículos con Stock Bajo o Igual al Nivel Mínimo
+6. Criterios de Aceptación
+ El sistema debe permitir:
+* Generar un listado de todos los artículos cuyo stock actual sea igual o menor al nivel mínimo definido en el maestro de artículos.
+
+* Mostrar el nivel mínimo, stock actual y diferencia entre ambos valores.
+
+* Filtrar por almacén, categoría, proveedor, país o sucursal.
+
+* Permitir ordenar los resultados por nivel de criticidad, categoría o rotación del artículo.
+
+* Visualizar alertas destacadas (por color o ícono) para los artículos con stock crítico (por debajo del 50% del nivel mínimo).
+
+* Exportar el reporte a Excel o PDF.
+
+* Generar notificaciones automáticas al área de compras o planificación cuando se detecten artículos con stock por debajo del mínimo.
+
+* Actualizar la información en tiempo real con base en los movimientos registrados en el módulo de Kardex / Inventario.
+
+* Registrar en el log de auditoría cada consulta o exportación (usuario, fecha, hora, acción).
+
+7. Campos del Reporte / Columnas de Vista Tabla
+ Campos principales:
+   * Código del Artículo
+
+   * Descripción del Artículo
+
+   * Categoría / Subcategoría
+
+   * Unidad de Medida
+
+   * Almacén / Sucursal
+
+   * Stock Actual
+
+   * Nivel Mínimo
+
+   * Diferencia (Stock Actual - Nivel Mínimo)
+
+   * Estado del Stock (Normal / Bajo / Crítico)
+
+   * Proveedor Principal
+
+   * Fecha de Última Compra
+
+   * Fecha de Última Venta
+
+   * Usuario Responsable de Registro
+
+Filtros disponibles:
+      * Almacén / Sucursal
+
+      * Categoría / Subcategoría
+
+      * Proveedor
+
+      * País del proveedor
+
+      * Estado del Stock
+
+      * Fecha de Última Actualización
+
+Acciones disponibles: El reporte contará con las siguientes acciones disponibles, aplicables a nivel de cada registro individual de los resultados:
+         * Exportar / Imprimir (Excel / PDF)
+
+         * Ver Detalle del Artículo
+
+         * Generar Solicitud de Reposición: Esta acción permite redirigir al usuario a la HU-COM-APR-007 (Aprovisionamiento – Planificación de Abastecimiento), siempre que cuente con los permisos correspondientes.
+Desde el reporte no se genera ninguna solicitud directamente; la acción sólo facilita el acceso al módulo oficial de aprovisionamiento para que el usuario realice allí la gestión formal de reposición.
+
+            * Enviar Alerta al Área de Compras: La funcionalidad permite que el sistema genere una alerta al área de Compras cuando el stock actual de un producto sea igual o inferior al nivel mínimo definido. Su propósito es notificar preventivamente para que el área pueda evaluar una posible reposición, sin que esto genere aún ningún documento formal de compra o requerimiento.Esta opción aplica principalmente para usuarios sin acceso a la planificación de aprovisionamiento (HU-COM-APR-007).
+Cuando el stock está en nivel mínimo el sistema podrá 
+            1. Mostrar una alerta visual en la interfaz (por ejemplo, resaltado en color o ícono de advertencia).
+            2. Enviar un mensaje interno o notificación al área de Compras indicando los productos en situación crítica.
+8. Detalle de Integración (opcional)
+ Integración con Maestro de Artículos: para obtener los valores mínimos definidos por producto.
+Integración con Kardex / Inventario: para actualizar los niveles de stock en tiempo real.
+Integración con Compras: para facilitar la generación automática de solicitudes o pedidos de reposición.
+Integración con Finanzas: para proyectar el impacto financiero de las futuras reposiciones.
+9. Consideraciones Técnicas
+ El sistema debe:
+            * Actualizar los datos en tiempo real con base en las entradas y salidas de inventario.
+
+            * Calcular automáticamente la diferencia entre el stock actual y el nivel mínimo.
+
+            * Permitir la generación de alertas automáticas vía correo electrónico o notificación interna.
+
+            * Controlar el acceso al reporte según los permisos del usuario y la sucursal asignada.
+
+            * Garantizar consistencia entre la información del reporte y los módulos integrados.
+
+            * Registrar en el log todas las acciones de consulta, exportación o impresión.
+
+10. Comentarios
+ Este reporte es fundamental para la gestión eficiente del inventario, ya que permite detectar de forma proactiva los productos que requieren reposición.
+Ayuda a evitar quiebres de stock que afecten la operación o la satisfacción del cliente.
+Se recomienda incluir un indicador visual (semáforo) con los estados:
+               * Verde: Stock normal.
+
+               * Amarillo: Stock igual al mínimo.
+
+               * Rojo: Stock por debajo del mínimo.
+
+Además, puede integrarse con un panel de control (dashboard) que muestre el porcentaje de artículos con stock crítico por almacén o categoría.

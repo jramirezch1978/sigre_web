@@ -1,0 +1,306 @@
+﻿HU-CON-001 - Gestión de Plan Contable (Catálogo de Cuentas) - v1.0
+Módulo: Contabilidad
+Opción de menú (navegabilidad): Contabilidad > Plan Contable
+Razón Social / País (informativos): mostrados en el encabezado según la sesión activa.
+Actores: Contador, Jefe Contable, Administrador del Sistema.
+Prioridad: Alta
+Dependencias: Parámetros de Contabilidad, Catálogo de Impuestos, Centros de Costo/Dimensiones, Sucursales, Terceros, Monedas.
+________________
+
+
+1. Descripción / Como… Quiero… Para…
+Como Contador de la Razón Social activa, quiero crear, modificar, consultar e importar el plan contable (catálogo de cuentas) para asegurar la consistencia contable y tributaria del país de operación, y habilitar la imputación correcta de asientos en todos los módulos integrados (Compras, Ventas, Almacén, RR. HH., Activos Fijos y Finanzas).
+Notas de contexto multipaís: El sistema opera una Razón Social por sesión. Cada Razón Social se asocia a un país (Perú, Colombia, Chile, Ecuador, R. Dominicana, Venezuela, El Salvador, Costa Rica o Nicaragua). El plan contable debe soportar: (a) plantillas por país, (b) máscaras de codificación configurables por país y (c) validaciones normativas básicas.
+________________
+
+
+2. Alcance
+* Alta, modificación, consulta, anulación/desactivación y (baja lógica) de cuentas contables.
+
+* Importación y exportación masiva (XLSX/CSV).
+
+* Generación desde plantilla por país. 
+*  importación del Plan Contable con las cuentas específicas en la maqueta o plantilla excel, para asignar a cada cliente según sus procesos, desde la cuenta de 04 dígitos a más.
+* Versionado y vigencias del plan contable.
+
+* Auditoría completa y control de permisos por rol.
+
+No incluye: parametrización de impuestos avanzados (se gestiona en Catálogo de Impuestos), ni cierre contable (se cubre en HU específica).
+________________
+
+
+3. Flujo principal (UI)
+   1. Ingresar a Contabilidad > Plan Contable.
+
+   2. Vista listado con filtros.
+
+   3. Botones: Nueva cuenta, Importar, Exportar, Generar desde plantilla, Acciones masivas.
+
+   4. En Nueva cuenta o Editar, se despliega formulario de cuenta contable.
+
+   5. Guardar / Cancelar.
+
+   6. Confirmaciones y validaciones.
+
+   7. Registro en log de auditoría.
+
+________________
+
+
+4. Campos del Listado y Filtros
+Columnas del listado: Código, Nombre, Naturaleza (Deudora/Acreedora), Tipo (Balance/Resultados/Orden/Control Nivel, Cuenta Padre, Permite Movimientos (Sí/No), Estado (Activa/Inactiva), Moneda Funcional, Vigente Desde/Hasta, Requiere Tercero, Requiere CC/Dimensión, Última Modificación (usuario/fecha).
+Acciones por fila: Ver, Editar, Desactivar/Bloquear, Duplicar, Historial, Fusionar (si aplica), Reasignar.
+Filtros: Texto (código/nombre), Naturaleza, Tipo, Nivel, Estado, Rango de vigencia, Requiere Tercero/CC/Documento, Plantilla/Versión, Sucursal/Dimensión, Etiquetas.
+Ordenación: por Código (default), Nombre, Última Modificación.
+Exportar: XLSX/CSV/PDF con las columnas visibles + filtros aplicados.
+________________
+
+
+5. Formulario: Campos y Validaciones
+Encabezado (solo lectura): Razón Social, País, Moneda Funcional, Versión del Plan.
+Identificación de Cuenta
+      * Código (obligatorio): cadena; máscara configurable por país (ej.: segmentos por niveles). Validaciones: unicidad por Razón Social + Versión; coincide con máscara; no permite espacios al final; máximo 30 caracteres.
+
+      * Nombre / Descripción (obligatorio): texto 3–120 caracteres; sin caracteres prohibidos.
+
+      * Nivel (obligatorio): entero ≥1; deducible por longitud/máscara; si Nivel=1 no requiere padre.
+
+      * Cuenta Padre (condicional): requerida si Nivel>1; debe existir y estar activa; el hijo hereda restricciones del padre (tipo, naturaleza, requerimientos) salvo excepciones permitidas por rol.
+
+Clasificación
+         * Naturaleza (obligatorio): Deudora | Acreedora.
+
+         * Tipo de Cuenta (obligatorio): Balance | Resultados | Orden | Control.
+
+         * Permite movimientos (obligatorio): Sí/No; sí No, sólo sub totalizadora.
+
+         * Estado: Activa |Inactiva | Bloqueada (bloqueada impide uso en asientos nuevos).
+
+Parametrización Operativa
+            * Requiere Tercero: Ninguno | Cliente | Proveedor | Empleado | Otro (catálogo de terceros).
+
+            * Requiere Documento Fiscal: Sí/No (comprobante, factura, boleta, NCF, etc.).
+
+            * Requiere Centro de Costo / Dimensión: Sí/No/Según Nivel.
+
+            * Requiere Sucursal: Sí/No.
+
+            * Asociación a Impuesto (opcional): selección de impuesto/retención aplicable (IVA/IGV/ITBIS, retenciones).
+
+            * Afecta Conciliación Bancaria: Sí/No.
+
+            * Asociación a Activo Fijo: Sí/No/Tipo (alta, depreciación, baja).
+
+            * Monedas permitidas: Moneda funcional | Multimoneda (lista).
+
+Normativa / Plantilla
+               * Plantilla base: PCGE/NIIF/PUC/Personalizada.
+-Plan contable General Empresarial (PCGE): Plan oficial del Perú que organiza las cuentas para registrar operaciones de forma uniforme y alineada a NIIF.
+-Normas Internacionales de Información Financiera(NIIF): Indican cómo reconocer, medir y presentar la información financiera.
+-Plan Unico de Cuentas(PUC):
+               * Mapa Normativo (opcional): equivalencia NIIF vs Tributaria (si el país exige libros tributarios paralelos).
+
+               * Vigente Desde (obligatorio) / Vigente Hasta (opcional, >= Desde). Cambios generan nueva versión si está en uso.
+
+Validaciones transversales
+                  * No se puede eliminar una cuenta con movimientos o referenciada en parámetros; permitir desactivar con advertencia.
+
+                  * Cambio de naturaleza o tipo bloqueado si tiene movimientos; exigir creación de nueva cuenta + herramienta de reasignación.
+
+                  * No permitir Permite movimientos=Sí cuando existan subcuentas.
+
+                  * La jerarquía debe ser consistente (padre existe, no circular).
+
+                  * Respetar máscara de código por país/versión.
+
+                  * Reglas específicas por país configurables (ej.: NCF en R. Dominicana, ajuste por inflación en VE, retenciones en CO).
+
+                  * Registrar auditoría (usuario, fecha/hora, IP, acción, valores antes/después).
+
+________________
+
+
+6. Acciones Disponibles
+                     * Crear: desde botón Nueva cuenta.
+
+                     * Editar: en cuentas sin movimientos críticos o mediante versión nueva.
+
+                     * Ver: detalle en modal/página.
+
+                     * Desactivar/Bloquear: por políticas o cierre de período.
+
+                     * Eliminar (baja lógica): solo sin asientos ni relaciones; queda en historial.
+
+                     * Duplicar: crea borrador con nuevo código.
+
+                     * Importar: mapeo de columnas; prevalidación; simulación; carga transaccional.
+
+                     * Exportar: todos/filtrados.
+
+                     * Generar desde plantilla: selecciona país/plantilla y versión; crea estructura inicial.
+
+                     * Reasignación masiva: mover saldos y parametrizaciones de una cuenta origen a destino (con asiento automático de reclasificación, si se habilita).
+
+                     * Fusionar cuentas: si ambas sin movimientos, o consolidación controlada con reasignación previa.
+
+                     * Historial: ver bitácora por cuenta y por plan.
+
+________________
+
+
+7. Reglas de Negocio
+                        1. La unicidad de código de cuenta es por Razón Social + Versión de Plan.
+
+                        2. Toda cuenta de nivel intermedio debe tener Permite movimientos=No.
+
+                        3. La naturaleza de cuentas de bancos/caja debe ser consistente con el tipo y no modificable con movimientos existentes.
+
+                        4. Si Requiere Documento Fiscal=Sí, validar tipo de comprobante según país.
+
+                        5. Si Requiere Tercero, forzar selección de tercero al registrar asientos desde cualquier módulo.
+
+                        6. Si Requiere CC/Dimensión, impedir asientos sin centro de costo asignado.
+
+                        7. Si la cuenta está Bloqueada o Inactiva, no se permite su uso en documentos ni asientos nuevos.
+
+                        8. Cambios de Vigente Desde/Hasta generan nueva versión si el plan ya fue utilizado en el período.
+
+________________
+
+
+8. Integraciones y Trazabilidad
+                           * Módulos: Compras/Ventas (impuestos y CxC/CxP), Almacén (Kardex y costo de ventas), Activos Fijos (altas/depreciaciones), RR. HH. (planillas y provisiones), Finanzas (bancos/tesorería).
+
+                           * Parámetros de Contabilización: mapeos por tipo de documento (p. ej., ventas contado/crédito, compras con IGV/IVA/ITBIS, percepciones/retenciones, notas de crédito/débito).
+
+                           * Reportes: Balance, Estado de Resultados, Libro Diario/Mayor, Reportes de Cuentas Contables, conciliación bancaria.
+________________
+
+
+9. Criterios de Aceptación (Gherkin)
+CA-1 – Crear cuenta válida
+ Dado que estoy en Contabilidad > Plan Contable
+Y presiono "Nueva cuenta"
+Cuando ingreso Código válido según máscara, Nombre, Naturaleza, Tipo, Nivel y demás obligatorios
+Entonces el sistema guarda la cuenta, la muestra en el listado y registra la auditoría.
+CA-2 – Validar jerarquía
+ Dado una cuenta de Nivel>1
+Cuando selecciono una Cuenta Padre inactiva o inexistente
+Entonces el sistema impide guardar y muestra un mensaje: "La cuenta padre debe existir y estar activa".
+CA-3 – Impedir eliminación con uso
+ Dada una cuenta con movimientos o parametrizada en mapeos
+Cuando intento eliminarla
+Entonces el sistema bloquea la eliminación y propone desactivar o reasignar.
+CA-4 – Importación con prevalidación
+ Dado un archivo XLSX con 1,000 cuentas
+Cuando ejecuto Importar
+Entonces el sistema muestra un resumen de errores/advertencias y sólo carga las filas válidas transaccionalmente.
+CA-5 – Bloqueo por período cerrado
+ Dado que la cuenta se usa en un período cerrado
+Cuando intento cambiar Naturaleza o Tipo
+Entonces el sistema impide el cambio y sugiere crear nueva cuenta.
+CA-6 – Requerimientos operativos
+ Dado que una cuenta tiene "Requiere Tercero=Sí"
+Cuando se registra un asiento desde Compras/Ventas/Diario
+Entonces el sistema exige seleccionar un tercero antes de contabilizar.
+CA-7 – Generar desde plantilla
+ Dado que selecciono "Generar desde plantilla" y el país de la Razón Social
+Cuando confirmo la versión de plantilla
+Entonces el sistema crea la estructura base de cuentas y deja las parametrizaciones operativas en estado pendiente.
+CA-8 – Versionado por vigencia
+ Dado un plan en uso
+Cuando modifico Vigente Desde/Hasta
+Entonces el sistema crea una nueva versión del plan y mantiene histórico de versiones.
+________________
+
+
+10. Mensajes de Error / Confirmaciones
+                              * "El código de cuenta ya existe en la versión actual".
+
+                              * "El código no cumple con la máscara configurada para el país".
+
+                              * "La cuenta padre debe existir y estar activa".
+
+                              * "No puede permitir movimientos si tiene subcuentas".
+
+                              * "No es posible eliminar: la cuenta tiene movimientos o está parametrizada".
+
+                              * "Se registró la operación y la auditoría contable".
+
+                              * "Se generó una nueva versión del plan contable".
+
+________________
+
+
+11. Seguridad y Permisos
+                                 * Roles y permisos: Ver Listado, Crear, Editar, Desactivar/Bloquear, Eliminar, Importar/Exportar, Generar desde plantilla, Acciones masivas, Ver Historial.
+
+                                 * Las acciones de Eliminar, Fusionar y Reasignar requieren permisos elevados.
+
+                                 * Todas las operaciones generan registro en Log de Auditoría (usuario, fecha/hora, acción, valores antes/después, IP/UA).
+
+________________
+
+
+12. Consideraciones Técnicas
+                                    * Máscara de código configurable por país/razón social/versión (regex + segmentos).
+
+                                    * Versionado del plan contable con vigencias; compatibilidad hacia atrás en reportes históricos.
+
+                                    * Integridad referencial: claves foráneas a mapeos e impedimentos de borrado.
+
+                                    * Transacciones ACID para importaciones masivas.
+
+                                    * Búsqueda por código prefijo y texto (full-text).
+
+                                    * Paginación server-side; exportaciones por lotes.
+
+                                    * API REST/GraphQL: /contabilidad/plan-cuentas (GET/POST/PUT/DELETE), /importaciones/plan-cuentas (POST), /plantillas/plan-cuentas (GET/POST).
+
+                                    * Soft delete con campo deleted_at; estados y bloqueos a nivel de negocio.
+
+                                    * Auditoría mediante tabla de eventos y trail de cambios (JSON diff).
+
+                                    * Internacionalización de etiquetas/documentos asociados.
+
+________________
+
+
+13. Supuestos y Normativa
+                                       * El sistema debe permitir adoptar plantillas compatibles con NIIF y con regulaciones locales (e.g., PCGE Perú, PUC Colombia, NCF/ITBIS R. Dominicana, etc.).
+
+                                       * Cada Razón Social opera en un solo país; el plan contable se valida con la normativa del país de la Razón Social.
+
+                                       * La longitud/máscara de código y reglas por país se parametrizan sin despliegue.
+
+                                       * Referencias normativas detalladas se documentarán en anexos por país.
+
+________________
+
+
+14. Datos para Inventario (Excel)
+                                          * Código HU: HU-CON-001
+
+                                          * Título: Gestión de Plan Contable (Catálogo de Cuentas)
+
+                                          * Descripción breve: Crear, modificar, consultar, importar/exportar y versionar el plan contable por Razón Social, con máscaras y validaciones por país.
+
+                                          * Comentarios: Requiere plantillas por país; registrar auditoría; integraciones con mapeos automáticos de módulos.
+
+________________
+
+
+15. Trazabilidad
+                                             * Épica: Contabilidad – Configuración Base.
+
+                                             * Relaciones: HU-CON-002 (Mapeo de Cuentas Automáticas), HU-FIN-0XX (Bancos/Conciliación), HU-AFI-0XX (Activos Fijos), HU-RRH-0XX (Provisiones), HU-VEN/COM-0XX (Impuestos).
+
+________________
+
+
+16. Mockups / UX (texto)
+                                                * Listado: tabla responsive con barra de filtros, botón primario "Nueva cuenta", secundarios "Importar" y "Generar desde plantilla".
+
+                                                * Formulario: secciones colapsables (Identificación, Clasificación, Operativa, Normativa/Vigencia).
+
+                                                * Importar: asistente en 3 pasos (Archivo → Prevalidar → Confirmar carga).

@@ -1,0 +1,157 @@
+﻿HU-FIN-ADL-002 - Aprobación de Ordenes de Giro - v1.0
+1. Título
+ Aprobación de Solicitudes de Adelantos
+2. Descripción
+Como usuario autorizado del sistema contable de Restaurant.pe, quiero aprobar o rechazar las solicitudes de adelantos generadas por colaboradores o áreas solicitantes, con el fin de garantizar el control, validación y autorización previa antes de la generación de una Orden de Giro o desembolso.
+3. Proceso
+ Proceso: Adelantos
+Subproceso: Solicitud de Adelantos
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Revisar, aprobar o rechazar solicitudes de adelantos ingresadas al sistema.
+Para: Asegurar que solo se procesen y paguen adelantos debidamente validados y autorizados por los responsables financieros.
+De manera que: Se mantenga la trazabilidad del proceso, el control presupuestal y la integridad contable de los desembolsos efectuados.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Finanzas > Adelantos > Solicitud de Adelantos > Aprobación
+6. Criterios de Aceptación
+* El sistema debe mostrar un listado con todas las solicitudes de Ordenes de Giro [a][b]pendientes de aprobación, con sus principales datos (número, solicitante, tipo, monto, fecha y estado).
+
+* El usuario podrá seleccionar una solicitud y visualizar su detalle completo antes de aprobar o rechazar.
+
+* Debe existir un botón “Aprobar” y otro “Rechazar”, habilitados solo para usuarios con perfil autorizado.
+
+* Al aprobar, el sistema debe cambiar el estado de la solicitud a “Aprobada” y registrar automáticamente la fecha, hora, usuario aprobador y observaciones.
+
+* Al rechazar, el sistema debe cambiar el estado a “Rechazada” y exigir el ingreso de una observación obligatoria.
+
+* El sistema debe permitir la aprobación masiva de solicitudes seleccionadas, siempre que cumplan con los criterios establecidos.
+
+* El sistema debe impedir la aprobación de solicitudes que no estén completas o que excedan el límite máximo permitido por política.
+
+* Toda acción de aprobación o rechazo debe registrarse en el log de auditoría contable, incluyendo Usuario, Fecha, Hora, IP, Acción y Observación.
+
+* La información de Razón Social y País debe mostrarse en modo solo lectura.
+
+* El sistema debe permitir exportar el listado de solicitudes en formato Excel o PDF.
+
+* Las aprobaciones deben reflejarse automáticamente en los módulos de Tesorería y Contabilidad.
+
+7. Campos del Formulario / Vista de Tabla
+Columnas principales del listado:
+   * N° de Solicitud de Orden de Giro [c][d]
+
+   * Fecha de Solicitud 
+
+   * Solicitante / Beneficiario
+
+   * Tipo de Beneficiario (Proveedor / Colaborador)
+
+   * Monto Solicitado
+
+   * Moneda
+
+   * Estado (Pendiente / Aprobada / Rechazada)
+
+   * Fecha de Aprobación
+
+   * Usuario Aprobador
+
+   * Observaciones
+
+   * Centro de Costo
+
+   * Sucursal / Local
+
+Filtros disponibles:
+      * Estado (Pendiente / Aprobada / Rechazada)
+
+      * Rango de Fechas (Solicitud / Aprobación)
+
+      * Tipo de Beneficiario
+
+      * Solicitante / Beneficiario
+
+      * Moneda
+
+      * Sucursal / Local
+
+Acciones disponibles:
+         * Ver Detalle de Solicitud de Orden de Giro
+
+         * Aprobar Solicitud
+
+         * Rechazar Solicitud (con comentario obligatorio)
+
+         * Aprobación Masiva
+
+         * Exportar (Excel / PDF)
+
+         * Filtrar / Limpiar Filtros
+
+         * Actualizar Información
+
+Campos del Detalle de Solicitud:
+            * Razón Social (solo lectura)
+
+            * N° de Solicitud de Adelanto/Orden de Giro
+
+            * Fecha de Solicitud
+
+            * Solicitante / Beneficiario
+            * Tipo de Adelanto/Beneficiario
+
+            * Concepto del Adelanto
+
+            * Monto Solicitado
+
+            * Moneda
+
+            * Tipo de Cambio (informativo)
+
+            * Centro de Costo
+
+            * Observaciones del Solicitante
+
+            * Estado Actual
+
+            * Usuario Aprobador / Fecha de Aprobación (sólo si fue aprobada)
+
+            * Observaciones de Aprobación / Rechazo
+
+8. Detalle de Integración (opcional)
+               * Integración con Contabilidad: Al aprobar una solicitud, se genera una reserva contable temporal del monto a desembolsar.
+
+               * Integración con Finanzas – Tesorería: Actualiza el flujo de caja proyectado, marcando el monto como compromiso financiero.
+
+               * Integración con RRHH: En caso de adelantos al personal, refleja la aprobación en la cuenta del colaborador.
+
+               * Integración con Auditoría: Cada acción (aprobación, rechazo, modificación) queda registrada con detalle técnico y usuario responsable.
+
+9. Consideraciones Técnicas
+                  * Solo los usuarios con rol Aprobador Financiero podrán ejecutar acciones de aprobación o rechazo.
+
+                  * El sistema debe validar que las solicitudes aprobadas no excedan el presupuesto asignado al centro de costo.
+
+                  * El cambio de estado (Pendiente → Aprobada / Rechazada) debe registrarse en tiempo real.
+
+                  * La interfaz debe mostrar alertas visuales diferenciadas (verde para aprobadas, rojo para rechazadas, gris para pendientes).[e][f]
+
+                  * Todas las acciones deben registrarse en el log de auditoría contable, incluyendo Usuario, Fecha, Hora, IP, Acción y Observación.
+
+                  * Debe permitir aprobación masiva mediante selección múltiple, con confirmación previa.
+
+                  * Cumplir con las normas NIC 7 (Flujo de Efectivo) y NIC 1 (Presentación de Estados Financieros).
+
+                  * Soporta multi moneda (conversión automática según tipo de cambio oficial).
+
+10. Comentarios
+Esta funcionalidad es fundamental para garantizar la validación previa y el control interno sobre los adelantos solicitados, reduciendo riesgos financieros y fraudes.
+Permite una trazabilidad completa del flujo desde la solicitud hasta el pago final, integrándose de forma automática con Contabilidad y Tesorería.
+Se recomienda habilitar un flujo de aprobación jerárquico (por monto o tipo de adelanto), así como notificaciones automáticas por correo a los responsables de aprobación.
+También se sugiere incluir una alerta automática para solicitudes pendientes de aprobación con más de 48 horas sin respuesta.
+[a]órdenes de giro
+[b]Corregido
+[c]órdenes de giro
+[d]Corregido
+[e]se está considerando los siguientes colores: verde para aprobadas, rojo para rechazadas y gris para pendientes
+[f]Me parece bien, ya lo corregí en la HU.

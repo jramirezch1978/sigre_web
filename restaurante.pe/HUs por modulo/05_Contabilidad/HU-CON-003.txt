@@ -1,0 +1,412 @@
+﻿HU-CON-002 - Matriz Contable - v1.0
+1. Identificación General
+* Código HU: HU-CON-002
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Configuración Contable
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Matriz Contable
+
+* Autor: Redactor de HU de Software de Contabilidad
+
+* Fuente: Alcance Global del Proyecto de Implementación de Sistema Contable y de Nómina Multipaís – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir configurar reglas de integración contable con los diferentes módulos del sistema (Compras, Ventas, Almacenes, Planillas, Activos Fijos, etc.), definiendo la forma en que cada transacción genera asientos contables automáticos.
+La Matriz Contable actuará como un puente entre los módulos operativos y la contabilidad general, asegurando la correcta imputación de cuentas contables, centros de costo y naturaleza de los movimientos (cargo/abono), según la configuración establecida por el usuario.
+________________
+
+
+3. Actor(es)
+   * Usuario Contable: Define y mantiene las reglas de integración.
+
+   * Administrador del Sistema: Supervisa la configuración general y autoriza modificaciones críticas.
+
+   * Auditor Interno: Accede en modo lectura para revisión y control.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe haber iniciado sesión en una Razón Social activa y contar con permisos en el módulo de Contabilidad.
+
+      * Debe existir un Plan de Cuentas activo y configurado.
+
+      * Los módulos que se integran (Compras, Ventas, Almacén, RRHH, etc.) deben estar previamente habilitados.
+
+      * Los campos Razón Social y País se mostrarán como informativos (solo lectura).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Configuraciones → Matriz Contable
+________________
+
+
+6. Requerimiento Funcional (Historia de Usuario)
+Como usuario contable,
+quiero configurar las reglas de integración contable con los módulos operativos (compras, ventas, almacén, planillas, activos fijos, etc.),
+para garantizar que cada transacción genere automáticamente los asientos contables correctos según las políticas contables de la empresa.
+
+
+
+
+
+
+
+
+________________
+
+
+7. Criterios de Aceptación
+#
+	Criterio
+	Resultado Esperado
+	1
+	El sistema permite crear, editar y eliminar reglas de integración contable.
+	Las reglas quedan registradas y activas según configuración.
+	2
+	Los módulos operativos disponibles se muestran en una lista desplegable.
+	El usuario selecciona el módulo para configurar su integración.
+	3
+	No se pueden duplicar combinaciones de módulo + tipo de documento + operación.
+	El sistema muestra un mensaje de validación.
+	4
+	Se pueden definir múltiples cuentas contables según naturaleza de operación (débito/crédito).
+	El sistema permite asociarlas correctamente.
+	5
+	Los campos Razón Social y País son informativos.
+	Se cargan automáticamente desde la sesión activa.
+	6
+	Las reglas inactivas no generan asientos contables.
+	El sistema valida el estado antes de aplicar la integración.
+	7
+	Todos los cambios (altas, modificaciones, bajas) se registran en el log de auditoría contable.
+	El log almacena usuario, fecha, hora y acción.
+	8
+	Los asientos generados automáticamente se registran en Contabilidad General.
+	Los movimientos son trazables hacia su origen operativo.
+	8. Formulario Único Maestro–Detalle (Cabecera + Detalle)
+Pantalla: Contabilidad → Configuraciones → Matriz Contable
+Modo: Formulario único (Maestro–Detalle) con cabecera arriba y grilla de detalle abajo.
+
+
+
+
+
+
+
+
+8.1. Cabecera (Maestro) — MATRIZ_CNTBL_FINAN
+Campo (UI)
+	Columna BD
+	Tipo UI
+	Longitud
+	Obligatorio
+	Validaciones / Descripción
+	Código de Matriz
+	MATRIZ (CHAR)
+	Texto
+	8
+	Sí
+	PK. Único por razón social. A–Z/0–9, sin espacios. Uppercase automático. No editable en edición.
+	Descripción
+	DESCRIPCION (VARCHAR2)
+	Texto
+	100
+	No
+	Texto libre para identificar uso/alcance de la matriz.
+	Estado
+	FLAG_ESTADO (CHAR)
+	Toggle/Lista (Activo/Inactivo)
+	1
+	Sí
+	UI ↔ BD: Activo=1, Inactivo=0. Default BD: '1'. Inactivar impide uso en nuevas integraciones.
+	Replicación
+	FLAG_REPLICACION (CHAR)
+	Toggle (Sí/No)
+	1
+	Sí
+	UI ↔ BD: Sí=1, No=0. Default BD: '1'. Indica si la configuración se replica (según tus jobs).
+	Comportamiento Cabecera:
+         * Guardar crea/actualiza cabecera y, si hay filas en detalle en estado “Pendiente”, las persiste en la misma transacción.
+
+         * Inactivar solo permitido si no hay procesos de integración en curso que dependan de la matriz (regla de negocio).
+
+         * Búsqueda/Seleccionar: buscador por MATRIZ, DESCRIPCION, FLAG_ESTADO.
+
+________________
+
+
+8.2. Detalle (Grilla en la misma pantalla) — MATRIZ_CNTBL_FINAN_DET
+Grilla con acciones inline (Agregar, Editar, Eliminar), y edición en fila o con modal (recomendado).
+PK detalle: (MATRIZ, ITEM) — MATRIZ hereda de cabecera; ITEM autonumérico por matriz (1..9999).
+Columnas de la Grilla Reglas de obligatoriedad condicional (Detalle)
+            * Si la fila genera asiento (regla activa): CNTA_CTBL y FLAG_DEBHAB → obligatorios.
+
+            * Si FLAG_CENCOS='1' → la transacción origen debe enviar CECO válido (bloquear contabilización si no llega).
+
+            * Si FLAG_CTABCO='1' → origen debe enviar cuenta bancaria válida.
+
+            * Si FLAG_DOCREF='1' → origen debe enviar documento de referencia.
+
+________________
+
+
+8.3. Comandos y Eventos del Formulario Único
+Toolbar maestro–detalle (arriba):
+               * Nuevo (limpia cabecera y grilla).
+
+               * Guardar (persistencia transaccional cabecera + detalle).
+
+               * Duplicar (clona cabecera + opcionalmente detalle con nuevo MATRIZ).
+
+               * Inactivar/Activar (toggle FLAG_ESTADO).
+
+               * Probar Reglas (tester sobre payload de ejemplo por DATAWINDOW).
+
+               * Buscar (diálogo/slide-over).
+
+Acciones en grilla detalle:
+                  * Agregar fila (asigna ITEM automático).
+
+                  * Editar (inline o modal).
+
+                  * Eliminar (soft delete en UI; eliminación física al guardar).
+
+                  * Mover arriba/abajo (opcional, si el orden es relevante para tu motor).
+
+Eventos/validaciones clave:
+Columna (UI)
+	Columna BD
+	Tipo UI
+	Longitud
+	Obligatorio
+	Validaciones / Descripción
+	
+
+	Ítem
+	ITEM (NUMBER(4,0))
+	Numérico (solo lectura)
+	4
+	Sí
+	Autonumerado MAX(ITEM)+1 por matriz. Único con MATRIZ.
+	
+
+	Cuenta Contable
+	CNTA_CTBL (CHAR)
+	Selector Plan de Cuentas
+	10
+	Cond.
+	Debe existir y estar activa. Obligatorio si el ítem genera asiento.
+	
+
+	Débito/Haber
+	FLAG_DEBHAB (CHAR)
+	Lista
+	1
+	Cond.
+	Valores: D/H (o 1/0 si prefieres). Obligatorio si el ítem genera asiento.
+	
+
+	Origen (DataWindow)
+	DATAWINDOW (VARCHAR2)
+	Lista/Texto
+	30
+	No
+	Identifica origen funcional (ej.: COMPRAS_DOC, VENTAS_DOC, ALMACEN_MOV, RRHH_NOM).
+	
+
+	Campo Origen
+	CAMPO (VARCHAR2)
+	Texto
+	30
+	No
+	Campo evaluado en la regla (ej.: TIPO_DOC, SUBTIPO, MOTIVO).
+	
+
+	Fórmula
+	FORMULA (VARCHAR2)
+	Texto
+	100
+	No
+	Expresión/motor de reglas (validar sintaxis).
+	
+
+	Glosa (Texto)
+	GLOSA_TEXTO (VARCHAR2)
+	Texto
+	60
+	No
+	Literal para el asiento.
+	
+
+	Glosa (Campo)
+	GLOSA_CAMPO (VARCHAR2)
+	Texto
+	60
+	No
+	Nombre de campo del origen para glosa dinámica.
+	
+
+	Req. Centro de Costo
+	FLAG_CENCOS (CHAR)
+	Toggle
+	1
+	Sí
+	Sí=1, No=0. Default BD '0'. Si 1, UI del origen debe exigir CECO válido.
+	
+
+	Usa Cuenta Bancaria
+	FLAG_CTABCO (CHAR)
+	Toggle
+	1
+	Sí
+	Sí=1, No=0. Default BD '0'. Si 1, origen debe traer cuenta bancaria válida.
+	
+
+	Req. Doc. Referencia
+	FLAG_DOCREF (CHAR)
+	Toggle
+	1
+	Sí
+	Sí=1, No=0. Default BD '0'. Si 1, origen debe traer doc. ref. (serie/número/UUID).
+	
+
+	Replicación (Det.)
+	FLAG_REPLICACION (CHAR)
+	Toggle
+	1
+	Sí
+	Sí=1, No=0. Default BD '1'. Control de despliegue del detalle.
+	
+
+	                     * onLoad: si MATRIZ viene por querystring, cargar cabecera + detalle.
+
+                     * onChange(FLAG_ESTADO): si se cambia a 0, advertir impacto.
+
+                     * onAddDetail/onEditDetail: validar obligatoriedad condicional y longitudes BD.
+
+                     * onSave: transacción única; rollback si falla cabecera o cualquier fila del detalle.
+
+                     * onTestRules: evaluar FORMULA con JSON de ejemplo y mostrar asiento resultante (D/H, cuenta, glosa).
+
+________________
+
+
+8.4. Reglas de Integridad (BD/UI)
+                        * Unicidad:
+
+                           * Cabecera: MATRIZ único.
+
+                           * Detalle: (MATRIZ, ITEM) único.
+
+                              * Referencial: DET.MATRIZ debe existir en cabecera.
+
+                              * Catálogo contable: CNTA_CTBL debe existir y estar activa; naturaleza compatible con FLAG_DEBHAB.
+
+                              * Flags: aceptar solo 0/1 (y D/H si aplicas esa codificación).
+
+                              * Longitudes: UI debe limitar entrada a las longitudes de BD (evitar overflow).
+
+                              * Auditoría: log de alta/edición/baja en cabecera y detalle (usuario, fecha, hora, acción, before/after).
+
+                              * Replicación: si FLAG_REPLICACION='1' en cabecera o detalle, incluir en procesos de despliegue correspondientes.
+
+________________
+
+
+8.5. Comportamiento de Guardado (Transaccional)
+                                 1. Validar cabecera.
+
+                                 2. Validar todas las filas detalle (incluyendo reglas condicionales y referencias).
+
+                                 3. BEGIN TX → Upsert cabecera → Upsert/DELETE detalle (según cambios) → COMMIT.
+
+                                 4. En error: ROLLBACK y mostrar lista de errores por fila (ITEM) y campo.
+
+________________
+
+
+8.6. Mensajes de Validación (ejemplos)
+                                    * “El Código de Matriz ya existe.”
+
+                                    * “Fila ITEM=7: Cuenta Contable es obligatoria para ítems que generan asiento.”
+
+                                    * “Fila ITEM=3: Débito/Haber no válido. Valores permitidos: D/H.”
+
+                                    * “No es posible Inactivar: existen integraciones en curso que dependen de esta matriz.”
+
+________________
+
+
+8.7. Sugerencias de UX (sin cambiar BD)
+                                       * Editor de fórmulas con resaltado y validación mínima.
+
+                                       * Catálogo de placeholders para GLOSA_TEXTO (ej.: {SERIE}-{NUMERO}, {RUC}, {MONEDA}).
+
+                                       * Plantillas por módulo (DATAWINDOW) para acelerar carga inicial.
+
+                                       * Exportar/Importar matriz (cabecera + detalle) en CSV/JSON para ambientes.
+
+
+
+
+
+9. Reglas de Negocio
+                                          1. No se podrá registrar una regla de integración contable con cuentas que no existan o estén inactivas.
+
+                                          2. Cada módulo debe tener definida al menos una regla activa para permitir la integración automática.
+
+                                          3. Las reglas inactivas no deben afectar la generación contable de nuevas transacciones.
+
+                                          4. Las configuraciones serán específicas por Razón Social y no se comparten entre empresas.
+
+                                          5. Toda transacción generada desde un módulo operativo debe poder rastrearse hasta su regla de integración contable en la matriz.
+
+                                          6. El sistema debe validar que las cuentas definidas respeten la naturaleza del asiento (débito/crédito).
+
+                                          7. Los cambios de configuración se almacenan en el log contable, para auditoría y trazabilidad.
+
+________________
+
+
+10. Integraciones
+                                             * Compras: Para contabilizar facturas, notas de crédito, órdenes y pagos.
+
+                                             * Ventas: Para contabilizar boletas, facturas y notas de crédito.
+
+                                             * Almacén: Para registrar movimientos de inventario que impacten la contabilidad.
+
+                                             * Recursos Humanos: Para imputar gastos de planillas.
+
+                                             * Activos Fijos: Para registrar depreciaciones y altas/bajas de activos.
+
+                                             * Finanzas: Para reflejar en reportes contables consolidados.
+
+________________
+
+
+11. Aspectos Técnicos
+                                                * Tabla principal: cont_matriz_contable
+
+                                                * Validación de unicidad: (modulo_origen, tipo_documento, operacion, id_razon_social)
+
+                                                * Registro automático en log de auditoría contable por cada alta, modificación o eliminación.
+
+                                                * Integración mediante API interna con los módulos operativos para generar asientos contables.
+
+                                                * Compatible con parametrización multipaís (moneda, cuentas locales y NIIF).
+
+                                                * Interfaz web responsive con filtros de búsqueda y exportación (Excel, PDF).

@@ -1,0 +1,250 @@
+﻿HU-CON-019 - Reportes de Validación / Reportes Contables según formatos DIAN y SUNAT - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-019
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Reportes de Validación
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes Contables según formatos DIAN y SUNAT
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la generación de reportes contables oficiales en los formatos exigidos por las entidades tributarias de los países en los que opera el sistema, principalmente:
+   * SUNAT (Perú): Libros Electrónicos (PLE) SIRE – formatos 5.1, 5.2, 6.1, 6.2, 8.1, 8.2, 14.1, entre otros.
+
+   * DIAN (Colombia): Reportes de información exógena y formatos de medios magnéticos.
+
+Estos reportes deben generarse a partir de los asientos contables registrados en el sistema, cumpliendo con las estructuras, validaciones y codificaciones oficiales publicadas por las autoridades fiscales.
+El sistema debe permitir seleccionar el país, el periodo contable, el tipo de formato, la razón social, y generar los archivos electrónicos en los formatos requeridos (.txt, .csv, .xml o .xls según normativa), listos para su envío o carga en los portales oficiales.
+________________
+
+
+3. Actor(es)
+      * Contador General: Responsable de la generación y revisión de los reportes oficiales.
+
+      * Analista Contable: Prepara y valida los datos antes de su envío a la autoridad tributaria.
+
+      * Jefe de Contabilidad: Supervisa el cumplimiento de las obligaciones contables y fiscales.
+
+      * Auditor Externo o Fiscalizador: Verifica la consistencia de los reportes entregados.
+
+________________
+
+
+4. Precondiciones
+         * El usuario debe tener permisos para acceder al menú Contabilidad → Reportes → Reportes Oficiales (SUNAT/DIAN).
+
+         * Deben existir asientos contables contabilizados y cerrados en el periodo seleccionado.
+
+         * Los catálogos contables (plan de cuentas, tipos de documento, centros de costo, etc.) deben estar correctamente configurados.
+
+         * La razón social y el país deben estar definidos en la sesión activa.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Reportes Contables SUNAT – DIAN
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar los reportes contables en los formatos requeridos por la SUNAT (Perú) o DIAN (Colombia),
+para cumplir con las obligaciones fiscales y regulatorias de forma automática y conforme a las normas vigentes.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar país, razón social y periodo contable.
+	El sistema determina el conjunto de formatos disponibles según el país.
+	2
+	Mostrar una lista de formatos oficiales disponibles (ej. 5.1, 5.2, 6.1, 6.2 para SUNAT; formatos XML para DIAN).
+	El usuario elige el formato requerido.
+	3
+	Generar los archivos en formato y estructura oficial según especificación del organismo fiscal.
+	El sistema crea los archivos con los nombres, columnas y delimitadores correctos.
+	4
+	Incluir validaciones de obligatoriedad según la normativa de cada país.
+	Se muestran mensajes de advertencia si faltan datos requeridos.
+	5
+	Permitir la exportación de los archivos generados (.txt, .csv, .xml, .xls).
+	Archivos listos para carga en portales tributarios.
+	6
+	Mostrar resumen del proceso (número de registros generados, periodo, fecha de generación).
+	Se presenta pantalla de confirmación.
+	7
+	Registrar en bitácora la generación del reporte (usuario, formato, país, fecha y hora).
+	Auditoría completa del proceso.
+	8
+	Validar que los saldos y asientos estén cuadrados y cerrados antes de generar el reporte.
+	No se permite generar formatos con asientos inconsistentes.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Pantalla de configuración y generación de reportes oficiales.
+Naturaleza: Reporte de cumplimiento fiscal – Generación de archivos oficiales (no editable).
+8.1 Filtros de Generación
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	País
+	Lista
+	Sí
+	Determina el conjunto de formatos fiscales disponibles.
+	Razón Social
+	Texto (informativo)
+	Sí
+	Se determina por la sesión activa del usuario.
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Periodo del cual se generará la información.
+	Tipo de Formato
+	Lista
+	Sí
+	Ejemplo: 5.1 – Diario, 5.2 – Mayor, 6.1 – Compras, 6.2 – Ventas, etc.
+	Tipo de Archivo
+	Lista
+	No
+	TXT, CSV, XML o XLS según norma.
+	Directorio de Descarga
+	Texto / Ruta
+	No
+	Carpeta donde se guardarán los archivos generados.
+	Incluir Asientos Anulados
+	Checkbox
+	No
+	Determina si se consideran asientos anulados.
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Tipo de Formato
+	Código y nombre del formato generado.
+	Fecha de Generación
+	Fecha y hora en que se crea el archivo.
+	Total de Registros
+	Número de asientos o movimientos incluidos.
+	Archivo Generado
+	Nombre del archivo conforme al formato oficial.
+	Estado del Proceso
+	Éxito / Error / Incompleto.
+	Usuario Registro
+	Usuario que ejecutó la generación.
+	________________
+
+
+9. Reglas de Negocio
+            1. Validación de cierre contable: Solo se generan reportes de periodos cerrados o con asientos contabilizados.
+
+            2. Estructura oficial: Cada formato debe cumplir con las columnas, delimitadores, longitudes y tipos de dato definidos por la entidad tributaria.
+
+            3. Identificación única: Los archivos deben generarse con el nombre oficial:
+
+               * SUNAT: LE{RUC}{AÑO}{MES}00{CÓDIGO_FORMATO}1111.txt
+
+               * DIAN: conforme al formato de información exógena.
+
+                  4. Integridad de datos: No se deben incluir asientos anulados, salvo que el usuario marque la opción correspondiente.
+
+                  5. Compatibilidad multipaís: El sistema debe determinar automáticamente qué entidad regulatoria aplica según el país de la razón social.
+
+                  6. Exportación fiel: Los datos exportados deben conservar el formato original, sin alteración de caracteres especiales ni separadores decimales.
+
+                  7. Auditoría completa: Se registrará cada generación con usuario, país, formato, filtros y resultado.
+
+                  8. Moneda y tipo de cambio: Si el sistema maneja doble moneda, se aplicará la conversión conforme al tipo de cambio del periodo.
+
+________________
+
+
+10. Integraciones
+                     * Módulo de Contabilidad General: Fuente de asientos y saldos.
+
+                     * Módulo de Plan de Cuentas: Mapeo de cuentas según los códigos oficiales.
+
+                     * Módulo de Compras y Ventas: Información para los formatos 8.1, 8.2 y exógena de DIAN.
+
+                     * Módulo de Auditoría: Registro de generación de reportes.
+
+                     * Módulo de Parámetros Tributarios: Configuración de rutas y estructuras por país.
+
+________________
+
+
+11. Aspectos Técnicos
+                        * Tipo de Componente: Reporte regulatorio y fiscal (solo lectura).
+
+                        * Tablas Fuente:
+
+                           * CNTBL_ASIENTO y CNTBL_ASIENTO_DET (movimientos contables).
+
+                           * CNTBL_CUENTA_CONTABLE (plan contable mapeado).
+
+                           * CNTBL_PARAMETROS_FISCALES (configuración de formatos).
+
+                           * CNTBL_EMPRESA (datos de la razón social y país).
+
+                              * Salida de Archivos:
+
+                                 * SUNAT: .txt delimitado por barras verticales |.
+
+                                 * DIAN: .xml o .csv según resolución vigente.
+
+                                    * Bitácora: LOG_REPORTE_FISCAL (usuario, país, formato, fecha, registros, estado).
+
+                                    * Validaciones automáticas: Verificación de cuadre de asientos y formato de RUC/NIT.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                                       1. El usuario ingresa a Contabilidad → Reportes → Validación / Reportes Contables SUNAT – DIAN.
+
+                                       2. Selecciona el país, periodo contable, razón social y formato oficial.
+
+                                       3. Presiona el botón “Generar Reporte”.
+
+                                       4. El sistema valida la información contable y genera el archivo en el formato requerido.
+
+                                       5. Se muestra un resumen de la generación (nombre de archivo, cantidad de registros, estado).
+
+                                       6. El usuario descarga el archivo y lo guarda o carga en el portal de la entidad tributaria.
+
+                                       7. El sistema registra la acción en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                                          * “Debe seleccionar un país y formato oficial para generar el reporte.”
+
+                                          * “El periodo contable seleccionado no contiene asientos contabilizados.”
+
+                                          * “Archivo generado correctamente: {nombre_archivo}.”
+
+                                          * “El formato contiene errores. Revise la configuración de cuentas o documentos.”
+
+                                          * “El usuario no tiene permisos para ejecutar esta operación.”

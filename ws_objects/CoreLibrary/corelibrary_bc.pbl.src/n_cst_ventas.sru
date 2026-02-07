@@ -1,4 +1,4 @@
-﻿$PBExportHeader$n_cst_ventas.sru
+$PBExportHeader$n_cst_ventas.sru
 forward
 global type n_cst_ventas from nonvisualobject
 end type
@@ -64,6 +64,9 @@ String 		is_observacion
 //Tamaños y distancias para el comprobante en termico
 Long			il_width_efact, il_height_efact, il_height_row_efact, il_height_row_fp, il_height_despacho, &
 				il_header_row_alm, il_header_row_desp
+
+//Tamaños para cierre de caja en impresora térmica (80mm)
+Long			il_width_cierre_caja, il_height_cierre_caja, il_height_row_cierre_caja
 
 //Ruta donde se ejecuta el SIGRE
 String		is_path_sigre
@@ -213,6 +216,11 @@ public function boolean of_load ();try
 	il_header_row_alm		= gnvo_app.of_get_parametro( "HEIGHT_ROW_ALMACEN", 12)		//Altura 130 mm
 	is_name_printer_desp = gnvo_app.of_get_parametro( "NAME_PRINTER_DESPACHO", "DESPACHO")		//Nombre de la impresora de despacho
 	il_header_row_desp	= gnvo_app.of_get_parametro( "HEIGHT_ROW_DESPACHO", 12)		//Altura de fila de despacho
+	
+	//Tamaños para cierre de caja en impresora térmica Epson TM-T20III (80mm)
+	il_width_cierre_caja		= gnvo_app.of_get_parametro( "WIDTH_CIERRE_CAJA", 80)		//Ancho 80 mm
+	il_height_cierre_caja		= gnvo_app.of_get_parametro( "HEIGHT_CIERRE_CAJA", 150)		//Altura base 150 mm
+	il_height_row_cierre_caja	= gnvo_app.of_get_parametro( "HEIGHT_ROW_CIERRE_CAJA", 8)	//Altura por fila 8 mm
 	
 	//Nombre de la impresora de tickets (vacio = impresora por defecto), sería por usuario
 	is_name_printer_ticket = gnvo_app.of_get_parametro( "NAME_PRINTER_TICKET_"+UPPER(trim(gs_user)), "")		
@@ -1072,7 +1080,7 @@ return true
 end function
 
 public function boolean of_rpt_cierre_caja (date adi_fecha1, date adi_fecha2);Long 				ll_height, ll_rows_fp, ll_rpta
-string			ls_tipo_rpt
+string			ls_tipo_rpt, ls_formato
 str_parametros	lstr_param
 
 //Primero Elijo el tipo de Reporte de Cierre de Caja
@@ -1081,6 +1089,7 @@ lstr_param = Message.PowerObjectParm
 
 if not lstr_param.b_return then return true
 ls_tipo_rpt = lstr_param.string1
+ls_formato = lstr_param.string2 //T = Ticket, A = A4
 
 //Solicita si es impresión directa o previsualización
 ll_rpta = gnvo_app.utilitario.of_print_preview()
@@ -1088,36 +1097,69 @@ if ll_rpta < 0 then return false
 
 if ll_rpta = 1 then
 	
-	//Elijo el datawindows adecuado
-	if FileExists(gs_logo) then
-		if ls_tipo_rpt = '1' then
-			ids_ticket.DataObject = 'd_rpt_cierre_caja_t1_tbl'
-		elseif ls_tipo_rpt = '2' then
-			ids_ticket.DataObject = 'd_rpt_cierre_caja_t2_tbl'
-		elseif ls_tipo_rpt = '3' then
-			ids_ticket.DataObject = 'd_rpt_cierre_caja_t3_tbl'
-		elseif ls_tipo_rpt = '4' then
-			ids_ticket.DataObject = 'd_rpt_cierre_caja_t4_tbl'
+	//Elijo el datawindows adecuado según formato y tipo
+	if ls_formato = 'A' then
+		//Formato A4 - según tipo de reporte seleccionado
+		if FileExists(gs_logo) then
+			if ls_tipo_rpt = '1' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_a4_t1_tbl'
+			elseif ls_tipo_rpt = '2' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_a4_t2_tbl'
+			elseif ls_tipo_rpt = '3' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_a4_t3_tbl'
+			elseif ls_tipo_rpt = '4' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_a4_t4_tbl'
+			else
+				MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
+							+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
+				return false
+			end if
 		else
-			MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
-						+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
-			return false
+			if ls_tipo_rpt = '1' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_a4_sinlogo_t1_tbl'
+			elseif ls_tipo_rpt = '2' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_a4_sinlogo_t2_tbl'
+			elseif ls_tipo_rpt = '3' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_a4_sinlogo_t3_tbl'
+			elseif ls_tipo_rpt = '4' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_a4_sinlogo_t4_tbl'
+			else
+				MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
+							+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
+				return false
+			end if
 		end if
 	else
-		if ls_tipo_rpt = '1' then
-			ids_ticket.DataObject = 'd_rpt_cierre_caja_sinlogo_t1_tbl'
-		elseif ls_tipo_rpt = '2' then
-			ids_ticket.DataObject = 'd_rpt_cierre_caja_sinlogo_t2_tbl'
-		elseif ls_tipo_rpt = '3' then
-			ids_ticket.DataObject = 'd_rpt_cierre_caja_sinlogo_t3_tbl'
-		elseif ls_tipo_rpt = '4' then
-			ids_ticket.DataObject = 'd_rpt_cierre_caja_sinlogo_t4_tbl'
+		//Formato Ticket/Etiquetadora
+		if FileExists(gs_logo) then
+			if ls_tipo_rpt = '1' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_t1_tbl'
+			elseif ls_tipo_rpt = '2' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_t2_tbl'
+			elseif ls_tipo_rpt = '3' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_t3_tbl'
+			elseif ls_tipo_rpt = '4' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_t4_tbl'
+			else
+				MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
+							+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
+				return false
+			end if
 		else
-			MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
-						+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
-			return false
+			if ls_tipo_rpt = '1' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_sinlogo_t1_tbl'
+			elseif ls_tipo_rpt = '2' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_sinlogo_t2_tbl'
+			elseif ls_tipo_rpt = '3' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_sinlogo_t3_tbl'
+			elseif ls_tipo_rpt = '4' then
+				ids_ticket.DataObject = 'd_rpt_cierre_caja_sinlogo_t4_tbl'
+			else
+				MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
+							+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
+				return false
+			end if
 		end if
-		
 	end if
 	
 	ids_ticket.SetTransObject(SQLCA)
@@ -1130,6 +1172,16 @@ if ll_rpta = 1 then
 		return false
 	end if
 	
+	//Configurar tamaño de papel para impresora térmica (solo formato Ticket)
+	if ls_formato <> 'A' then
+		//Calcular altura dinámica según contenido
+		ll_height = il_height_cierre_caja + il_height_row_cierre_caja * ids_ticket.RowCount()
+		//Tamaño personalizado (256) para impresora térmica Epson TM-T20III 80mm
+		ids_ticket.Object.DataWindow.Print.Paper.Size = 256 
+		ids_ticket.Object.DataWindow.Print.CustomPage.Width = il_width_cierre_caja
+		ids_ticket.Object.DataWindow.Print.CustomPage.Length = ll_height
+	end if
+	
 	//Coloco el logo
 	if FileExists(gs_logo) then
 		ids_ticket.object.p_logo.filename = gs_logo
@@ -1139,35 +1191,69 @@ if ll_rpta = 1 then
 	ids_ticket.Print()
 	
 else
-	if FileExists(gs_logo) then
-		if ls_tipo_rpt = '1' then
-			lstr_param.dw1 = 'd_rpt_cierre_caja_t1_tbl'
-		elseif ls_tipo_rpt = '2' then
-			lstr_param.dw1 = 'd_rpt_cierre_caja_t2_tbl'
-		elseif ls_tipo_rpt = '3' then
-			lstr_param.dw1 = 'd_rpt_cierre_caja_t3_tbl'
-		elseif ls_tipo_rpt = '4' then
-			lstr_param.dw1 = 'd_rpt_cierre_caja_t4_tbl'
+	//Previsualización
+	if ls_formato = 'A' then
+		//Formato A4 - según tipo de reporte seleccionado
+		if FileExists(gs_logo) then
+			if ls_tipo_rpt = '1' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_a4_t1_tbl'
+			elseif ls_tipo_rpt = '2' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_a4_t2_tbl'
+			elseif ls_tipo_rpt = '3' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_a4_t3_tbl'
+			elseif ls_tipo_rpt = '4' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_a4_t4_tbl'
+			else
+				MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
+							+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
+				return false
+			end if
 		else
-			MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
-						+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
-			return false
+			if ls_tipo_rpt = '1' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_a4_sinlogo_t1_tbl'
+			elseif ls_tipo_rpt = '2' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_a4_sinlogo_t2_tbl'
+			elseif ls_tipo_rpt = '3' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_a4_sinlogo_t3_tbl'
+			elseif ls_tipo_rpt = '4' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_a4_sinlogo_t4_tbl'
+			else
+				MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
+							+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
+				return false
+			end if
 		end if
 	else
-		if ls_tipo_rpt = '1' then
-			lstr_param.dw1 = 'd_rpt_cierre_caja_sinlogo_t1_tbl'
-		elseif ls_tipo_rpt = '2' then
-			lstr_param.dw1 = 'd_rpt_cierre_caja_sinlogo_t2_tbl'
-		elseif ls_tipo_rpt = '3' then
-			lstr_param.dw1 = 'd_rpt_cierre_caja_sinlogo_t3_tbl'
-		elseif ls_tipo_rpt = '4' then
-			lstr_param.dw1 = 'd_rpt_cierre_caja_sinlogo_t4_tbl'
+		//Formato Ticket/Etiquetadora
+		if FileExists(gs_logo) then
+			if ls_tipo_rpt = '1' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_t1_tbl'
+			elseif ls_tipo_rpt = '2' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_t2_tbl'
+			elseif ls_tipo_rpt = '3' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_t3_tbl'
+			elseif ls_tipo_rpt = '4' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_t4_tbl'
+			else
+				MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
+							+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
+				return false
+			end if
 		else
-			MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
-						+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
-			return false
+			if ls_tipo_rpt = '1' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_sinlogo_t1_tbl'
+			elseif ls_tipo_rpt = '2' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_sinlogo_t2_tbl'
+			elseif ls_tipo_rpt = '3' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_sinlogo_t3_tbl'
+			elseif ls_tipo_rpt = '4' then
+				lstr_param.dw1 = 'd_rpt_cierre_caja_sinlogo_t4_tbl'
+			else
+				MessageBox('Error', 'Tipo de reporte Elegido [' + ls_tipo_rpt &
+							+ '] no esta implementado o no existe, por favor verifique!', StopSign!)
+				return false
+			end if
 		end if
-		
 	end if
 
 	lstr_param.titulo = 'Cierre de Caja ' + string(adi_Fecha1, 'dd/mm/yyyy') + '-' + string(adi_Fecha2, 'dd/mm/yyyy')

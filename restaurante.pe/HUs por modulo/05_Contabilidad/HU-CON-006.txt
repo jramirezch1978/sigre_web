@@ -1,0 +1,520 @@
+﻿HU-CON-006 - Registro de Asientos (Creación Manual) - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-006
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Libro Diario
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Registro de Asientos (Creación Manual)
+
+* Autor: Redactor de HU de Software de Contabilidad
+
+* Fuente: Alcance Global del Proyecto de Implementación de Sistema Contable y de Nómina Multipaís – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la creación, edición, consulta e inactivación de asientos contables manuales, registrando una cabecera y un detalle de partidas con sus importes en debe/haber,  moneda, tasa de cambio, glosa y referencias.
+La pantalla será un único formulario maestro–detalle que valide el balance de los importes ( debe= haber) y la coherencia por moneda. La información se almacenará en las tablas CNTBL_ASIENTO (cabecera), CNTBL_ASIENTO_DET (detalle) y CNTBL_ASIENTO_DET_AUX (atributos auxiliares opcionales).
+________________
+
+
+3. Actor(es)
+   * Usuario Contable: Crea y modifica asientos manuales.
+
+   * Administrador del Sistema: Configura permisos, apertura/cierre de periodos.
+
+   * Auditor Interno: Consulta y descarga asientos (solo lectura).
+
+________________
+
+
+4. Precondiciones
+      * Usuario autenticado en una Razón Social con permisos en Contabilidad.
+
+      * Periodo contable abierto para el año/mes del asiento.
+
+      * Plan de cuentas activo y parametrizaciones mínimas (moneda local/alternativa, libros).
+
+      * Razón Social y País visibles en modo informativo (solo lectura).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Libro Diario → Registro de Asientos (Manual)
+________________
+
+
+6. Historia de Usuario
+Como usuario contable,
+quiero registrar asientos contables de forma manual con control de moneda, tasas y partidas debe/haber,
+para reflejar operaciones no integradas automáticamente y garantizar estados financieros correctos y auditables.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	La pantalla permite crear/editar/consultar/inactivar asientos.
+	Asiento guardado con su cabecera y partidas.
+	2
+	Balance obligatorio del asiento.
+	Sumas de debe = haber en moneda base y alternativa.
+	3
+	Validación de periodo abierto y libro permitido.
+	Bloqueo si el periodo o libro no están disponibles.
+	4
+	Las cuentas contables deben existir y estar activas.
+	Bloqueo y mensaje si no cumplen.
+	5
+	Control de moneda y tasa de cambio.
+	Importes en soles/dólares coherentes con la tasa.
+	6
+	Registro de glosa en cabecera.
+
+	Longitudes respetadas; guardado correcto.
+	7
+	Trazabilidad completa en log de auditoría contable.
+	Usuario, fecha, hora, acción, before/after.
+	8
+	Posibilidad de documento de referencia, centro de costo y cuenta bancaria por partida.
+	Validaciones referenciales exitosas.
+	________________
+
+
+8. Formulario Maestro–Detalle (alineado a BD)
+Tablas: CNTBL_ASIENTO (maestro), CNTBL_ASIENTO_DET (detalle), CNTBL_ASIENTO_DET_AUX (atributos opcionales)
+PK sugerida (cabecera): (ORIGEN, ANO, MES, NRO_LIBRO, NRO_ASIENTO)
+ PK (detalle): (ORIGEN, ANO, MES, NRO_LIBRO, NRO_ASIENTO, ITEM)
+8.1 Cabecera — CNTBL_ASIENTO
+Campo (UI)
+	Columna BD
+	Tipo
+	Long.
+	Oblig.
+	Validaciones / Descripción
+	Origen
+	ORIGEN CHAR(2)
+	Lista
+	2
+	Sí
+	Catálogo de orígenes (p.ej., MN manual). FK a libro/origen.
+	Año
+	ANO NUMBER(4)
+	Numérico
+	4
+	Sí
+	Debe estar abierto.
+	Mes
+	MES NUMBER(2)
+	Numérico
+	2
+	Sí
+	1–12 y abierto.
+	Libro
+	NRO_LIBRO NUMBER(3)
+	Lista
+	3
+	Sí
+	Diario, Compras, Ventas, etc. Según catálogo.
+	Moneda
+	COD_MONEDA CHAR(3)
+	Lista
+	3
+	No
+	Si no se informa, se asume moneda local.
+	Tasa de cambio
+	TASA_CAMBIO NUMBER(7,4)
+	Numérico
+	-
+	No
+	Requerida si moneda ≠ local; > 0.
+	Glosa
+	DESC_GLOSA VARCHAR2(2000)
+	Texto
+	2000
+	No
+	Observación general del asiento.
+	Fecha contable
+	FECHA_CNTBL DATE
+	Fecha
+	-
+	No
+	Debe pertenecer al mes/año seleccionados.
+	Usuario
+	COD_USR CHAR(6)
+	Automático
+	6
+	No
+	Usuario logueado.
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Estado
+	FLAG_ESTADO CHAR(1)
+	Lista
+	1
+	Sí
+	Activo=1, Inactivo=0. Default '1'.
+	Replicación
+	FLAG_REPLICACION CHAR(1)
+	Toggle
+	1
+	No
+	Sí=1, No=0. Default '1'.
+	Tot. Debe (Local)
+	TOT_SOLDEB NUMBER(13,2)
+	Automático
+	-
+	No
+	Calculado de detalle.
+	Tot. Haber (Local)
+	TOT_SOLHAB NUMBER(13,2)
+	Automático
+	-
+	No
+	Calculado de detalle.
+	Tot. Debe (Alt)
+	TOT_DOLDEB NUMBER(13,2)
+	Automático
+	-
+	No
+	Calculado de detalle.
+	Tot. Haber (Alt)
+	TOT_DOLHAB NUMBER(13,2)
+	Automático
+	-
+	No
+	Calculado de detalle.
+	Nota/Tipo
+	TIPO_NOTA CHAR(1)
+	Lista
+	1
+	No
+	Si la empresa usa tipos de nota.
+	Proceso
+	NRO_PROCESO CHAR(10)
+	Texto
+	10
+	No
+	Traza con procesos batch.
+	Fec. Registro
+	FEC_REGISTRO DATE
+	Automático
+	-
+	No
+	Set por BD.
+	Transferido
+	FLAG_ASNT_TRANSF CHAR(1)
+	Automático
+	1
+	No
+	Flag de cierre/bloqueo (0/1).
+	Flag tabla
+	FLAG_TABLA CHAR(1)
+	Automático
+	1
+	No
+	Uso interno.
+	Comportamiento cabecera:
+         * Guardar: valida periodo abierto, libro permitido y balance de totales.
+
+         * Inactivar: solo si el asiento no está transferido/cerrado (FLAG_ASNT_TRANSF='0').
+
+________________
+
+
+8.2 Detalle — CNTBL_ASIENTO_DET (grilla en la misma pantalla)
+Campo (UI)
+	Columna BD
+	Tipo
+	Long.
+	Oblig.
+	Validaciones / Descripción
+	Ítem
+	ITEM NUMBER(6)
+	Automático
+	6
+	Sí
+	Secuencial por asiento.
+	Cuenta
+	CNTA_CTBL CHAR(10)
+	Selector
+	10
+	Sí
+	Debe existir y estar activa. FK plan de cuentas.
+	Débito/Haber
+	FLAG_DEBHAB CHAR(1)
+	Lista
+	1
+	Sí
+	Valores: D/H (o 1/0 según parámetro).
+	Importe Local Deb/Hab
+	IMP_MOVSOL NUMBER(17,6)
+	Numérico
+	-
+	Sí
+	≥ 0.000001; exclusivo con importe alterno si no hay TC.
+	Importe Alterno Deb/Hab
+	IMP_MOVDOL NUMBER(17,6)
+	Numérico
+	-
+	Sí*
+	Requerido si moneda ≠ local; valida TC.
+	Ajuste
+	IMP_MOVAJU NUMBER(17,6)
+	Numérico
+	-
+	No
+	Diferencias por redondeo/ajuste.
+	Fecha Partida
+	FEC_CNTBL DATE
+	Fecha
+	-
+	No
+	≤ FECHA_CNTBL cabecera (sugerido = misma fecha).
+	Glosa Detalle
+	DET_GLOSA VARCHAR2(2000)
+	Texto
+	2000
+	No
+	Observación de la partida.
+	Centro de Costo
+	CENCOS CHAR(10)
+	Lista
+	10
+	No
+	Si política CECO=obligatorio por cuenta, exigir.
+	Cuenta Bancaria
+	COD_CTABCO CHAR(30)
+	Lista
+	30
+	No
+	Si la cuenta contable requiere banco.
+	Doc. Ref. (Tipo)
+	TIPO_DOCREF1 CHAR(4)
+	Lista
+	4
+	No
+	Catálogo de tipos de doc.
+	Doc. Ref. (Número)
+	NRO_DOCREF1 CHAR(15)
+	Texto
+	15
+	No
+	Formato según tipo de documento
+ej B001-1/F001-1.
+	Doc. Ref. (Núm. 2)
+	NRO_DOCREF2 CHAR(15)
+	Texto
+	15
+	No
+	Opcional.
+	Item Doc. Ref.
+	ITEM_DOCREF1 NUMBER(3)
+	Numérico
+	3
+	No
+	Opcional.
+	Proveedor
+	COD_RELACION CHAR(8)
+	Lista
+	8
+	No
+	Proveedor/Cliente/Relacionado.
+	Concepto
+	CONCEP CHAR(4)
+	Lista
+	4
+	No
+	Catálogo de conceptos contables.
+	Centro Beneficio
+	CENTRO_BENEF CHAR(12)
+	Lista
+	12
+	No
+	Si la empresa usa CB.
+	Ceco Transferencia
+	CENCOS_TRANSFERENCIA CHAR(10)
+	Lista
+	10
+	No
+	Para reclasificaciones.
+	Generado Automático
+	FLAG_GEN_AUT CHAR(1)
+	Automático
+	1
+	No
+	0/1. En manual queda 0.
+	Replica
+	FLAG_REPLICACION CHAR(1)
+	Toggle
+	1
+	No
+	1 por defecto.
+	Refs. Asiento
+	ORIGEN_REF/ANO_REF/MES_REF/NRO_LIBRO_REF/NRO_ASIENTO_REF/ITEM_REF
+	Texto/Num
+	-
+	No
+	Enlaza otra partida si corresponde.
+	Fec. Registro
+	FEC_REGISTRO DATE
+	Automático
+	-
+	No
+	sysdate.
+	* Obligatoriedad de importes:
+            * Si la moneda del asiento es local → exige IMP_MOVSOL; IMP_MOVDOL se calcula si hay TC.
+
+            * Si la moneda del asiento es alternativa → exige IMP_MOVDOL; IMP_MOVSOL se calcula con TC.
+
+________________
+
+
+8.3 Atributos Auxiliares (opcional por partida) — CNTBL_ASIENTO_DET_AUX
+Campo (UI)
+	Columna BD
+	Tipo
+	Long.
+	Oblig.
+	Descripción
+	Partida
+	(ORIGEN, ANO, MES, NRO_LIBRO, NRO_ASIENTO, ITEM)
+	Automático
+	-
+	Sí
+	Clave de la partida.
+	Cuenta Presup.
+	CNTA_PRSP CHAR(10)
+	Lista
+	10
+	No
+	Si hay módulo de presupuesto.
+	Centro de Costo
+	CENCOS CHAR(10)
+	Lista
+	10
+	No
+	Alternativo al del detalle base.
+	Flag Pre-cuenta
+	FLAG_PRE_CNTA CHAR(1)
+	Toggle
+	1
+	No
+	0/1.
+	Replica
+	FLAG_REPLICACION CHAR(1)
+	Toggle
+	1
+	No
+	1/0.
+	________________
+
+
+9. Reglas de Negocio
+               1. Balance: Suma de debe= haber en moneda local y en moneda alternativa (conversión por TASA_CAMBIO).
+
+               2. Periodo: Solo se permiten asientos en periodos abiertos. Se validan Año/Mes y Fecha contable.
+
+               3. Moneda/TC: Si COD_MONEDA ≠ moneda local, TASA_CAMBIO > 0 es obligatoria.
+
+               4. Cuentas: CNTA_CTBL debe existir, estar activa y permitir la naturaleza elegida (D/H).
+
+               5. CECO / Cuenta Bancaria / Doc. Ref.: Se exigen cuando la cuenta lo requiera por política.
+
+               6. Inactivación: No se puede inactivar si FLAG_ASNT_TRANSF='1' (asiento transferido/cerrado).
+
+               7. Edición: Al editar partidas, se recalculan totales y se revalida balance.
+
+               8. Auditoría: Todas las operaciones (alta, modificación, inactivación) se registran en log contable.
+
+               9. Trazabilidad: Debe poder consultarse el asiento y sus partidas por origen y referencias (docs/relación).
+
+               10. Replicación: Si FLAG_REPLICACION='1', el asiento/partidas pueden replicarse a entornos/razones sociales según configuración.
+
+________________
+
+
+10. Integraciones
+                  * Plan de Cuentas (validación de existencia/estado/naturaleza).
+
+                  * Tablas maestras: Moneda, Libros, Tipos de Documento, Terceros/Relaciones, Centros de Costo, Cuentas Bancarias.
+
+                  * Reportes: Libro Diario, Mayor, Balances, Auxiliares por cuenta/centro/tercero.
+
+________________
+
+
+11. Aspectos Técnicos
+                     * Tablas: CNTBL_ASIENTO, CNTBL_ASIENTO_DET, CNTBL_ASIENTO_DET_AUX.
+
+                     * Claves / Constraints:
+
+                        * Cabecera: PK (ORIGEN, ANO, MES, NRO_LIBRO, NRO_ASIENTO); FKs a Libro/Origen.
+
+                        * Detalle: PK (ORIGEN, ANO, MES, NRO_LIBRO, NRO_ASIENTO, ITEM); FK a cabecera y a Plan de Cuentas.
+
+                        * Auxiliar: misma clave + FKs a catálogos presupuestales/CECO.
+
+                           * Transaccionalidad: Guardado en una sola transacción (cabecera+detalle+auxiliares). Rollback ante fallo.
+
+                           * Cálculos: Totales de cabecera se autocalculan desde el detalle; validación de igualdad.
+
+                           * Defaults BD: TOT_* = 0, FLAG_ESTADO='1', FLAG_REPLICACION='1', FLAG_ASNT_TRANSF='0', FEC_REGISTRO=sysdate.
+
+                           * Seguridad: Permisos por rol (crear/editar/inactivar/consultar/exportar).
+
+                           * Auditoría: Registrar usuario, timestamp, acción, antes/después (mínimo a nivel de campos clave y montos).
+
+________________
+
+
+12. Flujo Principal (UI)
+                              1. Nuevo → sistema propone Origen, período actual y N° Asiento (autonum.).
+
+                              2. Completar Libro, Moneda, TC (si aplica), Fecha contable y Glosa.
+
+                              3. Agregar partidas en grilla: Cuenta, D/H, Importe(s), referencias (CECO, doc., banco, tercero, glosa).
+
+                              4. Guardar → validaciones (periodo, cuentas, moneda/TC, balance).
+
+                              5. Confirmación → asiento disponible para reportes y consultas.
+
+Acciones adicionales: Editar, Inactivar, Duplicar, Exportar (PDF/Excel), Imprimir voucher.
+________________
+
+
+13. Mensajes de Validación (ejemplos)
+                                 * “El periodo seleccionado no está abierto.”
+
+                                 * “La cuenta contable no existe o está inactiva.”
+
+                                 * “El asiento no balancea: debe≠ Haber en moneda local/alternativa.”
+
+                                 * “Debe ingresar tasa de cambio porque la moneda del asiento es distinta a la local.”
+
+                                 * “No es posible inactivar un asiento transferido/cerrado.”

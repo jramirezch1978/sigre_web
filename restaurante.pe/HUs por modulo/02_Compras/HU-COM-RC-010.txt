@@ -1,0 +1,125 @@
+﻿HU-COM-RC-010 - Reporte de Compras Recibidas sin Almacenar los Productos - v1.0
+1. Título
+Reporte de Compras Recibidas sin Almacenar los Productos
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero generar un reporte que muestre todas las compras que han sido recepcionadas pero cuyos productos aún no han sido ingresados formalmente al almacén, para detectar discrepancias entre recepción y almacenamiento, y garantizar la trazabilidad del inventario y el control contable.
+3. Proceso
+* Proceso: Reportes
+
+* Subproceso: Reportes de Compras
+
+* Módulo: Compras
+
+4. Narrativa de Usuario
+   * Quiero: Consultar un reporte de órdenes de compra recepcionadas cuyos productos aún no han sido registrados en inventario.
+
+   * Para: Identificar retrasos o errores en el proceso de almacenamiento.
+
+   * De manera que: Se pueda garantizar que todos los productos recepcionados sean correctamente ingresados al almacén y registrados en la contabilidad.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Compras > Reportes > Reporte de Compras Recibidas sin Almacenar los Productos
+6. Criterios de Aceptación
+      1. El reporte debe mostrar todas las órdenes de compra recepcionadas en el módulo de Compras pero sin movimiento de ingreso en el módulo de Almacén.
+
+      2. El sistema debe permitir filtrar por fecha de recepción, proveedor, sucursal, almacén, tipo de documento y usuario receptor.
+
+      3. Cada registro debe mostrar el número de orden de compra, fecha de recepción, proveedor, total recepcionado y el estado del ingreso al almacén (Pendiente / Incompleto).
+
+      4. Debe permitir identificar diferencias entre cantidad recepcionada y cantidad almacenada por ítem.
+
+      5. El reporte debe poder exportarse en Excel y PDF, conservando el formato estándar.
+
+      6. El usuario podrá acceder al detalle de la orden y al movimiento de recepción, si existiese.
+
+      7. Toda consulta y exportación debe quedar registrada en el log de auditoría contable (usuario, fecha, hora, acción).
+
+      8. El sistema debe recalcular los totales en tiempo real al aplicar filtros.
+
+      9. Solo se deben mostrar las órdenes pertenecientes a la razón social y sucursal activa del usuario.
+
+      10. El sistema debe permitir programar el reporte de forma automática (diaria, semanal o mensual).
+
+7. Campos del Reporte / Columnas de Vista Tabla
+Columnas principales:
+         * Número de Orden de Compra
+
+         * Fecha de Emisión
+
+         * Fecha de Recepción
+         * Documento de Proveedor
+
+         * Razón Social de Proveedor
+
+         * Moneda
+
+         * Monto Total
+
+         * Cantidad Recepcionada
+
+         * Cantidad Ingresada a Almacén
+
+         * Diferencia Pendiente
+
+         * Estado de Almacenamiento (Pendiente / Incompleto/ Completo)
+
+         * Usuario Receptor
+
+         * Sucursal / Almacén
+
+Filtros disponibles:
+            * Rango de Fechas de Recepción
+
+            * Proveedor
+
+            * Estado de Almacenamiento
+
+            * Sucursal / Almacén
+
+            * Usuario Receptor
+
+            * Moneda
+
+Acciones disponibles:
+               * Ver Detalle
+
+               * Exportar (Excel / PDF)
+
+               * Agrupar por Proveedor o Sucursal
+
+               * Programar Envío Automático
+
+               * Enviar Alerta a Responsable de Almacén
+
+8. Detalle de Integración (opcional)
+                  * Integración con:
+
+                     * Módulo de Compras: para obtener órdenes y recepciones aprobadas.
+
+                     * Módulo de Almacén: para verificar los movimientos de ingreso.
+
+                     * Contabilidad: para identificar si las compras fueron registradas contablemente.
+
+                        * En caso de órdenes de servicio, no debe mostrar registros, ya que no aplican a inventario.
+
+9. Consideraciones Técnicas
+                           * Los datos deben actualizarse en tiempo real al momento de ejecutar la consulta.
+
+                           * Las discrepancias (recepcionado ≠ almacenado) deben resaltarse visualmente (por ejemplo, en color rojo o con ícono de alerta).
+
+                           * Las exportaciones deben incluir fechas, usuario, filtros aplicados y totales generales.
+
+                           * Las acciones (consultas, exportaciones, notificaciones) deben registrarse en el log de auditoría contable.
+
+                           * El sistema debe garantizar tiempos de respuesta óptimos, incluso con grandes volúmenes de datos.
+
+10. Comentarios
+                              * Este reporte es clave para auditoría y control interno, ya que permite verificar la correcta integración entre Compras y Almacén.
+
+                              * En escenarios multipaís, debe adaptarse a los documentos locales de recepción y guía de remisión.
+
+                              * Se recomienda habilitar alertas automáticas al área de logística cuando una compra lleva más de “X” días sin almacenarse.
+
+                              * Debe permitir consolidar información por sucursal, proveedor o tipo de producto.
+
+                              * Servirá como insumo para reportes financieros y de rotación de inventario.

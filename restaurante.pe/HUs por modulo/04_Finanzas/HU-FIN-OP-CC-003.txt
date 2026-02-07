@@ -1,0 +1,123 @@
+﻿HU-FIN-OP-CC-003 - Registro de Facturas que No Provienen de Ventas Directas - v1.0
+1. Título
+Registro de Facturas que No Provienen de Ventas Directas
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero registrar facturas que no provienen de ventas directas (como servicios prestados, alquileres, intereses u otros ingresos eventuales), para mantener un control completo de todas las cuentas por cobrar y reflejar correctamente los ingresos en la contabilidad.
+3. Proceso
+Proceso: Operaciones
+Subproceso: Cuentas por Cobrar
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Registrar facturas por cobrar que se generan fuera del módulo de ventas directas.
+Para: Contabilizar correctamente ingresos que no derivan de operaciones comerciales típicas, pero que afectan la cartera de clientes y el flujo de caja.
+De manera que: Se mantenga la integridad contable y la trazabilidad de todos los documentos por cobrar, independientemente de su origen.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Operaciones > Cuentas por Cobrar > Registro de Facturas No Provenientes de Ventas Directas
+6. Criterios de Aceptación
+El sistema debe permitir registrar manualmente facturas emitidas a clientes por conceptos distintos a las ventas directas (servicios, alquiler, penalidades, intereses, etc.).
+Debe permitir seleccionar el cliente, concepto de la factura, moneda, tipo de cambio (si aplica) y centro de costo.
+El usuario podrá asociar cada registro a una cuenta contable de ingreso según el tipo de concepto.
+El sistema debe generar automáticamente el asiento contable correspondiente:
+* Débito: Cuentas por Cobrar – Clientes
+
+* Crédito: Cuenta de Ingresos (según concepto seleccionado)
+
+Debe permitir adjuntar un documento digital (PDF, XML u otro) como respaldo de la factura.
+El sistema validará que el número de factura no esté duplicado dentro de la misma razón social y cliente.
+Debe mostrar automáticamente la razón social y país del usuario en sesión (solo lectura).
+El usuario podrá consultar, editar o anular facturas registradas, según su perfil de permisos.
+Toda acción de registro, edición o anulación deberá registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción).
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos principales:
+
+   * Cliente
+
+   * Tipo de Documento (Factura, Nota de Débito, etc.)
+
+   * Serie y Número de Documento
+
+   * Fecha de Emisión
+
+   * Fecha de Vencimiento
+
+   * Concepto / Descripción del Servicio
+
+   * Monto Total
+
+   * Moneda
+
+   * Tipo de Cambio
+
+   * Centro de Costo
+
+   * Cuenta Contable de Ingreso
+
+   * Medio de Cobro[a][b] (si aplica)
+
+   * Estado (Pendiente / pagado / Anulado)
+
+   * N° de Asiento Contable
+
+   * Documento Adjunto (PDF / XML)
+
+   * Observaciones
+
+   * Usuario de Registro
+
+   * Fecha y Hora de Registro
+
+Filtros disponibles:
+      * Cliente
+
+      * Tipo de Documento
+
+      * Fecha de Emisión / Vencimiento
+
+      * Estado
+
+      * Moneda
+
+      * Centro de Costo
+
+      * Sucursal / Local
+
+Acciones disponibles:
+         * Registrar Nueva Factura
+
+         * Editar Factura
+
+         * Ver Asiento Contable
+
+         * Adjuntar Documento Soporte
+
+         * Anular Registro
+
+         * Exportar (Excel / PDF)
+
+8. Detalle de Integración (opcional)
+Integración con Contabilidad: Genera y actualiza automáticamente los asientos contables por la emisión o anulación de la factura.
+Integración con Tesorería: Permite asociar el registro con futuros cobros o conciliaciones bancarias.
+Integración con Reportes Financieros: Actualiza la cartera de cuentas por cobrar y los reportes de ingresos no operativos.
+Integración con Clientes: Permite mantener actualizado el historial de transacciones por cliente.
+9. Consideraciones Técnicas
+El sistema debe permitir el registro en moneda local o extranjera, aplicando el tipo de cambio vigente del día.
+Debe validar que la factura esté correctamente numerada y que no exista duplicidad.
+Cada asiento contable generado debe incluir información del documento, usuario, fecha y cuentas afectadas.
+Las modificaciones o anulaciones estarán restringidas a usuarios con permisos especiales definidos por el administrador.
+Todas las acciones deberán registrarse en el log de auditoría contable con los datos del usuario y operación ejecutada.
+Debe cumplir con las normas NIC 1, NIC 18 y NIIF 15, relacionadas con la presentación de estados financieros y reconocimiento de ingresos.
+10. Comentarios
+Esta funcionalidad permite al área contable registrar y controlar ingresos no comerciales, manteniendo la coherencia del sistema de cuentas por cobrar.
+Contribuye a una visión completa del flujo de ingresos de la empresa, incluyendo operaciones distintas a las ventas tradicionales.
+Se recomienda incluir indicadores de gestión como:
+            * Total de facturas no comerciales por periodo.
+
+            * Participación porcentual de ingresos no operativos.
+
+            * Facturas pendientes por cliente y tipo de concepto.
+
+Asimismo, puede incluirse una opción de “Plantillas de Registro” para agilizar la creación de facturas recurrentes de servicios o arrendamientos.
+
+
+[a]Debe ser un select o solo un texto libre?
+[b]Debe de ser un select

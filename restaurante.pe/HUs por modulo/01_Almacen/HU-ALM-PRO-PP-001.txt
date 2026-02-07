@@ -1,0 +1,208 @@
+﻿HU-ALM-PRO-PP-001 - Recálculo de Precios Promedio - v1.0
+
+
+1. Título
+Recálculo de Precios Promedio
+
+
+2. Descripción
+Como usuario del módulo de Almacén de Restaurant.pe, quiero recalcular los precios promedio de los artículos en función de los movimientos de inventario registrados, para asegurar que los costos reflejados en la contabilidad, kardex y reportes financieros sean correctos y estén alineados con las normas contables y el flujo real de inventarios.
+
+
+3. Proceso
+Proceso: Procesos
+Subproceso: Precios Promedio
+Módulo: Almacén
+
+
+4. Narrativa de Usuario
+Quiero: Ejecutar el recálculo del precio promedio de los artículos por almacén y periodo.
+Para: Actualizar el costo promedio considerando ingresos, egresos, ajustes y regularizaciones.
+De manera que: Los reportes de inventario, movimientos y estados financieros reflejen un costo correcto y consistente con las operaciones reales.
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Almacén > Procesos > Precios Promedio > Recálculo de Precios Promedio
+
+
+
+
+
+
+
+
+
+
+6. Criterios de Aceptación
+* El sistema debe permitir seleccionar:
+
+   * Almacén
+
+   * Rango de fechas o periodo contable
+
+   * Artículos específicos o todos los artículos
+
+      * El sistema debe mostrar el precio promedio actual y el precio recalculado antes de confirmar el proceso.
+
+      * Debe validar que existan movimientos en el periodo seleccionado.
+
+      * El sistema debe considerar para el cálculo:
+
+         * Ingresos por compras
+
+         * Ingresos por transferencias
+
+         * Ajustes de inventario
+
+         * Producciones (si aplica)
+
+         * Devoluciones
+
+         * Salidas y consumos
+
+            * El cálculo debe seguir la fórmula del Promedio Ponderado o la configurada en el sistema.
+
+            * El sistema debe permitir:
+
+               * Vista previa del recálculo
+
+               * Aceptar o cancelar el proceso
+
+                  * Una vez confirmado:
+
+                     * Se actualizará el costo promedio del artículo
+
+                     * Se generará una nueva versión del costo
+
+                     * Se recalculará el kardex del periodo
+
+                     * Se ajustarán los saldos valorizados
+
+                        * Si existen diferencias significativas, el sistema debe permitir generar un asiento contable de regularización automática.
+
+                        * Toda acción debe registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Almacén, Artículo, Periodo, Acción).
+
+                        * Solo los usuarios con permisos de Contador / Finanzas / Administrador pueden ejecutar el proceso.
+
+                        * La Razón Social y País deben mostrarse en modo solo lectura.
+7. Campos del Reporte / Columnas de Vista Tabla
+Vista previa del recálculo (tabla):
+                           * Almacén
+
+                           * Código del Artículo
+
+                           * Descripción del Artículo
+
+                           * Unidad de Medida
+
+                           * Stock Inicial
+
+                           * Precio Promedio Actual
+
+                           * Precio Promedio Recalculado
+
+                           * Diferencia
+
+                           * Movimientos Considerados
+
+                           * Valor Inventario Actual
+
+                           * Valor Inventario Recalculado
+
+                           * Estado del Proceso (Pendiente / Recalculado)
+
+                           * Fecha de Proceso
+
+Filtros disponibles
+                              * Almacén
+
+                              * Descripción del producto
+
+                              * Categoría
+
+                              * Periodo / Fecha
+
+                              * Estado del Proceso
+
+                              * Usuario
+
+Acciones disponibles
+                                 * Vista Previa del Recálculo
+
+                                 * Seleccionar Artículos
+
+                                 * Confirmar Recálculo
+
+                                 * Generar Asiento Contable
+
+                                 * Exportar (Excel / PDF)
+
+                                 * Reprocesar Kardex
+
+                                 * Filtrar / Limpiar Filtros
+
+                                 * Actualizar Información
+
+
+
+8. Detalle de Integración (opcional)
+                                    * Contabilidad:
+
+                                       * Genera diferencias contables por ajuste del costo promedio.
+
+                                       * Recalcula valorizaciones para estados financieros.
+
+                                          * Compras:
+
+                                             * Obtiene datos de ingresos por facturas registradas.
+
+                                                * Producción / Recetas (si aplica):
+
+                                                   * Recalcula costos de producción basados en los nuevos costos promedio.
+
+                                                      * Reportes Financieros:
+
+                                                         * Impacta en valorización de inventarios, costo de ventas y márgenes.
+
+                                                            * Auditoría:
+
+                                                               * Registra cada proceso, parámetro utilizado y resultado.
+
+
+
+9. Consideraciones Técnicas
+                                                                  * El recálculo debe operar sobre periodos contables abiertos.
+
+                                                                  * El sistema debe generar una nueva versión del costo promedio, sin perder el historial anterior.
+
+                                                                  * El proceso debe ejecutarse de forma asincrónica cuando el volumen de artículos sea alto.
+
+                                                                  * Se debe garantizar la integridad del kardex:
+
+                                                                     * Orden cronológico
+
+                                                                     * Consistencia entre stock físico y valorizado
+
+                                                                        * El sistema debe bloquear el recálculo si existe:
+
+                                                                           * Descuadre de inventario pendiente
+
+                                                                           * Movimientos sin aprobar
+
+                                                                              * Debe cumplir con:
+
+                                                                                 * NIC 2 Inventarios
+
+                                                                                 * Normativa tributaria según país (PE: costo promedio, CL: costeo permitido, etc.)
+
+
+
+10. Comentarios
+Esta funcionalidad es esencial para mantener la correcta valoración del inventario en entornos con alto volumen de movimientos, como restaurantes multisucursales.
+Permite corregir inconsistencias generadas por errores operativos o cargas fuera de secuencia.
+Se recomienda implementar:
+                                                                                    * Alertas por variaciones superiores al umbral definido.
+
+                                                                                    * Programación automática mensual del recálculo.
+
+                                                                                    * Simulación comparativa de valorizaciones antes y después del proceso.

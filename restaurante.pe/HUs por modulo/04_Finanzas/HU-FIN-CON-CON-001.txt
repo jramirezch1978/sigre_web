@@ -1,0 +1,118 @@
+﻿HU-FIN-CON-CON-001 - Cruce de Información del Extracto Bancario con la Información del Sistema (Pagos, Cobranzas, Transferencias, Gastos y Comisiones Bancarias) - v1.0
+1. Título
+Cruce de Información del Extracto Bancario con la Información del Sistema (Pagos, Cobranzas, Transferencias, Gastos y Comisiones Bancarias)
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero que el sistema realice el cruce automático y manual entre los movimientos del extracto bancario y los registros internos de pagos, cobranzas, transferencias y comisiones, para garantizar la conciliación bancaria efectiva y la detección de diferencias entre el banco y el sistema.
+3. Proceso
+Proceso: Conciliaciones
+Subproceso: Conciliaciones
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Conciliar los movimientos registrados en el sistema con los del extracto bancario.
+Para: Detectar diferencias, validar saldos y mantener actualizada la contabilidad bancaria.
+De manera que: Se pueda asegurar la integridad y consistencia entre las transacciones internas y los movimientos reportados por el banco.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Conciliaciones > Cruce de Extracto Bancario con Información del Sistema
+6. Criterios de Aceptación
+El sistema debe permitir:
+* Importar el extracto bancario en formatos comunes (.TXT, .CSV, .XLS, .XML) según el banco y país.
+
+* Identificar automáticamente los movimientos del extracto (depósitos, pagos, transferencias, comisiones).
+
+* Realizar el cruce automático entre los movimientos bancarios y las operaciones registradas en el sistema (pagos a proveedores, cobranzas de clientes, gastos, transferencias internas, comisiones).
+
+* Permitir el cruce manual cuando no se encuentre coincidencia automática.
+
+* Mostrar las coincidencias totales, parciales y pendientes de conciliación.
+
+* Permitir marcar movimientos como pendientes de revisión o conciliados parcialmente.
+
+* Registrar en el log de auditoría contable toda acción realizada (usuario, fecha, hora, tipo de movimiento, monto, estado).
+
+* Calcular automáticamente la diferencia entre el saldo del sistema y el saldo del banco.
+
+* Generar el asiento contable de ajuste cuando se registren gastos o comisiones bancarias no contabilizadas.
+
+* Permitir visualizar los movimientos conciliados y su respectivo asiento contable.
+
+* Generar un reporte de conciliación bancaria por cuenta, periodo y sucursal.
+
+* Solo mostrar la información correspondiente a la razón social, país y sucursal activa del usuario.
+
+7. Campos del Reporte / Columnas de Vista Tabla
+Campos principales:
+   * Fecha de Movimiento
+
+   * Descripción / Concepto
+
+   * Tipo de Movimiento (Pago / Cobranza / Transferencia / Comisión / Ajuste)
+
+   * Monto en Extracto
+
+   * Monto en Sistema
+
+   * Diferencia
+
+   * Estado de Conciliación (Conciliado / Parcial / Pendiente / No Encontrado)
+[a]
+   * Cuenta Bancaria
+
+   * Banco
+
+   * Usuario que Ejecuta la Conciliación
+
+   * Fecha de Conciliación
+
+   * Observaciones
+
+Filtros disponibles:
+      * Fecha de Movimiento
+
+      * Tipo de Movimiento
+
+      * Cuenta Bancaria
+
+      * Banco
+
+      * Estado de Conciliación
+
+      * Sucursal
+
+      * Usuario
+
+Acciones disponibles:
+         * Importar Extracto Bancario
+
+         * Ejecutar Cruce Automático
+
+         * Conciliar Manualmente
+
+         * Generar Ajuste Contable
+
+         * Consultar Asiento Contable
+
+         * Exportar (Excel / PDF)
+
+         * Ver Log de Auditoría
+
+8. Detalle de Integración (opcional)
+Integración con Tesorería: Para cruzar los registros de pagos, cobranzas y transferencias realizados desde el sistema.
+Integración con Bancos: Para importar los extractos bancarios en línea o por archivo plano.
+Integración con Contabilidad: Para generar los asientos de ajustes contables derivados de comisiones o diferencias. Se debería de considerar que pueden ser manual o pueder ser automáticos.
+Integración con Reportes Financieros: Para reflejar el estado actualizado de las conciliaciones bancarias.
+Integración con Log de Auditoría: Para garantizar la trazabilidad de todas las conciliaciones y ajustes realizados.
+9. Consideraciones Técnicas
+El sistema debe permitir configurar plantillas de importación bancaria por institución financiera, definiendo columnas, separadores y formatos.
+Debe incluir un algoritmo de coincidencia configurable, basado en criterios como: fecha, monto, número de operación y descripción.
+Los movimientos no conciliados deben mantenerse visibles hasta su regularización.
+El proceso debe ser multipaís, adaptando los formatos y denominaciones bancarias según la entidad y normativa local.
+El sistema debe permitir conciliación parcial o múltiple, por ejemplo, una transferencia que cubra varias facturas o una comisión agrupada.
+El log de auditoría debe registrar toda interacción del usuario con los extractos y conciliaciones.
+Debe permitir exportar reportes consolidados y generar alertas de diferencias mayores al umbral configurado.
+10. Comentarios
+Esta funcionalidad garantiza una conciliación bancaria precisa, reduciendo errores y tiempo de revisión manual.
+Facilita el control de pagos, cobranzas y movimientos internos entre cuentas, además de identificar comisiones y gastos bancarios no registrados.
+El cruce automatizado de información contribuye a la transparencia financiera y al control operativo del flujo de fondos del restaurante, integrando Tesorería, Contabilidad y Bancos bajo un proceso ágil y auditable.
+
+
+[a]Solo se debería tener en cuenta los estados: Conciliado y Pendiente, a los otros dos no les encuentro una definición exacta

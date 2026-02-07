@@ -1,0 +1,261 @@
+﻿HU-CON-011 - Reportes Diversos de Maestros Contables - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-011
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Administración de Maestros Contables
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes Diversos de Maestros
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir generar y consultar reportes diversos de los maestros contables, tales como el Plan de Cuentas, Centros de Costo, Impuestos, Tipos de Detracciones, y Configuraciones Contables.
+Estos reportes deben ofrecer opciones de búsqueda, filtrado, exportación y agrupación, brindando a los usuarios contables una visión consolidada y auditable de la información maestra del sistema.
+La funcionalidad debe permitir emitir los reportes en pantalla, Excel o PDF, incluyendo los datos principales y estados de los registros.
+El objetivo es facilitar el control, la verificación y la validación de los parámetros contables utilizados por el sistema en sus procesos automáticos.
+________________
+
+
+3. Actor(es)
+   * Usuario Contable: Consulta reportes para control y validación de configuraciones.
+
+   * Jefe de Contabilidad: Supervisa la integridad de los catálogos contables.
+
+   * Auditor Interno: Revisa las configuraciones registradas en los maestros para control financiero y normativo.
+
+   * Administrador del Sistema: Gestiona los parámetros de exportación y control de auditoría.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos de acceso a Contabilidad – Maestros Contables.
+
+      * Los catálogos (plan de cuentas, centros de costo, impuestos, detracciones y configuraciones) deben estar previamente cargados en el sistema.
+
+      * El usuario debe haber iniciado sesión bajo una razón social activa y país configurado.
+
+      * El sistema debe contar con las plantillas y formatos de reporte definidos.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Maestros Contables → Reportes Diversos de Maestros
+________________
+
+
+6. Historia de Usuario
+Como usuario contable,
+quiero generar reportes de los distintos maestros contables (plan de cuentas, centros de costo, impuestos, detracciones, configuraciones),
+para validar su consistencia, controlar los registros activos e inactivos y disponer de documentación de respaldo contable.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar el tipo de reporte maestro a generar.
+	Muestra los campos específicos según el maestro seleccionado.
+	2
+	Permitir aplicar filtros personalizados (estado, rango de fechas, código, descripción, cuenta contable, etc.).
+	Los resultados se ajustan a los filtros aplicados.
+	3
+	Mostrar resultados en una vista tipo tabla, con paginación, ordenamiento y totales.
+	Los registros se listan claramente y pueden ordenarse por columna.
+	4
+	Permitir exportar reportes en formatos Excel (.xlsx) y PDF (.pdf).
+	El archivo se descarga correctamente con los datos visibles.
+	5
+	Mostrar el estado del registro (Activo / Inactivo) en cada línea del reporte.
+	Permite control de vigencia de configuraciones.
+	6
+	Incluir en cada reporte los campos clave según el tipo de maestro (cuenta, centro de costo, impuesto, detracción, etc.).
+	Información completa y estructurada.
+	7
+	Permitir agrupación o resumen por categorías (por ejemplo, cuentas por nivel, centros de costo por área, impuestos por tipo).
+	Vista resumida del reporte.
+	8
+	Registrar en bitácora cada generación de reporte (usuario, fecha, tipo de reporte, cantidad de registros).
+	Auditoría automática.
+	9
+	Validar que el usuario tenga permiso para acceder al tipo de maestro solicitado.
+	Mensaje de restricción si no tiene acceso.
+	________________
+
+
+8. Formulario de Consulta y Reporte
+Vista: Pantalla de selección de tipo de maestro y filtros.
+Origen de datos: Tablas maestras contables (CNTBL_CUENTA, CENTROS_COSTO, CNTBL_IMPUESTO, CNTBL_DETRACCION, CNTBL_CONFIG_CONTABLE).
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Tipo de Maestro
+	Lista desplegable
+	Sí
+	Plan de Cuentas / Centros de Costo / Impuestos / Detracciones / Configuraciones Contables.
+	Código / ID
+	Texto
+	No
+	Filtra por código o identificador interno.
+	Descripción
+	Texto
+	No
+	Coincidencia parcial con la descripción.
+	Estado
+	Lista
+	No
+	Activo / Inactivo.
+	Fecha de Creación
+	Rango de fechas
+	No
+	Filtra registros por fecha de alta.
+	Usuario Registro
+	Lista desplegable
+	No
+	Filtra registros creados por usuario específico.
+	8.2 Resultados del Reporte (Campos Base)
+Tipo de Maestro
+	Campos Clave a Mostrar
+	Plan de Cuentas
+	Código, Descripción, Naturaleza (Débito/Haber), Nivel, Estado.
+	Centros de Costo
+	Código, Descripción, Área, Responsable, Estado.
+	Impuestos
+	Código, Descripción, % Tasa, Cuenta Contable Asociada, Estado.
+	Tipos de Detracción
+	Código, Descripción, % Detracción, Cuenta Bancaria SUNAT, Estado.
+	Configuraciones Contables
+	Módulo Origen, Cuenta Débito, Cuenta Crédito, Centro de Costo, Estado.
+	
+
+	
+
+	8.3 Opciones de Salida
+Opción
+	Descripción
+	Visualizar en Pantalla
+	Muestra los resultados directamente en el sistema.
+	Exportar a Excel
+	Genera archivo con formato tabular para análisis.
+	Exportar a PDF
+	Genera reporte con formato institucional, con logo y encabezado.
+	________________
+
+
+
+
+
+
+9. Reglas de Negocio
+         1. Datos actualizados: Los reportes deben mostrar información vigente del maestro seleccionado.
+
+         2. Permisos de acceso: Cada usuario solo puede generar reportes de maestros asignados a su perfil.
+
+         3. Exportación fiel: Los reportes exportados deben incluir todos los filtros aplicados y encabezados visibles.
+
+         4. Auditoría automática: Cada exportación o consulta se registra en la tabla LOG_REPORTE_CONTABLE.
+
+         5. Estado de registros: Se deben incluir los campos de estado y usuario de última modificación.
+
+         6. Integridad contable: Si una cuenta o centro de costo ha sido desactivado, debe reflejarse con su marca de estado.
+
+         7. Multipaís: Los reportes deben filtrar registros según la razón social y país activo.
+
+         8. Estructura jerárquica: En el caso del Plan de Cuentas, se debe mostrar la jerarquía (nivel 1, 2, 3, etc.).
+
+         9. Seguridad de datos: No se permitirá la edición desde esta vista, solo consulta o exportación.
+
+________________
+
+
+10. Integraciones
+            * Plan de Cuentas: Para mostrar estructura jerárquica y niveles contables.
+
+            * Centros de Costo: Para reporte por área, sucursal o proyecto.
+
+            * Impuestos y Detracciones: Para control tributario y contable.
+
+            * Configuraciones Contables: Para auditoría de reglas automáticas.
+
+            * Módulo de Auditoría: Registro de consultas y descargas.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tablas Principales:
+
+                  * CNTBL_CUENTA – Plan de Cuentas.
+
+                  * CENTROS_COSTO – Centros de Costo.
+
+                  * CNTBL_IMPUESTO – Catálogo de Impuestos.
+
+                  * CNTBL_DETRACCION – Tipos de Detracción.
+
+                  * CNTBL_CONFIG_CONTABLE – Configuraciones de Integración Contable.
+
+                     * Exportaciones: Formatos .xlsx y .pdf mediante librerías internas del sistema.
+
+                     * Logs: LOG_REPORTE_CONTABLE con campos: usuario, fecha, tipo_reporte, cantidad_registros, estado.
+
+                     * Filtros SQL Base: Por tipo de maestro, estado, usuario, país y razón social.
+
+                     * Performance: Consultas optimizadas mediante índices en campos clave (CODIGO, ESTADO, RAZON_SOCIAL).
+
+________________
+
+
+12. Flujo Principal del Proceso
+                        1. Usuario accede al menú Contabilidad → Maestros Contables → Reportes Diversos de Maestros.
+
+                        2. Selecciona el tipo de maestro y aplica los filtros necesarios.
+
+                        3. Presiona “Generar Reporte”.
+
+                        4. El sistema procesa la información y muestra los resultados en pantalla.
+
+                        5. El usuario puede exportar los datos en Excel o PDF.
+
+                        6. El sistema registra el evento en la bitácora contable con la información de la consulta.
+
+________________
+
+
+
+
+
+
+
+
+13. Mensajes de Validación
+                           * “Debe seleccionar un tipo de maestro para generar el reporte.”
+
+                           * “No existen registros que coincidan con los filtros seleccionados.”
+
+                           * “El usuario no tiene permisos para acceder a este maestro.”
+
+                           * “Reporte generado exitosamente.”
+
+                           * “Error en la exportación. Intente nuevamente o contacte al administrador.”

@@ -1,0 +1,155 @@
+﻿HU-FIN-TAB-001 - Documentos Financieros que se Usan en el Módulo de Finanzas - v1.0
+1. Título
+Documentos Financieros que se Usan en el Módulo de Finanzas
+2. Descripción
+Como usuario administrador del sistema Restaurant.pe, quiero poder registrar, mantener y consultar los tipos de documentos financieros que serán utilizados en el módulo de Finanzas (tales como recibos, vouchers, letras, pagarés, cheques, transferencias bancarias, etc.), para que puedan ser seleccionados correctamente en las transacciones financieras, de tesorería y conciliación bancaria, garantizando uniformidad contable y trazabilidad documental.
+3. Proceso
+* Proceso: Tablas
+
+* Subproceso: Documentos
+
+* Módulo: Finanzas
+
+4. Narrativa de Usuario
+   * Quiero: Definir y mantener una lista de documentos financieros válidos para su uso en las operaciones de finanzas.
+
+   * Para: Asegurar la consistencia y estandarización de los tipos de documentos utilizados en operaciones bancarias, de pagos y cobranzas.
+
+   * De manera que: Todas las operaciones financieras estén correctamente clasificadas, auditables y alineadas con la contabilidad corporativa.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tablas > Documentos Financieros
+6. Criterios de Aceptación
+      1. El sistema debe permitir registrar, modificar, consultar y desactivar tipos de documentos financieros.
+
+      2. Cada documento debe tener asignados los siguientes campos obligatorios:
+
+         * Código del documento (alfanumérico, único).
+
+         * Nombre del documento.
+
+         * Tipo de documento (Ingreso / Egreso / Transferencia / Otros).
+
+         * Naturaleza contable (Débito / Crédito).
+
+         * Uso (Pagos / Cobranzas / Tesorería / Conciliación  / Otros).
+
+         * Requiere número de referencia bancaria (Sí / No).
+
+         * Requiere número de comprobante (Sí / No).
+
+         * Estado (Activo / Inactivo).
+
+            3. El sistema debe validar que no se duplique el código ni la descripción.
+
+            4. Debe permitir asociar cada documento a una cuenta contable predeterminada (ej. Bancos, Caja, Cuentas por Pagar, etc.).
+
+            5. El listado debe mostrar todos los documentos registrados con opciones de búsqueda y filtros por estado, tipo o uso.
+
+            6. El sistema debe permitir exportar el listado a Excel o PDF.
+
+            7. Las acciones de alta, modificación o baja deben registrarse en el log de auditoría contable (usuario, fecha, hora, acción).
+
+            8. Solo los usuarios con perfil de administrador financiero o contable pueden crear o modificar documentos.
+
+            9. Los documentos definidos en esta tabla deben estar disponibles en los módulos de Finanzas, Compras, Ventas y Contabilidad cuando correspondan.
+
+            10. El sistema debe soportar diferentes catálogos de documentos por razón social y país, de acuerdo con la normativa local.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos principales (Formulario):
+               * Fecha de Creación / Última Modificación (automático)
+               * Código del Documento (obligatorio)
+               * Nombre del documento (obligatorio)
+
+               * Tipo de Documento (Ingreso / Egreso / Transferencia / Otros)
+
+               * Naturaleza Contable (Débito / Crédito)
+
+               * Uso del Documento (Pagos / Cobranzas / Tesorería / Conciliación / Otros)
+
+               * N° de referencia bancaria
+
+               *  N° de Comprobante
+[a][b]
+
+               * Cuenta Contable Asociada (Selector del Plan Contable)
+
+               * Estado (Activo / Inactivo)
+
+Columnas del listado:
+                  * Código
+
+                  * Nombre del documento
+
+                  * Tipo
+
+                  * Naturaleza Contable
+
+                  * Uso
+
+                  * Cuenta Asociada
+
+                  * Estado
+
+Filtros disponibles:
+                     * Estado (Activo / Inactivo)
+
+                     * Tipo de Documento
+
+                     * Uso
+
+                     * Naturaleza Contable
+
+
+Acciones disponibles:
+                        * Nuevo Documento
+
+                        * Editar
+
+                        * Desactivar
+
+                        * Exportar (Excel / PDF)
+
+                        * Ver Detalle
+
+                        * Auditar Cambios
+
+8. Detalle de Integración (opcional)
+                           * Integración con Contabilidad: los documentos financieros deben vincularse automáticamente a las cuentas contables definidas.
+
+                           * Integración con Tesorería: los documentos estarán disponibles al registrar pagos, cobranzas o transferencias.
+
+                           * Integración con Compras y Ventas: para la selección del documento financiero asociado al pago o cobro.
+
+                           * Integración con Bancos: para facilitar la conciliación bancaria y seguimiento de operaciones.
+
+9. Consideraciones Técnicas
+                              * Los documentos deben almacenarse en una tabla maestra global, con control por país y razón social.
+
+                              * Toda acción (alta, edición, baja) debe quedar registrada en el log de auditoría contable.
+
+                              * Las validaciones deben garantizar unicidad del código y descripción.
+
+                              * En entornos multipaís, el sistema debe permitir diferentes catálogos documentarios según normativa local (ej. Perú: Vouchers, Retiros; Chile: Comprobantes de Egreso; Colombia: Recibos de Caja, Cheques, etc.).
+
+                              * Debe soportarse la carga masiva mediante archivo Excel validado.
+
+                              * El sistema debe mostrar advertencias si el documento se encuentra asociado a transacciones activas antes de su desactivación.
+
+10. Comentarios
+                                 * Este registro será fundamental para mantener la integridad de la información financiera y contable.
+
+                                 * Se recomienda parametrizar los documentos financieros iniciales por defecto según cada país y permitir su edición posterior.
+
+                                 * Servirá como fuente de referencia para conciliaciones, flujos de efectivo y reportes financieros consolidados.
+
+                                 * Debe mantenerse una trazabilidad completa entre documento financiero, transacción asociada y asiento contable.
+
+                                 * Este catálogo se actualizará automáticamente cuando se realicen integraciones con bancos o entidades financieras externas.
+
+                                 * En contextos multiempresa, cada razón social podrá tener un catálogo diferenciado, conservando uniformidad contable a nivel corporativo.
+
+
+[a]Me indicas por favor si habría que tener un campo texto por si la opción es sí
+[b]Si, es correcto, ya lo guegué a la HU.

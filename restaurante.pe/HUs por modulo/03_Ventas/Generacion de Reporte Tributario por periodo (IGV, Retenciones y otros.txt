@@ -1,0 +1,154 @@
+﻿Historia de Usuario
+Código HU: HU-VEN-REP-RTB-001 – Reporte Tributario – v1.1
+Módulo: Ventas
+Proceso: Reportes
+Subproceso: Reporte Tributario
+Título
+Generación de Reporte Tributario por periodo (IGV, Retenciones y otros impuestos)
+Descripción
+Como Usuario Contable o Administrador de Ventas
+ Quiero generar un reporte tributario consolidado de impuestos (IGV/IVA, retenciones, percepciones u otros tributos aplicables) correspondientes a las ventas en un periodo determinado
+ Para cumplir con las obligaciones fiscales, facilitar la presentación de declaraciones ante las autoridades tributarias y tener trazabilidad de los montos recaudados, retenidos y pendientes de pago, tanto a nivel de sucursal como consolidado por razón social.
+Actores
+* Usuario Contable: Responsable de generar y revisar el reporte.
+
+* Administrador de Ventas: Usuario con permisos de validación y exportación.
+
+* Sistema Contable Restaurant.pe: Encargado de consolidar la información tributaria.
+
+* Entidades Tributarias Locales: SUNAT (Perú), DIAN (Colombia), SII (Chile), SAT (Centroamérica), DGII (Rep. Dominicana), etc.
+
+Precondiciones
+   1. El sistema debe tener ventas facturadas y registradas en el periodo seleccionado.
+
+   2. Los impuestos aplicables (IGV, IVA, ITBIS, retenciones, percepciones) deben estar configurados en el sistema para la razón social[a].
+
+   3. El usuario debe tener permisos de acceso al subproceso de reporte tributario.
+
+   4. El periodo seleccionado debe estar abierto (no cerrado contablemente ni declarado ante la autoridad tributaria).
+
+Flujo de Navegación
+📌 Ventas > Reportes > Reporte Tributario
+Campos en Formulario de Generación de Reporte Tributario
+Campo
+	Tipo
+	Obligatorio
+	Descripción / Validación
+	Razón Social
+	Informativo (solo lectura)
+	Sí
+	Se muestra automáticamente según la sesión del usuario. No editable. Determina la entidad jurídica sobre la que se genera el reporte.
+	País
+	Informativo (solo lectura)
+	Sí
+	Determinado por la razón social. Define qué impuestos se calculan en el reporte (ej. IGV en Perú, IVA en Colombia, ITBIS en RD).
+	Sucursal 
+	Selector desplegable
+	No
+	Permite filtrar el reporte por una sucursal específica. Si no se selecciona, el sistema genera un reporte consolidado de todas las sucursales de la razón social.
+	Periodo de Reporte
+	Selector (Mes/Año) o rango de fechas
+	Sí
+	Define el rango de tiempo a considerar. Validación: no permitir rangos vacíos ni que se traslapen con reportes ya cerrados/declarados.
+	Tipo de Impuesto
+	Checkboxes (multi-selección)
+	Sí
+	Selección de los impuestos a incluir en el reporte: IGV/IVA, Retenciones, Percepciones[b], ITBIS, etc. El sistema debe marcar automáticamente los aplicables al país.
+	Nivel de Detalle
+	Lista desplegable
+	Sí
+	Opciones: (a) Consolidado: muestra totales por impuesto. (b) Detallado: muestra desglose por factura o documento.
+	Formato de Exportación
+	Lista desplegable
+	Sí
+	Opciones: PDF, Excel, XML y Txt.  El sistema debe validar que el formato elegido esté disponible para el país. 
+	Observaciones
+	Texto libre
+	No
+	Campo opcional para que el usuario registre comentarios internos o notas relacionadas con el reporte generado.
+	Criterios de Aceptación
+      1. El reporte debe consolidar automáticamente base imponible, impuestos generados, retenciones y percepciones en función de las facturas registradas en el periodo.
+
+      2. El usuario debe poder visualizar en pantalla el reporte antes de exportarlo.
+
+      3. El reporte debe permitir filtrar por:
+
+         * Periodo
+
+         * Tipo de impuesto
+
+         * Sucursal / Consolidado
+
+            4. El sistema debe exportar el reporte en formatos:
+
+               * PDF para consulta interna
+
+               * Excel para análisis
+
+               * XML o TXT según exigencia de cada país para carga en sistemas tributarios oficiales
+
+                  5. Toda acción debe registrarse en el log de auditoría (usuario, fecha, hora, acción: generación, exportación, descarga).
+
+                  6. La información consolidada debe integrarse con el módulo de Contabilidad para conciliación de impuestos.
+
+Reglas de Negocio
+                     * Los impuestos parametrizados se aplican de acuerdo con la configuración tributaria del país.
+
+                     * El reporte debe ajustarse al formato oficial exigido por las autoridades fiscales locales (ejemplo: PLE SUNAT, XML DIAN, XML SII, TXT DGII).
+[c]
+                     * Si se selecciona nivel Detallado, el reporte debe mostrar:
+
+                        * Número de factura
+
+                        * Fecha
+
+                        * Cliente
+
+                        * Base imponible
+
+                        * Impuesto aplicado
+
+                        * Retención / Percepción
+
+                           * Si se selecciona nivel Consolidado, debe mostrar totales agrupados por impuesto.[d]
+
+                           * El reporte no debe poder generarse si el periodo ya ha sido declarado y cerrado en el sistema.
+
+Validaciones
+                              * Validar que el periodo seleccionado tenga al menos un documento de ventas registrado.
+
+                              * Validar que los impuestos configurados para el país estén activos y tengan reglas definidas.
+
+                              * Validar que no existan duplicados de reportes ya generados y cerrados para el mismo periodo.
+
+                              * Validar que el usuario tenga permisos de acceso al módulo de reportes tributarios.
+
+Impacto Contable y Financiero
+                                 * La generación del reporte no crea asientos contables, pero:
+
+                                    * Facilita la conciliación de Impuestos por pagar en contabilidad.
+
+                                    * Sirve de base para la presentación de declaraciones tributarias.
+
+                                    * Permite verificar diferencias entre impuestos generados en ventas vs. impuestos pagados.
+
+Observaciones Técnicas
+                                       * El sistema debe estar preparado para multipaís y multimoneda, aplicando reglas tributarias locales.
+
+                                       * Debe permitir integraciones con los servicios electrónicos tributarios de cada país (ejemplo: SUNAT Online, SII, DIAN).
+
+                                       * Los reportes deben ser parametrizables, para adaptarse a cambios normativos sin necesidad de reprogramar.
+
+                                       * Debe permitir la descarga masiva de reportes históricos para auditorías o fiscalizaciones.[e]
+
+
+
+[a]@igarcia@restaurant.pe indicar referencia del código de HU de impuestos aplicables a una razón social.
+_Asignada a igarcia@restaurant.pe_
+[b]Estos no se consideran un tipo de impuesto.
+[c]@igarcia@restaurant.pe  se debe anexar el detalle de los formatos oficiales que se pretende trabajar por país.
+_Asignada a igarcia@restaurant.pe_
+[d]@igarcia@restaurant.pe se debe detallar la información de los campos a mostrar en cada nivel, si se apoya de anexos como Mockups, serviría para entender un poco más el flujo de la Generación del Reporte tributario.
+_Asignada a igarcia@restaurant.pe_
+[e]@igarcia@restaurant.pe estos reportes históricos se descargan desde archivos generados y almacenados  previamente o se generan desde la base de datos. ?? Brindar detalle del procesamiento de descarga masiva o hacer referencia del código de HU.
+_Asignada a igarcia@restaurant.pe_

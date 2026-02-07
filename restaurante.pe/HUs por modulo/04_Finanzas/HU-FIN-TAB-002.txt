@@ -1,0 +1,162 @@
+﻿HU-FIN-TAB-002 - Detalle de Cada Movimiento para Identificar de Qué Proviene o Hacia Dónde Va el Dinero - v1.0
+1. Título
+Detalle de Cada Movimiento para Identificar de Qué Proviene o Hacia Dónde Va el Dinero
+2. Descripción
+Como usuario financiero del sistema Restaurant.pe, quiero que el sistema permita definir y mantener los conceptos financieros que describen el origen o destino del dinero en cada transacción (por ejemplo, pago a proveedores, cobro de clientes, préstamos, transferencias internas, rendiciones de gastos, etc.), para que cada movimiento tenga una trazabilidad clara, asegurando la correcta clasificación y análisis de los flujos de efectivo.
+3. Proceso
+* Proceso: Tablas
+
+* Subproceso: Conceptos Financieros
+
+* Módulo: Finanzas
+
+4. Narrativa de Usuario
+   * Quiero: Registrar y clasificar los conceptos financieros que expliquen el motivo, origen o destino de cada movimiento monetario.
+
+   * Para: Garantizar la trazabilidad y correcta asignación contable de los flujos de efectivo.
+
+   * De manera que: Los reportes financieros y conciliaciones bancarias reflejen con precisión el uso y procedencia de los recursos económicos.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tablas > Conceptos Financieros
+6. Criterios de Aceptación
+      1. El sistema debe permitir registrar, modificar, consultar y desactivar conceptos financieros.
+
+      2. Cada concepto debe incluir información que identifique si representa un origen de fondos (ingreso) o un uso de fondos (egreso).
+
+      3. Los campos mínimos a registrar son:
+
+         * Código del Concepto (único)
+
+         * Nombre del movimiento (obligatorio)
+
+         * Tipo de Movimiento (Ingreso / Egreso / Transferencia / Ajuste)
+
+         * Categoría (Operativo, Financiero, Extraordinario, Otros)
+
+         * Naturaleza Contable (Débito / Crédito)
+
+         * Cuenta Contable Asociada (selector del plan contable)
+
+         * Origen o Destino (Proveedor / Cliente / Empleado / Entidad Bancaria / Otro)
+
+         * Permite Asociar Documento (Sí / No)
+
+         * Estado (Activo / Inactivo)
+
+            4. El sistema debe validar que no se duplique el código ni la descripción del concepto.
+
+            5. El listado debe mostrar todos los conceptos registrados con filtros por tipo, estado y categoría.
+
+            6. Cada movimiento financiero deberá asociarse obligatoriamente a un concepto definido en esta tabla.
+
+            7. El sistema debe permitir vincular un concepto con múltiples tipos de documentos financieros (ej. un “Pago a Proveedor” puede usar cheque o transferencia).
+
+            8. Los conceptos deben ser reutilizables en los módulos de Finanzas, Contabilidad, Compras, Ventas y RRHH.
+
+            9. Toda creación, modificación o desactivación debe registrarse en el log de auditoría contable (usuario, fecha, hora, acción).
+
+            10. Los conceptos deben ser específicos por razón social y país, conforme a las normas contables locales.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos del Formulario:
+               * Código del Concepto (obligatorio)
+
+               * Descripción (obligatorio)
+
+               * Tipo de Movimiento (Ingreso / Egreso / Transferencia / Ajuste)
+
+               * Categoría (Operativo / Financiero / Extraordinario / Otros)
+
+               * Naturaleza Contable (Débito / Crédito)
+
+               * Cuenta Contable Asociada (obligatorio)
+
+               * Origen o Destino (Proveedor / Cliente / Empleado / Entidad Bancaria / Otro)
+
+               * Permite Asociar Documento (Sí / No)
+
+               * Observaciones (opcional)
+
+               * Estado (Activo / Inactivo)
+
+
+Columnas del Listado:
+                  * Código
+
+                  * Descripción
+
+                  * Tipo de Movimiento
+
+                  * Categoría
+
+                  * Naturaleza Contable
+
+                  * Cuenta Contable
+
+                  * Origen/Destino
+
+                  * Estado
+
+                  * Fecha de Creación
+
+                  * Usuario Responsable
+
+Filtros disponibles:
+                     * Tipo de Movimiento
+
+                     * Categoría
+
+                     * Naturaleza Contable
+
+                     * Estado (Activo / Inactivo)
+
+                     * País / Razón Social
+
+Acciones disponibles:
+                        * Nuevo Concepto
+
+                        * Editar Concepto
+
+                        * Desactivar
+
+                        * Exportar (Excel / PDF)
+
+                        * Ver Detalle
+
+                        * Auditoría de Cambios
+
+8. Detalle de Integración (opcional)
+                           * Integración con Contabilidad: los conceptos determinan las cuentas contables automáticas en los asientos generados.
+
+                           * Integración con Tesorería: los conceptos alimentan el detalle de los movimientos en caja y bancos.
+
+                           * Integración con Compras / Ventas: los conceptos permiten identificar la naturaleza de los pagos y cobros.
+
+                           * Integración con Recursos Humanos: para registrar conceptos de egresos relacionados con planillas o viáticos.
+
+9. Consideraciones Técnicas
+                              * Los conceptos deben almacenarse en una tabla maestra global, controlada por país y razón social.
+
+                              * Cada concepto debe tener una relación directa con una o más cuentas contables del plan de cuentas vigente.
+
+                              * Toda acción (alta, modificación o baja) debe registrarse en el log de auditoría contable.
+
+                              * El sistema debe impedir la eliminación de conceptos que ya estén vinculados a transacciones históricas (solo se podrá desactivar).
+
+                              * Debe permitir la importación masiva de conceptos mediante archivo Excel validado.
+
+                              * En ambientes multipaís, los conceptos financieros deben adaptarse a las cuentas normativas locales (ej. Perú: PCGE, Chile: IFRS, Colombia: NIIF).
+
+10. Comentarios
+                                 * Este catálogo de conceptos financieros es esencial para garantizar la trazabilidad y análisis de los flujos de efectivo.
+
+                                 * Facilita la generación de reportes como flujo de caja, análisis de origen y aplicación de fondos, y conciliación contable.
+
+                                 * Permite automatizar las clasificaciones de ingresos y egresos sin depender de codificación manual.
+
+                                 * Se recomienda definir categorías estandarizadas corporativamente, y permitir adaptaciones locales por país o razón social.
+
+                                 * La correcta definición de estos conceptos impactará en los indicadores financieros clave (KPI), como liquidez, rentabilidad y flujo operativo.
+
+                                 * Su adecuada parametrización permitirá optimizar los procesos de conciliación bancaria y control interno financiero.

@@ -1,0 +1,258 @@
+﻿HU-CON-027 - Procesos / Clonación de Asientos Contables - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-027
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Procesos
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Procesos / Clonación de Asientos Contables
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la clonación de asientos contables existentes, con el objetivo de agilizar el registro de transacciones recurrentes o similares a otras ya contabilizadas.
+La funcionalidad permitirá seleccionar un asiento contable registrado previamente, copiar su estructura (cuentas, centros de costo, montos, glosa, tipo de documento, moneda, etc.) y generar un nuevo asiento editable que conserve las mismas características del original, pero con la posibilidad de modificar datos como fechas, montos o descripciones antes de su contabilización final.
+El nuevo asiento generado debe mantener la integridad contable (Débito = Crédito), asignársele un nuevo número de asiento y registrarse en la bitácora contable con referencia al asiento original del cual fue clonado.
+________________
+
+
+3. Actor(es)
+   * Contador General: Clona asientos contables para registrar operaciones similares.
+
+   * Jefe de Contabilidad: Supervisa la trazabilidad y coherencia de los asientos clonados.
+
+   * Auditor Interno o Externo: Revisa el origen y propósito de los asientos duplicados.
+
+   * Administrador del Sistema: Controla los permisos para ejecutar la función de clonación.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos de acceso a Contabilidad → Procesos → Clonación de Asientos Contables.
+
+      * Deben existir asientos contables registrados y contabilizados en el sistema.
+
+      * El asiento original debe pertenecer a un periodo contable abierto o anterior validado.
+
+      * El sistema debe permitir asociar el nuevo asiento al original mediante un campo de referencia.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Procesos → Clonación de Asientos Contables
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero clonar asientos contables ya registrados,
+para agilizar la contabilización de operaciones recurrentes y reducir el tiempo de registro manual manteniendo la coherencia contable.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar un asiento contable existente para clonar.
+	Se muestra una lista de asientos registrados disponibles.
+	2
+	Copiar todos los detalles del asiento original (cuentas, montos, glosa, centro de costo, moneda, etc.).
+	El nuevo asiento hereda los valores del original.
+	3
+	Asignar un nuevo número de asiento al registro clonado.
+	Se genera un código único distinto al original.
+	4
+	Permitir modificar datos del asiento clonado antes de contabilizar (fecha, montos, glosa).
+	El usuario puede personalizar el nuevo asiento.
+	5
+	Validar que el asiento clonado mantenga el equilibrio contable (Débito = Crédito).
+	No se permite guardar si está descuadrado.
+	6
+	Registrar en bitácora contable la relación entre el asiento original y el clonado.
+	Log con referencia del asiento de origen.
+	7
+	Permitir anular o eliminar la clonación antes de su contabilización final.
+	Control de integridad contable y trazabilidad.
+	8
+	Mostrar un mensaje de confirmación al finalizar la clonación.
+	“Asiento clonado correctamente.”
+	________________
+
+
+8. Estructura del Proceso
+Tipo: Proceso contable automatizado.
+Naturaleza: Registro rápido basado en duplicación de estructuras contables existentes.
+8.1 Parámetros del Proceso
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable
+	Numérico
+	Sí
+	Periodo destino para el nuevo asiento.
+	Asiento de Origen
+	Lista
+	Sí
+	Código del asiento a clonar.
+	Fecha del Nuevo Asiento
+	Fecha
+	Sí
+	Fecha de contabilización del nuevo asiento.
+	Moneda
+	Lista
+	No
+	Moneda del nuevo asiento (por defecto, la del original).
+	Glosa / Descripción
+	Texto
+	No
+	Descripción editable del asiento clonado.
+	Tipo de Asiento
+	Lista
+	No
+	Manual / Automático / Recurrente.
+	8.2 Detalle del Nuevo Asiento
+Campo
+	Descripción
+	N° Asiento Nuevo
+	Generado automáticamente.
+	Fecha Contable
+	Fecha del nuevo registro.
+	Cuenta Contable
+	Copiada del asiento original.
+	Centro de Costo
+	Copiado o editable.
+	Débito
+	Monto del debe (editable).
+	Crédito
+	Monto del haber (editable).
+	Glosa Línea
+	Texto explicativo (editable).
+	Estado
+	Pendiente / Contabilizado.
+	Referencia Origen
+	Código del asiento original.
+	________________
+
+
+9. Reglas de Negocio
+         1. Integridad contable: El asiento clonado debe mantener la igualdad entre débitos y créditos.
+
+         2. Numeración automática: El nuevo asiento debe tener un número secuencial independiente.
+
+         3. Referencia cruzada: El nuevo asiento debe incluir el número del asiento original como referencia.
+
+         4. Auditoría obligatoria: Toda clonación se registra en la bitácora con fecha, usuario y motivo.
+
+         5. Restricción de periodo: Solo se pueden clonar asientos hacia periodos abiertos.
+
+         6. Permisos controlados: Solo usuarios con rol de Contador o Jefe Contable pueden clonar asientos.
+
+         7. Edición antes de contabilizar: El asiento clonado solo se contabiliza una vez revisado.
+
+         8. No duplicar anulados: Los asientos anulados no pueden ser clonados.
+
+________________
+
+
+10. Integraciones
+            * Módulo de Contabilidad General: Inserta el nuevo asiento en el libro diario y mayor.
+
+            * Módulo de Auditoría: Registra la acción de clonación.
+
+            * Módulo de Usuarios y Roles: Controla permisos para duplicación.
+
+            * Módulo de Centros de Costo: Permite mantener o cambiar imputaciones de costo.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tipo de Componente: Proceso contable automatizado con duplicación de datos.
+
+               * Tablas Involucradas:
+
+                  * CNTBL_ASIENTO (cabecera del asiento original y nuevo).
+
+                  * CNTBL_ASIENTO_DET (detalle de las cuentas y montos).
+
+                  * LOG_CLONACION_ASIENTO (registro de clonaciones realizadas).
+
+                     * Campos de Control:
+
+                        * ASIENTO_ORIGEN (referencia al asiento base).
+
+                        * USUARIO_CREACION, FECHA_CREACION.
+
+                           * Exportaciones: .xlsx (listado de asientos clonados).
+
+                           * Performance: Se recomienda indexar NRO_ASIENTO y ASIENTO_ORIGEN para trazabilidad.
+
+Consulta referencial (identificación de asientos clonados):
+SELECT 
+    a.nro_asiento AS asiento_nuevo,
+    a.asiento_origen,
+    a.fecha_cntbl,
+    a.cod_usr,
+    a.glosa
+FROM cntbl_asiento a
+WHERE a.asiento_origen IS NOT NULL
+ORDER BY a.fecha_cntbl DESC;
+
+
+________________
+
+
+12. Flujo Principal del Proceso
+                              1. El usuario accede a Contabilidad → Procesos → Clonación de Asientos Contables.
+
+                              2. Selecciona el asiento original desde la lista de asientos existentes.
+
+                              3. Define el periodo y fecha contable del nuevo asiento.
+
+                              4. Presiona “Clonar”.
+
+                              5. El sistema genera un nuevo asiento con la misma estructura del original.
+
+                              6. El usuario puede editar montos o glosas antes de contabilizarlo.
+
+                              7. El sistema valida el cuadre contable y permite guardar el nuevo asiento.
+
+                              8. Se registra la referencia cruzada y bitácora de clonación.
+
+                              9. El asiento clonado queda disponible en el Libro Diario como pendiente o contabilizado.
+
+________________
+
+
+13. Mensajes de Validación
+                                 * “Debe seleccionar un asiento contable válido para clonar.”
+
+                                 * “El asiento seleccionado está anulado y no puede clonarse.”
+
+                                 * “Debe indicar la fecha contable del nuevo asiento.”
+
+                                 * “Asiento clonado correctamente. N° generado: [XXXXXX].”
+
+                                 * “El nuevo asiento no cumple con la igualdad Débito = Crédito.”
+
+                                 * “No tiene permisos para realizar clonaciones contables.”

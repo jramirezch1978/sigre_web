@@ -1,0 +1,232 @@
+﻿HU-RRH-LOC-BS-001 – Reglas Locales – v1.0
+Módulo: Recursos Humanos (RR.HH)
+Proceso: Localización LATAM (LOC)
+Subproceso: Beneficios Sociales (BS)
+Versión: 1.0
+________________
+1. Título
+Gestión de Reglas Locales de Beneficios Sociales
+________________
+
+
+2. Descripción
+Como Administrador de Recursos Humanos, quiero definir, configurar y mantener las reglas locales de beneficios sociales por país, para asegurar que el sistema de nómina aplique correctamente las disposiciones legales vigentes sobre beneficios laborales, vacaciones, gratificaciones, indemnizaciones y otros conceptos específicos de cada país donde opera Restaurant.pe y segun el tipo de empresa al que corresponda (Micro Empresa, Pequeña Empresa y Regimen General).
+________________
+
+
+3. Narrativa
+El sistema debe permitir registrar y administrar las reglas laborales locales que afectan los beneficios sociales (por ejemplo: cálculo de vacaciones, gratificaciones, utilidades, indemnizaciones, cesantías, aguinaldos, décimos, etc.), conforme a la legislación de cada país de Latinoamérica donde Restaurant.pe tiene operaciones y segun el tipo de empresa al que corresponda (Micro Empresa, Pequeña Empresa y Regimen General).
+Cada regla podrá incluir fórmulas de cálculo, condiciones de aplicación, topes legales, fechas de vigencia y referencias normativas.
+Estas reglas deben ser aplicadas automáticamente durante el cálculo de nómina, liquidaciones y reportes legales, garantizando la correcta localización y cumplimiento fiscal-laboral.
+El sistema deberá permitir versionar las reglas locales y mantener un historial de cambios con auditoría completa.
+________________
+
+
+4. Flujo de Navegación
+Ruta: RRHH > Localización LATAM > Beneficios Sociales > Reglas Locales
+Opciones principales:
+1. Crear regla local
+
+2. Editar regla existente
+
+3. Definir fórmula o lógica de cálculo
+
+4. Asignar vigencia
+
+5. Consultar historial y versiones
+
+6. Exportar reglas por país
+
+________________
+
+
+5. Criterios de Aceptación
+N°
+	Criterio
+	Descripción / Condición de aceptación
+	1
+	Creación de regla
+	Permitir crear una nueva regla asociada a un país, tipo de beneficio y período de vigencia.
+	2
+	Definición de fórmula
+	Permitir ingresar fórmulas de cálculo en un editor lógico (ej. beneficio = sueldo base * 0.0833).
+	3
+	Vigencia controlada
+	No se deben solapar vigencias activas del mismo tipo y país.
+	4
+	Aplicación automática
+	Las reglas deben aplicarse automáticamente en los procesos de cálculo de nómina y beneficios.
+	5
+	Registro normativo
+	Cada regla debe incluir una referencia legal (ley, decreto o norma local).
+	6
+	Historial de versiones
+	Mantener histórico completo de versiones de la regla (fecha, usuario, motivo).
+	7
+	Multiempresa / Multipaís
+	Soportar reglas específicas por razón social y país.
+	8
+	Reportes
+	Permitir consultar y exportar listado de reglas vigentes e históricas por país.
+	9
+	Auditoría
+	Registrar todas las acciones (crear, editar, inactivar, eliminar) en el log contable de auditoría.
+	10
+	Validación previa
+	No permitir eliminar una regla que esté asociada a una nómina cerrada.
+	________________
+
+
+6. Campos del Formulario – Registro de Regla Local
+Campo
+	Tipo
+	Obligatorio
+	Validación / Observación
+	País
+	Lista
+	Sí
+	Seleccionable de países habilitados LATAM
+	Razón Social
+	Texto (informativo)
+	Sí
+	Determinada por la sesión activa
+	Tipo de Beneficio
+	Lista
+	Sí
+	Vacaciones / Gratificación / Aguinaldo / Indemnización / Utilidades / Otros
+	Nombre de la Regla
+	Texto
+	Sí
+	Ejemplo: “Cálculo de Gratificación Perú”
+	Descripción
+	Texto largo
+	Opcional
+	Detalle del propósito de la regla
+	Fórmula de Cálculo
+	Editor lógico
+	Sí
+	Debe validar sintaxis y variables definidas
+	Variables de Entrada
+	Lista dinámica
+	No
+	Sueldo Base, Antigüedad, Días Trabajados, etc.
+	Fecha de Inicio de Vigencia
+	Fecha
+	Sí
+	≥ Fecha actual
+	Fecha de Fin de Vigencia
+	Fecha
+	No
+	Si es indefinida, dejar en blanco
+	Referencia Legal
+	Texto
+	Sí
+	Ejemplo: “D. Leg. 728 - Art. 46”
+	Estado
+	Lista
+	Sí
+	Activo / Inactivo / Anulado
+	Usuario Responsable
+	Usuario
+	Sí
+	Registrado automáticamente
+	________________
+
+
+7. Integraciones
+   * Módulo de Nómina: Aplicación automática de reglas en el cálculo de beneficios.
+
+   * Módulo de Localización LATAM: Sincronización con parámetros legales por país.
+
+   * Módulo de Contabilidad: Generación de asientos automáticos de provisiones y pagos.
+
+   * Reportes Legales: Exportación de beneficios calculados según normativas locales.
+
+   * Auditoría Contable: Registro detallado de creación, modificación o baja de reglas.
+
+________________
+
+
+8. Reglas de Negocio
+      1. Cada país puede tener múltiples reglas activas, pero no más de una por tipo de beneficio en el mismo periodo.
+
+      2. Las reglas caducadas se conservarán en el historial con estado “Inactivo”.
+
+      3. La edición de una regla vigente debe crear una nueva versión automáticamente.
+
+      4. No se permite eliminar una regla que haya sido aplicada a una nómina o cálculo anterior.
+
+      5. Las fórmulas deben ser validadas antes de ser activadas (test de cálculo).
+
+      6. Las reglas deben ser interpretadas por el motor de cálculo central del sistema.
+
+      7. Toda acción debe quedar registrada en el Log de Auditoría Contable con usuario, fecha y hora.
+
+________________
+
+
+9. Observaciones Técnicas
+         * Uso de motor de cálculo parametrizable que permita reglas condicionales y fórmulas con variables según el tipo de empresa al que corresponda (Micro Empresa, Pequeña Empresa y Régimen General).
+
+         * Editor lógico con validación sintáctica (simil SQL / pseudo código).
+
+         * Compatibilidad con actualizaciones legales automáticas mediante servicio API (futuro).
+
+         * Exportación de reglas en formatos PDF, XLSX y JSON.
+
+         * Interfaz adaptada a móviles (responsive).
+
+________________
+
+
+10. Comentarios
+            * Esta HU se integra directamente con:
+
+               * HU-RRH-LOC-IA-001 – Parámetros por País
+
+               * HU-RRH-NOM-001 – Cálculo de Nómina
+
+                  * Facilita la localización y cumplimiento normativo en los distintos países LATAM donde opera Restaurant.pe.
+
+                  * En versiones futuras se prevé la automatización de actualización normativa con alertas legales.
+
+
+
+
+CÁLCULOS BÁSICOS:
+1. Cálculo de HORAS EXTRAS (HE)
+En Perú, las horas extras se pagan con recargos establecidos por ley:
+                     * HE primeras dos horas del día → +25%
+                     * HE desde la 3ra hora del dia → +35%
+Fórmula base del valor-hora
+Valor Hora= Remuneración Mensual / 30 dıas / 8 horas 
+Horas extras 25%
+HE25= Horas × Valor Hora ×1.25 
+Horas extras 35%
+HE35= Horas × Valor Hora × 1.35
+
+
+2. Cálculo de FERIADOS (trabajados)
+Si el feriado se trabaja sin descanso sustitutorio, corresponde:
+                     * Pago del día normal (ya incluido en el sueldo).
+                     * +100% adicional por haberlo trabajado + Una sobretasa del 100%
+Fórmula
+Pago por feriado trabajado= Valor Día × 2 
+Fórmula del valor-día
+Valor Día= Remuneración Mensual / 30l​
+
+
+3. Cálculo de FALTAS INJUSTIFICADAS
+Fórmula para descuento
+Descuento por Falta= Valor Día= Remuneración Mensual / 30 * Cantidad de días de Falta
+
+
+4. Cálculo de TARDANZAS
+Las tardanzas se descuentan proporcionalmente al valor-hora.
+Fórmula
+Descuento por Tardanza= Valor Hora × Minutos Tarde / 60 
+
+
+5. Cálculo de BONO NOCTURNO (trabajo nocturno)
+(Si aplica, de 10 p.m. a 6 a.m.)
+Bono Nocturno= Remuneración Mensual × 0.35

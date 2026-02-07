@@ -1,0 +1,255 @@
+﻿HU-AF-REP-003 - Reportes Consolidados Filtrados por Criterios Específicos - v1.1
+________________
+
+
+1. Módulo
+Activos Fijos
+________________
+
+
+2. Proceso
+Reportes
+________________
+
+
+3. Subproceso
+Resumen de Activo Fijo por Rangos
+________________
+
+
+4. Nombre de la Historia de Usuario
+Reportes Consolidados Filtrados por Criterios Específicos
+________________
+
+
+5. Descripción / Propósito
+Como Gerente Contable, Auditor o Analista Financiero, quiero generar reportes consolidados de activos aplicando filtros múltiples y rangos personalizados, para analizar información segmentada por código, fecha, ubicación, responsable o valor, permitiendo realizar reportería gerencial dinámica y personalizada, con resultados exportables y adecuados a procesos de control, planificación y auditoría.
+________________
+
+
+6. Alcance
+Esta funcionalidad proporciona una plataforma de generación flexible de reportes de activos fijos, donde el usuario define libremente los filtros y criterios de agrupación.
+Permite generar reportes con rangos de:
+* Códigos de activos (inicio–fin)
+
+* Fechas de adquisición o depreciación
+
+* Valores contables o netos
+
+* Ubicaciones físicas o centros de costo
+
+* Responsables asignados
+
+El sistema consolida la información de distintos módulos del área contable y de activos, ofreciendo vistas dinámicas, totales agrupados y reportes comparativos (por clase, responsable, ubicación o periodo).
+El resultado puede exportarse a Excel o PDF y personalizarse según la necesidad del usuario, con formato apto para análisis financiero, auditoría o control interno.
+________________
+
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Reportes → Resumen de Activo Fijo por Rangos 
+________________
+8. Campos y Filtros de Generación
+Filtros Disponibles
+Campo
+	Tipo / Descripción
+	Rango de Fechas
+	Fecha de adquisición
+	Clase
+	Jerarquía de tipo de activo.
+	Centro de Costo
+	Área contable o unidad responsable.
+	Ubicación Física
+	Sucursal, edificio o almacén.
+	Responsable
+	Usuario o persona a cargo.
+	Estado del Activo
+	Activo / Revaluado / Dado de Baja / Vendido.
+	Tipo de Moneda
+	Soles / Dólares.
+	
+
+Columnas del Reporte
+Campo
+	Descripción
+	Código del Activo
+	Identificador único.
+	Descripción
+	Denominación del bien.
+	Clase / Subclase
+	Clasificación jerárquica.
+	Fecha de Adquisición
+	Fecha de compra.
+	Valor Original
+	Costo de adquisición.
+	Depreciación Acumulada
+	Total depreciado al periodo.
+	Valor Neto Contable
+	Valor actual del activo.
+	Ubicación Física
+	Lugar o dependencia actual.
+	Centro de Costo
+	Área o proyecto asignado.
+	Responsable
+	Persona encargada del activo.
+	Estado
+	Activo / Revaluado / Vendido / Dado de Baja.
+	Moneda
+	Moneda de registro.
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Generar Reporte
+	Ejecuta el reporte según filtros definidos.
+	Muestra resultados consolidados en pantalla.
+	Agregar Filtro Avanzado
+	Permite añadir condiciones adicionales (ej. > valor X).
+	Mayor precisión en la consulta.
+	Guardar Configuración de Filtros
+	Guarda conjunto de filtros personalizados.
+	Facilita consultas recurrentes.
+	Exportar Excel
+	Exporta el reporte consolidado con fórmulas y totales.
+	Archivo Excel descargable.
+	Exportar PDF (Auditoría)
+	Genera versión institucional para auditorías.
+	Documento PDF con formato estándar.
+	Imprimir
+	Envia reporte a impresión con totales y encabezado.
+	Copia física del informe.
+	Comparar Periodos
+	Genera análisis comparativo entre dos periodos.
+	Tabla o gráfico de variación.
+	________________
+
+
+10. Reglas de Negocio
+   1. Solo se mostrarán activos con estado contable vigente o histórico, según filtros aplicados.
+
+   2. El rango de códigos no puede incluir valores fuera del universo de activos registrados.
+
+   3. Los valores contables se mostrarán en la moneda base de la razón social, aplicando conversión cuando sea necesario.
+
+   4. Los reportes consolidados deben sumar valores agrupados por clase, centro de costo o ubicación.
+
+   5. Los filtros múltiples deben combinarse mediante lógica AND, salvo que el usuario defina expresamente OR.
+
+   6. Los reportes generados deben incluir totales y subtotales al pie y al final del documento.
+
+   7. Toda acción de generación o exportación debe registrarse en el Log de Auditoría Contable (usuario, filtros, fecha, registros).
+
+   8. El reporte no debe alterar ni recalcular datos contables; solo consulta información consolidada.
+
+   9. Si el usuario selecciona más de un rango (ej. fechas y códigos), el sistema aplicará prioridad de jerarquía (primero código, luego fecha).
+
+   10. Los valores contables deben provenir de los módulos validados de depreciación, revaluaciones y bajas.
+
+   11. El sistema debe garantizar integridad entre los datos mostrados y los consolidados por el módulo contable.
+
+________________
+
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Maestro de Activos (HU-AF-OPE-001)
+	Fuente principal de información por activo.
+	Configuración de Tasas y Métodos (HU-AF-OPE-008)
+	Permite obtener los parámetros usados en los cálculos de depreciación.
+	Listado General de Activos (HU-AF-REP-001)
+	Base consolidada sobre la que se aplican los filtros de rango.
+	Matriz Contable (HU-AF-TAB-004)
+	Relación de cuentas contables afectadas.
+	Configuración Global (HU-AF-TAB-006)
+	Define moneda, parámetros y periodos contables activos.
+	Log de Auditoría Contable
+	Registro automático de consultas, exportaciones y filtros aplicados.
+	________________
+
+
+12. Consideraciones Técnicas
+      * Generación de reportes mediante motor dinámico de consultas SQL parametrizadas.
+
+      * Interfaz web responsiva con panel de filtros expandible y vista previa de resultados.
+
+      * Capacidad de exportación de hasta 250.000 registros por ejecución.
+
+      * Integración vía API RESTful para descarga de archivos Excel/PDF.
+
+      * Tablas involucradas:
+
+         * AF_MA_ACTIVOS (maestro de activos)
+
+         * AF_HIS_DEPRECIACION (histórico de depreciaciones)
+
+         * AF_MOV_BAJAS (bajas y ventas)
+
+         * AF_CFG_DEP_ACTIVOS (configuración contable).
+
+            * Exportaciones incluyen pie institucional, logotipo de Restaurant.pe y sello de auditoría.
+
+            * Registro automático de eventos en Log de Auditoría Contable.
+
+________________
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido según rol (Administrador, Contador, Auditor).
+	Performance
+	Generación ≤ 8 segundos para 100.000 registros.
+	Usabilidad
+	Filtros configurables con interfaz intuitiva.
+	Auditoría
+	Registro obligatorio de filtros y exportaciones.
+	Disponibilidad
+	99.5% durante horario operativo.
+	Escalabilidad
+	Soporte para ejecución simultánea de múltiples consultas.
+	________________
+
+
+14. Criterios de Aceptación
+               1. El usuario puede generar reportes aplicando múltiples filtros combinados (rango de códigos, fechas, valores, ubicaciones, responsables).
+
+               2. Los resultados muestran datos consistentes con el maestro de activos y la contabilidad.
+
+               3. Los totales y subtotales se muestran correctamente por agrupación.
+
+               4. El reporte puede exportarse a Excel y PDF sin errores.
+
+               5. Los filtros guardados pueden reutilizarse.
+
+               6. Toda generación y exportación se registra en el Log Contable.
+
+               7. El tiempo de respuesta cumple con los requisitos de performance.
+
+               8. La vista comparativa de periodos muestra variaciones exactas entre periodos contables seleccionados.
+
+________________
+
+
+15. Comentarios / Observaciones
+                  * Esta HU representa una herramienta estratégica para la gestión contable y gerencial, al permitir análisis segmentados, auditorías y control patrimonial mediante reportes configurables.
+
+                  * Permite realizar consultas flexibles y personalizadas sin intervención del área técnica, optimizando la autonomía de los usuarios contables.
+
+                  * Debe mantener coherencia con las HU:
+
+                     * HU-AF-REP-001 (Listado General de Activos)
+
+                     * HU-AF-REP-002 (Detalle de Depreciación Anual por Activo)
+
+                     * HU-AF-OPE-008 (Configuración de Tasas y Métodos de Depreciación)
+
+                     * HU-AF-TAB-006 (Configuración Global del Módulo).
+
+                        * Se recomienda implementar opción de “vista gráfica” para presentar totales por clase, ubicación o centro de costo.
+
+                        * El formato PDF debe incluir pie institucional, fecha, usuario generador y sello digital, cumpliendo requisitos de auditoría interna y externa.

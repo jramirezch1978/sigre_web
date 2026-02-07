@@ -1,0 +1,131 @@
+﻿HU-FIN-TES-TES-006 - Movimiento entre Cuentas Bancarias y Cajas - v1.0
+1. Título
+Movimiento entre Cuentas Bancarias y Cajas
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero registrar los movimientos de transferencia de fondos entre cuentas bancarias y cajas, ya sea dentro de la misma razón social o entre sucursales, para mantener actualizado el control de tesorería y reflejar correctamente los saldos disponibles en la contabilidad.
+3. Proceso
+Proceso: Tesorería
+Subproceso: Tesorería
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Registrar y controlar los movimientos internos de dinero entre cuentas bancarias, cajas y sucursales.
+Para: Garantizar la trazabilidad de las transferencias internas y mantener actualizados los saldos financieros del restaurante.
+De manera que: Los estados de caja y banco reflejen correctamente los movimientos de fondos y la información contable se mantenga precisa y conciliable.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tesorería > Movimiento entre Cuentas Bancarias y Cajas
+6. Criterios de Aceptación
+El sistema debe permitir registrar movimientos de transferencia de fondos entre:
+* Cuentas bancarias de la misma razón social.
+
+* Cajas de distintas sucursales.
+
+* Cuentas bancarias y cajas (ida o vuelta).
+
+El usuario podrá realizar las siguientes acciones:
+   * Registrar Movimiento: Definir cuenta de origen, cuenta de destino, monto, moneda, tipo de cambio (si aplica), fecha y medio de transferencia.
+
+   * Adjuntar Comprobante: Permitir cargar documentos de respaldo (voucher, transferencia, comprobante interno).
+
+   * Consultar Asiento Contable: Visualizar el asiento generado por el movimiento.
+
+   * Anular Movimiento: Permitir anular una transacción errónea, si no ha sido conciliada.
+
+El sistema debe generar automáticamente los asientos contables:
+      * Débito: Cuenta de destino (Caja o Banco)
+
+      * Crédito: Cuenta de origen (Caja o Banco)
+
+Debe validar que las cuentas seleccionadas sean diferentes y pertenezcan a la misma razón social.
+El sistema debe mostrar la fecha del movimiento y el usuario responsable del registro.
+Toda acción de registro o anulación debe registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción, Cuenta Origen, Cuenta Destino, Monto, Estado).
+Solo se permitirán movimientos dentro de la Razón Social y País activos en sesión (solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos principales:
+
+         * Fecha del Movimiento
+
+         * Tipo de Movimiento (Banco → Banco / Banco → Caja / Caja → Banco / Caja → Caja)
+
+         * Cuenta de Origen
+
+         * Tipo de Cuenta Origen (Banco / Caja)
+
+         * Moneda de Origen
+
+
+         * Cuenta de Destino
+
+         * Tipo de Cuenta Destino (Banco / Caja)
+
+         * Moneda de Destino
+
+         * Tipo de Cambio (si aplica)
+
+         * Monto Transferido
+
+         * Medio de Transferencia (Transferencia, Efectivo, Depósito, Cheque)
+
+         * N° de Comprobante / Referencia
+
+         * Estado del Movimiento (Pendiente / Confirmado / Anulado)
+
+         * N° de Asiento Contable
+
+         * Observaciones
+
+         * Usuario de Registro
+
+Filtros disponibles:
+            * Fecha de Movimiento
+
+            * Tipo de Movimiento
+
+            * Cuenta Origen
+
+            * Cuenta Destino
+
+            * Moneda
+
+            * Estado del Movimiento
+
+            * Sucursal / Local
+
+Acciones disponibles:
+               * Registrar Movimiento
+
+               * Ver Detalle
+
+               * Ver Asiento Contable
+
+               * Anular Movimiento
+
+               * Exportar (Excel / PDF)
+
+               * Adjuntar Comprobante
+
+               * Filtrar / Limpiar Filtros
+
+8. Detalle de Integración (opcional)
+Integración con Contabilidad: Genera y registra automáticamente los asientos contables de movimiento interno.
+Integración con Bancos y Caja: Actualiza los saldos disponibles de cada cuenta.
+Integración con Reportes Financieros: Refleja las transferencias en los flujos de efectivo y conciliaciones bancarias.
+Integración con Auditoría Contable: Registra las acciones de creación, modificación y anulación.
+9. Consideraciones Técnicas
+El sistema debe validar la existencia de fondos suficientes en la cuenta de origen antes de permitir el movimiento.
+Debe permitir registrar operaciones en moneda local o extranjera, aplicando el tipo de cambio oficial.
+El asiento contable debe reflejar correctamente el movimiento de dinero entre cuentas, con trazabilidad entre registros.
+Cada transacción debe quedar registrada en el log de auditoría contable, detallando usuario, fecha, hora y justificación en caso de anulación.
+Debe cumplir con las normas NIC 7 (Flujos de Efectivo) y NIC 21 (Efectos de las Variaciones en las Tasas de Cambio).
+10. Comentarios
+Esta funcionalidad permite mantener el control y trazabilidad de las transferencias internas de fondos entre cuentas y sucursales, asegurando coherencia entre los módulos de Tesorería, Caja y Bancos.
+Facilita la conciliación bancaria y la gestión de liquidez, reduciendo errores operativos en la administración de fondos.
+Se recomienda incluir indicadores de control, tales como:
+                  * Total de movimientos realizados por periodo.
+
+                  * Monto total transferido entre bancos y cajas.
+
+                  * Diferencia de saldos antes y después de la operación.
+
+                  * Movimientos por usuario y sucursal.
+
+Asimismo, se sugiere implementar alertas automáticas para movimientos duplicados o montos superiores a límites predefinidos, y la opción de autorización previa para transferencias de alto valor.

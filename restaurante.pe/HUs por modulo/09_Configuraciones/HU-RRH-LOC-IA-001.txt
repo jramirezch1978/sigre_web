@@ -1,0 +1,191 @@
+﻿HU-RRH-LOC-IA-001 – Parámetros por País – v1.0
+Módulo: Recursos Humanos (RR.HH)
+Proceso: Localización LATAM (LOC)
+Subproceso: Impuestos y Aportes (IA)
+Versión: 1.0
+
+________________
+1. Título
+Gestión de Parámetros por País (Impuestos y Aportes)
+________________
+
+
+2. Descripción
+Como Administrador de RR.HH., quiero definir y mantener los parámetros legales, tributarios y de aportes sociales por país, para garantizar que el cálculo de nómina, descuentos y contribuciones se realice de acuerdo con las normativas laborales y fiscales vigentes en cada país donde opera Restaurant.pe.
+________________
+
+
+3. Narrativa
+El sistema debe permitir registrar y actualizar todos los parámetros fiscales, tributarios y de aportes obligatorios asociados a cada país (ej. Perú, Chile, Colombia, Ecuador, República Dominicana, Venezuela, El Salvador, Costa Rica y Nicaragua).
+Estos parámetros incluyen porcentajes de aportes a seguridad social, salud, pensiones, impuestos a la renta de quinta categoría, fondos de desempleo, seguros, topes y deducciones legales, entre otros.
+Los valores parametrizados deben aplicarse automáticamente durante el proceso de cálculo de nómina, generación de planillas, declaraciones tributarias y reportes legales.
+Cada cambio de parámetro deberá quedar registrado en un log de auditoría, indicando fecha de vigencia, usuario y razón del cambio.
+________________
+
+
+4. Flujo de Navegación
+Ruta: RRHH > Localización LATAM > Impuestos y Aportes > Parámetros por País
+Opciones principales:
+1. Registrar nuevos parámetros
+
+2. Editar valores vigentes
+
+3. Asignar fechas de inicio y fin de vigencia
+
+4. Consultar historial de versiones
+
+5. Generar reportes de configuración
+
+6. Exportar parámetros por país
+
+________________
+
+
+5. Criterios de Aceptación
+N°
+	Criterio
+	Descripción / Condición de aceptación
+	1
+	Creación de parámetro
+	Permitir crear un parámetro indicando país, tipo (impuesto/aporte), nombre, porcentaje o monto y fechas de vigencia.
+	2
+	Edición controlada
+	Solo usuarios con rol Administrador RRHH o Contador General podrán modificar valores.
+	3
+	Vigencia activa
+	El sistema debe validar que no existan dos parámetros activos del mismo tipo para el mismo país y periodo.
+	4
+	Aplicación automática
+	Los parámetros deben reflejarse automáticamente en los cálculos de nómina y aportes.
+	5
+	Historial de cambios
+	Registrar automáticamente las versiones y cambios con fecha, usuario y motivo.
+	6
+	Reportes y exportación
+	Permitir visualizar y exportar los parámetros por país a Excel o PDF.
+	7
+	Multiempresa / Multipaís
+	Permitir la gestión de parámetros específicos por razón social y país.
+	8
+	Integración contable
+	Los aportes e impuestos definidos deben alimentar las cuentas contables automáticas, previamente establecidas.
+	9
+	Validación legal
+	Permitir registrar topes o límites máximos según normativa local.
+	10
+	Auditoría
+	Registrar todas las acciones (crear, modificar, eliminar, cerrar vigencia) en el log contable de auditoría.
+	
+
+6. Campos del Formulario – Registro de Parámetro por País
+Campo
+	Tipo
+	Obligatorio
+	Validación / Observación
+	País
+	Lista
+	Sí
+	Seleccionable entre los países LATAM disponibles
+	Razón Social
+	Texto (informativo)
+	Sí
+	Determinada por sesión activa
+	Tipo de Parámetro
+	Lista
+	Sí
+	Impuesto / Aporte / Seguro / Fondo
+	Nombre del Parámetro
+	Texto
+	Sí
+	Ej.: AFP, ESSALUD, ISR, IVSS, CCSS
+	Descripción
+	Texto largo
+	Opcional
+	Detalle de la contribución o impuesto
+	Porcentaje
+	Numérico
+	Sí
+	Máx. 2 decimales (0–100)
+	Monto Fijo
+	Numérico
+	No
+	Se usa cuando aplica valor nominal
+	Tope Máximo
+	Numérico
+	No
+	Valor límite aplicable
+	Vigencia Desde
+	Fecha
+	Sí
+	≥ Fecha actual
+	Vigencia Hasta
+	Fecha
+	No
+	Opcional (si es indefinida)
+	Estado
+	Lista
+	Sí
+	Activo / Inactivo / Anulado
+	Usuario Responsable
+	Usuario
+	Sí
+	Registrado automáticamente
+	________________
+
+
+7. Integraciones
+   * Módulo de Nómina: Aplicación automática de aportes e impuestos en cálculo de planillas.
+
+   * Contabilidad: Generación de asientos automáticos por cuentas de gasto y pasivo.
+
+   * Finanzas: Impacto en presupuestos de personal y proyecciones mensuales.
+
+   * Reportes Legales: Declaraciones tributarias y reportes de cumplimiento.
+
+   * Auditoría Contable: Registro histórico de todos los cambios de parámetros.
+
+________________
+
+
+8. Reglas de Negocio
+      1. Solo puede existir un parámetro activo por tipo, país y periodo.
+
+      2. Los cambios de valores deben contar con fecha de inicio de vigencia.
+
+      3. Un parámetro no podrá eliminarse si ha sido utilizado en un cálculo de nómina o aporte.
+
+      4. Los valores antiguos deben conservarse para fines históricos y auditoría.
+
+      5. Los parámetros de un país no deben interferir con los de otro.
+
+      6. Toda modificación debe generar una nueva versión del parámetro.
+
+      7. Toda acción (alta, baja, modificación) debe registrarse en el Log Contable de Auditoría con usuario, fecha y hora.
+
+________________
+
+
+9. Observaciones Técnicas
+         * La tabla de parámetros debe ser multipaís y versionable.
+
+         * La interfaz debe ser responsive, con filtros por país, tipo y estado.
+
+         * Integración con servicio de actualización de tasas (API REST en versiones futuras).
+
+         * Motor de cálculo debe leer automáticamente la versión vigente según fecha de nómina.
+
+         * Exportación de datos en formatos XLSX, CSV y PDF.
+
+________________
+
+
+10. Comentarios
+            * Esta HU se integra directamente con las HU de:
+
+               * Cálculo de Nómina Multipaís (HU-RRH-LOC-NOM-001)
+
+               * Generación de Planillas Legales (HU-RRH-LOC-REP-001)
+
+                  * Permite la administración descentralizada de parámetros locales en cada país.
+
+                  * En futuras versiones se implementará la actualización automática de tasas legales vía integración con entidades tributarias (ej.: SUNAT, DIAN, SII, etc.).

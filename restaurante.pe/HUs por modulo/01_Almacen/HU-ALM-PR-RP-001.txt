@@ -1,0 +1,127 @@
+﻿HU-ALM-PR-RP-001 - Actualización Automática del Precio de Última Compra - v1.0
+1. Título
+ Permite que el sistema actualice automáticamente el precio de compra en la ficha del producto, tomando como referencia el precio unitario registrado en la última factura de compra.
+2. Descripción
+ Como analista de inventarios o responsable de compras, quiero que el sistema actualice de manera automática el precio de compra en la ficha del producto, utilizando el precio unitario de la última factura registrada, para asegurar que la información de costos esté siempre actualizada y refleje el valor real de adquisición más reciente.
+3. Proceso
+ Proceso: Procesos
+Subproceso: Regeneración de Precio de Última Compra
+Módulo: Almacén
+4. Narrativa de Usuario
+ Quiero: Que el sistema identifique la última factura de compra registrada y actualice el precio de compra del producto en su ficha maestra.
+Para: Mantener consistencia en la información de costos de adquisición y optimizar los procesos de valoración de inventario.
+De manera que: Los reportes, valorizaciones y márgenes comerciales se calculen con base en el costo real más reciente.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Almacén > Procesos > Regeneración de Precio de Última Compra
+6. Criterios de Aceptación
+ El sistema debe permitir:
+* Identificar la última factura de compra registrada para cada producto.
+
+* Tomar el precio unitario registrado en esa factura como referencia.
+
+* Actualizar automáticamente el precio de compra en la ficha maestra del producto.
+
+* Registrar en el historial del producto el precio anterior, el nuevo precio y la fecha de actualización.
+
+* Permitir la ejecución manual o programada (por lote o diaria).
+
+* Filtrar por proveedor, familia, categoría o almacén los productos a actualizar.
+
+* Validar que la factura esté aprobada y contabilizada antes de considerar su precio.
+
+* Mostrar un resumen previo con los productos y precios a modificar antes de aplicar la actualización.
+
+* Permitir anular o revertir la actualización si se detecta algún error.
+
+* Generar un reporte de trazabilidad que detalle usuario, fecha, productos y variaciones aplicadas.
+
+* Enviar una notificación al usuario al finalizar el proceso.
+
+* Garantizar que la actualización no afecte documentos históricos o valorizaciones cerradas.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+ Campos principales:
+   * Código de Producto
+
+   * Descripción del Producto
+
+   * Unidad de Medida
+
+   * Código de Proveedor
+
+   * Nombre del Proveedor
+
+   * Precio Anterior
+
+   * Precio de Última Compra (nuevo)
+
+   * Fecha de Última Factura
+
+   * Fecha de Actualización
+
+   * Usuario Responsable
+
+   * Estado (Pendiente / Actualizado / Revertido)
+
+Filtros disponibles:
+      * Fecha de Última Factura
+
+      * Almacén / Sede
+
+      * Proveedor
+
+      * Categoría / Línea de Producto
+
+      * Estado del Proceso
+
+      * Usuario
+
+Acciones disponibles:
+         * Ejecutar Proceso de Actualización
+
+         * Ver Resumen Previo
+
+         * Aplicar Cambios
+
+         * Revertir Cambios
+
+         * Exportar Resultados
+
+         * Consultar Historial de Actualizaciones
+
+8. Detalle de Integración (opcional)
+ Integración con:
+            * Módulo de Compras: para obtener los precios unitarios de las facturas aprobadas.
+
+            * Módulo de Inventario: para actualizar el precio de compra en el maestro de artículos.
+
+            * Módulo de Contabilidad: para validar que la factura de compra esté contabilizada.
+
+            * Módulo de Reportes: para mostrar variaciones y trazabilidad del proceso.
+
+            * Módulo de Auditoría: para registrar los cambios realizados automáticamente.
+
+9. Consideraciones Técnicas
+ El sistema debe:
+               * Tomar el último documento de compra válido considerando fecha y estado.
+
+               * Realizar la actualización de manera transaccional, asegurando integridad de datos.
+
+               * Soportar ejecución manual o programada mediante tareas automáticas.
+
+               * Guardar los precios antiguos en una tabla histórica de movimientos de precios.
+
+               * Bloquear la actualización si el producto está en proceso de revalorización o ajuste.
+
+               * Permitir parametrizar si la actualización afecta solo el precio de compra o también el costo estándar.
+
+               * Controlar accesos mediante roles y permisos, solo para usuarios con perfil de compras o inventario.
+
+               * Mostrar mensajes de confirmación y validaciones previas antes de actualizar los registros.
+
+               * Permitir ejecución por empresa o sede, en entornos multiempresa.
+
+10. Comentarios
+ Esta funcionalidad garantiza que el precio de compra de los artículos refleje siempre el costo real más reciente, mejorando la exactitud de los márgenes de rentabilidad y los reportes financieros.
+Su automatización reduce errores manuales y mantiene la consistencia entre módulos de compras, inventarios y contabilidad.
+Se recomienda programar su ejecución de forma periódica (diaria o semanal) y registrar todas las actualizaciones en el historial de auditoría para fines de control y trazabilidad.

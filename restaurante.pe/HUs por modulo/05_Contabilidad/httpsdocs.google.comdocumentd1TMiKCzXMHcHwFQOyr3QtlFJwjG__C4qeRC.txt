@@ -1,0 +1,259 @@
+﻿HU-CON-020 - Reportes de Validación / Estado de Situación Financiera (Balance General) - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-020
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Reportes de Validación
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Estado de Situación Financiera (Balance General)
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la generación del reporte de Estado de Situación Financiera (Balance General), mostrando los activos, pasivos y patrimonio de la empresa a una fecha determinada o comparando periodos contables.
+El reporte debe obtener la información directamente de los asientos contables registrados y validados, y estructurarse conforme al plan contable y las normas internacionales de información financiera (NIIF) o normas locales aplicables (como PCGE – Perú, PUC – Colombia, etc.).
+El sistema debe permitir filtrar por periodo contable, rango de fechas, tipo de moneda (local o extranjera) y ofrecer comparativos interperiodos (por ejemplo, mes actual vs mes anterior, o año actual vs año anterior).
+Asimismo, el sistema debe permitir exportar el reporte a Excel (.xlsx) o PDF (.pdf), conservando su estructura jerárquica (niveles de cuenta contable).
+________________
+
+
+3. Actor(es)
+   * Contador General: Genera el balance general para cierre mensual o anual.
+
+   * Jefe de Contabilidad: Supervisa los resultados financieros consolidados.
+
+   * Gerente Financiero: Utiliza el reporte para análisis y toma de decisiones.
+
+   * Auditor Interno o Externo: Verifica la integridad del estado financiero.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe contar con permisos para acceder a Contabilidad → Reportes → Estado de Situación Financiera.
+
+      * Deben existir asientos contables contabilizados y cerrados en el periodo consultado.
+
+      * Los planes de cuentas contables deben tener asignado su tipo de cuenta (Activo, Pasivo, Patrimonio).
+
+      * El periodo contable debe estar abierto o cerrado (solo lectura si está cerrado).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Estado de Situación Financiera
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar el reporte de Estado de Situación Financiera (Balance General),
+para visualizar los saldos de las cuentas de activo, pasivo y patrimonio de la empresa, y poder analizar su posición financiera en un periodo determinado.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable o rango de fechas.
+	El reporte muestra los saldos acumulados al cierre del periodo seleccionado.
+	2
+	Agrupar las cuentas por tipo contable (Activo, Pasivo y Patrimonio).
+	Estructura jerárquica del plan contable.
+	3
+	Calcular los saldos finales por cuenta y subtotales por grupo contable.
+	Cuadre automático del balance.
+	4
+	Permitir comparar dos periodos contables (ej. actual vs anterior).
+	Mostrar columnas comparativas de saldos con detalle en el nombre de la columna. Ejemplo: Febrero 2025
+	5
+	Permitir filtrar por moneda (local / extranjera).
+	Conversión automática según tipo de cambio del periodo.
+	6
+	Mostrar totales generales y validar equilibrio contable (Activo = Pasivo + Patrimonio).
+	Generar alerta si hay descuadre.
+	7
+	Permitir exportar el reporte en formatos Excel (.xlsx) y PDF (.pdf).
+	Archivos generados correctamente con estructura jerárquica. Falta agregar el botón Exportar
+	8
+	Registrar en bitácora contable la generación del reporte (usuario, fecha, filtros).
+	Auditoría de generación exitosa.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Reporte jerárquico agrupado por tipo de cuenta contable.
+Naturaleza: Reporte informativo de validación contable (solo lectura).
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Define el periodo contable del reporte.
+	Fecha Hasta
+	Fecha
+	No
+	Fecha de corte para el cálculo de saldos.
+	Moneda
+	Lista
+	No
+	Permite seleccionar moneda local o extranjera.
+	Comparar con Periodo
+	Lista
+	No
+	Permite comparar con otro periodo contable.
+	Nivel de Detalle
+	Lista
+	No
+	Permite seleccionar nivel 1 a 5 del plan de cuentas.
+	
+
+	
+
+	
+
+	
+
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Código de Cuenta
+	Código del plan contable.
+	Descripción de Cuenta
+	Nombre de la cuenta contable.
+	Nivel
+	Nivel jerárquico del plan de cuentas.
+	Saldo Actual
+	Saldo del periodo actual.
+	Saldo Periodo Comparativo
+	Saldo del periodo anterior (si aplica).
+	Tipo de Cuenta
+	Activo / Pasivo / Patrimonio.
+	Moneda
+	Local / Extranjera.
+	8.3 Totales del Reporte
+         * Total Activo
+
+         * Total Pasivo
+
+         * Total Patrimonio
+
+         * Verificación del Cuadre: Activo = Pasivo + Patrimonio
+
+________________
+
+
+9. Reglas de Negocio
+            1. Equilibrio contable: El sistema debe garantizar que el total del activo sea igual a la suma del pasivo más patrimonio.
+
+            2. Jerarquía del plan contable: Las cuentas de nivel superior deben mostrar la suma de sus cuentas hijas. Pendiente.
+
+            3. Conversión de moneda: Si el reporte se genera en moneda extranjera, aplicar el tipo de cambio promedio del periodo.
+
+            4. Comparativo: Si se selecciona más de un periodo, mostrar los saldos en columnas paralelas.
+
+            5. Solo periodos cerrados o en curso: No se permite generar el reporte de periodos inexistentes.
+
+            6. Validación de integridad: El sistema no mostrará cuentas sin clasificación contable.
+
+            7. Auditoría: Cada ejecución del reporte debe registrarse en la bitácora LOG_REPORTE_BALANCE_GENERAL.
+
+________________
+
+
+10. Integraciones
+               * Módulo de Contabilidad General: Fuente de asientos y saldos contables.
+
+               * Módulo de Plan de Cuentas: Determina jerarquías y tipo contable (activo, pasivo, patrimonio).
+
+               * Módulo de Monedas y Tipo de Cambio: Conversión para reportes en moneda extranjera.
+
+               * Módulo de Auditoría: Registro de generación de reportes.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Tipo de Componente: Reporte contable estructurado (solo lectura).
+
+                  * Tablas Fuente:
+
+                     * CNTBL_ASIENTO (cabecera de asientos contables).
+
+                     * CNTBL_ASIENTO_DET (detalle de movimientos).
+
+                     * CNTBL_CUENTA_CONTABLE (plan contable).
+
+                     * CNTBL_TIPO_CAMBIO (valores de conversión monetaria).
+
+Consulta Base (referencial):
+
+ SELECT 
+    c.cnta_ctbl,
+    c.desc_cta,
+    c.tipo_cta,
+    NVL(SUM(d.debe - d.haber), 0) AS saldo_actual,
+    NVL(SUM(d.debe_anterior - d.haber_anterior), 0) AS saldo_comparativo
+FROM cntbl_asiento_det d
+JOIN cntbl_cuenta_contable c ON d.cnta_ctbl = c.cnta_ctbl
+WHERE d.fecha_cntbl <= :fecha_corte
+GROUP BY c.cnta_ctbl, c.desc_cta, c.tipo_cta
+ORDER BY c.tipo_cta, c.cnta_ctbl;
+                        *                         * Exportaciones: .xlsx y .pdf
+
+                        * Bitácora: LOG_REPORTE_BALANCE_GENERAL (usuario, fecha, filtros aplicados, totales).
+
+                        * Performance: Indexar campos CNTA_CTBL, FECHA_CNTBL, TIPO_CTA.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede al menú Contabilidad → Reportes → Estado de Situación Financiera.
+
+                           2. Selecciona el periodo contable o rango de fechas, moneda y nivel de detalle.
+
+                           3. Presiona “Generar Reporte”.
+
+                           4. El sistema procesa los saldos contables y genera el balance general.
+
+                           5. Se muestran los resultados agrupados por tipo de cuenta.
+
+                           6. El usuario puede exportar el reporte en Excel o PDF.
+
+                           7. El sistema registra la ejecución en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un periodo contable o rango de fechas.”
+
+                              * “No existen registros contables para el periodo seleccionado.”
+
+                              * “El balance general no cuadra: revise los asientos contables.”
+
+                              * “Reporte generado correctamente.”
+
+                              * “Error al procesar el reporte. Contacte al administrador del sistema.”

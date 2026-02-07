@@ -1,0 +1,208 @@
+﻿HU-RRH-LOC-RE-001 – Formatos y Archivos – v1.0
+Módulo: Recursos Humanos (RR.HH)
+Proceso: Localización LATAM (LOC)
+Subproceso: Regulación Electrónica (RE)
+Versión: 1.0
+________________
+
+
+1. Título
+Gestión de Formatos y Archivos Electrónicos Laborales
+________________
+
+
+2. Descripción
+Como Administrador de Nómina o Especialista de RR.HH., quiero configurar, generar y validar los formatos electrónicos y archivos requeridos por las entidades laborales y tributarias de cada país, para cumplir con las normativas de regulación electrónica, presentación de planillas, aportes, declaraciones y reportes exigidos por los organismos oficiales (SUNAT, DIAN, SII, IESS, CCSS, etc.).
+________________
+
+
+3. Narrativa
+El sistema debe permitir la definición, parametrización y generación automática de los diferentes formatos electrónicos laborales y tributarios exigidos por las autoridades de cada país de operación (Perú, Chile, Colombia, Ecuador, República Dominicana, Venezuela, El Salvador, Costa Rica y Nicaragua).
+Estos archivos incluyen planillas electrónicas, reportes de seguridad social, declaraciones de aportes, comprobantes electrónicos y certificados laborales en formatos TXT, XML, CSV, JSON o PDF, según lo establecido por cada normativa.
+El sistema debe garantizar la integridad del formato, nomenclatura, estructura y codificación de datos, así como permitir la validación previa y el registro de envíos oficiales.
+Cada formato deberá tener un mapeo interno de campos hacia los datos de nómina y empleados, garantizando trazabilidad y compatibilidad con los sistemas oficiales.
+________________
+
+
+4. Flujo de Navegación
+Ruta: RRHH > Localización LATAM > Regulación Electrónica > Formatos y Archivos
+Opciones principales:
+1. Registrar formato electrónico
+
+2. Configurar estructura de campos
+
+3. Generar archivo electrónico
+
+4. Validar formato (pre-envío)
+
+5. Exportar o descargar archivo
+
+6. Registrar envío oficial y comprobante
+
+7. Consultar historial de envíos
+
+________________
+
+
+5. Criterios de Aceptación
+N°
+	Criterio
+	Descripción / Condición de aceptación
+	1
+	Registro de formato
+	Permitir crear un nuevo formato con nombre, país, organismo emisor y tipo de archivo.
+	2
+	Configuración de estructura
+	Definir campos, longitud, tipo de dato y posición según especificación técnica del organismo.
+	3
+	Mapeo de datos
+	Permitir asignar campos del sistema de nómina a los campos del formato electrónico.
+	4
+	Generación automática
+	Generar el archivo electrónico en el formato requerido (TXT, XML, CSV, etc.).
+	5
+	Validación de estructura
+	Validar la estructura del archivo antes de su envío.
+	6
+	Control de versiones
+	Mantener versiones históricas de formatos según actualizaciones normativas.
+	7
+	Registro de envío
+[a]	
+Guardar evidencia del envío y acuse de recibo oficial.
+	8
+	Multiempresa / Multipaís
+	Soportar diferentes formatos por país y razón social.
+	9
+	Seguridad
+	Permitir la firma digital o cifrado cuando sea requerido por la autoridad.
+	10
+	Auditoría
+	Registrar todas las acciones (crear, editar, generar, enviar, eliminar) en el log contable de auditoría.
+	________________
+
+
+6. Campos del Formulario – Registro de Formato Electrónico
+Campo
+	Tipo
+	Obligatorio
+	Validación / Observación
+	País
+	Lista
+	Sí
+	Seleccionar país LATAM (Perú, Chile, etc.)
+	Razón Social
+	Texto (informativo)
+	Sí
+	Determinada por sesión activa
+	Nombre del Formato
+	Texto
+	Sí
+	Ejemplo: "PLAME", "PILA", "Previred", "TSS"
+	Organismo Emisor
+	Lista
+	Sí
+	SUNAT / DIAN / SII / IESS / CCSS / TSS / Otros
+	Tipo de Archivo
+	Lista
+	Sí
+	TXT / XML / CSV / JSON / PDF
+	Versión de Formato
+	Texto
+	Sí
+	Ejemplo: v1.2 o Resolución vigente
+	Estructura del Archivo
+	Tabla editable
+	Sí
+	Definición de columnas, longitud y tipo de dato
+	Periodo
+	Lista / Fecha
+	Sí
+	Mensual / Trimestral / Anual
+	Estado
+	Lista
+	Sí
+	Activo / Inactivo
+	Fecha de Vigencia
+	Fecha
+	Sí
+	≥ Fecha actual
+	Responsable
+	Usuario
+	Sí
+	Asignado automáticamente
+	Referencia Legal
+	Texto
+	Opcional
+	Resolución, Decreto o Norma aplicable
+	________________
+
+
+7. Integraciones
+   * Módulo de Nómina: Origen de datos para los formatos electrónicos.
+
+   * Módulo de Contabilidad: Generación de asientos contables vinculados a los archivos de reporte.
+
+   * Módulo de Finanzas: Relación con pagos de aportes y retenciones.
+
+   * Auditoría Contable: Registro de generación, modificación y envío.
+
+   * Servicios de Intercambio (API): Integración futura con entidades públicas para transmisión directa.
+
+________________
+
+
+8. Reglas de Negocio
+      1. Los formatos deben corresponder al país y razón social activa.
+
+      2. No se podrán generar archivos de periodos que no tengan nómina cerrada.
+
+      3. Las estructuras de formato deben cumplir con los campos, longitudes y tipos establecidos oficialmente.
+
+      4. Cada versión de formato deberá conservarse para trazabilidad normativa.
+
+      5. Solo usuarios con rol Administrador RRHH o Especialista Localización pueden modificar formatos.
+
+      6. Todo envío o exportación debe quedar registrado con fecha, usuario y hash del archivo.
+
+      7. Los archivos generados deben almacenarse con nomenclatura estándar:
+País_Año_Mes_TipoArchivo_RazónSocial_Versión.ext.
+
+      8. El sistema debe advertir cuando existan actualizaciones normativas pendientes.
+
+      9. Se debe conservar copia del archivo generado en repositorio seguro por un mínimo de 5 años.
+
+      10. Todas las acciones deben registrarse en el Log Contable de Auditoría.
+
+________________
+
+
+9. Observaciones Técnicas
+         * Compatibilidad con formatos TXT delimitados, XML estructurados y CSV planos.
+
+         * Validación previa mediante plantillas de esquema (XSD o JSON Schema).
+
+         * Generador de archivos con opción de firma digital y compresión ZIP.
+
+         * Interfaz responsive con filtros por país, organismo y estado.
+
+         * Soporte para exportación manual y automática (envío a SFTP o correo corporativo).
+
+         * Mecanismo de notificación automática en caso de error de validación o rechazo de entidad.
+
+________________
+
+
+10. Comentarios
+            * Esta HU se integra con:
+
+               * HU-RRH-LOC-IA-001 – Parámetros por País
+
+               * HU-RRH-NOM-001 – Cálculo y Declaraciones de Nómina
+
+                  * Permite estandarizar la presentación de archivos laborales y tributarios en todos los países LATAM.
+
+                  * En versiones futuras se integrará con el módulo de Reportes Legales y servicios web oficiales para envío directo y validación en línea.
+
+                  * Soporta automatización de tareas recurrentes (ej. envío mensual de planillas).
+[a]No me queda claro este criterio

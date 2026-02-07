@@ -1,0 +1,256 @@
+﻿HU-CON-025 - Procesos / Validar Consistencia de Asientos Contables - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-025
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Procesos
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Procesos / Validar Consistencia de Asientos Contables
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la validación automática de la consistencia de los asientos contables, verificando que el total de débitos sea igual al total de créditos (Débito = Crédito) en cada asiento registrado.
+Asimismo, el proceso debe identificar y reportar asientos descuadrados, incompletos o con inconsistencias estructurales, tales como:
+   * Cuentas contables inactivas o inexistentes.
+
+   * Falta de centro de costo cuando es obligatorio.
+
+   * Diferencias monetarias en el caso de asientos multimoneda.
+
+   * Campos requeridos sin valor (fecha contable, moneda, tipo de cambio, etc.).
+
+El sistema debe generar un reporte de inconsistencias contables y permitir su exportación a Excel o PDF, además de registrar el resultado de la validación en la bitácora de control contable.
+________________
+
+
+3. Actor(es)
+      * Contador General: Ejecuta la validación de consistencia contable antes del cierre de periodo.
+
+      * Jefe de Contabilidad: Supervisa la corrección de los asientos inconsistentes.
+
+      * Auditor Interno: Revisa la trazabilidad y consistencia de la información contable.
+
+      * Administrador del Sistema: Supervisa la ejecución programada del proceso.
+
+________________
+
+
+4. Precondiciones
+         * El usuario debe tener permisos para acceder al menú Contabilidad → Procesos → Validar Consistencia de Asientos Contables.
+
+         * Deben existir asientos contables registrados y contabilizados en el periodo seleccionado.
+
+         * Los planes de cuentas y centros de costo deben estar configurados y activos.
+
+         * El periodo contable debe estar abierto para permitir validaciones.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Procesos → Validar Consistencia de Asientos Contables
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero validar la consistencia de los asientos contables,
+para asegurar que todos los registros cumplan con la igualdad Débito = Crédito y que la información contable sea completa, exacta y coherente antes del cierre contable.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable o rango de fechas para la validación.
+	El proceso se ejecuta sobre los asientos del periodo seleccionado.
+	2
+	Validar que en cada asiento el total de débitos sea igual al total de créditos.
+	Muestra lista de asientos descuadrados con detalle de diferencia.
+	3
+	Verificar que todas las cuentas contables existan y estén activas.
+	Identifica y marca asientos con cuentas inactivas o inexistentes.
+	4
+	Validar centros de costo obligatorios en asientos que lo requieran.
+	Genera alerta si faltan centros de costo en cuentas de gastos o ingresos.
+	5
+	Validar consistencia en monedas y tipos de cambio.
+	Detecta diferencias en los asientos multimoneda.
+	6
+	Validar que los campos fecha contable, tipo de cambio, moneda no estén vacíos.
+	Reporta campos nulos o inválidos.
+	7
+	Generar un reporte de inconsistencias contables.
+	Exportación a Excel y PDF con detalle de los errores.
+	8
+	Registrar en bitácora contable el resultado de la validación.
+	Registro automático de usuario, fecha, periodo y total de inconsistencias.
+	________________
+
+
+8. Estructura del Proceso
+Tipo: Proceso contable automatizado de validación.
+Naturaleza: Control contable – solo lectura y generación de reportes.
+8.1 Parámetros de Ejecución
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Define el periodo a validar.
+	Fecha Desde / Hasta
+	Fecha
+	No
+	Rango de fechas opcional para validación.
+	Moneda
+	Lista
+	No
+	Permite filtrar por moneda local o extranjera.
+	Nivel de Detalle
+	Lista
+	No
+	Permite validar hasta cierto nivel del plan contable.
+	Incluir Asientos Automáticos
+	Checkbox
+	No
+	Permite incluir o excluir asientos generados por procesos automáticos.
+	8.2 Resultados del Proceso
+Campo
+	Descripción
+	Periodo
+	Periodo validado.
+	N° Asiento
+	Identificador del asiento contable.
+	Fecha Contable
+	Fecha del registro.
+	Cuenta Contable
+	Código y nombre de la cuenta.
+	Diferencia (Débito - Crédito)
+	Monto de diferencia detectada.
+	Tipo de Error
+	Clasificación del error (cuadre, cuenta inactiva, centro costo, etc.).
+	Estado
+	Inconsistente / Validado.
+	Usuario Validación
+	Usuario que ejecutó el proceso.
+	________________
+
+
+9. Reglas de Negocio
+            1. Cuadre obligatorio: Todo asiento contable debe cumplir con la regla ΣDébito = ΣCrédito.
+
+            2. Integridad contable: Solo se consideran asientos activos y contabilizados.
+
+            3. Validación automática: El proceso debe ejecutarse tanto manualmente como de forma programada.
+
+            4. Errores críticos: Los asientos con diferencia en débitos y créditos no pueden ser cerrados ni exportados a libros electrónicos.
+
+            5. Bitácora de control: Cada validación debe registrarse en la tabla LOG_VALIDACION_ASIENTOS.
+
+            6. Revisión detallada: El sistema debe permitir revisar en detalle los errores detectados antes de su corrección.
+
+            7. Ejecución masiva: La validación puede ejecutarse por rango de fechas o por empresa.
+
+            8. Moneda única: En caso de asientos multimoneda, el sistema validará los importes equivalentes según tipo de cambio registrado.
+
+________________
+
+
+10. Integraciones
+               * Módulo de Contabilidad General: Fuente de los asientos contables y saldos.
+
+               * Módulo de Centros de Costo: Validación de imputaciones requeridas.
+
+               * Módulo de Plan de Cuentas: Validación del estado de las cuentas contables.
+
+               * Módulo de Auditoría: Registro de bitácora de ejecución.
+
+               * Módulo de Monedas: Verificación de tipo de cambio y equivalencia contable.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Tipo de Componente: Proceso automático con generación de reporte.
+
+                  * Tablas Fuente:
+
+                     * CNTBL_ASIENTO (cabecera de asientos).
+
+                     * CNTBL_ASIENTO_DET (detalle contable).
+
+                     * CNTBL_CUENTA_CONTABLE (plan contable activo).
+
+                     * CNTBL_CENTRO_COSTO (validación de centros de costo).
+
+                        * Bitácora: LOG_VALIDACION_ASIENTOS (usuario, periodo, fecha, total de errores, tipo de error).
+
+                        * Exportaciones: .xlsx y .pdf.
+
+                        * Performance: Indexar campos PERIODO, NRO_ASIENTO, CNTA_CTBL, FECHA_CNTBL.
+
+Consulta referencial (validación de cuadre contable):
+SELECT 
+    a.ano, a.mes, a.nro_asiento,
+    SUM(d.debe) AS total_debito,
+    SUM(d.haber) AS total_credito,
+    (SUM(d.debe) - SUM(d.haber)) AS diferencia
+FROM cntbl_asiento a
+JOIN cntbl_asiento_det d 
+    ON a.ano = d.ano AND a.mes = d.mes AND a.nro_asiento = d.nro_asiento
+WHERE a.estado = 'CONTABILIZADO'
+GROUP BY a.ano, a.mes, a.nro_asiento
+HAVING SUM(d.debe) <> SUM(d.haber);
+
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Procesos → Validar Consistencia de Asientos Contables.
+
+                           2. Selecciona el periodo contable o rango de fechas a validar.
+
+                           3. Presiona “Ejecutar Validación”.
+
+                           4. El sistema analiza los asientos contables y ejecuta las validaciones de cuadratura e integridad.
+
+                           5. Se genera una lista de inconsistencias detectadas, mostrando tipo de error y asiento afectado.
+
+                           6. El usuario puede exportar el reporte en Excel o PDF.
+
+                           7. El sistema registra la validación en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un periodo contable o rango de fechas.”
+
+                              * “No existen asientos registrados para el periodo seleccionado.”
+
+                              * “Se encontraron asientos descuadrados. Revise el reporte de inconsistencias.”
+
+                              * “Validación completada correctamente. No se detectaron inconsistencias.”
+
+                              * “Error al ejecutar la validación. Contacte al administrador del sistema.”

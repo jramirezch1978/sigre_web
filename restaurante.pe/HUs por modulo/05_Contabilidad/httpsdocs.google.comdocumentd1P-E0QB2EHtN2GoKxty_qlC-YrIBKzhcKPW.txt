@@ -1,0 +1,257 @@
+﻿HU-CON-024 - Procesos / Generar Libros Electrónicos - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-024
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Procesos
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Procesos / Generar Libros Electrónicos
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la generación automática de libros contables electrónicos, de acuerdo con los formatos oficiales exigidos por las autoridades tributarias de cada país (por ejemplo, SUNAT en Perú, DIAN en Colombia, SII en Chile, entre otros).
+Los libros a generar incluyen:
+   * Registro de Ventas e Ingresos
+
+   * Registro de Compras
+
+   * Libro Diario
+
+   * Libro Mayor
+
+   * Registro de Asientos Auxiliares y Cuentas Corrientes
+
+El sistema debe extraer la información directamente de los asientos contables validados, estructurarla conforme a los formatos definidos por las entidades reguladoras y permitir su descarga en formato electrónico (.txt, .xml, .xlsx o .pdf) según corresponda.
+Además, debe ofrecer controles de validación previos a la generación (por ejemplo: verificación de cuadre contable, formatos de fecha, estructura de cuentas, identificación de contribuyentes, etc.) y registrar en bitácora contable la generación de cada archivo.
+________________
+
+
+3. Actor(es)
+      * Contador General: Genera y revisa los libros electrónicos oficiales.
+
+      * Jefe de Contabilidad: Supervisa la correcta presentación y validación de los archivos generados.
+
+      * Auditor Interno o Externo: Verifica la integridad y cumplimiento normativo de los libros.
+
+      * Administrador del Sistema: Supervisa la configuración de parámetros de exportación y seguridad.
+
+________________
+
+
+4. Precondiciones
+         * El usuario debe tener permisos para acceder al menú Contabilidad → Procesos → Generar Libros Electrónicos.
+
+         * Los asientos contables deben estar contabilizados y cerrados en el periodo a generar.
+
+         * Debe existir la configuración de formato electrónico tributario por país (SUNAT, DIAN, etc.).
+
+         * Las cuentas contables y documentos deben tener asignadas sus referencias tributarias y clasificadores correspondientes.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Procesos → Generar Libros Electrónicos
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar los libros contables electrónicos oficiales,
+para cumplir con las normativas tributarias vigentes y presentar la información contable de forma estructurada, validada y en los formatos requeridos por la autoridad fiscal de cada país.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar el tipo de libro electrónico a generar (ventas, compras, diario, mayor, auxiliares).
+	El sistema muestra los formatos disponibles según la normativa del país.
+	2
+	Permitir definir el periodo contable (año y mes).
+	Los registros corresponden al periodo seleccionado.
+	3
+	Validar que los asientos contables estén contabilizados y cerrados.
+	No se incluyen asientos en borrador o anulados.
+	4
+	Mostrar un resumen de validación previa antes de generar el archivo (errores, advertencias).
+	El usuario puede corregir inconsistencias antes de generar.
+	5
+	Generar los archivos electrónicos según los formatos oficiales vigentes (TXT, XML, XLSX, PDF).
+	Archivos generados correctamente con la estructura normativa.
+	6
+	Mostrar un registro de generación (usuario, fecha, libro, periodo).
+	Información visible en la bitácora contable.
+	7
+	Permitir la descarga o visualización del archivo generado.
+	El usuario puede abrir o descargar el libro.
+	8
+	Registrar en bitácora contable cada generación de libro.
+	Log de auditoría actualizado.
+	________________
+
+
+8. Estructura del Reporte / Generación
+Vista: Formulario maestro con selección de parámetros y lista de archivos generados.
+Naturaleza: Proceso contable de generación de reportes electrónicos (solo lectura posterior).
+8.1 Filtros de Búsqueda y Parámetros
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Tipo de Libro
+	Lista
+	Sí
+	Selecciona el libro contable a generar.
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Define el periodo de información.
+	País / Entidad Tributaria
+	Lista
+	Sí
+	Define el formato normativo aplicable (SUNAT, DIAN, SII, etc.).
+	Tipo de Archivo
+	Lista
+	No
+	Selecciona formato de salida (TXT, XML, XLSX, PDF).
+	Incluir Asientos Anulados
+	Checkbox
+	No
+	Permite incluir asientos anulados (según normativa).
+	Directorio de Exportación
+	Texto
+	No
+	Ruta o carpeta donde se almacenará el archivo.
+	8.2 Resultados y Acciones
+Campo
+	Descripción
+	Código de Libro
+	Código identificador según normativa.
+	Nombre de Libro
+	Descripción del libro contable.
+	Periodo
+	Periodo generado (AAAA-MM).
+	Fecha de Generación
+	Fecha y hora de creación del archivo.
+	Usuario
+	Usuario que generó el libro.
+	Estado
+	Éxito / Error / Pendiente de corrección.
+	Archivo
+	Link para descarga o vista previa.
+	________________
+
+
+9. Reglas de Negocio
+            1. Cumplimiento normativo: Los archivos deben cumplir con las estructuras y validaciones de cada entidad fiscal (por ejemplo, SUNAT: PLE, DIAN: Formato XML).
+
+            2. Integridad contable: Solo se incluyen asientos confirmados y no anulados.
+
+            3. Validación previa: Antes de generar el archivo, el sistema ejecutará una validación de consistencia de datos.
+
+            4. Bitácora obligatoria: Cada archivo generado debe registrarse en LOG_LIBROS_ELECTRONICOS con usuario, fecha y resultado.
+
+            5. Multiempresa y multipaís: La generación debe considerar la razón social y país activo del usuario.
+
+            6. Formato estándar: Los nombres de archivo deben cumplir el estándar tributario (ejemplo SUNAT: LE20555555555-20250100080100001111.txt).
+
+            7. Auditoría: Toda acción de generación, descarga o reenvío debe quedar registrada.
+
+            8. Seguridad: Solo usuarios con rol de Contador o Administrador pueden generar libros.
+
+________________
+
+
+10. Integraciones
+               * Módulo de Contabilidad General: Fuente de asientos, plan de cuentas y movimientos contables.
+
+               * Módulo de Ventas: Fuente para Libro de Ventas e Ingresos.
+
+               * Módulo de Compras: Fuente para Libro de Compras.
+
+               * Módulo de Tesorería: Fuente para movimientos bancarios y auxiliares.
+
+               * Módulo de Monedas y Tipo de Cambio: Conversión de montos.
+
+               * Módulo de Auditoría: Registro de logs de generación.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Tipo de Componente: Proceso de generación de reportes electrónicos.
+
+                  * Tablas Fuente:
+
+                     * CNTBL_ASIENTO (cabecera de asientos).
+
+                     * CNTBL_ASIENTO_DET (detalle contable).
+
+                     * CNTBL_CUENTA_CONTABLE (clasificación contable).
+
+                     * CNTBL_TIPO_CAMBIO (tipos de cambio).
+
+                     * CNTBL_CONFIG_FORMATOS (parámetros tributarios por país).
+
+                        * Bitácora: LOG_LIBROS_ELECTRONICOS (usuario, libro, periodo, país, fecha, estado).
+
+                        * Exportaciones: .txt, .xml, .xlsx, .pdf.
+
+                        * Performance: Indexar campos PERIODO, TIPO_LIBRO, RAZON_SOCIAL, PAIS.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Procesos → Generar Libros Electrónicos.
+
+                           2. Selecciona el tipo de libro y periodo contable.
+
+                           3. Define el formato de salida y los filtros adicionales.
+
+                           4. Presiona “Validar Información” para ejecutar la validación previa.
+
+                           5. El sistema muestra un resumen de validaciones (errores y advertencias).
+
+                           6. El usuario confirma la generación presionando “Generar Libro”.
+
+                           7. El sistema crea el archivo en el formato tributario correspondiente.
+
+                           8. Se registra la acción en la bitácora contable.
+
+                           9. El usuario puede descargar o visualizar el archivo generado.
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar el tipo de libro y periodo contable.”
+
+                              * “No existen registros contables en el periodo seleccionado.”
+
+                              * “Existen errores de validación. Corríjalos antes de generar el archivo.”
+
+                              * “Libro generado correctamente.”
+
+                              * “Error al procesar el archivo. Contacte al administrador del sistema.”
+
+                              * “No tiene permisos para generar libros electrónicos.”

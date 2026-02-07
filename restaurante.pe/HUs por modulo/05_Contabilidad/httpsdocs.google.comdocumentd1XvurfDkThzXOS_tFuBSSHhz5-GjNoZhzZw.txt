@@ -1,0 +1,269 @@
+﻿HU-CON-022 - Reportes de Validación / Estado de Flujos de Efectivo - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-022
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Reportes de Validación
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Estado de Flujos de Efectivo
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la generación del reporte de Estado de Flujos de Efectivo, que muestre de forma estructurada los ingresos y egresos de efectivo clasificados en actividades operativas, de inversión y de financiamiento, con el objetivo de analizar la liquidez y la capacidad de la empresa para generar efectivo durante un periodo determinado.
+El reporte debe obtener su información de los asientos contables validados y cerrados, vinculados a las cuentas bancarias y de caja. Además, debe permitir comparar flujos entre periodos (por ejemplo, mes actual vs mes anterior o año actual vs anterior).
+Asimismo, debe ofrecer la posibilidad de exportar los resultados a formatos Excel (.xlsx) o PDF (.pdf), con estructura jerárquica, subtotales por tipo de actividad y totales de flujos netos.
+________________
+
+
+3. Actor(es)
+   * Contador General: Genera el reporte de flujos de efectivo para análisis financiero.
+
+   * Jefe de Contabilidad: Supervisa la generación y consistencia de los reportes.
+
+   * Gerente Financiero: Analiza la liquidez y la posición de caja de la empresa.
+
+   * Auditor Interno o Externo: Verifica la consistencia de los movimientos de efectivo.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos para acceder a Contabilidad → Reportes → Estado de Flujos de Efectivo.
+
+      * Deben existir asientos contables contabilizados con movimientos en cuentas de caja o bancos.
+
+      * Los planes contables deben tener identificadas las cuentas de efectivo y equivalentes.
+
+      * El periodo contable debe estar configurado y contener información válida.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Estado de Flujos de Efectivo
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar el reporte de Estado de Flujos de Efectivo,
+para analizar la liquidez de la empresa y su capacidad para generar y utilizar efectivo en las actividades operativas, de inversión y de financiamiento durante un periodo específico.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable o rango de fechas.
+	El reporte muestra los flujos de efectivo del periodo seleccionado.
+	2
+	Clasificar los movimientos por actividad: Operativa, Inversión y Financiamiento.
+	Se muestran subtotales y totales por tipo de actividad.
+	3
+	Calcular automáticamente el flujo neto de efectivo del periodo.
+	Muestra el saldo final y la variación del efectivo.
+	4
+	Permitir comparar dos periodos contables (actual vs anterior).
+	Mostrar columnas comparativas de flujos. Colocar los periodos de comparación en las columnas.
+	5
+	Permitir filtrar por moneda (local / extranjera).
+	Conversión automática según tipo de cambio del periodo.
+	6
+	Mostrar el saldo inicial y final de efectivo y equivalentes.
+	Validación de cuadratura del flujo neto.
+	7
+	Permitir exportar el reporte en formatos Excel (.xlsx) y PDF (.pdf).
+	Archivos generados correctamente con formato jerárquico. Agregar el Botón de Exportar.
+	8
+	Registrar en bitácora contable la generación del reporte (usuario, fecha, filtros).
+	Auditoría registrada correctamente.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Reporte jerárquico agrupado por tipo de actividad.
+Naturaleza: Reporte informativo contable (solo lectura).
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Define el periodo del reporte.
+	Fecha Desde / Hasta
+	Fecha
+	No
+	Define el rango de fechas del reporte.
+	Moneda
+	Lista
+	No
+	Permite seleccionar la moneda de presentación.
+	Comparar con Periodo
+	Lista
+	No
+	Permite comparación de periodos.
+	Nivel de Detalle
+	Lista
+	No
+	Permite seleccionar nivel del plan de cuentas.
+	
+
+	
+
+	
+
+	
+
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Código de Cuenta
+	Código contable asociado al flujo.
+	Descripción de Cuenta
+	Nombre de la cuenta contable.
+	Tipo de Actividad
+	Operativa / Inversión / Financiamiento.
+	Monto del Periodo Actual
+	Monto de flujo correspondiente al periodo.
+	Monto del Periodo Comparativo
+	Monto del flujo en el periodo anterior.
+	Variación
+	Diferencia entre los periodos.
+	Moneda
+	Local / Extranjera.
+	8.3 Totales y Subtotales
+         * Flujo Neto de Actividades Operativas
+
+         * Flujo Neto de Actividades de Inversión
+
+         * Flujo Neto de Actividades de Financiamiento
+
+         * Aumento o Disminución Neta de Efectivo
+
+         * Saldo Inicial de Efectivo y Equivalentes
+
+         * Saldo Final de Efectivo y Equivalentes
+
+________________
+
+
+9. Reglas de Negocio
+            1. Clasificación de flujos: Las cuentas contables deben estar clasificadas en alguna de las tres categorías: operativa, inversión o financiamiento.
+
+            2. Validación de saldos: El saldo final del efectivo debe ser igual al saldo inicial más el flujo neto.
+
+            3. Conversión de moneda: Si el reporte se genera en moneda extranjera, aplicar el tipo de cambio promedio del periodo.
+
+            4. Comparativo: Si se selecciona más de un periodo, mostrar columnas de comparación y variación porcentual.
+
+            5. Auditoría: Registrar cada ejecución del reporte en la bitácora LOG_REPORTE_FLUJO_EFECTIVO.
+
+            6. Integridad contable: Solo incluir movimientos contabilizados y no anulados.
+
+            7. Cierre contable: Los valores deben provenir de asientos cerrados o confirmados.
+
+            8. Presentación jerárquica: Los flujos se presentan con niveles de detalle según la estructura del plan contable.
+
+________________
+
+
+10. Integraciones
+               * Módulo de Contabilidad General: Fuente de asientos contables y saldos.
+
+               * Módulo de Plan de Cuentas: Define la naturaleza de las cuentas (operativa, inversión, financiamiento).
+
+               * Módulo de Tesorería: Identifica las cuentas bancarias y de caja.
+
+               * Módulo de Monedas y Tipo de Cambio: Conversión de saldos.
+
+               * Módulo de Auditoría: Registro de bitácoras de reportes.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Tipo de Componente: Reporte contable estructurado (solo lectura).
+
+                  * Tablas Fuente:
+
+                     * CNTBL_ASIENTO (cabecera de asientos contables).
+
+                     * CNTBL_ASIENTO_DET (detalle de movimientos).
+
+                     * CNTBL_CUENTA_CONTABLE (clasificación de cuentas por actividad).
+
+                     * CNTBL_TIPO_CAMBIO (tipos de cambio de conversión).
+
+Consulta Base (referencial):
+
+ SELECT 
+    c.cnta_ctbl,
+    c.desc_cta,
+    c.tipo_actividad,
+    NVL(SUM(d.debe - d.haber), 0) AS flujo_actual,
+    NVL(SUM(d.debe_anterior - d.haber_anterior), 0) AS flujo_comparativo
+FROM cntbl_asiento_det d
+JOIN cntbl_cuenta_contable c ON d.cnta_ctbl = c.cnta_ctbl
+WHERE d.fecha_cntbl BETWEEN :fecha_inicio AND :fecha_fin
+  AND c.tipo_actividad IN ('OPERATIVA', 'INVERSION', 'FINANCIAMIENTO')
+GROUP BY c.cnta_ctbl, c.desc_cta, c.tipo_actividad
+ORDER BY c.tipo_actividad, c.cnta_ctbl;
+                        *                         * Exportaciones: .xlsx y .pdf
+
+                        * Bitácora: LOG_REPORTE_FLUJO_EFECTIVO (usuario, fecha, filtros aplicados, totales).
+
+                        * Performance: Indexar campos CNTA_CTBL, FECHA_CNTBL, TIPO_ACTIVIDAD.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Reportes → Estado de Flujos de Efectivo.
+
+                           2. Selecciona el periodo contable o rango de fechas.
+
+                           3. Define filtros adicionales (moneda, nivel de detalle, periodo comparativo).
+
+                           4. Presiona “Generar Reporte”.
+
+                           5. El sistema procesa los movimientos contables asociados a cuentas de caja y bancos.
+
+                           6. Se muestran los flujos agrupados por actividad.
+
+                           7. El usuario puede exportar el reporte a Excel o PDF.
+
+                           8. El sistema registra la ejecución en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un periodo contable o rango de fechas.”
+
+                              * “No existen movimientos de efectivo registrados para el periodo seleccionado.”
+
+                              * “El flujo neto no coincide con el cambio en el saldo de efectivo.”
+
+                              * “Reporte generado correctamente.”
+
+                              * “Error al procesar el reporte. Contacte al administrador del sistema.”

@@ -1,0 +1,141 @@
+﻿HU-FIN-OP-CP-003 - Automatización de Registros de Transacciones Periódicas (Luz, Agua, Internet, Alquiler) - v1.0
+1. Título
+Automatización de Registros de Transacciones Periódicas (Luz, Agua, Internet, Alquiler)
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero que el sistema registre automáticamente las transacciones recurrentes de gastos fijos, como servicios públicos (luz, agua, internet) y alquileres, para evitar la carga manual repetitiva, garantizar la oportunidad de registro contable y mantener actualizadas las cuentas por pagar mensuales.
+3. Proceso
+Proceso: Operaciones
+Subproceso: Cuentas por Pagar
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Automatizar el registro de gastos y facturas que se repiten periódicamente con montos fijos o variables (por ejemplo, luz, agua, internet, alquileres).
+Para: Reducir errores manuales y asegurar que los gastos periódicos se registren puntualmente cada mes.
+De manera que: Se mantenga la integridad contable y financiera de las obligaciones recurrentes y se optimice el flujo de trabajo en cuentas por pagar.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Operaciones > Cuentas por Pagar > Programación Automática de Transacciones Periódicas
+6. Criterios de Aceptación
+El sistema debe permitir configurar plantillas de transacciones automáticas para cada tipo de gasto periódico, indicando:
+* Proveedor
+
+* Tipo de Gasto
+
+* Cuenta Contable
+
+* Periodicidad (Mensual, Bimensual, Trimestral, Anual)
+
+* Día de Ejecución (por ejemplo, el día 1 o 5 de cada mes)
+
+* Monto Fijo o Variable
+
+* Moneda
+
+* Centro de Costo
+
+* Sucursal o Local
+
+El sistema debe generar automáticamente el registro contable y el documento por pagar en la fecha programada.[a]
+En caso de montos variables, el sistema debe permitir editar el monto antes de su aprobación definitiva.
+Cada transacción automática generada deberá quedar con estado “Pendiente de Validación”, hasta que el usuario con rol Supervisor Financiero la revise y apruebe.
+El sistema debe registrar en el log de auditoría contable toda acción de programación, ejecución automática, modificación o eliminación.
+Debe existir una opción de pausar o reactivar una programación automática sin perder su configuración.
+El sistema debe permitir consultar el historial de ejecuciones automáticas, mostrando la fecha, monto y resultado de cada proceso.
+Solo se mostrarán los datos de la Razón Social y País activos en la sesión del usuario (campos de solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+ Campos principales de la plantilla:
+   * Razón Social (solo lectura)
+
+
+   * Código de Programación
+
+   * Descripción / Tipo de Gasto (Luz, Agua, Internet, Alquiler, etc.)
+
+   * Proveedor
+
+   * Cuenta Contable
+
+   * Periodicidad
+
+   * Día de Ejecución
+
+   * Monto Fijo o Variable
+
+   * Moneda
+
+   * Centro de Costo
+
+   * Sucursal / Local
+
+   * Estado de la Programación (Activa / Pausada)
+
+   * Última Ejecución
+
+   * Próxima Ejecución
+
+Campos del registro generado:
+      * N° de Documento
+
+      * Fecha de Generación
+
+      * Monto Total
+
+      * Estado (Pendiente / Aprobada)[b]
+
+      * Usuario Generador
+
+      * Fecha y Hora
+
+Filtros disponibles:
+         * Tipo de Gasto
+
+         * Proveedor
+
+         * Periodicidad
+
+         * Estado de Programación
+
+         * Rango de Fechas
+
+         * Sucursal / Local
+
+Acciones disponibles:
+            * Crear Programación Automática
+
+            * Editar Programación
+
+            * Pausar / Reactivar
+
+            * Ver Historial de Ejecuciones
+
+            * Exportar (Excel / PDF)
+
+            * Aprobar Registro Generado
+
+8. Detalle de Integración (opcional)
+Integración con Contabilidad: Genera los asientos contables automáticos de gasto y cuenta por pagar según la configuración.
+Integración con Tesorería: Actualiza el calendario de pagos futuros con base en las fechas de ejecución programadas.
+Integración con Proveedores: Recupera automáticamente los datos de proveedor, condiciones de pago y cuentas bancarias registradas.
+Integración con Reportes Financieros: Incluye las transacciones recurrentes en los reportes de gastos mensuales y proyecciones de flujo de efectivo.
+
+
+9. Consideraciones Técnicas
+El sistema debe ejecutar los procesos automáticos mediante un servicio programado (scheduler) que se ejecute diariamente a una hora configurable (por ejemplo, 02:00 a.m.).
+Debe notificar por correo o alerta interna al responsable cuando una transacción automática se genere correctamente o falle.
+El sistema debe permitir definir montos máximos de variación permitidos (por ejemplo, ±10%) para montos variables, generando alertas si se exceden.
+Todas las acciones deben registrarse en el log de auditoría contable con: Usuario, Fecha, Hora, IP, Acción, Código de Programación, Estado y Detalle.
+Las transacciones generadas automáticamente deben seguir las normas NIC 1, NIC 37 y NIC 38 (en caso de servicios intangibles como licencias o software).
+Debe soportar entornos multipaís y multimoneda, aplicando la tasa de conversión contable vigente según la fecha de ejecución.
+10. Comentarios
+Esta funcionalidad mejora significativamente la eficiencia operativa del área contable al eliminar tareas repetitivas y garantizar la oportunidad del registro contable.
+Permite controlar de forma centralizada todos los compromisos recurrentes de la empresa, facilitando la planificación financiera y la proyección de flujo de efectivo.
+Se recomienda implementar indicadores como:
+               * Número de transacciones automáticas ejecutadas mensualmente.
+
+               * Monto total automatizado.
+
+               * Porcentaje de variación entre montos programados y montos reales.
+
+Además, puede configurarse para generar alertas previas a la ejecución automática, permitiendo revisión y ajuste de montos.
+
+
+[a]A que se refiere?
+[b]Este estado es más necesario que el estado de la programación? que pasa con el activo o pausado?

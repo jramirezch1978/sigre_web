@@ -1,0 +1,162 @@
+﻿HU-RRH-CV-VA-001 – Validación Automática de Inconsistencias en Nómina
+Versión: 1.0
+________________
+
+
+1. Título
+Detección automática de duplicados, topes excedidos, aportes fuera de rango y errores de cálculo
+________________
+
+
+2. Descripción
+Como analista de nómina o responsable de RR.HH., quiero que el sistema detecte automáticamente inconsistencias en los cálculos de planilla, tales como duplicados, montos que superan topes legales, aportes fuera de rango y errores aritméticos, de modo que pueda corregirlos antes del cierre o pago de la nómina, asegurando la integridad y confiabilidad de la información financiera y laboral.
+________________
+
+
+3. Proceso
+Módulo: RR.HH.
+Proceso: Consultas y Validaciones
+Subproceso: Validaciones Automáticas
+________________
+
+
+4. Narrativa de Usuario
+Quiero: Que el sistema analice automáticamente las planillas procesadas y detecte errores o valores fuera de los límites definidos.
+Para: Evitar inconsistencias que puedan generar pagos erróneos o incumplimientos normativos.
+De manera que: Los responsables puedan revisar, corregir y revalidar los cálculos antes de autorizar la nómina final.
+________________
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > RR.HH > Consultas y Validaciones > Validaciones Automáticas > Análisis de Inconsistencias
+________________
+
+
+6. Criterios de Aceptación
+* El sistema debe ejecutar validaciones automáticas sobre los registros de nómina antes del cierre del periodo.
+
+* Detectar:
+
+   * Registros duplicados por trabajador, periodo o concepto.
+
+   * Topes excedidos en descuentos, aportes o beneficios según normativa local.
+
+   * Aportes fuera de rango permitido para fondos de pensiones, salud o impuestos.
+
+   * Errores de cálculo entre el total de ingresos, descuentos y neto.
+
+      * Mostrar los resultados en una tabla resumen, agrupados por tipo de error y severidad.
+
+      * Permitir filtrar y ordenar los resultados por sede, trabajador, tipo de error o periodo.
+
+      * Mostrar un estado de validación (Aprobado / Observado / Corregido) con color de semáforo.
+
+      * Incluir opción de exportar reporte en Excel o PDF.
+
+      * Los usuarios con rol RR.HH. / Nómina / Auditoría podrán ejecutar y revisar la validación.
+
+      * Cada ejecución debe quedar registrada en el log del sistema (usuario, fecha, resultados).
+
+________________
+
+
+7. Campos del Formulario / Tabla de Vista
+Campo
+	Tipo de Campo
+	Descripción
+	Ejemplo
+	Validaciones / Consideraciones UX/UI
+	Periodo de Planilla
+	Lista desplegable
+	Periodo sobre el cual se ejecuta la validación.
+	Septiembre 2025
+	Obligatorio. Solo periodos abiertos o en revisión.
+	Sede / Centro de Costo
+	Selector múltiple
+	Filtra el análisis por unidad organizativa.
+	Lima / Cocina
+	Permite selección múltiple.
+	Tipo de Validación
+	Lista desplegable
+	Define el tipo de validación a ejecutar.
+	Duplicados / Topes / Aportes
+	Permite seleccionar una o todas.
+	Trabajador
+	Búsqueda / Autocompletar
+	Identifica al empleado con observaciones.
+	“Luis Pérez Rojas”
+	Campo de referencia, editable solo para búsqueda.
+	Tipo de Error
+	Etiqueta / Texto
+	Clasifica el tipo de inconsistencia detectada.
+	Aporte fuera de rango
+	Automático, generado por el sistema.
+	Descripción del Error
+	Texto largo
+	Detalla la causa o regla infringida.
+	Descuento AFP excede tope máximo permitido
+	Automático.
+	Monto Observado
+	Campo numérico
+	Valor del cálculo afectado por el error.
+	S/ 750.00
+	Automático. Formato numérico con dos decimales.
+	Valor Esperado
+	Campo numérico
+	Monto que debería haberse calculado correctamente.
+	S/ 650.00
+	Automático.
+	Estado de Validación
+	Etiqueta / Estado
+	Indica el estado del error.
+	Observado / Corregido / Validado
+	Visual con código de color.
+	Fecha de Detección
+	Fecha/Hora
+	Fecha de ejecución del análisis.
+	08/10/2025 14:22
+	Automático.
+	Acción Sugerida
+	Botón / Enlace
+	Enlace directo a la corrección o recalculo.
+	“Recalcular concepto”
+	Botón visible solo para usuarios con permiso.
+	________________
+
+
+8. Detalle de Integración
+         * Integración con Módulo de Nómina: Obtiene datos de los cálculos y conceptos aplicados.
+
+         * Integración con Parámetros del Módulo: Consulta límites legales, topes y rangos por país.
+
+         * Integración con Auditoría: Registra las validaciones y correcciones realizadas.
+
+         * Integración con Seguridad y Roles: Define quién puede ejecutar y modificar validaciones.
+
+________________
+
+
+9. Consideraciones Técnicas
+            * El proceso debe ejecutarse en tiempo real o bajo demanda por el usuario.
+
+            * Posibilidad de programar validaciones automáticas nocturnas antes del cierre de nómina.
+
+            * Las reglas de validación deben ser parametrizables por país, empresa y tipo de planilla.
+
+            * Los resultados deben guardarse en una tabla de auditoría con historial de cambios y versiones.
+
+            * Incluir alertas visuales y notificaciones automáticas si se detectan errores críticos.
+
+            * Soporte para exportación masiva de inconsistencias en formato CSV o Excel.
+
+________________
+
+
+10. Comentarios
+Esta funcionalidad es clave para garantizar la calidad de los datos en el proceso de nómina, evitando errores humanos o duplicidades antes del pago.
+Se recomienda:
+               * Incorporar indicadores visuales (rojo/amarillo/verde) según nivel de severidad.
+
+               * Permitir reprocesamiento parcial por trabajador o sede.
+
+               * Mostrar en el dashboard un resumen estadístico del porcentaje de errores por tipo o empresa.

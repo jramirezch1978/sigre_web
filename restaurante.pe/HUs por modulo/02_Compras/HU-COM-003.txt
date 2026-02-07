@@ -1,0 +1,233 @@
+﻿HU-COM-003 - Generar Orden de Compra - v1.0
+1. Título
+Generar Orden de Compra
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero registrar y generar órdenes de compra de bienes o servicios, para formalizar el requerimiento de adquisiciones a proveedores y asegurar la integración con inventarios, finanzas y contabilidad.
+3. Proceso
+* Proceso: Operaciones
+
+* Subproceso: Órdenes de Compra
+
+* Módulo: Compras
+
+4. Narrativa de Usuario
+   * Quiero: Crear y gestionar órdenes de compra.
+
+   * Para: Formalizar la adquisición de bienes y servicios a proveedores.
+
+   * De manera que: Se asegure el control de compras, inventarios, cuentas por pagar y reportes contables.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Compras > Operaciones > Órdenes de Compra > Generar Orden de Compra
+6. Criterios de Aceptación
+      1. El sistema debe permitir crear órdenes de compra con datos obligatorios: proveedor, fecha, condiciones de pago, artículos,  cantidades, moneda, fecha de entrega.
+
+      2. La numeración de la orden de compra debe ser correlativa y automática por razón social y sucursal.
+
+      3. El sistema debe validar que el proveedor seleccionado esté activo en el maestro de proveedores.
+
+      4. Los artículos seleccionados deben provenir del maestro de artículos y estar clasificados.
+
+      5. Debe ser posible registrar órdenes de compra en moneda local o extranjera, con conversión a tipo de cambio.
+
+      6. No se podrá modificar una orden de compra con estado aprobada o cerrada.
+
+      7. Toda acción (crear, modificar, aprobar, anular) debe quedar registrada en el log de auditoría contable.
+
+      8. El sistema debe generar un documento PDF de la orden de compra con el detalle de la transacción.
+
+      9. El listado de órdenes de compra debe permitir filtros por: número, proveedor, fecha, estado, sucursal.
+
+7. Campos del Formulario
+Datos Generales
+         * Número de Orden de Compra autogenerado con correlativo, teniendo un formato de año + correlativo (OC-YYYY-CORRELATIVO) Ejemplo: OC-2025-000001.
+         * Fecha de Emisión = FE (obligatorio, default: fecha actual).
+         * Fecha de entrega, que debe ser posterior o igual a la fecha de emisión de la orden de compra.
+         * Dirección de entrega, puede ser la del almacén principal o de alguna sucursal.
+         * Proveedor (obligatorio, búsqueda en maestro de proveedores).
+         * Moneda (obligatorio, lista desplegable).
+         * Tipo de Cambio (obligatorio si la moneda es distinta a la local).
+         * Nombre de Condición de Pago (obligatorio, lista desplegable desde catálogo de condiciones de pago con estado: Activo).
+         * Estado (Pendiente, Aprobada, De vuelta, Rechazada).
+         * Debe indicar quien emite y quien autoriza la Orden de Compra. 
+
+Detalle de Artículos
+            * Código de artículo (búsqueda en maestro de artículos).
+
+            * Descripción (informativo).
+
+            * Unidad de medida (informativo).
+
+            * Cantidad solicitada (numérico, obligatorio).
+
+            * Precio unitario (numérico, obligatorio), estableciendo 4 decimales, validando el valor debe ser mayor a 0.0001
+
+            * Subtotal (calculado).
+
+            * Impuestos aplicables (según país)[a][b][c][d].
+
+            * Total de la línea (calculado).
+
+Totales de Orden
+               * Subtotal General.
+
+               * Impuestos.
+
+               * Total de la Orden.
+
+8. Listado de Órdenes de Compra (Vista Tabla)
+Columnas:
+                  * Número de OC
+                  * Doc del Proveedor 
+                  * Proveedor
+                  * Sucursal
+                  * Almacen
+                  * Dirección Fiscal
+                  * Fecha de registro
+                  * Fecha de entrega
+                  * Dirección de entrega
+                  * Moneda
+                  * Tipo de cambio
+                  * condición de pago
+                  * Estado
+
+Acciones disponibles: Ver | Editar | Aprobar | Anular | Exportar (Excel/PDF)
+Filtros disponibles: Número de OC | Proveedor | Estado | Fecha | Sucursal
+9. Consideraciones Técnicas
+                     * La numeración será parametrizable por país, razón social y sucursal.
+
+                     * Validación de integridad con maestro de proveedores y maestro de artículos.
+
+                     * Integración automática con:
+
+                        * Inventarios (reserva/entrada programada de artículos).
+
+                        * Finanzas (cuentas por pagar).
+
+                        * Contabilidad (registro contable preliminar).
+
+                           * Las órdenes de compra deben poder exportarse en formato PDF y Excel.
+
+                           * Registro obligatorio en log de auditoría contable.
+
+10. Comentarios
+                              * El flujo de aprobación de órdenes de compra debe ser configurable por usuarios (Anexo 1).
+
+                              * El sistema debe contemplar la funcionalidad de carga masiva de órdenes de compra vía Excel, considerando únicamente el detalle de los productos. La plantilla en Excel debe incluir los siguientes campos obligatorios(*) y opcionales: Código producto (*)| Descripción | Cantidad (*)| Costo unit (*)| Total
+
+                              * El sistema debe permitir generar reportes consolidados de órdenes de compra por: proveedor, artículo, centro de costo, sucursal y periodo (Revisar HU-COM-RC-008)
+                              * En escenarios multipaís, debe adaptarse a las normativas fiscales locales (ejemplo: comprobantes electrónicos de compra).[e][f]
+                              * La edición de órdenes de compra sólo será posible a las que tengan estado Pendiente y  Rechazada
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ANEXOS
+
+
+Anexo 1. Flujograma de aprobación de órdenes de compra por niveles.
+
+
+                                 * Nivel 0. 
+  
+
+
+
+                                 * Nivel 1. 
+  
+
+
+
+                                 * Nivel 2.
+  
+
+[a]@consultorexterno1@restaurant.pe @igarcia@restaurant.pe 
+Se deben indicar los tipos de impuesto y forma de cálculo según el país.
+_Asignada a consultorexterno1@restaurant.pe_
+[b]esto seria especificado en el modulo de contabilidad e igualmente si el producto esta o no afecto a impueto.
+[c]Por favor, indicar el HU de referencia y que sea linkeable.
+[d]HU pendiente de desarrollo. Los impuestos aplicables por producto deberán ser configurables dependiendo del contexto país.
+[e]@consultorexterno1@restaurant.pe @igarcia@restaurant.pe 
+Se deben especificar las normativas fiscales por país para que se puedan implementar. Se deben colocar en un anexo en la HU.
+_Asignada a consultorexterno1@restaurant.pe_
+[f]@igarcia@restaurant.pe ¿las personas que nos están apoyando en los distintos países nos pueden apoyar esa información?
+_Reasignada a igarcia@restaurant.pe_

@@ -1,0 +1,193 @@
+﻿HU-AF-REP-001 - Listado General de Activos con Valores y Depreciación Acumulada - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Reportes
+3. Subproceso
+Resumen de Activo Fijo
+4. Nombre de la Historia de Usuario
+Listado General de Activos con Valores y Depreciación Acumulada
+5. Descripción / Propósito
+Como Administrador Contable o Auditor de Activos Fijos, quiero consultar y exportar un listado general con la información completa de todos los activos fijos, para obtener una visión global del inventario físico y contable, incluyendo sus valores de adquisición, depreciación acumulada, valor neto, ubicaciones y estados, con el fin de realizar conciliaciones, auditorías y reportes financieros confiables en el sistema Restaurant.pe.
+6. Alcance
+La funcionalidad permite generar un reporte maestro de activos fijos consolidando la información proveniente de los módulos de registro, depreciación y ubicación, mostrando datos contables, técnicos y administrativos actualizados.
+El usuario podrá aplicar filtros dinámicos por clase, ubicación, origen, centro de costo, fechas o estado del activo, y exportar el resultado a formatos Excel y PDF, compatibles con revisiones contables y de auditoría.
+El reporte es base para:
+* Auditorías financieras internas y externas.
+
+* Cierres contables y reportes de control patrimonial.
+
+* Conciliación entre contabilidad y físico.
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Reportes → Resumen de Activo Fijo → Listado General de Activos con Valores y Depreciación Acumulada
+8. Campos y Columnas del Reporte
+Campos Informativos (solo lectura en encabezado):Filtros del Reporte
+Filtro
+	Tipo / Descripción
+	Clase / Subclase
+	Filtro jerárquico del tipo de activo.
+	Origen / Centro de Costo
+	Permite segmentar por área contable o administrativa.
+	Ubicación Física
+	Filtra activos por sucursal, edificio, piso o almacén.
+	Estado del Activo
+	Activo / En Reparación / Dado de Baja / Vendido.
+	Rango de Valor
+	Filtra activos por monto de adquisición.
+	Moneda
+	Soles / Dólares.
+	Columnas del Reporte
+Campo
+	Descripción
+	Código de Activo
+	Identificador único generado (HU-AF-TAB-007).
+	Descripción del Activo
+	Nombre o detalle del bien.
+	Clase / Subclase
+	Clasificación contable del activo.
+	Ubicación Física
+	Lugar actual donde se encuentra el activo.
+	Fecha de Adquisición
+	Fecha de compra o alta.
+	Fecha de Inicio de Depreciación
+	Fecha en que comienza la depreciación.
+	Valor de Adquisición
+	Valor original del activo.
+	Depreciación Acumulada
+	Monto total depreciado hasta la fecha de corte.
+	Valor Neto Contable
+	Valor actual (adquisición – depreciación acumulada).
+	Moneda
+	Moneda base del registro.
+	Estado Actual
+	Situación del activo (Activo / Dado de Baja / Vendido).
+	Centro de Costo
+	Unidad responsable contable.
+	9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Actualizar Datos
+	Refresca información en tiempo real.
+	Cálculos actualizados de valores y depreciación.
+	Exportar a Excel
+	Exporta reporte detallado con fórmulas y totales.
+	Archivo Excel descargable.
+	Exportar a PDF (Formato Auditoría)
+	Genera informe con formato institucional y encabezados legales.
+	Archivo PDF listo para auditoría.
+	Imprimir
+	Envía reporte a impresora con formato reducido.
+	Versión física del reporte.
+	
+
+10. Reglas de Negocio
+   1. Los cálculos de depreciación acumulada se realizan automáticamente según la configuración vigente del activo (HU-AF-OPE-008).
+
+   2. El reporte mostrará los valores contables a la fecha de corte seleccionada.
+
+   3. Los activos dados de baja o vendidos se mostrarán solo si el usuario activa la opción “Incluir inactivos”.
+
+   4. La moneda base del reporte se determina según la configuración contable del país (HU-AF-TAB-006).
+
+   5. Los usuarios con rol “Auditor” solo tendrán acceso en modo lectura.
+
+   6. El sistema debe validar permisos antes de mostrar información contable sensible (valores y depreciaciones).
+
+   7. Todos los reportes generados deben registrarse en el Log de Auditoría Contable con: usuario, fecha, filtros aplicados y número de registros exportados.
+
+   8. La información debe reflejar el estado consolidado del activo, incluyendo revaluaciones, mejoras y bajas históricas.
+
+   9. Los totales generales deben mostrarse al final del reporte, separados por moneda.
+
+   10. Los reportes deben poder generarse para periodos cerrados sin modificar la información contable original.
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Maestro de Activos (HU-AF-OPE-001)
+	Fuente principal de información de cada activo.
+	Configuración de Tasas y Métodos (HU-AF-OPE-008)
+	Proporciona tasas y métodos para el cálculo de depreciación.
+	Matriz Contable (HU-AF-TAB-004)
+	Valida cuentas asociadas a los valores mostrados.
+	Configuración Global (HU-AF-TAB-006)
+	Determina parámetros de moneda, formatos y períodos contables.
+	Log de Auditoría Contable
+	Registra la generación y exportación de reportes.
+	Reportes Financieros Generales
+	Recibe los datos de activos consolidados para estados financieros.
+	12. Consideraciones Técnicas
+      * Reporte generado a través de consultas SQL optimizadas sobre vistas consolidadas del módulo de activos.
+
+      * Interfaz web con filtros dinámicos y actualización en tiempo real.
+
+      * Integración mediante API RESTful para generación y descarga de archivos.
+
+      * Tablas involucradas:
+
+         * AF_MA_ACTIVOS (maestro principal)
+
+         * AF_HIS_DEPRECIACION (histórico de depreciaciones)
+
+         * AF_MOV_BAJAS y AF_MOV_VENTAS (bajas y ventas)
+
+            * Opción de programación automática del reporte (diario o mensual) vía cron.
+
+            * Soporte para exportación masiva hasta 200.000 registros por ejecución.
+
+            * Registro automático en Log de Auditoría Contable.
+
+            * Formato PDF con encabezado institucional y numeración de páginas.
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido según rol (Administrador, Auditor, Contador).
+	Performance
+	Tiempo de generación ≤ 10 segundos para hasta 50.000 registros.
+	Usabilidad
+	Interfaz con filtros plegables, paginación y ordenamiento por columnas.
+	Disponibilidad
+	99.5% en horario operativo.
+	Auditoría
+	Registro obligatorio de usuario, fecha, filtros y exportaciones.
+	Escalabilidad
+	Capacidad para procesar más de 1 millón de registros en procesos batch.
+	14. Criterios de Aceptación
+               1. El usuario puede filtrar y generar el reporte correctamente por fecha, clase, origen y ubicación.
+
+               2. El reporte muestra valores de adquisición, depreciación acumulada y valor neto por activo.
+
+               3. La depreciación acumulada refleja el cálculo al periodo seleccionado.
+
+               4. El reporte puede exportarse sin errores a Excel y PDF (formato auditoría).
+
+               5. Los totales generales por moneda se muestran al final del reporte.
+
+               6. Las acciones de generación y exportación quedan registradas en el Log Contable.
+
+               7. El tiempo de respuesta no supera los 10 segundos para 50.000 registros.
+
+               8. Los filtros guardados pueden reutilizarse sin pérdida de información.
+15. Comentarios / Observaciones
+                  * Este reporte es el documento maestro de control patrimonial y contable, consolidando todos los movimientos e información actualizada de los activos.
+
+                  * Facilita las auditorías internas, revisiones fiscales y conciliaciones contables entre activos, depreciaciones y cuentas contables.
+
+                  * Debe mantener coherencia con las HU:
+
+                     * HU-AF-OPE-001 (Registro Principal de Activos Fijos)
+
+                     * HU-AF-OPE-008 (Configuración de Tasas y Métodos de Depreciación)
+
+                     * HU-AF-TAB-004 (Configuración de Cuentas Contables)
+
+                     * HU-AF-TAB-006 (Configuración Global del Módulo).
+
+                        * Se recomienda incluir la opción de “Reporte Histórico” que permita visualizar valores a fechas pasadas (cierre mensual o anual).
+
+                        * El formato PDF de auditoría debe incluir pie institucional, número de página, fecha de generación y firma digital o sello del sistema.

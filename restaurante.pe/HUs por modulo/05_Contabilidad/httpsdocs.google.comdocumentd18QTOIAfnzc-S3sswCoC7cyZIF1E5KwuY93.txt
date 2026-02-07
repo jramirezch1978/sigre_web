@@ -1,0 +1,258 @@
+﻿HU-CON-010 - Consulta de Centros de Costo por Trabajador - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-010
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Centros de Costo
+
+* Proceso: Contabilidad Analítica
+
+* Nombre de la Funcionalidad: Consultar Centros de Costo por Trabajador
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir consultar la imputación de costos a nivel de trabajadores o áreas, vinculada con los centros de costo definidos en la contabilidad.
+Esta funcionalidad permitirá visualizar la asignación de gastos por trabajador, área o proyecto, según los registros contables y de planillas, facilitando el análisis de costos laborales y la contabilidad analítica.
+La consulta mostrará la relación entre el trabajador, su centro de costo asociado, los montos imputados, y los asientos contables o movimientos que originan dichas imputaciones.
+________________
+
+
+3. Actor(es)
+   * Contador Analítico: Consulta y analiza la distribución de costos por  (se recomiendo agregar el termino  DNI-codigo para una búsqueda con mayor exactitud) trabajador o área.
+
+   * Analista Contable / Financiero: Evalúa la imputación de gastos laborales a centros de costo.
+
+   * Jefe de Contabilidad: Supervisa la correcta asignación de costos según políticas contables.
+
+   * Auditor Interno: Revisa la trazabilidad de los costos imputados a trabajadores.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos de acceso a Contabilidad – Centros de Costo y Planillas.
+
+      * Deben existir asientos contables o registros de planillas con centro de costo asignado.
+
+      * El periodo contable debe estar abierto o en modo consulta.
+
+      * Los centros de costo deben estar activos en el maestro correspondiente.
+
+      * La razón social y país deben ser determinados por la sesión activa.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Centros de Costo → Consulta por Trabajador
+________________
+
+
+6. Historia de Usuario
+Como analista contable,
+quiero consultar la asignación de centros de costo por trabajador o área,
+para analizar la distribución de los costos laborales y verificar su correcta imputación contable.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable, centro de costo, trabajador o área.
+	La consulta muestra los registros filtrados según los parámetros elegidos.
+	2
+	Mostrar asientos contables o movimientos de planilla asociados a cada trabajador.
+	Se visualizan las imputaciones con su monto, glosa y fecha.
+	3
+	Calcular y mostrar el total de costos imputados por trabajador o centro de costo.
+	Se presentan totales por agrupación seleccionada.
+	4
+	Permitir agrupación y resumen por centro de costo, trabajador o área.
+	Reporte dinámico con totales.
+	5
+	Mostrar glosa, fecha contable, cuenta contable, y documento de origen.
+	Trazabilidad completa del gasto.
+	6
+	Permitir exportar resultados a formatos Excel y PDF.
+	Archivo descargable con estructura de columnas visibles.
+	7
+	Validar que los centros de costo estén activos y vinculados correctamente a los trabajadores.
+	En caso contrario, mostrar advertencia.
+	8
+	Registrar en bitácora la fecha, usuario, filtros y resultados de la consulta.
+	Auditoría automática del uso de la funcionalidad.
+	________________
+
+
+8. Formulario de Consulta
+Vista: Pantalla de consulta maestro–detalle, con filtros superiores y tabla de resultados.
+Origen de datos: Tablas contables (CNTBL_ASIENTO, CNTBL_ASIENTO_DET), tablas de planillas y maestro de centros de costo.
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Periodo de análisis.
+	Centro de Costo
+	Lista desplegable
+	No
+	Filtra trabajadores y asientos asociados al centro seleccionado.
+	Trabajador
+	Lista desplegable (Planilla)
+	No
+	Muestra imputaciones relacionadas al trabajador.
+	Área / Departamento
+	Lista desplegable
+	No
+	Permite agrupar por área funcional.
+	Tipo de Movimiento
+	Lista
+	No
+	Gastos de Planilla / Ajustes / Asientos Manuales.
+	Moneda
+	Lista
+	No
+	Moneda local o extranjera.
+	Fecha Desde / Hasta
+	Fecha
+	No
+	Rango de fechas contables.
+	8.2 Resultados de la Consulta
+Campo
+	Descripción
+	Código de Centro de Costo
+	Identificador del CECO asignado.
+	Descripción del Centro de Costo
+	Nombre del centro o proyecto.
+	Código de Trabajador
+	Identificador interno del empleado.
+	Nombre del Trabajador
+	Nombres y apellidos completos.
+	Área / Departamento
+	Unidad organizacional del trabajador.
+	Cuenta Contable
+	Código de la cuenta asociada.
+	Glosa Contable
+	Descripción del movimiento.
+	Fecha Contable
+	Fecha del asiento o movimiento.
+	Documento de Origen
+	Referencia (boleta, comprobante).
+	Monto (Moneda Local)
+	Valor imputado al centro de costo.
+	Monto (Moneda Extranjera)
+	Valor equivalente, si aplica.
+	Usuario Registro
+	Usuario que generó la imputación.
+	________________
+
+
+9. Reglas de Negocio
+         1. Centros de costo activos: Solo se mostrarán registros vinculados a centros con estado activo (FLAG_ESTADO = '1').
+
+         2. Vinculación contable: Las imputaciones deben provenir de asientos contables o planillas con centro de costo asignado.
+
+         3. Conversión de moneda: Si el asiento está en moneda extranjera, el sistema mostrará también su conversión a moneda local según la tasa de cambio vigente.
+
+         4. Agrupación dinámica: La consulta permitirá agrupar los resultados por trabajador, área o centro de costo.
+
+         5. Validación de periodo: Solo se podrán consultar periodos abiertos o de lectura.
+
+         6. Integridad de datos: No se mostrarán registros sin referencia contable o trabajador válido.
+
+         7. Auditoría: Toda consulta se registra con usuario, fecha, filtros aplicados y resultados obtenidos.
+
+         8. Exportación: Los datos exportados deben conservar los formatos numéricos y los encabezados visibles en pantalla.
+
+________________
+
+
+10. Integraciones
+            * Módulo de Planillas: Obtención de trabajadores, áreas y costos laborales.
+
+            * Módulo de Centros de Costo: Asociación y estructura jerárquica de centros.
+
+            * Libro Diario / Asientos Contables: Fuente de los movimientos imputados.
+
+            * Módulo de Reportes: Exportación de resultados y gráficos de distribución.
+
+            * Auditoría del Sistema: Registro de consultas y descargas.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tablas Principales:
+
+                  * CNTBL_ASIENTO (cabecera de asiento contable).
+
+                  * CNTBL_ASIENTO_DET (detalle de imputaciones).
+
+                  * PLANILLA_TRABAJADOR (catálogo de empleados).
+
+                  * CENTROS_COSTO (maestro de centros de costo).
+
+                     * Relaciones:
+
+                        * CNTBL_ASIENTO_DET.CENCOS ↔ CENTROS_COSTO.COD_CENCOS
+
+                        * CNTBL_ASIENTO_DET.COD_RELACION ↔ PLANILLA_TRABAJADOR.COD_TRABAJADOR
+
+                           * Filtros SQL Base: Por periodo, trabajador, CECO, área, cuenta contable y fecha contable.
+
+                           * Exportaciones: Formatos XLSX y PDF con totales y agrupaciones dinámicas.
+
+                           * Seguridad: Validación por roles (Contabilidad, Analítica, Auditoría).
+
+________________
+
+
+12. Flujo Principal del Proceso
+                              1. Usuario ingresa al menú Contabilidad → Centros de Costo → Consulta por Trabajador.
+
+                              2. Selecciona los filtros deseados (periodo, trabajador, centro de costo, área).
+
+                              3. Presiona “Buscar”.
+
+                              4. El sistema muestra los resultados con detalle de imputaciones y totales.
+
+                              5. El usuario puede agrupar o filtrar los resultados dinámicamente.
+
+                              6. Puede exportar los datos o consultar el asiento contable de origen.
+
+                              7. El sistema registra la acción en la bitácora de auditoría.
+
+________________
+
+
+13. Mensajes de Validación
+                                 * “Debe seleccionar al menos un filtro de búsqueda.”
+
+                                 * “No se encontraron registros para los parámetros indicados.”
+
+                                 * “El centro de costo seleccionado se encuentra inactivo.”
+
+                                 * “El periodo contable está cerrado; solo se permite consulta.”
+
+                                 * “Error de conexión al módulo de Planillas.”
+
+                                 * “Consulta realizada correctamente. Resultados disponibles para exportar.”

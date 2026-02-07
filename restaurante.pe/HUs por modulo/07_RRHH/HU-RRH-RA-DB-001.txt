@@ -1,0 +1,189 @@
+﻿HU-RRH-RA-DB-001 – Dashboard de Indicadores Clave de RR.HH. por Sede
+Versión: 1.0
+________________
+
+
+1. Título
+Costo laboral/venta, % de propinas, horas extra (HHEE), rotación, ausentismo y headcount por sede
+________________
+
+
+2. Descripción
+Como gerente de recursos humanos o director financiero, quiero visualizar en un dashboard un resumen de indicadores clave de desempeño laboral —costo laboral sobre ventas, porcentaje de propinas, horas extras, rotación, ausentismo y headcount por sede—, para evaluar la eficiencia operativa y controlar los costos laborales en tiempo real.
+________________
+
+
+3. Proceso
+Módulo: RR.HH.
+Proceso: Reportes y Analítica
+Subproceso: Dashboards
+________________
+
+
+4. Narrativa de Usuario
+Quiero: Contar con un tablero interactivo que consolide indicadores laborales y financieros.
+Para: Analizar el desempeño y la eficiencia del personal por sede y canal.
+De manera que: Pueda tomar decisiones estratégicas sobre dotación, productividad y costos.
+________________
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > RR.HH > Reportes y Analítica > Dashboards > Indicadores Clave por Sede
+________________
+
+
+6. Criterios de Aceptación
+* El dashboard debe mostrar los siguientes indicadores principales por sede y periodo:
+
+   * Costo laboral / venta (%): Total de gastos laborales dividido entre ventas netas (sin IGV ni RC) debe poder verse por total venta de empresa o CECO.
+
+   * % de propinas: Total de propinas respecto al total de ventas por local.
+
+   * Horas extra (HHEE): Total de horas extra acumuladas por sede, CECO, cargo o tipo de personal.
+
+   * Rotación (%): (Bajas / Promedio de trabajadores activos) × 100.
+
+   * Ausentismo (%): (Horas no trabajadas / Horas programadas) × 100. Esto puede hacerse desde la funcionalidad horarios que ya funciona.
+
+   * Headcount: Total de empleados activos por sede, CECO, cargo o tipo de personal..
+
+      * Permitir filtrar por empresa, sede, CECO, cargo, tipo de personal, periodo (mensual / trimestral / anual / personalizado) y canal (salón, bar, delivery).
+
+      * El usuario podrá comparar indicadores entre sedes o periodos.
+
+      * El dashboard debe incluir gráficos interactivos y tarjetas resumen.
+
+      * Los datos deben actualizarse automáticamente cada día cuando el sistema sea actualizado con algún ingreso, cese o por corte definido (por ejemplo, semanalmente).
+
+      * Permitir exportar los indicadores a Excel, PDF y PNG (para presentaciones).
+
+      * Los indicadores deben mostrar colores o alertas visuales cuando excedan parámetros definidos (por ejemplo, costo laboral > 30%).
+
+      * El sistema debe integrarse con los módulos de Ventas, Planillas y Asistencia para cálculos automáticos.
+
+      * Debe permitir guardar vistas personalizadas de filtros por usuario.
+
+      * Compatible con visualización en desktop, tablet y móvil.
+
+________________
+
+
+7. Campos del Formulario / Componentes del Dashboard
+Campo / Elemento
+	Tipo de Componente
+	Descripción
+	Ejemplo / Formato
+	Validaciones / Consideraciones UX/UI
+	Periodo
+	Lista desplegable
+	Periodo de análisis (mensual, trimestral, anual)
+	“Enero 2025”
+	Obligatorio. Filtra todos los gráficos.
+	Empresa
+	Lista desplegable
+	Empresa o razón social
+	“Grupo Andino SAC”
+	Filtra sedes y canales.
+	Sede
+	Lista desplegable múltiple
+	Local o sucursal
+	“Miraflores, Arequipa”
+	Permite selección múltiple.
+	Canal
+	Lista desplegable
+	Segmento operativo
+	“Salón, Delivery”
+	Opcional.
+	Indicador: Costo laboral / Venta (%)
+	Tarjeta / Gráfico de líneas
+	Mide eficiencia laboral frente a ventas.
+	“32.5%”
+	Color rojo si > 35%.
+	Indicador: % de Propinas
+	Tarjeta / Gráfico de barras
+	Muestra proporción de propinas sobre ventas.
+	“4.8%”
+	Se integra con ventas y planillas.
+	Indicador: HHEE (Horas extra)
+	Tarjeta / Gráfico de columnas
+	Total de horas extra trabajadas.
+	“385 Hrs”
+	Puede dividirse por área.
+	Indicador: Rotación (%)
+	Tarjeta / Gráfico de líneas
+	Mide la tasa de salida de personal.
+	“12%”
+	Rojo si > 15%.
+	Indicador: Ausentismo (%)
+	Tarjeta / Gráfico de líneas
+	Mide faltas injustificadas o ausencias.
+	“3.2%”
+	Amarillo si > 5%.
+	Indicador: Headcount
+	Tarjeta / Tabla
+	Total de empleados activos.
+	“48 empleados”
+	Actualización diaria.
+	Comparativo por sede
+	Gráfico de barras horizontales
+	Compara indicadores entre sedes.
+	Visual tipo ranking
+	Interactivo.
+	Tendencia histórica
+	Gráfico de líneas
+	Muestra evolución mensual de indicadores.
+	Enero–Junio 2025
+	Tooltip con valores.
+	Botón “Exportar”
+	Botón
+	Permite exportar los datos y gráficos.
+	“Exportar a Excel”
+	Exporta vista actual.
+	Usuario responsable
+	Texto automático
+	Usuario que consulta el dashboard.
+	“analista.rrhh01”
+	Solo lectura.
+	________________
+
+
+8. Detalle de Integración
+         * Módulo de Ventas: Fuente de ventas totales y propinas.
+
+         * Módulo de RR.HH. – Planillas: Fuente para costo laboral, headcount y HHEE.
+
+         * Módulo de RR.HH. – Asistencia: Fuente para ausentismo.
+
+         * Módulo de Estructura Organizacional: Fuente para sedes y canales.
+
+         * Módulo de Reportes BI: Opción de conexión para visualización avanzada.
+
+________________
+
+
+9. Consideraciones Técnicas
+            * Actualización de indicadores mediante procesos programados (cron jobs) o en tiempo real vía API.
+
+            * Dashboard desarrollado con gráficos dinámicos (Recharts, Chart.js o similar).
+
+            * Implementar alertas visuales con semáforos de color según valores configurados.
+
+            * Posibilidad de drill-down (clic sobre una sede o indicador para ver detalle).
+
+            * Compatible con entornos responsive y modo oscuro/claro.
+
+            * Los datos deben almacenarse en una tabla de resumen histórico para comparativos.
+
+________________
+
+
+10. Comentarios
+Este dashboard es clave para el control estratégico del gasto laboral y productividad, integrando métricas financieras y de gestión de personal en un solo panel visual.
+Recomendaciones UX/UI:
+               * Usar tarjetas con iconografía simple y colores diferenciados por indicador.
+
+               * Incluir una línea de tendencia por indicador principal.
+
+               * Permitir descargar reportes con branding de la empresa.
+
+               * Integrar filtros persistentes para usuarios frecuentes (por ejemplo, gerentes de sede).

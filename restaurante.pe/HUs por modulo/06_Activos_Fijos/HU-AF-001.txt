@@ -1,0 +1,164 @@
+﻿HU-AF-001 - 
+Configuración de Tipos de Operaciones sobre Activos Fijos - v1.0
+Módulo:
+Activos Fijos
+Proceso:
+Tablas
+Subproceso:
+Operaciones con los Activos
+1. Título:
+Configuración de Tipos de Operaciones sobre Activos Fijos
+2. Descripción:
+Como Administrador Contable del Sistema,
+quiero definir, registrar y mantener actualizada la tabla maestra de tipos de operaciones sobre activos fijos,
+para que el sistema identifique correctamente los diferentes tipos de transacciones (depreciaciones, revaluaciones, bajas, transferencias, mejoras, etc.) y las relacione con sus parámetros contables y de cálculo, garantizando la trazabilidad y consistencia de los movimientos en el módulo de Activos Fijos.
+3. Navegabilidad:
+Menú principal: Activos Fijos → Tablas → Operaciones con los Activos → Configuración de Tipos de Operaciones
+4. Reglas de Negocio:
+Código
+	Descripción de la Regla
+	RN-AF-001
+	Cada tipo de operación deberá tener un código único
+	RN-AF-002
+	El sistema deberá validar que el código y la descripción estén completos antes de permitir guardar el registro.
+	RN-AF-003
+	Los tipos de operación definidos deberán estar asociados a parámetros contables (cuenta contable, centro de costo, naturaleza del movimiento).
+	RN-AF-004
+	No se podrá eliminar un tipo de operación si ya está siendo utilizado en alguna transacción del módulo de Activos Fijos (control de integridad referencial).
+	RN-AF-005
+	La modificación de parámetros contables en un tipo de operación deberá generar una entrada en el log de auditoría contable.
+	RN-AF-007
+	Cada tipo de operación debe estar clasificado según su naturaleza contable: Aumenta valor del activo, Disminuye valor, No afecta valor.
+	RN-AF-008
+	Los parámetros de cálculo (por ejemplo, método de depreciación aplicable) deberán ser validados según las normas locales (NIIF o norma contable nacional).
+	
+
+5. Campos del Formulario:
+Campo
+	Tipo
+	Obligatorio
+	Validación / Descripción
+	Código de Operación
+	Texto (máx. 10)
+	Sí
+	Único, sin espacios ni caracteres especiales.
+	Descripción
+	Texto (máx. 150)
+	Sí
+	Descripción detallada de la operación.
+	Naturaleza
+	Lista desplegable
+	Sí
+	Opciones: Aumento, Disminución, Neutro.
+	Tipo de Cálculo
+	Lista desplegable
+	Sí
+	Opciones: Depreciación, Revaluación, Mejora, Baja, Transferencia, Otros.
+	Cuenta Contable Asociada
+	Selección (Catálogo de Cuentas)
+	Sí
+	Validar existencia y vigencia en el plan contable.
+	Centro de Costo
+	Selección (Catálogo de Centros de Costo)
+	Opcional
+	Asociado a la operación contable.
+	Afecta Contabilidad
+	Checkbox
+	Sí
+	Determina si genera asiento contable.
+	Método de Cálculo
+	Lista desplegable
+	Condicional
+	Solo visible para operaciones de tipo “Depreciación” o “Revaluación”.
+	Estado
+	Lista desplegable
+	Sí
+	Activo / Inactivo
+	Observaciones
+	Texto largo
+	No
+	Comentarios adicionales.
+	Razón Social
+	Texto (solo lectura)
+	Sí
+	Determinada por la sesión del usuario.
+	País
+	Texto (solo lectura)
+	Sí
+	Determinado por la razón social seleccionada.
+	
+
+6. Validaciones Funcionales:
+* El sistema no permitirá guardar un registro con código duplicado.
+
+* Al intentar eliminar una operación en uso, se mostrará mensaje:
+“No es posible eliminar este tipo de operación porque está asociada a transacciones de activos fijos.”
+
+* Si se modifica una cuenta contable o centro de costo asociado, se deberá registrar en el log de auditoría (usuario, fecha, hora, acción, campo modificado).
+
+* La lista de tipos de cálculo deberá corresponder a las operaciones soportadas por el motor contable.
+
+* Los valores de naturaleza deben impactar correctamente los movimientos del activo (aumento o disminución del valor neto).
+
+7. Vistas del Sistema:
+a. Vista de Listado:
+   * Columnas: Código, Descripción, Naturaleza, Tipo de Cálculo, Cuenta Contable, Estado.
+
+   * Botones: Nuevo, Editar, Eliminar, Exportar a Excel/PDF, Buscar, Filtrar por Estado.
+
+b. Vista de Detalle / Edición:
+      * Formulario con campos definidos en la sección anterior.
+
+      * Botones: Guardar, Cancelar, Volver al Listado.
+
+
+
+8. Requerimientos Técnicos y de Integración:
+         * Tabla maestra integrada al motor de contabilidad y al submódulo de Movimientos de Activos.
+
+         * Debe permitir sincronización con el plan contable vigente.
+
+         * Registro de toda acción en log de auditoría contable: usuario, fecha, hora, acción, campos modificados.
+
+         * Implementar servicios API REST para lectura y actualización de los tipos de operación (GET, POST, PUT, DELETE).
+
+         * Validación de integridad referencial con las tablas de Activos Fijos, Asientos Contables y Centros de Costo.
+
+9. Criterios de Aceptación:
+ID
+	Criterio
+	Resultado Esperado
+	CA-AF-001
+	Crear nuevo tipo de operación con todos los campos obligatorios completos.
+	Registro creado exitosamente y visible en listado.
+	CA-AF-002
+	Intentar crear un código duplicado.
+	Sistema muestra mensaje de error y no guarda el registro.
+	CA-AF-003
+	Eliminar operación en uso.
+	Sistema impide la eliminación y muestra mensaje de advertencia.
+	CA-AF-004
+	Modificar cuenta contable asociada.
+	Sistema guarda cambios y registra evento en el log.
+	CA-AF-005
+	Consultar listado general.
+	Se visualizan todas las operaciones configuradas, con filtros activos/inactivos.
+	CA-AF-006
+	Exportar listado.
+	Genera archivo Excel/PDF correctamente formateado.
+	
+
+
+
+
+
+
+
+10. Observaciones Técnicas:
+            * Este maestro es base para la trazabilidad contable del módulo de Activos Fijos.
+
+            * Las modificaciones deben validarse por el rol Administrador Contable.
+
+            * Los registros inactivos no podrán ser seleccionados en operaciones posteriores.
+
+            * Compatible con normas contables locales y NIIF.

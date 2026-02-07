@@ -1,0 +1,286 @@
+﻿HU-CON-016 - Reportes de Validación / Reportes Varios de Asientos Contables - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-016
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Reportes de Validación
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Reportes Varios de Asientos Contables
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la generación de reportes de los asientos contables registrados en el sistema, aplicando filtros personalizables tales como rango de fechas, tipo de comprobante, cuenta contable, centro de costo, usuario y estado del asiento.
+El objetivo de esta funcionalidad es ofrecer al área contable una herramienta flexible de consulta y validación que facilite el análisis de movimientos, la verificación de integridad contable y la preparación de información para auditorías o cierres mensuales.
+El sistema debe permitir exportar los resultados del reporte en formatos Excel (.xlsx) y PDF (.pdf), garantizando la trazabilidad y consistencia de la información contable presentada.
+________________
+
+
+3. Actor(es)
+   * Contador General: Supervisa los registros contables y revisa la consistencia de los asientos.
+
+   * Analista Contable: Genera reportes detallados para revisión o conciliación de cuentas.
+
+   * Jefe de Contabilidad: Evalúa los reportes para control y cierre mensual.
+
+   * Auditor Interno / Externo: Utiliza los reportes como evidencia para verificaciones contables.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos para acceder a Contabilidad → Reportes → Asientos Contables.
+
+      * Deben existir asientos contables registrados en el sistema.
+
+      * El periodo contable correspondiente debe estar abierto o cerrado (solo lectura).
+
+      * Los catálogos de cuentas, centros de costo y tipos de comprobantes deben estar configurados y actualizados.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Reportes Varios de Asientos Contables
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar reportes de los asientos contables registrados aplicando diversos filtros,
+para analizar los movimientos, validar su consistencia y facilitar las revisiones contables o auditorías.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar rango de fechas y periodo contable.
+	Se muestran los asientos registrados en ese periodo.
+	2
+	Permitir filtrar por tipo de comprobante (Diario, Compras, Ventas, Ajustes, etc.).
+	El reporte se ajusta al tipo seleccionado.
+	3
+	Incluir filtro por cuenta contable.
+	Muestra solo los asientos que incluyen dicha cuenta.
+	4
+	Incluir filtro por centro de costo.
+	Muestra los asientos asociados al centro de costo seleccionado.
+	5
+	Incluir filtro por usuario o estado del asiento (activo, anulado, pendiente).
+	Se muestran los resultados conforme a los filtros elegidos.
+	6
+	Mostrar columnas de: fecha, libro, número de asiento, glosa, cuenta, debe, haber, usuario, estado y centro de costo.
+	Estructura tabular completa.
+	7
+	Permitir exportar los resultados a Excel (.xlsx) y PDF (.pdf).
+	Exportación exitosa con formato de reporte.
+	8
+	Mostrar totales de débitos y créditos al final del reporte.
+	Permite verificar el cuadre general.
+	9
+	Registrar en bitácora la generación del reporte (usuario, fecha, filtros, cantidad de registros).
+	Control de auditoría automática.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Reporte tabular y consolidado.
+Naturaleza: Reporte de validación informativo – No permite modificaciones.
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Fecha Desde / Hasta
+	Fecha
+	Sí
+	Rango de fechas de los asientos.
+	Periodo Contable (Año / Mes)
+	Numérico
+	No
+	Periodo al que pertenecen los asientos.
+	Tipo de Comprobante
+	Lista
+	No
+	Diario, Compras, Ventas, Ajustes, etc.
+	Cuenta Contable
+	Campo texto o búsqueda
+	No
+	Código o descripción de la cuenta.
+	Centro de Costo
+	Lista
+	No
+	Permite filtrar los asientos por centro de costo.
+	Usuario Registro
+	Lista
+	No
+	Usuario que generó el asiento.
+	Estado del Asiento
+	Lista
+	No
+	Activo / Anulado / Pendiente.
+	Moneda
+	Lista
+	No
+	Moneda local o extranjera.
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Fecha Contable
+	Fecha del asiento.
+	Libro Contable
+	Libro o diario asociado.
+	N° Asiento
+	Identificador único del asiento.
+	Glosa
+	Descripción del asiento contable.
+	Cuenta Contable
+	Código y nombre de la cuenta.
+	Centro de Costo
+	CECO asociado al registro.
+	Débito
+	Importe cargado al debe.
+	Crédito
+	Importe cargado al haber.
+	Usuario Registro
+	Usuario que registró el asiento.
+	Estado
+	Activo / Anulado / Pendiente.
+	Moneda
+	Tipo de moneda (Local / Extranjera).
+	8.3 Totales y Resumen
+         * Total Débitos.
+
+         * Total Créditos.
+
+         * Diferencia (Debe – Haber).
+
+         * Número de Asientos Listados.
+
+
+
+
+________________
+
+
+9. Reglas de Negocio
+            1. Cuadre obligatorio: El reporte debe mostrar el total de débitos y créditos, destacando si existe diferencia.
+
+            2. Tolerancia: Se admite una diferencia máxima de ±0.01 por redondeo.
+
+            3. Permisos: Solo usuarios con rol contable o auditor pueden generar o exportar este reporte.
+
+            4. Reporte informativo: No se permite editar ni eliminar registros desde la vista del reporte.
+
+            5. Auditoría: Cada generación se registra en la tabla LOG_REPORTE_ASIENTOS.
+
+            6. Seguridad: La información visualizada debe limitarse a la razón social y país activos del usuario.
+
+            7. Exportación fiel: Los datos exportados deben reflejar exactamente los filtros aplicados.
+
+            8. Moneda base: Si el sistema maneja doble moneda, debe mostrarse en ambas cuando aplique.
+
+________________
+
+
+10. Integraciones
+               * Módulo de Contabilidad General: Fuente de los asientos y movimientos.
+
+               * Módulo de Centros de Costo: Para filtrado analítico de los asientos.
+
+               * Módulo de Plan de Cuentas: Para descripción y jerarquía de cuentas.
+
+               * Módulo de Auditoría: Registro de generación y exportación de reportes.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Tipo de Componente: Reporte de validación contable (solo lectura).
+
+                  * Tablas Fuente:
+
+                     * CNTBL_ASIENTO (cabecera del asiento).
+
+                     * CNTBL_ASIENTO_DET (detalle de movimientos).
+
+                     * CNTBL_CENTRO_COSTO (centros de costo).
+
+                     * CNTBL_CUENTA_CONTABLE (plan de cuentas).
+
+Lógica del Reporte (conceptual):
+
+ SELECT 
+    a.fecha_cntbl,
+    a.nro_libro,
+    a.nro_asiento,
+    a.desc_glosa,
+    d.cnta_ctbl,
+    c.desc_cta,
+    d.debe,
+    d.haber,
+    d.cencos,
+    a.cod_usr,
+    a.flag_estado,
+    a.cod_moneda
+FROM cntbl_asiento a
+JOIN cntbl_asiento_det d 
+    ON a.origen = d.origen 
+    AND a.nro_asiento = d.nro_asiento
+JOIN cntbl_cuenta_contable c 
+    ON d.cnta_ctbl = c.cnta_ctbl
+WHERE a.fecha_cntbl BETWEEN :fecha_ini AND :fecha_fin
+ORDER BY a.fecha_cntbl, a.nro_asiento;
+                        *                         * Exportaciones: Formatos .xlsx y .pdf.
+
+                        * Bitácora: Tabla LOG_REPORTE_ASIENTOS (usuario, fecha, filtros, total de registros).
+
+                        * Performance: Se recomienda indexar los campos NRO_ASIENTO, FECHA_CNTBL, CNTA_CTBL, CENCOS.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Reportes → Validación / Reportes Varios de Asientos Contables.
+
+                           2. Define los filtros de búsqueda deseados.
+
+                           3. Presiona “Generar Reporte”.
+
+                           4. El sistema consulta los registros y muestra los resultados en pantalla.
+
+                           5. El usuario puede exportar el reporte a Excel o PDF.
+
+                           6. El sistema registra la generación del reporte en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un rango de fechas para generar el reporte.”
+
+                              * “No existen asientos contables que cumplan con los criterios seleccionados.”
+
+                              * “Reporte generado correctamente.”
+
+                              * “El usuario no tiene permisos para acceder a esta opción.”
+
+                              * “Error al procesar el reporte. Contacte al administrador.”

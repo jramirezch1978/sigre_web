@@ -1,0 +1,123 @@
+﻿HU-FIN-TES-TES-005 - Anulación o Reversión de Pagos Mal Registrados o Duplicados - v1.0
+1. Título
+Anulación o Reversión de Pagos Mal Registrados o Duplicados
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero poder anular o revertir pagos que hayan sido registrados de manera incorrecta o duplicada, para mantener la integridad de la información contable y financiera, evitando inconsistencias en las cuentas por pagar, los saldos bancarios y los reportes financieros.
+3. Proceso
+Proceso: Tesorería
+Subproceso: Tesorería
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Anular o revertir un pago que haya sido registrado por error o duplicado.
+Para: Corregir inconsistencias en la contabilidad y garantizar que los saldos de proveedores y cuentas bancarias sean correctos.
+De manera que: El sistema refleje únicamente los pagos válidos y la información financiera sea confiable para toma de decisiones y conciliaciones.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tesorería > Anulación o Reversión de Pagos
+6. Criterios de Aceptación
+El sistema debe permitir seleccionar un pago registrado y realizar su anulación o reversión, dependiendo del estado del mismo.
+* Anulación: Aplica cuando el pago fue registrado por error y aún no está conciliado ni aplicado a documentos.
+
+* Reversión: Aplica cuando el pago ya fue contabilizado o aplicado, y requiere un asiento contable inverso.
+
+El usuario podrá realizar las siguientes acciones:
+   * Buscar y seleccionar el pago a anular o revertir.
+
+   * Visualizar el detalle del pago (proveedor, documentos afectados, monto, fecha, cuenta contable, asiento asociado).
+
+   * Confirmar la acción mediante una ventana de validación con justificación obligatoria.
+
+   * Generar automáticamente el asiento contable de reversión cuando aplique.
+
+   * Consultar el historial de anulaciones o reversiones realizadas.
+
+El sistema debe generar automáticamente los asientos contables correspondientes:
+      * Anulación (si no está contabilizado): Eliminación del registro de pago.
+
+      * Reversión (si está contabilizado):
+
+         * Débito: Caja o Banco
+
+         * Crédito: Cuentas por Pagar – Proveedor
+
+Debe validar que el pago no esté conciliado ni vinculado a otro proceso activo (ej. reporte de flujo de caja o conciliación bancaria).
+Toda acción de anulación o reversión debe registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción, Monto, Proveedor, Documento, Justificación).
+Solo se permitirán operaciones sobre pagos pertenecientes a la Razón Social y País activos (solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos principales:
+
+            * Proveedor
+
+            * Tipo de Documento
+
+            * Número de Documento
+
+            * Fecha del Pago
+
+            * Monto del Pago
+
+            * Moneda
+
+            * Medio de Pago
+
+
+
+
+               * N° de Asiento Contable
+
+               * Fecha de Registro
+
+               * Usuario de Registro
+
+               * Justificación de Anulación / Reversión
+
+               * Observaciones
+
+Filtros disponibles:
+                  * Proveedor
+
+                  * Fecha de Pago
+
+                  * Medio de Pago
+
+                  * Moneda
+
+                  * Usuario de Registro
+
+Acciones disponibles:
+                     * Buscar Pago (Individual)
+
+                     * Ver Detalle del Pago (Individual)
+
+                     * Anular Pago (Individual)
+
+                     * Revertir Pago (Individual)
+
+                     * Ver Asiento Contable de Reversión (Individual)
+
+                     * Exportar (Excel / PDF) (general)
+
+                     * Consultar Historial de Anulaciones (general): Permite visualizar el historial de pagos anulados o revertidos debido a registros erróneos, duplicados o ajustes financieros.
+
+8. Detalle de Integración (opcional)
+Integración con Cuentas por Pagar: Restablece el estado de los documentos afectados por el pago anulado o revertido.
+Integración con Contabilidad: Genera los asientos contables inversos o elimina los registros asociados al pago anulado.
+Integración con Bancos y Caja: Actualiza automáticamente los saldos disponibles tras la reversión del movimiento.
+Integración con Reportes Financieros: Recalcula los flujos de caja, balances y conciliaciones afectadas.
+9. Consideraciones Técnicas
+El sistema debe validar el tipo de operación antes de permitir la anulación o reversión (solo pagos no conciliados o pagos contabilizados, respectivamente).
+Debe exigir una justificación obligatoria antes de confirmar la acción.
+En el caso de reversiones, el asiento contable generado debe vincularse al asiento original, manteniendo trazabilidad.
+Las operaciones de anulación o reversión deben actualizar en tiempo real las cuentas por pagar y los saldos bancarios.
+Cada acción debe registrarse en el log de auditoría contable, incluyendo la justificación y el usuario responsable.
+El sistema debe cumplir con las normas NIC 1, NIC 8 y NIC 10, relacionadas con correcciones de errores, presentación y hechos posteriores al cierre.
+10. Comentarios
+Esta funcionalidad permite mantener la integridad contable y financiera al corregir errores operativos o duplicidades en el registro de pagos.
+Facilita la trazabilidad de movimientos y previene inconsistencias en conciliaciones bancarias o reportes de flujo de efectivo.
+Se recomienda incluir indicadores de control, tales como:
+                        * Total de pagos anulados o revertidos por periodo.
+
+                        * Monto total revertido por proveedor.
+
+                        * Usuarios con mayor cantidad de operaciones de anulación.
+
+Asimismo, se sugiere implementar alertas automáticas para notificar a los responsables financieros sobre reversiones realizadas y requerir autorización de un supervisor para procesar pagos mayores a un monto configurado.

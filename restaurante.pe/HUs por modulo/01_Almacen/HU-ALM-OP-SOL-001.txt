@@ -1,0 +1,134 @@
+﻿HU-ALM-OP-SOL-001 - Solicitud de Requerimiento de Reposición de Stock por Nivel Mínimo - v1.0
+1. Título
+ Solicitud de requerimiento de reposición de stock cuando este se encuentra en mínimo
+2. Descripción
+ Como usuario del sistema Restaurant.pe, quiero que el sistema genere una solicitud de requerimiento de reposición de stock cuando el nivel de existencias de un producto alcance su punto mínimo, para asegurar la continuidad operativa del restaurante y evitar quiebres de inventario en los almacenes o puntos de consumo.
+3. Proceso
+ Proceso: Operaciones
+Subproceso: Solicitudes
+Módulo: Almacén
+4. Narrativa de Usuario
+ Quiero: Que el sistema detecte automáticamente cuando el stock de un producto llega a su nivel mínimo y permita generar una solicitud de reposición.
+Para: Mantener la disponibilidad de los productos necesarios para la operación del restaurante.
+De manera que: Se automatice el control del inventario, se reduzcan las faltas de stock y se optimice el proceso de abastecimiento.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Almacén > Operaciones > Solicitudes > Requerimiento de Reposición de Stock
+6. Criterios de Aceptación
+ El sistema debe permitir:
+* Detectar automáticamente los productos cuyo stock actual se encuentre igual o por debajo del nivel mínimo configurado.
+
+* Generar una solicitud de requerimiento de reposición de forma automática o manual desde el listado de productos.
+
+* Mostrar el almacén, producto, stock actual, stock mínimo y cantidad sugerida de reposición.
+
+* Permitir que el usuario modifique la cantidad sugerida antes de enviar la solicitud.
+
+* Enviar automáticamente la solicitud al almacén central o área de compras, según configuración de la empresa.
+
+* Permitir agregar observaciones o justificaciones para la solicitud.
+
+* Asignar un número correlativo y estado a cada solicitud
+        Estados:
+   * Pendiente. Pendiente atención por el proveedor
+   * En proceso. Se realizó OC y está pendiente de atención por parte del proveedor.
+   * Atendida. Se recepcionó OC con factura y todo OK.
+   * Rechazada. Por algún inconveniente en la recepción, producto dañado, producto o presentación equivocada.
+
+      * Mostrar las solicitudes pendientes y su estado de atención.
+
+      * Permitir la aprobación o rechazo de solicitudes por parte de un usuario autorizado.
+
+      * Actualizar automáticamente los movimientos de inventario una vez aprobada y atendida la reposición.
+
+      * Registrar todas las acciones (creación, edición, aprobación, atención, anulación) en el log de auditoría contable.
+
+      * Exportar las solicitudes a Excel o PDF.
+
+7. Campos del Reporte / Columnas de Vista Tabla
+ Campos principales:
+         * Número de Solicitud
+
+         * Fecha de Solicitud
+
+         * Almacén Solicitante
+
+         * Producto
+
+         * Unidad de Medida
+
+         * Stock Actual
+
+         * Stock Mínimo
+
+         * Cantidad Sugerida
+
+         * Cantidad Solicitada
+
+         * Estado (Pendiente / En Proceso / Atendida / Rechazada)
+
+         * Usuario Solicitante
+
+         * Fecha de Atención
+
+         * Observaciones
+
+Filtros disponibles:
+            * Rango de Fechas
+
+            * Almacén
+
+            * Estado de Solicitud
+
+            * Producto
+
+            * Usuario
+
+            * Tipo de Solicitud
+
+Acciones disponibles:
+               * Crear Nueva Solicitud
+
+               * Aprobar / Rechazar Solicitud
+
+               * Editar / Anular Solicitud
+
+               * Consultar Detalle de Producto
+
+               * Enviar a Compras / Almacén Central: Debe ser configurable de acuerdo al proceso operativo de cada empresa. Depende del contexto interno, se puede enviar la solicitud al área de compras de la empresa o al almacén central para hacer un traslado del pedido (del almacén central a la sede que lo solicita)
+
+               * Exportar (Excel / PDF)
+
+               * Ver Log de Auditoría
+
+8. Detalle de Integración (opcional)
+ Integración con Inventarios: para detectar niveles mínimos de stock y actualizar cantidades una vez atendida la reposición.
+Integración con Compras: para generar automáticamente órdenes de compra en caso de no tener stock disponible en almacén central.
+Integración con Centros de Costo (CECO): para registrar la afectación presupuestaria de la solicitud.
+Integración con Contabilidad: para reflejar los movimientos una vez concretada la reposición.
+9. Consideraciones Técnicas
+ El sistema debe:
+                  * Permitir configurar el stock mínimo y máximo por producto y por almacén.
+
+                  * Evaluar los niveles de stock de forma automática y periódica (por ejemplo, una vez al día).
+
+                  * Generar alertas visuales y notificaciones por correo o dentro del sistema cuando un producto llegue al mínimo.
+
+                  * No generar movimientos contables hasta que la reposición sea confirmada.
+
+                  * Mantener numeración automática y correlativa de las solicitudes.
+
+                  * Registrar todas las acciones en el log de auditoría contable con usuario, fecha, hora e IP.
+
+                  * Permitir la trazabilidad desde la solicitud hasta la atención del requerimiento o la orden de compra.
+
+10. Comentarios
+ Esta funcionalidad asegura una reposición oportuna del inventario, evitando interrupciones en la operación por falta de insumos o productos.
+Optimiza la gestión logística y mejora la coordinación entre almacenes, compras y operaciones.
+Se recomienda incorporar indicadores como:
+                     * Porcentaje de productos con stock por debajo del mínimo.
+
+                     * Tiempo promedio de atención de solicitudes de reposición.
+
+                     * Cumplimiento de niveles de stock por categoría o almacén.
+
+Asimismo, puede configurarse para generar notificaciones automáticas al área de compras o logística cuando una solicitud de reposición sea creada o aprobada.

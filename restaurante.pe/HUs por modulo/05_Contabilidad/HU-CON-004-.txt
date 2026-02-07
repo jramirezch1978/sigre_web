@@ -1,0 +1,215 @@
+﻿HU-CON-003 - Tipos de Detracción - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-003
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Parámetros Contables
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Tipos de Detracción
+
+* Autor: Redactor de HU de Software de Contabilidad
+
+* Fuente: Alcance Global del Proyecto de Implementación de Sistema Contable y de Nómina Multipaís – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir el registro, mantenimiento y consulta de los tipos de detracción, incluyendo su porcentaje aplicable, vigencia y código SUNAT (cuando aplique).
+Esta funcionalidad será utilizada para parametrizar las operaciones de compras y ventas que requieren detracción según la normativa vigente del país (por ejemplo, Perú).
+El catálogo de Tipos de Detracción se integrará con los módulos de Compras, Ventas y Tesorería, para aplicar automáticamente la Detracción en los comprobantes y registrar el asiento contable correspondiente.
+________________
+
+
+3. Actor(es)
+   * Usuario Contable: Registra y mantiene los tipos de detracción y sus porcentajes.
+
+   * Administrador del Sistema: Autoriza modificaciones y puede bloquear la edición de registros vigentes.
+
+   * Auditor Interno: Acceso de solo lectura para revisión de parámetros fiscales.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe haber iniciado sesión en una Razón Social activa y contar con permisos en el módulo Contabilidad.
+
+      * Debe existir un plan de cuentas contable activo para asignar la cuenta asociada a la detracción.
+
+      * Los campos RUC y País se mostrarán en modo informativo (solo lectura). 
+vincular la factura a la cual está asociada la detracción 
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Parámetros Contables → Tipos de Detracción
+________________
+
+
+6. Requerimiento Funcional (Historia de Usuario)
+Como usuario contable,
+quiero registrar y mantener los tipos de detracción junto con sus porcentajes y vigencias,
+para que el sistema aplique automáticamente las detracciones en los comprobantes y asientos contables conforme a la normativa tributaria del país correspondiente.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	El sistema permite crear, editar, consultar e inactivar tipos de detracción.
+	Los registros se actualizan correctamente y se guardan en la base de datos.
+	2
+	No se permite crear dos detracciones con el mismo código SUNAT.
+	El sistema muestra un mensaje de validación.
+	3
+	Los campos RUC y País son informativos y no editables.
+	Se cargan automáticamente según la sesión activa.
+	4
+	Se puede definir la vigencia (fecha inicio y fin) de cada tipo de detracción.
+	El sistema valida que no se crucen rangos de vigencia para el mismo tipo.
+	5
+	Los porcentajes se registran con hasta 2 decimales.
+	El sistema valida el formato numérico (ejemplo: 12.00).
+	6
+	Los cambios (altas, modificaciones e inactivaciones) se registran en el log de auditoría contable.
+	Se almacena usuario, fecha, hora y acción realizada.
+	7
+	Las detracciones se integran con los módulos de Compras, Ventas y Tesorería.
+	El sistema aplica automáticamente el porcentaje configurado.
+	________________
+
+
+8. Campos del Formulario
+Campo
+	Tipo
+	Longitud
+	Obligatorio
+	Validaciones / Descripción
+	Código de Detracción
+	Texto
+	6
+	Sí
+	Código interno del sistema. Debe ser único. Ejemplo: D001.
+	Código SUNAT
+	Texto
+	4
+	Sí
+	Código oficial según tabla de SUNAT (ejemplo: 025).
+	Tipo de Operación 
+	Texto
+	100
+	Sí
+	Descripción del tipo de detracción. Ejemplo: “Servicio de transporte de bienes”.
+
+
+	Porcentaje (%)
+	Numérico (2 decimales) 
+	-
+	Sí
+	Rango válido: 0.00 a 100.00. Validar formato decimal.
+	Cuenta Contable Asociada
+
+
+	Lista desplegable (Plan de Cuentas)
+	-
+	Sí
+	Cuenta contable de detracción. Debe existir y estar activa.
+	Fecha de pago detracción
+
+	Fecha
+	-
+	Sí
+	Fecha a partir de la cual aplica el tipo de detracción.
+	Fecha de Fin de Vigencia
+	Fecha
+	-
+	No
+	Si está vacía, se asume vigente indefinidamente.
+	Estado
+	Lista (Activo/Inactivo)
+	1
+	Sí
+	Valores: Activo = “1”, Inactivo = “0”. Default: “1”.
+	Observaciones
+	Texto largo
+	250
+	No
+	Comentarios o referencias adicionales.
+	Razón Social / RUC
+	Texto
+	-
+	Informativo
+	Determinada por sesión activa.
+	País
+	Texto
+	-
+	Informativo
+	Determinado por sesión activa.
+	Fecha de Creación
+	Fecha
+	-
+	Automático
+	Generada por el sistema.
+	Usuario Registro
+	Texto
+	-
+	Automático
+	Usuario logueado.
+	________________
+
+
+9. Reglas de Negocio
+         1. El Código SUNAT es obligatorio y único por país.
+
+         2. Los porcentajes de detracción deben estar dentro del rango permitido por la normativa local.
+
+         3. Solo las detracciones activas podrán ser seleccionadas en los módulos operativos.
+
+         4. Las detracciones inactivas no podrán aplicarse a nuevos comprobantes.
+
+         5. Cada detracción debe tener una cuenta contable  y factura asociada, que se utilizará en los asientos automáticos.
+
+         6. No se puede eliminar una detracción si ya fue utilizada en comprobantes o asientos contables.
+
+         7. Todo cambio debe quedar registrado en el log de auditoría contable, incluyendo usuario, fecha, hora y acción.
+
+________________
+
+
+10. Integraciones
+            * Compras: Para aplicar detracción en facturas de proveedores afectas a detracción.
+
+            * Ventas: Para calcular y registrar detracciones en comprobantes emitidos.
+
+            * Tesorería: Para registrar el pago de detracciones y conciliación con SUNAT.
+
+            * Contabilidad: Para generar los asientos automáticos correspondientes.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tabla principal: CNTBL_TIPO_DETRACCION
+
+               * Campos clave: COD_DETRACCION (PK), COD_SUNAT, PORCENTAJE, CTA_CONTABLE, FLAG_ESTADO.
+
+               * Registros en Log: altas, modificaciones, inactivaciones (usuario, fecha, hora, acción).
+
+               * Validaciones: unicidad de código y de código SUNAT.
+
+               * Interfaz: vista tipo formulario maestro con grilla de consulta, edición inline y filtros por estado/vigencia.
+
+               * Compatibilidad: parametrización multipaís (por razón social).

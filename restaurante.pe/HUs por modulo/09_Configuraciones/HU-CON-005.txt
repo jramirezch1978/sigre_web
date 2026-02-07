@@ -1,0 +1,232 @@
+﻿HU-CON-005 - Impuestos - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-004
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Parámetros Contables
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Impuestos
+
+* Autor: Redactor de HU de Software de Contabilidad
+
+* Fuente: Alcance Global del Proyecto de Implementación de Sistema Contable y de Nómina Multipaís – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir registrar, editar y mantener impuestos, estableciendo sus porcentajes, vigencia y cuentas contables asociadas, para garantizar su aplicación automática en las transacciones (compras, ventas, activos fijos, nómina y otros).
+Esta funcionalidad busca asegurar que los impuestos sean gestionados de forma parametrizada y centralizada, alineada con la normativa tributaria del país donde opera la Razón Social activa.
+Cada impuesto registrado podrá asociarse a cuentas contables de débito y crédito, lo que permitirá la generación automática de asientos contables y la integración con los módulos operativos.
+________________
+
+
+3. Actor(es)
+   * Usuario Contable: Registra y actualiza la configuración de impuestos.
+
+   * Administrador del Sistema: Supervisa, autoriza y bloquea cambios sobre parámetros tributarios.
+
+   * Auditor Interno: Accede en modo consulta para verificar configuración y trazabilidad.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe haber iniciado sesión en una Razón Social activa con permisos en el módulo Contabilidad.
+
+      * Debe existir un plan de cuentas activo en el sistema.
+
+      * Los campos Razón Social y País se mostrarán de forma informativa (solo lectura). 
+      * Se deben haber definido las cuentas contables donde se registran los impuestos. 
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Parámetros Contables → Impuestos
+________________
+
+
+6. Requerimiento Funcional (Historia de Usuario)
+Como usuario contable,
+quiero registrar, editar y mantener los impuestos con sus respectivos porcentajes y cuentas contables asociadas,
+para garantizar que se apliquen automáticamente en las transacciones y se contabilicen correctamente según las normas tributarias del país correspondiente.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	El sistema permite crear, editar, consultar e inactivar impuestos.
+	Los registros se almacenan y actualizan correctamente.
+	2
+	No se permite registrar dos impuestos con el mismo código o descripción dentro de la misma razón social.
+	El sistema muestra un mensaje de validación.
+	3
+	Los campos Razón Social y País son informativos.
+	Se completan automáticamente según la sesión activa.
+	4
+	Se pueden asociar cuentas contables de débito y crédito.
+	El sistema valida que las cuentas están activas en el plan contable.
+	5
+	Se puede definir un porcentaje y un tipo de impuesto (IGV, IVA, ISLR, etc.).
+	El sistema aplica la configuración en los módulos integrados.
+	6
+	Las modificaciones y cambios de estado quedan registradas en el log de auditoría contable.
+	El sistema guarda usuario, fecha, hora y acción.
+	7
+	Los impuestos inactivos no podrán seleccionarse en nuevas transacciones.
+	El sistema bloquea su uso automáticamente.
+	________________
+
+
+8. Campos del Formulario
+Campo
+	Tipo
+	Longitud
+	Obligatorio
+	Validaciones / Descripción
+	Código de Impuesto
+	Texto
+	6
+	Sí
+	Código interno único. Ejemplo: IMP001.
+	Descripción del Impuesto
+	Texto
+	100
+	Sí
+	Nombre descriptivo del impuesto. Ejemplo: “IGV 18%”.
+	Tipo de Impuesto
+	Lista desplegable
+	-
+	Sí
+	Valores: IGV, IVA, ISLR, ICBPER, Otros.
+	Porcentaje (%)
+	Numérico (2 decimales) 
+
+
+	-
+	Sí
+	Rango: 0.00 – 100.00. Validar formato decimal.
+	Cuenta Débito
+	Lista desplegable (Plan de Cuentas)
+	-
+	Sí
+	Cuenta contable de débito asociada al impuesto. Debe estar activa.
+	Cuenta Crédito
+	Lista desplegable (Plan de Cuentas)
+	-
+	Sí
+	Cuenta contable de crédito asociada. Debe estar activa.
+	Fecha Inicio de Vigencia
+	Fecha
+	-
+	Sí
+	Fecha desde la cual aplica el impuesto.
+	Fecha Fin de Vigencia
+	Fecha
+	-
+	No
+	Si está vacía, se asume vigente indefinidamente.
+	Aplicable a
+	Lista múltiple
+	-
+	Sí
+	Valores: Compras, Ventas, Activos Fijos, RRHH, Otros.
+	Estado
+	Lista desplegable
+	1
+	Sí
+	Activo = “1”; Inactivo = “0”. Default: “1”.
+	Observaciones
+	Texto largo
+	250
+	No
+	Comentarios adicionales.
+	Razón Social
+	Texto
+	-
+	Informativo
+	Determinada por sesión activa.
+	País
+	Texto
+	-
+	Informativo
+	Determinado por sesión activa.
+	Usuario Registro
+	Texto
+	-
+	Automático
+	Usuario logueado.
+	Fecha de Registro
+	Fecha
+	-
+	Automático
+	Generada por el sistema.
+	________________
+
+
+9. Reglas de Negocio
+         1. El Código de Impuesto debe ser único por Razón Social.
+
+         2. Un impuesto no puede eliminarse si ya ha sido usado en transacciones o asientos contables.
+
+         3. El porcentaje del impuesto debe estar dentro del rango permitido por la normativa fiscal del país.
+
+         4. Los impuestos inactivos no podrán seleccionarse en nuevos documentos de compra o venta.
+
+         5. Cada impuesto debe tener asignadas cuentas contables válidas para su registro automático.
+
+         6. La vigencia no puede superponerse con otra configuración del mismo tipo de impuesto.
+
+         7. Todas las operaciones (crear, modificar, inactivar) se registran en el log de auditoría contable.
+
+         8. Los impuestos definidos deben poder exportarse e importarse para replicación multipaís.
+
+________________
+
+
+10. Integraciones
+            * Compras: Aplica el impuesto en facturas de proveedores y genera asientos automáticos.
+
+            * Ventas: Calcula el impuesto en boletas, facturas y notas de crédito.
+
+            * Activos Fijos: Registra impuestos relacionados a adquisiciones de bienes.
+
+            * Recursos Humanos: Aplica impuestos en pagos sujetos a retenciones.
+
+            * Contabilidad: Genera y registra los asientos correspondientes al movimiento impositivo.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tabla principal: CNTBL_IMPUESTOS
+
+               * Campos clave: COD_IMPUESTO, DESCRIPCION, TIPO_IMPUESTO, PORCENTAJE, CTA_DEBITO, CTA_CREDITO, FLAG_ESTADO.
+
+               * Validaciones:
+
+                  * COD_IMPUESTO único por razón social.
+
+                  * PORCENTAJE > 0.00 y ≤ 100.00.
+
+                  * CTA_DEBITO y CTA_CREDITO deben existir en el plan contable activo.
+
+                     * Log Contable: Registro automático de usuario, fecha, hora y tipo de acción.
+
+                     * Interfaz: Formulario maestro con filtros por estado, tipo y vigencia.
+
+                     * Compatibilidad: Multipaís (se guarda país asociado y moneda local).

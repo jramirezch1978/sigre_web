@@ -1,0 +1,262 @@
+﻿HU-AF-PRO-002 - Creación Automática de Asientos Contables por Depreciación - v1.1
+________________
+
+
+1. Módulo
+Activos Fijos
+________________
+
+
+2. Proceso
+Procesos
+________________
+
+
+3. Subproceso
+Generación de Asientos de Depreciación
+________________
+
+
+4. Nombre de la Historia de Usuario
+Creación Automática de Asientos Contables por Depreciación
+________________
+
+
+5. Descripción / Propósito
+Como Contador General o Administrador Contable,
+quiero generar automáticamente los asientos contables de depreciación a partir de los resultados del cálculo mensual o anual,
+para registrar en la contabilidad los gastos y depreciaciones acumuladas correspondientes, con validaciones contables, distribución por centros de costo y trazabilidad de los procesos ejecutados, asegurando la integridad entre los módulos de Activos Fijos y Contabilidad General.
+________________
+
+
+6. Alcance
+Esta funcionalidad constituye la etapa final del proceso contable de depreciación.
+A partir de los resultados del cálculo masivo de depreciación (HU-AF-PRO-001), el sistema ejecuta un procedimiento almacenado (stored procedure) que convierte los cálculos registrados en pre-asientos contables automáticos, generando los documentos correspondientes por centro de costo, tipo de activo y razón social.
+El proceso incluye:
+1. Lectura de las tablas temporales o definitivas de depreciación.
+
+2. Validación de matrices contables y cuentas asociadas.
+
+3. Conversión de montos de depreciación en partidas contables (gasto y acumulada).
+
+4. Distribución de los montos por centro de costo según configuración.
+
+5. Generación de pre-asientos automáticos listos para revisión o contabilización.
+
+6. Verificación de integridad contable y referenciación cruzada con activos.
+
+7. Registro automático en el Log de Auditoría Contable.
+
+________________
+
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Procesos → Generación de Asientos de Depreciación → Creación Automática
+________________
+
+
+8. Campos y Parámetros de Ejecución
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada automáticamente por la sesión.
+	País
+	Determinado según la razón social activa.
+	Periodo Contable
+	Mes y año del cálculo.
+	Fecha de Generación
+	Fecha actual del proceso.
+	Usuario Ejecutor
+	Usuario que lanza el proceso.
+	Campos Obligatorios:
+Campo
+	Descripción
+	Validación
+	Tipo de Proceso
+	Mensual / Anual.
+	Obligatorio.
+	Fuente de Datos
+	Temporal / Definitiva (post cálculo).
+	Validar que existan datos disponibles.
+	Tipo de Depreciación
+	Contable / Tributaria / Ambas.
+	Obligatorio.
+	Centro de Costo
+	Uno o múltiples según configuración.
+	Validar existencia de distribución.
+	Fecha de Contabilización
+	Fecha del asiento contable.
+	No anterior al periodo procesado.
+	Campos Opcionales:
+Campo
+	Descripción
+	Prefijo de Documento
+	Código que identifica el tipo de asiento.
+	Observaciones
+	Texto libre (comentarios del proceso).
+	Reprocesar Periodo
+	Permite regenerar asientos si hubo ajustes.
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Validar Datos Previos
+	Verifica existencia de cálculo de depreciación y configuración contable.
+	Muestra resumen de validaciones.
+	Ejecutar Generación
+	Inicia el proceso automático de creación de asientos.
+	Crea pre-asientos en estado “Pendiente”.
+	Visualizar Log del Proceso
+	Muestra errores, advertencias y totales generados.
+	Reporte de ejecución.
+	Consultar Pre-Asientos
+	Permite revisar los asientos generados antes de su contabilización.
+	Detalle por centro de costo y activo.
+	Exportar Resultados
+	Exporta los asientos en formato Excel o PDF.
+	Archivo con totales y detalles contables.
+	Contabilizar en Módulo General
+	Envía los asientos al módulo contable principal.
+	Generación definitiva en contabilidad.
+	________________
+
+
+10. Reglas de Negocio
+   1. Solo se pueden generar asientos para periodos calculados y validados en el proceso HU-AF-PRO-001.
+
+   2. Cada asiento debe contener referencia al activo, centro de costo, cuenta de gasto y cuenta de depreciación acumulada.
+
+   3. No se generarán asientos si existen errores de configuración contable (cuentas nulas o duplicadas).
+
+   4. Los montos deben cuadrar entre débito y crédito, garantizando balance contable.
+
+   5. Los asientos se crean en estado “Pendiente” hasta su validación final por el módulo contable.
+
+   6. Si un activo tiene varias distribuciones de centro de costo, el sistema genera líneas separadas proporcionalmente.
+
+   7. El proceso debe validar existencia de matrices contables por subclase de activo (HU-AF-TAB-004) antes de ejecutar.
+
+   8. Se registra un Log de Ejecución Detallado, incluyendo: usuario, fecha, activos procesados, montos totales y errores detectados.
+
+   9. En caso de reprocesamiento, el sistema elimina asientos temporales previos y genera nuevos.
+
+   10. Si el proceso se interrumpe, el sistema guarda el estado parcial y permite reanudar desde el último activo procesado.
+
+   11. Los asientos deben incluir referencias cruzadas hacia el módulo de Activos Fijos y hacia el libro contable.
+
+   12. Los pre-asientos pueden visualizarse desde la funcionalidad de Consulta de Asientos Generados.
+
+________________
+
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Proceso Masivo de Cálculo de Depreciación (HU-AF-PRO-001)
+	Fuente de datos de base para generar asientos.
+	Matriz Contable (HU-AF-TAB-004)
+	Define las cuentas contables por tipo y subclase de activo.
+	Configuración Global (HU-AF-TAB-006)
+	Determina moneda, periodo activo y parámetros contables.
+	Log de Auditoría Contable
+	Registra cada ejecución del proceso y sus resultados.
+	Módulo Contable General
+	Recibe los asientos automáticos para su contabilización.
+	Centros de Costo (HU-AF-OPE-008)
+	Determina porcentajes de distribución de gasto.
+	________________
+
+
+12. Consideraciones Técnicas
+      * Implementación mediante procedimiento almacenado (Stored Procedure) con transacciones seguras y control de errores.
+
+      * Proceso optimizado para ejecución masiva y automática con control de lotes por empresa o sucursal.
+
+      * Registro automático en tablas:
+
+         * AF_TMP_DEP_CALC (origen de datos de depreciación).
+
+         * AF_ASIENTOS_DEP (pre-asientos generados).
+
+         * AF_LOG_ASIENTOS (log de ejecución).
+
+            * Integración vía API RESTful con el módulo contable para contabilización final.
+
+            * Generación de archivos temporales para revisión antes de contabilizar.
+
+            * Validación automática de integridad: balance débito/crédito = 0.
+
+            * Soporte para ejecución programada automática (cron mensual).
+
+            * Control visual del proceso con barra de progreso (%) y total de activos/asientos procesados.
+
+________________
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Solo roles “Administrador Contable” y “Supervisor Contable” pueden ejecutar.
+	Performance
+	Generación ≤ 5 minutos para 100,000 activos.
+	Usabilidad
+	Interfaz con barra de progreso y registro visual de errores.
+	Auditoría
+	Log completo de ejecución, errores y montos generados.
+	Disponibilidad
+	99.7% durante horario operativo.
+	Escalabilidad
+	Soporte multiempresa y multipaís con procesamiento paralelo.
+	________________
+
+
+14. Criterios de Aceptación
+               1. El sistema genera correctamente los asientos contables desde los resultados de depreciación.
+
+               2. Se validan todas las matrices contables antes de ejecutar.
+
+               3. Los montos de débito y crédito se generan balanceados.
+
+               4. Los asientos incluyen referencias cruzadas hacia el activo y el centro de costo.
+
+               5. Se registra un log detallado con fecha, usuario, activos y montos procesados.
+
+               6. Los resultados se visualizan en formato pre-asiento antes de su contabilización.
+
+               7. Los asientos pueden exportarse a Excel o PDF.
+
+               8. El reprocesamiento solo se permite con rol Supervisor.
+
+               9. Los datos son transferidos correctamente al módulo contable general.
+
+               10. El proceso se completa sin errores y dentro del tiempo máximo establecido.
+
+________________
+
+
+15. Comentarios / Observaciones
+                  * Esta HU automatiza la integración contable entre el módulo de Activos Fijos y la Contabilidad General, eliminando procesos manuales.
+
+                  * Permite cumplir con las normas de NIC 16 y principios de integridad contable y trazabilidad.
+
+                  * El proceso asegura que toda depreciación registrada se refleje contablemente con exactitud y oportunidad.
+
+                  * Mantiene coherencia con las HUs:
+
+                     * HU-AF-PRO-001 (Proceso Masivo de Cálculo de Depreciación)
+
+                     * HU-AF-OPE-008 (Configuración de Tasas y Métodos de Depreciación)
+
+                     * HU-AF-TAB-004 (Configuración de Cuentas Contables por Tipo de Activo)
+
+                     * HU-AF-TAB-006 (Configuración Global de Parámetros)
+
+                        * Se recomienda incorporar alertas previas a contabilización definitiva (por ejemplo, “Verificar totales antes de enviar a contabilidad”).
+
+                        * La generación automática de asientos contables es una pieza crítica para el cierre contable mensual, asegurando consistencia y trazabilidad total del proceso.

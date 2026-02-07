@@ -1,0 +1,126 @@
+﻿HU-ALM-OP-TRA-003 - Generación de Requerimiento de Traslado entre Almacenes con Validación de Disponibilidad y Afectación a Centros de Costo - v1.0
+1. Título
+ Generar requerimiento de traslado hacia otro almacén validando disponibilidad de productos y afectando Centros de Costo (CECO)
+2. Descripción
+ Como usuario del sistema Restaurant.pe, quiero generar un requerimiento de traslado de productos entre almacenes, validando la disponibilidad de los artículos antes de registrar la transferencia como operación efectiva, de manera que se garantice la correcta planificación de los movimientos internos de inventario y se afecten únicamente los Centros de Costo (CECO) sin impacto contable directo.
+3. Proceso
+ Proceso: Operaciones
+Subproceso: Traslados
+Módulo: Almacén
+4. Narrativa de Usuario
+ Quiero: Registrar un requerimiento de traslado de productos entre almacenes, con validación automática de stock disponible en el almacén origen.
+Para: Garantizar que los traslados internos sean gestionados correctamente y no generen faltantes o duplicidades de inventario.
+De manera que: Se asegure la trazabilidad del proceso, se afecten los Centros de Costo correspondientes y no se produzca impacto contable hasta que se confirme la operación.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Almacén > Operaciones > Traslados > Generar Requerimiento de Traslado
+6. Criterios de Aceptación
+ El sistema debe permitir:
+* Registrar un nuevo requerimiento de traslado interno indicando el almacén de origen y el almacén destino.
+
+* Seleccionar los productos a trasladar y las cantidades requeridas.
+
+* Validar en línea la disponibilidad de stock en el almacén origen antes de confirmar el requerimiento.
+
+* Mostrar una alerta o bloqueo si el producto no tiene disponibilidad suficiente.
+
+* Permitir registrar una justificación o motivo del traslado (por ejemplo: reposición de stock, redistribución, transferencia temporal).
+
+* Registrar el Centro de Costo (CECO) afectado por el movimiento, sin generar asiento contable.
+
+* Asignar un número correlativo al requerimiento.
+
+* Permitir definir prioridad del traslado (alta, media, baja).
+
+* Generar un documento en estado “Pendiente de Ejecución” hasta que el traslado sea confirmado.
+
+* Mostrar el detalle del requerimiento en una vista de seguimiento, con opción de aprobación o rechazo.
+
+* Actualizar los movimientos de inventario internos al momento de confirmarse el traslado.
+
+* Registrar toda acción (creación, edición, aprobación, anulación) en el log de auditoría.
+
+* Exportar los requerimientos a Excel o PDF.
+
+7. Campos del Reporte / Columnas de Vista Tabla
+ Campos principales:
+   * Número de Requerimiento
+
+   * Fecha de Registro
+   * Fecha de envio
+   * Almacén Origen
+   * Almacén Destino
+   * Código del Producto
+   * Descripción del Producto
+   * Unidad de Medida
+   * Cantidad Solicitada
+   * Cantidad Disponible
+      * Estado (Pendiente / Aprobado / Rechazado / Ejecutado)
+      * Centro de Costo (CECO)
+      * Motivo del Traslado
+      * Prioridad
+      * Usuario Solicitante
+      * Fecha de Aprobación
+      * Observaciones
+
+Filtros disponibles:
+         * Rango de Fechas
+
+         * Estado del Requerimiento
+
+         * Almacén Origen / Destino
+
+         * Centro de Costo
+
+         * Producto
+
+         * Usuario
+
+Acciones disponibles: 
+            * Crear Nuevo Requerimiento
+
+            * Validar Disponibilidad (Al realizar el requerimiento el sistema puede mostrar una lista desplegable de los almacenes en donde hay disponibilidad y el usuario seleccionará la sucursal según necesidad o distancia)
+
+            * Editar Requerimiento
+
+            * Aprobar / Rechazar (Almacén receptor del requerimiento debe aprobar la solicitud de traslado para que se descargue de su almacén y rebaje su CECO) 
+
+            * Confirmar Ejecución de Traslado (Almacén solicitante debe confirmar recepcion de mercaderia para que cargue a su inventario y CECO)
+
+            * Consultar Kardex
+
+            * Exportar (Excel / PDF)
+
+            * Ver Log de Auditoría
+
+8. Detalle de Integración (opcional)
+ Integración con Inventarios: para validar la disponibilidad y actualizar las existencias una vez confirmada la transferencia.
+Integración con Centros de Costo (CECO): para registrar la afectación presupuestaria del movimiento sin impacto contable.
+Integración con Tesorería / Finanzas (opcional): para reportes de control operativo, sin movimientos contables.
+Integración con Kardex: para reflejar los movimientos internos con trazabilidad completa.
+9. Consideraciones Técnicas
+ El sistema debe:
+               * Validar que el requerimiento solo pueda generarse si hay stock disponible en el almacén origen.
+
+               * No generar asiento contable ni afectar cuentas financieras.
+
+               * Registrar únicamente la afectación a los CECO, conservando trazabilidad operativa.
+
+               * Permitir múltiples aprobaciones según niveles de usuario (por ejemplo, solicitante, jefe de almacén, administrador).
+
+               * Generar el documento con numeración automática y estandarizada.
+
+               * Registrar las operaciones en el log de auditoría (usuario, fecha, hora, IP).
+
+               * Garantizar la trazabilidad entre el requerimiento, el traslado ejecutado y la afectación de inventario.
+
+10. Comentarios
+ Esta funcionalidad mejora la gestión interna de inventarios entre almacenes, permitiendo planificar los traslados antes de su ejecución.
+Facilita la optimización de recursos logísticos y evita movimientos contables innecesarios, afectando únicamente los Centros de Costo involucrados.
+Se recomienda incorporar indicadores de control como:
+                  * Porcentaje de requerimientos ejecutados frente a los registrados.
+
+                  * Tiempo promedio entre solicitud y ejecución del traslado.
+
+                  * Diferencias de stock detectadas durante las validaciones.
+
+Asimismo, puede configurarse para enviar notificaciones automáticas a los responsables de los almacenes involucrados cuando se registre, apruebe o ejecute un requerimiento.

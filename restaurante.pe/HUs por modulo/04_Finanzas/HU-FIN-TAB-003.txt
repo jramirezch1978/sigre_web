@@ -1,0 +1,163 @@
+﻿HU-FIN-TAB-003 - Estructura que Permite Agrupar los Conceptos Financieros - v1.0
+1. Título
+Estructura que Permite Agrupar los Conceptos Financieros
+2. Descripción
+Como usuario financiero del sistema Restaurant.pe, quiero definir una estructura jerárquica de agrupación de conceptos financieros, que me permita clasificar los movimientos de ingresos y egresos en grupos y subgrupos de flujo de caja, para generar reportes financieros analíticos y consolidados que faciliten la toma de decisiones estratégicas.
+3. Proceso
+* Proceso: Tablas
+
+* Subproceso: Grupos y Códigos de Flujos de Caja
+
+* Módulo: Finanzas
+
+4. Narrativa de Usuario
+   * Quiero: Agrupar los conceptos financieros en estructuras jerárquicas o códigos de flujo de caja.
+
+   * Para: Clasificar correctamente los movimientos financieros y facilitar la elaboración de reportes consolidados.
+
+   * De manera que: Pueda analizar los orígenes y destinos de los fondos a nivel global, por empresa o por sucursal.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tablas > Grupos y Códigos de Flujos de Caja
+6. Criterios de Aceptación
+      1. El sistema debe permitir crear, editar, consultar y desactivar grupos de flujos de caja.
+
+      2. Cada grupo podrá tener subgrupos, generando una estructura jerárquica (Ej. “Ingresos Operativos > Ventas Nacionales > Efectivo”).
+
+      3. Los campos mínimos del formulario son:
+
+         * Código del Grupo (único)
+
+         * Descripción del Grupo (obligatorio)
+
+         * Tipo de Flujo (Ingreso / Egreso)
+
+         * Nivel Jerárquico (1 = Principal, 2 = Subgrupo, 3 = Detalle)
+
+         * Grupo Padre (opcional, si aplica)
+
+         * Naturaleza Contable (Débito / Crédito)
+
+         * Estado (Activo / Inactivo)
+
+            4. El sistema debe permitir asociar conceptos financieros previamente definidos (HU-FIN-TAB-002) a cada grupo o subgrupo.
+
+            5. El sistema debe validar que no se dupliquen códigos ni descripciones dentro de un mismo nivel jerárquico.
+
+            6. El usuario podrá reorganizar los grupos mediante una vista tipo árbol o estructura jerárquica.
+
+            7. El sistema debe mostrar el código de flujo de caja completo, concatenando los niveles jerárquicos (Ej. 1.01.02).
+
+            8. La estructura debe ser diferenciable por razón social y país, para adaptarse a la normativa contable local.
+
+            9. El listado debe permitir búsqueda, filtrado y exportación (Excel/PDF).
+
+            10. Toda acción de alta, modificación o baja debe registrarse en el log de auditoría contable (usuario, fecha, hora, acción).
+
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos del Formulario:
+               * Código del Grupo (obligatorio, único)
+
+               * Descripción (obligatorio)
+
+               * Tipo de Flujo (Ingreso / Egreso)
+
+               * Nivel Jerárquico (1, 2, 3)
+
+               * Grupo Padre (selector, si aplica)
+
+               * Naturaleza Contable (Débito / Crédito)
+
+               * Conceptos Financieros Asociados (multi-selección)
+
+               * Estado (Activo / Inactivo)
+
+               * País (informativo, determinado por la razón social activa)
+
+               * Fecha de Creación / Última Modificación (automático)
+
+Columnas del Listado:
+                  * Código del Grupo
+
+                  * Descripción
+
+                  * Tipo de Flujo
+
+                  * Nivel Jerárquico
+
+                  * Grupo Padre
+
+                  * Naturaleza Contable
+
+                  * N° de Conceptos Asociados
+
+                  * Estado
+
+                  * Fecha de Creación
+
+                  * Usuario Responsable
+
+Filtros disponibles:
+                     * Tipo de Flujo (Ingreso / Egreso)
+
+                     * Nivel Jerárquico
+
+                     * Estado (Activo / Inactivo)
+
+                     * País / Razón Social
+
+Acciones disponibles:
+                        * Nuevo Grupo
+
+                        * Editar Grupo
+
+                        * Desactivar Grupo
+
+                        * Asociar Conceptos
+
+                        * Exportar (Excel / PDF)
+
+                        * Ver Detalle
+
+                        * Auditoría de Cambios
+
+8. Detalle de Integración (opcional)
+                           * Integración con Conceptos Financieros (HU-FIN-TAB-002): permite asociar cada concepto al grupo de flujo de caja correspondiente.
+
+                           * Integración con Contabilidad: los grupos alimentan reportes contables y estados financieros (flujo de caja directo e indirecto).
+
+                           * Integración con Tesorería: permite consolidar los movimientos bancarios y de caja por categoría de flujo.
+
+                           * Integración con Reportes Financieros: los grupos sirven como base para análisis de liquidez, rentabilidad y origen de fondos.
+
+9. Consideraciones Técnicas
+                              * La estructura de agrupación debe almacenarse en una tabla jerárquica con soporte para múltiples niveles.
+
+                              * Cada grupo debe tener identificador único y control de unicidad por razón social y país.
+
+                              * No se podrá eliminar un grupo que tenga conceptos asociados; solo podrá desactivarse.
+
+                              * Las relaciones entre grupo y concepto deben mantenerse mediante una tabla intermedia de asociación (N:N).
+
+                              * Toda acción deberá registrarse en el log de auditoría contable (usuario, acción, fecha, hora).
+
+                              * El sistema debe permitir la importación y exportación masiva de estructuras mediante Excel validado.
+
+                              * Debe existir la opción de visualización tipo árbol (tree view) para una navegación más intuitiva.
+
+                              * Compatible con los estándares contables IFRS y NIIF, según el país.
+
+10. Comentarios
+                                 * Esta funcionalidad permitirá estructurar los flujos de caja de forma homogénea entre diferentes razones sociales y países.
+
+                                 * La agrupación jerárquica facilitará la consolidación financiera corporativa y los reportes analíticos de gestión.
+
+                                 * Permite un control preciso del origen y aplicación de los fondos, alineado con los estados financieros y presupuestales.
+
+                                 * Es fundamental para la generación de reportes de Flujo de Efectivo (Cash Flow) y análisis de liquidez.
+
+                                 * Se recomienda mantener una estructura corporativa base, adaptable por país o sucursal.
+
+                                 * Servirá como insumo principal para los módulos de Tesorería, Contabilidad y Finanzas Corporativas.
+
+                                 * Puede configurarse con códigos jerárquicos automáticos (ej. 1.00, 1.01, 1.01.01) según niveles definidos.

@@ -1,0 +1,122 @@
+﻿HU-FIN-TES-TES-001 - Lista de Documentos por Pagar Pendientes, con Opción de Programar, eliminar ó Transferir - v1.0
+1. Título
+
+
+
+
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero visualizar una lista consolidada de todos los documentos por pagar pendientes, con la posibilidad de programar pagos, eliminar o transferir documentos, para gestionar eficientemente las obligaciones financieras y optimizar el flujo de caja.
+3. Proceso
+Proceso: Tesorería
+Subproceso: Tesorería
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Consultar los documentos por pagar pendientes y realizar acciones como programar, o transferir.
+Para: Controlar y priorizar los pagos a proveedores o acreedores según la disponibilidad financiera y los vencimientos.
+De manera que: Se mantenga la información actualizada y se optimice la planificación de tesorería del restaurante.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tesorería > Lista de Documentos por Pagar Pendientes
+6. Criterios de Aceptación
+El sistema debe mostrar una lista completa de documentos pendientes de pago (facturas, letras, notas de débito, etc.) generados desde el módulo de Cuentas por Pagar.
+Cada registro debe incluir información del proveedor, tipo de documento, número, fecha de emisión, vencimiento, monto total, monto pendiente, moneda y estado.
+El usuario podrá realizar las siguientes acciones desde la lista:
+* Programar Pago: Definir la fecha y medio de pago (transferencia, cheque, efectivo).
+
+* Pagar Documento: Registrar el pago inmediato, generando el asiento contable correspondiente.
+
+* Eliminar Documento: Quitar documentos erróneos o duplicados, siempre que no tengan pagos asociados.
+
+* Transferir Documento: Mover el documento a otra sucursal o razón social (si aplica y el usuario tiene permisos).
+
+El sistema debe generar automáticamente los asientos contables al realizar el pago:
+   * Débito: Cuentas por Pagar – Proveedor
+
+   * Crédito: Caja o Banco
+
+Debe permitir consultar el asiento contable de pago directamente desde la vista.
+Las acciones de eliminación o transferencia deberán solicitar confirmación del usuario y quedar registradas en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción, Documento).
+Solo se mostrarán los documentos correspondientes a la Razón Social y País activos en sesión (solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+Columnas principales:
+
+
+      * Proveedor
+
+      * Tipo de Documento (Factura, Letra, Nota de Débito, etc.)
+
+      * Serie y Número de Documento
+
+      * Fecha de Emisión
+
+      * Fecha de Vencimiento
+
+      * Monto Total
+
+      * Monto Pendiente
+
+      * Moneda
+
+      * Tipo de Cambio
+
+      * Estado del Documento (Pendiente / Programado)
+
+      * Medio de Pago (si está programado)
+
+      * Fecha de Pago Programado
+
+      * Observaciones
+
+      * Usuario de Registro
+
+Filtros disponibles:
+         * Proveedor
+
+         * Tipo de Documento
+
+         * Estado del Documento
+
+         * Rango de Fechas (Emisión / Vencimiento / Pago)
+
+         * Moneda
+
+         * Sucursal / Local
+
+Acciones disponibles:
+            * Programar Pago
+
+            * Ejecutar Pago
+
+            * Ver Asiento Contable
+
+            * Eliminar Documento
+
+            * Transferir Documento
+
+            * Exportar (Excel / PDF)
+
+            * Ver Detalle del Documento
+
+8. Detalle de Integración (opcional)
+Integración con Cuentas por Pagar: Permite obtener automáticamente los documentos pendientes generados en dicho módulo.
+Integración con Contabilidad: Genera los asientos contables por programación, ejecución o eliminación del pago.
+Integración con Bancos y Caja: Registra el movimiento financiero del pago y actualiza los saldos de tesorería.
+Integración con Reportes Financieros: Actualiza el flujo de caja, pagos pendientes y proyecciones de egresos.
+9. Consideraciones Técnicas
+El sistema debe permitir el manejo de documentos en moneda local y extranjera, aplicando el tipo de cambio oficial vigente.
+Las acciones de pago, eliminación o transferencia deben validar permisos de usuario y requerir confirmación antes de ejecutarse.
+Debe permitir agrupar documentos por proveedor, tipo o fecha de vencimiento, y mostrar totales por grupo.
+Cada acción deberá registrarse en el log de auditoría contable con: Usuario, Fecha, Hora, IP, Acción, Documento, Monto, Estado.
+El sistema debe cumplir con las normas NIC 7 y NIC 21, relacionadas con el flujo de efectivo y diferencias de cambio.
+10. Comentarios
+Esta funcionalidad centraliza el control de documentos por pagar, facilitando la toma de decisiones sobre el momento y forma de pago.
+Permite planificar el flujo de caja y priorizar pagos críticos, garantizando la salud financiera del negocio.
+Se recomienda incluir indicadores de gestión, como:
+               * Total de documentos pendientes por vencer.
+
+               * Pagos programados por semana.
+
+               * Proveedores con mayor concentración de deuda.
+
+               * Proyección de egresos futuros.
+
+Asimismo, se sugiere incluir alertas automáticas para documentos próximos a vencer y una opción de programación masiva de pagos por proveedor o rango de fechas.

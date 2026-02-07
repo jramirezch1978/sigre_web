@@ -1,0 +1,309 @@
+﻿HU-AF-PRO-006 - Workflow Completo para Registrar Siniestros y Gestionar Recuperos de Seguros de Activos Fijos - v1.1
+________________
+
+
+1. Módulo
+Activos Fijos
+________________
+
+
+2. Proceso
+Procesos
+________________
+
+
+3. Subproceso
+Generación de Asientos de Siniestro y Recupero
+________________
+
+
+4. Nombre de la Historia de Usuario
+Workflow Completo para Registrar Siniestros y Gestionar Recuperos de Seguros de Activos Fijos
+________________
+
+
+5. Descripción / Propósito
+Como Administrador de Activos Fijos o Contador General,
+quiero registrar, gestionar y contabilizar los siniestros ocurridos sobre los activos fijos asegurados,
+para mantener un control integral del proceso de pérdida, evaluación, reclamo, indemnización y recupero, garantizando la trazabilidad contable, la actualización de los valores del activo afectado y la correcta imputación de las indemnizaciones recibidas.
+________________
+
+
+6. Alcance
+Esta funcionalidad implementa un workflow completo e integrado que gestiona el ciclo de vida de un siniestro de activo fijo, desde el momento de la ocurrencia hasta el registro del recupero financiero o baja definitiva del activo.
+Incluye las siguientes etapas:
+1. Registro del incidente: Creación del caso de siniestro con detalle del evento, activos afectados, y documentación inicial.
+
+2. Evaluación de daños: Determinación técnica y contable del porcentaje de daño, costo de reparación o valor de reposición.
+
+3. Comunicación a la aseguradora: Generación automática del formulario de reclamo con datos del activo y póliza.
+
+4. Seguimiento del reclamo: Gestión de estados del proceso (Reportado, En Evaluación, Aprobado, Rechazado, Indemnizado).
+
+5. Gestión del recupero: Registro de los montos indemnizados o recuperados, generación de asientos contables automáticos y actualización del estado del activo.
+
+El sistema además:
+   * Permite bajas parciales o totales según el nivel de daño.
+
+   * Integra con el módulo contable para registrar pérdidas, recuperos y ajustes.
+
+   * Emite alertas en caso de demoras o vencimientos de plazos de respuesta del seguro.
+
+   * Genera reportes de siniestralidad e historial por activo y aseguradora.
+
+________________
+
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Procesos → Generación de Asientos de Siniestro y Recupero → Workflow de Siniestros de Activos
+________________
+
+
+8. Campos y Formulario del Proceso
+Sección 1: Registro del Incidente
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Código de Siniestro
+	Alfanumérico (15)
+	Identificador único generado automáticamente.
+	No duplicado.
+	Fecha del Incidente
+	Fecha
+	Fecha real del evento.
+	No puede ser futura.
+	Descripción del Evento
+	Texto largo
+	Detalle del siniestro y circunstancias.
+	Obligatorio.
+	Causa del Siniestro
+	Lista
+	Robo / Incendio / Inundación / Daño Mecánico / Otro.
+	Obligatorio.
+	Activo(s) Afectado(s)
+	Lista de selección múltiple
+	Activos involucrados en el siniestro.
+	Validar existencia y estado activo.
+	Valor Contable del Activo
+	Numérico (14,2)
+	Valor neto antes del siniestro.
+	Automático desde maestro.
+	Póliza Asociada
+	Lista
+	Póliza vigente al momento del siniestro.
+	Obligatorio.
+	Sección 2: Evaluación de Daños
+Campo
+	Descripción
+	Porcentaje de Daño
+	Valor entre 0 y 100%.
+	Costo Estimado de Reparación
+	Valor monetario.
+	Valor de Reposición
+	Monto total del activo si fuera reemplazado.
+	Observaciones Técnicas
+	Comentarios del perito o técnico.
+	Responsable Evaluador
+	Usuario o entidad asignada.
+	Sección 3: Reclamo a la Aseguradora
+Campo
+	Descripción
+	Fecha de Comunicación
+	Fecha de envío del reclamo.
+	Monto Solicitado
+	Monto total reclamado a la aseguradora.
+	Formulario de Reclamo
+	Generación automática en formato PDF.
+	Estado del Reclamo
+	Reportado / En Evaluación / Aprobado / Rechazado / Indemnizado.
+	Fecha de Respuesta
+	Fecha de resolución por parte de la aseguradora.
+	Sección 4: Gestión del Recupero
+Campo
+	Descripción
+	Monto Indemnizado
+	Valor recibido por parte de la aseguradora.
+	Fecha de Recupero
+	Fecha efectiva del cobro.
+	Tipo de Recupero
+	Parcial / Total.
+	Cuenta Contable del Ingreso
+	Configurada según matriz contable[a] (HU-AF-TAB-004).
+	Estado Final del Activo
+	Reparado / Dado de Baja Parcial / Dado de Baja Total.
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Registrar Siniestro
+	Permite crear un nuevo registro de incidente.
+	Caso creado y numerado automáticamente.
+	Evaluar Daños
+	Captura y guarda información técnica del daño.
+	Se calcula el valor afectado del activo.
+	Generar Reclamo Automático
+	Emite formulario PDF con datos de póliza, aseguradora y activo.
+	Documento listo para envío.
+	Actualizar Estado del Reclamo
+	Permite registrar avance según comunicación con aseguradora.
+	Estado actualizado en línea.
+	Registrar Recupero
+	Registra monto indemnizado y genera asiento contable.
+	Contabilización automática.
+	Exportar Reporte
+	Genera reporte de siniestros activos o cerrados.
+	Archivo Excel/PDF.
+	Enviar Alertas
+	Envía notificaciones sobre reclamos pendientes o vencimientos.
+	Notificación enviada al usuario.
+	________________
+
+
+10. Reglas de Negocio
+      1. Solo pueden registrarse siniestros sobre activos con estado Activo o En Uso.
+
+      2. Cada siniestro debe estar asociado a una póliza vigente al momento del evento.
+
+      3. Si la póliza está vencida o inactiva, el sistema alertará al usuario y bloqueará la generación del reclamo.
+
+      4. El valor de pérdida no puede exceder el valor contable neto del activo.
+
+      5. Los activos con daño total deben ser dados de baja automática tras la confirmación de pérdida total.
+
+      6. El monto indemnizado se registra como ingreso extraordinario y se asocia contablemente a la cuenta de recupero de siniestros.
+
+      7. Toda modificación de montos o estados debe registrarse en el Log de Auditoría Contable.
+
+      8. Los reclamos rechazados deben generar asiento de pérdida contable por siniestro.
+
+      9. En siniestros parciales, el sistema ajustará el valor residual y la depreciación futura del activo.
+
+      10. Si un siniestro tiene más de un activo afectado, se generará un asiento contable por activo.
+
+      11. Se deben generar alertas automáticas para reclamos pendientes de respuesta por más de 30 días.
+
+      12. El proceso debe permitir anexar documentación digital (fotos, informes, cartas, etc.).
+
+________________
+
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Gestión de Seguros (HU-AF-OPE-006)
+	Fuente de pólizas, coberturas y aseguradoras.
+	Matriz Contable (HU-AF-TAB-004)
+	Define cuentas para pérdidas, recuperos y bajas.
+	Configuración Global (HU-AF-TAB-006)
+	Controla periodos contables y moneda de registro.
+	Log de Auditoría Contable
+	Registra trazabilidad de todas las acciones.
+	Módulo Contable General
+	Recibe asientos automáticos por pérdida, recupero e ingreso.
+	Módulo de Activos Fijos
+	Actualiza valores contables y estado del activo afectado.
+	________________
+
+
+12. Consideraciones Técnicas
+         * Implementación mediante motor de workflow dinámico, con transiciones configurables por estado.
+
+         * Tablas involucradas:
+
+            * AF_SINIESTROS (cabecera de siniestro).
+
+            * AF_SINIESTRO_DET (activos afectados).
+
+            * AF_RECUPEROS (montos indemnizados).
+
+            * AF_LOG_SINIESTROS (bitácora del proceso).
+
+               * Integración API RESTful con módulos de pólizas y contabilidad.
+
+               * Generación automática de formularios PDF de reclamo con datos dinámicos.
+
+               * Soporte para carga de archivos adjuntos (fotos, informes, documentos).
+
+               * Control visual con línea de tiempo (timeline) del estado del reclamo.
+
+               * Ejecución automática de asientos contables en los siguientes casos:
+
+                  * Pérdida por siniestro (Gasto).
+
+                  * Ingreso por recupero (Recupero de siniestro).
+
+                  * Ajuste de valor residual (Activo).
+
+                     * Capacidad de exportar reportes consolidados por aseguradora, tipo de siniestro o activo.
+
+________________
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles “Administrador Contable”, “Gestor de Seguros” o “Supervisor de Activos”.
+	Performance
+	Carga ≤ 3 segundos por etapa del workflow.
+	Usabilidad
+	Interfaz con pestañas (Incidente, Evaluación, Reclamo, Recupero) y línea de tiempo visual.
+	Auditoría
+	Log detallado de estados, fechas, montos y usuarios responsables.
+	Disponibilidad
+	99.7% durante horario operativo.
+	Escalabilidad
+	Soporte para múltiples empresas y aseguradoras simultáneamente.
+	________________
+
+
+14. Criterios de Aceptación
+                        1. El usuario puede registrar un siniestro con todos los datos obligatorios.
+
+                        2. El sistema permite asociar varios activos a un mismo incidente.
+
+                        3. Se generan automáticamente los formularios de reclamo con datos de la póliza y aseguradora.
+
+                        4. El flujo de estados (Reportado → Evaluación → Aprobado → Recuperado) se actualiza correctamente.
+
+                        5. Los asientos contables por pérdida y recupero se generan y contabilizan correctamente.
+
+                        6. El sistema alerta por pólizas vencidas o sin cobertura vigente.
+
+                        7. Los reportes muestran información consolidada por aseguradora y tipo de siniestro.
+
+                        8. Los logs de auditoría registran todas las acciones y cambios de estado.
+
+________________
+
+
+15. Comentarios / Observaciones
+                           * Esta HU representa la automatización integral del proceso de siniestros, asegurando el control financiero, operativo y contable de los activos asegurados.
+
+                           * Cumple con los principios de revelación y prudencia contable, reflejando correctamente las pérdidas y recuperos.
+
+                           * Facilita la trazabilidad completa del reclamo desde su registro hasta el cobro.
+
+                           * Debe mantener coherencia con las HUs:
+
+                              * HU-AF-OPE-006 (Gestión de Seguros Asociados a Activos Fijos)
+
+                              * HU-AF-PRO-002 (Creación Automática de Asientos Contables por Depreciación)
+
+                              * HU-AF-PRO-005 (Proceso de Devengamiento Mensual de Seguros)
+
+                              * HU-AF-TAB-004 (Configuración de Cuentas Contables por Tipo de Activo)
+
+                              * HU-AF-TAB-006 (Configuración Global del Módulo)
+
+                                 * Se recomienda incorporar notificaciones automáticas al correo institucional y panel de control de siniestros activos.
+
+                                 * Es una funcionalidad clave para auditorías internas y externas, garantizando la correcta gestión del riesgo patrimonial.
+
+
+[a]Se debe cambiar este término por cuenta contable

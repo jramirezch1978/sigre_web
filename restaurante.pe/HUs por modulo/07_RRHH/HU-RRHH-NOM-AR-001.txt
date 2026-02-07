@@ -1,0 +1,154 @@
+﻿HU-RRHH-NOM-AR-001 - Cálculo de impuestos al trabajo y contribuciones sociales
+ Versión: 1.0
+________________
+
+
+1. Título
+Cálculo de impuestos al trabajo y contribuciones a seguridad social/pensiones/seguro de salud
+________________
+
+
+2. Descripción
+Como analista de nómina, quiero que el sistema calcule automáticamente los impuestos al trabajo, así como las contribuciones a la seguridad social, fondos de pensiones y seguro de salud, de acuerdo con las normativas locales de cada país, para asegurar el cumplimiento tributario y la exactitud en las planillas.
+________________
+
+
+3. Proceso
+Proceso: Procesos de Nómina
+Subproceso: Aportes y Retenciones
+Módulo: RR.HH
+________________
+
+
+4. Narrativa de Usuario
+Quiero: Que el sistema calcule y registre automáticamente los aportes y retenciones laborales y patronales.
+Para: Garantizar que las planillas cumplan con las obligaciones legales vigentes.
+De manera que: Se eviten errores en los montos a pagar y se simplifique la declaración ante los entes reguladores.
+________________
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > RR.HH > Procesos de Nómina > Aportes y Retenciones > Cálculo de Contribuciones
+________________
+
+
+6. Criterios de Aceptación
+* El sistema debe calcular los impuestos y contribuciones laborales según la normativa vigente por país.
+
+* Debe permitir configurar tasas de aportes y retenciones diferenciadas por tipo de contrato, régimen o categoría laboral.
+
+* Las contribuciones patronales y las retenciones del trabajador deben mostrarse de manera desglosada.
+
+* Los valores deben integrarse automáticamente al cálculo de la planilla mensual.
+
+* Debe permitir actualizar las tasas o fórmulas sin intervención del área técnica (parámetros administrables).
+
+* Los cálculos deben considerar topes máximos y mínimos de aportación establecidos por ley.
+
+* Debe generar un reporte detallado de aportes por trabajador, centro de costo y tipo de fondo.
+
+* Toda modificación de parámetros debe registrarse en el log de auditoría (usuario, fecha, cambio).
+
+* Los resultados deben estar disponibles tanto en moneda local como corporativa.
+
+________________
+
+
+7. Campos del Formulario / Tabla de Vista
+Campo
+	Tipo de Campo
+	Descripción
+	Ejemplo
+	Validaciones / Consideraciones UX/UI
+	Trabajador
+	Lista desplegable
+	Selección del empleado al que se aplican los cálculos.
+	María Torres
+	Carga desde el maestro de empleados activos.
+	País / Régimen
+	Lista desplegable
+	Define las reglas tributarias aplicables según país o régimen.
+	Perú - Régimen General
+	Determina tablas de aportes.
+	Tipo de Aporte
+	Selección
+	Define si es aporte patronal, retención de trabajador o ambos.
+	Retención del trabajador
+	Campo obligatorio.
+	Concepto
+	Lista desplegable
+	Tipo de impuesto o contribución.
+	AFP / ONP / ESSALUD / IRPF
+	Lista configurable por país.
+	Base de Cálculo
+	Numérico (calculado)
+	Monto sobre el cual se aplica la tasa.
+	3,000.00
+	Se calcula en base al ingreso imponible.
+	Tasa (%)
+	Numérico
+	Porcentaje aplicable al concepto.
+	13.00
+	Editable según permisos.
+	Monto Calculado
+	Numérico (calculado)
+	Resultado del cálculo según tasa y base.
+	390.00
+	Muestra dinámica.
+	Tope Legal
+	Numérico
+	Monto máximo de aporte según ley.
+	5,000.00
+	Valida límites automáticos.
+	Fecha de Vigencia
+	Fecha
+	Vigencia de la tasa o parámetro.
+	01/01/2025
+	Control de versiones de tasas.
+	Estado
+	Selección
+	Estado del cálculo o parámetro.
+	Activo / Inactivo
+	Determina si aplica en el periodo.
+	Observaciones
+	Texto libre
+	Comentarios o excepciones.
+	Exonerado por convenio
+	Opcional.
+	________________
+
+
+8. Detalle de Integración (opcional)
+   * Integración con Nómina: Los aportes calculados se aplican automáticamente al procesamiento mensual de planillas.
+
+   * Integración con Contabilidad: Los aportes y retenciones generan asientos contables según cuentas definidas por empresa.
+
+   * Integración con Entidades Externas: Exportación de archivos para AFP, seguros, salud y SUNAT/DIAN/SII/SENIAT.
+
+________________
+
+
+9. Consideraciones Técnicas
+      * Las tasas y topes deben ser parametrizables por empresa, sede y país.
+
+      * Los cálculos deben soportar actualización masiva ante cambios normativos.
+
+      * El sistema debe mantener un histórico de tasas y fórmulas aplicadas por periodo.
+
+      * La interfaz debe permitir visualizar el detalle de aportes en tiempo real durante el cálculo de planilla.
+
+      * Los resultados deben almacenarse en moneda local y corporativa.
+
+      * Permitir exportación de reportes a Excel, PDF y XML (para entes reguladores).
+
+________________
+
+
+10. Comentarios
+Esta funcionalidad asegura el cumplimiento de las obligaciones laborales y tributarias, automatizando el cálculo de impuestos y contribuciones.
+Se recomienda incorporar indicadores como:
+         * % de contribuciones por tipo (trabajador/patronal).
+
+         * Costo laboral total por empleado y sede.
+
+         * Comparativo de tasas aplicadas entre periodos.

@@ -1,0 +1,154 @@
+﻿HU-FIN-TES-TES-009 - Administración de Fondo Fijo y Caja Chica : Registro de Egresos Menores y Reposición de Caja Chica
+Asignación de importe de Fondo Fijo y Caja Chica para Egresos Menores y Reposición de Fondo Fijo o Caja Chica
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero administrar los fondos fijos y cajas chicas de cada sucursal, registrando los egresos menores y gestionando sus reposiciones de manera controlada, para garantizar la correcta rendición de gastos y mantener actualizados los saldos disponibles de fondo fijo y caja chica.
+3. Proceso
+Proceso: Tesorería
+Subproceso: Tesorería
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Registrar los egresos menores realizados con cargo a caja chica.
+Para: Controlar el uso de los fondos de efectivo y asegurar su reposición oportuna según las políticas del restaurante.
+De manera que: Se mantenga la trazabilidad de los movimientos de efectivo, los saldos de caja y la correcta rendición contable de los gastos menores.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tesorería > Administración de Caja Chica
+6. Criterios de Aceptación
+El sistema debe permitir:
+* Registrar egresos menores realizados con cargo a la caja chica .
+
+* Adjuntar comprobantes o facturas de respaldo digitalizados.
+
+* Controlar el saldo disponible del fondo fijo y el monto autorizado por sucursal o punto de venta.
+
+* Solicitar la reposición de caja chica cuando el saldo se encuentre por debajo del mínimo establecido.
+
+* Registrar la reposición del fondo una vez aprobada y efectuada por Tesorería.
+
+* Generar los asientos contables automáticos de cada movimiento (egreso y reposición).
+
+* Restringir el uso del fondo fijo exclusivamente a gastos operativos menores y autorizados.
+
+* Consultar el historial de egresos, reposiciones y cierres por cada caja o responsable.
+
+El sistema debe validar:
+   * Que el egreso no supere el monto máximo permitido por transacción.
+
+   * Que el tipo de gasto esté dentro de las categorías autorizadas.
+
+   * Que la caja o fondo tenga saldo suficiente.
+
+Toda acción de registro, modificación o reposición debe registrarse en el log de auditoría contable (Usuario, Fecha, Hora, Acción, Monto, Categoría de Gasto, Caja, Estado).
+Solo se mostrará información de la razón social y país activos (solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos principales:
+
+      * Sucursal / Punto de Venta
+
+      * Tipo de Fondo (Caja Chica / Fondo Fijo)
+
+      * Responsable de Caja
+
+      * Fecha de Movimiento
+
+      * Tipo de Movimiento (Egreso / Reposición / Cierre)
+
+      * Categoría de Gasto (Papelería, Limpieza, Transporte, etc.)[a]
+
+      * Descripción del Gasto
+
+      * Monto
+
+      * Moneda
+
+      * Tipo de Cambio (si aplica)
+
+      * Comprobante de Gasto (N° de factura, boleta o voucher)
+
+      * Estado (Pendiente / Aprobado[b][c] / Repuesto / Cerrado/ Rechazado)
+
+      * Observaciones
+      * Usuario de Registro
+
+
+
+Filtros disponibles:
+         * Tipo de Fondo
+
+         * Fecha de Movimiento
+
+         * Categoría de Gasto
+
+         * Estado
+
+         * Responsable
+
+         * Sucursal / Local
+
+Acciones disponibles[d]:
+            * Registrar Egreso Menor
+
+            * Solicitar Reposición[e]
+
+            * Registrar Reposición[f]
+
+            * Ver Asiento Contable
+
+            * Ver Detalle de Comprobante
+
+            * Exportar (Excel / PDF)
+
+            * Cerrar Fondo[g]
+
+            * Filtrar / Limpiar Filtros
+
+8. Detalle de Integración (opcional)
+Integración con Contabilidad: Para generar los asientos automáticos de egresos, reposiciones y cierres de caja chica.
+Integración con Tesorería - Bancos: Para reflejar las reposiciones de fondos desde cuentas bancarias.
+Integración con Recursos Humanos: Para identificar al responsable de caja y validar su autorización.
+Integración con Auditoría Contable: Para registrar todas las acciones y movimientos del fondo.
+9. Consideraciones Técnicas
+El sistema debe generar automáticamente los asientos contables:
+               * Por egreso menor:
+
+                  * Débito: Cuenta de Gasto Operativo
+
+                  * Crédito: Caja Chica o Fondo Fijo
+
+                     * Por reposición:
+
+                        * Débito: Caja Chica o Fondo Fijo
+
+                        * Crédito: Banco o Cuenta Corriente
+
+Debe permitir parametrizar los montos máximos de egreso y los límites de reposición por sucursal.
+Debe generar alertas automáticas cuando el saldo del fondo esté por debajo del mínimo establecido o se detecten egresos fuera de política.[h]
+Debe cumplir con las normas NIC 7 (Flujos de Efectivo) y NIC 1 (Presentación de Estados Financieros).
+10. Comentarios
+Esta funcionalidad permite mantener un control riguroso sobre el uso de efectivo destinado a gastos menores, garantizando trazabilidad, control contable y reposición oportuna de los fondos.
+Facilita la transparencia en la gestión de caja chica y optimiza el flujo de aprobación y reposición.
+Se recomienda incluir indicadores de gestión tales como:
+                           * Monto total de egresos menores por periodo.
+
+                           * Porcentaje de reposiciones ejecutadas.
+
+                           * Tiempos promedio de reposición.
+
+                           * Diferencias detectadas al cierre de fondo.
+
+Asimismo, se sugiere habilitar alertas automáticas de saldo bajo y bloqueo temporal de fondos ante irregularidades o faltantes recurrentes.
+
+
+[a]Crear historia de usuario para categoría de gasto
+[b]Este estado de aprobado es para todos? o solo para las solicitudes de reposición?
+[c]Este es para las aprobaciones de egresos menores y el estado "Repuesto" es para las solicitudes de Reposición.
+[d]@consultorexterno1@restaurant.pe @consultorexterno1@restaurant.pe 
+Indicar para cada acción, si es por registro o para todos los registros generados a través de los filtros.
+_Asignada a consultorexterno1@restaurant.pe_
+[e]Esta solicitud a donde va?
+[f]Este registro de reposición lo van a poder hacer todos o solamente las personas con permisos especificos?
+[g]@consultorexterno1@restaurant.pe @consultorexterno1@restaurant.pe 
+Detallar de que se trata esta funcionalidad.
+_Asignada a consultorexterno1@restaurant.pe_
+[h]@consultorexterno1@restaurant.pe @consultorexterno1@restaurant.pe 
+Indicar HU de referencia de la config. de esta parametrización.
+_Asignada a consultorexterno1@restaurant.pe_

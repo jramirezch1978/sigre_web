@@ -1,0 +1,227 @@
+﻿HU-COM-006 - Aprobación de Orden de Servicio - v1.0
+1. Título
+Aprobación de Orden de Servicio
+2. Descripción
+Como usuario con rol autorizado en el sistema contable de Restaurant.pe, quiero aprobar, rechazar o devolver órdenes de servicio generadas, para asegurar el cumplimiento de los flujos de autorización y garantizar que solo las órdenes aprobadas se integren con finanzas y contabilidad.
+3. Proceso
+* Proceso: Operaciones
+
+* Subproceso: Órdenes de Servicio
+
+* Módulo: Compras
+
+4. Narrativa de Usuario
+   * Quiero: Revisar y aprobar las órdenes de servicio pendientes.
+
+   * Para: Asegurar que las contrataciones de servicios cumplen con políticas y presupuestos definidos.
+
+   * De manera que: Sólo las órdenes aprobadas continúen hacia el registro contable y financiero.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Compras > Operaciones > Órdenes de Servicio > Aprobación de Orden de Servicio
+6. Criterios de Aceptación
+      1. El sistema debe mostrar solo las órdenes de servicio con estado Pendiente de Aprobación.
+
+      2. El usuario debe poder aprobar, rechazar o devolver una orden de servicio.
+
+      3. Las órdenes aprobadas cambian su estado a Aprobada y quedan disponibles para integración contable y financiera.
+
+      4. Las órdenes rechazadas cambian a Rechazada y no podrán usarse en procesos posteriores.
+
+      5. Las órdenes devueltas cambian a Devuelta, quedando editables para corrección.
+
+      6. El sistema debe permitir configurar un flujo de aprobación parametrizable (por monto, sucursal, centro de costo o tipo de servicio).[a]
+
+      7. Si se rechaza o devuelve, el sistema debe solicitar un comentario obligatorio.
+
+      8. Toda acción (aprobar, rechazar, devolver) debe quedar registrada en el log de auditoría contable (usuario, fecha, hora).
+
+      9. El sistema debe enviar notificaciones automáticas al creador de la orden sobre la decisión tomada.
+
+      10. El listado debe permitir filtros por proveedor, estado, fecha, sucursal y monto.
+
+7. Campos del Formulario de Aprobación
+Datos Generales (informativos)
+         * Número de Orden de Servicio
+
+         * Fecha de Emisión
+
+         * Proveedor
+
+         * Moneda
+
+         * Monto Total
+
+         * Condición de Pago
+
+         * Estado Actual
+
+Detalle de Servicios (informativo)
+            * Descripción del servicio
+
+            * Cantidad (si aplica)
+
+            * Precio unitario
+
+            * Subtotal
+
+            * Impuestos
+
+            * Total de línea
+
+Acciones de Aprobación
+               * Botón Aprobar
+
+               * Botón Rechazar (requiere comentario obligatorio)
+
+               * Botón Devolver (requiere comentario obligatorio)
+
+               * Campo Observaciones (texto libre, obligatorio si se rechaza o devuelve).
+
+8. Listado de Órdenes de Servicio (Vista Tabla)
+Columnas:
+                  * Número de OS
+
+                  * Fecha de Emisión
+
+                  * Proveedor
+
+                  * Moneda
+
+                  * Total
+
+                  * Estado
+
+                  * Solicitado por
+
+                  * Sucursal
+
+Acciones disponibles: Ver Detalle | Aprobar | Rechazar | Devolver | Exportar (Excel/PDF)
+Filtros disponibles: Número de OS | Proveedor | Estado | Fecha | Sucursal | Rango de Monto
+9. Consideraciones Técnicas
+                     * El flujo de aprobación debe ser multinivel configurable, de acuerdo con políticas de cada razón social. (Anexo 1)
+
+                     * Integración con:
+
+                        * Finanzas (cuentas por pagar y control presupuestal).
+
+                        * Contabilidad (registro contable preliminar).
+
+                           * Todas las acciones deben registrarse en el log de auditoría contable.
+
+                           * Notificación automática por correo o dentro del sistema al creador de la orden.
+
+10. Comentarios
+                              * El sistema debe permitir definir políticas de aprobación específicas para tipos de servicios[b][c][d] o montos máximos autorizados.
+
+                              * En multipaís, las aprobaciones deben cumplir con normativas locales en materia de contratación y tributación de servicios.[e][f][g]
+
+                              * Se debe permitir la trazabilidad completa desde la creación de la orden hasta su aprobación/rechazo, accesible para auditoría.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ANEXOS
+
+
+Anexo 1. Flujograma de aprobación de órdenes de compra de servicios por niveles.
+
+
+                                 * Nivel 0. 
+  
+
+
+
+                                 * Nivel 1. 
+  
+
+
+
+                                 * Nivel 2.
+  
+
+[a]No logro entender lo que se solicita en este punto
+[b]@igarcia@restaurant.pe @consultorexterno1@restaurant.pe 
+Donde se define el tipo de servicio de una OS, y que HU tendrá a cargo la definición de políticas de aprobación, como montos autorizados.
+_Asignada a consultorexterno1@restaurant.pe_
+[c]Esto debe ser configurable dependiendo del contexto de la empresa
+[d]Brindar la referencia de HU donde se detallan las políticas de aprobación por tipos de servicios o montos máximos.
+[e]@consultorexterno1@restaurant.pe @igarcia@restaurant.pe  El anexo de las normativas locales en materia de contratación en que HU se encuentran?
+_Asignada a consultorexterno1@restaurant.pe_
+[f]Esto debe ser configurable dependiendo del contexto de la empresa
+[g]Colocar referencia de HU de estos tipos de configuración por país.

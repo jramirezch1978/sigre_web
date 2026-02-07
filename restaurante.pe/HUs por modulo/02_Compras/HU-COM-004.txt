@@ -1,0 +1,212 @@
+﻿HU-COM-004 - Aprobación de Orden de Compra - v1.0
+1. Título
+Aprobación de Orden de Compra
+2. Descripción
+Como usuario con rol autorizado en el sistema contable de Restaurant.pe, quiero aprobar o rechazar órdenes de compra generadas, para asegurar el control de adquisiciones, cumplir con los flujos de autorización y garantizar la integración con inventarios, finanzas y contabilidad.
+3. Proceso
+* Proceso: Operaciones
+
+* Subproceso: Órdenes de Compra
+
+* Módulo: Compras
+
+4. Narrativa de Usuario
+   * Quiero: Aprobar, rechazar o devolver órdenes de compra pendientes.
+
+   * Para: Controlar que las adquisiciones cumplan con las políticas del restaurante.
+
+   * De manera que: Sólo las órdenes aprobadas puedan integrarse con inventarios, cuentas por pagar y contabilidad.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Compras > Operaciones > Órdenes de Compra > Aprobación de Orden de Compra
+6. Criterios de Aceptación
+      1. El sistema debe mostrar las órdenes de compra con estado Pendiente de Aprobación.
+
+      2. El usuario debe poder aprobar, rechazar o retornar la orden de compra.
+
+      3. Las órdenes aprobadas cambian de estado a Aprobada, y quedan disponibles para su recepción e integración contable.
+
+      4. Las órdenes rechazadas cambian de estado a Rechazada y no podrán usarse en procesos posteriores.
+
+      5. Las órdenes devueltas cambian de estado a Retornada, quedando disponibles para correcciones.
+
+      6. El sistema debe permitir definir un flujo de aprobación parametrizable ([a][b]por montos, sucursales o categorías de compra).
+
+      7. Toda acción (aprobar, rechazar, retornar) debe quedar registrada en el log de auditoría contable con usuario, fecha y hora.
+
+      8. El listado de órdenes debe permitir filtros por proveedor, estado, fecha, sucursal y monto.
+
+      9. El sistema debe enviar notificaciones automáticas al creador de la orden cuando sea aprobada, rechazada o retornada.
+
+7. Campos del Formulario de Aprobación
+Datos Generales (informativos)
+         * Número de Orden de Compra
+
+         * Fecha de Emisión
+
+         * Proveedor
+
+         * Moneda
+
+         * Monto Total
+
+         * Condición de Pago
+
+         * Estado Actual
+
+Detalle de Artículos (informativo)
+            * Código de artículo
+
+            * Descripción
+
+            * Cantidad solicitada
+
+            * Precio unitario
+
+            * Subtotal
+
+            * Impuestos
+
+            * Total de línea
+
+Acciones de Aprobación
+               * Botón Aprobar
+
+               * Botón Rechazar (requiere comentario obligatorio)
+
+               * Botón Retornar (requiere comentario obligatorio)
+
+               * Campo de Observaciones (texto libre, obligatorio si se rechaza o devuelve).
+
+8. Listado de Órdenes Pendientes (Vista Tabla)
+Columnas:
+                  * Número de OC
+                  * Doc del proveedor
+                  * Proveedor
+                  * Sucursal
+                  * Almacén
+                  * Centro de costos
+                  * Fecha de Registro
+                  * Fecha de Entrega
+                  * Dirección de entrega
+                  * Moneda
+                  * Tipo de cambio
+                  * Condición de pago
+                  * Estado 
+
+Acciones disponibles: Ver Detalle | Aprobar | Rechazar | Retornar| Exportar (Excel/PDF)
+Filtros disponibles: Estado | Fecha | Sucursal
+9. Consideraciones Técnicas
+                     * El sistema debe soportar flujos de aprobación multinivel, configurables según montos, sucursales o centros de costo. (Anexo 1)
+
+                     * Integración con:
+
+                        * Inventarios (solo si está aprobada).
+
+                        * Finanzas (reservas de cuentas por pagar).
+
+                        * Contabilidad (pre-registro contable).
+
+                           * Toda operación debe registrarse en el log de auditoría contable.
+
+                           * Notificación automática por correo o dentro del sistema al creador de la orden.
+
+10. Comentarios
+                              * Se debe permitir definir políticas de aprobación por: montos, familias de artículos o jerarquías de usuarios. Se debe establecer un límite por rango de montos siendo que montos mayores de S/ 20.000 la orden de compra debe ser aprobada por dos usuarios como jefe de compras y gerente de finanzas.
+
+                              * En escenarios multipaís, las aprobaciones deben adaptarse a las regulaciones locales (ejemplo: límites de autorización por niveles gerenciales).
+
+                              * Se debe contemplar la trazabilidad completa de las órdenes, desde su creación hasta su aprobación/rechazo, accesible para auditoría.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ANEXOS
+
+
+Anexo 1. Flujograma de aprobación de órdenes de compra por niveles.
+
+
+                                 * Nivel 0. 
+  
+
+
+
+                                 * Nivel 1. 
+  
+
+
+
+                                 * Nivel 2.
+  
+
+[a]Esto tiene que ser configurable - relacionado con el tema de permisos
+[b]Correcto, en la hoja 5 hay un Flujograma de aprobación. Debe definirse en donde se realizarán estas configuraciones.

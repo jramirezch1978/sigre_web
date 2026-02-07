@@ -1,0 +1,185 @@
+﻿HU-ALM-PR-CS-001 - Reproceso y Actualización de Saldos de Inventario - v1.0
+1. Título
+ Reprocesa y actualiza los saldos de inventario de cada producto, considerando todos los movimientos registrados hasta la fecha seleccionada.
+2. Descripción
+ Como analista de inventarios, quiero reprocesar y actualizar los saldos de inventario de los productos, tomando en cuenta todos los movimientos registrados hasta una fecha determinada, para asegurar que las existencias físicas y lógicas estén alineadas y corregir posibles diferencias ocasionadas por anulaciones, reprocesos o registros inconsistentes.
+3. Proceso
+ Proceso: Procesos
+Subproceso: Cuadres de Stock
+Módulo: Almacén
+4. Narrativa de Usuario
+ Quiero: Ejecutar un reproceso que recalcule los saldos de inventario en base a los movimientos válidos registrados hasta una fecha seleccionada.
+Para: Corregir diferencias entre las existencias físicas y las existencias registradas en el sistema.
+De manera que: Los reportes, consultas y transacciones futuras reflejen información exacta y confiable del stock.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Almacén > Procesos > Cuadres de Stock > Reprocesar Saldos de Inventario
+6. Criterios de Aceptación
+ El sistema debe permitir:
+* Seleccionar una fecha de corte hasta la cual se considerarán los movimientos de inventario.
+
+* Procesar todos los movimientos registrados (entradas, salidas, traslados, ajustes, devoluciones, anulaciones).
+
+* Calcular automáticamente el saldo final por producto y almacén considerando el orden cronológico de los movimientos.
+
+* Comparar los saldos recalculados con los saldos actuales del sistema.
+
+* Mostrar un resumen de diferencias detectadas por producto y almacén.
+
+* Permitir al usuario aprobar y aplicar la actualización de saldos.
+
+* Generar un log de reproceso, registrando fecha, usuario, almacén y resultados.
+
+* Permitir la reversión del reproceso en caso de error.
+
+* Actualizar los reportes de inventario, kardex y stock consolidado con los nuevos saldos.
+
+* Garantizar que el reproceso no afecte documentos contables ya cerrados o auditados.
+
+* Notificar al usuario mediante alerta o correo cuando el proceso finalice.
+
+* Registrar todas las operaciones en el módulo de auditoría.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+ Campos principales:
+   * Fecha de Corte (hasta la cual se reprocesarán los movimientos)
+
+   * Código de Almacén
+
+   * Nombre de Almacén
+
+   * Código de Producto
+
+   * Descripción del Producto
+
+   * Unidad de Medida
+
+   * Stock Actual
+
+   * Stock Recalculado
+
+   * Diferencia
+
+   * Usuario Responsable
+
+   * Fecha y Hora del Proceso
+
+   * Estado del Proceso (Pendiente / En Ejecución / Finalizado / Revertido)
+
+Filtros disponibles:
+      * Fecha de Corte
+
+      * Almacén
+
+      * Categoría / Línea de Producto
+
+      * Estado del Proceso
+
+      * Usuario
+
+Acciones disponibles:
+         * Ejecutar Reproceso: Recalcula los saldos de inventario desde una fecha base, tomando en cuenta todos los movimientos registrados (ingresos, salidas, ajustes, transferencias, compras, ventas, etc.).
+Qué hace el sistema:
+         1. Revisa todos los movimientos en orden cronológico.
+         2. Aplica nuevamente las reglas de valoración (PEPS, UEPS, promedio ponderado, costo estándar).
+         3. Reconstruye:
+         1. Stock físico
+         2. Stock valorizado
+         3. Costos unitarios
+         4. Diferencias pendientes
+         4. Verifica que no existan movimientos inconsistentes (fechas fuera de orden, documentos no cerrados, movimientos duplicados).
+Cuándo se usa:
+         * Cuando se detectan saldos incoherentes.
+         * Después de corregir documentos o movimientos históricos.
+         * Al identificar diferencias entre sistema y físico.
+
+
+
+         * Ver Resultados del Cálculo: Permite revisar lo que el reproceso generó antes de aplicar cualquier cambio.
+Qué muestra:
+         1. Saldos actuales vs. saldos recalculados.
+         2. Movimientos observados.
+         3. Diferencias en:
+         1. Cantidades
+         2. Costos
+         3. Valorizaciones
+         4. Alertas o inconsistencias detectadas.
+
+
+         * Aplicar Actualización de Saldos:
+Confirma que los resultados del reproceso sean aplicados al inventario real del sistema.
+Qué realiza
+         1. Actualiza:
+         1. Saldos físicos definitivos.
+         2. Costos unitarios.
+         3. Valorizaciones.
+         2. Reemplaza los valores actuales por los recalculados.
+         3. Guarda un historial del ajuste.
+Efectos
+         1. Los reportes posteriores (Kardex, valorizaciones, costo de ventas, integridad contable) usarán los nuevos valores.
+         2. Si hay integración contable, los nuevos valores corregidos pueden generar asientos de ajuste.
+
+
+         * Exportar Resumen de Diferencias: Genera un archivo a modo de evidencia o auditoría.
+         1. Lista de productos con diferencias.
+         2. Kardex comparativo “antes vs. después”.
+         3. Movimientos que generaron incoherencias.
+         4. Costo corregido.
+         5. Responsable del proceso y fecha.
+Formatos: Excel, PDF, Texto plano o CSV
+Finalidad
+         1. Presentación a auditoría interna o externa.
+         2. Evidencia para contabilidad.
+         3. Revisión por jefatura o comité de inventarios.
+
+            * Revertir Reproceso: Regresa los saldos al estado previo al reproceso, siempre que no se haya aplicado actualización de saldos o si el sistema mantiene versiones previas.
+Qué hace
+            1. Revierte:
+            1. Saldos calculados
+            2. Costos recalculados
+            3. Ajustes temporales
+            2. Restaura la última versión válida del inventario.
+Cuándo se usa
+            1. Si los resultados del reproceso no fueron correctos.
+            2. Si se detecta un error en el origen (movimiento mal digitado o documento pendiente).
+            3. Si no se desea aplicar cambios todavía.
+
+
+
+            * Consultar Log Histórico
+
+8. Detalle de Integración (opcional)
+ Integración con:
+               * Módulo de Inventarios: para recalcular y actualizar los saldos físicos y lógicos.
+
+               * Módulo de Kardex: para regenerar movimientos históricos de inventario.
+
+               * Módulo de Compras y Ventas: para validar coherencia de entradas y salidas.
+
+               * Módulo de Auditoría: para registrar trazabilidad del reproceso.
+
+               * Módulo de Reportes: para reflejar el nuevo estado de los saldos tras el reproceso.
+
+9. Consideraciones Técnicas
+ El sistema debe:
+                  * Procesar movimientos de forma cronológica y secuencial.
+
+                  * Ejecutarse como tarea en segundo plano (background process) para no afectar el rendimiento del sistema.
+
+                  * Incluir validaciones automáticas para evitar duplicidad de movimientos.
+
+                  * Bloquear temporalmente la edición o registro de nuevos movimientos durante el reproceso.
+
+                  * Permitir la visualización del progreso del cálculo en tiempo real.
+
+                  * Registrar resultados en una tabla de control histórico de reprocesos.
+
+                  * Soportar ejecución por almacén, por sede o global.
+
+                  * En entornos multiempresa, garantizar la independencia de datos por compañía.
+
+                  * Implementar control de permisos por rol para restringir la ejecución del reproceso a usuarios autorizados.
+
+10. Comentarios
+ Esta funcionalidad es esencial para mantener la consistencia de la información de inventario frente a operaciones complejas o reprocesos.
+Permite corregir errores históricos o desajustes sin afectar la trazabilidad contable.
+Se recomienda programar su ejecución periódica o automatizada durante horas de baja operación para optimizar el rendimiento del sistema y mantener la integridad del stock en tiempo real.

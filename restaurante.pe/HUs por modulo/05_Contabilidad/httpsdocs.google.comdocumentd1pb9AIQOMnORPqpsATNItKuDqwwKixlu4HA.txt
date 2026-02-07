@@ -1,0 +1,253 @@
+﻿HU-CON-029 - Procesos / Ejecutar Cierre Contable Mensual - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-029
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Procesos
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Procesos / Ejecutar Cierre Contable Mensual
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir ejecutar el cierre contable mensual de manera controlada, asegurando que todos los movimientos contables de un periodo determinado estén completos, validados y correctamente registrados antes de su consolidación.
+El cierre contable implica bloquear la modificación, eliminación o incorporación de nuevos registros contables pertenecientes al periodo cerrado, así como generar automáticamente los reportes de comprobación y resultados correspondientes al mes.
+El proceso debe realizar una validación previa de consistencia contable, verificando que todos los asientos del periodo estén cuadrados (Débito = Crédito) y que no existan asientos pendientes, incompletos o con errores de contabilización.
+Al finalizar, el sistema debe actualizar el estado del periodo contable a “Transferido”, registrando la acción en la bitácora contable con el usuario responsable, la fecha y la hora de ejecución.
+________________
+
+
+3. Actor(es)
+   * Contador General: Ejecuta el proceso de cierre contable mensual.
+
+   * Jefe de Contabilidad: Supervisa la correcta ejecución del cierre y aprueba su resultado.
+
+   * Administrador del Sistema: Configura los permisos y desbloquea periodos en caso de contingencia.
+
+   * Auditor Interno o Externo: Revisa los reportes generados y la trazabilidad del cierre.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos para acceder a Contabilidad → Procesos → Ejecutar Cierre Contable Mensual.
+
+      * Todos los asientos contables del periodo deben estar validados y contabilizados.
+
+      * No deben existir asientos pendientes o descuadrados en el mes a cerrar.
+
+      * El periodo contable debe estar abierto y corresponder al mes a cerrar.
+
+      * Los reportes de comprobación (balance, diario, mayor) deben haberse generado previamente.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Procesos → Ejecutar Cierre Contable Mensual
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero ejecutar el cierre contable mensual,
+para asegurar que los registros del periodo no sean modificados y consolidar los resultados contables del mes con reportes de comprobación y resultados.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar el periodo contable a cerrar.
+	Se muestra una lista de periodos abiertos disponibles.
+	2
+	Validar que todos los asientos estén contabilizados y cuadrados (Débito = Crédito).
+	El sistema bloquea el cierre si detecta inconsistencias.
+	3
+	Verificar que no existan asientos pendientes o importaciones incompletas.
+	Se genera reporte de pendientes antes de cerrar.
+	4
+	Generar automáticamente reportes de comprobación y resultados.
+	El sistema guarda los reportes en el repositorio del cierre.
+	5
+	Cambiar el estado del periodo a “Cerrado”.
+	Se bloquean modificaciones, eliminaciones o nuevas cargas en ese periodo.
+	6
+	Registrar la ejecución del cierre en la bitácora contable.
+	Se guarda usuario, fecha y hora de cierre.
+	7
+	Permitir reapertura de periodo solo con permisos de administrador.
+	Control estricto de reaperturas.
+	8
+	Mostrar mensaje de confirmación del cierre.
+	“El cierre contable mensual se ha ejecutado correctamente.”
+	________________
+
+
+8. Estructura del Proceso
+Tipo: Proceso contable automatizado y de control.
+Naturaleza: Bloqueo y consolidación mensual de registros contables.
+8.1 Parámetros del Proceso
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable
+	Numérico
+	Sí
+	Año y mes que se desea cerrar.
+	Fecha de Ejecución
+	Fecha
+	Sí
+	Fecha en que se realiza el cierre.
+	Usuario Responsable
+	Automático
+	Sí
+	Usuario que ejecuta el cierre.
+	Generar Reportes
+	Checkbox
+	No
+	Indica si se desea generar reportes automáticamente.
+	Observaciones
+	Texto
+	No
+	Motivo o comentarios del cierre.
+	8.2 Resultados del Proceso
+Resultado
+	Descripción
+	Estado del Periodo: Cerrado
+	El periodo queda bloqueado.
+	Asientos Bloqueados
+	Ningún asiento puede ser modificado.
+	Reportes Generados
+	Balance de comprobación, Libro Diario y Estado de Resultados.
+	Registro en Bitácora
+	Se documenta la acción del usuario responsable.
+	________________
+
+
+9. Reglas de Negocio
+         1. Integridad contable: No se puede cerrar un periodo con asientos descuadrados.
+
+         2. Control de estados: Los periodos cerrados no pueden modificarse salvo reapertura autorizada.
+
+         3. Reapertura restringida: Solo un usuario con rol “Administrador Contable” puede reabrir un periodo.
+
+         4. Validación previa: El cierre requiere ejecutar previamente un proceso de validación de asientos.
+
+         5. Bloqueo automático: Tras el cierre, el sistema bloquea las tablas de movimiento del periodo.
+
+         6. Generación de reportes: Al cerrar, el sistema debe emitir los reportes oficiales de comprobación y resultados.
+
+         7. Auditoría obligatoria: Toda acción de cierre o reapertura debe registrarse en la bitácora contable.
+
+________________
+
+
+10. Integraciones
+            * Módulo de Contabilidad General: Actualiza el estado de los asientos y del periodo.
+
+            * Módulo de Reportes: Genera los reportes de comprobación y resultados.
+
+            * Módulo de Auditoría: Registra todas las acciones del proceso de cierre.
+
+            * Módulo de Usuarios y Roles: Controla los permisos para ejecutar o revertir cierres.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tipo de Componente: Proceso contable automático con validación de reglas.
+
+               * Tablas Involucradas:
+
+                  * CNTBL_PERIODO_CONTABLE (control de estados de periodos).
+
+                  * CNTBL_ASIENTO (bloqueo de asientos del periodo).
+
+                  * CNTBL_ASIENTO_DET (detalle contable bloqueado).
+
+                  * LOG_CIERRE_CONTABLE (registro de acciones de cierre y reapertura).
+
+                     * Estados del Periodo: Abierto / En Validación / Cerrado / Reabierto.
+
+                     * Reportes Generados:
+
+                        * Balance de comprobación.
+
+                        * Libro Diario.
+
+                        * Libro Mayor.
+
+                        * Estado de Resultados.
+
+Consulta referencial (validación previa al cierre):
+SELECT 
+    ano, mes,
+    SUM(debe) AS total_debe,
+    SUM(haber) AS total_haber,
+    (SUM(debe) - SUM(haber)) AS diferencia
+FROM cntbl_asiento_det
+WHERE ano = :ano AND mes = :mes
+GROUP BY ano, mes
+HAVING SUM(debe) <> SUM(haber);
+
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Procesos → Ejecutar Cierre Contable Mensual.
+
+                           2. Selecciona el periodo contable a cerrar.
+
+                           3. Presiona “Validar Periodo”.
+
+                           4. El sistema revisa que no existen asientos descuadrados ni pendientes.
+
+                           5. Si la validación es exitosa, el usuario presiona “Ejecutar Cierre”.
+
+                           6. El sistema cambia el estado del periodo a “Cerrado” y bloquea modificaciones.
+
+                           7. Se generan automáticamente los reportes de comprobación y resultados.
+
+                           8. El sistema registra la acción en la bitácora contable.
+
+                           9. Se muestra mensaje de confirmación:
+
+
+“El cierre contable mensual del periodo [MM-AAAA] se ejecutó correctamente.”
+
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un periodo contable válido para cerrar.”
+
+                              * “Existen asientos descuadrados o pendientes. No se puede ejecutar el cierre.”
+
+                              * “Periodo cerrado correctamente. Los registros del mes ya no pueden modificarse.”
+
+                              * “Error durante el cierre contable. Contacte al administrador.”
+
+                              * “Solo un administrador puede reabrir periodos cerrados.”
+
+                              * “El periodo seleccionado ya está cerrado.”

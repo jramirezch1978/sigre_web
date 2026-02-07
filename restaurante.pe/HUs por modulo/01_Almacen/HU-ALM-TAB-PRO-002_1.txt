@@ -1,0 +1,124 @@
+﻿HU-ALM-TAB-MCA-001 - Definición de la Naturaleza Contable, de Inventario o de Gestión y Configuración de Impuestos por Artículo y País - v1.0
+1. Título
+ Definición de la Naturaleza Contable, de Inventario o de Gestión y Configuración de Impuestos por Artículo y País
+2. Descripción
+ Como usuario del sistema Restaurant.pe, quiero definir la naturaleza de los artículos (contable, de inventario o de gestión) y configurar los impuestos aplicables según el país, para que el sistema registre correctamente los movimientos contables, fiscales y de gestión asociados a cada tipo de artículo, cumpliendo con las normativas tributarias locales.
+3. Proceso
+ Proceso: Tablas
+Subproceso: Maestro de Clases de Artículos
+Módulo: Almacén
+4. Narrativa de Usuario
+ Quiero: Definir la naturaleza contable, de inventario o de gestión de los artículos y configurar los impuestos por artículo y país.
+Para: Asegurar que las transacciones de los artículos se registren correctamente en contabilidad y se apliquen los impuestos correspondientes según la normativa del país.
+De manera que: Se garantice la coherencia fiscal, contable y operativa en las operaciones del restaurante, evitando errores en declaraciones tributarias o reportes financieros.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Almacén > Tablas > Maestro de Clases de Artículos > Naturaleza y Configuración de Impuestos
+6. Criterios de Aceptación
+ El sistema debe permitir:
+* Registrar diferentes clases de artículos y definir su naturaleza:
+
+   * Contable (impacta en cuentas contables).
+
+   * Inventario (controla existencia física).
+
+   * Gestión (uso administrativo sin impacto contable directo).
+
+      * Asociar a cada clase de artículo las cuentas contables correspondientes (inventario, costo, ingreso, gasto, ajustes, etc.).
+
+      * Configurar impuestos por artículo y por país, según las legislaciones fiscales locales (IGV, IVA, ITBIS, ISV, etc.).
+
+      * Permitir definir si los impuestos son afectos o exonerados, así como su porcentaje de aplicación.
+
+      * Validar que cada artículo pertenezca a una única clase definida.
+
+      * Permitir la edición o inactivación de una clase de artículo, siempre que no existan movimientos asociados.
+
+      * Registrar en el log de auditoría contable toda acción de creación, modificación, o inactivación (usuario, fecha, hora, IP).
+
+      * Mostrar las configuraciones de impuestos de forma diferenciada por país.
+
+      * Permitir la importación y exportación (Excel / PDF) de las clases de artículos con sus configuraciones.
+
+7. Campos del Reporte / Columnas de Vista Tabla
+ Campos principales:
+         * Razón Social (solo lectura)
+
+         * País (solo lectura)
+
+         * Código de Clase de Artículo
+
+         * Descripción de la Clase
+
+         * Naturaleza (Contable / Inventario / Gestión)
+
+         * Cuenta Contable de Inventario
+
+         * Cuenta Contable de Costo
+
+         * Cuenta Contable de Ingreso / Gasto
+
+         * Impuesto Principal (IGV / IVA / ITBIS / ISV, etc.)
+
+         * Porcentaje de Impuesto
+
+         * Exonerado (Sí / No)
+
+         * Estado (Activo / Inactivo)
+
+         * Fecha de Creación
+
+         * Usuario que Registró
+
+         * Observaciones
+
+Filtros disponibles:
+            * Naturaleza
+
+            * País
+
+            * Impuesto Aplicado
+
+            * Estado (Activo / Inactivo)
+
+            * Usuario que Registró
+
+Acciones disponibles:
+               * Crear Nueva Clase de Artículo
+
+               * Editar Clase
+
+               * Activar / Inactivar
+
+               * Eliminar (solo si no tiene artículos asociados)
+
+               * Ver Detalle
+
+               * Exportar (Excel / PDF)
+
+               * Importar Configuración
+
+               * Ver Log de Auditoría
+
+8. Detalle de Integración (opcional)
+ Integración con Contabilidad: para registrar los asientos automáticos de compras, ventas, ajustes y consumos según la naturaleza contable del artículo.
+Integración con Impuestos / Fiscal: para aplicar las tasas impositivas correctas según país y tipo de artículo.
+Integración con Compras y Ventas: para calcular automáticamente los impuestos y cuentas asociadas durante las transacciones.
+Integración con Almacén: para controlar las existencias de los artículos de naturaleza inventario.
+9. Consideraciones Técnicas
+ El sistema debe permitir definir parametrizaciones multipaís, asociando la tasa y tipo de impuesto correspondiente al país en el que opera la razón social.
+Debe manejar la relación dinámica entre naturaleza y cuentas contables, evitando inconsistencias al momento de registrar movimientos.
+Las tasas de impuestos deben almacenarse con historial de vigencias (inicio y fin de validez).
+Debe existir validación cruzada para evitar duplicidad de clases con el mismo código y país.
+El sistema debe permitir actualizaciones masivas de impuestos por país, preservando el histórico de configuraciones anteriores.
+Las operaciones que involucren artículos con naturaleza contable deben reflejarse automáticamente en el Kardex y en los estados financieros.
+10. Comentarios
+ Esta funcionalidad garantiza la correcta clasificación fiscal, contable y de inventario de los artículos, adaptándose a las normativas tributarias de cada país donde opere el sistema Restaurant.pe.
+Facilita la automatización de los procesos contables y fiscales, reduciendo errores humanos en la configuración de impuestos o cuentas contables.
+Se recomienda incorporar indicadores KPI como:
+                  * Porcentaje de artículos con naturaleza definida.
+
+                  * Clases de artículos sin cuentas contables asociadas.
+
+                  * Incidencias por configuración impositiva incorrecta.
+
+Asimismo, se sugiere incluir alertas automáticas cuando una tasa de impuesto cambie o esté próxima a vencer, para garantizar la actualización oportuna de las configuraciones en todas las razones sociales activas.

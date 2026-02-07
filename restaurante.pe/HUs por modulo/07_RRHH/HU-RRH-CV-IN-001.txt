@@ -1,0 +1,150 @@
+﻿HU-RRH-CV-IN-001 – Detección y Corrección de Inconsistencias en Inasistencias
+Versión: 1.0
+________________
+
+
+1. Título
+Detección y Corrección de Inconsistencias en Inasistencias
+________________
+
+
+2. Descripción
+Como analista de RR.HH. o responsable de nómina, quiero que el sistema detecte y permita corregir inconsistencias en los registros de inasistencias, tales como fechas duplicadas, faltas no justificadas o registros superpuestos, de modo que las variables de nómina se actualicen automáticamente y reflejen la situación laboral real del trabajador.
+________________
+
+
+3. Proceso
+Módulo: RR.HH
+Proceso: Consultas y Validaciones
+Subproceso: Inasistencias
+________________
+
+
+4. Narrativa de Usuario
+Quiero: Identificar y corregir inconsistencias en los registros de inasistencias de los trabajadores.
+Para: Garantizar la precisión de los cálculos de nómina y mantener actualizado el historial laboral.
+De manera que: El sistema ajuste automáticamente las variables de pago, descuentos y beneficios relacionados con la asistencia.
+________________
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > RR.HH > Consultas y Validaciones > Inasistencias > Detección y Corrección de Inconsistencias
+________________
+
+
+6. Criterios de Aceptación
+* El sistema debe detectar inconsistencias por trabajador y periodo, tales como:
+
+   * Fechas duplicadas de inasistencia.
+
+   * Cruces con registros de permisos o vacaciones.
+
+   * Días no laborables o feriados registrados como faltas.
+
+      * Debe permitir filtrar por sede, centro de costo, fecha, trabajador o tipo de inconsistencia.
+
+      * El usuario podrá visualizar el detalle del error y realizar la corrección directamente en el formulario.
+
+      * Al guardar los cambios, el sistema debe actualizar automáticamente las variables de nómina relacionadas (descuentos, días trabajados, etc.).
+
+      * Registrar toda modificación en el log de auditoría contable y laboral (usuario, fecha, hora, tipo de corrección).
+
+      * Permitir exportar un reporte con el resumen de inconsistencias detectadas y acciones correctivas aplicadas.
+
+      * Solo usuarios con rol de Administrador o Analista de RR.HH. podrán editar registros.
+
+      * Las correcciones deben ser reprocesadas en la nómina activa si afectan periodos en curso.
+
+________________
+
+
+7. Campos del Formulario / Tabla de Vista
+Campo
+	Tipo de Campo
+	Descripción
+	Ejemplo
+	Validaciones / Consideraciones UX/UI
+	Trabajador
+	Búsqueda / Selector
+	Identifica al trabajador afectado.
+	“Juan Pérez López”
+	Campo obligatorio. Autocompletar por nombre o DNI.
+	Fecha de Inasistencia
+	Fecha
+	Fecha registrada como inasistencia.
+	10/09/2025
+	No debe duplicarse ni cruzarse con otra ausencia.
+	Tipo de Inasistencia
+	Lista desplegable
+	Clasificación del tipo de falta.
+	Injustificada / Justificada / Médica
+	Opciones definidas en el maestro de ausencias.
+	Sede / Centro de Costo
+	Lista desplegable
+	Ubicación o área del trabajador.
+	Restaurante Lima - Cocina
+	Filtrado según usuario o país.
+	Estado de Registro
+	Etiqueta
+	Indica si hay error o inconsistencia.
+	Duplicada / Superpuesta / Correcta
+	Calculado automáticamente.
+	Acción Correctiva
+	Lista desplegable
+	Acción aplicada sobre la inconsistencia.
+	Corregida / Eliminada / Justificada
+	Campo obligatorio antes de guardar.
+	Observaciones
+	Texto libre
+	Comentarios adicionales sobre la corrección.
+	Ajuste por cruce con vacaciones
+	Longitud máxima: 500 caracteres.
+	Usuario Responsable
+	Texto
+	Usuario que realizó la corrección.
+	mpalacios
+	Automático.
+	Fecha de Modificación
+	Fecha/Hora
+	Momento en que se realizó la corrección.
+	11/09/2025 10:30
+	Automático.
+	________________
+
+
+8. Detalle de Integración
+         * Integración con Nómina: Actualiza automáticamente los días trabajados, descuentos y ausencias que afectan el cálculo de sueldo.
+
+         * Integración con Asistencias: Verifica marcaciones biométricas o POS antes de determinar inconsistencias.
+
+         * Integración con Calendarios Laborales: Cruza datos de feriados y turnos programados para detectar errores.
+
+         * Integración con Auditoría: Registra todas las modificaciones para trazabilidad.
+
+________________
+
+
+9. Consideraciones Técnicas
+            * Los procesos de detección deben ejecutarse en tiempo real o por lote al cierre de jornada.
+
+            * El algoritmo debe identificar superposiciones de fechas con precisión día/hora.
+
+            * Las correcciones deben disparar un reprocesamiento automático en la nómina activa.
+
+            * Debe permitir deshacer una corrección en caso de error del usuario, manteniendo versión histórica.
+
+            * Compatible con entornos multiempresa y multipaís, aplicando reglas laborales locales.
+
+________________
+
+
+10. Comentarios
+Esta funcionalidad optimiza la gestión de ausencias garantizando que la información de asistencia y nómina sea coherente y legalmente válida.
+Se recomienda incluir indicadores de control, tales como:
+               * % de registros con inconsistencias corregidos.
+
+               * Tiempo promedio de resolución.
+
+               * Impacto total en montos de nómina.
+
+Además, puede configurarse una alerta automática que notifique al área de RR.HH. cuando se detecten inconsistencias en más del 5% del personal en un mismo periodo.

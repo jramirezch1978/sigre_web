@@ -1,0 +1,169 @@
+﻿HU-RRH-NOM-CP-007 - Distribución del Recargo al Consumo - v1.0
+1. Título
+Distribución del Recargo al Consumo según Periodo y Reglas Definidas
+2. Descripción
+Como usuario del módulo de RR.HH. de Restaurant.pe, quiero que el sistema distribuya automáticamente el recargo al consumo recaudado durante un periodo específico, aplicando las reglas de distribución definidas por la empresa y/o país, para asegurar el cálculo correcto de compensaciones, beneficios e importes a entregar al personal operativo.
+3. Proceso
+Proceso: Procesos de Nómina
+Subproceso: Cálculo de Planillas
+Módulo: RR.HH.
+4. Narrativa de Usuario
+Quiero: Generar la distribución del monto total recaudado por recargo al consumo en un periodo determinado.
+Para: Asignar los montos correspondientes a cada colaborador según sus roles, días laborados, horas trabajadas u otros criterios configurados.
+De manera que: Se cumpla con las políticas internas, normas legales y la correcta retribución al personal según su participación en el servicio.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > RR.HH. > Procesos de Nómina > Cálculo de Planillas > Distribución de Recargo al Consumo
+6. Criterios de Aceptación
+* El sistema debe permitir seleccionar un periodo de nómina (semanal, quincenal o mensual) para realizar la distribución del recargo al consumo.
+
+* Debe mostrar el monto total recaudado por recargo al consumo para el periodo seleccionado. 
+
+* El usuario debe poder consultar y aplicar reglas de distribución configuradas previamente, tales como:
+
+   1. Proporción por horas trabajadas.
+
+   2. Proporción por días trabajados.
+
+   3. Tabla porcentual por puesto/rol.
+
+   4. Monto fijo por categoría.
+
+   5. Combinación de criterios.
+
+Se debe permitir parametrizar:
+      1. Fecha de vigencia.
+
+      2. País y Razón Social (solo lectura).
+
+      3. Sucursal / Local aplicable.
+
+      4. Prioridad entre reglas.
+
+
+
+         * El sistema debe validar que no existan reglas superpuestas en fechas y locales.
+         * Las reglas deben almacenarse con versión histórica.
+         * Debe incluir vista previa de ejemplo del cálculo aplicando la regla.
+         * Debe permitir asignar qué puestos/áreas participan en la distribución.
+         * Toda modificación debe registrarse en el log de auditoría, con Usuario, Fecha, Hora, IP y Acción.
+         * Debe permitir exportar las reglas a Excel/PDF.
+         * Solo usuarios autorizados (RR.HH. Admin o Financiero Admin) podrán parametrizar reglas.
+
+
+
+         * El sistema debe calcular automáticamente el importe correspondiente a cada colaborador.
+
+         * Debe permitir visualizar el detalle del cálculo antes de confirmar la distribución.
+
+         * Una vez confirmada la distribución:
+
+            * Se generarán los movimientos en planilla correspondientes al concepto “Recargo al Consumo”.
+
+            * Se bloqueará la edición del cálculo (solo reversiones controladas permitidas).
+            * No permitirá que se vuelva a distribuir el Recargo al Consumo de un periodo ya distribuido. 
+
+               * Debe validar que los colaboradores incluidos estén activos durante el periodo.
+
+               * Si existen colaboradores con datos incompletos, el sistema debe mostrar alertas.
+
+               * Debe permitir exportar el resultado a Excel y PDF.
+
+               * Toda acción debe registrarse en el log de auditoría, indicando Usuario, Fecha, Hora, IP, Periodo y Acción ejecutada.
+
+7. Campos del Reporte / Columnas de Vista Tabla
+Columnas principales (vista de distribución):
+                  * Razón Social (solo lectura)
+
+                  * Periodo de Nómina
+
+                  * Colaborador
+
+                  * Documento de Identidad
+
+                  * Área / Puesto
+
+                  * Rol del Servicio (Mozo, Bartender, etc.)
+
+                  * Horas Trabajadas
+
+                  * Días Trabajados
+
+                  * Porcentaje de Participación
+
+                  * Regla Aplicada
+
+                  * Monto Asignado
+
+                  * Moneda
+
+                  * Estado de Distribución (Pendiente / Distribuido / Revertido)
+
+                  * Usuario Responsable
+
+                  * Fecha de Cálculo
+
+Filtros disponibles:
+                     * Periodo
+
+                     * Rol del Servicio
+
+                     * Área / Puesto
+
+                     * Estado de Distribución
+
+                     * Colaborador
+
+                     * Sucursal / Local
+
+Acciones disponibles:
+                        * Seleccionar Periodo
+
+                        * Aplicar Reglas
+
+                        * Ver Detalle del Cálculo
+
+                        * Confirmar Distribución
+
+                        * Revertir Distribución
+
+                        * Exportar (Excel / PDF)
+
+                        * Filtrar / Limpiar Filtros
+
+                        * Actualizar Información
+
+8. Detalle de Integración (opcional)
+                           * Integración con Ventas: Obtiene el total recaudado por recargo al consumo por periodo.
+
+                           * Integración con Configuración de RR.HH.: Obtiene las reglas de distribución parametrizadas por país, empresa o sucursal.
+
+                           * Integración con Planillas: Registra los montos asignados como conceptos remunerativos o no remunerativos según corresponda.
+
+                           * Integración con Contabilidad: Genera las provisiones contables para el recargo al consumo distribuido.
+
+                           * Integración con Auditoría: Registra todas las acciones de cálculo, modificación y reversión.
+
+9. Consideraciones Técnicas
+                              * El cálculo debe considerar la legislación vigente de cada país respecto al tratamiento del recargo al consumo.
+
+                              * El sistema debe soportar múltiples monedas y tipos de cambio.
+
+                              * La fórmula de asignación debe calcularse con precisión decimal configurable.
+
+                              * El proceso debe permitir reversiones con justificación, manteniendo un historial de versionado.
+
+                              * La regla de distribución debe ser seleccionable y auditable (con código, descripción y fecha de aplicación).
+
+                              * Debe cumplir con normativas laborales locales y NIIF relacionadas con provisiones y beneficios al personal (NIC 19).
+
+                              * La ejecución del cálculo debe estar optimizada para grandes volúmenes de empleados y puntos de venta.
+
+10. Comentarios
+Esta funcionalidad garantiza una correcta y transparente distribución del recargo al consumo, un componente clave de la compensación en el sector gastronómico.
+Permite estandarizar criterios, reducir errores manuales y asegurar que el personal reciba lo correspondiente según su participación en el servicio.
+Se recomienda habilitar:
+                                 * Indicadores de proceso (monto distribuido, monto no asignado, cantidad de colaboradores incluidos).
+
+                                 * Alertas para periodos sin recaudación.
+
+                                 * Validaciones automáticas cuando un colaborador no cumple criterios de participación.

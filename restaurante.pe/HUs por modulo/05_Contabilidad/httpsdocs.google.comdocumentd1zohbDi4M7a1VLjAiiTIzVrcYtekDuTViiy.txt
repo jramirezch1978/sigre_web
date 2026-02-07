@@ -1,0 +1,280 @@
+﻿HU-CON-017 - Reportes de Validación / Libro Mayor - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-017
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Reportes de Validación
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Libro Mayor
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la generación del reporte del Libro Mayor, conforme a los registros contables ingresados en el sistema, agrupando los movimientos por cuenta contable, con detalle de débitos, créditos y saldo acumulado.
+Este reporte es una herramienta fundamental de validación contable, que permite revisar la evolución de los saldos de cada cuenta durante un periodo determinado, conforme a las normas contables y tributarias aplicables en cada país.
+El sistema debe permitir filtrar por periodo contable, rango de fechas, cuenta contable, centro de costo, tipo de libro y moneda, y debe incluir opciones de exportación en formatos Excel (.xlsx) y PDF (.pdf) para auditorías o revisiones contables.
+________________
+
+
+3. Actor(es)
+   * Contador General: Supervisa los movimientos contables y verifica los saldos de las cuentas.
+
+   * Analista Contable: Realiza revisiones detalladas de los movimientos por cuenta.
+
+   * Jefe de Contabilidad: Evalúa los reportes como parte de los procesos de cierre mensual o anual.
+
+   * Auditor Interno o Externo: Utiliza el reporte como fuente de evidencia para la verificación contable.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos para acceder a Contabilidad → Reportes → Libro Mayor.
+
+      * Deben existir asientos contables registrados y contabilizados en el sistema.
+
+      * Los planes de cuentas contables y periodos contables deben estar configurados correctamente.
+
+      * El periodo seleccionado debe estar abierto o cerrado (solo lectura).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Libro Mayor
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar el reporte del Libro Mayor,
+para revisar los movimientos contables por cuenta y validar los saldos de cada cuenta contable de manera consolidada y detallada.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable (año/mes) o rango de fechas.
+	El sistema muestra los movimientos registrados en ese periodo.
+	2
+	Mostrar los movimientos agrupados por cuenta contable.
+	Cada cuenta muestra sus débitos, créditos y saldo acumulado.
+	3
+	Incluir columnas de fecha, glosa, número de asiento, debe, haber y saldo.
+	Estructura de reporte tipo libro mayor tradicional.
+	4
+	Permitir filtrar por centro de costo y moneda.
+	El reporte muestra solo los movimientos que cumplen los filtros.
+	5
+	Calcular automáticamente los saldos acumulados por cuenta.
+	El saldo final debe cuadrar con el balance de comprobación.
+	6
+	Mostrar el saldo inicial de cada cuenta al inicio del periodo.
+	El saldo inicial se toma del cierre anterior.
+	7
+	Permitir exportar el reporte a Excel (.xlsx) y PDF (.pdf).
+	Exportación exitosa con los filtros aplicados.
+	8
+	Incluir totales generales de débitos y créditos.
+	Totales al final del reporte.
+	9
+	Registrar en la bitácora cada ejecución del reporte (usuario, fecha, filtros aplicados).
+	Auditoría automática de uso del reporte.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Reporte tabular agrupado por cuenta contable.
+Naturaleza: Reporte informativo de validación – No permite modificación de datos.
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Define el periodo contable del reporte.
+	Fecha Desde / Hasta
+	Fecha
+	No
+	Permite limitar el rango de fechas dentro del periodo.
+	Cuenta Contable
+	Campo texto / búsqueda
+	No
+	Permite seleccionar una cuenta o rango de cuentas.
+	Centro de Costo
+	Lista
+	No
+	Filtra movimientos asociados a un CECO.
+	Moneda
+	Lista
+	No
+	Moneda local o extranjera.
+	Libro Contable
+	Lista
+	No
+	Diario General, Compras, Ventas, Ajustes, etc.
+	Mostrar Cuentas sin Movimiento
+	Checkbox
+	No
+	Permite incluir cuentas sin movimientos.
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Código de Cuenta
+	Código contable de la cuenta.
+	Descripción de Cuenta
+	Nombre o detalle de la cuenta contable.
+	Fecha Contable
+	Fecha del movimiento.
+	Nº Asiento
+	Identificador del asiento.
+	Glosa
+	Descripción del movimiento contable.
+	Centro de Costo
+	CECO asociado, si aplica.
+	Débito
+	Importe cargado al debe.
+	Crédito
+	Importe cargado al haber.
+	Saldo Acumulado
+	Saldo de la cuenta luego de cada movimiento.
+	Moneda
+	Tipo de moneda (Local / Extranjera).
+	Usuario Registro
+	Usuario que registró el asiento.
+	8.3 Totales del Reporte
+         * Total Débitos del periodo.
+
+         * Total Créditos del periodo.
+
+         * Saldo Final por cuenta.
+
+         * Totales globales del libro.
+
+________________
+
+
+9. Reglas de Negocio
+            1. Integridad contable: Los débitos y créditos deben cuadrar por cada cuenta.
+
+            2. Saldo inicial: Se obtiene del cierre del periodo anterior o del asiento de apertura.
+
+            3. Saldos acumulados: Se recalculan automáticamente al procesar el reporte.
+
+            4. Filtros obligatorios: Se requiere al menos el periodo o rango de fechas.
+
+            5. Seguridad: Solo usuarios con rol contable o auditor pueden generar este reporte.
+
+            6. Auditoría: Cada ejecución queda registrada en la tabla LOG_REPORTE_LIBRO_MAYOR.
+
+            7. Multipaís: El reporte debe mostrar solo los movimientos de la razón social activa.
+
+            8. Solo lectura: No se permite modificar ni eliminar registros desde el reporte.
+
+________________
+
+
+10. Integraciones
+               * Módulo de Contabilidad General: Fuente de asientos y saldos contables.
+
+               * Módulo de Plan de Cuentas: Estructura de las cuentas contables.
+
+               * Módulo de Centros de Costo: Asociaciones analíticas de las cuentas.
+
+               * Módulo de Auditoría: Registro de generación de reportes.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Tipo de Componente: Reporte de validación contable (solo lectura).
+
+                  * Tablas Fuente:
+
+                     * CNTBL_ASIENTO (cabecera del asiento).
+
+                     * CNTBL_ASIENTO_DET (detalle de movimientos).
+
+                     * CNTBL_CUENTA_CONTABLE (plan de cuentas).
+
+                     * CNTBL_CENTRO_COSTO (centros de costo).
+
+Consulta Base (referencial):
+
+ SELECT 
+    d.cnta_ctbl,
+    c.desc_cta,
+    a.fecha_cntbl,
+    a.nro_asiento,
+    a.desc_glosa,
+    d.debe,
+    d.haber,
+    (SUM(d.debe - d.haber) OVER (PARTITION BY d.cnta_ctbl ORDER BY a.fecha_cntbl, a.nro_asiento)) AS saldo_acumulado,
+    d.cencos,
+    a.cod_usr,
+    a.cod_moneda
+FROM cntbl_asiento a
+JOIN cntbl_asiento_det d 
+    ON a.origen = d.origen 
+   AND a.nro_asiento = d.nro_asiento
+JOIN cntbl_cuenta_contable c 
+    ON d.cnta_ctbl = c.cnta_ctbl
+WHERE a.fecha_cntbl BETWEEN :fecha_ini AND :fecha_fin
+ORDER BY d.cnta_ctbl, a.fecha_cntbl, a.nro_asiento;
+                        *                         * Exportaciones: Formatos .xlsx y .pdf.
+
+                        * Bitácora: Tabla LOG_REPORTE_LIBRO_MAYOR (usuario, fecha, filtros, total de registros).
+
+                        * Performance: Indexar los campos CNTA_CTBL, FECHA_CNTBL, NRO_ASIENTO y ORIGEN.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Reportes → Validación / Libro Mayor.
+
+                           2. Define los filtros de búsqueda (periodo, cuenta, moneda, centro de costo, etc.).
+
+                           3. Presiona el botón “Generar Reporte”.
+
+                           4. El sistema procesa los registros contables y genera el Libro Mayor.
+
+                           5. Los resultados se muestran agrupados por cuenta con sus saldos acumulados.
+
+                           6. El usuario puede exportar el reporte a Excel o PDF.
+
+                           7. El sistema registra la ejecución en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un periodo contable o rango de fechas para generar el reporte.”
+
+                              * “No existen movimientos contables en el rango seleccionado.”
+
+                              * “Reporte generado correctamente.”
+
+                              * “Error al procesar el reporte. Contacte al administrador del sistema.”
+
+                              * “El usuario no tiene permisos para ejecutar esta funcionalidad.”

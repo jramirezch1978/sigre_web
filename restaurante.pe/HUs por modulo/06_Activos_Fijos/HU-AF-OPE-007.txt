@@ -1,0 +1,254 @@
+﻿HU-AF-OPE-007 - Proceso de Revaluación Técnica y Comercial de Activos - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Operaciones
+3. Subproceso
+Revaluaciones
+4. Nombre de la Historia de Usuario
+Proceso de Revaluación Técnica y Comercial de Activos
+5. Descripción / Propósito
+Como Administrador Contable o Valuador Técnico de Activos Fijos, quiero registrar y ejecutar procesos de revaluación técnica o comercial sobre activos fijos, para actualizar su valor contable según tasaciones técnicas o índices oficiales, recalcular la base depreciable, generar los asientos contables correspondientes y mantener el historial de revaluaciones con fines de auditoría y control patrimonial, conforme a la NIC 16 – Propiedades, Planta y Equipo y regulaciones tributarias locales.
+6. Alcance
+Esta funcionalidad permite la revaluación periódica o extraordinaria de activos fijos, ya sea por:
+* Tasación técnica: mediante informes periciales o valuaciones físicas.
+
+* Índices oficiales: aplicando factores de revalorización por inflación o normativa vigente.
+
+El sistema calcula automáticamente los nuevos valores contables, ajusta la base de depreciación, determina el incremento o decremento de valor, y genera los asientos contables de revaluación o pérdida por desvalorización, manteniendo trazabilidad completa e histórico de todas las valuaciones efectuadas sobre el activo.
+________________
+
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Operaciones → Revaluaciones → Proceso de Revaluación Técnica y Comercial
+8. Campos del Formulario
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada por la sesión activa.
+	País
+	Determinado automáticamente.
+	Código del Activo
+	Identificador único del activo.
+	Descripción del Activo
+	Denominación del bien a revaluar.
+	Valor Original
+	Valor de adquisición.
+	Depreciación Acumulada
+	Calculada hasta la fecha de revaluación.
+	Valor Neto Actual
+	Valor contable previo a la revaluación.
+	Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Tipo de Revaluación
+	Lista
+	Técnica / Comercial (Índice Oficial).
+	Obligatorio.
+	Fecha de Revaluación
+	Fecha
+	Fecha efectiva de la tasación o índice.
+	No posterior al cierre contable.
+	Fuente de Revaluación
+	Lista
+	Informe Técnico / Índice Oficial / Otro.
+	Obligatorio.
+	Factor de Revaluación
+	Numérico (10,6)
+	Porcentaje o factor aplicado.
+	Obligatorio para índice.
+	Nuevo Valor
+	Numérico (15,2)
+	Valor revaluado según tasación o cálculo.
+	Obligatorio. Mayor al valor neto actual.
+	Moneda
+	Lista
+	Moneda del valor revaluado (Soles / Dólares).
+	Obligatorio.
+	Documento Soporte
+	Texto (30)
+	N° de informe o resolución de revaluación.
+	Obligatorio.
+	Responsable / Valuador
+	Usuario / Texto
+	Persona o entidad responsable de la valuación.
+	Obligatorio.
+	Estado del Proceso
+	Lista
+	En Proceso / Validado / Contabilizado / Cerrado.
+	Controlado por flujo.
+	Campos Opcionales:
+Campo
+	Descripción
+	Nueva Vida Útil (Años)
+	Ajuste de vida útil en caso de mejoras o renovación.
+	Motivo de Revaluación
+	Texto (150)
+	Observaciones
+	Comentarios administrativos o técnicos.
+	Valor Residual
+	Valor residual tras revaluación (si aplica).
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo Proceso
+	Inicia una nueva revaluación.
+	Se habilitan campos de registro.
+	Calcular Nueva Base
+	Calcula automáticamente el nuevo valor contable y la base de depreciación.
+	Muestra resultado preliminar.
+	Validar Revaluación
+	Revisa consistencia de cálculos y documentación.
+	Cambia estado a “Validado”.
+	Contabilizar
+	Genera asiento contable automático de revaluación.
+	Actualiza módulo contable.
+	Anular
+	Cancela proceso antes de contabilización.
+	Conserva registro histórico.
+	Consultar Historial
+	Muestra todas las revaluaciones realizadas sobre el activo.
+	Reporte consolidado.
+	Exportar / Imprimir
+	Genera informe PDF o Excel con detalle técnico y contable.
+	Archivo descargable.
+	________________
+
+
+10. Reglas de Negocio
+   1. Solo pueden revaluarse activos en estado “Activo” o “Depreciándose”.
+
+   2. No se permite revaluar activos con procesos de venta, baja o traslado pendientes.
+
+   3. El nuevo valor revaluado debe ser superior al valor neto contable previo (salvo desvalorizaciones).
+
+   4. Si la revaluación implica un incremento, se genera un asiento de superávit por revaluación (cuenta 57xx); si implica disminución, se registra pérdida por desvalorización (cuenta 67xx).
+
+   5. Toda operación debe generar un registro en el Log de Auditoría Contable (usuario, fecha, monto, factor aplicado).
+
+   6. El sistema recalcula automáticamente la nueva base de depreciación según el valor revaluado y vida útil actualizada.
+
+   7. Las revaluaciones se aplican por activo individual, no por grupo o subclase.
+
+   8. No se permite más de una revaluación activa (en proceso) por el mismo activo.
+
+   9. Las revaluaciones contabilizadas no pueden eliminarse, solo visualizarse.
+
+   10. Los documentos soporte (tasaciones, informes técnicos) deben adjuntarse antes de la contabilización.
+
+   11. Los cambios se reflejan automáticamente en los reportes contables y financieros.
+
+________________
+
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Maestro de Activos (HU-AF-OPE-001)
+	Actualiza valores contables y base depreciable del activo.
+	Matriz Contable (HU-AF-TAB-004)
+	Define cuentas para asiento contable de revaluación y desvalorización.
+	Módulo Contable General
+	Recibe asientos automáticos de revaluación.
+	Log de Auditoría Contable
+	Registra toda acción y cálculo contable.
+	Configuración Global (HU-AF-TAB-006)
+	Controla moneda, tasas y periodos contables activos.
+	Reportes Financieros
+	Muestran efecto de revaluaciones en balances y depreciaciones.
+	________________
+
+
+12. Consideraciones Técnicas
+      * Interfaz web tipo asistente (wizard) para flujo paso a paso:
+1️⃣ Selección del activo →
+2️⃣ Ingreso de valores o índice →
+3️⃣ Cálculo →
+4️⃣ Contabilización →
+5️⃣ Cierre.
+
+      * Integración por API RESTful con los módulos contable y de activos.
+
+      * Tablas principales:
+
+         * AF_OP_REVALUACIONES (registro principal).
+
+         * AF_HIS_REVALUACIONES (historial completo por activo).
+
+            * Cálculos automáticos con fórmulas contables y actualización inmediata de base depreciable.
+
+            * Validaciones automáticas por periodo contable activo.
+
+            * Registro obligatorio en Log de Auditoría Contable.
+
+            * Capacidad de exportar reportes PDF y Excel para auditoría.
+
+________________
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Solo usuarios con rol “Administrador Contable” o “Valuador Técnico” pueden validar o contabilizar.
+	Performance
+	Cálculos y contabilización ≤ 4 segundos por activo.
+	Usabilidad
+	Flujo intuitivo con vistas dinámicas por tipo de revaluación.
+	Auditoría
+	Registro completo de cálculos, documentos y decisiones.
+	Disponibilidad
+	99.5% durante horario operativo.
+	Escalabilidad
+	Soporte para más de 100.000 activos y 500.000 operaciones de revaluación históricas.
+	________________
+
+
+14. Criterios de Aceptación
+               1. El usuario puede iniciar una revaluación seleccionando un activo existente.
+
+               2. El sistema calcula automáticamente el nuevo valor y base de depreciación.
+
+               3. Los asientos contables se generan correctamente según el tipo de operación (incremento/disminución).
+
+               4. Los documentos soporte pueden adjuntarse y consultarse.
+
+               5. Los valores se actualizan correctamente en el maestro de activos.
+
+               6. Las operaciones quedan registradas en el log contable.
+
+               7. El historial de revaluaciones por activo puede consultarse sin errores.
+
+               8. El proceso completo (registro, cálculo y contabilización) no supera los 5 segundos.
+
+________________
+
+
+15. Comentarios / Observaciones
+                  * Esta HU constituye un proceso contable fundamental para reflejar adecuadamente el valor real de los activos fijos en los estados financieros, conforme a las NIIF (NIC 16).
+
+                  * Garantiza trazabilidad total de las revaluaciones, con historial auditable, documentación soporte y control contable automático.
+
+                  * Permite mantener actualizada la información patrimonial y respaldar procesos de auditoría, fiscalización o valuación corporativa.
+
+                  * Debe mantener coherencia con las HU:
+
+                     * HU-AF-OPE-001 (Registro Principal de Activos Fijos)
+
+                     * HU-AF-TAB-004 (Matriz Contable por Tipo de Activo)
+
+                     * HU-AF-OPE-004 (Registro de Operaciones Especiales sobre Activos)
+
+                     * HU-AF-TAB-006 (Configuración Global del Módulo)
+
+                        * Se recomienda implementar una función de “Simulación de Revaluación” antes de contabilizar, para visualizar impactos contables y financieros previos.
+
+                        * Esta funcionalidad alimenta los reportes de Superávit por Revaluación, Desvalorizaciones Acumuladas y Evolución del Valor Patrimonial de Activos.

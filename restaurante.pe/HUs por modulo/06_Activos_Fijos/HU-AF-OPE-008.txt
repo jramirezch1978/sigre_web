@@ -1,0 +1,274 @@
+﻿HU-AF-OPE-008 - Configuración de Tasas y Métodos de Depreciación por Activo - v1.1
+________________
+
+
+1. Módulo
+Activos Fijos
+________________
+
+
+2. Proceso
+Operaciones
+________________
+
+
+3. Subproceso
+Asignación de Ratios de Depreciación
+________________
+
+
+4. Nombre de la Historia de Usuario
+Configuración de Tasas y Métodos de Depreciación por Activo
+________________
+
+
+5. Descripción / Propósito
+Como Administrador Contable o Analista de Activos Fijos,
+quiero configurar las tasas y métodos de depreciación contable y tributaria por activo o por subclase,
+para asegurar que el cálculo de depreciación se realice de manera correcta, conforme a las normativas contables, tributarias y políticas internas, permitiendo ajustar la base depreciable, definir fechas de inicio, valores residuales y distribuir el gasto entre centros de costo asociados.
+________________
+
+
+6. Alcance
+Esta funcionalidad permite definir, parametrizar y gestionar las tasas, métodos y fechas de inicio de depreciación aplicables a cada activo fijo.
+El sistema soporta la configuración diferenciada entre depreciación contable y depreciación tributaria, conforme a la legislación vigente de cada país.
+La configuración considera los siguientes elementos:
+* Método de Depreciación: Lineal, Decreciente u Otro parametrizable.
+
+* Tasa de Depreciación: Porcentaje anual o mensual aplicable al activo.
+
+* Valor Residual: Monto no depreciable.
+
+* Fecha de Inicio de Depreciación: Determina cuándo se inicia el cálculo.
+
+* Centro(s) de Costo: Permite distribución proporcional del gasto de depreciación.
+
+* Normativa Aplicable: Vinculación con NIIF/NIC 16 y normas tributarias locales.
+
+Los parámetros definidos impactan directamente en el cálculo de las depreciaciones mensuales y en los asientos automáticos contables.
+________________
+
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Operaciones → Asignación de Ratios de Depreciación → Configuración de Tasas y Métodos
+________________
+
+
+8. Campos del Formulario
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada por sesión del usuario.
+	País
+	Determinado según la razón social.
+	Código del Activo
+	Identificador único del activo.
+	Descripción del Activo
+	Nombre del activo asociado.
+	Valor de Adquisición
+	Valor original registrado.
+	Vida Útil Actual
+	Calculada según la clase o configuración previa.
+	Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Tipo de Depreciación
+	Lista
+	Contable / Tributaria / Ambas.
+	Obligatorio.
+	Método de Depreciación
+	Lista
+	Lineal / Decreciente / Otro parametrizado.
+	Obligatorio.
+	Tasa Anual (%)
+	Numérico (5,2)
+	Porcentaje anual aplicado.
+	Validar entre 0 y 100.
+	Valor Residual
+	Numérico (15,2)
+	Valor no depreciable.
+	No mayor al 20% del valor de adquisición.
+	Fecha de Inicio
+	Fecha
+	Fecha desde la cual inicia la depreciación.
+	No anterior a la adquisición.
+	Centro de Costo
+	Lista / Multiselección
+	Centro o centros donde se distribuye la depreciación.
+	Obligatorio.
+	Porcentaje de Distribución
+	Numérico (5,2)
+	Participación por centro de costo.
+	Debe sumar 100%.
+	Normativa Aplicable
+	Lista
+	NIC 16 / NIIF / Tributaria Nacional.
+	Obligatorio.
+	Campos Opcionales:
+Campo
+	Descripción
+	Observaciones
+	Comentarios adicionales o justificación contable.
+	Documento de Referencia
+	Archivo o número de resolución interna.
+	Fecha de Fin (solo depreciación tributaria)
+	Fecha límite si aplica.
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nueva Configuración
+	Permite registrar tasas y métodos para un activo.
+	Parámetros guardados y validados.
+	Editar Configuración
+	Modifica datos antes de generar cálculos.
+	Actualiza valores y registra log.
+	Duplicar Configuración
+	Copia tasas y métodos de otro activo similar.
+	Ahorra tiempo de configuración.
+	Calcular Previo
+	Simula depreciación con los parámetros ingresados.
+	Muestra proyección contable.
+	Guardar / Confirmar
+	Guarda la configuración definitiva.
+	Parámetros activos para cálculos reales.
+	Anular / Desactivar
+	Inactiva configuración sin eliminar.
+	Mantiene trazabilidad histórica.
+	Exportar / Imprimir
+	Genera reporte con tasas, métodos y normativa aplicada.
+	PDF o Excel descargable.
+	________________
+
+
+10. Reglas de Negocio
+   1. Cada activo debe tener al menos una configuración contable activa de depreciación.
+
+   2. No se puede asignar una tasa de depreciación mayor a la máxima establecida por normativa tributaria.
+
+   3. Los métodos “Lineal” y “Decreciente” deben aplicarse según el tipo de activo o clase configurada (HU-AF-TAB-003).
+
+   4. La fecha de inicio debe ser posterior o igual a la fecha de adquisición.
+
+   5. Los centros de costo seleccionados deben pertenecer a la razón social activa.
+
+   6. Las tasas contables y tributarias pueden diferir, pero deben coexistir bajo el mismo activo.
+
+   7. Todo cambio de tasa o método debe registrarse en el Log de Auditoría Contable (usuario, fecha, acción).
+
+   8. La suma de los porcentajes de distribución entre centros de costo debe ser igual al 100%.
+
+   9. El sistema debe recalcular automáticamente la depreciación mensual con la nueva tasa.
+
+   10. Si la normativa cambia, las configuraciones anteriores deben conservarse como histórico.
+
+   11. Las configuraciones desactivadas no se consideran en cálculos futuros, pero se mantienen para auditoría.
+
+   12. Si un activo es revaluado, el sistema solicitará confirmar o ajustar la tasa según el nuevo valor.
+
+________________
+
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Maestro de Activos (HU-AF-OPE-001)
+	Recibe la configuración para aplicar el cálculo mensual.
+	Matriz Contable (HU-AF-TAB-004)
+	Determina cuentas afectadas en el gasto y depreciación acumulada.
+	Configuración Global (HU-AF-TAB-006)
+	Valida normativas, periodos y moneda.
+	Módulo Contable General
+	Genera asientos automáticos de depreciación.
+	Log de Auditoría Contable
+	Registra acciones de creación, edición y validación.
+	Reportes de Depreciación Mensual
+	Usa tasas y métodos definidos en esta configuración.
+	________________
+
+
+12. Consideraciones Técnicas
+      * Interfaz web tipo formulario multipestaña, con secciones: Datos Generales, Tasas Contables, Tasas Tributarias, Distribución por Centros de Costo, y Auditoría.
+
+      * Integración mediante API RESTful con el motor de cálculo de depreciación.
+
+      * Tablas principales:
+
+         * AF_CFG_DEP_ACTIVOS (configuración contable/tributaria).
+
+         * AF_CFG_DEP_CENTROS (distribución de costos).
+
+            * Validación automática de tasas máximas por país según parámetros globales.
+
+            * Soporte para simulaciones previas antes de guardar.
+
+            * Registro automático en Log de Auditoría Contable.
+
+            * Actualización dinámica de valores en el módulo de depreciación mensual.
+
+________________
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles “Administrador de Activos” o “Contador General”.
+	Performance
+	Guardado y validación ≤ 3 segundos.
+	Usabilidad
+	Interfaz con validaciones visuales y ayuda contextual por campo.
+	Auditoría
+	Registro de cambios de tasa, método y fechas en log contable.
+	Disponibilidad
+	99.5% durante horario operativo.
+	Escalabilidad
+	Capacidad para manejar configuraciones para más de 100.000 activos.
+	________________
+
+
+14. Criterios de Aceptación
+               1. El usuario puede crear o editar configuraciones por activo con tasas y métodos válidos.
+
+               2. El sistema valida automáticamente la tasa máxima y la normativa aplicable.
+
+               3. Las fechas de inicio no pueden ser anteriores a la fecha de adquisición.
+
+               4. Los porcentajes de distribución entre centros de costo deben sumar 100%.
+
+               5. Los cálculos simulados coinciden con los métodos seleccionados (lineal/decreciente).
+
+               6. El registro queda guardado en el Log Contable con trazabilidad completa.
+
+               7. Los asientos de depreciación se generan correctamente según la configuración aplicada.
+
+               8. El tiempo de respuesta de guardado no supera los 3 segundos.
+
+________________
+
+
+15. Comentarios / Observaciones
+                  * Esta HU es clave para la automatización del cálculo contable y tributario de las depreciaciones, asegurando cumplimiento normativo en todos los países operativos.
+
+                  * Se alinea a los principios de la NIC 16 y normas fiscales locales, garantizando trazabilidad y control.
+
+                  * La funcionalidad está directamente vinculada a las HU:
+
+                     * HU-AF-OPE-001 (Registro Principal de Activos Fijos)
+
+                     * HU-AF-TAB-004 (Configuración de Cuentas Contables por Tipo de Activo)
+
+                     * HU-AF-TAB-006 (Configuración Global de Parámetros del Módulo)
+
+                     * HU-AF-OPE-007 (Revaluación Técnica y Comercial de Activos).
+
+                        * Se recomienda incluir una opción de “Simulación de Depreciación” para revisar el impacto contable antes de confirmar la configuración.
+
+                        * Esta funcionalidad constituye la base para los cálculos automáticos de depreciación mensual y la generación de reportes financieros y tributarios.

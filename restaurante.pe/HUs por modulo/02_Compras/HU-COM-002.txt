@@ -1,0 +1,100 @@
+﻿HU-COM-002 - Condición de Pago - v1.0
+1. Título
+Gestión de Condiciones de Pago
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero registrar, modificar, consultar e inactivar las condiciones de pago de los proveedores, para que estas puedan ser utilizadas en el registro de compras y en la gestión de cuentas por pagar.
+3. Proceso
+* Proceso: Tablas
+
+* Subproceso: Condiciones de Pago
+
+* Módulo: Compras
+
+4. Narrativa de Usuario
+   * Quiero: Administrar las condiciones de pago de los proveedores.
+
+   * Para: Estandarizar la forma en que se registran las obligaciones de pago.
+
+   * De manera que: Se facilite la gestión de compras y la integración con las cuentas por pagar y contabilidad.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Compras > Tablas > Condiciones de Pago
+6. Criterios de Aceptación
+      1. El sistema debe permitir crear, modificar, consultar e inactivar condiciones de pago.
+
+      2. Cada condición de pago debe estar identificada de manera única por un código interno [a][b][c][d]y un nombre.
+
+      3. El sistema debe validar que no existan condiciones de pago duplicadas (por código o nombre).
+
+      4. No se podrán eliminar condiciones de pago que estén asociadas a proveedores o documentos de compra; sólo podrán inactivarse.
+
+      5. El sistema debe registrar toda acción en el log de auditoría contable (usuario, fecha, hora, acción).
+
+      6. El listado de condiciones de pago debe permitir filtros por código, nombre y estado (activo/inactivo).
+
+      7. Las condiciones de pago registradas deben ser seleccionables en el módulo de Compras (órdenes, facturas) y en proveedores.
+
+7. Campos del Formulario
+Datos de Condición de Pago
+         * Código (autogenerado o manual, único)[e][f][g].
+
+         * Nombre de Condición de Pago (obligatorio, texto).
+
+         * Descripción (opcional, texto libre).
+
+         * Tipo de Condición (lista desplegable: Contado, Crédito, Anticipo y Mixto).
+
+         * Plazo de Crédito (numérico en días, requerido si aplica crédito).
+
+         * Número de cuotas (numérico, visible si aplica crédito en cuotas).
+
+         * Estado (Activo/Inactivo).
+
+8. Listado de Condiciones de Pago (Vista Tabla)
+Columnas:
+            * Código
+
+            * Nombre
+
+            * Tipo de Condición
+
+            * Plazo (días)
+
+            * Número de Cuotas
+
+            * Estado
+
+Acciones disponibles: Ver | Editar | Inactivar | Exportar (Excel/PDF)
+Filtros disponibles: Código | Nombre | Tipo de Condición | Estado
+9. Consideraciones Técnicas
+               * Validación obligatoria de unicidad por código y nombre.
+
+               * El sistema debe permitir carga masiva de condiciones de pago vía Exce[h][i][j]l.
+
+               * Todas las operaciones deben registrarse en el log de auditoría contable.
+
+               * Integración con módulos de Compras y Finanzas (Cuentas por Pagar).
+
+               * El campo “Plazo de Crédito” debe estar parametrizado en días, para cálculos automáticos de vencimiento en facturas.
+
+10. Comentarios
+                  * En condiciones de pago tipo crédito en cuotas, se debe permitir definir periodicidad (semanal, quincenal, mensual).
+
+                  * Las condiciones de pago inactivas no deben estar disponibles en la selección de formularios de compras ni en el maestro de proveedores.
+
+
+[a]@igarcia@restaurant.pe @consultorexterno1@restaurant.pe el código interno de las condiciones de pago, tendría algún formato especial o será un número entero solamente?
+_Asignada a igarcia@restaurant.pe_
+[b]Puede empezar por el prefijo "CP" seguido de un número entero (Ej. CP001)
+[c]_Marcada como completada_
+[d]_Reabierto_
+Por favor, agregar los detalles funcionales en el documento de HU, ya que los comentarios resueltos luego se eliminarán.
+[e]@consultorexterno1@restaurant.pe @igarcia@restaurant.pe  Brindar detalles de como trabajaría el código autogenerado o manual, pienso que debe ser autogenerado, según  un formato,  para no ocasionar diferentes formatos de códigos al dejar que lo defina de forma manual el usuario.
+_Asignada a consultorexterno1@restaurant.pe_
+[f]podria usarce CP-0001, CP-0002 etc seguir esa secuencia
+[g]esta bien, por favor, actualizar la HU con el detalle del formato.
+[h]@igarcia@restaurant.pe @consultorexterno1@restaurant.pe  
+Verificar si es necesario carga masiva, pues valdría la pena si las condiciones de pago son más de 20 registros por proveedor y si esta información varía con frecuencia. Con respecto al formato, revisar si el estándar en formato CSV o xlsx en todas las cargas masivas.
+_Asignada a igarcia@restaurant.pe_
+[i]Puede estar habilitado para ambos formatos?
+[j]Normalmente se utiliza CSV cuando es una gran cantidad de datos (ya que las hojas de Excel tiene un límite de filas), además se debe estandarizar el formato de archivos de carga. Sugiero manejarlo como CSV, además,  estos fácilmente se pueden generar desde un Excel.

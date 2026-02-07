@@ -1,0 +1,190 @@
+﻿HU-ALM-TAB-PRO-002 – Definición y Configuración de Productos por Naturaleza, Sucursal e Impuestos
+________________
+
+
+1. Descripción
+Como usuario del sistema Restaurant.pe, quiero registrar y configurar correctamente los productos definiendo: Su naturaleza (contable, inventario o gestión) Su sucursal de uso, Su centro de costo, Sus cuentas contables asociadas, sus impuestos según el país
+Para que el sistema registre de forma correcta los movimientos contables, de inventario y tributarios, cumpliendo con la normativa vigente (SUNAT u otras según país), y evitando errores en los libros contables, kardex y reportes financieros.
+________________
+
+
+2. Proceso
+Proceso: Tablas
+Subproceso: Maestro de Productos
+Módulo: Almacén
+________________
+3. Narrativa de Usuario
+Quiero: Registrar productos definiendo su naturaleza (contable, inventario o gestión), asociándolos a una sucursal y centro de costo, vinculando correctamente sus cuentas contables y configurando sus impuestos según el país en el que opera la empresa.
+Para: Que los procesos de compra, control de inventario, registro contable y cálculo de impuestos se realicen de manera automática, correcta y sin errores.
+De manera que: Se garantice la coherencia contable, fiscal y operativa del sistema, evitando inconsistencias en el kardex, IGV, libros electrónicos y estados financieros.
+________________
+
+
+4.Regla de Navegabilidad
+Ruta: Menú Principal → Almacén / Compras → Tablas → Maestro de Productos → Configuración de Naturaleza e Impuestos
+________________
+5.  Criterios de Aceptación (versión ampliada y explicada)
+El sistema debe permitir:
+✔ Registrar productos (bienes tangibles y servicios).
+✔ Asignar una naturaleza única al producto:
+* Contable → Impacta directamente en cuentas contables.
+* Inventario → Controla stock físico.
+* Gestión → Uso administrativo, sin impacto contable directo.
+✔ Asignar el producto a:
+* Una o más sucursales
+* Un centro de costo por defecto
+✔ Asociar las cuentas contables correctas, dependiendo de su naturaleza:
+* Cuenta de Inventario
+* Cuenta de Costo
+* Cuenta de Ingreso
+* Cuenta de Gasto
+✔ Configurar los impuestos por producto y por país:
+* IGV (Perú)
+* IVA (otros países)
+* ITBIS / ISV (según corresponda)
+✔ Definir si el producto está:
+* Afecto
+* Exonerado
+* Infecto
+✔ Validar:
+* Que un producto tenga una sola naturaleza
+* Que no existan productos duplicados por:
+   * Código + País + Sucursal
+✔ Permitir la:
+* Edición del producto (siempre que no tenga movimientos cerrados)
+* Inactivación (si no está siendo utilizado)
+✔ Registrar en el log de auditoría:
+* Usuario
+* Fecha
+* Hora
+* IP
+✔ Permitir:
+* Exportar a Excel / PDF
+* Importar configuraciones masivas
+✔ Mostrar:
+* Histórico de versiones del producto
+________________
+
+
+6. Campos del Reporte / Columnas de Vista Tabla
+Campos principales:
+Campo
+	Descripción
+	Validaciones / Reglas / Ejemplo
+	Sucursal
+	Sede física donde el producto puede ser utilizado o comprado.
+	Obligatorio. El producto solo podrá utilizarse en estas sucursales. Ej: Piura / Lima / Tumbes
+	Código de Producto
+	Código interno único del producto.
+	Obligatorio. No se permiten duplicados por País + Sucursal + Código. Ej: PROD-001
+	Descripción del Producto
+	Nombre comercial del producto o servicio.
+	Obligatorio. Ej: “Gas doméstico 10 kg”
+	Naturaleza (Contable / Inventario / Gestión)
+	Define el comportamiento del producto en el sistema.
+	Una sola selección obligatoria: 
+• Contable → genera asiento contable
+• Inventario → mueve stock
+• Gestión → solo informativo
+	Unidad de Medida
+	Forma en que se mide el producto.
+	Obligatorio. Ej: Unidad, Kg, Litros, Caja, Hora
+	Centro de Costo
+	Área responsable del gasto/consumo del producto.
+	Obligatorio. Se arrastra a la OC y asiento. Ej: Cocina / Administración
+	Cuenta de Inventario
+	Cuenta contable donde se registra el activo si controla stock.
+	Obligatorio SI Naturaleza = Inventario. Ej: 2011 – Mercaderías
+	Cuenta de Costo
+	Cuenta donde se registra el costo del producto consumido.
+	Obligatorio si Naturaleza = Inventario o Contable. Ej: 691 – Costo de ventas
+	Cuenta de Ingreso / Gasto
+	Cuenta donde se registra el gasto o ingreso asociado al producto.
+	Obligatoria si Naturaleza = Contable o Gestión. Ej: 6011 – Gas / 7011 – Ventas
+	Impuesto Principal (IGV/IVA/ITBIS/ISV)
+	Tipo de impuesto aplicable según país.
+	Obligatorio. Depende del País. Ej: IGV (Perú)
+	Porcentaje de Impuesto
+	Porcentaje del impuesto seleccionado.
+	Automático desde el maestro de impuestos. Ej: 18.00 / 10.00
+	Exonerado (Sí / No)
+	Indica si el producto está exonerado del impuesto.
+	Si = Sí → % Impuesto pasa a 0 automáticamente
+	Estado (Activo / Inactivo)
+	Indica si el producto puede ser usado en transacciones.
+	Solo productos activos pueden ser usados en OC y facturas
+	Fecha de Creación
+	Fecha y hora en que se creó el producto.
+	Automático por el sistema. No editable
+	Observaciones
+	Comentarios adicionales del producto.
+	Opcional. Ej.: “Solo usar en sucursal Piura”
+	
+
+	
+
+	
+
+	
+
+Filtros disponibles:
+ Naturaleza
+País
+Sucursal
+Centro de Costo
+Impuesto
+Estado
+Usuario
+Acciones disponibles:
+Crear nuevo producto
+Editar producto
+Activar / Inactivar
+Eliminar (si no tiene movimientos)
+Ver Detalle
+Ver Histórico
+Exportar (Excel / PDF)
+Importar
+Ver Log de Auditoría
+________________
+
+
+7. 🔗 Detalle de Integración
+✔ Contabilidad:
+Genera automáticamente asientos contables según la naturaleza del producto.
+✔ Impuestos / SUNAT / Multipaís:
+Aplica automáticamente el IGV (o impuesto correspondiente) según el país y la vigencia.
+✔ Compras:
+El producto puede utilizarse en:
+* Orden de compra
+* Recepción de mercadería
+* Factura del proveedor
+✔ Inventario:
+Si es tipo Inventario, se registra en:
+* Kardex
+* Stock físico
+* Valorización
+✔ Centros de Costo y Sucursales:
+Se vincula la operación al área responsable (Ej. Cocina, Almacén, Admin).
+________________
+
+
+8.  Consideraciones Técnicas
+* El sistema debe funcionar en modalidad:
+✅ Multiempresa
+✅ Multipaís
+✅ Multisucursal
+* Las configuraciones de impuestos deben manejar:
+   * Fecha de inicio de vigencia
+   * Fecha de fin de vigencia
+   * Historial completo
+   * No se podrá cambiar:
+   * La naturaleza del producto si ya tiene movimientos
+   * La sucursal si ya fue utilizada
+   * Todo cambio debe generar:
+✅ Nueva versión
+✅ Registro histórico
+✅ Registro en auditoría
+   * Validaciones cruzadas:
+      * Evitar duplicados
+      * Evitar productos incompletos
+      * Evitar errores contables

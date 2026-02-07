@@ -1,0 +1,260 @@
+﻿HU-AF-REP-002 - Detalle de Cálculos de Depreciación Anual por Cada Activo - v1.1
+________________
+
+
+1. Módulo
+Activos Fijos
+________________
+
+
+2. Proceso
+Reportes
+________________
+
+
+3. Subproceso
+Depreciación Anual por Activo
+________________
+
+
+4. Nombre de la Historia de Usuario
+Detalle de Cálculos de Depreciación Anual por Cada Activo
+________________
+
+
+5. Descripción / Propósito
+Como Contador General o Auditor de Activos Fijos, quiero consultar un reporte analítico con el detalle de los cálculos de depreciación anual y mensual de cada activo, para verificar la exactitud de las tasas aplicadas, valores depreciados, saldos acumulados y proyecciones, permitiendo así respaldar la información contable y tributaria ante auditorías o declaraciones fiscales.
+________________
+
+
+6. Alcance
+Esta funcionalidad permite la generación de un reporte detallado por activo, donde se visualizan los cálculos de depreciación efectuados durante el ejercicio contable seleccionado.
+El sistema toma como base los parámetros definidos en la Configuración de Tasas y Métodos de Depreciación (HU-AF-OPE-008) y los valores registrados en el Maestro de Activos (HU-AF-OPE-001).
+El reporte incluye:
+* Cálculo mensual y anual de depreciación.
+
+* Tasas contables y tributarias aplicadas.
+
+* Valor de adquisición, residual y neto contable.
+
+* Número de meses depreciados y saldo pendiente.
+
+* Proyección de depreciación futura.
+
+El resultado puede exportarse en Excel (para análisis contable) o PDF en formato de auditoría, con totales y validaciones por activo.
+________________
+
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Reportes → Depreciación Anual por Activo → Detalle de Cálculos de Depreciación
+________________
+
+
+8. Campos y Columnas del Reporte
+Filtros del Reporte
+Filtro
+	Descripción
+	Año Fiscal
+	Año del ejercicio contable.
+	Periodo / Mes
+	Permite seleccionar un mes o rango de meses.
+	Clase / Subclase
+	Filtro por tipo contable del activo.
+	Centro de Costo
+	Área o unidad de negocio.
+	Ubicación Física
+	Edificio, almacén o sucursal.
+	Estado del Activo
+	Activo / Revaluado / Dado de Baja.
+	Tipo de Depreciación
+	Contable / Tributaria / Ambas.
+	
+
+Columnas del Reporte
+Campo
+	Descripción
+	Código del Activo
+	Identificador único del activo.
+	Descripción del Activo
+	Nombre o denominación del bien.
+	Clase
+	Clasificación jerárquica del activo.
+	Valor Original
+	Costo de adquisición.
+	Base Depreciable
+	Valor original – valor residual.
+	Método de Depreciación
+	Lineal / Decreciente / Otro.
+	Tasa Anual (%)
+	Tasa aplicada según configuración.
+	Meses Depreciados
+	Total de meses contabilizados.
+	Depreciación Mensual
+	Monto depreciado cada mes.
+	Depreciación Anual
+	Total depreciado en el ejercicio.
+	Depreciación Acumulada
+	Monto total depreciado hasta la fecha de corte.
+	Valor Neto Contable
+	Valor actual del activo luego de depreciar.
+	Proyección Depreciación
+	Cálculo estimado de depreciaciones futuras.
+	Tipo de Cálculo
+	Contable / Tributario.
+	Estado
+	Activo / Revaluado / Dado de Baja.
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Generar Reporte
+	Ejecuta el cálculo y muestra resultados según filtros.
+	Reporte detallado por activo.
+	Actualizar Datos
+	Refresca cálculos con base a últimas depreciaciones registradas.
+	Datos actualizados.
+	Exportar a Excel
+	Exporta reporte detallado con fórmulas.
+	Archivo Excel descargable.
+	Exportar a PDF (Auditoría)
+	Genera informe institucional con firmas y totales.
+	Archivo PDF listo para auditoría.
+	Guardar Filtros Frecuentes
+	Permite guardar combinaciones de filtros para uso recurrente.
+	Mejora eficiencia.
+	Simular Proyección
+	Genera una proyección de depreciación futura según tasa y vida útil.
+	Muestra gráfico o tabla proyectada.
+	________________
+
+
+10. Reglas de Negocio
+   1. Solo pueden visualizarse activos con fecha de adquisición y configuración de depreciación activa.
+
+   2. Los cálculos deben basarse en los parámetros de HU-AF-OPE-008 (tasas, método, valor residual).
+
+   3. Las tasas contables y tributarias deben mostrarse en columnas separadas si ambas existen.
+
+   4. Los valores contables se calculan con precisión de dos decimales.
+
+   5. Los montos anuales deben corresponder a la suma exacta de los montos mensuales registrados.
+
+   6. El sistema debe validar que la depreciación acumulada no supere la base depreciable.
+
+   7. Los reportes deben mostrar una nota técnica en el pie indicando la fórmula aplicada.
+
+   8. Toda generación o exportación del reporte debe registrarse en el Log de Auditoría Contable (usuario, filtros, fecha, hora, registros).
+
+   9. Los activos con revaluaciones deben reflejar los nuevos valores ajustados (HU-AF-OPE-007).
+
+   10. La proyección de depreciación se calculará hasta la fecha de fin de vida útil del activo.
+
+   11. El usuario solo puede consultar activos de las razones sociales a las que tiene acceso.
+
+   12. La información de depreciación tributaria debe basarse en el porcentaje oficial definido por país.
+
+________________
+
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Maestro de Activos (HU-AF-OPE-001)
+	Fuente de datos base para cada activo.
+	Configuración de Tasas y Métodos (HU-AF-OPE-008)
+	Define los métodos y tasas aplicadas en el cálculo.
+	Matriz Contable (HU-AF-TAB-004)
+	Proporciona las cuentas de gasto y depreciación acumulada.
+	Configuración Global (HU-AF-TAB-006)
+	Determina moneda, periodos y parámetros contables.
+	Revaluaciones (HU-AF-OPE-007)
+	Actualiza valores base para nuevos cálculos.
+	Log de Auditoría Contable
+	Registra todas las acciones de generación y exportación.
+	________________
+
+
+12. Consideraciones Técnicas
+      * Generación de reporte basada en vistas consolidadas de depreciación mensual (AF_HIS_DEPRECIACION).
+
+      * Procesamiento en background (asíncrono) para grandes volúmenes de datos.
+
+      * Capacidad de exportación hasta 200.000 registros por ejecución.
+
+      * Interfaz web con opción de paginación, ordenamiento y búsqueda dinámica.
+
+      * Tablas involucradas:
+
+         * AF_HIS_DEPRECIACION (histórico mensual)
+
+         * AF_MA_ACTIVOS (datos maestros)
+
+         * AF_CFG_DEP_ACTIVOS (tasas y métodos)
+
+            * Registro automático en Log de Auditoría Contable.
+
+            * Reporte PDF con encabezado institucional, pie con fecha, número de página y firma digital.
+
+________________
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido por roles: Administrador, Contador, Auditor.
+	Performance
+	Generación ≤ 8 segundos para 50.000 activos.
+	Usabilidad
+	Interfaz con filtros intuitivos y previsualización del resultado.
+	Auditoría
+	Registro completo de parámetros y usuario generador.
+	Disponibilidad
+	99.5% en horario operativo.
+	Escalabilidad
+	Capacidad para manejar 1 millón de registros históricos.
+	________________
+
+
+14. Criterios de Aceptación
+               1. El usuario puede generar el reporte por año o rango de meses.
+
+               2. El sistema muestra para cada activo: valor original, tasa aplicada, meses depreciados, depreciación mensual/anual y acumulada.
+
+               3. Los cálculos son consistentes con las tasas configuradas.
+
+               4. Las diferencias contables y tributarias se visualizan correctamente.
+
+               5. El reporte puede exportarse a Excel y PDF sin errores.
+
+               6. Toda generación y exportación queda registrada en el Log Contable.
+
+               7. El tiempo de respuesta cumple con los requisitos de performance.
+
+               8. La proyección futura de depreciación muestra resultados coherentes.
+
+________________
+
+
+15. Comentarios / Observaciones
+                  * Este reporte constituye un instrumento crítico para auditorías y declaraciones tributarias, al permitir la trazabilidad completa de los cálculos de depreciación.
+
+                  * Facilita la conciliación entre la contabilidad general y los registros del módulo de activos fijos.
+
+                  * Debe mantener coherencia visual y técnica con las HU:
+
+                     * HU-AF-OPE-001 (Registro Principal de Activos Fijos)
+
+                     * HU-AF-OPE-008 (Configuración de Tasas y Métodos de Depreciación)
+
+                     * HU-AF-REP-001 (Listado General de Activos)
+
+                     * HU-AF-OPE-007 (Revaluación Técnica y Comercial)
+
+                        * Se recomienda incluir un gráfico resumen por clase de activo o centro de costo, mostrando depreciación anual acumulada.
+
+                        * El formato PDF debe incorporar pie institucional con sello digital, versión y fecha de generación, listo para auditorías externas.

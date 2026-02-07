@@ -1,0 +1,178 @@
+﻿HU-COM-OPE-003 - Registro de documento que reduce o ajusta la deuda - v1.0
+1. Título
+Registro de documento que reduce o ajusta la deuda
+2. Descripción
+Como usuario del módulo de Finanzas, quiero registrar documentos que reduzcan o ajusten la deuda con proveedores (por ejemplo: notas de crédito, notas de débito, devoluciones, descuentos comerciales o ajustes contables), para actualizar correctamente el saldo de las facturas afectadas, reflejar el efecto en Cuentas por Pagar y generar los asientos contables correspondientes, manteniendo trazabilidad y cumplimiento fiscal.
+3. Proceso
+* Proceso: Operaciones
+
+* Subproceso: Cuentas por Pagar
+
+* Módulo: Finanzas
+
+4. Narrativa de Usuario
+   * Quiero: Registrar y aplicar documentos que reduzcan, aumenten o ajusten obligaciones con proveedores.
+
+   * Para: Ajustar saldos pendientes y reflejar correctamente el efecto financiero y contable.
+
+   * De manera que: Se mantenga la consistencia entre Compras, Recepciones, Cuentas por Pagar y Contabilidad, y exista trazabilidad para auditoría y fiscalización.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Operaciones > Cuentas por Pagar > Registro de Ajustes / Notas de Crédito / Notas de Débito
+6. Criterios de Aceptación
+      1. El sistema debe permitir crear, editar (mientras esté en estado Pendiente), aplicar y anular documentos de ajuste.
+
+      2. Todo documento de ajuste debe estar vinculado obligatoriamente a una factura u obligación con saldo pendiente (salvo ajustes generales que se definan como “no vinculados”).
+
+      3. No se podrá aplicar un ajuste cuyo monto supere el saldo pendiente del documento afectado.
+
+      4. El sistema debe validar la moneda y aplicar conversión según tipo de cambio si procede; no se permitirán inconsistencias de moneda entre documento y ajuste sin registro de diferencia cambiaria.
+
+      5. Al aplicar el ajuste, debe generarse automáticamente el asiento contable correspondiente y actualizarse el registro en Cuentas por Pagar.
+
+      6. Las facturas ya canceladas o con estado que impida ajustes deben quedar bloqueadas para aplicación de ajustes.
+
+      7. Todas las operaciones de alta, modificación, aplicación o anulación deben registrarse en el log de auditoría contable con usuario, fecha, hora y cambio.
+
+      8. El sistema debe permitir adjuntar comprobantes (PDF/XML) y, si procede, validar series/números en caso de notas de crédito electrónicas según la normativa local.
+
+      9. Debe existir control de duplicidad (número/serie por proveedor y tipo de documento).
+
+      10. El listado de ajustes debe permitir filtros por proveedor, estado, rango de fechas, tipo de documento y usuario responsable.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos del Formulario (visibles y su validación)
+         * Código interno (autogenerado).
+
+         * Tipo de documento (selector: Nota de Crédito, Nota de Débito, Descuento, Devolución, Ajuste Contable). (Obligatorio)
+
+         * Serie / Número (texto). (Obligatorio, único por proveedor y tipo)
+
+         * Proveedor (buscador/autocompletar desde maestro de proveedores). (Obligatorio; solo proveedores activos)
+
+         * Documento afectado (selector / vínculo a factura u obligación con saldo pendiente). (Obligatorio salvo ajuste no vinculado)
+
+         * Fecha de emisión (selector fecha). (Obligatorio; no mayor a la fecha del sistema)
+
+         * Fecha de registro (automático, editable por rol autorizado).
+
+         * Moneda (selector). (Debe coincidir con moneda del documento afectado; si no coincide, requiere tipo de cambio y genera asiento por diferencia si aplica)
+
+         * Tipo de cambio (numérico) — si aplica.
+
+         * Monto del ajuste (numérico). (Obligatorio; no puede exceder saldo pendiente)
+
+            * Motivo / Glosa (texto largo). (Obligatorio, mínimo 10 caracteres)
+
+               * Cuenta contable asociada (selector del plan contable). (Asignación automática por tipo de ajuste; editable según permisos)
+
+               * Adjuntos (carga de archivos: PDF, XML). (Opcional; obligatorio para notas de crédito electrónicas según país)
+
+               * Estado (Pendiente / Aplicado / Anulado). (Gestionado por el sistema)[a]
+
+               * Usuario creador / Usuario última modificación (informativos).
+
+               * Razón Social y País (informativos, solo lectura; definidos por la empresa en sesión).
+
+Columnas del Listado (vista tabla)
+                  * Código interno
+
+                  * Tipo de documento
+
+                  * Serie / Número
+
+                  * Proveedor
+
+                  * Documento afectado (número)
+
+                  * Fecha de emisión
+
+                  * Fecha de registro
+
+                  * Monto del ajuste
+
+                  * Moneda
+
+                  * Estado
+
+                  * Usuario responsable
+
+                  * Fecha última modificación
+
+Filtros disponibles
+                     * Rango de fechas (emisión / registro)
+
+                     * Proveedor
+
+                     * Estado (Pendiente / Aplicado / Anulado)
+
+                     * Tipo de documento
+
+                     * Moneda
+
+                     * Usuario responsable
+
+8. Acciones disponibles
+                        * Nuevo ajuste (crear).
+
+                        * Guardar borrador (estado Pendiente).
+
+                        * Aplicar ajuste (ejecuta contabilización y actualiza saldo).
+
+                        * Editar ajuste (solo si está en estado Pendiente).
+
+                        * Anular ajuste (genera reverso y registra en auditoría).
+
+                        * Ver detalle (vista solo lectura con historial de cambios y adjuntos).
+
+                        * Auditar cambios (ver log de cambios: quién, cuándo, qué campo y valores).
+
+                        * Exportar listado (Excel / PDF).
+
+                        * Generar asiento contable (visualizar / descargar).
+
+                        * Notificar (enviar alerta al responsable de compras / proveedor si procede).
+
+9. Integraciones
+                           * Compras: para obtener referencia de facturas/órdenes y validar cantidades/importe.
+
+                           * Almacén: en caso de devoluciones físicas, vincular con la recepción/nota de entrada.
+
+                           * Contabilidad: generación automática de asientos (débitos y créditos según tipo de ajuste).
+
+                           * Tesorería / Bancos: para efectos de conciliación y bloqueos de pago si aplica.
+
+                           * Módulo de Documentos Electrónicos / Fiscal: validación de series/números y recepción de comprobantes electrónicos (XML) con autoridades fiscales (SUNAT, DIAN, SII, etc.).
+
+                           * Auditoría: registro de todas las acciones en log centralizado.
+
+10. Consideraciones Técnicas
+
+
+
+                              * Validaciones: duplicidad de serie/número por proveedor; validación de monto vs saldo; validación de moneda y tipo de cambio; validación fiscal para notas electrónicas.
+
+                              * Asiento automático: parametrizable por tipo de ajuste (mapeo cuenta débito / cuenta crédito por tipo y por país).
+
+                              * Registro de auditoría: todas las operaciones (alta, edición, aplicación, anulación) deben quedar registradas con usuario, fecha, hora, IP y cambios.
+
+                              * Multipaís: adaptar formatos de documento, validaciones tributarias y condiciones legales según país/razón social.
+
+                              * Exportaciones: debe poder exportarse el detalle y el asiento generado en formatos estándar (Excel, PDF, CSV).
+
+11. Comentarios
+                                 * Los permisos de crear, aplicar y anular ajustes deben estar restringidos por rol (por ejemplo: Analista Contable, Jefe de Cuentas por Pagar, Auditor).
+
+                                 * Para montos superiores a un umbral configurable, el ajuste deberá pasar por un flujo de aprobación multinivel antes de aplicarse.
+
+                                 * Se recomienda registrar en la interfaz un enlace directo al documento fiscal original y a la orden de compra o remisión relacionada para facilitar validaciones manuales.
+
+                                 * En casos de devolución física, el ajuste deberá vincularse a la guía de remisión / nota de ingreso correspondiente en Almacén.
+
+
+
+
+[a]@consultorexterno1@restaurant.pe 
+@igarcia@restaurant.pe 
+Considerar un diagrama de los estados de este tipo de documentos, e indicar que otros elementos o módulos se ven afectados.
+_Asignada a consultorexterno1@restaurant.pe_

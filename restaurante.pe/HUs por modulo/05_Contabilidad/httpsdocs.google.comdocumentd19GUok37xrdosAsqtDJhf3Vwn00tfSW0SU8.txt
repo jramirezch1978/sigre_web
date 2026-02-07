@@ -1,0 +1,281 @@
+﻿HU-CON-018 - Reportes de Validación / Libro Diario - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-018
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Reportes de Validación
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Libro Diario
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la generación del reporte de Libro Diario, que contenga todos los asientos contables registrados en el sistema durante un periodo determinado, ordenados cronológicamente y conforme a la normativa contable vigente.
+Este reporte es de carácter oficial y obligatorio, y constituye una herramienta esencial para la validación contable, auditorías y presentación de estados financieros.
+Debe permitir aplicar filtros por periodo contable, rango de fechas, tipo de libro, centro de costo, tipo de comprobante, usuario y estado del asiento, ofreciendo la opción de exportar el reporte a formatos Excel (.xlsx) y PDF (.pdf) para su revisión, control y respaldo documental.
+________________
+
+
+3. Actor(es)
+   * Contador General: Supervisa la consistencia de los asientos registrados.
+
+   * Analista Contable: Genera reportes para control, auditoría y cierre mensual.
+
+   * Jefe de Contabilidad: Evalúa la información antes de los cierres contables.
+
+   * Auditor Interno o Externo: Utiliza el reporte para verificar el registro cronológico de las operaciones.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe contar con permisos para acceder al menú Contabilidad → Reportes → Libro Diario.
+
+      * Deben existir asientos contables registrados y contabilizados en el periodo seleccionado.
+
+      * Los planes de cuentas contables y tipos de libro contable deben estar correctamente configurados.
+
+      * El periodo contable debe estar abierto o cerrado (solo lectura en caso cerrado).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Libro Diario
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar el reporte del Libro Diario con todos los asientos contables registrados,
+para validar la integridad, el orden cronológico y el cuadre contable de las operaciones registradas en el sistema.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable (año/mes) o rango de fechas.
+	El sistema muestra los asientos registrados en el rango elegido.
+	2
+	Mostrar los asientos ordenados cronológicamente por fecha contable y número de asiento.
+	El reporte conserva el orden contable.
+	3
+	Incluir columnas de fecha, tipo de libro, número de asiento, glosa, cuenta contable, debe y haber.
+	Estructura fiel al formato de Libro Diario.
+	4
+	Permitir filtrar por centro de costo, tipo de comprobante, usuario y estado del asiento.
+	Resultados personalizados según filtros aplicados.
+	5
+	Calcular y mostrar totales de débitos y créditos por asiento y totales generales del periodo.
+	Validación automática de cuadre contable.
+	6
+	Permitir exportar el reporte en formatos Excel (.xlsx) y PDF (.pdf).
+	Generación y descarga exitosa.
+	7
+	Mostrar los asientos anulados o pendientes según configuración del filtro.
+	Permite incluir o excluir según necesidad.
+	8
+	Registrar en bitácora la generación del reporte (usuario, fecha, filtros).
+	Auditoría automática del uso del reporte.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Reporte tabular cronológico.
+Naturaleza: Reporte informativo – No permite modificación de datos.
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Define el periodo del reporte.
+	Fecha Desde / Hasta
+	Fecha
+	No
+	Define el rango de fechas a incluir.
+	Tipo de Libro
+	Lista
+	No
+	Diario General, Compras, Ventas, Ajustes, etc.
+	Tipo de Comprobante
+	Lista
+	No
+	Permite filtrar por tipo de asiento.
+	Centro de Costo
+	Lista
+	No
+	Muestra los asientos asociados al CECO.
+	Usuario Registro
+	Lista
+	No
+	Filtra los asientos por usuario creador.
+	Estado del Asiento
+	Lista
+	No
+	Activo / Anulado / Pendiente.
+	Moneda
+	Lista
+	No
+	Moneda local o extranjera.
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Fecha Contable
+	Fecha del registro.
+	Libro Contable
+	Tipo o diario contable.
+	N° Asiento
+	Número identificador del asiento.
+	Glosa
+	Descripción general del asiento.
+	Cuenta Contable
+	Código de la cuenta contable.
+	Descripción Cuenta
+	Nombre o detalle de la cuenta.
+	Centro de Costo
+	Centro de costo asociado.
+	Débito
+	Monto cargado al debe.
+	Crédito
+	Monto cargado al haber.
+	Usuario Registro
+	Usuario que ingresó el asiento.
+	Estado
+	Activo / Anulado / Pendiente.
+	8.3 Totales del Reporte
+         * Total Débitos del periodo.
+
+         * Total Créditos del periodo.
+
+         * Diferencia (Debe – Haber).
+
+         * Número total de asientos procesados.
+
+________________
+
+
+9. Reglas de Negocio
+            1. Integridad contable: Cada asiento debe cuadrar (total debe = total haber).
+
+            2. Secuencia cronológica: Los asientos deben ordenarse según fecha y número contable.
+
+            3. Filtros mínimos: Se requiere al menos un periodo o rango de fechas definido.
+
+            4. Moneda: Si existe doble moneda, mostrar ambas (local y extranjera) cuando aplique.
+
+            5. Seguridad: Solo usuarios con permisos contables pueden generar el reporte.
+
+            6. Auditoría: Cada generación se registra en la tabla LOG_REPORTE_LIBRO_DIARIO.
+
+            7. Exportación fiel: Los resultados exportados deben reflejar los filtros aplicados.
+
+            8. Solo lectura: No se permite modificación ni eliminación de registros.
+
+________________
+
+
+10. Integraciones
+               * Módulo de Contabilidad General: Fuente principal de asientos y movimientos.
+
+               * Módulo de Plan de Cuentas: Referencia de estructura y descripción contable.
+
+               * Módulo de Centros de Costo: Para el detalle analítico del asiento.
+
+               * Módulo de Auditoría: Registro de generación de reportes.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Tipo de Componente: Reporte contable (solo lectura).
+
+                  * Tablas Fuente:
+
+                     * CNTBL_ASIENTO (cabecera del asiento).
+
+                     * CNTBL_ASIENTO_DET (detalle de movimientos).
+
+                     * CNTBL_CUENTA_CONTABLE (plan de cuentas).
+
+                     * CNTBL_CENTRO_COSTO (centros de costo).
+
+Consulta Base (referencial):
+
+ SELECT 
+    a.fecha_cntbl,
+    a.nro_libro,
+    a.nro_asiento,
+    a.desc_glosa,
+    d.cnta_ctbl,
+    c.desc_cta,
+    d.debe,
+    d.haber,
+    d.cencos,
+    a.cod_usr,
+    a.flag_estado
+FROM cntbl_asiento a
+JOIN cntbl_asiento_det d 
+    ON a.origen = d.origen 
+   AND a.nro_asiento = d.nro_asiento
+JOIN cntbl_cuenta_contable c 
+    ON d.cnta_ctbl = c.cnta_ctbl
+WHERE a.fecha_cntbl BETWEEN :fecha_ini AND :fecha_fin
+ORDER BY a.fecha_cntbl, a.nro_asiento;
+                        *                         * Exportaciones: Formatos .xlsx y .pdf.
+
+                        * Bitácora: LOG_REPORTE_LIBRO_DIARIO (usuario, fecha, filtros, registros, totales).
+
+                        * Performance: Se deben indexar los campos NRO_ASIENTO, FECHA_CNTBL, CNTA_CTBL.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Reportes → Validación / Libro Diario.
+
+                           2. Define los filtros de búsqueda (periodo, fechas, tipo de libro, etc.).
+
+                           3. Presiona “Generar Reporte”.
+
+                           4. El sistema procesa los datos y genera el reporte del Libro Diario.
+
+                           5. Los resultados se muestran agrupados cronológicamente.
+
+                           6. El usuario puede exportar el reporte a Excel o PDF.
+
+                           7. El sistema registra la ejecución en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un periodo contable o rango de fechas para generar el reporte.”
+
+                              * “No existen asientos contables en el rango seleccionado.”
+
+                              * “Reporte generado correctamente.”
+
+                              * “El usuario no tiene permisos para ejecutar esta función.”
+
+                              * “Error al procesar el reporte. Contacte al administrador del sistema.”

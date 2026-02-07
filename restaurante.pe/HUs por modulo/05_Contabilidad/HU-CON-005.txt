@@ -1,0 +1,275 @@
+﻿HU-CON-005 - Relacionar Subcategorías de Productos con Cuentas Contables - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-005
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Parámetros Contables
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Relacionar Subcategorías de Productos con Cuentas Contables
+
+* Autor: Redactor de HU de Software de Contabilidad
+
+* Fuente: Alcance Global del Proyecto de Implementación de Sistema Contable y de Nómina Multipaís – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir establecer la relación automática entre subcategorías de producto y cuentas contables (gasto/costo, ingreso y otras asociadas), de modo que al registrar transacciones en Compras, Ventas y Almacén, se generen asientos contables automáticos conforme al plan de cuentas de la Razón Social activa.
+Esta parametrización se administrará desde Contabilidad y utilizará la tabla existente ARTICULO_SUB_CATEG; únicamente se expondrán en esta pantalla los campos pertinentes al ámbito contable, dejando fuera los propios del módulo de Compras u otros.
+________________
+
+
+3. Actor(es)
+   * Usuario Contable: Configura la relación subcategoría ↔ cuentas contables.
+
+   * Administrador del Sistema: Autoriza cambios críticos y gestiona permisos.
+
+   * Auditor Interno: Acceso de solo lectura para control y trazabilidad.
+
+________________
+
+
+4. Precondiciones
+      * Sesión iniciada en una Razón Social con permisos en Contabilidad.
+
+      * Plan de Cuentas activo y vigente.
+
+      * Subcategorías de producto registradas (origen: Inventarios/Artículos).
+
+      * Campos Razón Social y País se muestran informativos (solo lectura).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Parámetros Contables → Relación Subcategorías–Cuentas
+________________
+
+
+6. Historia de Usuario
+Como usuario contable,
+quiero relacionar cada subcategoría de producto con las cuentas contables correspondientes (gasto/costo, ingreso, y reglas auxiliares),
+para que el sistema aplique automáticamente dichas cuentas en las transacciones operativas y genere asientos contables consistentes y trazables.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	La pantalla muestra solo columnas relevantes para Contabilidad.
+	Se ocultan campos propios de Compras u otros módulos.
+	2
+	Es posible asignar cuentas contables por subcategoría.
+	El sistema valida existencia y vigencia de cuentas en el plan.
+	3
+	No se permite guardar una subcategoría sin al menos una cuenta principal asociada (según política de la empresa).
+	Mensaje de validación y bloqueo de guardado.
+	4
+	Se pueden definir cuentas diferenciadas para Débito y Crédito (cuando aplique).
+	La UI exige naturaleza compatible con la cuenta.
+	5
+	Los cambios (altas, modificaciones, inactivaciones) se registran en log de auditoría contable.
+	Se almacena usuario, fecha, hora y acción.
+	6
+	Al integrarse con Compras/Ventas/Almacén, el sistema usa la cuenta configurada según la subcategoría del artículo.
+	Los asientos automáticos referencian la subcategoría y la cuenta.
+	7
+	La replicación (si está activa) replica solo los campos contables definidos.
+	Parametrización consistente entre sucursales/autoservicios.
+	________________
+
+
+8. Campos del Formulario (Vista Contabilidad)
+Tabla de base: ARTICULO_SUB_CATEG
+ Nota: Solo se exponen en esta opción los campos relevantes para Contabilidad. Los demás se mantienen en su módulo de origen (Compras/Inventarios) y no se muestran aquí.
+Campo (UI)
+	Columna BD
+	Tipo
+	Longitud
+	Obligatorio
+	Validaciones / Descripción
+	Código Subcategoría
+	COD_SUB_CAT (CHAR)
+	Texto / solo lectura
+	6
+	Sí
+	PK. Viene del maestro de Inventarios. No editable aquí.
+	Categoría
+	CAT_ART (CHAR)
+	Texto / solo lectura
+	6
+	Sí
+	FK a Categoría. Informativo para contexto.
+	Descripción Subcategoría
+	DESC_SUB_CAT (VARCHAR2)
+	Texto / solo lectura
+	60
+	No
+	Informativo.
+	Cuenta Gasto/Compra
+	CNTA_CNTBL (CHAR)
+	Lista (Plan de Cuentas)
+	10
+	Cond.
+	Usada en compras/costos. Debe existir y estar activa.
+	Cuenta Ingreso/Venta
+	CNTA_CTBL_HABER (CHAR)
+	Lista (Plan de Cuentas)
+	10
+	Cond.
+	Usada en ventas. Debe existir y estar activa.
+	Cuenta Presup. Egreso
+	CNTA_PRSP_EGRESO (CHAR)
+	Lista (Catálogo Presup.)
+	10
+	No
+	Si la empresa usa módulo presupuestal.
+	Cuenta Presup. Ingreso
+	CNTA_PRSP_INGRESO (CHAR)
+	Lista (Catálogo Presup.)
+	10
+	No
+	Si aplica presupuestación de ingresos.
+	Cálculo/Regla
+	COD_CALCULO (CHAR)
+	Lista
+	4
+	No
+	Referencia a librería de cálculo si la empresa lo usa.
+	Rubro Facturación
+	FACTURA_RUBRO (CHAR)
+	Lista
+	4
+	No
+	Clasifica asientos/ventas por rubro (reporting).
+	Replicación
+	FLAG_REPLICACION (CHAR)
+	Toggle (Sí/No)
+	1
+	Sí
+	Sí=1, No=0. Default BD '1'. Afecta despliegue de la parametrización.
+	Estado
+	FLAG_ESTADO (CHAR)
+	Lista (Activo/Inactivo)
+	1
+	Sí
+	Vinculado=1, Por Vincular=0. Default BD '1'. Por Vincular no se usa en nuevas transacciones.
+	
+
+
+
+
+
+Obligatoriedad condicional:
+         * Al menos una cuenta contable debe estar informada por subcategoría según la política:
+
+            * Si la subcategoría se utiliza en Compras/Costos → Cuenta Gasto/Compra obligatoria (CNTA_CNTBL).
+
+            * Si la subcategoría se utiliza en Ventas → Cuenta Ingreso/Venta obligatoria (CNTA_CTBL_HABER).
+
+            * Si se usan presupuestos → CNTA_PRSP_EGRESO/CNTA_PRSP_INGRESO se recomiendan (no obligatorias).
+
+________________
+
+
+9. Columnas de BD excluidas de esta opción (por pertenecer a Compras/otros)
+No se mostrarán ni editarán aquí (se gestionan en su módulo de origen):
+FLAG_SERVICIO, FLAG_ART_MANT, VERSION, COD_MARCA, COD_CARROCERIA, COD_COMB, PESO_SECO, PESO_BRUTO, PASAJEROS, ASIENTOS, EJES, CILINDRADA, ANCHO, LARGO, ALTO, RUEDAS, POTENCIA, FORMULA, CARGA_UTIL, NRO_CILINDROS, COD_COLOR, COD_CLASE_VEHICULO, COD_CATEG_VEHICULO, COD_MODELO.
+Motivo: Son técnicos o propios de logística/compras/vehículos y no intervienen en la imputación contable en esta pantalla.
+________________
+
+
+10. Reglas de Negocio
+               1. Unicidad: COD_SUB_CAT es único y proviene de Inventarios; en Contabilidad solo se parametrizan las cuentas.
+
+               2. Integridad contable: Las cuentas seleccionadas deben existir en el Plan de Cuentas y estar activas.
+
+               3. Naturaleza: La Cuenta Ingreso/Venta debe permitir naturaleza haber para ventas; la Cuenta Gasto/Compra debe permitir naturaleza debe (según plan).
+
+               4. Estado: Subcategorías Por Vincular (FLAG_ESTADO='0') no podrán ser usadas en nuevas transacciones.
+
+               5. Trazabilidad: Toda transacción generada desde módulos operativos debe conservar referencia a COD_SUB_CAT y a la cuenta aplicada.
+
+               6. Replicación: Si FLAG_REPLICACION='1', la parametrización contable podrá replicarse a sucursales/entidades autorizadas.
+
+               7. No eliminación física: Si una subcategoría ya fue utilizada en asientos, solo se permite inactivación.
+
+               8. Multipaís: La parametrización es por Razón Social; no se comparte entre empresas.
+
+________________
+
+
+11. Integraciones
+                  * Compras: imputa Cuenta Gasto/Compra en recepciones/facturas según la subcategoría del artículo.
+
+                  * Ventas: imputa Cuenta Ingreso/Venta en facturas/boletas por la subcategoría.
+
+                  * Almacén: soporta valorizaciones que deriven en costo (cuando aplique la cuenta de gasto/costo).
+
+                  * Contabilidad: genera asientos automáticos con referencia a subcategoría y cuenta.
+
+                  * Presupuesto (opcional): usa CNTA_PRSP_* para reportes y control de ejecución.
+
+________________
+
+
+12. Aspectos Técnicos
+                     * Tabla utilizada: ARTICULO_SUB_CATEG
+
+                     * Claves y relaciones:
+
+                        * PK: COD_SUB_CAT
+
+                        * FK: CAT_ART (Categoría); CNTA_CNTBL, CNTA_CTBL_HABER, CNTA_PRSP_EGRESO, CNTA_PRSP_INGRESO a catálogos contables/presupuestales.
+
+                           * Reglas de validación BD/UI:
+
+                              * Longitudes máximas según diccionario: CHAR(6/10/4/1), VARCHAR2(60).
+
+                              * Flags aceptan 0/1. Defaults existentes: FLAG_ESTADO='1', FLAG_REPLICACION='1'.
+
+                                 * Auditoría: Log contable para altas, modificaciones e inactivaciones (usuario, fecha, hora, acción, before/after).
+
+                                 * Transaccionalidad: Cambios se guardan en una única transacción; rollback ante cualquier fallo.
+
+                                 * Filtros UI: por Categoría, Estado, Cuenta asignada/no asignada, Rubro.
+
+                                 * Exportación/Importación: CSV/JSON para masivos (opcional).
+
+________________
+
+
+13. Flujo Principal (Resumen UI)
+                                    1. Usuario ingresa a Relación Subcategorías–Cuentas.
+
+                                    2. Busca/filtra subcategorías por Categoría/Estado.
+
+                                    3. Selecciona una subcategoría y asigna Cuenta Gasto/Compra y/o Cuenta Ingreso/Venta (y presupuestales si aplica).
+
+                                    4. Guardar → válida plan contable, naturaleza y obligatoriedad mínima → Confirmación.
+
+                                    5. Los módulos operativos usan la parametrización al generar comprobantes/asientos.
+
+________________
+
+
+14. Mensajes de Validación (Ejemplos)
+                                       * “Debe asignar al menos una cuenta contable (Gasto/Compra o Ingreso/Venta) para esta subcategoría.”
+
+                                       * “La cuenta seleccionada no existe o está inactiva en el Plan de Cuentas.”
+
+
+                                       * “Cambios guardados. La parametrización será aplicada en nuevas transacciones.”

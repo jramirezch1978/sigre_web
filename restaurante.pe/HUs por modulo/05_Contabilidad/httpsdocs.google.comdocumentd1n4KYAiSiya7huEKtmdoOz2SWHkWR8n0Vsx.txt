@@ -1,0 +1,344 @@
+﻿HU-CON-007 - Modificación de Asiento Contable Automático - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-007
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Libro Diario
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Modificación de Asiento Contable Automático
+
+* Autor: Redactor de HU de Software de Contabilidad
+
+* Fuente: Alcance Global del Proyecto de Implementación de Sistema Contable y de Nómina Multipaís – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la modificación controlada de asientos contables generados automáticamente (integraciones, procesos masivos o importación de pre-asientos), manteniendo trazabilidad, balance y auditoría.
+La edición se realiza en una vista maestro–detalle sobre las tablas existentes de diario, con restricciones y flujos de aprobación opcionales según políticas de la Razón Social. Toda modificación debe quedar registrada con motivo del cambio, usuario, timestamp, y antes/después de los valores.
+________________
+
+
+3. Actor(es)
+   * Usuario Contable: Solicita/realiza modificaciones permitidas.
+
+   * Aprobador Contable / Jefe de Contabilidad: Autoriza cambios críticos (según política).
+
+   * Auditor Interno: Consulta historial de cambios y comparativos.
+
+________________
+
+
+4. Precondiciones
+      * Usuario autenticado con permisos en Contabilidad y privilegio de Edición de Asientos Automáticos.
+
+      * Periodo contable abierto para el año/mes del asiento.
+
+      * El asiento no debe estar transferido/cerrado (FLAG_ASNT_TRANSF='0'), salvo que se use el mecanismo de ajuste por asiento reverso.
+
+      * Plan de cuentas activo. Campos Razón Social y País visibles en modo informativo.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Libro Diario → Modificación de Asientos Automáticos
+________________
+
+
+6. Historia de Usuario
+Como usuario contable,
+quiero modificar asientos contables generados automáticamente, por procesos masivos o por importación de pre-asientos,
+para corregir criterios contables, cuentas, centros de costo, glosas o montos, asegurando balance y trazabilidad completa.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	La pantalla permite buscar y abrir asientos con FLAG_GEN_AUT='1' o con origen de procesos/importaciones.
+	Listado con filtros por periodo, libro, origen, estado, usuario.
+	2
+	Los campos clave (Origen, Año, Mes, Libro, N° Asiento) son no editables.
+	Se muestran solo lectura.
+	3
+	La edición exige Motivo del cambio y, si está activado, Aprobación.
+	Registro en bitácora y posible workflow.
+	4
+	El asiento debe balancear (Débito = Haber) en moneda local y alternativa.
+	Validación obligatoria al guardar.
+	5
+	Las cuentas seleccionadas deben existir y estar activas con naturaleza compatible.
+	Validaciones referenciales.
+	6
+	Si el asiento está transferido/cerrado, solo se permite ajuste por reverso + nuevo asiento.
+	El sistema ofrece asistente de reverso.
+	7
+	Se registra auditoría de todos los cambios (antes/después).
+	Bitácora completa y exportable.
+	8
+	Se recalculan totales de cabecera desde el detalle y se valida tasa de cambio cuando aplique.
+	Totales coherentes y TC > 0 si moneda ≠ local.
+	________________
+
+
+8. Formulario Maestro–Detalle (alineado a BD existente)
+Tablas: CNTBL_ASIENTO (cabecera), CNTBL_ASIENTO_DET (detalle), CNTBL_ASIENTO_DET_AUX (atributos).
+PK: (ORIGEN, ANO, MES, NRO_LIBRO, NRO_ASIENTO) / Detalle + ITEM.
+8.1 Cabecera — CNTBL_ASIENTO (Edición Controlada)
+Campo (UI)
+	Columna BD
+	Tipo
+	Edit.
+	Validaciones / Descripción
+	Origen
+	ORIGEN CHAR(2)
+	Lista
+	No
+	Identifica fuente (integración/importación). FK a catálogo.
+	Año
+	ANO NUMBER(4)
+	Numérico
+	No
+	Periodo debe estar abierto.
+	Mes
+	MES NUMBER(2)
+	Numérico
+	No
+	1–12; periodo abierto.
+	Libro
+	NRO_LIBRO NUMBER(3)
+	Lista
+	No
+	Diario/Compras/Ventas/etc.
+	N° Asiento
+	NRO_ASIENTO NUMBER(10)
+	Numérico
+	No
+	Clave del asiento.
+	Moneda
+	COD_MONEDA CHAR(3)
+	Lista
+	Sí*
+	Si cambia, recalcular importes alternos con TC.
+	Tasa de Cambio
+	TASA_CAMBIO NUMBER(7,4)
+	Numérico
+	No*
+	Obligatoria si moneda ≠ local y > 0.
+	Glosa
+	DESC_GLOSA VARCHAR2(2000)
+	Texto
+	Sí
+	Libre; respeta longitud.
+	Fecha contable
+	FECHA_CNTBL DATE
+	Fecha
+	Sí
+	Debe pertenecer al año/mes del asiento.
+	Estado
+	FLAG_ESTADO CHAR(1)
+	Lista
+	Sí
+	Activo=1, Inactivo=0.
+	Transferido
+	FLAG_ASNT_TRANSF CHAR(1)
+	Toggle
+	No
+	Si 1, solo vía reverso/ajuste.
+	Totales (SOL/DOL Deb/Hab)
+	TOT_*
+	Automático
+	No
+	Recalculados desde detalle.
+	Motivo del cambio
+	(bitácora)
+	Texto
+	Oblig.
+	Campo obligatorio previo a guardar.
+	* Cambio de moneda/TC: permitido solo si el asiento no está transferido/cerrado y no tiene conciliaciones/relaciones que lo impidan.
+8.2 Detalle — CNTBL_ASIENTO_DET (Grilla editable)
+Campo (UI)
+	Columna BD
+	Edit.
+	Validaciones
+	Ítem (ITEM)
+	NUMBER(6)
+	No (autonum.)
+	Secuencial.
+	Cuenta (CNTA_CTBL CHAR(10))
+	Sí
+	Debe existir y estar activa; naturaleza válida.
+	
+
+	D/H (FLAG_DEBHAB CHAR(1))
+	Sí
+	D o H. Consistencia con cuenta.
+	
+
+	Importe Local (IMP_MOVSOL)
+	Sí
+	≥ 0; coherente con TC.
+	
+
+	Importe Alterno (IMP_MOVDOL)
+	Sí
+	Obligatorio si moneda ≠ local.
+	
+
+	Ajuste (IMP_MOVAJU)
+	Sí
+	Para redondeos/diferencias.
+	
+
+	Fecha Partida (FEC_CNTBL)
+	Sí
+	≤ fecha contable cabecera.
+	
+
+	Glosa Detalle (DET_GLOSA)
+	Sí
+	Longitud ≤ 2000.
+	
+
+	CECO (CENCOS)
+	Sí
+	Si la cuenta lo exige, obligatorio.
+	
+
+	Cuenta Bancaria (COD_CTABCO)
+	Sí
+	Si política de cuenta lo exige.
+	
+
+	Doc. Ref. (TIPO_DOCREF1,NRO_DOCREF1,NRO_DOCREF2,ITEM_DOCREF1)
+	Sí
+	Formatos según catálogo.
+	
+
+	Tercero (COD_RELACION)
+	Sí
+	Proveedor/Cliente/Relacionado.
+	
+
+	Concepto (CONCEP)
+	Sí
+	Catálogo de conceptos.
+	
+
+	Bandera Generado Automático (FLAG_GEN_AUT)
+	No
+	Mantener 1 para trazabilidad; edición no lo cambia.
+	
+
+	Replica (FLAG_REPLICACION)
+	Sí
+	1/0 según políticas.
+	
+
+	Referencias a otro asiento (*_REF)
+	Sí
+	Si aplica enlace contable.
+	
+
+	8.3 Atributos opcionales — CNTBL_ASIENTO_DET_AUX
+         * Cuenta Presup. (CNTA_PRSP), CECO alterno (CENCOS), Flags de pre-cuenta y Replicación.
+
+         * Editables solo si la empresa usa módulo presupuestal/analítico extendido.
+
+________________
+
+
+9. Reglas de Negocio
+            1. No edición de clave: No se permite modificar (ORIGEN, ANO, MES, NRO_LIBRO, NRO_ASIENTO).
+
+            2. Balance obligatorio: Débito = Haber en moneda local y alternativa (usando TASA_CAMBIO).
+
+            3. Estado/transferencia: Si FLAG_ASNT_TRANSF='1' o el periodo está cerrado, la edición directa queda bloqueada; el sistema ofrece Reverso + Nuevo Asiento de Ajuste.
+
+            4. Trazabilidad: Se mantiene FLAG_GEN_AUT='1' en partidas automáticas, aun después de editar; el historial mostrará origen, proceso y referencias.
+
+            5. Políticas por cuenta: CECO, banco y doc. ref. son obligatorios cuando la cuenta así lo exige.
+
+            6. Control de moneda: Cambio de COD_MONEDA/TASA_CAMBIO recalcula importes alternos; si hay diferencia, usar IMP_MOVAJU.
+
+            7. Aprobación: Cambios críticos (cuenta, importe, CECO, moneda) pueden requerir aprobación antes de aplicar (parametrizable).
+
+            8. Auditoría: Registrar en log usuario, fecha, acción, motivo y before/after a nivel cabecera y por cada ítem modificado.
+
+            9. Integridad referencial: Validar todas las FKs (plan de cuentas, terceros, tipos de doc., CECO, bancos).
+
+            10. Replicación: Si FLAG_REPLICACION='1', propagar cambios conforme a la política (solo si el libro/periodo está abierto en destino).
+
+________________
+
+
+10. Integraciones
+               * Plan de Cuentas, Terceros, Monedas/TC, Libros, CECO, Bancos, Tipos de Documento.
+
+               * Reportes: Libro Diario, Mayor, Auxiliares por cuenta/tercero/centro de costo, y bitácora de modificaciones.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Persistencia: Actualización en CNTBL_ASIENTO, CNTBL_ASIENTO_DET y CNTBL_ASIENTO_DET_AUX dentro de una única transacción (commit/rollback).
+
+                  * Cálculos automáticos: Recalcular TOT_SOLDEB/TOT_SOLHAB/TOT_DOLDEB/TOT_DOLHAB desde el detalle.
+
+                  * Bloqueos: Optimistic locking por timestamp o versión para evitar sobre-escritura concurrente.
+
+                  * Bitácora: Tabla de auditoría (sugerida: CNTBL_ASIENTO_AUD y CNTBL_ASIENTO_DET_AUD) con: clave del asiento, campo cambiado, valor anterior, valor nuevo, usuario, fecha/hora, motivo, IP/host.
+
+                  * Permisos: Roles y scopes granulares: “Editar glosa”, “Editar importes”, “Editar cuentas”, “Editar analítica”, “Solicitar/Aprobar cambios”.
+
+                  * APIs internas: Endpoint de “Reverso + Ajuste” que cree asiento espejo (D↔H) y proponga nuevo asiento editable.
+
+________________
+
+
+12. Flujo Principal de Edición (UI)
+                     1. Buscar asiento (filtros: periodo, libro, origen, estado, usuario).
+
+                     2. Abrir → vista maestro–detalle con campos clave bloqueados.
+
+                     3. Editar glosa, cuentas, D/H, importes, analíticas, documento ref., moneda/TC (si procede).
+
+                     4. Ingresar Motivo del cambio (obligatorio).
+
+                     5. (Si aplica) Enviar a Aprobación → aprobador valida y autoriza.
+
+                     6. Guardar → validaciones (periodo, balance, FKs, moneda/TC).
+
+                     7. Confirmación y registro en bitácora; reportes se actualizan.
+
+                     8. Caso bloqueado (transferido/cerrado): Asistente Reverso + Nuevo (copiar glosas/ref., permitir ajustes).
+
+________________
+
+
+13. Mensajes de Validación (Ejemplos)
+                        * “El periodo contable seleccionado no está abierto.”
+
+                        * “No es posible editar un asiento transferido/cerrado. Use Reverso + Ajuste.”
+
+                        * “El asiento no balancea:Debe≠ Haber en moneda local/alternativa.”
+
+                        * “La cuenta contable no existe o está inactiva / naturaleza incompatible con D/H.”
+
+                        * “Debe indicar el Motivo del cambio.”
+
+                        * “Cambio guardado correctamente. Auditoría registrada.”

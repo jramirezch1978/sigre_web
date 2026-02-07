@@ -1,0 +1,160 @@
+﻿HU-RRH-RA-ES-002 – Distribución de Costos por Centro de Costo, Canal y Unidad de Negocio
+Versión: 1.0
+________________
+
+
+1. Título
+Distribuye costos por centro de costo/canal (cocina, salón, delivery) y unidad de negocio.
+________________
+
+
+2. Descripción
+Como analista de recursos humanos o responsable financiero, quiero que el sistema distribuya automáticamente los costos de planilla por centro de costo, canal operativo (cocina, salón, delivery) y unidad de negocio, de acuerdo con los criterios configurados, para reflejar con precisión la carga laboral en los reportes de costos y rentabilidad.
+________________
+
+
+3. Proceso
+Módulo: RR.HH.
+Proceso: Reportes y Analítica
+Subproceso: Estándar
+________________
+
+
+4. Narrativa de Usuario
+Quiero: Que el sistema asigne los costos de personal según su centro de costo, canal operativo y unidad de negocio.
+Para: Obtener reportes de costos laborales más precisos que permitan analizar la rentabilidad por área y canal.
+De manera que: Se optimicen los procesos de control presupuestal y toma de decisiones financieras.
+________________
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > RR.HH > Reportes y Analítica > Estándar > Distribución de Costos por Centro de Costo y Canal
+________________
+
+
+6. Criterios de Aceptación
+* El sistema debe distribuir automáticamente los costos de planilla según los centros de costo asignados a cada trabajador.
+
+* Debe permitir configurar reglas de distribución por porcentaje o valor fijo entre canales (cocina, salón, delivery).
+
+* Cada trabajador debe estar asociado a uno o más centros de costo o unidades de negocio.
+
+* El sistema debe generar un reporte consolidado con los montos asignados por área, canal y unidad de negocio.
+
+* Los reportes deben poder filtrarse por periodo, sede, centro de costo, canal o tipo de trabajador.
+
+* Permitir exportación en Excel y PDF.
+
+* Cada proceso de distribución debe quedar registrado en el log de auditoría (fecha, usuario, periodo, tipo de distribución).
+
+* Las reglas aplicadas deben ser versionadas y parametrizables por empresa y país.
+
+* En caso de ajustes manuales, el sistema debe permitir recalcular la distribución y dejar trazabilidad.
+
+* Debe existir integración con contabilidad para registrar los asientos correspondientes por centro de costo.
+
+________________
+
+
+7. Campos del Formulario / Tabla de Vista
+Campo
+	Tipo de Campo
+	Descripción
+	Ejemplo
+	Validaciones / Consideraciones UX/UI
+	Periodo
+	Lista desplegable
+	Periodo de nómina o mes a procesar.
+	Septiembre 2025
+	Obligatorio, solo periodos cerrados.
+	Empresa
+	Lista desplegable
+	Empresa o razón social sobre la cual aplicar la distribución.
+	Corporación Andina S.A.
+	Filtrado según permisos del usuario.
+	Sede
+	Lista desplegable
+	Local o sucursal de trabajo.
+	Sede Miraflores
+	Permite selección múltiple.
+	Canal Operativo
+	Selector múltiple
+	Canal al que se asignará el costo.
+	Cocina / Salón / Delivery
+	Permite varios canales con % de distribución.
+	Centro de Costo
+	Lista desplegable
+	Centro contable al cual se imputarán los costos.
+	Cocina Central / Atención al Cliente
+	Validación según estructura organizativa.
+	Unidad de Negocio
+	Lista desplegable
+	Área estratégica o línea de producto asociada.
+	Restaurante / Catering Corporativo
+	Campo informativo, no editable.
+	Tipo de Distribución
+	Radio button
+	Método de asignación.
+	Porcentaje / Valor fijo / Horas trabajadas
+	Obligatorio.
+	% de Distribución
+	Campo numérico
+	Porcentaje del costo asignado por canal.
+	50% / 30% / 20%
+	La suma total debe ser 100%.
+	Monto Asignado
+	Campo numérico calculado
+	Valor total del costo asignado.
+	3,250.00
+	Automático.
+	Estado de Distribución
+	Etiqueta / Estado
+	Indica si la distribución fue calculada, pendiente o confirmada.
+	Calculada / Pendiente / Confirmada
+	Código de color visual.
+	Usuario Responsable
+	Etiqueta / Texto
+	Usuario que ejecuta la operación.
+	rh_costos01
+	Automático.
+	________________
+
+
+8. Detalle de Integración
+   * Módulo de Contabilidad: Para generar asientos contables por centro de costo y canal.
+
+   * Módulo de Nómina: Fuente de datos para los costos de personal (sueldos, beneficios, aportes).
+
+   * Módulo de Estructura Organizacional: Proporciona los centros de costo y unidades de negocio definidos.
+
+   * Módulo de Auditoría: Registra las ejecuciones, cambios y usuarios responsables.
+
+________________
+
+
+9. Consideraciones Técnicas
+      * La distribución debe ejecutarse automáticamente al cierre del periodo de nómina o mediante ejecución manual.
+
+      * El sistema debe soportar reglas diferenciadas por país o sede, según estructura organizacional.
+
+      * Los cálculos deben conservar historial y versionamiento de las reglas aplicadas.
+
+      * El proceso debe ser reversible, permitiendo reprocesos en caso de errores.
+
+      * Debe permitir la integración con BI / Data Warehouse para análisis comparativo de costos laborales.
+
+      * Todos los resultados deben manejarse en moneda local y corporativa (USD).
+
+________________
+
+
+10. Comentarios
+Esta funcionalidad proporciona una visión analítica y contable del costo laboral por canal y unidad de negocio, fortaleciendo el control financiero y la toma de decisiones.
+Se recomienda implementar:
+         * Visualización gráfica de distribución (barras o pastel) para análisis rápido.
+
+         * Plantillas preconfiguradas de distribución por tipo de sede o negocio.
+
+         * Validaciones automáticas para garantizar que el total de distribución no exceda el 100%.
+
+         * Notificación al área contable al completarse una distribución final confirmada.

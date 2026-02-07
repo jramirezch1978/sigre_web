@@ -1,0 +1,115 @@
+﻿HU-FIN-CON-CON-002 - Cruce de Información de la Pasarela de Pago con la Cobranza Realizada y Control de Comisiones - v1.0[a]
+1. Título
+Cruce de Información de la Pasarela de Pago con la Cobranza Realizada y Control de Comisiones
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero que el sistema realice el cruce automático entre la información de las pasarelas de pago y las cobranzas registradas por ese medio, incluyendo el control de las comisiones cobradas por el proveedor del servicio, para garantizar la conciliación correcta de ingresos y egresos asociados a las transacciones electrónicas.
+3. Proceso
+Proceso: Conciliaciones
+Subproceso: Conciliaciones
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Conciliar las transacciones reportadas por las pasarelas de pago con las cobranzas registradas en el sistema.
+Para: Validar los montos efectivamente cobrados y detectar diferencias generadas por comisiones o ajustes.
+De manera que: Se pueda reflejar correctamente en Tesorería y Contabilidad los ingresos reales por ventas electrónicas y las comisiones asociadas a su procesamiento.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Conciliaciones > Cruce de Pasarela de Pago con Cobranza y Control de Comisiones
+6. Criterios de Aceptación
+ El sistema debe permitir:
+* Importar automáticamente o de forma manual los archivos o reportes de las pasarelas de pago (ej. VisaNet, Niubiz, MercadoPago, PayU, Stripe, etc.).
+
+* Leer los movimientos de ventas procesadas, cobranzas recibidas y comisiones descontadas.
+
+* Cruzar la información de la pasarela con los registros internos de ventas y cobranzas provenientes del módulo de Ventas o Tesorería.
+
+* Identificar diferencias entre el monto cobrado por la pasarela y el monto registrado en el sistema.
+
+* Registrar automáticamente las comisiones bancarias o de pasarela en cuentas contables configurables (Gastos por Comisiones / IVA sobre Comisiones).
+
+* Permitir la conciliación automática y manual, en caso de diferencias por fechas o redondeos.
+
+* Mostrar el estado de conciliación por transacción, lote o fecha.
+
+* Generar un reporte de conciliación por pasarela de pago, con detalle de ingresos, comisiones y diferencias.
+
+* Registrar todas las acciones en el log de auditoría contable (usuario, fecha, hora, monto, pasarela, estado).
+
+* Solo mostrar información correspondiente a la razón social, país y sucursal activa.
+
+7. Campos del Reporte / Columnas de Vista Tabla
+Campos principales:
+   * Fecha de Transacción
+
+   * Pasarela de Pago (medios de pago)
+
+   * ID de Transacción / Lote
+
+   * Cliente / Pedido
+
+   * Monto Registrado en Sistema
+
+   * Monto Reportado por Pasarela
+
+   * Comisión Aplicada
+
+   * Neto Recibido
+
+   * Fecha de Liquidación
+
+   * Estado de Conciliación (Conciliado / Parcial / Pendiente)
+
+   * Usuario Responsable
+
+   * Observaciones
+
+Filtros disponibles:
+      * Fecha de Transacción
+
+      * Pasarela de Pago
+
+      * Estado de Conciliación
+
+      * Sucursal
+
+      * Usuario
+
+      * Rango de Monto
+
+      * Tipo de Comprobante
+
+Acciones disponibles:
+         * Importar Archivo de Pasarela
+
+         * Ejecutar Cruce Automático
+
+         * Conciliar Manualmente
+
+         * Generar Asiento de Comisión
+
+         * Consultar Asiento Contable
+
+         * Exportar (Excel / PDF)
+
+         * Ver Log de Auditoría
+
+8. Detalle de Integración (opcional)
+Integración con Ventas: Para validar las transacciones cobradas y registradas por pasarela.
+Integración con Tesorería: Para reflejar los ingresos netos y vincularlos con las cuentas bancarias asociadas.
+Integración con Contabilidad: Para generar los asientos contables de comisiones y ajustes.
+Integración con Bancos: Para comparar los montos depositados por la pasarela con el extracto bancario.
+Integración con Reportes Financieros: Para mostrar los resultados netos de las cobranzas electrónicas por periodo.
+Integración con Log de Auditoría: Para registrar todas las operaciones de importación, cruce y conciliación.
+9. Consideraciones Técnicas
+El sistema debe permitir configurar plantillas de importación por cada pasarela de pago, definiendo columnas, formatos y estructura del archivo.
+Debe incluir un motor de conciliación automática basado en criterios ajustables: fecha, monto, ID de transacción o número de comprobante.
+Las comisiones deben calcularse y registrarse automáticamente en función del porcentaje y condiciones definidas por la pasarela.
+Debe permitir el manejo de monedas múltiples y conversión automática según el tipo de cambio del día.
+El sistema debe generar los asientos contables con las cuentas predefinidas (Bancos / Comisiones / IVA / Cuentas por Cobrar).
+Toda acción debe quedar registrada en el log de auditoría contable.
+Debe permitir la exportación del reporte conciliado con totales de ingresos, comisiones y diferencias por periodo.
+10. Comentarios
+Esta funcionalidad permite un control integral de las transacciones electrónicas, asegurando que los ingresos por ventas procesadas mediante pasarelas coincidan con los montos efectivamente depositados.
+Facilita el control de comisiones y mejora la precisión de los registros financieros y contables.
+Esta conciliación garantiza la trazabilidad completa del flujo electrónico de ingresos, integrando los módulos de Ventas, Tesorería, Bancos y Contabilidad en un solo proceso financiero auditable.
+
+
+[a]En esta HU se ha contemplado intengrar lo que especifican en la HU-FIN-CON-CON-003 - Conciliación de Ventas Realizadas por Canal Ecommerce contra Liquidación Recibida

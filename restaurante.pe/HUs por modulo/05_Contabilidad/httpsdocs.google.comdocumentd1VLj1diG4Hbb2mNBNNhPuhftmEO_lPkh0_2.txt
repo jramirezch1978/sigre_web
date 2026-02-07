@@ -1,0 +1,267 @@
+﻿HU-CON-026 - Procesos / Registro de Ajustes Contables - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-026
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Procesos
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Procesos / Registro de Ajustes Contables
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir el registro, control y contabilización de ajustes contables, tales como  ajustes por diferencia de cambio, ajustes por redondeo  (AJUSTES AUTOMÁTICOS)   con el fin de asegurar la correcta presentación de los estados financieros antes del cierre contable.
+El proceso debe permitir al usuario crear asientos de ajuste manuales o automáticos, indicando el tipo de ajuste, periodo, cuentas afectadas y su justificación.
+Además, el sistema debe garantizar que todo ajuste cumpla con la partida doble (Débito = Crédito) y se integre automáticamente al Libro Diario y a los reportes financieros.
+Debe registrarse en la bitácora contable la información de cada ajuste (usuario, fecha, tipo de ajuste, monto total y cuentas afectadas), asegurando trazabilidad, control y auditoría sobre todas las modificaciones contables.
+________________
+
+
+3. Actor(es)
+   * Contador General: Registra los ajustes, provisiones y reclasificaciones contables.
+
+   * Jefe de Contabilidad: Supervisa la correcta aplicación de los ajustes y su coherencia con las normas contables.
+
+   * Auditor Interno o Externo: Revisa los ajustes aplicados antes del cierre contable.
+
+   * Administrador del Sistema: Gestiona los permisos para realizar o modificar ajustes contables.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos de acceso a Contabilidad → Procesos → Registro de Ajustes Contables.
+
+      * El periodo contable debe estar abierto y disponible para registrar movimientos.
+
+      * Debe existir un plan de cuentas activo y actualizado.
+
+      * El tipo de ajuste debe estar configurado previamente (provisión, reclasificación, ajuste por tipo de cambio, etc.).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Procesos → Registro de Ajustes Contables
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero registrar ajustes, provisiones y reclasificaciones contables,
+para asegurar la correcta presentación de los registros contables y garantizar que los estados financieros reflejen razonablemente la situación económica de la empresa.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir registrar un nuevo asiento de ajuste contable.
+	El sistema crea un asiento identificado como “Ajuste Contable”.
+	2
+	Validar que el asiento cumpla con Débito = Crédito.
+	No se permite guardar ajustes descuadrados.
+	3
+	Permitir registrar distintos tipos de ajustes (Tipo de cambio, etc.).
+	Los ajustes se clasifican según tipo para su control.
+	4
+	Registrar fecha contable y periodo del ajuste.
+	Los ajustes se contabilizan en el periodo correspondiente.
+	5
+	Permitir adjuntar glosa o comentario justificativo del ajuste.
+	Se almacena la descripción en el asiento.
+	6
+	Integrar los ajustes automáticamente a los libros contables (diario, mayor).
+	Los ajustes son visibles en los reportes financieros.
+	7
+	Registrar cada ajuste en la bitácora contable.
+	Se registra usuario, fecha, tipo de ajuste y monto.
+	8
+	Permitir modificar o anular ajustes mientras el periodo esté abierto.
+	Control de auditoría mantiene trazabilidad de cambios.
+	________________
+
+
+8. Estructura del Proceso
+Tipo: Proceso contable manual y/o automático.
+Naturaleza: Registro y control de movimientos contables de ajuste.
+8.1 Campos del Formulario Maestro
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	N° Ajuste
+	Texto
+	Automático
+	Código único generado por el sistema.
+	Tipo de Ajuste
+	Lista
+	Sí
+	Provisión, Reclasificación, Tipo de Cambio, Redondeo, Otros.
+	Fecha Contable
+	Fecha
+	Sí
+	Fecha de contabilización del ajuste.
+	Periodo Contable
+	Numérico
+	Sí
+	Año y mes del ajuste.
+	Glosa / Descripción
+	Texto largo
+	Sí
+	Justificación o motivo del ajuste.
+	Moneda
+	Lista
+	Sí
+	Moneda local o extranjera.
+	Estado
+	Lista
+	Sí
+	Pendiente / Contabilizado / Anulado.
+	8.2 Detalle del Asiento Contable
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Cuenta Contable
+	Lista (Plan de Cuentas)
+	Sí
+	Código de cuenta afectada por el ajuste.
+	Descripción de Cuenta
+	Texto
+	Automático
+	Se carga según la cuenta seleccionada.
+	Centro de Costo
+	Lista
+	No
+	Aplica cuando la cuenta lo requiera.
+	Débito
+	Numérico (15,2)
+	No
+	Monto en el debe.
+	Crédito
+	Numérico (15,2)
+	No
+	Monto en el haber.
+	Referencia
+	Texto
+	No
+	Identificador o nota de respaldo.
+	________________
+
+
+9. Reglas de Negocio
+         1. Integridad contable: Todo ajuste debe cumplir con la partida doble (Débito = Crédito).
+
+         2. Clasificación por tipo: Cada ajuste debe pertenecer a un tipo predefinido (provisión, reclasificación, ajuste por cambio, etc.).
+
+         3. Auditoría obligatoria: Todo registro, modificación o anulación de ajuste se registra en la bitácora.
+
+         4. Control de periodos: Solo se permiten ajustes en periodos abiertos.
+
+         5. Bloqueo automático: Una vez cerrado el periodo, los ajustes no pueden modificarse.
+
+         6. Campos obligatorios: Tipo de ajuste, periodo contable, fecha contable, glosa y cuentas contables.
+
+         7. Validación de cuentas: Solo pueden usarse cuentas activas del plan contable.
+
+         8. Integración automática: Los ajustes se integran al Libro Diario, Mayor y Estado de Resultados.
+
+________________
+
+
+10. Integraciones
+            * Módulo de Contabilidad General: Inserta los ajustes en los libros contables.
+
+            * Módulo de Centros de Costo: Permite imputar ajustes a centros específicos.
+
+            * Módulo de Auditoría: Registra las operaciones realizadas (alta, modificación, anulación).
+
+            * Módulo de Monedas: Aplica el tipo de cambio correspondiente al periodo.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tipo de Componente: Proceso contable transaccional.
+
+               * Tablas Fuente:
+
+                  * CNTBL_AJUSTE_CAB (cabecera de ajuste contable).
+
+                  * CNTBL_AJUSTE_DET (detalle del asiento de ajuste).
+
+                  * CNTBL_CUENTA_CONTABLE (validación de cuentas).
+
+                  * CNTBL_CENTRO_COSTO (referencia de costos).
+
+                     * Bitácora: LOG_AJUSTES_CONTABLES (usuario, fecha, tipo, periodo, monto total).
+
+                     * Exportaciones: .xlsx, .pdf.
+
+                     * Performance: Validar en tiempo real el cuadre de débitos y créditos antes de guardar.
+
+Consulta referencial (validación de cuadre de ajustes):
+SELECT 
+    nro_ajuste,
+    SUM(debe) AS total_debe,
+    SUM(haber) AS total_haber,
+    (SUM(debe) - SUM(haber)) AS diferencia
+FROM cntbl_ajuste_det
+WHERE nro_ajuste = :nro_ajuste
+GROUP BY nro_ajuste
+HAVING SUM(debe) <> SUM(haber);
+
+
+________________
+
+
+12. Flujo Principal del Proceso
+                        1. El usuario accede a Contabilidad → Procesos → Registro de Ajustes Contables.
+
+                        2. Presiona “Nuevo” para crear un ajuste contable.
+
+                        3. Selecciona el tipo de ajuste y completa la información general (fecha, periodo, glosa).
+
+                        4. Ingresa las cuentas contables afectadas con sus montos en Débito y Crédito.
+
+                        5. El sistema valida que Débito = Crédito.
+
+                        6. Guarda el ajuste con estado “Pendiente” o “Contabilizado”.
+
+                        7. El sistema registra la operación en la bitácora contable.
+
+                        8. El ajuste queda disponible para los reportes financieros y libros contables.
+
+________________
+
+
+13. Mensajes de Validación
+                           * “Debe seleccionar el tipo de ajuste y periodo contable.”
+
+                           * “El ajuste contable está descuadrado. Revise los montos en Débito y Crédito.”
+
+                           * “La cuenta contable seleccionada no está activa.”
+
+                           * “Ajuste registrado correctamente.”
+
+                           * “No se puede modificar un ajuste de un periodo cerrado.”
+
+                           * “Error al registrar el ajuste. Contacte al administrador del sistema.”

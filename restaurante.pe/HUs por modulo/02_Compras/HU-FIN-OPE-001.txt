@@ -1,0 +1,228 @@
+﻿HU-FIN-OPE-001 - Ingreso de Facturas de Proveedores provenientes del Módulo de Compras - v1.0
+1. Título
+Ingreso de Facturas de Proveedores provenientes del Módulo de Compras
+2. Descripción
+Como usuario del área contable o financiera, quiero que las facturas emitidas por los proveedores y registradas en el módulo de Almacén sean ingresadas automáticamente o validadas manualmente en el módulo de Compras, para generar las cuentas por pagar correspondientes, integradas al flujo de pagos y a la contabilidad general, asegurando que toda factura recepcionada esté correctamente asociada a su orden de compra y registro contable.
+3. Proceso
+* Proceso: Operaciones
+
+* Subproceso: Cuentas por Pagar
+
+* Módulo: Compras
+
+4. Narrativa de Usuario
+   * Quiero: Revisar y registrar facturas de proveedores provenientes del módulo de Almacén.
+
+   * Para: Generar automáticamente los compromisos de pago y asientos contables correspondientes.
+
+   * De manera que: Se mantenga la trazabilidad completa entre la orden de compra, la recepción de productos y la factura del proveedor.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal → Compras → Operaciones → Cuentas por Pagar → Ingreso de Facturas de Proveedores
+6. Criterios de Aceptación
+      1. El sistema debe permitir importar automáticamente facturas de proveedores registradas en el módulo de Almacén, tanto de manera manual como electrónica (XML, API, PDF etc.).
+
+      2. Cada factura debe estar vinculada a una Orden de Compra previamente aprobada.
+
+      3. Debe validarse que los productos, cantidades y montos coincidan con lo recepcionado en almacén y lo facturado por el proveedor.
+
+      4. Si la factura no coincide con la orden de compra o recepción, el sistema debe generar una alerta de discrepancia. Debe existir la opción de observar el ingreso realizado por Almacén o Compras para que éstos subsanen el error y proceder con el adecuado registro. 
+
+      5. El sistema debe permitir ingresar manualmente facturas no originadas en compras (servicios, gastos administrativos, arrendamientos, etc.), marcándose como “factura directa”.
+
+      6. Cada factura debe registrar: proveedor, número de documento, tipo de comprobante, fecha de emisión, fecha de vencimiento, moneda, monto total, impuestos (si existen) y condición de pago.
+
+      7. Cuando se registre una compra de bienes o servicios afecta a detracción, se debe marcar la opción “Aplica detracción”, de acuerdo con los parámetros establecidos por el ente tributario correspondiente. A modo de ejemplo, en el caso de Perú, la SUNAT establece que la operación está sujeta a detracción cuando el importe total supera los S/ 700, o S/ 400 en el caso de servicios de transporte.
+En estos casos, se debe seleccionar el código de detracción correspondiente según lo definido en la HU-CON-003, y el sistema generará automáticamente un documento DE por pagar por el porcentaje que corresponda.
+Por consiguiente el documento de compra F registrado tendrá el saldo por pagar descontando el monto de la detracción.
+
+         8. Al confirmar la factura, debe generarse automáticamente el asiento contable correspondiente y el registro en Cuentas por Pagar.
+
+         9. La información debe integrarse con los módulos de Contabilidad, Compras, Bancos y Tesorería.
+
+         10. Todas las acciones deben registrarse en el log de auditoría contable (usuario, fecha, hora, acción).
+
+         11. El sistema debe permitir filtrar, consultar, editar y anular facturas antes de su contabilización definitiva.
+
+         12. Solo usuarios con permisos contables pueden modificar facturas contabilizadas.
+
+         13. Las facturas importadas deben mostrar el estado de integración (Pendiente / Validada / Contabilizada / Anulada).
+
+         14. El sistema debe permitir la exportación del listado de facturas a Excel o PDF.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos del Formulario
+Campo
+	Tipo / Control
+	Descripción
+	Validación
+	Proveedor
+	Selector
+	Nombre o RUC del proveedor (vinculado al módulo de Compras).
+	Obligatorio
+	Tipo de Comprobante
+	Selector
+	Factura, Boleta, ticket, recibo por honorario 
+	Obligatorio
+	Número de Comprobante
+	Texto
+	Serie y número de factura.
+	Obligatorio, único por proveedor
+	Fecha de Emisión
+	Fecha
+	Fecha del documento fiscal.
+	Obligatorio
+	Fecha de Recepción
+	Fecha
+	Fecha en que se registra en el sistema.
+	Automática o editable
+	Fecha de Vencimiento
+	Fecha
+	Calculada según condición de pago.
+	Automática, editable con permiso
+	Moneda
+	Selector
+	Moneda del documento.
+	Obligatorio
+	Tipo de Cambio
+	Numérico (decimal)
+	Tipo de cambio vigente.
+	Obligatorio si moneda ≠ local
+	Condición de Pago
+	Selector
+	Contado, Crédito 30 días, etc.
+	Obligatorio
+	Monto Subtotal
+	Numérico
+	Valor antes de impuestos.
+	Obligatorio
+	Impuestos (IGV/IVA)
+	Numérico
+	Cálculo automático según país.
+	Obligatorio
+	Monto Total
+	Numérico
+	Subtotal + impuestos.
+	Automático
+	Orden de Compra Asociada
+	Selector / vínculo
+	Referencia a la OC aprobada.
+	Obligatorio si aplica
+	Estado
+	Selector (Registrada / Anulada)
+	Estado de la factura.
+	Obligatorio
+	Cuenta Contable Asociada
+	Selector
+	Cuenta de gastos o compras.
+	Obligatorio
+	Documento Adjunto (XML/PDF)
+	Carga de archivo
+	Comprobante electrónico del proveedor.
+	Opcional según país
+	País
+	Texto informativo
+	Determinado por la sesión activa.
+	Solo lectura
+	Razón Social
+	Texto informativo
+	Determinada por la sesión activa.
+	Solo lectura
+	Columnas del Listado
+Campo
+	Descripción
+	Proveedor
+	Nombre o razón social del proveedor
+	Tipo de Comprobante
+	Factura, Nota de Crédito, etc.
+	Número de Comprobante
+	Serie y número
+	Fecha de Emisión
+	Fecha del documento
+	Fecha de Vencimiento
+	Calculada por condición de pago
+	Moneda
+	Moneda del documento
+	Monto Total
+	Valor total del comprobante
+	Estado
+	Pendiente, Validada, Contabilizada, Anulada[a]
+	Orden de Compra
+	Número de OC asociada
+	Usuario Últ. Modificación
+	Usuario que realizó la última acción
+	Fecha de Creación
+	Fecha del registro inicial
+	Filtros disponibles£
+            * Proveedor
+
+            * Estado de la Factura
+
+            * Tipo de Comprobante
+
+            * Fecha de Emisión / Vencimiento
+
+            * Moneda
+
+            * País / Razón Social
+
+Acciones disponibles
+               * Importar Facturas desde Almacén
+
+               * Nuevo Registro Manual (Registrar facturas que no correspondan al módulo de almacén) Como por ejemplo: Alquileres, Luz, Agua, etc. 
+
+               * Editar Factura (corregir errores de ingreso, número o serie de la factura, fecha de emisión, impuestos, etc)
+
+               * Ver Detalle
+
+               * Validar / Contabilizar: El sistema debe dejar las facturas registradas por almacén o analista de compras en "por contabilizar". El Analista de Contabilidad debe revisar esta lista de facturas y validar que lo ingresado coincida con lo facturado para que proceda a contabilizar y generar los registros correspondientes (Asientos contables y finanzas (cuentas por pagar y flujo de caja)). 
+
+               * Anular Factura
+
+               * Exportar Listado (Excel / PDF)
+
+               * Auditar Cambios
+
+               * Agrupar por Proveedor o Estado: Ver facturas por contabilizar agrupadas por proveedor, insumo, producto, montos de mayor a menor o viceversa, o facturas con fecha de vencimiento más reciente.
+
+               * Ver gráfico comparativo (monto de facturas por proveedor o mes)
+
+8. Integraciones
+                  * Compras: Importar datos de órdenes y facturas de proveedores.
+
+                  * Contabilidad: Genera automáticamente asientos contables.
+
+                  * Cuentas por Pagar: Registra compromisos de pago y vencimientos.
+
+                  * Tesorería: Envía información para planificación de pagos.
+
+                  * Bancos: Permite conciliación posterior al pago.
+
+                  * Impuestos: Reporta información fiscal (IGV/IVA) según país.
+
+9. Consideraciones Técnicas
+                     * La importación automática puede realizarse por API o archivo XML según normativa local.
+
+                     * El sistema debe validar duplicidad de número de comprobante por proveedor.
+
+                     * Registrar todas las acciones en el log de auditoría contable.
+
+                     * Integrar validación de RUC/NIT del proveedor con servicios tributarios locales (SUNAT, DIAN, SII, etc.).
+
+                     * Manejar correctamente la conversión de moneda y tipo de cambio vigente.
+
+                     * Compatible con entornos multipaís y multimoneda.
+
+10. Comentarios
+                        * Esta HU permite la integración directa entre los módulos de Compras y Finanzas, optimizando el registro de facturas y reduciendo errores manuales.
+
+                        * La automatización del ingreso de facturas garantiza la consistencia entre órdenes de compra, recepción de mercaderías y registros contables.
+
+                        * Es esencial para mantener actualizado el módulo de Cuentas por Pagar y proyectar correctamente el flujo de caja.
+
+                        * Solo los usuarios con rol Contador o Administrador Financiero podrán aprobar la contabilización definitiva de facturas.
+
+                        * La trazabilidad de facturas es un requisito clave para auditorías fiscales y control interno.
+
+
+[a]Estados actuales: Registrada, Anulada

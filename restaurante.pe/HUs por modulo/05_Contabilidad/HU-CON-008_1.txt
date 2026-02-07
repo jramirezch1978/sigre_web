@@ -1,0 +1,311 @@
+﻿HU-CON-008 - Ajustes y Reclasificación Contable - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-008
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Libro Diario
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Ajustes y Reclasificación
+
+* Autor: Redactor de HU de Software de Contabilidad
+
+* Fuente: Alcance Global del Proyecto de Implementación de Sistema Contable y de Nómina Multipaís – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir realizar ajustes y reclasificaciones contables para mantener la integridad, exactitud y coherencia de los saldos, ya sea por provisiones, reclasificaciones, Ajustes menores (AJUSTES MANUALES), Esta funcionalidad deberá operar sobre los asientos contables existentes o generar nuevos asientos automáticos con las partidas de ajuste correspondientes, manteniendo trazabilidad total y control de auditoría.
+Los ajustes podrán realizarse de forma manual o automática, dependiendo del tipo (reclasificación, redondeo o tipo de cambio). Todos los movimientos generados deben mantener balance entre débito y crédito y estar sujetos a validaciones contables y de periodo.
+________________
+
+
+3. Actor(es)
+   * Usuario Contable: Ejecuta ajustes manuales o automáticos según su rol.
+
+   * Jefe de Contabilidad: Revisa y aprueba ajustes contables y reclasificaciones.
+
+   * Auditor Interno: Consulta los ajustes y sus bitácoras asociadas para control posterior.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos de “Generar Ajustes Contables” o “Reclasificar Cuentas”.
+
+      * El periodo contable debe encontrarse abierto para registrar los asientos de ajuste.
+
+      * Las cuentas involucradas deben estar activas y disponibles en el plan contable.
+
+      * El sistema debe contar con configuraciones de tipo de cambio y tolerancia de redondeo vigentes.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Libro Diario → Ajustes y Reclasificación
+________________
+
+
+6. Historia de Usuario
+Como usuario contable,
+quiero realizar ajustes contables por redondeo, diferencia de tipo de cambio o reclasificación de saldos entre cuentas,
+para garantizar que los estados financieros reflejen valores correctos y las cuentas contables estén clasificadas correctamente según las normas de la empresa.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir reclasificar saldos entre cuentas contables de naturaleza compatible (activo, pasivo, gasto, ingreso).
+	Se generan asientos automáticos con la glosa “Reclasificación de saldos”.
+	2
+	Permitir ajustes por redondeo en las diferencias menores entre débitos y créditos.
+	El sistema crea automáticamente las partidas de ajuste.
+	3
+	Permitir ajustes por tipo de cambio, recalculando importes alternos según la tasa vigente.
+	El sistema genera un asiento con las diferencias en moneda local.
+	4
+	Validar que los asientos generados estén balanceados ( debe = Haber).
+	El sistema bloquea grabación si hay desequilibrio.
+	5
+	Permitir seleccionar origen (manual, automático, cierre mensual, revaluación).
+	Se guarda trazabilidad en campo ORIGEN.
+	6
+	Registrar todos los ajustes en bitácora contable, con usuario, fecha, tipo de ajuste y motivo.
+	Auditoría visible desde módulo de reportes.
+	7
+	No permitir ajustes en periodos cerrados o transferidos.
+	Mensaje de error al intentar procesar.
+	8
+	Los asientos automáticos deben generarse bajo el libro configurado para ajustes (por ejemplo, Libro Diario General).
+	Se registra correctamente en el plan contable.
+	________________
+
+
+8. Formulario Maestro–Detalle
+Tablas utilizadas: CNTBL_ASIENTO, CNTBL_ASIENTO_DET, CNTBL_ASIENTO_DET_AUX
+ Vista: Maestro (cabecera del asiento de ajuste) + Detalle (partidas contables del ajuste).
+8.1 Cabecera del Asiento (CNTBL_ASIENTO)
+Campo (UI)
+	Columna BD
+	Tipo
+	Edit.
+	Descripción / Validaciones
+	Origen
+	ORIGEN CHAR(2)
+	Lista
+	No
+	Define tipo de ajuste (RE, TC, RC, etc.).
+	Año
+	ANO NUMBER(4)
+	Numérico
+	No
+	Debe corresponder al ejercicio activo.
+	Mes
+	MES NUMBER(2)
+	Numérico
+	No
+	1–12.
+	Libro Contable
+	NRO_LIBRO NUMBER(3)
+	Lista
+	Sí
+	Libro asociado a ajustes contables.
+	N° Asiento
+	NRO_ASIENTO NUMBER(10)
+	Numérico
+	No
+	Autonumérico.
+	Moneda
+	COD_MONEDA CHAR(3)
+	Lista
+	Sí
+	Moneda base o extranjera.
+	Tasa de Cambio
+	TASA_CAMBIO NUMBER(7,4)
+	Numérico
+	Sí
+	Requerido si moneda ≠ local.
+	Glosa General
+	DESC_GLOSA VARCHAR2(2000)
+	Texto
+	Sí
+	“Ajuste por tipo de cambio”, “Reclasificación de cuentas”, etc.
+	Fecha Contable
+	FECHA_CNTBL DATE
+	Fecha
+	Sí
+	Debe estar dentro del periodo abierto.
+	Usuario
+	COD_USR CHAR(6)
+	Automático
+	No
+	Se registra automáticamente.
+	Estado
+	FLAG_ESTADO CHAR(1)
+	Lista
+	Sí
+	Activo=1, Inactivo=0.
+	Transferido
+	FLAG_ASNT_TRANSF CHAR(1)
+	Toggle
+	No
+	0 por defecto (no transferido).
+	8.2 Detalle del Asiento (CNTBL_ASIENTO_DET)
+Campo (UI)
+	Columna BD
+	Edit.
+	Validaciones / Descripción
+	Ítem
+	ITEM NUMBER(6)
+	No
+	Secuencial.
+	Cuenta Contable
+	CNTA_CTBL CHAR(10)
+	Sí
+	Debe existir y estar activa.
+	D/H
+	FLAG_DEBHAB CHAR(1)
+	Sí
+	D o H.
+	Importe en Moneda Local
+	IMP_MOVSOL NUMBER(17,6)
+	Sí
+	Mayor o igual a 0.
+	Importe en Moneda Extranjera
+	IMP_MOVDOL NUMBER(17,6)
+	Sí
+	Solo si moneda ≠ local.
+	Centro de Costo
+	CENCOS CHAR(10)
+	Sí
+	Requerido si cuenta lo exige.
+	Tercero / Relación
+	COD_RELACION CHAR(8)
+	Opcional
+	Según política contable.
+	Glosa Detalle
+	DET_GLOSA VARCHAR2(2000)
+	Sí
+	Máx. 2000 caracteres.
+	Documento Ref.
+	TIPO_DOCREF1, NRO_DOCREF1
+	Opcional
+	Si corresponde a una reclasificación de documento.
+	8.3 Tipos de Ajuste Soportados
+Tipo
+	Descripción
+	Forma de Generación
+	Observaciones
+	RC – Reclasificación
+	Movimiento entre cuentas contables.
+	Manual
+	Requiere selección de cuenta origen y destino.
+	RE – Redondeo
+	Ajuste por diferencias menores.
+	Automático
+	Detecta diferencias al cierre.
+	TC – Tipo de Cambio
+	Ajuste por revaluación de moneda extranjera.
+	Automático
+	Basado en TC vigente y saldos contables.
+	________________
+
+
+9. Reglas de Negocio
+         1. Balance obligatorio: Todo asiento generado debe cuadrar Débito = Haber.
+
+         2. Reclasificación: Solo se permiten movimientos entre cuentas con naturaleza compatible.
+
+         3. Redondeo: Se aplicará únicamente si la diferencia es menor o igual al umbral configurado (ej. 0.01 en moneda local).
+
+         4. Tipo de cambio: El ajuste se basa en la diferencia entre el tipo de cambio actual y el registrado en los asientos originales.
+
+         5. Auditoría: Todos los asientos generados o modificados deben registrar usuario, fecha, hora y motivo.
+
+         6. Bloqueo de periodo: No se permite ejecutar ajustes en periodos cerrados o ya transferidos.
+         7. 
+Aprobación: Los ajustes manuales podrán requerir aprobación según configuración.
+
+         8. Reversión: Si un ajuste fue erróneo, debe poder revertirse mediante un asiento espejo automático.
+
+         9. Libro de ajustes: Todos los movimientos deben registrarse bajo el libro contable asignado a “Ajustes”.
+
+________________
+
+
+10. Integraciones
+            * Plan de Cuentas: Validación de cuentas activas y naturaleza.
+
+            * Monedas y Tipo de Cambio: Para recalcular valores en moneda extranjera.
+
+            * Centros de Costo: En ajustes analíticos.
+
+            * Reportes Contables: Impacta en Libro Diario, Libro Mayor y Balances.
+
+            * Auditoría: Registro en bitácora de modificaciones y asientos generados.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tablas principales: CNTBL_ASIENTO, CNTBL_ASIENTO_DET, CNTBL_ASIENTO_DET_AUX.
+
+               * PK: (ORIGEN, ANO, MES, NRO_LIBRO, NRO_ASIENTO).
+
+               * Transacciones: Se realizan dentro de una misma transacción automática (commit/rollback).
+
+               * Automatización: Procesos automáticos de ajuste por TC y redondeo podrán ejecutarse mediante job programado.
+
+               * Auditoría: Tabla de log CNTBL_ASIENTO_AUD con campos: tipo de ajuste, usuario, fecha, glosa, valores antes/después.
+
+               * Filtros UI: Por tipo de ajuste, periodo, libro contable, usuario, estado.
+
+               * Reportes Exportables: Excel / PDF para control de ajustes realizados.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                  1. Usuario ingresa a Contabilidad → Libro Diario → Ajustes y Reclasificación.
+
+                  2. Selecciona el tipo de ajuste (reclasificación, redondeo o tipo de cambio).
+
+                  3. Indica el periodo contable y las cuentas a afectar.
+
+                  4. El sistema calcula las diferencias o permite registrar manualmente las partidas.
+
+                  5. Valida balance, cuentas activas y tipo de cambio vigente.
+
+                  6. Guarda asiento → genera registro maestro–detalle con glosa y auditoría.
+
+                  7. Emite mensaje de confirmación o error si el asiento no cuadra.
+
+________________
+
+
+13. Mensajes de Validación
+                     * “El periodo contable seleccionado está cerrado o transferido.”
+
+                     * “La cuenta destino no tiene naturaleza compatible para reclasificación.”
+
+                     * “Diferencia fuera del rango permitido para ajuste por redondeo.”
+
+                     * “Debe ingresar la glosa del ajuste.”
+
+                     * “El asiento no balancea: debe≠ Haber.”
+
+                     * “Asiento de ajuste generado correctamente.”

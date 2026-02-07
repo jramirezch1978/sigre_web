@@ -1,0 +1,123 @@
+﻿HU-RRHH-AJ-HR-001 - Cálculo Automático de Horas Extra y Recargos - v1.0
+1. Título
+ Calcula horas extra con 25% y 35% de recargo según corresponda, nocturnidad y recargos por domingos/feriados según normativa local.
+2. Descripción
+ Como analista de nómina, quiero que el sistema calcule automáticamente las horas extra y los recargos aplicables (25%, 35%, nocturnidad, domingos y feriados), considerando las normativas laborales de cada país, para garantizar el cumplimiento legal y la correcta liquidación de remuneraciones.
+3. Proceso
+ Proceso: Asistencia y Jornadas
+Subproceso: Horas Extras y Recargos
+Módulo: RR.HH
+4. Narrativa de Usuario
+ Quiero: Que el sistema determine y calcule de manera automática las horas extra y los recargos aplicables según las marcaciones de asistencia y los turnos definidos.
+Para: Asegurar que los pagos por trabajo adicional o en condiciones especiales se realicen conforme a ley.
+De manera que: Se minimicen errores humanos, se cumpla con las normas laborales locales y se optimice el proceso de cálculo de planilla.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > RR.HH > Asistencia y Jornadas > Horas Extras y Recargos
+6. Criterios de Aceptación
+ El sistema debe:
+* Identificar automáticamente las horas trabajadas fuera del horario habitual registrado en el calendario laboral.
+
+* Calcular las horas extra con 25% de recargo (primeras horas adicionales) y 35% de recargo (horas posteriores), conforme a la normativa local.
+
+* Detectar y aplicar recargos nocturnos según el rango horario definido (por ejemplo, entre 22:00 y 06:00 horas).
+
+* Calcular recargos dominicales y feriados, tomando en cuenta los feriados nacionales/locales configurados.
+
+* Considerar los turnos rotativos o especiales definidos en el calendario laboral de cada sede.
+
+* Permitir parametrizar los porcentajes de recargo por país o grupo de trabajadores.
+
+* Mostrar en el resumen de asistencia las horas normales, extras y con recargo.
+
+* Validar que las horas extra hayan sido autorizadas antes de su liquidación.
+
+* Integrar los valores calculados con el módulo de planillas para su pago.
+
+* Registrar todos los cálculos en el log de auditoría (usuario, fecha, parámetros y valores).
+
+* Permitir la generación de reportes con el detalle de horas extra y recargos por trabajador, fecha o centro de costo.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+ Campos principales:
+   * Código de Trabajador
+
+   * Nombre del Trabajador
+
+   * Fecha
+
+   * Hora de Entrada / Salida
+
+   * Horas Normales
+
+   * Horas Extra 25%
+
+   * Horas Extra 35%
+
+   * Horas Nocturnas
+
+   * Horas en Domingo / Feriado
+
+   * Total Horas con Recargo
+
+   * Monto Total Calculado
+
+   * Estado (Pendiente / Aprobado / Liquidado)
+
+Filtros disponibles:
+      * Fecha / Rango de Fechas
+
+      * Sede / Centro de Costo
+
+      * Tipo de Jornada (Diurna / Nocturna / Mixta)
+
+      * Estado del Cálculo
+
+      * Trabajador / Cargo / Departamento
+
+Acciones disponibles:
+         * Calcular Horas Extra
+
+         * Validar Recargos
+
+         * Autorizar Cálculo
+
+         * Exportar Reporte (Excel / PDF)
+
+         * Enviar a Planilla
+
+         * Consultar Log de Auditoría
+
+8. Detalle de Integración (opcional)
+ Integración con:
+            * Módulo de Asistencia: para obtener las marcaciones diarias y los horarios reales trabajados.
+
+            * Módulo de Planillas: para aplicar los montos calculados en el pago de remuneraciones.
+
+            * Módulo de Configuración General: para importar feriados y parámetros de cálculo por país.
+
+            * Módulo de Auditoría: para registrar cálculos, aprobaciones y modificaciones.
+
+9. Consideraciones Técnicas
+ El sistema debe:
+               * Usar el horario planificado y las marcaciones reales para calcular las diferencias.
+
+               * Soportar distintas reglas laborales por país, incluyendo tasas de recargo y topes máximos de horas extra.
+
+               * Permitir definir rango de nocturnidad configurable por sede o país.
+
+               * Bloquear la duplicidad de cálculo para un mismo trabajador y fecha.
+
+               * Guardar los resultados en una tabla histórica de cálculo de horas extra.
+
+               * Permitir recalcular si se actualizan marcaciones o parámetros.
+
+               * Mostrar alertas si un trabajador supera el límite legal de horas extra.
+
+               * Validar las jornadas cruzadas (por ejemplo, de noche a madrugada).
+
+               * Generar reportes consolidados y detallados por área o sucursal.
+
+10. Comentarios
+ Esta funcionalidad garantiza el cumplimiento de las normativas laborales locales en el pago de horas extra y recargos, reduciendo el riesgo de errores y sanciones.
+Permite mantener una trazabilidad completa de las horas calculadas, autorizadas y liquidadas, y asegura una integración fluida con el módulo de planillas.
+Se recomienda programar la ejecución del cálculo de manera diaria o semanal, así como revisar los parámetros de recargo al menos una vez por año para mantener la conformidad legal.

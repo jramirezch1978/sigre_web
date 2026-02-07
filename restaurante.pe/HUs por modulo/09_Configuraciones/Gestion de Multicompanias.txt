@@ -1,0 +1,231 @@
+﻿Gestión de Multicompañías
+Módulo: Configuraciones
+Proceso: Compañías
+Subproceso: Empresa
+1. Descripción
+Como Administrador Global / Administrador de la Cuenta, quiero visualizar todas las compañías registradas y acceder a la configuración de cada una, para administrar su información general, sus sucursales y las reglas de transacciones entre empresas dentro de la misma cuenta (suscripción).
+2. Contexto y Alcance Funcional
+* La funcionalidad opera dentro de una Cuenta (Suscripción) que puede contener múltiples compañías.
+* Se dispone de un panel de previsualización de compañías.
+* Cada compañía tiene su configuración independiente.
+* Las transacciones entre empresas solo se aplican entre compañías registradas en la misma cuenta.
+* El usuario opera siempre en el contexto de una compañía seleccionada al ingresar a su detalle.
+3. Navegabilidad
+Configuraciones > Gestión Empresarial > Empresas
+ → Click en compañía
+ → Empresa > Información general | Sucursales | Transacciones entre empresas
+4. Funcionalidad
+4.1 Panel de Compañías (Vista Externa)
+* Visualización tipo lista o tarjetas de todas las compañías de la cuenta.
+* Información resumida por compañía:
+
+   * Nombre de la empresa
+   * País
+   * Identificación fiscal
+   * Estado (Activa / Inactiva)
+
+      * Acción principal:
+
+         * Click para acceder a la configuración de la compañía
+
+5. Configuración Interna por Compañía
+5.1 Información de la Compañía
+Campos disponibles
+Campo
+	Tipo
+	Obligatorio
+	Edición
+	Observaciones
+	Nombre de la empresa
+	Texto
+	Sí
+	No
+	Razón social
+	Correo electrónico fiscal
+	Email
+	Sí
+	Sí
+	Validación de formato
+	País
+	Select
+	Sí
+	No
+	Determina reglas fiscales
+	Dirección fiscal
+	Texto
+	Sí
+	Sí
+	—
+	Identificación fiscal
+	Texto
+	Sí
+	No
+	Único por país
+	Zona horaria
+	Select
+	Sí
+	Sí
+	Basado en UTC
+	Nombre comercial
+	Texto
+	Sí
+	Sí
+	Visible en documentos
+	Año contable inicial
+	Select / Año
+	Sí
+	No
+	Se define al crear la compañía
+	Mes de inicio contable
+	Select (Mes)
+	Sí
+	No
+	Define el primer periodo contable válido
+	Idioma
+	Select
+	Sí
+	Sí
+	Idioma por defecto
+	Logotipo de la empresa
+	Imagen
+	No
+	Sí
+	PNG/JPG hasta 2MB
+	Acciones
+            * Subir / reemplazar logotipo
+            * Guardar (cambios)
+            * Cancelar (cambios)
+
+5.1.1 Configuración Contable Inicial
+               * El Mes de inicio contable determina desde qué período el sistema permitirá:
+               * Registrar transacciones contables
+               * Generar periodos contables
+               * Emitir reportes financieros
+
+                  * Los meses anteriores al mes configurado:
+                  * No existen operativamente
+                  * No pueden ser abiertos ni cerrados
+                  * No aceptan transacciones
+
+📌 Ejemplo
+ Si la compañía se crea con:
+                     * Año contable inicial: 2024
+                     * Mes de inicio contable: Abril
+Entonces:
+                     * Enero, febrero y marzo 2024 no están disponibles
+                     * Abril 2024 es el primer periodo válido
+                     * Los saldos previos deben ingresarse mediante asiento de apertura
+5.2 Sucursales de la Compañía
+Cada sucursal representa una unidad operativa de la compañía.
+                     1. Vista
+                     * Tabla editable con botón “Agregar sucursal”.
+                     2. Campos por sucursal
+(mismos campos base que Información de la Compañía, ajustados a nivel sucursal)
+Campo
+	Tipo
+	Obligatorio
+	Nombre de la sucursal
+	Texto
+	Sí
+	Correo electrónico fiscal
+	Email
+	Sí
+	País
+	Texto
+	Sí
+	Dirección fiscal
+	Texto
+	Sí
+	Identificación fiscal
+	Texto
+	Sí
+	Zona horaria
+	Select
+	Sí
+	Nombre comercial
+	Texto
+	Sí
+	Idioma
+	Select
+	Sí
+	Activa
+	Checkbox
+	Sí
+	Acciones
+                     * Agregar sucursal
+                     * Editar sucursal
+📌 No se permite eliminar sucursales, solo desactivarlas.
+5.3 Micro Panel de Transacciones entre Empresas
+Configuración específica por compañía para operaciones intercompañías
+                     1. Configuración de Transacciones
+Opción
+	Tipo
+	Descripción
+	Generar facturas y reembolsos
+	Checkbox
+	Automatiza facturación intercompany
+	Generar órdenes de venta
+	Checkbox
+	Venta entre compañías
+	Generar órdenes de compra
+	Checkbox
+	Compra espejo
+	Sincronizar entregas y recepciones
+	Checkbox
+	Logística intercompany
+	
+
+                     2. Crear como
+Campo
+	Tipo
+	Descripción
+	Crear como
+	Select
+	Rol responsable (ej. Gerencia General)
+	
+
+                     3. Automatización
+Opción
+	Tipo
+	Comportamiento
+	Crear como borrador
+	Radio
+	Requiere validación manual
+	Crear y validar
+	Radio
+	Flujo automático completo
+	📌 Solo se listan compañías registradas en la misma cuenta para operaciones intercompany.
+6. Reglas de Negocio
+                     * RN-01: La configuración es exclusiva por compañía.
+                     * RN-02: Las sucursales heredan reglas base de la compañía.
+                     * RN-03: Las transacciones entre empresas sólo son válidas dentro de la misma cuenta.
+                     * RN-04: País e identificación fiscal no pueden modificarse tras la creación.
+                     * RN-05: La automatización intercompany requiere permisos administrativos.
+                     * RN-06: El mes de inicio contable se define únicamente durante la creación de la compañía.
+                     * RN-07: Los periodos anteriores al mes de inicio no existen operativamente y no pueden recibir transacciones.
+                     * RN-08: Si la compañía tiene operaciones previas, los saldos deberán registrarse mediante asiento de apertura en el primer mes válido.
+                     * RN-09: Una vez existan movimientos contables, el mes de inicio contable no puede ser modificado.
+7. Criterios de Aceptación
+                     * El usuario visualiza todas las compañías en un panel.
+                     * Puede acceder a la configuración individual de cada compañía.
+                     * Puede editar la información general de la compañía.
+                     * Puede gestionar sucursales con los mismos campos base.
+                     * Puede configurar reglas de transacciones entre empresas.
+                     * El sistema exige definir año y mes de inicio contable al crear una compañía.
+                     * El sistema solo genera periodos contables desde el mes de inicio configurado.
+                     * No es posible registrar transacciones en meses anteriores.
+                     * El balance del primer mes válido parte de los asientos de apertura.
+                     * El campo queda bloqueado (solo lectura) luego del primer registro contable.
+8. Auditoría y Trazabilidad
+Registrar obligatoriamente:
+                     * Usuario
+                     * Fecha
+                     * Hora
+                     * Compañía afectada
+                     * Tipo de acción (acceso, edición, activación)
+
+
+9. Flujos Generados por esta HU
+
+
+Flujos Generados por la HU "Gestión de Multicompañias"

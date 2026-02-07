@@ -1,0 +1,172 @@
+﻿HU-RRHH-PN-CP-003 - Distribución de Propinas Automática Integrada a Nómina - v1.0
+1. Título
+ Distribuye propinas por reglas: porcentaje, ventas por turno o rol; integra a nómina conforme a ley local.
+2. Descripción
+ Como analista de nómina, quiero que el sistema distribuya automáticamente las propinas generadas por los empleados según reglas configurables (porcentaje, ventas por turno o rol), para que el proceso de cálculo de planilla incorpore correctamente las propinas conforme a la normativa laboral vigente de cada país.
+3. Proceso
+Campo
+	Valor
+	Módulo
+	RR.HH
+	Proceso
+	Procesos de Nómina
+	Subproceso
+	Cálculo de Planillas
+	
+
+4. Narrativa de Usuario
+ Quiero automatizar la distribución de propinas en función de criterios preestablecidos (porcentaje, ventas por turno o tipo de rol),
+Para garantizar la equidad, la transparencia y el cumplimiento de la legislación laboral,
+De manera que las propinas se integren correctamente en los cálculos de nómina y reportes contables.
+
+
+5. Regla de Navegabilidad
+ Ruta: Menú Principal → RR.HH → Procesos de Nómina → Cálculo de Planillas → Distribución de Propinas
+
+
+6. Criterios de Aceptación
+* Permitir la definición de reglas de distribución (porcentaje fijo, ventas por turno, participación por rol o combinación).
+
+* Calcular automáticamente el monto de propina asignado a cada trabajador.
+
+* Validar que las reglas cumplan la legislación local del país.
+
+* Permitir ajustes manuales supervisados con trazabilidad.
+
+* Integrar automáticamente las propinas en el cálculo de planilla y reportes de remuneración.
+
+* Registrar logs de auditoría: usuario, fecha, regla aplicada y monto distribuido.
+
+* Mostrar reportes resumidos y detallados por periodo, sede y trabajador.
+
+* Exportar resultados en formato Excel o PDF.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+Campo
+	Tipo de Dato / Control UX
+	Descripción Funcional
+	Ejemplo / Valores Permitidos
+	Validaciones / Reglas UI
+	Periodo / Fecha de Cálculo
+	Fecha (DatePicker)
+	Determina el periodo al que corresponde la distribución de propinas.
+	01/10/2025 - 31/10/2025
+	Obligatorio. No puede coincidir con un periodo cerrado.
+	Sede / Local
+	Lista desplegable (ComboBox)
+	Identifica el local o sede donde se generaron las propinas.
+	Restaurante Miraflores
+	Obligatorio. Solo una sede por proceso.
+	Turno
+	ComboBox / Selector
+	Permite seleccionar el turno a evaluar (mañana, tarde, noche).
+	Turno Noche
+	Opcional. Si se selecciona, filtra ventas y personal.
+	Tipo de Regla
+	Lista desplegable
+	Define el criterio de distribución.
+	% Fijo, Por ventas, Por rol, Mixto
+	Obligatorio. Catálogo configurable.
+	Porcentaje de Distribución
+	Numérico (Input Decimal)
+	Indica el porcentaje del total de propinas a distribuir.
+	10.00 %
+	Obligatorio si la regla es “% Fijo”. Máx. 100%.
+	Monto Total de Propinas
+	Numérico (Solo lectura)
+	Monto total recaudado para el periodo/turno.
+	2,850.00
+	Calculado automáticamente.
+	Rol / Cargo
+	Lista desplegable
+	Identifica el rol de los empleados participantes.
+	Mesero, Bartender, Cajero
+	Obligatorio si la regla aplica por rol.
+	Ventas Asociadas
+	Numérico / Solo lectura
+	Ventas totales del turno o empleado según registro POS.
+	12,500.00
+	Importado automáticamente desde módulo de Ventas.
+	Empleado
+	Autocompletar / Selector
+	Identifica al trabajador receptor de la propina.
+	EMP-000127 - Ana Torres
+	Debe estar activo en planilla del periodo.
+	Monto Asignado
+	Numérico (Input Decimal)
+	Valor de propina asignado al empleado según regla.
+	185.25
+	Calculado automáticamente; editable con permisos.
+	Estado
+	Select / Etiqueta
+	Indica el estado del proceso.
+	Pendiente, Validado, Aplicado
+	Editable solo hasta “Validado”.
+	Usuario Responsable
+	Texto (Solo lectura)
+	Usuario que generó la distribución.
+	cquiroz
+	Asignado automáticamente.
+	Fecha de Generación
+	Fecha y hora (Solo lectura)
+	Momento en que se ejecutó la distribución.
+	01/11/2025 14:30
+	Autogenerado por el sistema.
+	Filtros disponibles (Vista Tabla):
+   * Periodo
+
+   * Sede / Local
+
+   * Tipo de Regla
+
+   * Estado
+
+   * Usuario
+
+Acciones disponibles:
+      * Definir Regla
+
+      * Calcular Distribución
+
+      * Validar y Confirmar
+
+      * Ajustar Montos
+
+      * Exportar Resultados
+
+      * Integrar con Planilla
+
+      * Consultar Historial
+
+8. Detalle de Integración
+Módulo Integrado
+	Funcionalidad
+	Ventas / POS
+	Importación automática del total de propinas registradas por turno.
+	RR.HH – Cálculo de Planillas
+	Incorporación automática de montos de propinas en la planilla del periodo.
+	Contabilidad
+	Generación de asientos contables por propinas distribuidas.
+	Auditoría / Seguridad
+	Registro detallado de usuario, fecha y reglas aplicadas.
+	
+
+
+
+9. Consideraciones Técnicas
+         * Motor de cálculo parametrizable por país y sede.
+
+         * Validaciones legales automáticas (tope máximo de propinas por ley).
+
+         * Posibilidad de revertir o recalcular la distribución.
+
+         * Logs de auditoría completos (usuario, monto, regla, fecha).
+
+         * Soporte para multiempresa y multipaís.
+
+         * UI adaptable para escritorio y tablet (gestión en campo).
+
+
+
+10. Comentarios
+ Esta funcionalidad optimiza el proceso de asignación de propinas, asegurando que la distribución sea justa, trazable y cumpla con las regulaciones laborales, además de integrarse sin intervención manual en el cálculo de nómina.

@@ -1,0 +1,120 @@
+﻿HU-COM-005 - Generar Orden de Servicio - v1.0
+1. Título
+Generar Orden de Servicio
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero registrar y generar órdenes de servicio a proveedores, para formalizar la contratación de servicios, asegurar su control operativo y garantizar la integración con finanzas y contabilidad.
+3. Proceso
+* Proceso: Operaciones
+
+* Subproceso: Órdenes de Servicio
+
+* Módulo: Compras
+
+4. Narrativa de Usuario
+   * Quiero: Crear y gestionar órdenes de servicio.
+
+   * Para: Formalizar la contratación de servicios externos (mantenimiento, publicidad, consultoría, etc.).
+
+   * De manera que: Se controle el gasto, se integren las obligaciones en cuentas por pagar y se registre en contabilidad.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Compras > Operaciones > Órdenes de Servicio > Generar Orden de Servicio
+6. Criterios de Aceptación
+      1. El sistema debe permitir crear órdenes de servicio con datos obligatorios: proveedor, fecha, descripción del servicio, condiciones de pago y monto.
+
+      2. La numeración de la orden de servicio debe ser correlativa y automática teniendo un formato de año + correlativo (OS-YYYY-CORRELATIVO) Ejemplo: OS-2025-000001                
+      3. El proveedor seleccionado debe estar activo en el maestro de proveedores.
+
+      4. La orden de servicio debe poder registrarse en moneda local o extranjera, aplicando tipo de cambio si corresponde.
+
+      5. El sistema debe permitir registrar servicios múltiples dentro de la misma orden.
+
+      6. No se podrá modificar una orden de servicio con estado aprobada o cerrada.
+
+      7. Todas las acciones (crear, modificar, aprobar, anular) deben registrarse en el log de auditoría contable.
+
+      8. El sistema debe generar un documento PDF de la orden de servicio.
+
+      9. El listado de órdenes de servicio debe permitir búsqueda y filtros por: número, proveedor, fecha, estado y sucursal.
+
+7. Campos del Formulario
+Datos Generales
+         * Número de Orden de Servicio (autogenerado). Teniendo un formato de año + correlativo (OS-YYYY-CORRELATIVO) Ejemplo: OS-2025-000001,
+         * Fecha de Emisión (obligatorio, default: fecha actual).
+         * Fecha de ejecución del servicio, que debe ser posterior o igual a la fecha de emisión de la orden de compra.
+         * Dirección donde se ejecutará el servicio.
+         * Proveedor (obligatorio, búsqueda en maestro de proveedores).
+         * Moneda (obligatorio, lista desplegable).
+         * Tipo de Cambio (obligatorio si moneda ≠ moneda local).
+         * Nombre de Condición de Pago (obligatorio, lista desplegable desde catálogo de condiciones de pago con estado: Activo).
+         * Estado (Pendiente, Aprobada, Retornada y  Anulada).
+         * Debe indicar quien emite y quien autoriza la Orden de Servicio.
+Detalle de Servicios
+         * Código interno de servicio (si aplica).
+
+         * Descripción del servicio (texto obligatorio).
+
+         * Cantidad (numérico, opcional).
+
+         * Precio unitario (numérico, obligatorio) estableciendo 4 decimales, validando el valor debe ser mayor a 0.0001
+
+         * Subtotal (calculado).
+
+         * Impuestos aplicables (según país).[a][b][c]
+
+         * Total del servicio (calculado).
+
+Totales de Orden
+            * Subtotal General.
+
+            * Impuestos.
+
+            * Total de la Orden.
+
+8. Listado de Órdenes de Servicio (Vista Tabla)
+Columnas:
+               * Número de OS
+
+               * Fecha de Emisión
+
+               * Proveedor
+
+               * Moneda
+
+               * Total
+
+               * Estado
+
+               * Sucursal
+
+Acciones disponibles: Ver | Editar | Aprobar | Anular | Exportar (Excel/PDF)
+Filtros disponibles: Número de OS | Proveedor | Estado | Fecha | Sucursal
+9. Consideraciones Técnicas
+                  * Numeración configurable por país, razón social y sucursal.
+
+                  * Integración con:
+
+                     * Finanzas (cuentas por pagar, control de gastos).
+
+                     * Contabilidad (registro contable preliminar).
+
+                        * No requiere integración con inventarios, ya que corresponde a servicios.
+
+                        * Todas las operaciones deben registrarse en el log de auditoría contable.
+
+                        * Exportación de órdenes en formato PDF y Excel.
+
+10. Comentarios
+                           * Se debe permitir definir flujos de aprobación configurables, al igual que las órdenes de compra. Revisar flujograma en anexo de HU-COM-006.
+
+                           * En multipaís, deben parametrizarse impuestos aplicables a servicios (ejemplo: IGV en Perú, IVA en Colombia, ITBIS en República Dominicana).
+
+                           * Reportes consolidados deben poder generarse por proveedor, tipo de servicio, centro de costo, sucursal y periodo, más detalle en la HU-COM-008.
+
+
+
+[a]@consultorexterno1@restaurant.pe @igarcia@restaurant.pe 
+Por favor, indicar el HU de referencia y que sea linkeable, con el detalle de los impuestos aplicables por país.
+_Asignada a consultorexterno1@restaurant.pe_
+[b]Esta opción debe ser configurable al momento de la implementación del sistema
+[c]Por favor, indicar el HU de referencia y que sea linkeable, con el detalle de esta opción configurable.

@@ -1,0 +1,275 @@
+﻿HU-CON-015 - Reportes de Validación / Balance de Comprobación - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-015
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Reportes de Validación
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Balance de Comprobación
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir generar un reporte de Balance de Comprobación, mostrando por cada cuenta contable sus saldos iniciales, movimientos del periodo (débitos y créditos) y saldos finales, tanto en moneda local como extranjera, según la configuración de la empresa.
+Este reporte tiene como finalidad verificar el cuadre contable de los registros registrados en los diferentes libros contables, asegurando que la información esté completa y balanceada antes de la generación de los estados financieros.
+Debe permitir filtrar por periodo contable, rango de fechas, tipo de moneda, nivel de cuenta y centro de costo, ofreciendo la posibilidad de exportar los resultados a formatos Excel (.xlsx) y PDF (.pdf) con totales generales al final del documento.
+________________
+
+
+3. Actor(es)
+   * Contador General: Verifica el balance general y los saldos del periodo.
+
+   * Analista Contable: Revisa el detalle de cuentas y analiza movimientos inusuales.
+
+   * Jefe de Contabilidad: Supervisa la consistencia del balance contable antes del cierre.
+
+   * Auditor Interno o Externo: Utiliza el reporte como insumo para conciliaciones y revisiones financieras.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos para acceder al módulo Contabilidad → Reportes.
+
+      * Deben existir asientos contables registrados y cerrados o en proceso en el periodo consultado.
+
+      * Los planes de cuentas y centros de costo deben estar debidamente configurados.
+
+      * El periodo contable seleccionado debe estar abierto o cerrado (solo lectura).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Balance de Comprobación
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar un reporte de Balance de Comprobación,
+para revisar los saldos iniciales, débitos, créditos y saldos finales por cuenta contable y garantizar la exactitud del cuadre contable antes del cierre.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable (año/mes) o rango de fechas.
+	Se muestran las cuentas con movimientos en el periodo.
+	2
+	Mostrar columnas de saldo inicial, débitos, créditos, saldo final y diferencia.
+	Los totales deben cuadrar entre débitos y créditos.
+	3
+	Incluir filtros por nivel de cuenta contable (1 a 5).
+	Permite agrupar los resultados según la estructura del plan contable.
+	4
+	Permitir filtrar por centro de costo o segmento analítico.
+	Muestra los saldos asociados al centro seleccionado.
+	5
+	Mostrar los totales de débitos y créditos al final del reporte.
+	El balance debe cuadrar (débitos = créditos).
+	6
+	Permitir visualizar los resultados en moneda local y extranjera.
+	Los valores se presentan según la configuración de la empresa.
+	7
+	Permitir exportar el reporte a Excel (.xlsx) y PDF (.pdf).
+	Descarga exitosa con formato estructurado.
+	8
+	Mostrar estado de validación del balance (cuadrado / descuadrado).
+	Indicador visible en cabecera del reporte.
+	9
+	Registrar en bitácora la generación del reporte (usuario, fecha, filtros aplicados).
+	Auditoría contable automática.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Reporte contable tabular y consolidado.
+Naturaleza: Reporte informativo de validación contable – No modifica datos.
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Define el periodo contable a consultar.
+	Fecha Desde / Hasta
+	Fecha
+	No
+	Rango de fechas opcional dentro del periodo.
+	Nivel de Cuenta
+	Lista
+	No
+	Permite mostrar cuentas hasta el nivel seleccionado (1 a 5).
+	Moneda
+	Lista
+	No
+	Moneda local o extranjera.
+	Centro de Costo
+	Lista
+	No
+	Filtra cuentas asociadas a un CECO específico.
+	Mostrar Cuentas sin Movimiento
+	Checkbox
+	No
+	Permite incluir cuentas sin movimientos.
+	Estado del Periodo
+	Lista
+	No
+	Abierto / Cerrado.
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Código de Cuenta
+	Código contable según plan de cuentas.
+	Descripción de la Cuenta
+	Nombre de la cuenta.
+	Nivel
+	Nivel jerárquico de la cuenta.
+	Moneda
+	Moneda del registro (local/extranjera).
+	Saldo Inicial
+	Saldo acumulado al inicio del periodo.
+	Débitos
+	Movimientos cargados al debe.
+	Créditos
+	Movimientos cargados al haber.
+	Saldo Final
+	Saldo resultante después de los movimientos.
+	Diferencia
+	(Débitos – Créditos); debe ser cero si está cuadrado.
+	Estado
+	Cuadrado / Descuadrado.
+	8.3 Totales y Resumen
+         * Total general de débitos.
+
+         * Total general de créditos.
+
+         * Diferencia total.
+
+         * Estado global del balance (Cuadrado / Descuadrado).
+
+________________
+
+
+9. Reglas de Negocio
+            1. Balance Cuadrado: La suma total de débitos debe ser igual a la de créditos.
+
+            2. Diferencia Tolerada: Se permite un margen máximo de ±0.01 por efectos de redondeo.
+
+            3. Moneda de Control: Las validaciones se hacen por moneda base definida en la empresa.
+
+            4. Agrupación Jerárquica: El sistema debe respetar los niveles de cuenta definidos (grupo, subgrupo, cuenta, subcuenta, auxiliar).
+
+            5. Solo Lectura: El reporte no permite edición ni modificación de datos contables.
+
+            6. Seguridad: Solo usuarios con rol contable o auditor pueden ejecutar y exportar el reporte.
+
+            7. Auditoría: Cada generación de reporte debe registrarse en la bitácora contable (LOG_BALANCE_COMPROBACION).
+
+            8. Multipaís: Los resultados deben filtrarse según la razón social y país activos.
+
+________________
+
+
+10. Integraciones
+               * Módulo de Contabilidad General: Fuente principal de saldos y movimientos.
+
+               * Módulo de Plan de Cuentas: Estructura jerárquica de las cuentas contables.
+
+               * Módulo de Centros de Costo: Para imputaciones analíticas.
+
+               * Módulo de Auditoría: Registro de generación de reportes.
+
+               * Módulo de Tipos de Cambio: Para conversión de moneda extranjera.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Tipo de Componente: Reporte de validación contable (solo lectura).
+
+                  * Tablas Fuente:
+
+                     * CNTBL_ASIENTO (cabecera del asiento contable).
+
+                     * CNTBL_ASIENTO_DET (detalle de movimientos contables).
+
+                     * CNTBL_CUENTA_CONTABLE (plan de cuentas).
+
+                     * CNTBL_CENTRO_COSTO (centros de costo).
+
+Consulta Base (referencial):
+
+ SELECT 
+    c.cnta_ctbl,
+    c.desc_cta,
+    NVL(SUM(CASE WHEN a.fecha < :fecha_inicio THEN d.debe - d.haber ELSE 0 END), 0) AS saldo_inicial,
+    NVL(SUM(CASE WHEN a.fecha BETWEEN :fecha_inicio AND :fecha_fin THEN d.debe END), 0) AS debitos,
+    NVL(SUM(CASE WHEN a.fecha BETWEEN :fecha_inicio AND :fecha_fin THEN d.haber END), 0) AS creditos,
+    (saldo_inicial + debitos - creditos) AS saldo_final
+FROM cntbl_asiento a
+JOIN cntbl_asiento_det d ON a.origen = d.origen 
+    AND a.nro_asiento = d.nro_asiento
+JOIN cntbl_cuenta_contable c ON d.cnta_ctbl = c.cnta_ctbl
+WHERE a.estado = 'A'
+GROUP BY c.cnta_ctbl, c.desc_cta;
+                        *                         * Exportaciones: Formatos .xlsx y .pdf con logos institucionales y filtros visibles.
+
+                        * Bitácora: Tabla LOG_BALANCE_COMPROBACION (usuario, fecha, filtros, totales, estado).
+
+                        * Performance: Consultas optimizadas con índices en CNTA_CTBL, NRO_ASIENTO, FECHA.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                           1. El usuario accede a Contabilidad → Reportes → Validación / Balance de Comprobación.
+
+                           2. Define los filtros de búsqueda (periodo, nivel de cuenta, moneda, etc.).
+
+                           3. Presiona “Generar Reporte”.
+
+                           4. El sistema ejecuta la validación y genera la vista del balance.
+
+                           5. Se muestran los saldos iniciales, débitos, créditos y saldos finales por cuenta.
+
+                           6. El usuario puede exportar el reporte a Excel o PDF.
+
+                           7. El sistema registra el evento en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                              * “Debe seleccionar un periodo contable para generar el reporte.”
+
+                              * “No existen movimientos en el rango de fechas seleccionado.”
+
+                              * “El balance de comprobación se encuentra cuadrado.”
+
+                              * “El balance presenta diferencias. Revise los asientos contables.”
+
+                              * “Reporte generado correctamente.”
+
+                              * “Error al procesar el reporte. Contacte al administrador del sistema.”

@@ -1,0 +1,162 @@
+﻿HU-RRHH-NOM-CC-001 - Gestión de adelantos, préstamos y amortizaciones por trabajador
+ Versión: 1.0
+________________
+
+
+1. Título
+Gestión de adelantos, préstamos y amortizaciones por trabajador
+________________
+
+
+2. Descripción
+Como analista de nómina, quiero registrar, controlar y gestionar los adelantos y préstamos otorgados a los trabajadores, así como sus amortizaciones automáticas en planilla, aplicando políticas internas y topes establecidos por la empresa, para garantizar un control financiero adecuado y transparente.
+________________
+
+
+3. Proceso
+Proceso: Procesos de Nómina
+Subproceso: Cuentas Corrientes
+Módulo: RR.HH
+________________
+
+
+4. Narrativa de Usuario
+Quiero: Registrar y administrar adelantos y préstamos otorgados a los trabajadores.
+Para: Garantizar un seguimiento detallado de los montos, cuotas y saldos pendientes.
+De manera que: Se cumplan las políticas internas y se integren automáticamente las amortizaciones en las planillas mensuales.
+________________
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > RR.HH > Procesos de Nómina > Cuentas Corrientes > Gestión de Adelantos y Préstamos
+________________
+
+
+6. Criterios de Aceptación
+* El sistema debe permitir registrar adelantos y préstamos vinculados a un trabajador activo.
+
+* Debe validar los topes máximos configurados por política (porcentaje del sueldo o monto fijo).
+
+* Las amortizaciones deben calcularse automáticamente según número de cuotas y frecuencia de pago.
+
+* Debe permitir registrar pagos anticipados o cancelaciones totales.
+
+* Las amortizaciones se integran automáticamente al cálculo de planillas del periodo correspondiente.
+
+* El usuario podrá consultar el histórico de préstamos, saldos y cuotas pendientes.
+
+* El sistema debe permitir generar reportes por trabajador, sede o periodo.
+
+* Toda operación debe registrarse en el log de auditoría (usuario, fecha, acción, monto).
+
+* Solo usuarios con permisos contables o de nómina podrán editar o anular registros.
+
+________________
+
+
+7. Campos del Formulario / Tabla de Vista
+Campo
+	Tipo de Campo
+	Descripción
+	Ejemplo
+	Validaciones / Consideraciones UX/UI
+	Código del Préstamo
+	Texto (Autogenerado)
+	Identificador único del préstamo o adelanto.
+	PR-000123
+	Autogenerado, no editable.
+	Trabajador
+	Lista desplegable
+	Selección del empleado que recibe el préstamo.
+	Juan Pérez
+	Carga desde la base de empleados activos.
+	Tipo de Movimiento
+	Selección
+	Define si es adelanto de sueldo o préstamo personal.
+	Adelanto
+	Campo obligatorio.
+	Monto Total
+	Numérico
+	Valor total del préstamo o adelanto.
+	1,500.00
+	Validar monto ≤ tope configurado.
+	Moneda
+	Selección
+	Moneda del préstamo.
+	PEN / USD
+	Según configuración de la empresa.
+	Fecha de Otorgamiento
+	Fecha
+	Fecha en la que se registra el préstamo.
+	10/10/2025
+	No puede ser futura.
+	Nº de Cuotas
+	Numérico
+	Cantidad de cuotas para amortizar.
+	5
+	Debe ser mayor a 0.
+	Monto por Cuota
+	Numérico (calculado)
+	Valor de cada cuota.
+	300.00
+	Calculado automáticamente.
+	Descuento en Planilla
+	Checkbox
+	Indica si se descuenta automáticamente en la planilla.
+	✔
+	Por defecto, activo.
+	Fecha de Inicio de Descuento
+	Fecha
+	Fecha de inicio del descuento.
+	30/10/2025
+	Validar que coincida con periodo de planilla.
+	Estado del Préstamo
+	Selección
+	Estado actual del préstamo.
+	Activo / Cancelado
+	Automático según cuotas pagadas.
+	Observaciones
+	Texto libre
+	Comentarios o justificación del préstamo.
+	Emergencia médica
+	Campo opcional.
+	Usuario Registro
+	Texto
+	Usuario que creó el registro.
+	admin01
+	Autocompletado.
+	________________
+
+
+8. Detalle de Integración (opcional)
+   * Integración con Nómina: Las cuotas pendientes se descuentan automáticamente en la planilla activa.
+
+   * Integración con Contabilidad: Los préstamos se registran en cuentas contables de empleados.
+
+   * Integración con Seguridad y Auditoría: Se registra cada modificación o eliminación con trazabilidad completa.
+
+________________
+
+
+9. Consideraciones Técnicas
+      * Los topes y políticas de préstamos se parametrizan por empresa o sede.
+
+      * Los cálculos deben actualizarse dinámicamente ante modificaciones del número de cuotas o montos.
+
+      * El sistema debe mostrar alertas si un trabajador supera los límites definidos.
+
+      * Los movimientos deben almacenarse con fecha, usuario y referencia contable.
+
+      * Permitir exportar registros a Excel o PDF.
+
+________________
+
+
+10. Comentarios
+Esta funcionalidad mejora la gestión financiera de los empleados, automatizando el control de adelantos y préstamos, reduciendo errores manuales y garantizando el cumplimiento de políticas laborales y fiscales.
+Se recomienda incluir indicadores como:
+         * % de trabajadores con préstamos activos.
+
+         * Monto total pendiente por sede.
+
+         * Ratio de cumplimiento de amortizaciones.

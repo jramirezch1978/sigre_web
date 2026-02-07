@@ -1,0 +1,210 @@
+﻿HU-AF-TAB-004 - Configuración de Cuentas Contables por Tipo de Activo - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Tablas
+3. Subproceso
+Matrices Contables por Subclases
+4. Nombre de la Historia de Usuario
+Configuración de Cuentas Contables por Tipo de Activo
+5. Descripción / Propósito
+Como Analista Contable de Activos Fijos, quiero configurar las cuentas contables asociadas a cada subclase de activo fijo, para definir la matriz contable que permitirá la contabilización automática de las operaciones de alta, depreciación, baja, y venta de activos, garantizando la integración directa con el módulo contable y la correcta imputación a centros de costo.
+6. Alcance
+La funcionalidad permite registrar y mantener la matriz contable de cuentas asociadas a cada subclase de activo fijo, incluyendo las cuentas de activo, depreciación acumulada, gasto por depreciación, ganancia/pérdida por venta, y las configuraciones por centro de costos.
+Su objetivo es estandarizar los asientos automáticos generados en los procesos contables del módulo de Activos Fijos, alineados con la Clasificación de Activos (Clases y Subclases) previamente definida.
+El alcance abarca:
+* Configuración multipaís y multi-razón social.
+* Asociación directa a subclases del catálogo maestro.
+* Integración automática con el Módulo Contable General para la generación de asientos.
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Tablas → Matrices Contables por Subclases → Configuración de Cuentas Contables
+8. Campos del Formulario
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Clase / Subclase
+	Visualización jerárquica del activo asociado.
+	Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Subclase
+	Texto (100)
+	Selector de la sub clase a la que estará asociada la configuración
+	Select.
+	Cuenta de Activo Fijo
+	Numérico (12)
+	Cuenta contable de reconocimiento del activo.
+	Validar con catálogo contable activo.
+	Cuenta de Depreciación Acumulada
+	Numérico (12)
+	Cuenta contable de contrapartida del activo.
+	Obligatoria.
+	Cuenta de Gasto por Depreciación
+	Numérico (12)
+	Cuenta contable para el registro de gastos mensuales.
+	Obligatoria.
+	Cuenta de Ganancia por Venta
+	Numérico (12)
+	Cuenta contable para resultados positivos por venta.
+	Obligatoria.
+	Cuenta de Pérdida por Venta
+	Numérico (12)
+	Cuenta contable para resultados negativos por venta.
+	Obligatoria.
+	Centro de Costo / Unidad Operativa
+	Lista desplegable
+	Centro contable asociado a la subclase.
+	Validar existencia en catálogo de centros de costo.
+	Estado
+	Lista (Activo / Inactivo)
+	Define la vigencia de la configuración.
+	Por defecto “Activo”.
+	(*) Campos Opcionales:
+Campo
+	Descripción
+	Observaciones
+	Notas internas o comentarios sobre la configuración contable.
+	Fecha de Vigencia
+	Fecha a partir de la cual la configuración entra en efecto.
+	
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo
+	Permite crear una nueva configuración contable por subclase.
+	Se guarda registro activo vinculado a la subclase.
+	Editar
+	Permite modificar las cuentas o parámetros asociados.
+	Actualiza la matriz contable y registra log.
+	Consultar
+	Visualiza la configuración sin opción de edición.
+	Solo lectura.
+	Desactivar
+	Cambia el estado a Inactivo.
+	No se usa en nuevos movimientos.
+	Buscar / Filtrar
+	Filtros por clase, subclase, cuenta contable o estado.
+	Muestra resultados filtrados.
+	Exportar
+	Exporta la configuración a Excel o PDF.
+	Incluye campos visibles y filtros aplicados.
+	
+
+10. Reglas de Negocio
+   1. Cada subclase de activo debe tener una configuración contable única y activa.
+
+   2. No se permitirá eliminar registros, solo desactivar, para mantener la trazabilidad contable.
+
+   3. Todas las cuentas deben existir en el Catálogo de Cuentas Contables activo del país correspondiente.
+
+   4. Si una subclase no tiene matriz configurada, el sistema impedirá registrar activos asociados.
+
+   5. Si una configuración está en estado “Inactivo”, las operaciones contables automáticas no se generarán.
+
+   6. Los cambios en las cuentas contables deben registrarse en el Log de Auditoría Contable con detalle de usuario, fecha, hora y motivo.
+
+   7. Las configuraciones deben permitir asignar centros de costo múltiples, si el perfil de usuario lo autoriza.
+
+   8. Las cuentas de ganancia/pérdida por venta deben pertenecer al grupo de resultados (5xxx o 6xxx según país).
+
+   9. Si una subclase cambia de cuenta contable, las operaciones históricas mantienen su referencia anterior (no retroactiva).
+
+   10. La matriz contable debe ser validada antes de ejecutar procesos de depreciación mensual o contabilización masiva.
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Clasificación de Activos (HU-AF-TAB-003)
+	Base jerárquica para asociar clases y subclases.
+	Módulo Contable General
+	Genera asientos automáticos a partir de la matriz.
+	Catálogo de Cuentas Contables
+	Valida existencia, estado y tipo de cuenta.
+	Módulo de Depreciación de Activos
+	Utiliza las cuentas configuradas para contabilizar depreciaciones.
+	Log de Auditoría Contable
+	Registra todas las operaciones realizadas.
+	Centros de Costo / Unidades Operativas
+	Define imputaciones analíticas por sucursal o área.
+	
+
+12. Consideraciones Técnicas
+      * CRUD implementado mediante API RESTful.
+
+      * Tablas relacionadas:
+
+         * AF_CFG_MATRIZ_CONTABLE
+
+         * AF_MA_SUBCLASE_ACTIVO
+
+         * CO_MA_CUENTAS_CONTABLES
+
+            * Integración directa con el motor contable para la generación de asientos automáticos.
+
+            * Validación de integridad referencial entre subclases y cuentas.
+
+            * Soporte para carga masiva mediante plantilla Excel.
+
+            * Registro automático en el Log de Auditoría Contable.
+
+            * Interfaz con búsqueda avanzada, paginación y filtros jerárquicos (Clase/Subclase).
+
+
+
+
+
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles con permiso “Administrador Contable de Activos”.
+	Performance
+	Respuesta máxima: ≤ 3 segundos en consultas y filtros.
+	Auditoría
+	Registro obligatorio de toda acción CRUD.
+	Usabilidad
+	Interfaz estandarizada con ayuda contextual y botones de acción rápida.
+	Disponibilidad
+	99.5% en horario operativo.
+	Escalabilidad
+	Capacidad para gestionar más de 5.000 configuraciones por país.
+	
+
+14. Criterios de Aceptación
+               1. El usuario puede registrar una matriz contable completa para una subclase activa.
+
+               2. El sistema valida la existencia de todas las cuentas asociadas.
+
+               3. Solo puede existir una configuración contable activa por subclase.
+
+               4. La modificación o desactivación genera registro en el log contable.
+
+               5. Si se intenta registrar un activo sin matriz configurada, el sistema lo bloquea.
+
+               6. La integración con el módulo contable genera los asientos correctamente.
+
+               7. La exportación del catálogo se genera en formatos Excel y PDF.
+
+               8. Las consultas jerárquicas responden en menos de 3 segundos.
+15. Comentarios / Observaciones
+                  * Esta HU representa la columna vertebral de la integración contable del módulo de Activos Fijos, garantizando la correcta contabilización automática y coherencia con los planes contables de cada país.
+
+                  * Es clave para la auditoría financiera, ya que define las cuentas base para los asientos de adquisición, depreciación, venta y baja de activos.
+
+                  * Su diseño debe mantener coherencia visual con las HU:
+
+                     * HU-AF-TAB-003 (Estructura Jerárquica de Activos)
+
+                     * HU-AF-TAB-001 (Aseguradoras)
+
+                     * HU-AF-TAB-002 (Tipos de Seguros).
+
+                        * Se recomienda establecer versionado y trazabilidad de las matrices para auditar cambios históricos en configuraciones contables.

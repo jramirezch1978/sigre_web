@@ -1,0 +1,279 @@
+﻿HU-CON-021 - Reportes de Validación / Estado de Resultados - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-021
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Reportes de Validación
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Estado de Resultados
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la generación del reporte de Estado de Resultados, mostrando de manera estructurada los ingresos, costos, gastos operativos y resultados netos de la empresa en un periodo determinado.
+Este reporte debe calcular automáticamente el resultado neto del ejercicio (utilidad o pérdida) y permitir comparaciones entre periodos contables, mostrando la evolución de la rentabilidad de la empresa.
+El reporte debe obtener la información de los asientos contables registrados y validados en el sistema, agrupando las cuentas según su naturaleza (ingresos, costos, gastos, otros ingresos, otros egresos) y conforme a la clasificación del plan contable institucional o PCGE.
+Asimismo, el sistema debe permitir exportar el reporte a Excel (.xlsx) o PDF (.pdf), manteniendo su estructura jerárquica, subtotales y resultados comparativos.
+________________
+
+
+3. Actor(es)
+   * Contador General: Genera el reporte para cierres mensuales y anuales.
+
+   * Jefe de Contabilidad: Supervisa los resultados operativos y financieros.
+
+   * Gerente Financiero: Analiza la rentabilidad y desempeño de la empresa.
+
+   * Auditor Interno o Externo: Verifica la consistencia de los resultados.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos para acceder al menú Contabilidad → Reportes → Estado de Resultados.
+
+      * Deben existir asientos contables contabilizados y cerrados en el periodo consultado.
+
+      * Las cuentas contables deben estar clasificadas por naturaleza (Ingresos, Costos, Gastos, etc.).
+
+      * El periodo contable debe estar abierto o cerrado (solo lectura en caso cerrado).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Estado de Resultados
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar el reporte de Estado de Resultados,
+para visualizar los ingresos, costos y gastos de la empresa, y determinar la utilidad o pérdida neta del periodo contable seleccionado.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable o rango de fechas.
+	El reporte muestra los resultados acumulados del periodo.
+	2
+	Mostrar las cuentas agrupadas por categoría contable (Ingresos, Costos, Gastos, etc.).
+	Estructura jerárquica conforme al plan contable.
+	3
+	Calcular automáticamente la utilidad o pérdida neta del periodo.
+	Resultado mostrado al final del reporte.
+	4
+	Permitir comparar dos periodos contables (actual vs anterior).
+	Mostrar columnas comparativas de saldos. Agregar periodos en columnas.
+	5
+	Permitir filtrar por moneda (local / extranjera).
+	Conversión automática según tipo de cambio del periodo.
+	6
+	Mostrar subtotales y totales por categoría contable.
+	Presenta resultados operativos y netos.
+	7
+	Permitir exportar el reporte en formatos Excel (.xlsx) y PDF (.pdf).
+	Archivos generados correctamente. Agregar Botón Exportar
+	8
+	Registrar en bitácora contable la generación del reporte (usuario, fecha, filtros).
+	Auditoría registrada correctamente.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Reporte jerárquico agrupado por naturaleza contable.
+Naturaleza: Reporte informativo de validación contable (solo lectura).
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Define el periodo del reporte.
+	Fecha Desde / Hasta
+	Fecha
+	No
+	Define el rango de fechas del reporte.
+	Moneda
+	Lista
+	No
+	Permite seleccionar la moneda de visualización.
+	Comparar con Periodo
+	Lista
+	No
+	Permite comparar con otro periodo contable.
+	Nivel de Detalle
+	Lista
+	No
+	Permite seleccionar el nivel del plan de cuentas.
+	
+
+	
+
+	
+
+	
+
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Código de Cuenta
+	Código del plan contable.
+	Descripción de Cuenta
+	Nombre de la cuenta contable.
+	Nivel
+	Nivel jerárquico del plan contable.
+	Monto Periodo Actual
+	Saldo del periodo seleccionado.
+	Monto Periodo Comparativo
+	Saldo del periodo anterior (si aplica).
+	Naturaleza Contable
+	Ingreso / Costo / Gasto / Resultado.
+	Moneda
+	Local / Extranjera.
+	8.3 Totales y Subtotales
+         * Total Ingresos Operativos
+
+         * Total Costos de Venta
+
+         * Utilidad Bruta
+
+         * Total Gastos Operativos
+
+         * Resultado Operativo
+
+         * Otros Ingresos / Egresos
+
+         * Resultado Antes de Impuestos
+
+         * Resultado Neto del Ejercicio (Utilidad o Pérdida)
+
+
+
+
+
+
+            * Modelo SUNAT a Considerar:
+            *   
+________________
+
+
+9. Reglas de Negocio
+               1. Estructura contable: Las cuentas deben agruparse conforme a su naturaleza (Ingreso, Costo, Gasto, etc.).
+
+               2. Equilibrio contable: Los movimientos de ingresos y gastos deben reflejarse en los asientos contables cerrados.
+
+               3. Conversión de moneda: Si el reporte se genera en moneda extranjera, aplicar tipo de cambio promedio del periodo.
+
+               4. Comparativo: Si se selecciona más de un periodo, mostrar columnas de comparación y variación porcentual.
+
+               5. Validación de cuentas: No se incluirán cuentas sin clasificación de naturaleza.
+
+               6. Auditoría: Registrar en bitácora cada ejecución del reporte con filtros aplicados.
+
+               7. Cierre contable: Los saldos se obtienen de los asientos contabilizados y no modificables.
+
+               8. Visualización jerárquica: El reporte debe respetar los niveles definidos en el plan de cuentas.
+
+________________
+
+
+10. Integraciones
+                  * Módulo de Contabilidad General: Fuente principal de asientos y movimientos contables.
+
+                  * Módulo de Plan de Cuentas: Clasificación de cuentas por naturaleza contable.
+
+                  * Módulo de Monedas y Tipo de Cambio: Conversión de saldos a moneda extranjera.
+
+                  * Módulo de Auditoría: Registro de generación de reportes.
+
+________________
+
+
+11. Aspectos Técnicos
+                     * Tipo de Componente: Reporte contable estructurado (solo lectura).
+
+                     * Tablas Fuente:
+
+                        * CNTBL_ASIENTO (cabecera de asientos contables).
+
+                        * CNTBL_ASIENTO_DET (detalle de movimientos).
+
+                        * CNTBL_CUENTA_CONTABLE (plan contable).
+
+                        * CNTBL_TIPO_CAMBIO (valores de conversión monetaria).
+
+Consulta Base (referencial):
+
+ SELECT 
+    c.cnta_ctbl,
+    c.desc_cta,
+    c.tipo_cta,
+    NVL(SUM(d.debe - d.haber), 0) AS monto_actual,
+    NVL(SUM(d.debe_anterior - d.haber_anterior), 0) AS monto_comparativo
+FROM cntbl_asiento_det d
+JOIN cntbl_cuenta_contable c ON d.cnta_ctbl = c.cnta_ctbl
+WHERE d.fecha_cntbl BETWEEN :fecha_inicio AND :fecha_fin
+  AND c.tipo_cta IN ('INGRESO', 'COSTO', 'GASTO', 'RESULTADO')
+GROUP BY c.cnta_ctbl, c.desc_cta, c.tipo_cta
+ORDER BY c.tipo_cta, c.cnta_ctbl;
+                           *                            * Exportaciones: .xlsx y .pdf.
+
+                           * Bitácora: LOG_REPORTE_ESTADO_RESULTADOS (usuario, fecha, filtros aplicados, totales).
+
+                           * Performance: Indexar campos CNTA_CTBL, FECHA_CNTBL, TIPO_CTA.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                              1. El usuario accede a Contabilidad → Reportes → Estado de Resultados.
+
+                              2. Selecciona el periodo contable o rango de fechas.
+
+                              3. Define filtros adicionales (moneda, nivel, periodo comparativo).
+
+                              4. Presiona “Generar Reporte”.
+
+                              5. El sistema procesa los movimientos contables y calcula los resultados.
+
+                              6. Se muestra el reporte estructurado por naturaleza contable.
+
+                              7. El usuario puede exportar el reporte a Excel o PDF.
+
+                              8. El sistema registra la acción en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                                 * “Debe seleccionar un periodo contable o rango de fechas.”
+
+                                 * “No existen asientos contables registrados para el periodo seleccionado.”
+
+                                 * “Reporte generado correctamente.”
+
+                                 * “El usuario no tiene permisos para acceder a esta funcionalidad.”
+
+                                 * “Error al procesar el reporte. Contacte al administrador del sistema.”

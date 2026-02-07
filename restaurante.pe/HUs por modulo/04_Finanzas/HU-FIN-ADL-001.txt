@@ -1,0 +1,207 @@
+﻿HU-FIN-ADL-001 - Generación de Órdenes de Giro - v1.0
+1. Título
+ Generación de Órdenes de Giro
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero generar órdenes de giro a partir de las Ordenes de compras que tengan como forma de pago “Adelanto”; para esto el sistema debe mostrar la lista de las Ordenes compras con este tipo de forma de pago, con el fin de formalizar y autorizar el pago correspondiente desde las cuentas bancarias registradas de la empresa, garantizando la trazabilidad financiera y contable del proceso.
+3. Proceso
+ Proceso: Adelantos
+Subproceso: Solicitud de Adelantos
+Módulo: Finanzas
+4. Narrativa de Usuario
+ Quiero: Emitir una Orden de Giro vinculada a una solicitud de adelanto proveniente de una Orden de Compra aprobada.
+Para: Autorizar el desembolso de fondos a proveedores o colaboradores, según corresponda.
+De manera que: Se mantenga el control contable, financiero y de auditoría de los pagos efectuados por adelantos.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Finanzas > Adelantos > Solicitud de Adelantos > Generación de Órdenes de Giro
+6. Criterios de Aceptación
+* El sistema debe permitir generar una Orden de Giro únicamente a partir de Ordenes de Compra aprobadas con la modalidad de pago “Anticipo”.
+
+* Al ingresar, el sistema mostrará los datos generales de la Orden de Compra: número, fecha, beneficiario, tipo de adelanto, porcentaje, monto, moneda y centro de costo asociado.
+
+* El sistema debe mostrar un formulario con los siguientes campos obligatorios:
+
+   * Número de Orden de Compra (autogenerado, correlativo por Razón Social y año fiscal). Ejemplo de formato OC-2025-0001
+
+   * Fecha de emisión (editable).
+
+   * Beneficiario (proveedor o colaborador).
+
+   * Banco y Cuenta Bancaria (listas desplegables con validación de cuentas activas).
+
+   * Monto del Giro (validado que no supere el monto solicitado).
+
+   * Moneda (seleccionable según las monedas configuradas por país).
+
+   * Forma de Pago (Transferencia, Cheque, Efectivo, Otro).
+
+   * Fecha Programada de Pago.
+
+   * Glosa Contable (campo libre).
+
+      * El sistema debe generar automáticamente el asiento contable correspondiente, con las cuentas configuradas según el tipo de adelanto.
+
+      * El sistema debe actualizar el estado de la solicitud asociada a “Orden Generada”.
+
+      * Toda acción de generación, edición, anulación o exportación debe registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción).
+
+      * El usuario podrá visualizar y descargar la Orden de Giro en formato PDF o Excel.
+
+      * El sistema debe mostrar la información de Razón Social en modo solo lectura.
+
+      * Si la cuenta bancaria está inactiva o no pertenece a la Razón Social activa, el sistema debe mostrar un mensaje de validación y no permitir guardar.
+
+      * Debe integrarse automáticamente con el módulo de Contabilidad para el registro de movimientos financieros y conciliaciones.
+
+7. Campos del Formulario / Vista de Tabla
+Campos principales del formulario:[a]
+
+         * Número de Orden de Giro (autogenerado)
+
+         * Fecha de Emisión
+
+         * Referencia de Solicitud de Adelanto
+
+         * Tipo de beneficiario (Proveedor / Colaborador)
+[b][c]
+         * Tipo de Documento del Beneficiario (RUC / DNI / Pasaporte)
+
+         * Número de Documento
+
+         * Nombre o Razón Social del Beneficiario
+
+         * Banco
+
+         * Cuenta Bancaria
+
+         * Monto del Giro
+         * Se adiciona un cuadro de selección de cuotas y fechas de vencimiento (según formato de SUNAT).
+
+         * Moneda
+
+         * Tipo de Cambio (informativo)
+
+         * Forma de Pago (Transferencia / Cheque / Efectivo / Otro)
+
+         * Fecha Programada de Pago
+
+         * Glosa Contable
+
+         * Estado (Borrador / Emitida / Anulada)
+
+         * Centro de Costo (opcional)
+
+Acciones disponibles:
+            * Generar / Guardar Orden de Giro
+
+            * Ver Solicitud Asociada
+
+            * Ver Asiento Contable
+[d][e][f][g]
+            * Exportar (PDF / Excel)
+
+            * Anular Orden de Giro
+
+            * Filtrar / Limpiar Filtros
+
+            * Actualizar Información
+
+Filtros disponibles (vista de listado):
+               * Fecha de Emisión
+
+               * Estado de la Orden (Pendiente/ Emitida / Anulada)
+
+               * Beneficiario
+
+               * Tipo de Adelanto[h][i][j][k]
+
+               * Banco
+
+               * Moneda
+
+Columnas principales del listado:
+                  * N° de Orden de Giro
+
+                  * Fecha de Emisión
+
+                  * Beneficiario
+
+                  * Banco
+
+                  * Cuenta Bancaria
+
+                  * Monto
+
+                  * Moneda
+
+                  * Estado
+
+                  * Fecha de Pago Programada
+
+                  * N° Solicitud de Adelanto[l][m]
+
+                  * N° Asiento Contable[n][o][p][q]
+
+                  * Usuario Responsable
+
+8. Detalle de Integración (opcional)
+                     * Integración con Contabilidad: Registro automático del asiento contable del adelanto, con impacto directo en cuentas por pagar o anticipos al personal.
+
+                     * Integración con Finanzas – Tesorería: El proceso de Orden de Giro debe impactar directamente en Tesorería, reservando el monto correspondiente en el flujo de caja proyectado y actualizando la disponibilidad bancaria.
+
+                     * Integración con RRHH: En caso de adelantos a colaboradores, actualización automática del módulo de planillas.
+
+                     * Integración con Auditoría: Registro detallado de toda acción ejecutada sobre la orden (creación, modificación, anulación, exportación).
+
+9. Consideraciones Técnicas
+                        * El número de Orden de Giro debe generarse automáticamente con formato parametrizable: OG-[AÑO]-[CORRELATIVO].
+
+                        * Toda Orden de Giro debe estar asociada a una Orden de Compra aprobada con la condición de pago “Anticipo”.[r][s]
+
+                        * Debe soportar multimoneda, realizando la conversión automática según tipo de cambio SUNAT o tabla oficial del país correspondiente.
+
+                        * Se debe validar que el monto del giro no exceda el saldo disponible de la solicitud.
+
+                        * Todas las operaciones deben registrarse en el log de auditoría contable, incluyendo Usuario, Fecha, Hora, IP y Acción.
+
+                        * La información se integra en tiempo real con Contabilidad mediante API interna.
+
+                        * Compatible con múltiples países y razones sociales.
+
+                        * Cumple con las normas NIC 7 (Flujo de Efectivo) y NIC 1 (Presentación de Estados Financieros).
+
+10. Comentarios
+Esta funcionalidad centraliza y automatiza la emisión de órdenes de pago para adelantos, garantizando control financiero y cumplimiento contable.
+Permite reducir errores humanos, mantener trazabilidad completa entre solicitud, orden y asiento contable, y facilitar auditorías internas o externas.
+Se sugiere incorporar un control de aprobación secundaria antes de la emisión definitiva, así como un registro de usuarios autorizados por tipo de adelanto.
+Asimismo, puede integrarse con el módulo de Notificaciones para enviar alertas automáticas a los responsables financieros al emitirse una nueva Orden de Giro.
+
+
+[a]Agregar en los campos el apartado de Usuario responsable
+[b]Solo se va a contemplar el tipo de adelanto Proveedor, porque una orden de compra no está enlazada con un colaborador.
+[c]El adelanto a proveedor va relacionado a una orden de compra , pero el adelanto a un colaborador/trabajador va relacionado al importe solicitado por el mismo.
+[d]No queda claro de dónde viene el asiento contable
+[e]El asiento contable corresponde por los adelantos que se generan al momento de aprobar la Orden de Giro por adelanto ya sea a proveedor o a colaborador.
+[f]Entonces, este campo solo debe tomarse en cuenta en la siguiente HU de aprobación, más no en la generación de una orden de giro.
+[g]El campo relacionado al asiento contable por adelantos no debe considerarse en la HU de generación de la Orden de Giro.
+Ese campo solo debe aplicarse en la HU donde se realiza la aprobación de la Orden de Giro por adelanto.
+[h]Se quita porque siempre van a ser Proveedores
+[i]Existen dos beneficiarios : proveedor y colaborador/trabajador
+[j]Faltaría cambiar el término "Tipo de adelanto" por "Tipo de beneficiario".
+[k]si cambiar a  
+Tipo de beneficiario
+[l]Cambiar por Orden de compra
+[m]N° Orden de Compra si en caso es Proveedor y 
+N° Solicitud de Adelanto si en caso es Colaborador.
+[n]De dónde sale este dato?
+[o]En este caso se vincula con el registro de compras para proveedores y con RR.HH para colaboradores/trabajador.
+[p]En un comentario anterior, indicas que el asiento contable se genera de la aprobación de la orden de giro, pero aquí mencionas que está relacionado a la orden de compra o la solicitud de adelanto con la que se asocia una orden de giro.
+[q]El asiento contable solo se genera cuando la Orden de Giro es APROBADA.
+La generación del asiento NO depende de la Orden de Compra ni de la Solicitud de Adelanto.
+Depende del momento del flujo (la aprobación).
+
+
+La Orden de Giro, antes de aprobarse, debe asociarse a un documento base, según el tipo de beneficiario:
+Si es Proveedor → se vincula con una Orden de Compra.
+Si es Colaborador → se vincula con una Solicitud de Adelanto de RR.HH.
+[r]De dónde sale esta solicitud?
+[s]modificado

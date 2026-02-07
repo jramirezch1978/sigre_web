@@ -1,0 +1,264 @@
+﻿HU-AF-OPE-006 Proceso de Baja de Activos por Venta, Siniestro y Obsolescencia con Cálculo de Resultados
+1.Descripción / Propósito (actualizada)
+Como Administrador Contable de Activos Fijos, quiero realizar el proceso completo de baja de activos fijos, ya sea por venta, siniestro u obsolescencia, para dar de baja los activos, calcular automáticamente la depreciación acumulada, determinar la ganancia o pérdida según corresponda, generar los asientos contables y registrar la documentación legal asociada, conforme a la NIC 16 – Propiedades, Planta y Equipo y a las normativas fiscales locales.
+________________
+
+
+2. Alcance
+La funcionalidad ahora abarca el flujo integral de baja de activos por:
+* Venta
+* Siniestro (robo, incendio, accidente, etc.)
+* Obsolescencia / desuso
+Incluye las siguientes etapas:
+* Selección del activo y validación de estado contable.
+* Cálculo automático de la depreciación acumulada hasta la fecha de baja.
+* Determinación automática de la ganancia o pérdida.
+* Generación de asientos contables según matriz configurada (HU-AF-TAB-004).
+* Registro del motivo y sustento de la baja.
+* Actualización del estado del activo según el tipo de baja.
+* Generación de reportes y respaldo documental.
+________________
+
+
+3. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Operaciones → Proceso de Baja
+4. Campos del Formulario
+ Campos Informativos (solo lectura)
+Campo
+	Descripción
+	Código del Activo
+	Identificador único del activo
+	Descripción del Activo
+	Denominación del bien
+	Valor Original
+	Valor de adquisición
+	Depreciación 
+Acumulada
+	Calculada automáticamente hasta la fecha
+	Valor Neto Contable
+	Valor en libros al momento de la baja
+	________________
+
+
+Campos Obligatorios
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Tipo de Baja
+	Lista
+	Motivo de la baja del activo
+	Opciones: Venta / Siniestro / Obsolescencia
+	Fecha de Baja
+	Fecha
+	Fecha efectiva de la baja
+	No posterior al cierre contable
+	Moneda
+	Lista
+	Soles / Dólares
+	Obligatorio
+	Cuenta de Resultado
+	Lista
+	Cuenta contable asociada
+	Validar contra matriz
+	Responsable del Proceso
+	Usuario
+	Persona que ejecuta la baja
+	Obligatorio
+	Estado de la Operación
+	Lista
+	En proceso / Contabilizado / Cerrado
+	Flujo controlado
+	________________
+
+
+Campos Condicionales (según Tipo de Baja)
+Si es VENTA:
+Campo
+	Tipo
+	Descripción
+	Regla
+	Valor de Venta
+	Numérico (15,2)
+	Importe por el cual se vende el activo
+	Mayor o igual a 0
+	Comprador
+	Texto (100)
+	Razón social del comprador
+	Obligatorio
+	Tipo Documento Venta
+	Lista
+	Factura / Boleta / Contrato / Otro
+	Obligatorio
+	Número Documento
+	Texto (30)
+	Comprobante o contrato
+	No duplicado
+	________________
+
+
+Si es SINIESTRO
+Campo
+	Tipo
+	Descripción
+	Regla
+	Tipo de Siniestro
+	Lista
+	Robo / Incendio / Inundación / Accidente / Otro
+	Obligatorio
+	Parte Policial / Seguro
+	Texto
+	N° de denuncia o póliza
+	Si existe, obligatorio
+	Monto Indemnización
+	Numérico
+	Monto cubierto por seguro
+	Opcional
+	Descripción del Siniestro
+	Texto
+	Detalle del evento ocurrido
+	Obligatorio
+	El Valor de Venta = 0 automáticamente
+Se genera Pérdida total si no hay indemnización
+________________
+
+
+ Si es OBSOLESCENCIA / DESUSO
+Campo
+	Tipo
+	Descripción
+	Regla
+	Motivo de Obsolescencia
+	Lista
+	Tecnológica / Dañado / Fin vida útil / Bajo rendimiento
+	Obligatorio
+	Descripción Técnica
+	Texto
+	Sustento del descarte
+	Opcional
+	El Valor de Venta = 0
+Se reconoce como pérdida por obsolescencia
+________________
+
+
+✅ Campos Opcionales
+Campo
+	Descripción
+	Observaciones
+	Comentarios contables o administrativos
+	Documento Adjunto
+	Evidencia (PDF / imagen) del siniestro / informe / contrato
+	________________
+
+
+5. Acciones Disponibles (actualizado al nuevo alcance)
+Acción
+	Descripción
+	Resultado
+	Nuevo Proceso de Baja
+	Inicia el flujo de baja
+	Activo seleccionado
+	Calcular Resultado
+	Determina pérdida o ganancia
+	Valores calculados
+	Generar Asientos
+	Crea asiento automático
+	Registra en contabilidad
+	Adjuntar Evidencias
+	Sube documentos
+	Queda vinculado
+	Finalizar / Dar de Baja
+	Cambia estado del activo
+	BAJ-V / BAJ-S / BAJ-O
+	Anular
+	Cancela antes de contabilizar
+	Mantiene activo
+	Exportar
+	Genera PDF / Excel
+	Reporte de baja
+	________________
+
+
+6. Nuevos Estados del Activo
+Código
+	Estado
+	BAJ-V
+	Dado de Baja por Venta
+	BAJ-S
+	Dado de Baja por Siniestro
+	BAJ-O
+	Dado de Baja por Obsolescencia
+	BAJ-D
+	Dado de Baja por Donación
+	BAJ-R
+	Retirado
+	Esto mejora la trazabilidad en reportes y auditorías.
+
+
+________________
+
+
+7. Reglas de Negocio 
+Solo se podrán dar de baja activos con estado “Activo” o “Disponible para Baja”.
+1. El sistema debe calcular automáticamente la depreciación acumulada hasta la fecha de baja, independientemente del tipo (venta, siniestro u obsolescencia).
+2. La ganancia o pérdida se determina como:
+Resultado = Valor de Venta / Indemnización – Valor Neto Contable
+3. Si el resultado es positivo → Ganancia por baja de activo (cuenta 76xx)
+Si el resultado es negativo → Pérdida por baja de activo (cuenta 67xx)
+4. Para baja por siniestro u obsolescencia:
+   * El Valor de Venta será 0 automáticamente
+   * El resultado normalmente será una pérdida total
+   * Se registra en cuenta 67xx – Pérdida por siniestro / obsolescencia
+   5. Los asientos contables se generarán de acuerdo con la Matriz Contable (HU-AF-TAB-004), afectando:
+   * Cuenta del activo (33xx)
+   * Cuenta de depreciación acumulada (39xx)
+   * Cuenta de resultado (67xx / 76xx)
+   6. Todo movimiento debe registrarse obligatoriamente en el Log de Auditoría Contable:
+   * Usuario
+   * Fecha y hora
+   * Tipo de baja
+   * Valores involucrados
+   * Resultado (ganancia / pérdida)
+   7. No se permitirá registrar una baja con fecha posterior al cierre contable del periodo activo.
+   8. El sistema debe exigir la carga de documentos de respaldo antes de la contabilización:
+   * Venta: comprobante / contrato
+   * Siniestro: parte policial / informe / póliza
+   * Obsolescencia: informe técnico
+   9. Al finalizar el proceso, el activo cambiará automáticamente su estado según el tipo de baja:
+   * BAJ-V → Dado de Baja por Venta
+   * BAJ-S → Dado de Baja por Siniestro
+   * BAJ-O → Dado de Baja por Obsolescencia
+   11. El sistema debe bloquear el proceso de baja si el activo se encuentra:
+   * En proceso de traslado
+   * En revaluación
+   * En mantenimiento mayor
+   12. No se calculará depreciación posterior a la fecha de baja.
+   13. La baja de activos generará alertas automáticas hacia:
+   * Módulo contable
+   * Reportes de control interno
+   * Reportes patrimoniales
+8. Integraciones
+Módulo / Servicio
+	Descripción
+	Maestro de Activos (HU-AF-OPE-001)
+	Actualiza el estado del activo según tipo de baja
+	Matriz Contable (HU-AF-TAB-004)
+	Define las cuentas contables por tipo de activo y tipo de baja
+	Módulo Contable General
+	Registra automáticamente los asientos derivados
+	Configuración Global (HU-AF-TAB-006)
+	Controla moneda, periodo y numeración
+	Log de Auditoría Contable
+	Registra todas las acciones y cálculos
+	Reportes Financieros / Tributarios
+	Muestra las bajas por tipo y periodo
+	9. Criterios de Aceptación
+   * El usuario puede registrar una baja por venta, siniestro u obsolescencia
+   * El sistema calcula la depreciación y valor neto
+   *  Se calcula automáticamente la ganancia o pérdida
+   *  Se generan los asientos correctos
+   *  El activo cambia su estado según el tipo de baja
+   *  Se adjunta documentación obligatoria
+   *  El proceso queda en el Log Contable
+   *  Duración máxima ≤ 5 segundos

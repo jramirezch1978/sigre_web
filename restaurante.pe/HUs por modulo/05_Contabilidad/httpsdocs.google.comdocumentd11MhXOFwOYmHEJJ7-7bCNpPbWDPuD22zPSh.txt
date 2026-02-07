@@ -1,0 +1,287 @@
+﻿HU-CON-012 - Reportes de Validación / Consistencia de Asientos Contables - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-012
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Libro Diario
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Consistencia de Asientos Contables
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir generar reportes de validación y consistencia contable que verifiquen el cuadre de los asientos contables (débitos vs créditos) y detecten posibles inconsistencias.
+Estos reportes permitirán identificar asientos desbalanceados, cuentas no asignadas, diferencias por tipo de cambio o importes negativos, garantizando la integridad de la información contable antes del cierre mensual o del proceso de generación de estados financieros.
+La funcionalidad debe proporcionar una vista consolidada y analítica, mostrando por cada asiento su origen, número, totales por debe y haber, diferencia, usuario responsable y fecha de registro.
+El objetivo es facilitar la auditoría y control contable preventivo mediante reportes automáticos y exportables.
+________________
+
+
+3. Actor(es)
+   * Contador General: Verifica la consistencia contable antes del cierre.
+
+   * Analista Contable: Identifica y corrige asientos desbalanceados.
+
+   * Jefe de Contabilidad: Supervisa las validaciones de cuadre contable.
+
+   * Auditor Interno o Externo: Revisa la exactitud y trazabilidad de los asientos contables.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe tener permisos de acceso al módulo de Contabilidad – Libro Diario.
+
+      * Deben existir asientos contables registrados o importados en el sistema.
+
+      * Los periodos contables deben estar abiertos o en modo de consulta.
+
+      * Las cuentas contables deben estar debidamente configuradas en el plan de cuentas.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Consistencia de Asientos Contables
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar reportes de validación y consistencia contable,
+para verificar que los asientos estén correctamente cuadrando entre débitos y créditos, y detectar errores antes del cierre contable.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable (año/mes) y rango de fechas para el análisis.
+	Se listan los asientos registrados en el rango definido.
+	2
+	Mostrar el total de débitos, créditos y diferencia por asiento contable.
+	Se resaltan los asientos desbalanceados.
+	3
+	Permitir aplicar filtros por origen, libro, usuario o estado del asiento.
+	El resultado se ajusta según los filtros aplicados.
+	4
+	Identificar asientos con diferencias por tipo de cambio o por redondeo.
+	Se genera columna de observación automática.
+	5
+	Mostrar detalle contable de los asientos seleccionados (cuenta, glosa, importe).
+	Acceso mediante doble clic o botón “Ver detalle”.
+	6
+	Permitir exportar el reporte en formato Excel (.xlsx) y PDF (.pdf).
+	Descarga exitosa con la información visible.
+	7
+	Validar que todos los asientos del periodo tengan cuadre contable (Débito = Crédito).
+	Se genera resumen con totales generales y asientos observados.
+	8
+	Registrar en bitácora la fecha, usuario, periodo y cantidad de asientos revisados.
+	Auditoría automática.
+	9
+	Permitir agrupación por tipo de origen o libro contable.
+	Mejora la trazabilidad de inconsistencias.
+	________________
+
+
+8. Formulario del Reporte
+Vista: Pantalla de consulta con filtros de búsqueda y tabla de resultados tipo resumen.
+Origen de datos: Tablas CNTBL_ASIENTO, CNTBL_ASIENTO_DET, CNTBL_ASIENTO_DET_AUX, y CNTBL_LIBRO_CONTABLE.
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Periodo a validar.
+	Rango de Fechas
+	Fecha
+	No
+	Define el intervalo de análisis.
+	Origen
+	Lista desplegable
+	No
+	Identifica el módulo o proceso que generó el asiento (manual, compras, ventas, etc.).
+	Libro Contable
+	Lista desplegable
+	No
+	Filtra por libro diario, libro mayor, libro caja, registro de compras y registro de ventas
+	Usuario
+	Lista desplegable
+	No
+	Filtra por usuario que registró o modificó el asiento.
+	Estado del Asiento
+	Lista
+	No
+	Activo / Pendiente / Anulado.
+	Moneda
+	Lista
+	No
+	Moneda local o extranjera.
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Origen
+	Módulo o proceso que generó el asiento.
+	Año / Mes
+	Periodo contable correspondiente.
+	N° Libro
+	Identificador del libro contable.
+	N° Asiento
+	Número del asiento.
+	Glosa
+	Descripción general del asiento.
+	Total Débitos
+	Suma de importes al debe.
+	Total Créditos
+	Suma de importes al haber.
+	Diferencia
+	Monto de desbalance (Débito – Crédito).
+	Estado
+	Activo  / Anulado.
+	Usuario
+	Usuario que generó el asiento.
+	Fecha Contable
+	Fecha del registro.
+	Observación
+	Motivo del desbalance (tipo de cambio, error manual, etc.).
+
+
+
+
+
+
+	8.3 Reporte Detallado (opcional)
+Accesible mediante doble clic en el asiento o botón “Ver detalle”.
+Campo
+	Descripción
+	Cuenta Contable
+	Código de la cuenta afectada.
+	Descripción Cuenta
+	Nombre de la cuenta.
+	Centro de Costo
+	CECO asociado (si aplica).
+	Débito
+	Monto cargado.
+	Crédito
+	Monto abonado.
+	Moneda
+	Moneda del asiento.
+	Glosa Detalle
+	Descripción de la transacción.
+	________________
+
+
+9. Reglas de Negocio
+         1. Cuadre obligatorio: Todo asiento debe cumplir la regla contable básica: suma de débitos = suma de créditos.
+
+         2. Diferencia tolerada: Se permite una diferencia máxima de ±0.01 por efectos de redondeo.
+
+         3. Moneda de validación: Las validaciones se realizan tanto en moneda local como extranjera.
+
+         4. Estado del asiento: Solo se validan los asientos con estado “Activo” .
+
+         5. Observaciones automáticas: Si existe desbalance, el sistema genera una observación automática indicando el posible origen (redondeo, tipo de cambio, error manual, asiento incompleto).
+
+         6. Bitácora de auditoría: Cada ejecución del reporte se registra con usuario, fecha, periodo y total de registros procesados.
+
+         7. Exportación fiel: Los reportes exportados deben contener los mismos filtros aplicados en pantalla.
+
+         8. Seguridad: Solo usuarios con perfil contable o de auditor pueden generar o exportar reportes.
+
+________________
+
+
+10. Integraciones
+            * Módulo de Asientos Contables: Fuente principal de los registros a validar.
+
+            * Módulo de Tipos de Cambio: Para verificación de diferencias monetarias.
+
+            * Módulo de Auditoría: Para registro de las ejecuciones de reporte.
+
+            * Plan de Cuentas: Para validar naturaleza de cuentas y estructura contable.
+
+            * Centros de Costo: Para identificar desbalances por imputaciones parciales.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Tablas Principales:
+
+                  * CNTBL_ASIENTO (cabecera de asiento).
+
+                  * CNTBL_ASIENTO_DET (detalle contable).
+
+                  * CNTBL_ASIENTO_DET_AUX (detalle auxiliar).
+
+                  * CNTBL_LIBRO_CONTABLE (libros de registro).
+
+Validación SQL Base:
+
+ SELECT origen, ano, mes, nro_libro, nro_asiento,
+       SUM(debe) AS total_debe,
+       SUM(haber) AS total_haber,
+       (SUM(debe) - SUM(haber)) AS diferencia
+FROM cntbl_asiento_det
+GROUP BY origen, ano, mes, nro_libro, nro_asiento
+HAVING ABS(SUM(debe) - SUM(haber)) > 0.01;
+                     *                      * Exportaciones: Formatos .xlsx y .pdf.
+
+                     * Logs: LOG_VALIDACION_ASIENTO con campos (usuario, fecha, periodo, total_asientos, total_desbalanceados).
+
+                     * Performance: Validaciones con índices en NRO_ASIENTO, NRO_LIBRO, ORIGEN.
+
+                     * Seguridad: Validación de permisos a nivel de perfil.
+
+________________
+
+
+12. Flujo Principal del Proceso
+                        1. Usuario accede al menú Contabilidad → Reportes → Validación / Consistencia de Asientos Contables.
+
+                        2. Selecciona filtros de búsqueda (periodo, origen, libro, usuario, etc.).
+
+                        3. Presiona “Generar Reporte”.
+
+                        4. El sistema ejecuta la validación contable y muestra los resultados.
+
+                        5. Los asientos desbalanceados se resaltan visualmente.
+
+                        6. El usuario puede acceder al detalle del asiento o exportar los resultados.
+
+                        7. El sistema registra el evento en la bitácora de validaciones.
+
+________________
+
+
+13. Mensajes de Validación
+                           * “Debe seleccionar un periodo contable para generar el reporte.”
+
+                           * “No se encontraron asientos con inconsistencias en el rango seleccionado.”
+
+                           * “El usuario no tiene permisos para acceder a este reporte.”
+
+                           * “Reporte generado correctamente.”
+
+                           * “Error al procesar validación. Contacte al administrador.”

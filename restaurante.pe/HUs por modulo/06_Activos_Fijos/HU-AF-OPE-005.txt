@@ -1,0 +1,239 @@
+﻿HU-AF-OPE-005 - Gestión de Seguros Asociados a Activos Fijos - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Operaciones
+3. Subproceso
+Pólizas de Seguro
+4. Nombre de la Historia de Usuario
+Gestión de Seguros Asociados a Activos Fijos
+5. Descripción / Propósito
+Como Administrador de Activos Fijos o Analista Contable, quiero registrar, controlar y mantener actualizada la información de las pólizas de seguros asociadas a los activos fijos, para garantizar la cobertura, seguimiento y control financiero de los activos asegurados, incluyendo vigencias, sumas aseguradas, deducibles, primas, beneficiarios y alertas de vencimiento o renovación automática, con trazabilidad contable y fiscal dentro del sistema Restaurant.pe.
+6. Alcance
+Esta funcionalidad permite la gestión integral de las pólizas de seguro de activos, vinculando la información del activo (valor, ubicación, aseguradora, cobertura, etc.) con los contratos de seguro vigentes.
+El sistema controla las vigencias, importes asegurados, deducibles y primas, y permite configurar alertas automáticas de vencimiento y renovaciones programadas.
+Se integra con las tablas maestras de:
+* Aseguradoras (HU-AF-TAB-001)
+
+* Tipos de Seguro (HU-AF-TAB-002)
+
+* Activos Fijos (HU-AF-OPE-001)
+
+Además, genera impacto contable en los registros de gastos por primas y mantiene trazabilidad de coberturas, siniestros y beneficiarios asociados.
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Operaciones → Pólizas de Seguro → Gestión de Seguros Asociados a Activos
+8. Campos del Formulario
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada automáticamente según sesión.
+	País
+	Determinado según la razón social activa.
+	Código del Activo
+	Identificador único del activo asegurado.
+	Descripción del Activo
+	Detalle o denominación del bien.
+	Valor Neto del Activo
+	Valor contable actual del activo.
+	Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Código de Póliza[a]
+	Alfanumérico (20)
+	Identificador único de la póliza.
+	No duplicado.
+	Compañía Aseguradora
+	Lista
+	Seleccionada del maestro de aseguradoras (HU-AF-TAB-001).
+	Obligatorio.
+	Tipo de Seguro
+	Lista
+	Asociado al catálogo de tipos de seguros (HU-AF-TAB-002).
+	Obligatorio.
+	Fecha de Inicio
+	Fecha
+	Fecha de inicio de vigencia.
+	Obligatorio.
+	Fecha de Vencimiento
+	Fecha
+	Fecha de término de vigencia.
+	Mayor a fecha de inicio.
+	Suma Asegurada
+	Numérico (15,2)
+	Valor total cubierto por la póliza.
+	Obligatorio.
+	Moneda
+	Lista
+	Moneda de la póliza (Soles / Dólares / Otra).
+	Obligatorio.
+	Prima Total
+	Numérico (15,2)
+	Importe total de la prima contratada.
+	Obligatorio.
+	Deducible
+	Numérico (10,2)
+	Porcentaje o monto deducible.
+	Campo obligatorio.
+	Beneficiario
+	Texto (100)
+	Entidad o persona beneficiaria del seguro.
+	Obligatorio.
+	Estado de la Póliza
+	Lista
+	Vigente / Vencida / Renovada[b] / Cancelada.
+[c]	
+Controlado por el sistema.
+	Campos Opcionales:
+Campo
+	Descripción
+	Documento Soporte
+	Archivo adjunto del contrato o póliza escaneada.
+	Observaciones
+	Comentarios administrativos o contables.
+	Monto de Renovación
+	En caso de renovación programada.
+	Fecha de Renovación Automática
+	Fecha estimada de renovación.
+	9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nueva Póliza
+	Crea un nuevo registro de póliza.
+	Se guarda vinculada al activo.
+	Editar
+	Permite modificar campos antes de vencer.
+	Actualiza y registra log.
+	Renovar Automáticamente
+	Crea nueva póliza con base en la anterior.
+	Genera registro actualizado y mantiene historial.
+	Vencer Automáticamente
+	Cambia estado de póliza vencida por fecha.
+	Notifica al responsable.
+	Cancelar
+	Desactiva cobertura antes de vencimiento.
+	Cambia estado a “Cancelada”.
+	Adjuntar Documento
+	Permite subir póliza escaneada.
+	Vincula archivo a registro.
+	Buscar / Filtrar
+	Permite buscar pólizas por aseguradora, activo o estado.
+	Muestra listado filtrado.
+	Exportar
+	Exporta información a Excel o PDF.
+	Incluye datos y vigencias.
+	10. Reglas de Negocio
+   1. Toda póliza debe estar asociada a un activo existente y vigente.
+
+   2. No se pueden registrar fechas de vencimiento menores a la fecha de inicio.
+
+   3. Cada activo puede tener una o más pólizas vigentes, siempre que las coberturas no se solapen en tipo o periodo.
+
+   4. Las pólizas vencidas no podrán modificarse, solo renovarse o consultarse.
+
+   5. El sistema debe generar alertas automáticas 30 y 10 días antes del vencimiento.
+
+   6. Las renovaciones automáticas duplicarán la póliza con nueva fecha de inicio y vencimiento, manteniendo referencia al registro anterior.
+
+   7. Toda modificación de suma asegurada o prima debe registrarse en el Log de Auditoría Contable.
+
+   8. Si la póliza tiene impacto financiero (prima o deducible), se debe generar asiento automático en el módulo contable.
+
+   9. Las pólizas canceladas antes de tiempo deben conservar registro histórico y motivo.
+
+   10. La renovación no debe alterar el número de póliza original, sino crear un registro vinculado con numeración consecutiva.
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Maestro de Activos (HU-AF-OPE-001)
+	Asocia el activo a la póliza de seguro.
+	Maestro de Aseguradoras (HU-AF-TAB-001)
+	Fuente de información de compañías aseguradoras.
+	Tipos de Seguro (HU-AF-TAB-002)
+	Define el tipo y cobertura de póliza asociada.
+	Módulo Contable General
+	Genera asientos automáticos por primas o deducibles.
+	Log de Auditoría Contable
+	Registra todas las acciones de creación, modificación y renovación.
+	Configuración Global (HU-AF-TAB-006)
+	Controla moneda, periodos contables y alertas.
+	Sistema de Notificaciones
+	Envía alertas automáticas de vencimiento o renovación.
+	12. Consideraciones Técnicas
+      * Desarrollado en interfaz web con pestañas: Datos Generales, Cobertura, Renovaciones, Documentos y Auditoría.
+
+      * Integración mediante API RESTful con los módulos contables y de activos.
+
+      * Tablas principales:
+
+         * AF_POLIZAS (cabecera de pólizas)
+
+         * AF_POLIZAS_HIST (historial de renovaciones)
+
+         * AF_POLIZAS_ALERTAS (alertas programadas)
+
+            * Control automático de vencimientos por job programado diario.
+
+            * Soporte para adjuntar documentos PDF/JPG hasta 10 MB.
+
+            * Registro automático en Log de Auditoría Contable.
+
+            * Capacidad de exportar pólizas en formato PDF con datos del activo y vigencias.
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles “Administrador de Activos” y “Contador de Seguros”.
+	Performance
+	Consultas y registros ≤ 3 segundos.
+	Usabilidad
+	Interfaz con filtros por estado y alertas visuales de color.
+	Auditoría
+	Registro de toda acción CRUD en log contable.
+	Disponibilidad
+	99.5% en horario operativo.
+	Escalabilidad
+	Capacidad para más de 50.000 pólizas activas por país.
+	14. Criterios de Aceptación
+               1. El usuario puede registrar una nueva póliza con todos los campos obligatorios.
+
+               2. Las fechas de vigencia se validan correctamente.
+
+               3. El sistema genera alertas de vencimiento a los responsables.
+
+               4. Las pólizas pueden renovarse automáticamente con nuevo periodo.
+
+               5. Los movimientos contables (prima y deducible) se reflejan en el módulo contable.
+
+               6. Toda modificación queda registrada en el log de auditoría.
+
+               7. Las pólizas canceladas o vencidas no pueden modificarse.
+
+               8. Los reportes y exportaciones muestran información actualizada y completa.
+
+15. Comentarios / Observaciones
+                  * Esta HU permite la administración completa de las coberturas de activos fijos, asegurando control sobre los contratos, costos y riesgos.
+
+                  * Es esencial para la gestión de riesgo patrimonial y la conciliación contable de gastos por primas y deducibles.
+
+                  * Las alertas automáticas y renovaciones garantizan continuidad en la cobertura, evitando brechas de seguro.
+
+                  * El diseño debe mantener coherencia con las HU:
+
+                     * HU-AF-TAB-001 (Maestro de Compañías Aseguradoras)
+
+                     * HU-AF-TAB-002 (Tipos de Seguros)
+
+                     * HU-AF-OPE-001 (Registro Principal de Activos Fijos)
+
+                        * Se recomienda incluir un dashboard de alertas en el módulo principal que muestre pólizas próximas a vencer y estadísticas de cobertura por sucursal.
+
+
+[a]número de póliza
+[b]quitar estado de renovada y agregar otro estado de "pendiente" o "por entrar en vigencia" (se definirá)
+[c]Agregar el estado de "En siniestro" que solo aparecerá en las polizas correspondientes, este proceso se hara en "Generación de asientos de Siniestro y recupero.

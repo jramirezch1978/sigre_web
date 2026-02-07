@@ -1,0 +1,162 @@
+﻿HU-RRHH-NOM-PROV-001 - Generación de asientos contables por provisión de gastos de planilla
+ Versión: 1.0
+________________
+
+
+1. Título
+Genera asientos contables por provisión de gastos de planilla, como gratificaciones, CTS, vacaciones y otros conceptos remunerativos según empresa.
+________________
+
+
+2. Descripción
+Como analista contable o de nómina, quiero que el sistema genere automáticamente los asientos contables de provisión de gastos de planilla (gratificaciones, CTS, vacaciones, bonificaciones y otros conceptos remunerativos) según las configuraciones contables de cada empresa, para garantizar la correcta imputación de costos y provisiones en el sistema financiero-contable.
+________________
+
+
+3. Proceso
+Proceso: Procesos de Nómina
+Subproceso: Provisión de Gasto
+Módulo: RR.HH
+________________
+
+
+4. Narrativa de Usuario
+Quiero: Que el sistema genere los asientos contables de las provisiones de planilla.
+Para: Reflejar en la contabilidad los pasivos y gastos acumulados por beneficios laborales.
+De manera que: Se mantenga la coherencia entre la nómina y la contabilidad, evitando errores manuales y cumpliendo con las normas financieras y laborales.
+________________
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > RR.HH > Procesos de Nómina > Provisión de Gasto > Generación de Asientos Contables
+________________
+
+
+6. Criterios de Aceptación
+* El sistema debe permitir seleccionar el periodo de nómina y la empresa para la cual se generará la provisión.
+
+* Debe calcular automáticamente las provisiones de los siguientes conceptos:
+
+   * Gratificaciones
+
+   * CTS u otros fondos equivalentes
+
+   * Vacaciones acumuladas
+
+   * Bonificaciones extraordinarias u otros conceptos remunerativos configurados.
+
+      * Los asientos contables deben generarse en base a las cuentas contables definidas en el módulo de Parámetros de RR.HH o Contabilidad.
+
+      * El sistema debe permitir visualizar el asiento antes de su confirmación (modo “previsualización”).
+
+      * Una vez confirmados, los asientos deben registrarse automáticamente en el módulo de Contabilidad General, con número de asiento y fecha contable.
+
+      * Debe incluir soporte multiempresa y multipaís, adaptando las reglas contables y conceptos según país.
+
+      * Debe permitir la anulación o reversión de asientos en caso de error, dejando trazabilidad.
+
+      * Todos los asientos deben quedar registrados en el log de auditoría (usuario, fecha, hora, acción).
+
+________________
+
+
+7. Campos del Formulario / Tabla de Vista
+Campo
+	Tipo de Campo
+	Descripción
+	Ejemplo
+	Validaciones / Consideraciones UX/UI
+	Empresa
+	Lista desplegable
+	Selecciona la empresa o razón social.
+	Restaurante XYZ S.A.
+	Obligatorio. Filtra centros de costo y cuentas.
+	Periodo de Nómina
+	Selector de periodo
+	Define el mes o rango de provisión.
+	Septiembre 2025
+	Solo periodos cerrados o validados.
+	Tipo de Provisión
+	Lista desplegable
+	Selecciona tipo de gasto a provisionar.
+	Gratificaciones, CTS, Vacaciones
+	Selección individual.
+	Fecha Contable
+	Fecha
+	Fecha en la que se registrará el asiento.
+	30/09/2025
+	No puede superar la fecha actual.
+	Centro de Costo
+	Lista desplegable
+	CECO asociado a la provisión.
+	CC-ALM001 (Almacén Central)
+	Carga automática desde ficha de trabajador.
+	Monto Total a Provisionar
+	Numérico (calculado)
+	Suma total de los conceptos seleccionados.
+	52,430.00
+	Calculado automáticamente.
+	Moneda
+	Lista desplegable
+	Moneda base o corporativa.
+	PEN / USD
+	Definida según empresa.
+	Cuenta Contable de Gasto
+	Lista desplegable
+	Cuenta contable donde se imputará el gasto.
+	621101 - Sueldos y Salarios
+	Configurable por tipo de gasto.
+	Cuenta Contable de Pasivo
+	Lista desplegable
+	Cuenta contable del pasivo generado.
+	411201 - Provisión de Vacaciones
+	Definida por concepto.
+	Observaciones
+	Texto libre
+	Comentarios o notas sobre el asiento.
+	Provisión mensual septiembre
+	Opcional.
+	Estado del Asiento
+	Etiqueta / Estado
+	Indica si el asiento está en borrador, generado o contabilizado.
+	En revisión / Contabilizado
+	Control de flujo.
+	________________
+
+
+8. Detalle de Integración (opcional)
+         * Integración con Contabilidad: Los asientos generados deben enviarse automáticamente al libro diario general.
+
+         * Integración con CECO / Contabilidad Analítica: Las provisiones deben distribuirse por centro de costo o unidad organizativa.
+
+         * Integración con Nómina: Los valores de provisión deben provenir de los cálculos validados de planilla.
+
+         * Integración con Auditoría: Cada asiento debe quedar registrado con usuario, fecha, y versión del proceso.
+
+________________
+
+
+9. Consideraciones Técnicas
+            * Soporte multiempresa y multipaís.
+
+            * Cuentas contables y centros de costo deben ser configurables por tipo de gasto.
+
+            * Validar coherencia de montos con los cálculos de planilla (no debe permitir duplicidad).
+
+            * Permitir exportación del asiento contable en formatos TXT, Excel o XML según requerimiento tributario.
+
+            * Incluir control de versiones de asientos (histórico de regeneraciones).
+
+            * Compatible con cierres contables automáticos por periodo.
+
+________________
+
+
+10. Comentarios
+Esta funcionalidad asegura la trazabilidad y consistencia contable de las provisiones laborales, reduciendo errores y tiempos de registro manual.
+Se recomienda incorporar visualizaciones tipo dashboard contable, mostrando:
+               * Monto total provisionado por concepto y por empresa.
+
+               * Comparativo de provisiones vs gastos reales.
+
+               * Alertas de diferencias o cuentas no configuradas.

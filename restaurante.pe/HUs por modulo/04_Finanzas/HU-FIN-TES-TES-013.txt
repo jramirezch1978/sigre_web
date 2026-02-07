@@ -1,0 +1,210 @@
+﻿HU-FIN-TES-TES-013 – Pago de Detracción - v1
+
+
+1. Título
+Pago de Detracción
+2. Descripción
+Como analista o tesorero, quiero registrar y ejecutar el pago de detracciones correspondientes a facturas o servicios sujetos al régimen de detracciones, desde el módulo de Finanzas, para cumplir con las obligaciones tributarias y mantener actualizada la información de pagos y constancias en el sistema.
+3. Proceso
+Nivel
+	Descripción
+	Módulo:
+	Finanzas
+	Proceso:
+	Tesorería
+	Subproceso
+	Pagos / Detracciones
+	4. Narrativa de Usuario
+Quiero: Registrar y ejecutar los pagos de detracciones a los proveedores según las operaciones afectas.
+Para: Cumplir con la normativa tributaria vigente y generar los comprobantes requeridos por la entidad recaudadora.
+De manera que: El sistema actualice los estados de las detracciones, emita los asientos contables y permita exportar el archivo TXT con el formato establecido por la SUNAT para pagos masivos o individuales.
+5. Regla de Navegabilidad
+Ruta: Menú Principal → Finanzas → Tesorería → Pago de Detracciones
+6. Criterios de Aceptación
+* El sistema debe listar todos los documentos tipo DE (Detracciones) pendientes de pago, que estén asociados a documentos de compra registrados en el módulo de Compras.
+* Permitir seleccionar una o varias detracciones para pago individual o masivo.
+
+* Permitir elegir la cuenta de origen (financiera o caja) desde la cual se efectuará el pago.
+
+* Calcular automáticamente el importe total a pagar según las detracciones seleccionadas.
+* Al seleccionar generar el archivo TXT, las detracciones seleccionadas pasarán al estado “Pendiente de Constancia”, bloqueando su edición o duplicación.
+* Luego de cargar el txt al portal de SUNAT y este nos dé los números de constancia de cada documento pagado, en el ERP los documentos tipo DE con estado Pendiente de Constancia podrán ser seleccionados para registrar manualmente el número de constancia emitido por SUNAT o permitir cargar la constancia de pago en formato TXT y que el sistema reconozca y asigne los números de constancia de pago de cada factura y la fecha de pago. Una vez completado este registro, el usuario procederá a ejecutar el pago dentro del sistema, actualizando el estado a Pagada.
+* Generar el asiento contable automático al confirmar el pago, afectando las cuentas de detracciones por pagar y la cuenta bancaria.
+
+* Permitir exportar el comprobante de pago interno en PDF, Excel o TXT.
+
+* Mantener trazabilidad completa de la operación (usuario, fecha, monto, cuenta de origen, constancia).
+7. Campos del Formulario / Tabla de Vista
+Campo
+	Tipo
+	Descripción
+	Ejemplo
+	Validaciones / Consideraciones UX/UI
+	Fecha de Pago
+	Fecha
+	Fecha en que se realiza el pago.
+	08/10/2025
+	No puede ser posterior al periodo contable activo.
+	Medio de Pago
+	Lista desplegable
+	Define si el pago se realiza desde cuenta bancaria o caja.
+	Transferencia / Efectivo
+	Campo obligatorio.
+	Cuenta de Origen
+	Lista desplegable
+	Cuenta desde la que se realiza el pago.
+	Cuenta Detracciones SUNAT
+	Solo cuentas activas en módulo de finanzas.
+	Proveedor
+	Texto / Lista
+	Nombre o razón social del proveedor.
+	Servicios Generales SAC
+	Se autocompleta desde documento fuente.
+	Documento Asociado
+	Texto / Hipervínculo
+	Factura o comprobante sujeto a detracción.
+	F001-5897
+	Enlace al documento original.
+	Importe de Detracción
+	Numérico
+	Monto retenido para detracción.
+	1,200.00
+	Calculado automáticamente.
+	Estado
+	Etiqueta / Estado
+	Estado del pago.
+	Pendiente / Pagado / Anulado
+	Automático según acción del usuario.
+	Usuario Registro
+	Texto
+	Usuario que registra el pago.
+	jrojas
+	Automático.
+	Observaciones
+	Texto libre
+	Notas sobre el pago o referencia de operación.
+	Detracción octubre proveedores
+	Opcional.
+	
+
+8. Detalle de Integración
+   * Integración con Cuentas por Pagar:
+ Actualiza el estado de documentos asociados a “Detracción Pagada”.
+
+   * Integración con Contabilidad:
+ Genera asiento contable automático con la estructura definida para detracciones.
+
+   * Integración con Reportes Financieros:
+ Incluye la operación en los reportes de pagos, flujo de caja y estado de obligaciones tributarias.
+
+   * Integración con Exportación TXT SUNAT:
+ Genera archivo plano conforme al formato especificado por la SUNAT para pago masivo de detracciones a través del Banco de la Nación.
+
+
+
+9. Subproceso: Generación y Registro de Constancia SUNAT
+Objetivo:
+Permitir al usuario generar un archivo TXT con las detracciones seleccionadas para realizar pagos masivos desde el portal del Banco de la Nación, cumpliendo con las especificaciones técnicas establecidas por la SUNAT.
+Etapas del flujo:
+1️.- Generación del archivo TXT
+      * El usuario selecciona detracciones pendientes de pago y genera el archivo TXT SUNAT.
+
+      * El sistema marca dichas detracciones con estado “Pendiente de Constancia”.
+
+      * El archivo se genera con el formato establecido por SUNAT:
+Requisitos: El archivo debe contener el formato exacto exigido por SUNAT:
+         1. Datos de cabecera
+         * Indicador de maestra
+         * RUC del adquiriente
+         * Nombre / Razón Social del adquiriente
+         * N° de lote (Debe cumplir el formato AANNNN)
+         * Importe total lote
+
+
+         2. Datos de las filas subsiguientes (Registro de los Abonos)
+
+            * Tipo de documento del Proveedor
+            * RUC del Proveedor 
+            * Nombre / Razón Social del Proveedor
+            * N ° de Proforma. *No obligatorio
+            * Código bien o servicio
+            * N° Cuenta Corriente Proveedor
+            * Importe del depósito 
+            * Código del Tipo de Operación realizada (venta, retiro, traslado….)
+            * Periodo Tributario (formato aaaamm)
+            * Tipo de comprobante
+            * Serie de comprobante 
+            * Número de comprobante.
+
+Criterios de aceptación adicionales:
+               * Validar estructura, longitud de campos y separadores conforme al instructivo SUNAT. (DEPÓSITO MASIVO DE DETRACCIONES)
+
+               * Permitir descargar o visualizar el archivo TXT antes de su envío.
+
+               * Bloquear detracciones que ya tengan constancia generada para evitar duplicidad.
+
+               * Registrar en el sistema el número de archivo TXT y usuario que lo generó.
+
+               * Al importar la constancia del Banco, actualizar automáticamente el estado a “Pagada”.
+
+Formato del archivo TXT (Ejemplo simplificado):
+TipoDocProv|RUCProveedor|RazonSocialProveedor|NroProforma|CodBienServicio|CuentaBN|ImporteDeposito|CodTipoOperacion|PeriodoTributario|TipoComprobante|SerieComprobante|NumeroComprobante
+06|20123456789|Proveedor Ejemplo SAC|0|027|000112345678|1200.00|01|202510|01|F001|00005897
+
+
+2.- Pago en el portal SUNAT / Banco de la Nación
+                  * El usuario carga el TXT en el portal SUNAT y ejecuta el pago masivo.
+
+                  * SUNAT emite constancias individuales de depósito por cada documento.
+
+3.- Registro manual de constancias en el ERP y pago interno en sistema
+ Opción:
+Menú Principal → Finanzas → Tesorería → Pago de Detracciones
+                     * Se listan las detracciones en estado “Pendiente de Constancia”.
+                     * Se selecciona fecha del pago
+                     * El banco de donde se registró el pago.
+                     * El usuario debe agregar en cada documento el número de constancia de pago de detracción que arrojó SUNAT.
+                     * Una vez registradas todas las constancias, se ejecuta el pago dentro del ERP.
+                     * Al confirmar:
+                     * El sistema actualiza el tipo de documento DE detracción de la factura asociada a estado “Pagada” 
+                     * Se genera el asiento contable automático
+                     * Se registra el número y fecha de constancia en el documento fuente para que esa información se refleje al momento de la declaración mensual de tributos.
+
+10. Estados del proceso
+Estado
+	Descripción
+	Responsable
+	Pendiente de Pago
+	Detracción aún no incluida en archivo TXT
+	Tesorería
+	Pendiente de Constancia
+	Detracción incluida en TXT, esperando constancia SUNAT
+	Tesorería
+	Pagada
+	Constancia registrada y asiento contable generado
+	Tesorería / Contabilidad
+	11. Consideraciones Técnicas
+                        * Controlar que el monto total no supere el saldo de la cuenta de origen.
+
+                        * Evitar duplicidades de pago o generación de archivo TXT repetido.
+
+                        * Mantener registro histórico de usuario, fecha y hora de generación del archivo.
+
+                        * El comprobante interno de pago debe poder imprimirse o descargarse.
+
+                        * Incluir parámetros configurables (porcentaje, código de detracción, entidad recaudadora, etc.).
+
+                        * Soportar multiempresas y multimoneda.
+
+                        * El archivo TXT debe ser 100% compatible con el formato SUNAT vigente para carga directa en el portal del Banco de la Nación.
+
+12. Comentarios
+Esta funcionalidad centraliza la gestión y pago de detracciones dentro del módulo de Finanzas, asegurando trazabilidad completa y cumplimiento normativo.
+Se recomienda incluir un panel resumen con indicadores clave:
+                           * Total de detracciones pendientes.
+
+                           * Detracciones pagadas en el periodo.
+
+                           * Detracciones vencidas.
+
+                           * Detracciones por proveedor.

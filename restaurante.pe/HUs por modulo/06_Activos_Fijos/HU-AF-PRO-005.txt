@@ -1,0 +1,262 @@
+﻿HU-AF-PRO-005 - Proceso Automatizado de Devengamiento Mensual de Primas de Seguros de Activos Fijos - v1.1
+________________
+
+
+1. Módulo
+Activos Fijos
+________________
+
+
+2. Proceso
+Procesos
+________________
+
+
+3. Subproceso
+Generación de Devengo Mensual de Aseguradores
+________________
+
+
+4. Nombre de la Historia de Usuario
+Proceso Automatizado de Devengamiento Mensual de Primas de Seguros de Activos Fijos
+________________
+
+
+5. Descripción / Propósito
+Como Contador General o Responsable de Activos Fijos,
+quiero ejecutar un proceso automatizado que calcule y registre mensualmente el devengamiento de las primas de seguros de los activos fijos,
+para reconocer proporcionalmente el gasto en cada periodo de vigencia de las pólizas, distribuirlo por centro de costo y asegurar la correcta imputación contable de los pagos anticipados, manteniendo trazabilidad, validaciones y alertas sobre vencimientos próximos.
+________________
+
+
+6. Alcance
+Esta funcionalidad permite automatizar el proceso de devengamiento mensual de las primas de seguros contratadas para los activos fijos registrados en el sistema, asegurando el reconocimiento contable conforme al principio de devengo (NIC 1 y NIC 37).
+El proceso toma como base las pólizas vigentes registradas en el submódulo de Seguros (HU-AF-OPE-006), calcula el gasto mensual de acuerdo al período de cobertura, y genera automáticamente los asientos contables correspondientes, con distribución por centro de costo según la ubicación o asignación del activo.
+Incluye:
+* Cálculo Automático: División de la prima total entre los meses de cobertura o según frecuencia definida.
+
+* Distribución por Centro de Costo: Aplicación de porcentajes de uso o ubicación de los activos asegurados.
+
+* Gestión Multi-Póliza: Manejo simultáneo de múltiples pólizas con diferentes fechas de inicio y vencimiento.
+
+* Validaciones Previas: Comprobación de vigencia, estado y saldo pendiente de cada póliza.
+
+* Alertas Automáticas: Notificación de pólizas próximas a vencer o que requieren renovación.
+
+________________
+
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Procesos → Generación de Devengo Mensual de Aseguradores → Proceso de Devengamiento Automático
+________________
+
+
+8. Campos y Parámetros del Proceso
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada automáticamente por la sesión activa.
+	País
+	Determinado según la razón social.
+	Periodo Contable
+	Mes y año seleccionados para el devengamiento.
+	Fecha de Ejecución
+	Fecha actual del proceso.
+	Usuario Ejecutor
+	Usuario autenticado que lanza el proceso.
+	Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Tipo de Póliza
+	Lista
+	Todo Riesgo / Incendio / Robo / Responsabilidad Civil / Otro.
+	Obligatorio.
+	Periodo a Devengar
+	Fecha (Mes/Año)
+	Periodo contable activo.
+	No puede estar cerrado.
+	Fuente de Datos
+	Lista
+	Pólizas Vigentes / Todas las Pólizas.
+	Debe existir al menos una póliza activa.
+	Tipo de Cálculo
+	Lista
+	Lineal (mensual) / Proporcional según cobertura.
+	Obligatorio.
+	Libro Contable
+	Lista
+	Principal / Tributario.
+	Obligatorio.
+	Campos Opcionales:
+Campo
+	Descripción
+	Centro de Costo
+	Para restringir ejecución a un área específica.
+	Prefijo de Documento
+	Código que identifica el asiento contable generado.
+	Observaciones
+	Comentarios administrativos o contables.
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Validar Pólizas
+	Verifica vigencia, fechas, montos y cobertura de pólizas.
+	Muestra resumen de pólizas aptas para devengar.
+	Calcular Devengo
+	Aplica fórmula de cálculo mensual según prima total y periodo de cobertura.
+	Genera tabla temporal con valores mensuales.
+	Revisar Resultados
+	Muestra detalle del devengo por activo, póliza y centro de costo.
+	Vista previa del asiento contable.
+	Contabilizar Devengo
+	Genera asiento contable automático del gasto y del activo diferido.
+	Asiento enviado al módulo contable general.
+	Exportar Resultados
+	Descarga reporte en Excel o PDF con detalle por póliza y activo.
+	Archivo exportable.
+	Enviar Alertas
+	Envía notificación por correo o sistema sobre pólizas próximas a vencer.
+	Alerta generada automáticamente.
+	________________
+
+
+10. Reglas de Negocio
+   1. Solo se devengarán pólizas con estado “Vigente” y con fecha de cobertura activa en el periodo seleccionado.
+
+   2. El cálculo del devengo se realiza según la fórmula:
+Devengo mensual=Prima totalNuˊmero de meses de vigencia\text{Devengo mensual} = \frac{\text{Prima total}}{\text{Número de meses de vigencia}}Devengo mensual=Nuˊmero de meses de vigenciaPrima total​
+   3. Si la póliza cubre menos o más de 12 meses, el sistema ajustará el cálculo proporcionalmente.
+
+   4. Los montos devengados se registran como gasto mensual contra la cuenta de seguro diferido (activo corriente).
+
+   5. Cada asiento incluirá referencias a: póliza, aseguradora, activo, periodo y centro de costo.
+
+   6. Los centros de costo se determinan automáticamente según la ubicación o asignación del activo.
+
+   7. No se permite ejecutar el proceso sobre periodos contables cerrados.
+
+   8. En caso de renovación anticipada, el sistema fusiona la cobertura de ambas pólizas si las fechas se superponen.
+
+   9. Las diferencias de cambio por pólizas en moneda extranjera se registran automáticamente en cuentas específicas.
+
+   10. Todo proceso genera registro en el Log de Auditoría Contable (usuario, fecha, pólizas procesadas, montos).
+
+   11. Si una póliza ha sido dada de baja o cancelada, no se incluirá en el cálculo.
+
+   12. El proceso emite alertas automáticas para pólizas que vencen dentro de los próximos 30 días.
+
+________________
+
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Gestión de Pólizas (HU-AF-OPE-006)
+	Fuente principal de datos de pólizas, vigencias y primas.
+	Matriz Contable (HU-AF-TAB-004)
+	Determina cuentas contables de gasto y seguro diferido.
+	Configuración Global (HU-AF-TAB-006)
+	Define periodo contable activo, moneda y políticas de integración.
+	Log de Auditoría Contable
+	Registra todos los procesos ejecutados.
+	Módulo Contable General
+	Recibe los asientos automáticos del devengo.
+	Centros de Costo (HU-AF-OPE-008)
+	Aplica distribución del gasto según configuración.
+	________________
+
+
+12. Consideraciones Técnicas
+      * Implementación mediante procedimiento almacenado (Stored Procedure) con ejecución masiva.
+
+      * Generación de tablas temporales de devengo (AF_TMP_DEVENGO_SEGUROS) para revisión previa.
+
+      * Ejecución programada (mensual) o manual según configuración global.
+
+      * Control visual con barra de progreso, totales devengados y pólizas procesadas.
+
+      * Integración vía API RESTful con módulo contable y de activos.
+
+      * Tablas involucradas:
+
+         * AF_POLIZAS (datos de pólizas vigentes)
+
+         * AF_DEVENGOS_SEGUROS (registro histórico de devengamientos)
+
+         * AF_LOG_DEVENGOS (registro de ejecución).
+
+            * Generación automática de archivos Excel y PDF con resumen por aseguradora y póliza.
+
+            * Alertas automáticas enviadas vía correo o panel de notificaciones del sistema.
+
+            * Registro obligatorio en Log de Auditoría Contable.
+
+________________
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles “Administrador Contable” y “Supervisor de Activos”.
+	Performance
+	Ejecución ≤ 5 minutos para 5,000 pólizas activas.
+	Usabilidad
+	Interfaz intuitiva con vista previa de resultados y validaciones visuales.
+	Auditoría
+	Registro completo de pólizas procesadas y montos devengados.
+	Disponibilidad
+	99.7% durante horario operativo.
+	Escalabilidad
+	Soporte para ejecución paralela multiempresa / multipaís.
+	________________
+
+
+14. Criterios de Aceptación
+               1. El sistema solo procesa pólizas vigentes y con cobertura activa.
+
+               2. El cálculo del devengo mensual es exacto según prima total y periodo de vigencia.
+
+               3. Los asientos contables se generan correctamente, balanceados y con cuentas asignadas.
+
+               4. Se registran logs completos con detalle de pólizas procesadas, montos y usuario.
+
+               5. El proceso puede ejecutarse de forma automática o manual.
+
+               6. Los resultados pueden visualizarse y exportarse a Excel o PDF.
+
+               7. Las alertas de vencimiento y renovación se emiten correctamente.
+
+               8. El tiempo de procesamiento cumple con los estándares de performance establecidos.
+
+________________
+
+
+15. Comentarios / Observaciones
+                  * Esta HU implementa el devengamiento automático de seguros, garantizando el cumplimiento del principio contable de correlación del gasto con el periodo de beneficio.
+
+                  * Asegura la integración entre los módulos de Activos Fijos, Seguros y Contabilidad General, eliminando procesos manuales.
+
+                  * Cumple con las disposiciones de las NIIF / NIC 1 y 37, sobre registro de gastos anticipados.
+
+                  * Debe mantener coherencia con las HUs:
+
+                     * HU-AF-OPE-006 (Gestión de Seguros Asociados a Activos Fijos)
+
+                     * HU-AF-TAB-004 (Configuración de Cuentas Contables por Tipo de Activo)
+
+                     * HU-AF-TAB-006 (Configuración Global del Módulo)
+
+                     * HU-AF-PRO-002 (Creación Automática de Asientos Contables por Depreciación).
+
+                        * Se recomienda implementar simulaciones previas al devengo, para revisión contable antes de su contabilización definitiva.
+
+                        * Esta funcionalidad es esencial para la precisión contable mensual y control financiero de las pólizas de activos fijos.

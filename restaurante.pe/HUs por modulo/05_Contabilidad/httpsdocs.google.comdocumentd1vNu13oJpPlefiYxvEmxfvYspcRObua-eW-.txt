@@ -1,0 +1,261 @@
+﻿HU-CON-014 - Reportes de Validación / Asientos Descuadrados - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-014
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Validación Contable
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Asientos Descuadrados
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir generar reportes de validación de asientos contables descuadrados, mostrando aquellos registros donde la suma de los débitos difiera de la suma de los créditos.
+El objetivo es identificar de manera preventiva los asientos con inconsistencias para su revisión y corrección antes del cierre contable o la generación de reportes financieros.
+El reporte debe permitir filtrar por periodo contable, origen, libro contable, usuario y fecha de registro, mostrando para cada asiento los importes totales en el debe y haber, la diferencia y el estado del asiento.
+El sistema debe permitir la exportación de los resultados en formato Excel y PDF, así como la visualización detallada del asiento afectado.
+________________
+
+
+3. Actor(es)
+   * Contador General: Supervisa la integridad del cuadre contable.
+
+   * Analista Contable: Revisa y corrige los asientos identificados como descuadrados.
+
+   * Jefe de Contabilidad: Evalúa los reportes de control antes de los cierres mensuales.
+
+   * Auditor Interno o Externo: Revisa los reportes para validar la consistencia de los registros contables.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe contar con permisos para acceder al módulo Contabilidad → Reportes.
+
+      * Deben existir asientos contables registrados en el sistema.
+
+      * Los periodos contables seleccionados deben estar abiertos o en modo de consulta.
+
+      * La configuración de cuentas contables debe estar actualizada en el plan de cuentas.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Asientos Descuadrados
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar reportes que muestren los asientos contables descuadrados,
+para detectar y corregir errores en los débitos y créditos antes de los procesos de cierre contable.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable (año/mes) y rango de fechas para la validación.
+	Se muestran los asientos registrados dentro del periodo filtrado.
+	2
+	Calcular y mostrar automáticamente diferencias entre debe y haber.
+	Se listan únicamente los asientos con diferencias mayores a ±0.01.
+	3
+	Permitir aplicar filtros por origen, libro contable, usuario y estado del asiento.
+	El reporte se ajusta según los filtros aplicados.
+	4
+	Mostrar columnas de: origen, año, mes, libro, número de asiento, total debe, total haber, diferencia, usuario y fecha contable.
+	Los datos se presentan en formato tabular.
+	5
+	Permitir exportar el reporte a Excel (.xlsx) y PDF (.pdf).
+	Exportación exitosa con los filtros aplicados.
+	6
+	Resaltar visualmente los asientos con diferencias significativas.
+	Asientos descuadrados se muestran con color de advertencia.
+	7
+	Incluir un resumen general de la cantidad de asientos revisados, descuadrados y su monto total de diferencia.
+	Sección de resumen al final del reporte.
+	8
+	Registrar en bitácora cada ejecución del reporte (usuario, fecha, filtros, cantidad de registros).
+	Auditoría automática.
+	9
+	El reporte no debe permitir modificaciones de datos.
+	Componente de solo lectura.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Reporte tabular de validación de cuadre contable.
+Naturaleza: Reporte de control y validación – No realiza operaciones ni genera asientos.
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Define el periodo a validar.
+	Rango de Fechas
+	Fecha
+	No
+	Filtra los asientos según fecha contable.
+	Origen
+	Lista desplegable
+	No
+	Indica el módulo o proceso que generó el asiento.
+	Libro Contable
+	Lista desplegable
+	No
+	Permite filtrar por libro diario o auxiliar.
+	Usuario Registro
+	Lista desplegable
+	No
+	Filtra por el usuario que creó o modificó el asiento.
+	Estado del Asiento
+	Lista
+	No
+	Activo / Anulado / Pendiente.
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Origen
+	Módulo o proceso del que proviene el asiento.
+	Año / Mes
+	Periodo contable del asiento.
+	Libro Contable
+	Código o nombre del libro.
+	N° Asiento
+	Identificador del asiento contable.
+	Glosa
+	Descripción del asiento.
+	Total Débitos
+	Suma total de los importes al debe.
+	Total Créditos
+	Suma total de los importes al haber.
+	Diferencia
+	Monto de desbalance (Debe – Haber).
+	Moneda
+	Moneda base del asiento.
+	Estado
+	Activo / Pendiente / Anulado.
+	Usuario Registro
+	Usuario que creó o modificó el asiento.
+	Fecha Contable
+	Fecha de contabilización.
+	8.3 Resumen del Reporte
+         * Total de asientos revisados.
+
+         * Total de asientos descuadrados.
+
+         * Monto total de diferencias acumuladas.
+
+         * Periodo contable validado.
+
+________________
+
+
+9. Reglas de Negocio
+            1. Cuadre obligatorio: Todo asiento debe cumplir la regla contable básica: suma de débitos = suma de créditos.
+
+            2. Tolerancia máxima: Se permite una diferencia de ±0.01 por efectos de redondeo.
+
+            3. Estado de validación: Solo se incluyen asientos activos o pendientes.
+
+            4. Reporte informativo: No modifica, corrige ni afecta los registros contables.
+
+            5. Seguridad: Solo usuarios con rol contable o auditor pueden generar o exportar el reporte.
+
+            6. Auditoría: Cada ejecución queda registrada en la tabla LOG_VALIDACION_ASIENTOS_DESCUADRADOS.
+
+            7. Multipaís: El reporte debe filtrar los resultados por la razón social y país activos.
+
+            8. Exportación fiel: Los datos exportados deben respetar los filtros aplicados.
+
+________________
+
+
+10. Integraciones
+               * Módulo de Asientos Contables: Fuente de los registros a validar.
+
+               * Módulo de Auditoría: Para registrar los eventos de generación de reporte.
+
+               * Catálogo de Libros Contables: Para identificación y referencia del libro origen.
+
+               * Plan de Cuentas: Para verificar la integridad de las cuentas contables utilizadas.
+
+________________
+
+
+11. Aspectos Técnicos
+                  * Tipo de Componente: Reporte de validación (solo lectura).
+
+                  * Tablas Fuente (solo consulta):
+
+                     * CNTBL_ASIENTO (cabecera del asiento).
+
+                     * CNTBL_ASIENTO_DET (detalle del asiento).
+
+                        * Lógica de validación (conceptual):
+
+                           * Agrupar los asientos por origen, año, mes, libro y número.
+
+                           * Calcular la diferencia entre total debe y total haber.
+
+                           * Seleccionar solo aquellos con diferencias mayores a ±0.01.
+
+                              * Exportaciones: Formatos .xlsx y .pdf.
+
+                              * Bitácora: Tabla LOG_VALIDACION_ASIENTOS_DESCUADRADOS (usuario, fecha, periodo, cantidad de asientos, total diferencia).
+
+                              * Performance: Optimización mediante índices en campos NRO_ASIENTO, NRO_LIBRO, ORIGEN, ANO, MES.
+
+________________
+
+
+12. Flujo Principal del Proceso (Consulta y Reporte)
+                                 1. El usuario accede a Contabilidad → Reportes → Validación / Asientos Descuadrados.
+
+                                 2. Define los filtros de búsqueda (periodo, libro, origen, usuario, etc.).
+
+                                 3. Presiona el botón “Generar Reporte”.
+
+                                 4. El sistema procesa los registros y muestra los asientos descuadrados.
+
+                                 5. Los resultados se presentan en una vista tabular con totales y diferencias.
+
+                                 6. El usuario puede exportar el reporte a Excel o PDF.
+
+                                 7. El sistema registra la ejecución del reporte en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                                    * “Debe seleccionar un periodo contable para generar el reporte.”
+
+                                    * “No se encontraron asientos descuadrados en el rango seleccionado.”
+
+                                    * “El usuario no cuenta con permisos para generar este reporte.”
+
+                                    * “Reporte generado correctamente.”
+
+                                    * “Error al procesar el reporte. Contacte al administrador del sistema.”

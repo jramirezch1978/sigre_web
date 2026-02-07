@@ -1,0 +1,259 @@
+﻿HU-AF-PRO-001 - Proceso Masivo de Cálculo Mensual/Anual de Depreciación - v1.1
+________________
+
+
+1. Módulo
+Activos Fijos
+________________
+
+
+2. Proceso
+Procesos
+________________
+
+
+3. Subproceso
+Cálculo de Depreciación
+________________
+
+
+4. Nombre de la Historia de Usuario
+Proceso Masivo de Cálculo Mensual/Anual de Depreciación
+________________
+
+
+5. Descripción / Propósito
+Como Administrador Contable o Analista de Activos Fijos,
+quiero ejecutar el proceso masivo de cálculo de depreciación mensual o anual,
+para actualizar los valores contables y tributarios de todos los activos fijos, distribuir automáticamente los gastos por centro de costos, y garantizar el registro exacto y trazable de la depreciación acumulada, validando periodos, matrices contables y parámetros antes de su contabilización final.
+________________
+
+
+6. Alcance
+Esta funcionalidad constituye el engine principal de cálculo de depreciación del módulo de Activos Fijos.
+Permite ejecutar de manera masiva y automatizada el proceso de cálculo mensual o anual de depreciación, considerando las configuraciones por activo, subclase, centro de costo y parámetros contables globales.
+El proceso:
+1. Valida periodos contables abiertos antes de iniciar el cálculo.
+
+2. Verifica la configuración de tasas, métodos y matrices contables.
+
+3. Calcula automáticamente la depreciación contable y tributaria para cada activo.
+
+4. Distribuye los gastos según los porcentajes configurados en los centros de costo.
+
+5. Genera tablas temporales de resultados para revisión previa.
+
+6. Permite reprocesamiento controlado en caso de errores.
+
+7. Incluye barra de progreso y logs detallados del proceso ejecutado.
+
+Los resultados se integran directamente con la contabilidad general y quedan disponibles para revisión en los reportes de depreciación mensual y anual.
+________________
+
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Procesos → Cálculo de Depreciación → Ejecución Masiva Mensual/Anual
+________________
+
+
+8. Campos del Formulario
+Campos de Parámetros Generales
+Campo
+	Descripción
+	Razón Social
+	Determinada automáticamente por la sesión activa.
+	País
+	Determinado según la razón social.
+	Periodo Contable
+	Mes y año a procesar.
+	Tipo de Cálculo
+	Mensual / Anual.
+	Fecha de Ejecución
+	Fecha actual del proceso.
+	Tipo de Depreciación
+	Contable / Tributaria / Ambas.
+	Método de Cálculo
+	Lineal / Decreciente / Otro (según configuración).
+	Modo de Ejecución
+	Prueba / Definitivo.
+	Usuario Ejecutor
+	Usuario que lanza el proceso.
+	Campos Opcionales
+Campo
+	Descripción
+	Incluir Activos Revaluados
+	Permite incluir activos con revaluaciones recientes.
+	Incluir Activos en Mejora
+	Opción para depreciar activos en proceso de capitalización.
+	Reprocesar Periodo Cerrado
+	Solo usuarios con permisos de Supervisor Contable.
+	Centro de Costo
+	Permite limitar el cálculo a un área específica.
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Validar Configuración
+	Revisa que todos los activos tengan tasas, métodos y cuentas contables configuradas.
+	Muestra resumen de validaciones previas.
+	Ejecutar Cálculo Masivo
+	Inicia el proceso de depreciación para todos los activos.
+	Calcula y genera datos temporales.
+	Visualizar Barra de Progreso
+	Muestra avance porcentual del cálculo masivo.
+	Seguimiento en tiempo real.
+	Revisar Resultados Temporales
+	Permite visualizar los montos calculados antes de contabilizar.
+	Vista previa editable para validación.
+	Contabilizar Resultados
+	Genera asientos contables automáticos de depreciación.
+	Registros enviados a contabilidad general.
+	Reprocesar Periodo
+	Permite volver a ejecutar el cálculo si hubo errores.
+	Reemplaza cálculos anteriores.
+	Exportar Resultados
+	Exporta los resultados a Excel o PDF.
+	Archivo con resumen por activo y centro de costo.
+	________________
+
+
+10. Reglas de Negocio
+   1. Solo se pueden ejecutar cálculos en periodos contables abiertos definidos en el módulo global.
+
+   2. Cada activo debe tener tasa, método y cuentas contables configuradas (HU-AF-OPE-008 y HU-AF-TAB-004).
+
+   3. No se permite reprocesar un periodo ya contabilizado, salvo que tenga estatus “Reabierto”.
+
+   4. La distribución de gasto por centro de costo se calcula con base en los porcentajes definidos en la configuración del activo.
+
+   5. El sistema debe bloquear activos en baja o venta durante el proceso.
+
+   6. En modo “Prueba”, los resultados se generan en tablas temporales y no afectan la contabilidad.
+
+   7. Los cálculos deben realizarse tanto para valores contables como tributarios, según configuración.
+
+   8. Todo proceso genera un Log detallado con: usuario, fecha, duración, activos procesados, errores detectados y resultado final.
+
+   9. El sistema debe impedir la ejecución si existen errores de configuración contable o tasas nulas.
+
+   10. Los resultados deben actualizar el módulo de depreciación mensual y alimentar los reportes HU-AF-REP-002 y HU-AF-REP-001.
+
+   11. Las diferencias entre cálculo contable y tributario deben mostrarse en reportes de conciliación.
+
+   12. Las ejecuciones masivas deben validarse contra el número total de activos activos en el maestro.
+
+________________
+
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Maestro de Activos (HU-AF-OPE-001)
+	Fuente principal de datos base de los activos.
+	Configuración de Tasas y Métodos (HU-AF-OPE-008)
+	Define las tasas y métodos usados en los cálculos.
+	Matriz Contable (HU-AF-TAB-004)
+	Determina las cuentas de depreciación, gasto y acumulación.
+	Configuración Global (HU-AF-TAB-006)
+	Define periodos contables activos y moneda base.
+	Log de Auditoría Contable
+	Registra todas las ejecuciones y resultados.
+	Reportes de Depreciación (HU-AF-REP-002)
+	Muestra los resultados anuales y acumulados.
+	Módulo Contable General
+	Recibe los asientos automáticos generados al finalizar el cálculo.
+	________________
+
+
+12. Consideraciones Técnicas
+      * Implementación mediante motor batch de cálculo masivo con capacidad de ejecución programada o manual.
+
+      * Cálculo distribuido por bloques de activos, optimizando rendimiento por multihilo.
+
+      * Control visual de barra de progreso (%), con detalle de activos procesados y errores detectados.
+
+      * Registro automático en tabla de logs (AF_LOG_CALC_DEP).
+
+      * Generación de tablas temporales (AF_TMP_DEP_CALC) para revisión antes de contabilizar.
+
+      * Integración mediante API RESTful con contabilidad general y módulo de reportes.
+
+      * Soporte de procesos paralelos por razón social.
+
+      * Capacidad para procesar más de 500,000 activos por ejecución.
+
+      * Alertas visuales y por correo ante finalización exitosa o con errores.
+
+________________
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Solo usuarios con rol “Administrador Contable” o “Supervisor de Procesos” pueden ejecutar.
+	Performance
+	Cálculo masivo ≤ 10 minutos para 100,000 activos.
+	Usabilidad
+	Barra de progreso y mensajes de estado en tiempo real.
+	Auditoría
+	Log detallado con trazabilidad de cálculo, errores y totales.
+	Disponibilidad
+	99.7% en horario operativo.
+	Escalabilidad
+	Capacidad de ejecución paralela multiempresa / multipaís.
+	________________
+
+
+14. Criterios de Aceptación
+         1. El sistema valida correctamente la configuración de cada activo antes de iniciar el cálculo.
+
+         2. Se ejecuta el cálculo de depreciación mensual o anual para todos los activos vigentes.
+
+         3. La distribución por centro de costo se aplica conforme a los porcentajes configurados.
+
+         4. Los resultados se generan en tablas temporales antes de contabilizar.
+
+         5. El usuario puede visualizar una barra de progreso y resumen del proceso.
+
+         6. Los errores y advertencias se registran en el log contable.
+
+         7. El sistema impide la ejecución sobre periodos cerrados.
+
+         8. Los resultados finales coinciden con las tasas, métodos y configuraciones de cada activo.
+
+         9. El reprocesamiento solo se permite con permisos de nivel Supervisor.
+
+         10. Los reportes HU-AF-REP-002 y HU-AF-REP-001 reflejan los resultados correctamente tras la contabilización.
+
+________________
+
+
+15. Comentarios / Observaciones
+            * Esta HU representa el núcleo operativo del módulo de Activos Fijos, centralizando el cálculo contable y tributario de la depreciación.
+
+            * Es un proceso crítico para cierres contables mensuales y anuales, y para el cumplimiento de las NIIF (NIC 16).
+
+            * El log generado debe permitir auditorías técnicas y contables posteriores.
+
+            * Debe mantener consistencia con las HUs:
+
+               * HU-AF-OPE-001 (Registro Principal de Activos Fijos)
+
+               * HU-AF-OPE-008 (Configuración de Tasas y Métodos de Depreciación)
+
+               * HU-AF-REP-002 (Detalle de Cálculos de Depreciación Anual por Activo)
+
+               * HU-AF-TAB-004 (Configuración de Cuentas Contables por Tipo de Activo)
+
+               * HU-AF-TAB-006 (Configuración Global del Módulo)
+
+                  * Se recomienda implementar parámetros de control para ejecución programada automática (ej. el primer día hábil del mes).
+
+                  * La función debe generar alertas de validación previas antes de iniciar el cálculo, para evitar reprocesamientos erróneos.
+
+                  * Esta funcionalidad debe garantizar integridad total de los datos procesados y trazabilidad completa en el log de auditoría.

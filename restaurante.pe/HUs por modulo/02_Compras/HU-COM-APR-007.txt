@@ -1,0 +1,173 @@
+﻿HU-COM-APR-007 - Planificación de Abastecimiento - v1.0
+1. Título
+Planificación de Abastecimiento
+2. Descripción
+Como usuario responsable de compras en Restaurant.pe, quiero planificar el abastecimiento de insumos, materias primas y servicios, con base en la demanda proyectada, niveles de inventario y programación de producción, para asegurar el suministro oportuno y eficiente en todas las sucursales de la razón social.
+3. Proceso
+* Proceso: Operaciones
+
+* Subproceso: Aprovisionamiento
+
+* Módulo: Compras
+
+4. Narrativa de Usuario
+   * Quiero: Generar planes de abastecimiento periódicos (diarios, semanales o mensuales).
+
+   * Para: Garantizar que los insumos requeridos estén disponibles antes de su uso.
+
+   * De manera que: Se reduzcan quiebres de stock, se optimicen los costos de compra y se mejoren los tiempos de reposición.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Compras > Operaciones > Aprovisionamiento > Planificación de Abastecimiento
+6. Criterios de Aceptación
+      1. El sistema debe permitir crear planes de abastecimiento con base en:
+
+         * Consumo histórico.
+
+         * Proyecciones de ventas o producción.
+
+         * Niveles mínimos y máximos de inventario.
+
+            2. El plan debe generarse por razón social, sucursal y almacén.
+
+            3. El sistema debe sugerir cantidades a abastecer considerando el stock actual y los pedidos pendientes.
+
+            4. El usuario podrá ajustar manualmente las cantidades sugeridas antes de confirmar el plan.
+
+            5. El sistema debe permitir guardar versiones del plan y marcarlo como “en revisión” o “validado”.
+
+            6. Desde un plan validado, el usuario debe poder generar solicitudes de aprovisionamiento [a]u órdenes de compra automáticas.
+
+            7. Toda acción (crear, modificar, validar, cerrar) debe registrarse en el log de auditoría contable (usuario, fecha, hora, acción).
+
+            8. El listado debe permitir filtros por periodo, sucursal, estado y tipo de plan.
+
+            9. El sistema debe emitir alertas visuales si los niveles de inventario no cubren la demanda proyectada.
+
+7. Campos del Formulario
+Encabezado del Plan
+               * Número de Plan (autogenerado, correlativo por razón social y sucursal).
+
+               * Fecha de Planificación (obligatorio, default: fecha actual).
+
+               * Periodo del Plan (semanal, mensual, personalizado).
+
+               * Tipo de Plan (insumos, bebidas, materiales, servicios).
+
+               * Responsable (usuario logueado).
+
+               * Almacén (obligatorio, lista desplegable).
+
+               * Estado (En revisión, Validado, Cerrado).
+
+Detalle del Plan de Abastecimiento
+                  * Código del artículo o servicio (obligatorio) opción de selección múltiple.
+
+                  * Descripción (informativo).
+
+                  * Unidad de medida (informativo).
+
+                  * Stock actual (consultado de inventario).
+
+                  * Consumo histórico promedio (calculado). Anexo 1.
+
+                  * Demanda proyectada (editable).
+
+                  * Cantidad sugerida (calculada). Anexo 2. 
+
+                  * Cantidad final planificada (editable).
+
+                  * Observaciones (texto libre).
+
+Totales del Plan (informativo)
+                     * Total de artículos/servicios planificados.
+
+                     * Total estimado de unidades a adquirir.
+
+8. Listado de Planes de Abastecimiento (Vista Tabla)
+Columnas:
+                        * Número de Plan
+
+                        * Fecha
+
+                        * Periodo
+
+                        * Tipo de Plan
+
+                        * Almacén
+
+                        * Estado
+
+                        * Responsable
+
+                        * Total de Ítems
+
+Acciones disponibles: Ver | Editar | Validar |Generar Orden de Compra | Exportar (Excel/PDF)
+Filtros disponibles: Número de Plan | Fecha | Estado | Tipo de Plan | Almacén | Responsable
+9. Consideraciones Técnicas
+                           * El sistema debe integrar datos desde:
+
+                              * Inventarios: niveles actuales y proyecciones de consumo.
+
+                              * Ventas/Producción: pronósticos de demanda.
+
+                              * Compras: órdenes en curso y pendientes.
+
+                                 * Soporte para algoritmos de proyección simples (promedio móvil, consumo histórico) con posibilidad de configuración futura de modelos avanzados.
+
+                                 * Registro de todas las acciones en el log de auditoría contable.
+
+                                 * Exportación de planes en formatos Excel y PDF.
+
+10. Comentarios
+                                    * En entornos multipaís, la planificación debe ajustarse a las políticas locales de abastecimiento y los calendarios de operación.
+
+                                    * El sistema debe permitir definir periodicidades automáticas para regenerar el plan (por ejemplo, cada lunes).
+
+                                    * Se recomienda que el plan pueda alimentar reportes de compras planificadas vs. ejecutadas.
+
+                                    * Este módulo se integra con el flujo de Aprovisionamiento y Órdenes de Compra, generando eficiencia operativa.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ANEXOS
+Anexo 1. Fórmula consumo histórico promedio
+Consumo histórico promedio (CHP) = Suma de consumos del periodo / número de periodos
+
+
+Anexo 2. Fórmula cantidad sugerida
+Cantidad sugerida = (Consumo histórico promedio x Tiempo de reposición o entrega) + Stock de seguridad - Stock actual
+
+
+
+
+[a]solo se generarán órdenes de compra

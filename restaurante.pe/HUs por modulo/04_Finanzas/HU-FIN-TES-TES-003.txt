@@ -1,0 +1,120 @@
+﻿HU-FIN-TES-TES-003 - Cancelación de Varios Documentos de Uno o Varios Proveedores - v1.0
+1. Título
+Cancelación de Varios Documentos de Uno o Varios Proveedores
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero poder realizar la cancelación simultánea de varios documentos pendientes de uno o varios proveedores, utilizando un solo proceso de pago, para optimizar el tiempo de gestión de tesorería y asegurar la correcta actualización contable y financiera.
+3. Proceso
+Proceso: Tesorería
+Subproceso: Tesorería
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Seleccionar múltiples documentos pendientes de pago, correspondientes a uno o varios proveedores, y cancelarlos en una sola operación.
+Para: Agilizar la gestión de pagos y disminuir los tiempos administrativos asociados a la liquidación individual de facturas.
+De manera que: Se mantenga una contabilidad precisa, reflejando correctamente los pagos realizados y las obligaciones liquidadas.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tesorería > Cancelación de Varios Documentos
+6. Criterios de Aceptación
+El sistema debe permitir seleccionar múltiples documentos pendientes de pago (facturas, letras, notas de débito, etc.) desde la lista de Cuentas por Pagar.
+Debe permitir agrupar documentos por proveedor o realizar cancelaciones cruzadas para varios proveedores, siempre que el medio de pago sea el mismo (transferencia, cheque, efectivo, etc.).
+El usuario podrá realizar las siguientes acciones:
+* Seleccionar Documentos Pendientes: Filtros por proveedor, rango de fechas, tipo de documento, moneda o estado.
+
+* Definir Medio de Pago: Caja, banco, transferencia, cheque o efectivo.
+
+* Ejecutar Cancelación: Registrar el pago y generar los asientos contables correspondientes.
+
+* Generar Comprobante de Pago Consolidado: Documento que detalle todos los pagos realizados y los documentos cancelados.
+
+* Consultar Asiento Contable: Ver el asiento generado por la operación consolidada.
+
+El sistema debe generar automáticamente los asientos contables al confirmar la cancelación:
+   * Débito: Cuentas por Pagar – Proveedor(es)
+
+   * Crédito: Caja o Banco
+
+Debe validar que los documentos seleccionados estén en estado Pendiente de Pago y que el usuario cuente con permisos de ejecución.
+Toda cancelación deberá registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción, Proveedor, Documentos afectados, Monto total).
+Solo se mostrarán los documentos correspondientes a la Razón Social y País activos (solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+Columnas principales:
+      * Razón Social (solo lectura)
+
+      * País (solo lectura)
+
+      * Proveedor
+
+      * Tipo de Documento (Factura, Letra, Nota de Débito, etc.)
+
+      * Serie y Número de Documento
+
+      * Fecha de Emisión
+
+      * Fecha de Vencimiento
+
+      * Monto Total
+
+      * Monto Pendiente
+
+      * Moneda
+
+      * Medio de Pago Seleccionado
+
+      * Estado del Documento (Pendiente / Parcial)
+
+      * N° de Asiento Contable
+
+      * Usuario de Registro
+
+      * Observaciones
+
+Filtros disponibles:
+         * Proveedor
+
+         * Tipo de Documento
+
+         * Estado del Documento
+
+         * Rango de Fechas (Emisión / Vencimiento)
+
+         * Moneda
+
+         * Medio de Pago
+
+Acciones disponibles:
+            * Seleccionar Documentos
+
+            * Cancelar Seleccionados
+
+            * Ver Asiento Contable
+
+            * Generar Comprobante Consolidado
+
+            * Exportar (Excel / PDF)
+
+            * Limpiar Filtros
+
+8. Detalle de Integración (opcional)
+Integración con Cuentas por Pagar: Permite obtener la lista de documentos pendientes y actualizarlos como “Pagados” tras la cancelación.
+Integración con Contabilidad: Genera automáticamente los asientos contables de pago consolidado.
+Integración con Bancos y Caja: Registra los movimientos financieros en las cuentas respectivas, actualizando los saldos de tesorería.
+Integración con Reportes Financieros: Refleja los pagos realizados en el flujo de caja, proyecciones y balances.
+9. Consideraciones Técnicas
+El sistema debe soportar cancelaciones en moneda local o extranjera, aplicando el tipo de cambio vigente al momento del pago.
+Debe validar la disponibilidad de fondos en la cuenta o caja seleccionada antes de ejecutar la cancelación.
+Debe permitir la cancelación parcial o total de documentos según necesidad del usuario.
+Las cancelaciones múltiples deben agruparse bajo un único número de comprobante de pago para trazabilidad.
+Cada acción de ejecución, modificación o anulación deberá registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción, Documento, Monto, Estado).
+Debe cumplir con las normas NIC 7 (Flujos de Efectivo) y NIC 1 (Presentación de Estados Financieros).
+10. Comentarios
+Esta funcionalidad optimiza la gestión de tesorería permitiendo realizar pagos masivos de manera controlada y transparente.
+Facilita la conciliación bancaria y reduce la carga operativa al agrupar múltiples cancelaciones bajo una sola operación.
+Se recomienda incluir indicadores de gestión, tales como:
+               * Total de documentos cancelados por periodo.
+
+               * Monto total pagado por proveedor.
+
+               * Número de cancelaciones consolidadas realizadas.
+
+               * Proveedores con mayor concentración de pagos.
+
+Asimismo, se sugiere incorporar alertas automáticas para pagos duplicados y un módulo de autorización de cancelación masiva, que permita supervisión por parte del área de finanzas.

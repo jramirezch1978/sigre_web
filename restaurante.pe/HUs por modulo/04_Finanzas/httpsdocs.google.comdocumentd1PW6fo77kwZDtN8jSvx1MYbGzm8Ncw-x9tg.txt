@@ -1,0 +1,195 @@
+﻿HU-FIN-OPE-004 – Aprobación de Liquidación de Rendición de Gastos
+1. Título
+Aprobación de liquidaciones de rendición de gastos
+________________
+
+
+2. Descripción
+Como usuario aprobador del módulo de Finanzas, quiero revisar, Observar, aprobar  o rechazar las liquidaciones de rendición de gastos registradas por colaboradores o proveedores (boletas, facturas, recibos, tickets), para asegurar que los comprobantes cumplen las normas internas y tributarias, verificar que los montos son correctos, y permitir la regularización del adelanto entregado, manteniendo trazabilidad y control financiero.
+________________
+
+
+3. Proceso
+Proceso: Finanzas
+Subproceso: Rendición de gastos / Caja chica
+Módulo: Finanzas
+________________
+
+
+4. Narrativa de Usuario
+Quiero:
+Validar la información general de la liquidación, revisar los comprobantes adjuntos y los montos reportados, y tomar una decisión (aprobar, rechazar u observar).
+Para:
+Asegurar que el dinero entregado mediante adelanto fue utilizado correctamente y que los gastos cumplen políticas internas y requisitos tributarios.
+De manera que:
+La empresa pueda realizar la regularización contable del adelanto, garantizar la transparencia del gasto y mantener trazabilidad ante auditorías.
+________________
+
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Operaciones > Rendición de gastos > Lista de liquidaciones > Seleccionar > Aprobar / Rechazar / Observar
+________________
+
+
+6. Criterios de Aceptación
+6.1. General
+* El sistema debe permitir visualizar todas las liquidaciones en estado Pendiente, Observada, Aprobada y Rechazada.
+
+* Solo usuarios con rol de aprobador podrán emitir un “Visto Bueno”.
+
+6.2. Validación de Cabecera
+El sistema debe permitir revisar la información registrada:
+   * Fecha de desembolso
+
+   * Tipo de beneficiario (Proveedor / Colaborador)
+
+   * Documento del beneficiario (DNI, RUC, etc.)
+
+   * Beneficiario
+
+   * Centro de costo
+
+   * Moneda
+
+   * Monto del adelanto
+
+   * Tipo de cambio
+
+   * Total gastado
+
+   * Saldo a devolver
+
+
+   * Observaciones
+
+6.3. Validación de Comprobantes
+El sistema debe mostrar la lista de gastos con:
+      * Fecha del gasto
+
+      * Descripción
+      * Tipo de Gasto
+
+      * Tipo de documento
+
+      * Serie y número
+
+      * Proveedor
+
+      * Monto
+
+      * Moneda
+
+Reglas:
+
+         * No se permite aprobar si faltan datos obligatorios.
+
+         * No se podrá aprobar comprobantes duplicados (serie + número + proveedor).
+
+         * La fecha del comprobante no puede ser futura.
+
+         * La moneda debe coincidir con la cabecera o generar advertencia si hay inconsistencia.
+
+6.4. Reglas de Cálculo
+El sistema debe calcular automáticamente:
+            * Total gastado = suma de todos los comprobantes
+
+            * Saldo a devolver = adelanto – total gastado
+
+Debe emitir advertencia si el total gastado excede el adelanto.
+6.5. Aprobación
+Al seleccionar Aprobar:
+               * El estado de la liquidación cambia a Aprobada.
+
+               * La liquidación queda bloqueada para edición.
+
+               * Se registra un log contable con usuario, fecha, hora y acción.
+
+               * Se habilita la generación del asiento contable y el proceso de regularización del adelanto.
+
+6.6. Rechazo
+Al seleccionar Rechazar:
+                  * El sistema debe exigir una justificación obligatoria.
+
+                  * La liquidación cambia a estado Rechazada.
+
+                  * Debe bloquearse para edición.
+
+                  * Se debe notificar al usuario que registró la rendición.
+
+6.7. Observación
+Si el aprobador selecciona Observar:
+                     * Debe ingresar un motivo obligatorio.
+
+                     * El estado cambia a Observada.
+
+                     * La rendición queda nuevamente editable por el usuario que la registró.
+
+6.8. Auditoría
+Todas las acciones deben registrarse en el log de auditoría contable indicando:
+                        * Usuario
+
+                        * Fecha
+
+                        * Hora
+
+                        * Acción (Aprobó / Rechazó / Observó)
+
+                        * Cambios relevantes
+
+________________
+7. Filtros disponibles
+                           * Rango de fechas
+
+                           * Beneficiario
+
+                           * Estado (Pendiente, Observada, Aprobada, Rechazada)
+
+                           * Centro de costo
+
+                           * Moneda
+
+________________
+
+
+8. Acciones Disponibles
+                              * Ver detalle
+
+                              * Revisar adjuntos
+
+                              * Aprobar
+
+                              * Rechazar
+
+                              * Observar
+
+                              * Ver historial de cambios
+
+                              * Exportar lista
+
+                              * Auditar registros
+
+________________
+
+
+9. Integraciones
+                                 * Tesorería: regularización del adelanto/ saldo pendiente.
+
+                                 * Contabilidad: generación automática del asiento contable.
+
+                                 * Documentos electrónicos (SUNAT): validación de series/números si aplica.
+
+                                 * Auditoría: registro de todas las acciones del aprobador.
+
+________________
+
+
+10. Consideraciones Técnicas
+                                    * El estado “Aprobada” bloquea totalmente la edición.
+
+                                    * No se debe aprobar si existe algún comprobante sin adjunto.
+
+                                    * Debe alertar si el total gastado supera el adelanto.
+
+                                    * Todos los cambios deben ser guardados en un log centralizado.
+
+                                    * La aprobación puede activar un flujo de notificaciones.

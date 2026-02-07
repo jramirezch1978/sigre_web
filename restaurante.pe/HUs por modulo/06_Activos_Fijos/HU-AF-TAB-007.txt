@@ -1,0 +1,215 @@
+﻿HU-AF-TAB-007 - Configuración de Secuencias Numéricas para Códigos de Activos - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Tablas
+3. Subproceso
+Numeradores de Activos
+4. Nombre de la Historia de Usuario
+Configuración de Secuencias Numéricas para Códigos de Activos
+5. Descripción / Propósito
+Como Administrador de Activos Fijos, quiero configurar secuencias numéricas automáticas para la generación de códigos únicos de activos fijos, para garantizar la trazabilidad, unicidad y orden lógico de los activos dentro de cada razón social y sucursal, estableciendo prefijos, longitudes, incrementos y rangos controlados que permitan identificar fácilmente el origen, tipo y procedencia del activo dentro del sistema Restaurant.pe.
+6. Alcance
+Esta funcionalidad permite definir las reglas automáticas de numeración utilizadas en la creación de activos fijos dentro del módulo, adaptadas a diferentes estructuras organizacionales (por país, razón social o sucursal).
+La secuencia numérica será utilizada para asignar automáticamente el código único de cada activo en procesos como altas manuales, integraciones desde compras o importaciones masivas.
+La configuración deberá contemplar:
+* Prefijos personalizables por sucursal o tipo de activo.
+
+* Definición de longitud total del código.
+
+* Control de incrementos y rango máximo permitido.
+
+* Reinicio de numeración por periodo (anual, mensual o manual).
+
+* Control de unicidad global del identificador del activo.
+
+7. Navegabilidad
+Ruta de acceso:
+Activos Fijos → Tablas → Numeradores de Activos → Configuración de Secuencias Numéricas
+8. Campos del Formulario
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada automáticamente por la sesión del usuario.
+	País
+	Determinado por la razón social activa.
+	Fecha de Última Actualización
+	Muestra la fecha y hora del último cambio en la configuración.
+	Campos Obligatorios:
+Campo
+	Tipo/ Longitud
+	Descripción
+	Validaciones/ Reglas
+	Código de Configuración
+	Alfanumérico (10)
+	Identificador único del registro de secuencia.
+	Generado automáticamente.
+	Origen/ Sucursal
+	Lista desplegable
+	Define la unidad organizativa a la cual aplica la numeración.
+	Obligatorio. Sin duplicidad por sucursal.
+	Prefijo
+	Texto (5)
+	Letras o siglas que identifican la sucursal o tipo de activo (ej. “LIM”, “BOG”, “EQP”).
+	Obligatorio.
+	Longitud Total del Código
+	Numérico (2)
+	Número total de caracteres (prefijo + secuencia).
+	Rango permitido 6–20.
+	Número Inicial
+	Numérico (10)
+	Valor inicial de la secuencia.
+	Mayor o igual a 1.
+	Número Actual
+	Numérico (10)
+	Valor actual en uso.
+	Se incrementa automáticamente.
+	Incremento Automático
+	Numérico (2)
+	Paso numérico de aumento (por defecto = 1).
+	Obligatorio.
+	Rango Máximo
+	Numérico (10)
+	Límite superior permitido para la secuencia.
+	Debe ser mayor al valor inicial.
+	Formato de Relleno
+	Lista
+	Ninguno / Ceros a la izquierda.
+	Obligatorio.
+	Reinicio de Secuencia
+	Lista
+	Anual / Mensual / Manual / No reiniciar.
+	Obligatorio.
+	Estado
+	Lista (Activo / Inactivo)
+	Define si la configuración está en uso.
+	Por defecto “Activo”.
+	Campos Opcionales:
+Campo
+	Descripción
+	Tipo de Activo Aplicable
+	Permite vincular la numeración a una clase o subclase específica.
+	Observaciones
+	Comentarios sobre la configuración o reglas adicionales.
+	9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo
+	Permite crear una nueva configuración de secuencia.
+	Se guarda registro activo y operativo.
+	Editar
+	Modifica parámetros existentes de la numeración.
+	Actualiza configuración y registra log.
+	Consultar
+	Muestra los datos sin permitir edición.
+	—
+	Desactivar
+	Inhabilita la configuración de numeración.
+	No podrá asignarse en nuevos registros.
+	Reiniciar Secuencia
+	Permite restablecer la numeración al valor inicial configurado.
+	Genera registro de auditoría.
+	Buscar / Filtrar
+	Filtros por sucursal, prefijo o estado.
+	Muestra resultados filtrados.
+	Exportar
+	Exporta configuraciones a Excel o PDF.
+	Incluye todos los campos visibles.
+	10. Reglas de Negocio
+   1. Solo puede existir una secuencia activa por sucursal y tipo de activo.
+
+   2. Los códigos generados deben ser únicos, irrepetibles y auditables a nivel global del sistema.
+
+   3. El campo Número Actual se actualiza automáticamente al generar un nuevo activo.
+
+   4. Si se alcanza el rango máximo, el sistema bloquea nuevas altas y emite alerta al administrador.
+
+   5. El formato del código se genera concatenando:
+Prefijo + Número Correlativo, con longitud y relleno según configuración.
+
+   6. Si el parámetro de reinicio automático está activado, el sistema reinicia la numeración según el periodo configurado.
+
+   7. No se permite editar el prefijo ni el número inicial una vez la secuencia haya sido utilizada.
+
+   8. Las modificaciones deben registrarse en el Log de Auditoría Contable con usuario, fecha, hora y acción.
+
+   9. Los códigos generados deben mantenerse consistentes con los registros de integración desde Compras o Inventarios.
+
+   10. Si una secuencia está inactiva, el sistema no podrá generar códigos para su ámbito configurado.
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Módulo de Altas de Activos
+	Utiliza la numeración configurada para generar el código del activo.
+	Módulo de Compras
+	Aplica la secuencia al registrar activos provenientes de compras.
+	Módulo de Inventarios
+	Valida unicidad de códigos físicos de activos.
+	Log de Auditoría Contable
+	Registra todas las operaciones de creación, edición y reinicio.
+	Módulo de Configuración Global (HU-AF-TAB-006)
+	Hereda parámetros generales (formato de numeración por defecto).
+	12. Consideraciones Técnicas
+      * Implementación mediante API RESTful con servicios CRUD y endpoint para generación automática.
+
+      * Tablas involucradas:
+
+         * AF_CFG_NUMERACION_ACTIVOS
+
+         * AF_MA_ACTIVOS (campo COD_ACTIVO generado).
+
+            * Integración directa con los procesos de alta e importación masiva.
+
+            * Validación en tiempo real de unicidad de código.
+
+            * Registro obligatorio en el Log de Auditoría Contable.
+
+            * Soporte para carga/exportación masiva vía Excel.
+
+            * Control transaccional en la generación del número (lock de concurrencia).
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Solo perfiles con rol “Administrador de Activos” pueden crear o editar secuencias.
+	Performance
+	Tiempo máximo de respuesta en generación de código ≤ 1 segundo.
+	Usabilidad
+	Interfaz con vista jerárquica por sucursal y vista previa del formato generado.
+	Auditoría
+	Registro detallado de cambios y reinicios en log contable.
+	Disponibilidad
+	99.5% en horario operativo.
+	Escalabilidad
+	Soporte para más de 20.000 activos por secuencia configurada.
+	14. Criterios de Aceptación
+               1. El usuario puede crear una secuencia numérica nueva con prefijo, longitud y rango definidos.
+
+               2. El sistema valida la unicidad del código configurado por sucursal.
+
+               3. Al registrar un nuevo activo, se genera automáticamente un código conforme a la configuración.
+
+               4. El incremento del número actual se realiza correctamente sin saltos ni duplicados.
+
+               5. Si se alcanza el rango máximo, el sistema notifica y bloquea el registro.
+
+               6. Las modificaciones y reinicios se registran en el log contable.
+
+               7. La exportación de configuraciones se genera en Excel y PDF.
+
+               8. La respuesta en generación de código no supera los 1–2 segundos.
+
+15. Comentarios / Observaciones
+                  * Esta HU es clave para la trazabilidad del ciclo de vida de los activos, garantizando unicidad de identificación a nivel multipaís y multisucursal.
+
+                  * Los códigos generados deben permitir auditoría contable y física (coincidencia entre el código del sistema y etiquetas físicas).
+
+                  * Se recomienda que la numeración incorpore componentes personalizables, como año fiscal o tipo de activo (ejemplo: “AF-2025-LIM-00045”).
+
+                  * Su diseño debe ser coherente con la configuración general de parámetros del módulo (HU-AF-TAB-006) y las políticas contables establecidas.
+
+                  * La funcionalidad es base para procesos automáticos de integración, especialmente desde los módulos de Compras, Inventarios y Contabilidad.

@@ -1,0 +1,270 @@
+﻿HU-AF-PRO-004 - Contabilización de Ajustes por Inflación - v1.1
+________________
+
+
+1. Módulo
+Activos Fijos
+________________
+
+
+2. Proceso
+Procesos
+________________
+
+
+3. Subproceso
+Generación de Asientos de Indexación
+________________
+
+
+4. Nombre de la Historia de Usuario
+Contabilización de Ajustes por Inflación
+________________
+
+
+5. Descripción / Propósito
+Como Contador General o Administrador Contable de Activos Fijos,
+quiero ejecutar el proceso de contabilización de ajustes por inflación aplicando índices oficiales,
+para actualizar los valores contables de los activos fijos y reflejar en los estados financieros el mantenimiento del poder adquisitivo del capital invertido, generando los asientos contables automáticos de indexación conforme a las normas contables locales e internacionales (NIC 29 y NIC 16).
+________________
+
+
+6. Alcance
+Esta funcionalidad permite realizar ajustes inflacionarios automáticos sobre los valores contables de los activos fijos y su depreciación acumulada, a partir de la aplicación de índices oficiales de inflación emitidos por la autoridad competente de cada país.
+El proceso calcula el efecto inflacionario de los activos al cierre de cada periodo contable, generando automáticamente los asientos contables correspondientes para reflejar la revaluación por inflación o pérdida del valor real del activo.
+El sistema:
+1. Consulta y valida los índices oficiales de inflación.
+
+2. Aplica el factor de ajuste sobre el valor neto contable de cada activo.
+
+3. Calcula la variación y genera los asientos contables correspondientes.
+
+4. Registra los efectos en las cuentas de ajuste por inflación y capital reexpresado.
+
+5. Mantiene trazabilidad y registro de auditoría de cada proceso ejecutado.
+
+________________
+
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Procesos → Generación de Asientos de Indexación → Contabilización de Ajustes por Inflación
+________________
+
+
+8. Campos y Parámetros del Proceso
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada por sesión del usuario.
+	País
+	Determinado según la razón social activa.
+	Periodo Contable
+	Mes y año en curso.
+	Fecha de Ejecución
+	Fecha del proceso.
+	Usuario Ejecutor
+	Usuario autenticado que lanza el proceso.
+	Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Tipo de Proceso
+	Lista
+	Mensual / Trimestral / Anual.
+	Obligatorio.
+	Índice de Inflación Aplicable
+	Numérico (10,6)
+	Factor oficial emitido por entidad reguladora.
+	Obligatorio.
+	Fecha de Referencia
+	Fecha
+	Fecha de corte del índice aplicado.
+	Debe ser ≤ fecha actual.
+	Libro Contable
+	Lista
+	Principal / Tributario.
+	Obligatorio.
+	Tipo de Moneda
+	Lista
+	Soles / Dólares.
+	Moneda base del país.
+	Campos Opcionales:
+Campo
+	Descripción
+	Observaciones
+	Detalle adicional del proceso o índice aplicado.
+	Prefijo de Documento
+	Código identificador del asiento generado.
+	Centro de Costo
+	Aplica si se desea distribuir el efecto por áreas.
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Validar Datos Previos
+	Revisa que todos los activos tengan valor neto vigente y cuentas configuradas.
+	Muestra resumen de validación.
+	Aplicar Índice de Inflación
+	Calcula el valor ajustado aplicando el índice oficial.
+	Muestra resultados por activo.
+	Generar Asientos Contables
+	Crea los asientos de ajuste por inflación y capital reexpresado.
+	Genera registros contables automáticos.
+	Visualizar Log del Proceso
+	Muestra detalle de activos procesados, índices y variaciones.
+	Registro auditable.
+	Exportar Resultados
+	Permite descargar los ajustes en Excel o PDF.
+	Archivo con resultados y asientos generados.
+	Contabilizar en Módulo General
+	Envía los asientos automáticos al sistema contable.
+	Registro definitivo en contabilidad.
+	________________
+
+
+10. Reglas de Negocio
+   1. Solo pueden procesarse activos con valor contable y depreciación acumulada vigente.
+
+   2. El índice de inflación debe estar registrado y aprobado en el sistema antes de ejecutar el proceso.
+
+   3. El cálculo de ajuste aplica sobre el valor neto contable del activo a la fecha seleccionada.
+
+   4. Si el índice de inflación es negativo, el sistema registrará pérdida por reexpresión.
+
+   5. Los asientos generados deben incluir las siguientes cuentas:
+
+      * Cuenta de Ajuste por Inflación del Activo (57xx)
+
+      * Cuenta de Depreciación Ajustada (16xx)
+
+      * Cuenta de Reexpresión del Capital (55xx o 59xx)
+
+      * Cuenta de Efecto Tributario Diferido (47xx)
+
+         6. El sistema debe garantizar que los asientos sean balanceados (débito = crédito).
+
+         7. El proceso debe generar un Log Detallado con índice aplicado, activos afectados, montos y usuario ejecutor.
+
+         8. Los resultados se registran inicialmente como Pre-Asientos, hasta su aprobación o contabilización definitiva.
+
+         9. Los ajustes no pueden ejecutarse sobre periodos contables cerrados.
+
+         10. Los cálculos deben respetar la moneda y tasa de cambio configuradas en la HU-AF-TAB-006 (Configuración Global).
+
+         11. Si un activo fue revaluado en el mismo periodo, se aplicará el índice sobre el valor revaluado.
+
+         12. Los reportes de depreciación deben reflejar los nuevos valores indexados después de la contabilización.
+
+________________
+
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Matriz Contable (HU-AF-TAB-004)
+	Determina las cuentas de ajuste, reexpresión y efecto tributario.
+	Configuración Global (HU-AF-TAB-006)
+	Define el periodo contable activo y la moneda de referencia.
+	Registro Principal de Activos (HU-AF-OPE-001)
+	Proporciona valores originales y netos de los activos.
+	Revaluaciones (HU-AF-OPE-007)
+	Interactúa para determinar base actualizada antes del ajuste inflacionario.
+	Log de Auditoría Contable
+	Guarda trazabilidad del proceso y los asientos generados.
+	Módulo Contable General
+	Recibe y contabiliza los asientos automáticos generados.
+	________________
+
+
+12. Consideraciones Técnicas
+            * Implementación mediante procedimiento almacenado (Stored Procedure) con control de transacciones y rollback ante errores.
+
+            * Proceso optimizado para ejecución masiva y multipaís, según índice oficial configurado por país.
+
+            * Tablas involucradas:
+
+               * AF_IDX_INFLACION (índices oficiales registrados).
+
+               * AF_ASIENTOS_IDX (asientos de ajuste generados).
+
+               * AF_LOG_IDX (registro de ejecución).
+
+                  * Integración mediante API RESTful con módulo contable general.
+
+                  * Validaciones previas automáticas de cuentas contables y periodos.
+
+                  * Generación de archivos PDF y Excel con detalles por activo, monto ajustado y cuenta afectada.
+
+                  * Capacidad para procesar hasta 500,000 activos por ejecución.
+
+                  * Control visual del proceso con barra de progreso (%), resumen de totales y errores detectados.
+
+________________
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles “Administrador Contable” y “Supervisor de Activos”.
+	Performance
+	Procesamiento ≤ 6 minutos para 100,000 activos.
+	Usabilidad
+	Interfaz con validaciones visuales, barra de progreso y mensajes claros.
+	Auditoría
+	Registro completo de índices aplicados, usuario y montos ajustados.
+	Disponibilidad
+	99.7% durante horario operativo.
+	Escalabilidad
+	Ejecución paralela multiempresa / multipaís.
+	________________
+
+
+14. Criterios de Aceptación
+                     1. El sistema valida la existencia y vigencia del índice de inflación.
+
+                     2. Se generan correctamente los ajustes por inflación para los activos vigentes.
+
+                     3. Los asientos contables incluyen las cuentas correctas y cuadran entre débito y crédito.
+
+                     4. El log de proceso registra todos los detalles (usuario, fecha, índice, activos procesados, montos).
+
+                     5. Los resultados pueden visualizarse, exportarse y auditarse antes de contabilizar.
+
+                     6. El proceso no permite ejecución sobre periodos cerrados.
+
+                     7. Los valores ajustados se reflejan correctamente en los reportes de activos y depreciación.
+
+                     8. El tiempo de ejecución cumple los parámetros de performance establecidos.
+
+________________
+
+
+15. Comentarios / Observaciones
+                        * Esta HU permite mantener la consistencia del valor real de los activos ante escenarios inflacionarios, asegurando que los estados financieros reflejen su poder adquisitivo actualizado.
+
+                        * Cumple con las disposiciones de la NIC 29 y NIC 16, según la normativa contable de cada país donde opera Restaurant.pe.
+
+                        * Garantiza integración automática con contabilidad general, eliminando ajustes manuales y asegurando trazabilidad completa.
+
+                        * Debe mantener coherencia con las HUs:
+
+                           * HU-AF-PRO-001 (Proceso Masivo de Cálculo de Depreciación)
+
+                           * HU-AF-PRO-002 (Creación Automática de Asientos Contables por Depreciación)
+
+                           * HU-AF-PRO-003 (Contabilización Automática de Procesos de Revaluación)
+
+                           * HU-AF-TAB-004 (Configuración de Cuentas Contables por Tipo de Activo)
+
+                           * HU-AF-TAB-006 (Configuración Global del Módulo)
+
+                              * Se recomienda incorporar una opción de “Simulación de Ajuste” para revisar impactos contables antes de contabilizar.
+
+                              * El proceso debe permitir registro de índices históricos, para mantener evidencia documental ante auditorías externas.

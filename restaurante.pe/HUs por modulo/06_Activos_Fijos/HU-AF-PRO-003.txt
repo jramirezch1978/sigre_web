@@ -1,0 +1,293 @@
+﻿HU-AF-PRO-003 - Contabilización Automática de Procesos de Revaluación - v1.1
+________________
+
+
+1. Módulo
+Activos Fijos
+________________
+
+
+2. Proceso
+Procesos
+________________
+
+
+3. Subproceso
+Generación de Asientos de Revaluación
+________________
+
+
+4. Nombre de la Historia de Usuario
+Contabilización Automática de Procesos de Revaluación
+________________
+
+
+5. Descripción / Propósito
+Como Contador General o Administrador de Activos Fijos,
+quiero generar automáticamente los asientos contables derivados de procesos de revaluación técnica o comercial de activos,
+para reflejar correctamente en la contabilidad los incrementos o decrementos de valor, los ajustes en depreciación acumulada y los efectos de superávit o pérdida por revaluación, garantizando la integridad contable y cumplimiento con la NIC 16 y la normativa tributaria aplicable.
+________________
+
+
+6. Alcance
+Esta funcionalidad permite transformar los resultados de una revaluación técnica o comercial (HU-AF-OPE-007) en asientos contables automáticos, integrados directamente con el Módulo de Contabilidad General.
+El proceso genera de manera controlada los registros contables que reflejan los cambios en el valor del activo y en su depreciación acumulada, así como el tratamiento del superávit o pérdida, tanto contable como tributario.
+El proceso:
+1. Valida la existencia y aprobación del proceso de revaluación.
+
+2. Lee los nuevos valores revaluados y la depreciación ajustada.
+
+3. Calcula la diferencia de valor y su efecto en cuentas contables.
+
+4. Genera asientos automáticos de:
+
+   * Incremento del valor del activo.
+
+   * Ajuste a la depreciación acumulada.
+
+   * Registro del superávit por revaluación o pérdida por desvalorización.
+
+   * Efectos tributarios diferidos (si aplica).
+
+      5. Registra el asiento en estado pendiente o contabilizado.
+
+      6. Almacena la trazabilidad completa en el Log Contable.
+
+________________
+
+
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Procesos → Generación de Asientos de Revaluación → Contabilización Automática
+________________
+
+
+8. Campos y Parámetros de Ejecución
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada por la sesión activa.
+	País
+	Determinado automáticamente.
+	Fecha de Ejecución
+	Fecha actual del proceso.
+	Usuario Ejecutor
+	Usuario responsable del proceso.
+	Periodo Contable
+	Mes y año activos según configuración global.
+	Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Tipo de Revaluación
+	Lista
+	Técnica / Comercial (Índice Oficial).
+	Obligatorio.
+	Origen de Datos
+	Lista
+	Registro de Revaluaciones Aprobadas (HU-AF-OPE-007).
+	Debe existir al menos un registro aprobado.
+	Fecha Contable
+	Fecha
+	Fecha efectiva de contabilización.
+	No anterior al periodo activo.
+	Tipo de Moneda
+	Lista
+	Soles / Dólares.
+	Moneda base de la razón social.
+	Libro Contable
+	Lista
+	Principal / Tributario.
+	Obligatorio.
+	Campos Opcionales:
+Campo
+	Descripción
+	Prefijo de Documento
+	Código que identificará el asiento generado.
+	Centro de Costo
+	Permite asignar la afectación de gasto si aplica.
+	Observaciones
+	Texto libre con detalles de la operación.
+	________________
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Validar Datos Previos
+	Verifica que las revaluaciones estén aprobadas y tengan cuentas asociadas.
+	Muestra validación exitosa o lista de errores.
+	Ejecutar Contabilización Automática
+	Genera los asientos contables según las diferencias de valor.
+	Crea registros en el módulo contable.
+	Visualizar Log de Proceso
+	Muestra detalle de registros procesados y errores.
+	Log con resultado del proceso.
+	Revisar Pre-Asientos
+	Permite validar montos y cuentas antes de contabilizar.
+	Vista previa contable.
+	Contabilizar en Módulo General
+	Envío automático al módulo contable principal.
+	Registros contabilizados.
+	Exportar Resultados
+	Exporta los asientos generados a Excel o PDF.
+	Archivo descargable.
+	Reprocesar Asiento
+	Permite regenerar asientos si hubo ajustes en valores.
+	Nueva ejecución controlada.
+	________________
+
+
+10. Reglas de Negocio
+         1. Solo se pueden contabilizar revaluaciones con estado “Aprobado” en HU-AF-OPE-007.
+
+         2. Cada asiento debe registrar referencias cruzadas al activo y al proceso de revaluación.
+
+         3. Los asientos se generan balanceados (débito = crédito).
+
+         4. El sistema debe validar que existan cuentas contables configuradas en la Matriz Contable (HU-AF-TAB-004) para:
+
+            * Cuenta de activo fijo (57xx).
+
+            * Cuenta de depreciación acumulada (16xx).
+
+            * Cuenta de superávit por revaluación (57xx).
+
+            * Cuenta de pérdida por desvalorización (67xx).
+
+            * Cuenta de impuesto diferido (37xx o 47xx).
+
+               5. Si el resultado de la revaluación es negativo, se genera asiento de pérdida por desvalorización.
+
+               6. Las diferencias contables y tributarias se reflejan en columnas separadas del asiento.
+
+               7. Los valores deben expresarse en moneda local y registrarse con precisión de dos decimales.
+
+               8. Los asientos se crean inicialmente en estado “Pendiente” hasta la contabilización definitiva.
+
+               9. Todo proceso genera registro en el Log de Auditoría Contable (usuario, fecha, activo, valores, cuentas).
+
+               10. Si se detectan errores contables (cuentas no configuradas o montos inválidos), el proceso no debe continuar.
+
+               11. Las cuentas contables usadas deben estar activas en el plan de cuentas vigente.
+
+               12. Los montos de superávit deben consolidarse por clase de activo para reportes financieros.
+
+________________
+
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Revaluación Técnica y Comercial (HU-AF-OPE-007)
+	Fuente de los valores y diferencias generadas.
+	Matriz Contable (HU-AF-TAB-004)
+	Define las cuentas contables aplicables.
+	Configuración Global (HU-AF-TAB-006)
+	Controla periodos y moneda contable activa.
+	Log de Auditoría Contable
+	Registra la trazabilidad completa de cada asiento generado.
+	Módulo Contable General
+	Recibe los asientos automáticos para su contabilización.
+	Reportes Financieros
+	Reflejan el impacto del superávit o pérdida por revaluación.
+	________________
+
+
+12. Consideraciones Técnicas
+                  * Implementación mediante procedimiento almacenado (Stored Procedure) con validación transaccional y rollback ante error.
+
+                  * Integración mediante API RESTful con el módulo contable general.
+
+                  * Registro automático en tablas:
+
+                     * AF_REVALUACIONES (origen de datos).
+
+                     * AF_ASIENTOS_REV (asientos generados).
+
+                     * AF_LOG_REV (log de ejecución).
+
+                        * Control visual del proceso: barra de progreso, resumen de montos, número de registros procesados.
+
+                        * Ejecución programada o manual según configuración global.
+
+                        * Validación previa de cuentas activas en la Matriz Contable.
+
+                        * Generación automática de archivos de exportación (Excel / PDF).
+
+                        * Soporte para procesamiento multiempresa y multipaís.
+
+                        * Manejo de tipos de cambio contable y tributario.
+
+________________
+
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles “Administrador Contable” y “Supervisor de Activos”.
+	Performance
+	Generación ≤ 5 minutos para 50,000 activos revaluados.
+	Usabilidad
+	Interfaz con barra de progreso y mensajes de validación claros.
+	Auditoría
+	Log completo con detalle de cuentas, montos y usuarios.
+	Disponibilidad
+	99.7% en horario operativo.
+	Escalabilidad
+	Soporte para ejecuciones simultáneas multiempresa.
+	________________
+
+
+14. Criterios de Aceptación
+                           1. El sistema solo contabiliza revaluaciones con estado “Aprobado”.
+
+                           2. Los asientos generados incluyen las cuentas contables correctas según la Matriz Contable.
+
+                           3. Se reflejan los movimientos de:
+
+                              * Incremento de valor del activo.
+
+                              * Ajuste de depreciación acumulada.
+
+                              * Superávit o pérdida por revaluación.
+
+                              * Efectos tributarios diferidos.
+
+                                 4. Los montos cuadran entre débito y crédito.
+
+                                 5. El sistema genera y registra correctamente el log de ejecución.
+
+                                 6. Los asientos pueden visualizarse y exportarse antes de contabilizar.
+
+                                 7. El proceso se completa dentro del tiempo de performance establecido.
+
+                                 8. Los reportes contables reflejan el impacto de la revaluación tras contabilizar.
+
+________________
+
+
+15. Comentarios / Observaciones
+                                    * Esta HU garantiza la automatización completa del ciclo contable de revaluación, desde el registro hasta la contabilización final.
+
+                                    * Cumple con la NIC 16 y normas tributarias locales, asegurando la correcta presentación del superávit o pérdida por revaluación.
+
+                                    * Refuerza la integración entre Activos Fijos y Contabilidad General, eliminando tareas manuales.
+
+                                    * Debe mantener coherencia con las HUs:
+
+                                       * HU-AF-OPE-007 (Revaluación Técnica y Comercial de Activos)
+
+                                       * HU-AF-TAB-004 (Configuración de Cuentas Contables por Tipo de Activo)
+
+                                       * HU-AF-TAB-006 (Configuración Global de Parámetros del Módulo)
+
+                                       * HU-AF-PRO-002 (Creación Automática de Asientos por Depreciación)
+
+                                          * Se recomienda incluir validación de superávit acumulado disponible y alertas tributarias automáticas.
+
+                                          * Este proceso constituye un pilar crítico para auditorías contables, garantizando trazabilidad y consistencia del patrimonio empresarial.

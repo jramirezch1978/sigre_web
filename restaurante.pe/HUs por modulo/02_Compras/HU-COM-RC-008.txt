@@ -1,0 +1,137 @@
+﻿HU-COM-RC-008 - Lista de Compras Procesadas - v1.0
+1. Título
+Lista de Compras Procesadas
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero consultar y descargar la lista de compras procesadas dentro de un periodo determinado, para analizar el comportamiento de las adquisiciones, validar su integración contable y generar reportes de gestión consolidados por proveedor, sucursal o centro de costo.
+3. Proceso
+* Proceso: Reportes
+
+* Subproceso: Reportes de Compras
+
+* Módulo: Compras
+
+4. Narrativa de Usuario
+   * Quiero: Visualizar un reporte consolidado de todas las compras procesadas.
+
+   * Para: Controlar las órdenes de compra ejecutadas, verificar la recepción de bienes y servicios, y revisar el impacto contable de las operaciones.
+
+   * De manera que: Se facilite el seguimiento, auditoría y análisis de compras en cada razón social.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Compras > Reportes > Lista de Compras Procesadas
+6. Criterios de Aceptación
+      1. El sistema debe mostrar todas las compras procesadas (órdenes de compra y órdenes de servicio aprobadas y registradas).
+
+      2. El reporte debe poder filtrarse por fecha, proveedor, sucursal, tipo de documento, usuario, y estado contable.
+
+      3. Debe incluir tanto compras locales como importadas, diferenciando tipo de moneda y tipo de cambio aplicado.
+
+      4. El sistema debe permitir exportar el reporte en formatos Excel y PDF.
+
+      5. Cada registro debe mostrar la trazabilidad completa: orden de compra → recepción → factura → registro contable.
+
+      6. Las columnas deben poder ordenarse y agruparse dinámicamente por el usuario.
+
+      7. Los registros deben reflejar la información actualizada de integración con contabilidad (estado: pendiente, registrado, contabilizado).
+
+      8. Toda consulta y exportación debe registrarse en el log de auditoría contable (usuario, fecha, hora, acción).
+
+      9. El reporte debe estar disponible por razón social y sucursal, según los permisos del usuario logueado.
+
+      10. El sistema debe permitir configurar reportes programados automáticos (diarios/semanales/mensuales) enviados por correo.
+
+7. Campos del Reporte / Columnas de Vista Tabla
+Columnas principales:
+         * Número de Documento (Orden de Compra / Orden de Servicio)
+
+         * Fecha de Emisión
+
+         * Razón Social de Proveedor
+
+         * RUC / NIT
+
+         * Tipo de Documento (Factura, Boleta, Nota, etc.)
+
+         * Número de Comprobante
+
+         * Fecha de Registro
+
+         * Moneda
+         * Base Imponible 
+         * Valor Inafecto
+         * Valor Adq. No Gravadas
+         * IGV
+         * Otros Gastos ICBPER
+
+         * Importe Total
+         * Tipo de Cambio
+
+         * Estado Contable (Pendiente, Registrado, Contabilizado)
+
+         * Usuario Responsable
+
+         * Sucursal
+
+         * Centro de Costo
+
+Filtros disponibles:
+            * Rango de Fechas
+
+            * Razón Social de Proveedor
+
+            * Estado Contable
+
+            * Sucursal
+
+            * Centro de Costo
+
+            * Moneda
+
+            * Usuario
+
+            * Tipo de Documento
+
+Acciones disponibles:
+               * Exportar (Excel / PDF)
+
+               * Agrupar por proveedor o sucursal
+
+               * Programar envío automático[a][b][c]
+
+8. Detalle de Integración (opcional)
+                  * Permitir acceso al detalle del documento (clic en número de orden → abre vista de detalle con información de proveedor, ítems, facturas y asientos contables).
+
+                  * Desde el reporte, debe ser posible revisar el asiento contable asociado (si aplica).
+
+9. Consideraciones Técnicas
+                     * Integración con los módulos:
+
+                        * Compras: para obtener órdenes de compra y órdenes de servicio procesadas.
+
+                        * Contabilidad: para mostrar el estado de contabilización.
+
+                        * Finanzas: para validar pagos o compromisos registrados.
+
+                           * Las consultas deben realizarse mediante filtros dinámicos optimizados para grandes volúmenes de datos.
+
+                           * Las acciones deben registrarse en el log de auditoría contable.
+
+
+10. Comentarios
+                              * En escenarios multipaís, el reporte debe mostrar los valores en moneda local y moneda base corporativa (ejemplo: USD).
+
+                              * Se debe permitir consolidar la información de todas las sucursales de una misma razón social.
+
+                              * Este reporte será la base para los indicadores de gestión de compras (KPI: monto mensual, top de proveedores, variación de costos).
+
+                              * Debe incluir una funcionalidad de descarga rápida para usuarios con permisos de auditoría o gerencia.
+
+                              * Las consultas pueden almacenarse como vistas personalizadas para reutilización frecuente.
+
+
+
+[a]@consultorexterno1@restaurant.pe @igarcia@restaurant.pe 
+Brindar mayor detalle de la funcionalidad de envío automático.
+_Asignada a consultorexterno1@restaurant.pe_
+[b]Automatizar el envío por correo del reporte de compras realizadas en un periodo determinado que se pueda configurar (Ej. Reporte mensual cada fin de mes)
+[c]Agregar el detalle brindado en el documento, así mismo, indicar si los correos estarán configurados, o lo extrae de algún dato que alguna HU haga referencia, así como detallar los campos que conformen la vista de configuración del envío automático.

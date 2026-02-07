@@ -1,0 +1,254 @@
+﻿HU-CON-032 – Reporte Detallado de Pre Asientos – v1.0
+________________
+
+
+1. Identificación General
+Código HU: HU-CON-032
+Versión: 1.0
+Fecha: 31/10/2025
+Módulo: Contabilidad
+Subproceso: Reportes Contables
+Proceso: Contabilidad General
+Nombre de la Funcionalidad: Reporte Detallado de Pre Asientos
+Tipo: Reporte Contable
+Autor: Redactor de HU – Sistema Contable Multipaís
+________________
+
+
+2. Descripción General
+El sistema debe permitir la generación de un Reporte Detallado de Pre Asientos Contables, el cual muestre toda la información relevante de los pre asientos generados automática o masivamente por otros módulos o procesos (Compras, Ventas, Almacén, RRHH, Activos Fijos, Importaciones de Pre Asientos).
+El reporte debe permitir visualizar el detalle del pre asiento antes de ser confirmado y convertido en asiento contable final, con el fin de que los usuarios puedan realizar validaciones, verificaciones, correcciones o ajustes previos.
+Este reporte forma parte del flujo de control interno que permite evitar errores contables antes de ejecutar procesos de contabilización.
+________________
+
+
+3. Actor(es)
+* Contador General
+
+* Asistente Contable
+
+* Auditor Interno
+
+* Administrador Contable
+
+________________
+
+
+4. Precondiciones
+   * El usuario debe tener permisos para acceder al menú:
+Contabilidad → Reportes → Pre Asientos → Reporte Detallado de Pre Asientos.
+
+   * Deben existir pre asientos generados por procesos automáticos o importaciones.
+
+   * La Razón Social y País están definidos por la sesión activa (solo lectura).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Pre Asientos → Reporte Detallado de Pre Asientos
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero generar un reporte detallado de los pre asientos contables registrados por los diferentes módulos del sistema,
+para validar su consistencia y verificar que los valores, cuentas, glosas y parámetros sean correctos antes de convertirlos a asientos contables definitivos.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado esperado
+	1
+	Permitir aplicar filtros avanzados
+	El usuario puede filtrar por fecha, módulo origen, tipo de documento, número de pre asiento, estado y usuario creador.
+	2
+	El reporte debe mostrar encabezado y detalle del pre asiento
+	Se debe mostrar información contable completa de cada ítem.
+	3
+	Validar que el reporte muestre diferencias en Debe/Haber
+	Se deben resaltar pre asientos descuadrados.
+	4
+	Permitir exportar a Excel y PDF
+	El usuario puede descargar el reporte.
+	5
+	Mostrar totales por Debe y Haber
+	Se deben calcular totales por pre asiento.
+	6
+	El reporte no debe permitir editar
+	Solo visualización, exportación y validación.
+	7
+	Incluir trazabilidad
+	Mostrar usuario, origen y fecha de registro.
+	8
+	Incluir glosas de pre asiento y glosas del detalle
+	Ambas deben mostrarse.
+	
+
+8. Requisitos Funcionales
+8.1 Filtros del Reporte
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Fecha Desde
+	Fecha
+	Sí
+	Fecha inicial del rango.
+	Fecha Hasta
+	Fecha
+	Sí
+	Fecha final del rango.
+	Módulo Origen
+	Lista
+	No
+	Compras, Ventas, Almacén, RRHH, Activos Fijos, Importaciones.
+	Tipo de Documento
+	Lista
+	No
+	Según catálogo del módulo origen.
+	Número de Documento
+	Texto
+	No
+	Permite buscar un pre asiento puntual.
+	Número de Pre Asiento
+	Texto
+	No
+	Identificador interno.
+	Estado del Pre Asiento
+	Lista
+	No
+	Generado, Observado, Listo para Contabilizar, Error.
+	Usuario Registrador
+	Lista
+	No
+	Filtrar por el usuario que generó el pre asiento.
+	Razón Social / País
+	Informativo
+	No
+	Determinado por la sesión.
+	________________
+
+
+8.2 Columnas del Reporte – Encabezado
+Campo
+	Descripción
+	Nro. Pre Asiento
+	Código único del pre asiento.
+	Fecha
+	Fecha del pre asiento.
+	Módulo Origen
+	Módulo que generó el pre asiento.
+	Tipo Documento
+	Código del documento origen.
+	Número Documento
+	Identificación del documento origen.
+	Glosa General
+	Descripción general del pre asiento.
+	Usuario Registro
+	Usuario que generó el pre asiento.
+	Estado
+	Estado del pre asiento.
+	________________
+
+
+8.3 Columnas del Reporte – Detalle del Pre Asiento
+Campo
+	Descripción
+	Ítem
+	Secuencia del asiento.
+	Cuenta Contable
+	Código de cuenta.
+	Descripción de la Cuenta
+	Nombre de la cuenta.
+	Centro de Costo
+	Centro de costo aplicado (si corresponde).
+	Debe
+	Importe en debe.
+	Haber
+	Importe en haber.
+	Moneda
+	Moneda del registro.
+	T.C.
+	Tipo de cambio aplicado.
+	Glosa Detalle
+	Glosa del ítem.
+	Documento Referencia
+	Tipo y número de documento si corresponde.
+	Proveedor / Cliente
+	Código relacionado si aplica.
+	________________
+
+
+8.4 Funcionalidades
+      * Generación del reporte en pantalla.
+
+      * Resaltado automático de pre asientos descuadrados.
+
+      * Totales por Debe y Haber por cada pre asiento.
+
+      * Botones:
+
+         * Exportar Excel
+
+         * Exportar PDF
+
+         * Imprimir
+
+            * Permitir ampliar/colapsar detalle del pre asiento.
+
+________________
+
+
+9. Reglas de Negocio
+               1. Un pre asiento se considera descuadrado cuando Debe ≠ Haber.
+
+               2. Los pre asientos provenientes de procesos automáticos no pueden editarse desde esta pantalla.
+
+               3. Los pre asientos observados deben aparecer resaltados para facilitar su identificación.
+
+               4. La información del reporte debe ser trazable y sin posibilidad de edición.
+
+               5. La Razón Social y País están fijados por la sesión del usuario.
+
+________________
+
+
+10. Integraciones
+                  * Compras: pre asientos de facturas, notas de crédito, órdenes.
+
+                  * Ventas: pre asientos de boletas y facturas.
+
+                  * Almacén: pre asientos por movimientos de inventario.
+
+                  * RRHH: pre asientos de planillas.
+
+                  * Activos Fijos: depreciación, altas, bajas.
+
+                  * Módulo de Importación de Pre Asientos.
+
+________________
+
+
+11. Aspectos Técnicos
+                     * El reporte consulta las tablas de pre asientos (CNTBL_ASIENTO_PRE, CNTBL_ASIENTO_PRE_DET o equivalentes del diseño final).
+
+                     * Se debe implementar paginación para evitar cargas pesadas.
+
+                     * La exportación debe respetar formato tabular.
+
+                     * Registro en log para generación del reporte: usuario, fecha y parámetros usados.
+
+________________
+
+
+12. Mensajes del Sistema
+                        * “No se encontraron pre asientos con los filtros seleccionados.”
+
+                        * “Debe seleccionar un rango de fechas válido.”
+
+                        * “Reporte generado correctamente.”
+
+                        * “Este pre asiento presenta diferencias entre Debe y Haber.”

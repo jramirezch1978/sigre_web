@@ -1,0 +1,192 @@
+﻿HU-AF-TAB-001- Maestro de Compañías Aseguradoras para Gestión de Pólizas - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Tablas
+3. Subproceso
+Aseguradores
+4. Nombre de la Historia de Usuario
+Maestro de Compañías Aseguradoras para Gestión de Pólizas
+5. Descripción / Propósito
+Como Analista Contable de Activos Fijos,
+quiero mantener un registro maestro de compañías aseguradoras con información legal, comercial y de contacto,
+para facilitar la gestión, trazabilidad y vinculación automática de pólizas de seguros en el módulo de Activos Fijos, asegurando que las pólizas asociadas a activos estén correctamente vinculadas a su entidad aseguradora, según las normas contables y de control interno vigentes.
+6. Alcance
+Esta funcionalidad forma parte del subproceso Aseguradores dentro del módulo Activos Fijos, y permite administrar una base de datos centralizada y multipaís de compañías aseguradoras, con operaciones disponibles de alta, edición, consulta y desactivación.
+Los datos registrados se integran automáticamente con el módulo de Pólizas, desde el cual podrán ser seleccionados para asignar seguros a los activos registrados en el sistema.
+El mantenimiento de esta información se realiza a nivel de Razón Social activa, pero mantiene compatibilidad multipaís conforme a la configuración global de Restaurant.pe.
+ 
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Tablas → Aseguradores → Maestro de Compañías Aseguradoras
+8. Campos del Formulario
+(*) Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Código de Aseguradora
+	Alfanumérico (10)
+	Identificador único de la aseguradora.
+	No duplicado. No editable tras creación. Generado automáticamente si no se ingresa.
+	Razón Social
+	Texto (100)
+	Nombre legal de la aseguradora.
+	Campo obligatorio. Sin duplicidad por país.
+	RUC / NIT / ID Fiscal
+	Texto (20)
+	Identificación tributaria.
+	Validar formato según país. Debe ser único.
+	Dirección Fiscal
+	Texto (150)
+	Domicilio legal.
+	Obligatorio.
+	Teléfono Principal
+	Numérico (15)
+	Contacto telefónico principal.
+	Validar formato (prefijo + número).
+	Correo de Contacto
+	Email (100)
+	Correo institucional de contacto.
+	Validar estructura de email.
+	Contacto Principal
+	Texto (100)
+	Persona de contacto responsable.
+	Obligatorio.
+	Condiciones Comerciales
+	Texto largo
+	Detalle de plazos, comisiones y coberturas.
+	Campo obligatorio, editable en cualquier momento.
+	Estado
+	Lista (Activo / Inactivo)
+	Situación operativa de la aseguradora.
+	Por defecto “Activo”.
+	Campos Opcionales:
+Campo
+	Descripción
+	Página Web
+	Enlace informativo de la aseguradora.
+	Observaciones
+	Notas internas del usuario sobre la relación comercial.
+	
+
+
+
+
+
+
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo
+	Crea un nuevo registro de aseguradora.
+	Se guarda en estado Activo y queda disponible para el módulo de Pólizas.
+	Editar
+	Permite modificar datos comerciales y de contacto.
+	Actualización registrada en log contable.
+	Desactivar
+	Cambia el estado de la aseguradora a Inactivo.
+	No puede ser usada en nuevas pólizas, pero se conserva para historial.
+	Buscar / Filtrar
+	Búsqueda por Razón Social, ID Fiscal, País o Estado.
+	Muestra lista filtrada según criterios.
+	Exportar
+	Genera listado de las Pólizas en Excel o PDF.
+	Incluye filtros aplicados y campos visibles.
+	
+
+
+
+
+
+10. Reglas de Negocio
+1. Una aseguradora en estado Inactivo no podrá seleccionarse para registrar nuevas pólizas.
+
+2. Los registros no pueden eliminarse, solo desactivarse para conservar trazabilidad histórica.
+
+3. El Código de Aseguradora es único dentro de cada país.
+
+4. No se permite duplicar aseguradoras con el mismo RUC/NIT dentro de la misma razón social.
+
+5. Toda creación, modificación o desactivación se registrará automáticamente en el Log de Auditoría Contable (usuario, fecha, hora, acción, razón social).
+
+6. La modificación de Razón Social o ID Fiscal requerirá confirmación de usuario y quedará registrada con observación.
+
+7. La sincronización con el Módulo de Pólizas se realizará en tiempo real, garantizando disponibilidad inmediata en los formularios de pólizas.
+
+8. En caso de empresas multipaís, los formatos de identificación fiscal se validarán de acuerdo con la normativa del país configurado (por ejemplo: RUC en Perú, NIT en Colombia, RNC en República Dominicana).
+
+9. Si una aseguradora tiene pólizas activas, su estado no podrá cambiar a “Inactivo” sin confirmación explícita del usuario administrador.
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Gestión de Pólizas de Activos Fijos
+	El listado de aseguradoras estará disponible como catálogo para selección en pólizas.
+	Log de Auditoría Contable
+	Registro automático de todas las operaciones CRUD
+Crear (Create), Leer (Read), Actualizar (Update) y Eliminar (Delete)
+	Catálogo de Países y Parámetros Fiscales
+	Valida el formato del RUC/NIT según país.
+	Gestor de Seguridad y Roles
+	Controla acceso por perfil (solo usuarios con permisos de mantenimiento de tablas de Activos Fijos).
+	12. Consideraciones Técnicas (Dev)
+   * Se implementará mediante servicios RESTful con operaciones CRUD completas.
+
+   * Los datos se almacenarán en la tabla AF_MA_ASEGURADORAS, relacionada con AF_POL_POLIZAS mediante clave foránea.
+
+   * Deberá soportar carga masiva mediante plantilla Excel validada.
+
+   * La interfaz incluirá paginación, búsqueda dinámica y validación en tiempo real.
+
+   * Integración con módulo de auditoría centralizada para trazabilidad multipaís.
+
+   * Se debe garantizar consistencia de datos al replicarse en entornos de backup contable.
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles con permiso “Administrador AF – Tablas”.
+	Performance
+	Tiempo de respuesta máximo de 3 segundos en consultas filtradas.
+	Disponibilidad
+	99.5% en horario operativo.
+	Usabilidad
+	Interfaz coherente con diseño de tablas de Activos Fijos (colores, estructura, botones).
+	Auditoría
+	Registro obligatorio en log por cada acción (Alta, Edición, Inactivación).
+	Escalabilidad
+	Soporte para más de 5.000 aseguradoras registradas por país.
+	
+
+14. Criterios de Aceptación
+      1. El sistema permite crear una nueva aseguradora completando todos los campos obligatorios.
+
+      2. Se valida duplicidad de RUC/NIT y Razón Social por país.
+
+      3. Las modificaciones quedan registradas en el log contable con usuario, fecha y descripción de cambio.
+
+      4. Al intentar desactivar una aseguradora con pólizas vigentes, el sistema solicita confirmación.
+
+      5. El módulo de Pólizas muestra la aseguradora recién creada en el listado de selección.
+
+      6. Los reportes y exportaciones reflejan la información actualizada.
+
+      7. No es posible eliminar registros.
+
+      8. El tiempo de respuesta de búsqueda es menor a 3 segundos.
+
+________________
+
+
+15. Comentarios / Observaciones
+         * Esta HU se considera fundamental para la gestión integral de activos asegurados dentro de Restaurant.pe.
+
+         * Permite asegurar la trazabilidad de los activos y sus coberturas por aseguradora, cumpliendo con los requerimientos de auditoría financiera.
+
+         * Debe mantenerse coherencia visual y funcional con las demás tablas maestras del módulo de Activos Fijos.
+
+         * Las pruebas funcionales deben realizarse con aseguradoras de diferentes países para validar las reglas multipaís.

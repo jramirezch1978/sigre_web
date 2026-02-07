@@ -1,0 +1,137 @@
+﻿HU-ALM-OP-TRA-002 - Despacho de Productos Vendidos a Cliente o Entregados a Áreas Internas para Consumo - v1.0
+1. Título
+ Despacho de productos vendidos a un cliente o insumos entregados a un área interna para consumo
+2. Descripción
+ Como usuario del sistema Restaurant.pe, quiero registrar el despacho de productos vendidos a un cliente o la entrega de insumos a un área interna para su consumo, con el fin de mantener actualizado el inventario, garantizar la trazabilidad de las salidas de almacén y asegurar que las entregas se realicen conforme a los documentos de venta o solicitudes internas autorizadas.
+3. Proceso
+ Proceso: Operaciones
+Subproceso: Traslados
+Módulo: Almacén
+4. Narrativa de Usuario
+ Quiero: Registrar y controlar las salidas de productos desde el almacén, ya sea por ventas a clientes o por consumo interno de áreas operativas.
+Para: Mantener la coherencia entre las existencias físicas y los registros del sistema, además de asegurar que las salidas estén debidamente autorizadas y documentadas.
+De manera que: Se reduzcan errores en los despachos, se mantenga la trazabilidad de los movimientos de inventario y se reflejen correctamente las disminuciones de stock en tiempo real.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Almacén > Operaciones > Traslados > Despacho de Productos / Consumo Interno
+6. Criterios de Aceptación
+ El sistema debe permitir:
+* Registrar el tipo de despacho: por venta a cliente o por entrega a área interna.
+
+* Seleccionar el documento fuente (factura, boleta, pedido interno o solicitud de materiales).
+
+* Mostrar el detalle de los artículos con cantidades y ubicaciones en almacén.
+
+* Validar que los artículos existan en stock y en cantidad suficiente.
+
+* Registrar la cantidad despachada por artículo.
+
+* Generar un documento de salida de almacén vinculado al documento de origen.
+
+* Permitir registrar observaciones o incidencias durante el despacho (faltantes, sobrantes, sustituciones).
+
+* En caso de entregas internas, permitir seleccionar el área o departamento solicitante.
+
+* Actualizar automáticamente el Kardex valorizado y el saldo de inventario.
+
+* Generar el comprobante de salida con la información del despacho (número, fecha, usuario, cliente/área, productos).
+
+* Registrar el movimiento en el log de auditoría contable y operativa (usuario, fecha, hora, IP).
+
+* Permitir exportar el registro de despachos en PDF y Excel.
+
+* Integrarse con los módulos de Ventas, Producción y Finanzas, según el tipo de movimiento.
+
+7. Campos del Reporte / Columnas de Vista Tabla
+ Campos principales:
+   * Tipo de Despacho (Venta / Consumo Interno)
+
+   * Número de Documento Fuente (Factura / Pedido Interno)
+
+   * Fecha de Despacho
+
+   * Cliente o Área Interna
+
+   * Código de Artículo
+
+   * Descripción del Artículo
+
+   * Unidad de Medida
+
+   * Cantidad Solicitada
+
+   * Cantidad Despachada
+
+   * Diferencia (en unidades y %)
+
+   * Almacén de Origen
+
+   * Responsable del Despacho
+
+   * Estado (Pendiente / Despachado / Parcial)
+
+   * Usuario que Registró
+
+   * Observaciones
+
+Filtros disponibles:
+      * Tipo de Despacho
+
+      * Estado del Despacho
+
+      * Rango de Fechas
+
+      * Cliente o Área Interna
+
+      * Almacén de Origen
+
+      * Usuario
+
+Acciones disponibles:
+         * Registrar Despacho (nivel: por documento fuente)
+
+         * Validar Stock (nivel: por ítems), esta acción permite validar en tiempo real si hay stock disponible de cada producto por despachar en el almacén seleccionado.
+
+         * Editar Despacho (nivel: por documento fuente)
+
+         * Confirmar Despacho (nivel: por documento fuente) esta acción culmina el ciclo operativo del despacho, al ejecutar esta acción el sistema actualiza el inventario y el registra el movimiento real en el sistema.
+
+         * Generar Comprobante de Salida (nivel: por documento fuente) esta acción permite emitir un documento que respalda la salida del producto del almacén, se obtiene un comprobante oficial o interno de salida vinculado al despacho
+
+         * Ver Kardex (nivel: por ítems)
+
+         * Exportar (Excel / PDF) (nivel: por documento fuente o general filtros por fecha, cliente, área, usuario)
+
+         * Ver Log de Auditoría (nivel: por documento fuente)
+
+8. Detalle de Integración (opcional)
+ Integración con Ventas: para obtener las facturas o pedidos de venta y registrar la salida de los productos vendidos.
+Integración con Producción: para registrar la entrega de insumos o materiales a las áreas de consumo interno.
+Integración con Finanzas: para reflejar el impacto contable de las salidas y su relación con la facturación.
+Integración con Kardex e Inventarios: para actualizar automáticamente las existencias y valorizaciones.
+9. Consideraciones Técnicas
+ El sistema debe validar que:
+            * El documento fuente esté autorizado y pendiente de despacho.
+
+            * Existe suficiente stock disponible antes de confirmar la salida.
+
+            * Las diferencias en cantidades o sustituciones quedan registradas con motivo y responsable.
+
+            * Las salidas afectan tanto el inventario físico como contable.
+
+            * Solo usuarios con permisos específicos pueden editar o anular un despacho confirmado.
+
+            * El documento de salida se genere con numeración correlativa y trazabilidad completa.
+
+            * Toda la información se registra en el log de auditoría para control interno.
+
+10. Comentarios
+ Esta funcionalidad garantiza el control del flujo de productos e insumos que salen del almacén, ya sea por ventas o por consumo interno.
+Permite mantener actualizado el inventario en tiempo real, reduce errores de despacho y mejora la trazabilidad operativa.
+Se recomienda incluir indicadores de gestión como:
+               * Porcentaje de despachos completos sin diferencias.
+
+               * Tiempo promedio entre autorización y despacho.
+
+               * Control de consumo por área interna.
+
+Asimismo, puede configurarse para emitir alertas automáticas cuando el stock de un artículo esté por debajo del nivel mínimo o cuando se detecten diferencias entre lo solicitado y lo despachado.

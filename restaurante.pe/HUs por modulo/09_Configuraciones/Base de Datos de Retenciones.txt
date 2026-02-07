@@ -1,0 +1,194 @@
+﻿Base de Datos de Retenciones
+Módulo: Configuraciones
+Proceso: Localización
+Subproceso: Contable
+________________
+
+
+1. Descripción
+Como Administrador Contable / Contador de la Empresa, quiero configurar y administrar una base de datos de retenciones fiscales genéricas, precargadas según el país de operación, para que el sistema pueda aplicar automáticamente las retenciones correctas en compras, pagos y planillas, garantizando cumplimiento fiscal, correcta contabilización y escalabilidad para distintos países de LATAM.
+________________
+
+
+2. Contexto y Alcance Funcional
+* La funcionalidad opera exclusivamente a nivel de Compañía.
+* Una Cuenta puede tener múltiples compañías, pero:
+   * Cada compañía tiene su propio catálogo de retenciones, asociado a su país.
+* El sistema provee:
+   * Un catálogo base de retenciones por país, cargado automáticamente.
+   * Capacidad de editar o ampliar dicho catálogo por compañía.
+* El catálogo:
+   * Usa terminología fiscal genérica.
+   * No contiene nombres rígidos de impuestos locales.
+* Para gestionar retenciones de otra compañía, el usuario debe cambiar la compañía activa en la sesión, tal como en Odoo.
+________________
+
+
+3. Navegabilidad
+Configuraciones > Localización > Contable > Retenciones
+📌 La información mostrada corresponde únicamente a la compañía y país activos.
+________________
+
+
+4. Catálogo de Retenciones
+4.1 Catálogo Base por País
+* Al crear una compañía o definir su país:
+   * El sistema precarga automáticamente el catálogo base de retenciones correspondiente a ese país.
+* El catálogo base:
+   * Varía según el país de operación.
+   * Se marca con origen “Sistema”.
+   * Es completamente editable por el usuario.
+      Ejemplo de comportamiento:
+* Compañía con país Perú → se muestran solo retenciones del país Perú.
+* Compañía con el país Colombia → se muestra su catálogo correspondiente.
+________________
+
+
+4.2 Listado de Retenciones
+Campo
+	Tipo
+	Descripción
+	Código de retención
+	Texto
+	Código normativo o interno
+	Descripción
+	Texto
+	Concepto legal
+	Valor
+	Porcentaje
+	Valor configurado
+	Acciones disponibles
+* Nuevo
+* Modificar
+* Activar / Desactivar
+* Guardar / Cancelar
+________________
+
+
+5. Vista: Datos de la Retención (Crear / Editar)
+Esta vista se abre al seleccionar Nuevo o Modificar.
+________________
+
+
+5.1 Datos Generales de la Retención
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Código fiscal
+	Texto
+	Sí
+	Código normativo o interno
+	Estado
+	Checkbox
+	Sí
+	Activa / Inactiva
+	Descripción
+	Texto largo
+	Sí
+	Concepto de la retención
+	Porcentaje
+	Numérico
+	Sí
+	Valor base (≥ 0)
+	Reglas
+* Si el porcentaje es variable, puede modificarse en el documento.
+* Si no, el valor es fijo.
+________________
+
+
+5.3 Cuentas Contables Asociadas
+Campo
+	Tipo
+	Obligatorio
+	Uso
+	Cuenta contable cargo – Operaciones de entrada
+	Select
+	Condicional
+	Retenciones practicadas
+	Cuenta contable abono – Operaciones de salida
+	Select
+	Condicional
+	Retenciones recibidas
+	* Las cuentas pertenecen al plan contable de la compañía activa.
+* Al menos una cuenta contable debe estar configurada.
+________________
+
+
+5.4 Acciones de la Vista
+* Guardar
+* Cancelar
+* Activar / Desactivar
+________________
+
+
+6. Uso Transversal de las Retenciones
+Las retenciones configuradas pueden aplicarse en:
+* Compras (facturas, pagos a proveedores)
+* Pagos y liquidaciones
+* Ventas (retenciones practicadas por terceros)
+* Planillas / RR.HH. (retenciones laborales y aportes)
+* Recibos por honorarios
+
+El sistema:
+   * Calcula automáticamente el importe retenido.
+   * Ajusta el monto neto del documento.
+   * Genera los asientos contables correspondientes.
+________________
+
+
+7. Implicaciones Contables
+   * Las retenciones generan obligaciones fiscales por pagar o compensar.
+   * Se contabilizan automáticamente en las cuentas configuradas.
+   * No pueden aplicarse en períodos contables cerrados.
+   * Cambios en la configuración:
+   * No afectan documentos históricos.
+   * Se reflejan en:
+   * Libros contables
+   * Reportes fiscales
+   * Declaraciones tributarias por país
+________________
+
+
+8. Reglas de Negocio
+   * RN-01: Toda compañía inicia con un catálogo base de retenciones según su país.
+
+   * RN-02: El catálogo base puede editarse o eliminarse.
+
+   * RN-03: No se muestran retenciones de otros países.
+
+   * RN-04: Una retención en uso no puede eliminarse.
+
+   * RN-05: Las retenciones son exclusivas por compañía y país.
+
+   * RN-06: Al menos una cuenta contable es obligatoria.
+
+   * RN-07: El tipo de retención define su uso en módulos.
+
+   * RN-08: Retenciones inactivas no se aplican a nuevos documentos.
+
+________________
+
+
+9. Campos Obligatorios y Validaciones
+      * Código fiscal de cada retención es y será único por compañía + país.
+      * Descripción obligatoria.
+      * Porcentaje ≥ 0.
+      * Validación de cuentas contables existentes.
+      * Control de permisos contables.
+________________
+
+
+10. Criterios de Aceptación
+      * Se carga automáticamente el catálogo por país al crear la compañía.
+      * El usuario puede editar, activar/desactivar o crear retenciones.
+      * El listado varía según el país de la compañía activa.
+      * Las retenciones se aplican correctamente en documentos.
+      * La contabilidad se genera correctamente.
+      * La solución es multipaís y escalable.
+________________
+
+
+11. Flujos
+Guiarse de:
+FLUJOS DE RETENCIONES

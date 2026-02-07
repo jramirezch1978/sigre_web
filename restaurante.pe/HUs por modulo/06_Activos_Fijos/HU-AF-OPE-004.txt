@@ -1,0 +1,217 @@
+﻿HU-AF-OPE-004 - Registro de Operaciones Especiales sobre Activos - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Operaciones
+3. Subproceso
+Operaciones con Activos
+4. Nombre de la Historia de Usuario
+Registro de Operaciones Especiales sobre Activos
+5. Descripción / Propósito
+Como Administrador Contable de Activos Fijos, quiero registrar y controlar las operaciones especiales que afectan el valor contable o la clasificación de los activos, para mantener actualizada la base depreciable, reflejar correctamente los cambios en valor y estructura de los activos, y garantizar la trazabilidad de las operaciones contables extraordinarias, conforme a la NIC 16 – Propiedades, Planta y Equipo.
+6. Alcance
+La funcionalidad permite gestionar operaciones no recurrentes o especiales sobre activos fijos ya registrados, que generan impacto directo en su valor contable, clasificación o vida útil.
+Se incluyen las siguientes categorías de operación:
+* Revaluaciones técnicas: Ajustes de valor por peritaje técnico o tasación.
+
+* Indexaciones por inflación: Ajustes automáticos según índices de precios oficiales.
+
+* Mejoras capitalizables: Incorporación de gastos adicionales que aumentan la vida útil o valor.
+
+* Cambios de clasificación: Reclasificación de clase/subclase de activo por reubicación funcional o contable.
+Cada operación conserva su trazabilidad mediante documentos de respaldo, control de fecha, usuario y efecto contable en la base depreciable.
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Operaciones → Operaciones con Activos → Registro de Operaciones Especiales
+8. Campos del Formulario
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada automáticamente según la sesión activa.
+	País
+	Determinado según la razón social.
+	Código de Activo
+	Código único del activo (según numerador de activos).
+	Descripción del Activo
+	Nombre o descripción del activo seleccionado.
+	Valor Neto Actual
+	Valor contable del activo antes de la operación.
+	Vida Útil Restante
+	En años o meses.
+	Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Tipo de Operación
+	Lista
+	Revaluación / Indexación / Mejora Capitalizable 
+	Obligatorio.
+	Fecha de Operación
+	Fecha
+	Fecha efectiva de la operación.
+	No posterior al cierre contable.
+	Monto de Operación
+	Numérico (15,2)
+	Valor de ajuste o incremento.
+	Puede ser positivo o negativo según tipo.
+	Moneda
+	Lista
+	Moneda en la que se registra el ajuste.
+	Debe coincidir con moneda del activo.
+	Documento de Referencia
+	Texto (30)
+	Número de informe, tasación o documento respaldo.
+	Obligatorio.
+	Descripción / Motivo
+	Texto largo
+	Detalle técnico o contable de la operación.
+	Obligatorio.
+	Responsable
+	Usuario
+	Persona que registra la operación.
+	Validar rol autorizado.
+	Estado
+	Lista
+	Registrado / Validado / Contabilizado.
+	Flujo controlado.
+	Campos Opcionales:
+Campo
+	Descripción
+	Tasa de Indexación (%)
+	Para operaciones de ajuste inflacionario.
+	Nueva Vida Útil (Años)
+	En caso de mejoras capitalizables.
+	Nueva Clase / Subclase
+	En caso de cambio de clasificación.
+	Observaciones
+	Comentarios adicionales o notas contables.
+	9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo
+	Permite crear una nueva operación especial.
+	Se registra el movimiento con estado “Registrado”.
+	Editar
+	Permite modificar antes de validar.
+	Actualiza los campos y registra log.
+	Validar
+	Confirma revisión contable antes del asiento.
+	Cambia estado a “Validado”.
+	Contabilizar
+	Genera asiento automático en contabilidad.
+	Estado pasa a “Contabilizado”.
+	Anular
+	Cancela la operación antes de contabilización.
+	Mantiene registro histórico.
+	Buscar / Filtrar
+	Filtra operaciones por tipo, activo o fecha.
+	Muestra resultados filtrados.
+	Exportar
+	Exporta reporte a Excel o PDF.
+	Incluye campos y estados.
+	10. Reglas de Negocio
+   1. Cada operación debe estar asociada a un activo activo y depreciable.
+
+   2. No se permite registrar operaciones con fecha posterior al cierre contable del periodo.
+
+   3. Las operaciones de revaluación deben aumentar o disminuir el valor neto del activo según el monto indicado.
+
+   4. Las mejoras capitalizables incrementan el valor neto y actualizan la base depreciable y la vida útil.
+
+   5. Las indexaciones se aplican sobre el valor neto y actualizan automáticamente la depreciación acumulada.
+
+   6. Los cambios de clasificación deben estar validados contra el catálogo jerárquico (HU-AF-TAB-003).
+
+   7. Toda operación debe generar un registro en el Log de Auditoría Contable con detalle del usuario, fecha, acción y monto.
+
+   8. Solo los usuarios con rol “Administrador Contable de Activos” pueden validar o contabilizar operaciones.
+
+   9. Las operaciones contabilizadas no pueden editarse ni eliminarse.
+
+   10. El sistema debe recalcular la depreciación futura en base al nuevo valor o vida útil resultante.
+
+   11. Los montos y documentos de respaldo son obligatorios para operaciones de revaluación o mejora.
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Maestro de Activos (HU-AF-OPE-001)
+	Actualiza valores contables y base depreciable.
+	Matriz Contable (HU-AF-TAB-004)
+	Define las cuentas afectadas en cada tipo de operación.
+	Módulo Contable General
+	Recibe asientos automáticos de las operaciones.
+	Log de Auditoría Contable
+	Registra todas las acciones ejecutadas.
+	Configuración Global (HU-AF-TAB-006)
+	Determina parámetros contables, monedas y métodos de depreciación.
+	Reportes Financieros de Activos
+	Refleja los valores ajustados tras la operación.
+	12. Consideraciones Técnicas
+      * Implementación con interfaz web de formulario único dividido por tipo de operación (tabs o secciones dinámicas).
+
+      * Integración vía API RESTful con los módulos de contabilidad y depreciación.
+
+      * Tablas principales:
+
+         * AF_OP_ESPECIALES (registro principal).
+
+         * AF_HIS_OP_ESPECIALES (historial y trazabilidad).
+
+            * Cálculo automático de nueva base depreciable.
+
+            * Generación de asientos contables automáticos y reversión de depreciación cuando aplique.
+
+            * Validación de roles y bloqueos por periodo contable cerrado.
+
+            * Registro automático en Log de Auditoría Contable.
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles contables y auditores.
+	Performance
+	Registro o validación en ≤ 3 segundos.
+	Usabilidad
+	Interfaz dinámica con validaciones contextuales por tipo de operación.
+	Auditoría
+	Registro obligatorio de cada cambio con trazabilidad completa.
+	Disponibilidad
+	99.5% en horario operativo.
+	Escalabilidad
+	Soporte para más de 50.000 operaciones anuales.
+	
+
+14. Criterios de Aceptación
+               1. El usuario puede registrar una operación especial con todos los campos obligatorios.
+
+               2. El sistema valida el tipo de operación y actualiza automáticamente los valores del activo.
+
+               3. La contabilización genera asiento contable automático.
+
+               4. No se permiten operaciones con fecha fuera del periodo contable abierto.
+
+               5. Las mejoras capitalizables ajustan la vida útil y el valor neto.
+
+               6. Las revaluaciones registran correctamente el incremento o disminución contable.
+
+               7. Los rechazos o anulaciones conservan su registro histórico.
+
+               8. Todas las acciones quedan registradas en el Log Contable.
+
+               9. El proceso de validación y contabilización se completa en ≤ 3 segundos.
+
+15. Comentarios / Observaciones
+                  * Esta HU representa un proceso contable clave para el cumplimiento de las NIIF y normativas tributarias locales, asegurando el reflejo fiel del valor contable de los activos.
+
+                  * Permite mantener actualizada la base depreciable y la clasificación contable del activo en función de eventos extraordinarios.
+
+                  * Se recomienda incluir una opción de simulación antes de contabilizar, para verificar el impacto contable y de depreciación.
+
+                  * El diseño de esta funcionalidad debe mantener coherencia visual con la HU HU-AF-OPE-001 (Registro Principal de Activos Fijos).
+
+                  * Las operaciones especiales deben reflejarse automáticamente en los reportes de movimientos contables y revaluaciones.
+
+                  * Es una funcionalidad crítica para auditorías financieras y revisiones técnicas patrimoniales.

@@ -1,0 +1,130 @@
+﻿HU-FIN-TES-TES-004 - Registro de Pagos y Anticipos Efectuados a Proveedores - v1.0
+1. Título
+Registro de Pagos y Anticipos Efectuados a Proveedores
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero registrar los pagos y anticipos efectuados a proveedores, de forma manual o automática, para mantener un control exacto de los desembolsos y su correcta imputación contable, garantizando la trazabilidad y conciliación de las operaciones de tesorería.
+3. Proceso
+Proceso: Tesorería
+Subproceso: Tesorería
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Registrar pagos y anticipos realizados a proveedores mediante diferentes medios de pago.
+Para: Controlar los desembolsos efectuados, mantener actualizadas las cuentas por pagar y reflejar correctamente los movimientos financieros.
+De manera que: La contabilidad refleje en tiempo real los pagos efectuados, los saldos pendientes y los anticipos disponibles para aplicar en futuras facturas.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tesorería > Registro de Pagos y Anticipos a Proveedores
+6. Criterios de Aceptación
+El sistema debe permitir registrar manualmente o de forma automática (desde programación de pagos) los pagos y anticipos realizados a proveedores.
+Debe ofrecer opciones para seleccionar el proveedor, el tipo de documento a cancelar o anticipar, la cuenta contable de pago y el medio de pago (efectivo, transferencia, cheque, tarjeta, etc.).
+El usuario podrá realizar las siguientes acciones:
+* Registrar Pago: Asociar el pago a uno o varios documentos pendientes del proveedor.
+
+* Registrar Anticipo: Registrar un pago sin documento asociado, que podrá aplicarse posteriormente a facturas del mismo proveedor.
+
+* Aplicar Anticipo: Aplicar el anticipo a documentos por pagar futuros.
+
+* Consultar Asiento Contable: Visualizar el asiento generado por el pago o anticipo.
+
+* Anular o Revertir Pago: Permitir la anulación de un pago siempre que no esté conciliado o aplicado.
+
+El sistema debe generar automáticamente los asientos contables correspondientes:
+   * Pago de Documento:
+
+      * Débito: Cuentas por Pagar – Proveedor
+
+      * Crédito: Caja o Banco
+
+         * Anticipo:
+
+            * Débito: Anticipos a Proveedores
+
+            * Crédito: Caja o Banco
+
+Debe validar que el monto del pago o anticipo no supere el saldo disponible en la cuenta seleccionada.
+Toda transacción deberá registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción, Proveedor, Documento, Monto, Estado).
+Solo se permitirán registros asociados a la Razón Social y País activos en sesión (solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos principales:
+
+               * Proveedor
+
+               * Tipo de Registro (Pago / Anticipo)
+
+               * Tipo de Documento (Factura, Letra, Nota de Débito, etc.)
+
+               * Serie y Número de Documento (opcional para anticipos)
+
+               * Fecha del Pago / Anticipo
+
+               * Monto Total
+
+               * Moneda
+
+               * Tipo de Cambio
+
+               * Medio de Pago (Transferencia, Cheque, Efectivo, Tarjeta, etc.)
+
+               * Cuenta Contable de Pago
+
+               * Estado (Pendiente / Aplicado / Anulado)
+
+               * N° de Asiento Contable
+
+               * Observaciones
+
+               * Usuario de Registro
+
+Filtros disponibles:
+                  * Proveedor
+
+                  * Tipo de Registro (Pago / Anticipo)
+
+                  * Estado del Registro
+
+                  * Rango de Fechas
+
+                  * Medio de Pago
+
+                  * Moneda
+
+                  * Sucursal / Local
+
+Acciones disponibles:
+                     * Registrar Pago
+
+                     * Registrar Anticipo
+
+                     * Aplicar Anticipo
+
+                     * Ver Asiento Contable
+
+                     * Anular Registro
+
+                     * Exportar (Excel / PDF)
+
+                     * Limpiar Filtros
+
+8. Detalle de Integración (opcional)
+Integración con Cuentas por Pagar: Actualiza los documentos cancelados y registra los anticipos como saldo a favor del proveedor.
+Integración con Contabilidad: Genera automáticamente los asientos contables asociados al pago o anticipo.
+Integración con Bancos y Caja: Registra el movimiento financiero y actualiza los saldos disponibles.
+Integración con Reportes Financieros: Refleja los pagos y anticipos en el flujo de caja, balances y conciliaciones.
+9. Consideraciones Técnicas
+El sistema debe permitir registrar pagos y anticipos en moneda local o extranjera, aplicando el tipo de cambio oficial.
+Debe validar la disponibilidad de fondos antes de confirmar el registro.
+Los pagos y anticipos deberán tener un número de comprobante único para trazabilidad.
+Toda acción de registro, modificación o anulación deberá quedar registrada en el log de auditoría contable.
+El sistema debe cumplir con las normas NIC 7 (Flujos de Efectivo), NIC 21 (Efectos de las Variaciones en las Tasas de Cambio) y NIC 37 (Provisiones y Pasivos Contingentes).
+10. Comentarios
+Esta funcionalidad permite un control integral de los pagos y anticipos efectuados a proveedores, garantizando la consistencia entre Tesorería, Cuentas por Pagar y Contabilidad.
+Facilita la conciliación bancaria y mejora la planificación de egresos, aportando a una gestión de liquidez más eficiente.
+Se recomienda incluir indicadores de gestión, tales como:
+                        * Total de pagos y anticipos efectuados por periodo.
+
+                        * Anticipos pendientes de aplicación.
+
+                        * Monto total de pagos por proveedor.
+
+                        * Porcentaje de pagos realizados en efectivo vs. bancarizados.
+
+Asimismo, se sugiere habilitar alertas automáticas para anticipos no aplicados después de un tiempo determinado y reportes automáticos de pagos efectuados por día o semana.

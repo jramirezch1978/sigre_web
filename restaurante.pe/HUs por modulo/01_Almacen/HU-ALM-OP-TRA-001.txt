@@ -1,0 +1,135 @@
+﻿HU-ALM-OP-TRA-001 - Almacenamiento de Mercaderías Provenientes de Órdenes de Compra con Validación de Entregas del Proveedor - v1.0
+1. Título
+ Almacenamiento de Mercaderías Provenientes de Órdenes de Compra con Validación de Entregas del Proveedor 
+2. Descripción
+ Como usuario del sistema Restaurant.pe, quiero registrar el almacenamiento de las mercaderías que provienen de órdenes de compra, validando que lo entregado por el proveedor coincida con lo solicitado y lo facturado, para asegurar la correcta recepción de bienes, evitar diferencias de inventario y garantizar la trazabilidad entre compras, almacén y contabilidad.
+3. Proceso
+ Proceso: Operaciones
+Subproceso: Traslados
+Módulo: Almacén
+4. Narrativa de Usuario
+ Quiero: Registrar en el sistema el ingreso de mercaderías provenientes de órdenes de compra, validando la coincidencia entre lo solicitado, lo entregado y lo facturado.
+Para: Garantizar que los registros de inventario reflejen fielmente las existencias recibidas y asegurar la concordancia con la documentación del proveedor.
+De manera que: Se mantenga un control preciso sobre las recepciones, se reduzcan discrepancias y se fortalezca la trazabilidad contable y operativa del proceso de compra.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > Almacén > Operaciones > Traslados > Recepción de Mercaderías de Orden de Compra
+6. Criterios de Aceptación
+ El sistema debe permitir:
+* Seleccionar una orden de compra aprobada y pendiente de recepción.
+* La persona responsable de la recepción de mercadería debe (Almacen o Compras) deben cargar al sistema el XML o PDF de la factura recibida, para la posterior revisión de Contabilidad. 
+
+* Mostrar el detalle de los artículos solicitados, cantidades, precios y condiciones de entrega.
+
+* Registrar la cantidad efectivamente entregada por el proveedor.
+
+* Validar automáticamente que lo entregado coincida con lo solicitado y lo facturado.
+
+* Alertar al usuario si existe diferencia entre lo pedido, entregado o facturado. Deberá salir una ventana emergente que existe diferencia entre la Orden de Compra, factura o conteo físico; también deberá enviarse un E-mail al jefe de almacén, jefe de compras, Administrador; para que se revise y corrija. 
+
+* Permitir el registro parcial de entregas cuando existan pendientes por recibir.
+
+* Actualizar el stock del almacén receptor al confirmar el almacenamiento.
+
+* Generar automáticamente el documento de entrada de almacén vinculado a la orden de compra y factura del proveedor.
+
+* Registrar en el log de auditoría contable las acciones de recepción, validación y confirmación (usuario, fecha, hora, IP).
+
+* Bloquear la recepción si el documento del proveedor presenta inconsistencias tributarias o precios no coincidentes.
+
+* Permitir exportar el registro de recepción en formatos PDF y Excel.
+
+* Asociar automáticamente los movimientos de entrada con el Kardex valorizado.
+
+7. Campos del Reporte / Columnas de Vista Tabla
+ Campos principales:
+
+
+
+   * Número de Orden de Compra
+
+   * Proveedor
+
+   * Fecha de Orden
+
+   * Fecha de Recepción
+
+   * Código de Artículo
+
+   * Descripción del Artículo
+
+   * Unidad de Medida
+
+   * Cantidad Solicitada
+
+   * Cantidad Entregada
+
+   * Cantidad Facturada
+
+   * Diferencia (en unidades y %)
+
+   * Almacén de Destino
+
+   * Estado de Recepción (Parcial / Total)
+
+   * Número de Factura Proveedor
+
+   * Usuario que Registró
+
+   * Observaciones
+
+Filtros disponibles:
+      * Proveedor
+
+      * Estado de Recepción
+
+      * Rango de Fechas
+
+      * Número de Orden de Compra
+
+      * Almacén de Destino
+
+      * Usuario que Registró
+
+Acciones disponibles:
+         * Registrar Recepción
+
+         * Validar Recepción vs Factura (Se debe validar que la OC y la facturación coincida) 
+
+         * Editar Registro de Recepción (Si se equivoca contando e ingresando una información errada al sistema, se debe poder editar para evitar diferencias). 
+
+         * Confirmar Almacenamiento (Muestra todas las compras cuya mercadería ha sido recibida físicamente, pero que aún no ha sido ingresada o almacenada en el sistema. Facilita el control de los productos pendientes de ubicación en el almacén, evitando diferencias entre el stock físico y el stock en sistema.)
+
+         * Ver Kardex Asociado
+
+         * Exportar (Excel / PDF)
+
+         * Ver Log de Auditoría
+
+8. Detalle de Integración (opcional)
+ Integración con Compras: para obtener los datos de la orden de compra y validar los artículos y cantidades autorizadas.
+Integración con Finanzas / Cuentas por Pagar: para enlazar las facturas de proveedores con las recepciones y evitar pagos por productos no entregados.
+Integración con Contabilidad: para generar automáticamente los asientos contables de entrada de almacén y actualización de inventarios.
+Integración con Kardex: para actualizar el registro de movimientos y valoraciones del inventario.
+9. Consideraciones Técnicas
+ El sistema debe validar que la orden de compra esté aprobada y vigente antes de permitir la recepción.
+Debe manejar diferencias de cantidades o precios y registrar automáticamente las observaciones.
+El almacenamiento debe afectar el stock físico y contable en tiempo real.
+Las validaciones deben realizarse mediante comparación tripartita (orden - entrega - factura).
+El sistema debe bloquear la confirmación de recepción si la factura no está vinculada o no coincide en valor total.
+Las recepciones deben poder revertirse sólo mediante autorización y dejando traza en el log.
+Se podrá revertir un ingreso si es que el personal de almacén se equivoca con el ingreso de un proveedor por otro.
+Debe existir una pestaña de revertir o reversar ingreso al almacén, esta función permitirá revertir un ingreso por error al seleccionar un proveedor, cantidad o producto. 
+
+
+Toda la información debe mantenerse trazable por orden, factura, proveedor y almacén.
+10. Comentarios
+ Esta funcionalidad es clave para mantener la integridad de la cadena de abastecimiento y garantizar la trazabilidad entre los módulos de Compras, Almacén y Finanzas.
+Permite reducir pérdidas por errores de recepción, controlar diferencias entre lo pedido y lo recibido, y mejorar la eficiencia operativa en la gestión de inventarios.
+Se recomienda incorporar indicadores KPI como:
+            * Porcentaje de recepciones con diferencias.
+
+            * Tiempo promedio de validación de entregas.
+
+            * Nivel de cumplimiento de proveedores (cantidad y valor).
+
+Asimismo, se sugiere habilitar alertas automáticas cuando existan diferencias superiores a un umbral definido o cuando se intente registrar una recepción sin factura asociada.

@@ -1,0 +1,166 @@
+﻿HU-FIN-ADL-004 - Cierre de Liquidación de Órdenes de Giro - v1.0
+1. Título
+ Cierre de Liquidación de Adelantos
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero realizar el cierre contable y financiero de las liquidaciones de adelantos aprobadas, con el fin de consolidar la información de gastos, devoluciones o saldos pendientes, y reflejar su impacto definitivo en las cuentas contables, asegurando el cumplimiento de los procesos de control interno y las normas contables aplicables.
+3. Proceso
+Proceso: Adelantos
+Subproceso: Solicitud de Adelantos
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Ejecutar el cierre de una liquidación de adelanto previamente aprobada.
+Para: Confirmar la contabilización definitiva de los movimientos asociados y liberar los saldos de adelantos pendientes.
+De manera que: Se mantenga la integridad contable y financiera del sistema, garantizando que todas las liquidaciones cerradas estén completas, auditadas y reflejadas correctamente en los reportes financieros.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Adelantos > Solicitud de Adelantos > Cierre de Liquidación
+6. Criterios de Aceptación
+* El sistema debe mostrar todas las liquidaciones con estado “Aprobada” o “Pendiente de Cierre”.
+
+* El usuario podrá seleccionar una liquidación y visualizar su detalle completo antes de realizar el cierre (solicitud, gastos, documentos adjuntos, asientos contables previos).
+
+* Solo los usuarios con rol Contador General o Administrador Financiero podrán ejecutar el cierre.
+
+* El sistema debe validar que la liquidación esté aprobada y sin observaciones pendientes antes de permitir el cierre.
+
+* Al confirmar el cierre, el sistema debe:
+
+   * Cambiar el estado a “Cerrada”.
+
+   * Generar el asiento contable de cierre del adelanto, aplicando las cuentas configuradas de gasto, devolución o diferencia.
+
+   * Bloquear cualquier modificación posterior de los datos de la liquidación.
+
+   * Actualizar automáticamente los saldos en las cuentas de anticipos, gastos y bancos.
+
+      * Si la liquidación presenta saldo a devolver, el sistema debe registrar el movimiento correspondiente en Tesorería para control de devolución.
+
+      * Si existe saldo por regularizar, el sistema debe generar un documento pendiente de pago (orden de giro o ajuste contable).
+
+      * Toda acción de cierre o reversión debe registrarse en el log de auditoría contable, incluyendo Usuario, Fecha, Hora, IP, Acción y Observación.
+
+      * El sistema debe permitir exportar la información del cierre a Excel o PDF.
+
+      * Las operaciones de cierre deben reflejarse automáticamente en los reportes financieros y en el Kardex contable de adelantos.
+
+      * La información de Razón Social y País debe mostrarse en modo solo lectura.
+
+7. Campos del Formulario / Vista de Tabla
+Columnas principales (vista de listado de liquidaciones pendien
+tes de cierre):
+         * N° de Liquidación
+
+
+         * Fecha de Aprobación
+
+         * Beneficiario
+
+         * Tipo de Adelanto (Proveedor / Colaborador)
+
+         * Monto del Adelanto
+
+         * Total Gastado
+
+         * Saldo a Devolver / Regularizar
+
+         * Moneda
+
+         * Centro de Costo
+
+         * Estado (Aprobada / Pendiente de Cierre / Cerrada)
+[a][b]
+         * Usuario Responsable / Aprobador
+
+         * Fecha de Cierre
+
+Campos del detalle de cierre:
+
+
+            * N° de Liquidación
+
+            * Fecha de Liquidación
+
+            * Total Gastado
+
+            * Monto Adelantado
+
+            * Saldo a Devolver / Regularizar
+
+            * Asiento Contable Asociado
+[c]
+            * Glosa Descripción Contable del Cierre
+[d][e]
+            * Usuario que Ejecuta el Cierre
+
+            * Fecha y Hora del Cierre
+
+            * Estado Final (Cerrada)
+
+            * ObservacionesSi se debe de considerar
+
+Filtros disponibles:
+               * Estado de Liquidación (Pendiente / Cerrada)
+
+               * Rango de Fechas (Aprobación[f] / Cierre)
+
+               * Beneficiario
+
+               * Tipo de Adelanto
+
+               * Centro de Costo
+
+               * Moneda
+
+               * Sucursal / Local
+
+Acciones disponibles:
+                  * Ver Detalle de Liquidación
+
+                  * Cerrar Liquidación
+
+                  * Revertir Cierre (solo usuarios con permisos especiales)
+
+                  * Exportar (Excel / PDF)
+
+                  * Filtrar / Limpiar Filtros
+
+                  * Actualizar Información
+
+8. Detalle de Integración (opcional)
+                     * Integración con Contabilidad: Genera el asiento contable de cierre del adelanto y actualiza las cuentas de gasto, anticipos y bancos.
+
+                     * Integración con Tesorería: Registra los movimientos por devolución o pago complementario derivados del cierre.
+
+                     * Integración con RRHH: Refleja el cierre de adelantos personales en el historial del colaborador.
+
+                     * Integración con Auditoría: Registra todas las acciones de cierre y reversión, garantizando trazabilidad total.
+
+                     * Integración con Reportes Financieros: Alimenta los informes de flujo de efectivo, control de anticipos y conciliaciones bancarias.
+
+9. Consideraciones Técnicas
+                        * El cierre de una liquidación es una operación irreversible, salvo mediante proceso de reapertura controlada con justificación.
+
+                        * Se debe bloquear cualquier modificación de datos o documentos una vez cerrada la liquidación.
+
+                        * El asiento contable de cierre debe generarse automáticamente con las cuentas configuradas en parámetros financieros.
+
+                        * El sistema debe soportar cierres masivos por rango de fechas o beneficiario, con confirmación previa.
+
+                        * Todas las acciones deben registrarse en el log de auditoría contable, con los campos: Usuario, Fecha, Hora, IP, Acción, N° Liquidación.
+
+                        * Compatible con múltiples países, monedas y razones sociales.
+
+                        * Cumple con las normas NIC 1, NIC 7, NIC 8 y NIIF 9 sobre presentación de estados financieros, flujo de efectivo y reconocimiento de activos financieros.
+
+                        * La fecha de cierre debe corresponder al período contable abierto. Si el período está cerrado, el sistema debe mostrar advertencia y bloquear la acción.
+
+10. Comentarios
+Esta funcionalidad marca el fin del ciclo operativo de los adelantos, garantizando la integridad contable, presupuestal y documental del proceso.
+El cierre de liquidación asegura que todos los movimientos estén correctamente conciliados y reflejados en los estados financieros.
+Se recomienda implementar una validación previa al cierre, que verifique la existencia de comprobantes, asientos generados y ausencia de observaciones.
+Asimismo, se sugiere incluir una alerta automática que notifique a los responsables financieros sobre las liquidaciones pendientes de cierre al final de cada período contable.
+[a]Definir el estado. Serán estas 3 o Pendiente/Cerrada como lo mencionan en los filtros disponibles
+[b]Sólo son dos estados : Pendiente y Cerrada
+[c]de dónde viene eso?
+[d]En la HU anterior, se ha colocado como descripción
+[e]Siguiendo la correlación de la HU anterior, debe ir "Descrpición"
+[f]De. aprobación? en qué parte se aprueba?

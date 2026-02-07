@@ -1,0 +1,127 @@
+﻿HU-FIN-OP-CC-001 - Aplicación de Pagos Recibidos a Documentos de Venta, Letras u Otros Documentos - v1.0
+1. Título
+Aplicación de Pagos Recibidos a Documentos de Venta, Letras u Otros Documentos
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero aplicar los pagos recibidos de clientes a los documentos de venta, letras u otros comprobantes pendientes de cobro, para mantener actualizadas las cuentas por cobrar y reflejar correctamente los ingresos percibidos y los saldos pendientes de cada cliente.
+3. Proceso
+Proceso: Operaciones
+Subproceso: Cuentas por Cobrar
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Registrar la aplicación de pagos recibidos contra documentos de venta, letras u otros documentos emitidos.
+Para: Mantener actualizados los saldos de clientes y reflejar adecuadamente las cobranzas realizadas.
+De manera que: Se garantice la integridad contable, la conciliación bancaria y el control financiero de las operaciones de cobro.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Operaciones > Cuentas por Cobrar > Aplicación de Pagos Recibidos
+6. Criterios de Aceptación
+El sistema debe permitir seleccionar un cliente y mostrar todos los documentos pendientes de cobro (facturas, letras, notas de débito u otros).
+El usuario podrá ingresar uno o varios pagos recibidos (efectivo, transferencia, cheque, tarjeta, etc.) y aplicarlos parcial o totalmente a los documentos seleccionados.
+El sistema debe mostrar el monto total recibido, el monto aplicado y el saldo pendiente del cliente.
+Debe validar que el monto aplicado no exceda el monto del pago disponible.
+En caso de pagos parciales, el sistema deberá mantener el documento con saldo pendiente hasta su cancelación total.
+Cada aplicación de pago generará automáticamente el asiento contable correspondiente:
+* Débito: Cuentas por Cobrar
+
+* Crédito: Caja o Banco
+
+El sistema debe permitir visualizar el asiento contable asociado al pago aplicado.
+Si existe una diferencia por redondeo o tipo de cambio, el sistema deberá registrar automáticamente un ajuste contable (ganancia o pérdida por tipo de cambio).
+Debe registrarse en el log de auditoría contable toda acción de registro, modificación o anulación (Usuario, Fecha, Hora, IP, Acción).
+Sólo se mostrarán los datos de la Razón Social y País activos en la sesión del usuario (campos de solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos principales:
+
+   * Cliente
+
+   * Tipo de Documento (Factura, Letra, Nota de Débito, etc.)
+
+   * N° de Documento
+
+   * Fecha de Emisión
+
+   * Fecha de Vencimiento
+
+   * Monto Total del Documento
+
+   * Monto Pendiente
+
+   * Moneda
+
+   * Tipo de Cambio
+
+   * Monto del Pago Recibido
+
+   * Medio de Pago (Efectivo, Transferencia, Cheque, Tarjeta)
+
+   * Fecha del Pago
+
+   * Referencia del Pago (N° de Operación, Banco, etc.)
+
+   * Monto Aplicado
+
+   * Saldo Posterior al Pago
+
+   * Estado (Pendiente / Pagado / Parcial)
+
+   * N° de Asiento Contable
+
+   * Usuario de Registro
+
+   * Fecha y Hora de Registro
+
+Filtros disponibles:
+      * Cliente
+
+      * Tipo de Documento
+
+      * Estado del Documento
+
+      * Fecha de Emisión
+
+      * Fecha de Vencimiento
+
+      * Moneda
+
+      * Sucursal / Local[a][b][c]
+
+Acciones disponibles:
+         * Aplicar Pago a Documento (Acción: Individual y masivo)
+
+         * Ver Asiento Contable (Acción: Individual)
+
+         * Anular Aplicación de Pago (Acción: Individual)
+
+         * Exportar (Excel / PDF) (Acción: general)
+
+         * Ver Detalle del Documento (Acción: Individual)
+
+8. Detalle de Integración (opcional)
+Integración con Contabilidad: Genera automáticamente los asientos contables al aplicar el pago y refleja los movimientos en cuentas por cobrar y bancos.
+Integración con Tesorería: Permite vincular el pago aplicado con el movimiento bancario o de caja correspondiente.
+Integración con Ventas: Vincula el pago aplicado con el documento de venta o factura de origen.
+Integración con Reportes Financieros: Actualiza los reportes de cobranza, antigüedad de saldos y flujo de efectivo.
+9. Consideraciones Técnicas
+El sistema debe permitir aplicar pagos en moneda local o extranjera, calculando automáticamente la conversión según el tipo de cambio del día.
+Debe validar que los documentos y pagos correspondan a la misma razón social y cliente.
+Las aplicaciones de pago deben ser irreversibles una vez aprobadas, salvo mediante anulación autorizada.
+Cada asiento contable generado debe registrar las cuentas involucradas, la fecha contable, el usuario y el comprobante vinculado.
+Todas las acciones deben registrarse en el log de auditoría contable con: Usuario, Fecha, Hora, IP, Acción, Documento, Monto Aplicado y Estado.
+Debe cumplir con las normas NIC 1, NIC 21 y NIC 18, relacionadas con la presentación, tipo de cambio y reconocimiento de ingresos.
+10. Comentarios
+Esta funcionalidad permite mantener actualizado el estado de cuentas de los clientes, garantizando la correcta imputación contable de los cobros recibidos.
+Facilita la conciliación bancaria y contable, mejorando la gestión de flujo de caja y control de ingresos.
+Se recomienda incluir indicadores de gestión como:
+            * Total cobrado por periodo.
+
+            * Cobros aplicados vs no aplicados.
+
+            * Porcentaje de facturas canceladas por cliente.
+
+Además, puede incluirse una opción de “Aplicación Automática”, donde el sistema sugiera la imputación del pago según fecha de vencimiento o prioridad del documento.
+
+
+[a]@consultorexterno1@restaurant.pe @igarcia@restaurant.pe 
+La Sucursal y Local son conceptos diferentes o similares? Si hacen referencia a lo mismo, se debe estandarizar el término en la elaboración de de HU (es decir, hacer referencia solo a uno de los dos términos) para no generar confusión.
+_Asignada a consultorexterno1@restaurant.pe_
+[b]Sucursal es una entidad administrativa, local es establecimiento fisico, una sucursal puede tener varios locales. son conceptos diferentes
+[c]Por favor, coordinar con @igarcia@restaurant.pe  para establecer un documento general donde se defina el glosario o definición de términos utilizados en las definiciones de HU. Trabajarlo porfa en la unidad compartida para que sea accesible para todos.

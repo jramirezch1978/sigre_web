@@ -1,4 +1,4 @@
-﻿$PBExportHeader$w_choice_cierre_caja.srw
+$PBExportHeader$w_choice_cierre_caja.srw
 forward
 global type w_choice_cierre_caja from window
 end type
@@ -16,13 +16,19 @@ type cb_aceptar from commandbutton within w_choice_cierre_caja
 end type
 type st_titulo from statictext within w_choice_cierre_caja
 end type
+type gb_formato from groupbox within w_choice_cierre_caja
+end type
+type rb_ticket from radiobutton within w_choice_cierre_caja
+end type
+type rb_a4 from radiobutton within w_choice_cierre_caja
+end type
 end forward
 
 global type w_choice_cierre_caja from window
 integer width = 1568
-integer height = 640
+integer height = 800
 boolean titlebar = true
-string title = "Elija Tipo de Cierra de Caja"
+string title = "Elija Tipo de Cierre de Caja"
 windowtype windowtype = response!
 long backcolor = 67108864
 string icon = "AppIcon!"
@@ -36,6 +42,9 @@ rb_1 rb_1
 cb_cancelar cb_cancelar
 cb_aceptar cb_aceptar
 st_titulo st_titulo
+gb_formato gb_formato
+rb_ticket rb_ticket
+rb_a4 rb_a4
 end type
 global w_choice_cierre_caja w_choice_cierre_caja
 
@@ -60,6 +69,13 @@ else
 	lstr_param.string1 = '0'
 end if
 
+//Formato de impresión: T = Ticket/Etiquetadora, A = Hoja A4
+if rb_a4.checked then
+	lstr_param.string2 = 'A'
+else
+	lstr_param.string2 = 'T'
+end if
+
 lstr_param.b_return 	= true
 
 CloseWithReturn(this, lstr_param)
@@ -73,13 +89,19 @@ this.rb_1=create rb_1
 this.cb_cancelar=create cb_cancelar
 this.cb_aceptar=create cb_aceptar
 this.st_titulo=create st_titulo
+this.gb_formato=create gb_formato
+this.rb_ticket=create rb_ticket
+this.rb_a4=create rb_a4
 this.Control[]={this.rb_4,&
 this.rb_3,&
 this.rb_2,&
 this.rb_1,&
 this.cb_cancelar,&
 this.cb_aceptar,&
-this.st_titulo}
+this.st_titulo,&
+this.gb_formato,&
+this.rb_ticket,&
+this.rb_a4}
 end on
 
 on w_choice_cierre_caja.destroy
@@ -90,6 +112,9 @@ destroy(this.rb_1)
 destroy(this.cb_cancelar)
 destroy(this.cb_aceptar)
 destroy(this.st_titulo)
+destroy(this.gb_formato)
+destroy(this.rb_ticket)
+destroy(this.rb_a4)
 end on
 
 type rb_4 from radiobutton within w_choice_cierre_caja
@@ -208,5 +233,52 @@ alignment alignment = center!
 boolean border = true
 borderstyle borderstyle = styleraised!
 boolean focusrectangle = false
+end type
+
+type gb_formato from groupbox within w_choice_cierre_caja
+integer x = 37
+integer y = 548
+integer width = 1006
+integer height = 220
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 16777215
+long backcolor = 67108864
+string text = "Formato de Impresión"
+end type
+
+type rb_ticket from radiobutton within w_choice_cierre_caja
+integer x = 73
+integer y = 616
+integer width = 450
+integer height = 80
+integer textsize = -12
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long backcolor = 67108864
+string text = "Ticket"
+boolean checked = true
+end type
+
+type rb_a4 from radiobutton within w_choice_cierre_caja
+integer x = 537
+integer y = 616
+integer width = 450
+integer height = 80
+integer textsize = -12
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long backcolor = 67108864
+string text = "Hoja A4"
 end type
 

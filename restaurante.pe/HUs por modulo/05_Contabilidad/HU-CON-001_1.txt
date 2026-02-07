@@ -1,0 +1,182 @@
+﻿HU-CON-001 - Maestro de Centros de Costo - v1.0
+1. Identificación General
+* Código HU: HU-CON-001
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Centros de Costo
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Maestro de Centros de Costo
+
+* Autor: Redactor de HU de Software de Contabilidad
+
+* Fuente: Alcance Global del Proyecto de Implementación de Sistema Contable y de Nómina Multipaís – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir la creación, edición, consulta y desactivación de centros de costo, con el objetivo de asignar gastos e ingresos a áreas, proyectos, sucursales o unidades operativas de la razón social activa.
+Esta funcionalidad soporta la contabilidad analítica, permitiendo generar reportes financieros segmentados por centro de costo, y facilitar la toma de decisiones sobre rentabilidad por línea de negocio o punto de venta.
+________________
+
+
+3. Actor(es)
+   * Usuario Contable: Encargado de crear, modificar o desactivar centros de costo.
+
+   * Administrador del Sistema: Puede aprobar o supervisar los cambios.
+
+   * Auditor Interno: Tiene acceso de solo lectura para revisión.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe haber iniciado sesión en una Razón Social activa y tener perfil con permisos en el módulo de Contabilidad.
+
+      * Debe existir al menos un Plan de Cuentas configurado.
+
+      * Los campos de Razón Social y País se muestran en modo informativo (solo lectura).
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Centros de Costo → Maestros → Gestión de Centros de Costo
+________________
+
+
+6. Requerimiento Funcional (Historia de Usuario)
+Como usuario contable
+quiero registrar, editar, consultar y desactivar centros de costo
+para asignar correctamente los gastos e ingresos de la empresa, permitiendo una contabilidad analítica precisa y trazable por área, proyecto o sucursal.
+________________
+
+
+7. Criterios de Aceptación
+#
+	Criterio
+	Resultado Esperado
+	1
+	El sistema permite crear un nuevo centro de costo ingresando los campos obligatorios.
+	Se guarda el registro y se muestra un mensaje de confirmación.
+	2
+	Los campos Razón Social y País son informativos y no editables.
+	El sistema los muestra automáticamente según la sesión activa.
+	3
+	No se permite crear dos centros de costo con el mismo código dentro de la misma razón social.
+	El sistema muestra un mensaje de validación.
+	4
+	Se pueden modificar los datos descriptivos de un centro de costo existente.
+	El sistema actualiza la información y registra el cambio en el log contable.
+	5
+	Se puede desactivar un centro de costo si no tiene movimientos contables asociados.
+	El sistema cambia el estado a “Inactivo”.
+	6
+	Todos los cambios (altas, modificaciones, bajas) quedan registrados en el log de auditoría contable.
+	Se almacena usuario, fecha, hora y acción realizada.
+	7
+	Los centros de costo se integran con los reportes de análisis financiero y presupuestal.
+	La información aparece consolidada en los reportes correspondientes.
+	________________
+
+
+8. Campos del Formulario
+Campo
+	Tipo
+	Longitud
+	Obligatorio
+	Validaciones / Descripción
+	Código del Centro de Costo
+	Texto
+	10
+	Sí
+	Único por razón social, sin espacios.
+	Nombre del Centro de Costo
+	Texto
+	100
+	Sí
+	Descripción clara y representativa.
+	Descripción
+	Texto largo
+	250
+	No
+	Información adicional del centro.
+	Tipo de Centro de Costo
+	Lista desplegable
+	-
+	Sí
+	Valores: Operativo, Administrativo, Proyecto, Sucursal, Otro.
+
+
+agregar el porcentaje del costo asignado a cada área .
+	Estado
+	Lista desplegable
+	-
+	Sí
+	Valores: Activo / Inactivo.
+	Factor (%)
+	Lista desplegable
+	-
+	Sí
+	Número.
+	
+
+	
+
+	
+
+	
+
+	
+
+	Fecha de Creación
+	Fecha
+	-
+	Automático
+	Generada por el sistema.
+	________________
+
+
+9. Reglas de Negocio
+         1. Un Centro de Costo no puede eliminarse si ya tiene movimientos contables o presupuestales asociados.
+
+         2. Solo los usuarios con rol Contador o Administrador pueden modificar o crear nuevos centros.
+
+         3. Los Centros de Costo Inactivos no podrán ser seleccionados en comprobantes contables o presupuestos.
+
+         4. Todos los registros deben contar con trazabilidad en el log contable, según la norma de control interno vigente.
+
+         5. Los centros de costo pueden agruparse jerárquicamente para análisis consolidado (ej. 01.01 Cocina, 01.02 Atención).
+
+________________
+
+
+10. Integraciones
+            * Contabilidad: Para registro analítico de asientos.
+
+            * Finanzas: Para reportes de ejecución presupuestal.
+
+            * Recursos Humanos: Para asignación de gastos por área.
+
+            * Compras / Ventas: Para imputar costos y márgenes por centro.
+
+________________
+
+
+11. Aspectos Técnicos
+               * Registro de eventos en Log Contable: alta, modificación, inactivación (usuario, fecha, hora, acción).
+
+               * Los datos se almacenan en la tabla cont_centros_costo.
+
+               * Validación de unicidad en base de datos: (codigo_centro, id_razon_social) debe ser único.
+
+               * El estado “Inactivo” impide su uso en nuevas transacciones.
+
+               * Interfaz compatible con dispositivos web y tablet.

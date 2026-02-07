@@ -1,0 +1,142 @@
+﻿Ejercicios y Períodos Contables (Configuración por Compañía)
+Módulo: Configuraciones
+Proceso: Localización
+Subproceso: Contable
+1. Descripción
+Como Administrador Contable / Administrador del Sistema, quiero configurar el año fiscal y sus períodos mensuales para la compañía en la que he iniciado sesión, para controlar aperturas, cierres y bloqueos de módulos contables por período, asegurando orden contable y cumplimiento fiscal.
+2. Contexto y Alcance Funcional
+* La configuración aplica únicamente a la compañía activa en la sesión.
+* La cuenta puede tener múltiples compañías, pero:
+   * Cada compañía define sus propios ejercicios y períodos.
+* Para configurar otra compañía, el usuario debe cambiar el selector de compañía.
+* No existe una configuración global de ejercicios fiscales para todas las compañías.
+* El diseño y flujo siguen exactamente la interfaz mostrada.
+
+3. Navegabilidad
+Configuraciones > Localización > Contable > Ejercicios y Períodos
+4. Vista Principal: Configuración del Año Fiscal
+4.1 Sección: Configuración del Año Fiscal
+Campos visibles
+Campo
+	Tipo
+	Obligatorio
+	Observaciones
+	Nombre del año fiscal
+	Texto
+	Sí
+	Ej. FY 2024
+	Fecha de inicio
+	Fecha
+	Sí
+	Inicio del ejercicio
+	Fecha de finalización
+	Fecha
+	Sí
+	Fin del ejercicio
+	Opción de cierre de año
+	Select
+	Sí
+	Pre-cierre / Cierre definitivo
+	📌 Reglas visuales y funcionales
+   * El año fiscal sólo puede editarse si no está cerrado.
+   * Las fechas determinan automáticamente el rango total de períodos.
+5. Sección: Períodos Mensuales
+5.1 Visualización
+   * Los períodos se muestran como tarjetas mensuales, cada una con:
+
+      * Nombre del período (Periodo 1, Periodo 2, etc.)
+      * Rango de fechas
+      * Estado: abierto / cerrado
+      * Ícono de candado según estado
+
+5.2 Acciones disponibles
+         * + Nuevo Período
+         * Click sobre un período → abre modal Configuración del Período
+📌 Los períodos pertenecen exclusivamente al año fiscal y compañía activa.
+6. Modal: Configuración del Período
+6.1 Información General
+Campo
+	Tipo
+	Obligatorio
+	Nombre del período
+	Texto
+	Sí
+	Fecha inicio
+	Fecha
+	Sí
+	Fecha fin
+	Fecha
+	Sí
+	
+
+Validaciones:
+         * Fecha inicio < Fecha fin
+         * El período debe estar dentro del rango del año fiscal
+6.2 Declaración Fiscal
+Campo
+	Tipo
+	Descripción
+	Periodicidad
+	Select
+	Mensual / Trimestral/ semestral
+	Recordatorio antes del cierre
+	Numérico
+	Días antes del cierre
+	📌 Usado para alertas fiscales y control interno.
+6.3 Cierre de Módulos
+Opción
+	Tipo
+	Cerrar Contabilidad
+	Checkbox
+	Cerrar Bancos
+	Checkbox
+	Cerrar Inventarios
+	Checkbox
+	Cerrar Activos Fijos
+	Checkbox
+	Cerrar Ventas
+	Checkbox
+	Cerrar Compras
+	Checkbox
+	Seleccionar todos
+	Checkbox
+	📌 El cierre bloquea nuevas operaciones del módulo en ese período.
+6.4 Acciones del Modal
+         * Guardar Cambios
+         * Cancelar
+📌 No se permite guardar si existen validaciones pendientes.
+7. Sección: Corte Anual
+Visualización
+         * Tarjeta resumen del cierre anual, mostrando:
+         * Año fiscal
+         * Rango total
+         * Estado: abierto / cerrado
+📌 El cierre anual:
+         * Consolida resultados
+         * Bloquea todo el ejercicio
+         * Habilita la creación del siguiente año fiscal
+8. Reglas de Negocio
+         * RN-01: Cada compañía gestiona sus ejercicios de forma independiente.
+         * RN-02: Cambiar de compañía cambia completamente los ejercicios visibles.
+         * RN-03: Un período cerrado no permite nuevas transacciones.
+         * RN-04: No se puede modificar un período cerrado.
+         * RN-05: El cierre anual bloquea definitivamente el ejercicio.
+9. Criterios de Aceptación
+         * El usuario visualiza el año fiscal de la compañía activa.
+         * Puede crear y editar períodos dentro del año fiscal.
+         * Puede cerrar módulos por período.
+         * Al cambiar de compañía, se muestran otros ejercicios.
+         * La interfaz y comportamiento replican Odoo.
+10. Consideraciones Técnicas
+         * Persistencia estricta por company_id.
+         * Estados de período: open, closed.
+         * Bloqueo transversal por módulo y período.
+         * Control por permisos de rol.
+         * Manejo de fechas según zona horaria de la compañía.
+11. Auditoría y Trazabilidad
+Registrar por cada acción:
+         * Usuario
+         * Compañía activa
+         * Fecha y hora
+         * Acción (crear, editar, cerrar)
+         * Año fiscal / período afectado

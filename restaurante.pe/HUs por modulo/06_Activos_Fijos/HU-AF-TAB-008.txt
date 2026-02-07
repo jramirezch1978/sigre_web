@@ -1,0 +1,221 @@
+﻿HU-AF-TAB-008 - Numeración Automática para Documentos de Traslado - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Tablas
+3. Subproceso
+Numeradores de Traslados
+4. Nombre de la Historia de Usuario
+Numeración Automática para Documentos de Traslado
+5. Descripción / Propósito
+Como Administrador de Activos Fijos, quiero configurar la numeración automática y consecutiva de los documentos de traslado interno de activos, para garantizar la trazabilidad, secuencia lógica y control por periodo de los movimientos físicos de los activos entre ubicaciones, centros de costo o sucursales, asegurando integridad contable y cumplimiento con los procedimientos de auditoría interna.
+6. Alcance
+La funcionalidad permitirá la configuración, control y administración de las secuencias numéricas utilizadas para generar los documentos de traslado de activos fijos.
+Cada configuración definirá los parámetros de numeración automática por origen (sucursal, centro de costo o almacén), controlando la secuencia por periodo contable (mensual o anual) y garantizando la no duplicidad de numeración.
+Los números generados se utilizarán en:
+* Documentos de traslado interno (entre ubicaciones).
+
+* Traslados por reasignación entre centros de costo o sucursales.
+
+* Movimientos temporales por mantenimiento o préstamo interno.
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Tablas → Numeradores de Traslados → Configuración de Numeración Automática
+8. Campos del Formulario
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Razón Social
+	Determinada por la sesión activa del usuario.
+	País
+	Determinado por la razón social seleccionada.
+	Fecha de Última Actualización
+	Fecha y hora de la última modificación de la configuración.
+	Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Código de Configuración
+	Alfanumérico (10)
+	Identificador único de la configuración.
+	Generado automáticamente.
+	Origen / Sucursal
+	Lista desplegable
+	Define la sucursal o centro de costo donde aplica la secuencia.
+	No duplicado por periodo.
+	Prefijo
+	Texto (5)
+	Identificador alfanumérico asociado a la sucursal (ej. “LIM”, “BOG”).
+	Obligatorio.
+	Tipo de Documento
+	Lista
+	Traslado Interno / Reasignación / Mantenimiento.
+	Obligatorio.
+	Periodo Contable
+	Texto (7)
+	Ejemplo: “2025-01”.
+	Validar formato YYYY-MM.
+	Longitud Total
+	Numérico (2)
+	Longitud total del número correlativo (sin prefijo).
+	Rango permitido 4–10.
+	Número Inicial
+	Numérico (8)
+	Valor inicial de la secuencia.
+	Mayor o igual a 1.
+	Número Actual
+	Numérico (8)
+	Último número utilizado.
+	Actualizado automáticamente.
+	Incremento
+	Numérico (2)
+	Paso de aumento (por defecto = 1).
+	Obligatorio.
+	Control de Rango Máximo
+	Numérico (8)
+	Límite superior del número correlativo.
+	Debe ser mayor al inicial.
+	Reinicio Automático
+	Lista
+	Mensual / Anual / Manual / Sin reinicio.
+	Obligatorio.
+	Estado
+	Lista (Activo / Inactivo)
+	Define si la secuencia está habilitada.
+	Por defecto “Activo”.
+	Campos Opcionales:
+Campo
+	Descripción
+	Formato de Documento
+	Texto (20)
+	Observaciones
+	Comentarios sobre la configuración o su alcance.
+	9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo
+	Crea una nueva configuración de numeración automática.
+	Registro activo con valores iniciales establecidos.
+	Editar
+	Permite modificar parámetros de numeración.
+	Actualiza configuración y registra log.
+	Consultar
+	Visualiza los detalles de la configuración sin editar.
+	—
+	Reiniciar Secuencia
+	Reinicia la numeración según la configuración.
+	Genera nuevo correlativo inicial.
+	Desactivar
+	Inhabilita la numeración para nuevos documentos.
+	No genera números hasta reactivarse.
+	Buscar / Filtrar
+	Filtra por origen, tipo de documento o periodo.
+	Muestra resultados filtrados.
+	Exportar
+	Exporta configuraciones a Excel o PDF.
+	Incluye campos visibles.
+	10. Reglas de Negocio
+   1. Solo puede existir una numeración activa por tipo de documento y periodo contable en una sucursal.
+
+   2. El número consecutivo se genera automáticamente al registrar un traslado de activo.
+
+   3. La secuencia se actualiza en tiempo real y se bloquea durante la transacción (para evitar duplicidad).
+
+   4. Si se alcanza el rango máximo, el sistema emite alerta y bloquea nuevos registros hasta que se configure un nuevo rango.
+
+   5. La estructura del documento se forma concatenando:
+Prefijo + Año + Número Correlativo (con ceros de relleno).
+
+   6. Las modificaciones de parámetros de numeración quedan registradas en el Log de Auditoría Contable (usuario, fecha, hora, acción).
+
+   7. Si está habilitado el reinicio automático, la secuencia se reinicia automáticamente al iniciar el nuevo periodo contable.
+
+   8. No se permite modificar el Número Inicial ni el Prefijo una vez utilizada la secuencia.
+
+   9. Cada documento de traslado debe ser único y consecutivo, garantizando trazabilidad entre el número y la fecha del movimiento.
+
+   10. Las numeraciones inactivas no pueden ser utilizadas en nuevos documentos.
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Módulo de Movimientos / Traslados de Activos
+	Consume la secuencia para asignar un número único a cada documento.
+	Módulo de Auditoría Contable
+	Registra toda creación, edición y reinicio de numeraciones.
+	Módulo de Configuración Global (HU-AF-TAB-006)
+	Hereda formato de numeración por defecto si no se define uno local.
+	Módulo de Reportes de Movimientos
+	Usa la numeración para identificar los documentos emitidos por periodo.
+	Catálogo de Sucursales / Centros de Costo
+	Valida el origen aplicable a la configuración.
+	12. Consideraciones Técnicas
+      * Implementación mediante API RESTful con servicios de consulta, generación y actualización de secuencias.
+
+      * Tablas involucradas:
+
+         * AF_CFG_NUM_TRASLADOS (configuración de numeradores).
+
+         * AF_DOC_TRASLADOS (documentos generados con numeración automática).
+
+            * Validación de unicidad y concurrencia transaccional.
+
+            * Registro obligatorio en Log de Auditoría Contable.
+
+            * Integración con el motor de movimientos del módulo.
+
+            * Soporte para importación/exportación masiva vía Excel.
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Solo usuarios con rol “Administrador de Activos” pueden crear o editar configuraciones.
+	Performance
+	Tiempo de generación de número ≤ 1 segundo.
+	Disponibilidad
+	99.5% durante horario operativo.
+	Usabilidad
+	Interfaz con vista jerárquica por sucursal y vista previa del formato de documento.
+	Auditoría
+	Registro automático de todas las operaciones CRUD.
+	Escalabilidad
+	Capacidad para más de 50.000 documentos por sucursal y periodo.
+	________________
+
+
+14. Criterios de Aceptación
+               1. El usuario puede crear una nueva configuración de numeración con todos los campos obligatorios.
+
+               2. El sistema genera automáticamente el número consecutivo al crear un documento de traslado.
+
+               3. No se permite duplicar configuraciones por tipo de documento y periodo.
+
+               4. El número correlativo incrementa correctamente y respeta los rangos definidos.
+
+               5. Al alcanzar el rango máximo, el sistema bloquea nuevos números y notifica al usuario.
+
+               6. Los reinicios automáticos funcionan correctamente según la configuración (mensual/anual).
+
+               7. Las modificaciones se registran en el Log Contable.
+
+               8. El tiempo de generación de número es ≤ 1 segundo.
+
+               9. Las configuraciones pueden exportarse correctamente a Excel y PDF.
+
+15. Comentarios / Observaciones
+                  * Esta HU es clave para la trazabilidad física y contable de los movimientos internos de activos, ya que garantiza la secuencia única de los documentos de traslado.
+
+                  * La numeración automática facilita los procesos de auditoría interna, inventarios periódicos y conciliaciones contables.
+
+                  * El diseño de esta funcionalidad debe mantener coherencia con:
+
+                     * HU-AF-TAB-007 – Configuración de Secuencias Numéricas para Códigos de Activos
+
+                     * HU-AF-TAB-006 – Configuración Global de Parámetros del Módulo.
+
+                        * Se recomienda incluir controles visuales (alertas) en caso de aproximarse al rango máximo configurado.
+
+                        * El formato del documento deberá permitir la lectura rápida en reportes y exportaciones (ejemplo: TR-LIM-2025-000123).

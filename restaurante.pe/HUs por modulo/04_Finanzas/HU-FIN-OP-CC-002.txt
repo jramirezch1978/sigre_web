@@ -1,0 +1,130 @@
+﻿HU-FIN-OP-CC-002 - Registro de Letras de Cambio Emitidas a Clientes como Forma de Pago - v1.0
+1. Título
+Registro de Letras de Cambio Emitidas a Clientes como Forma de Pago
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero registrar las letras de cambio emitidas a los clientes como forma de pago de sus documentos de venta, para mantener un control detallado de las cuentas por cobrar documentadas y facilitar el seguimiento de su cobro, vencimiento y contabilización.
+3. Proceso
+Proceso: Operaciones
+Subproceso: Cuentas por Cobrar
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Registrar y administrar letras de cambio emitidas a clientes como una modalidad de pago documentado.
+Para: Controlar los compromisos de pago diferido de los clientes y reflejarlos correctamente en la contabilidad y reportes financieros.
+De manera que: Se mantenga actualizado el saldo de cuentas por cobrar y se facilite la gestión de cobranzas futuras, vencimientos y renovaciones.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Operaciones > Cuentas por Cobrar > Registro de Letras de Cambio
+6. Criterios de Aceptación
+El sistema debe permitir registrar una o más letras de cambio emitidas a un cliente, vinculadas a uno o varios documentos de venta (facturas, notas de débito u otros).
+Debe validar que el monto total de las letras coincida con el saldo pendiente de los documentos de venta seleccionados.
+El sistema debe permitir definir los siguientes datos:
+* Fecha de emisión y vencimiento de la letra.
+
+* Monto total y moneda.
+
+* Tasa de interés (si aplica).
+
+* Número de cuotas o fracciones (si corresponde).
+
+* Banco y número de cuenta (opcional).
+
+* Estado inicial de la letra (Emitida / En gestión / Protestada /Anulada).
+
+Debe generarse automáticamente el asiento contable de emisión:
+   * Débito: Cuentas por Cobrar – Documentos por Cobrar
+
+   * Crédito: Cuentas por Cobrar – Clientes
+
+El sistema debe permitir consultar el asiento contable asociado a cada letra emitida.
+En caso de protesto o cancelación, el sistema deberá actualizar automáticamente el estado y generar los asientos contables correspondientes.
+Debe registrarse toda acción (registro, modificación, cancelación, protesto, anulación) en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción).
+Sólo se mostrarán datos correspondientes a la Razón Social y País activos en la sesión del usuario (sólo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos principales:
+
+      * Cliente
+
+      * N° de Letra
+
+      * Fecha de Emisión
+
+      * Fecha de Vencimiento
+
+      * Monto Total
+
+      * Moneda
+
+      * Tipo de Cambio
+
+      * Tasa de Interés (%)
+
+      * Documento(s) Asociado(s)
+
+      * Monto Documento Asociado
+
+      * Banco Emisor / Cuenta Bancaria
+
+      * Estado (Emitida / En gestión / Protestada / Anulada)
+
+      * N° de Asiento Contable
+
+      * Observaciones
+
+      * Usuario de Registro
+
+      * Fecha y Hora de Registro
+
+Filtros disponibles:
+         * Cliente
+
+         * Estado de la Letra
+
+         * Rango de Fechas (Emisión / Vencimiento)
+
+         * Moneda
+
+         * Sucursal / Local
+
+Acciones disponibles:
+            * Registrar Nueva Letra (Acción individual)
+
+            * Editar Registro de Letra (Acción individual)
+
+            * Ver Asiento Contable (Acción individual)
+
+            * Cambiar Estado (Protestada )[a] (Acción individual)
+
+            * Anular Letra (Acción individual) (Anulada)
+
+            * Exportar (Excel / PDF) (Acción todos los registros generados)
+
+            * Consultar Documentos Asociados (Acción individual): Permite visualizar todos los documentos vinculados a una Letra de Cambio específica, facilitando el seguimiento y la trazabilidad de su origen.
+
+8. Detalle de Integración (opcional)
+Integración con Contabilidad: Genera y actualiza automáticamente los asientos contables por emisión, cancelación o protesto de la letra.
+Integración con Ventas: Permite vincular las letras con los documentos de venta (facturas o notas de débito).
+Integración con Tesorería: En caso de cobro o descuento de letra, refleja el ingreso en caja o bancos.
+Integración con Reportes Financieros: Actualiza reportes de cartera de clientes, antigüedad de saldos y flujo de efectivo proyectado.
+9. Consideraciones Técnicas
+El sistema debe permitir el registro en moneda local o extranjera, calculando el equivalente según el tipo de cambio oficial del día.
+Debe permitir la configuración de la numeración de letras de cambio por empresa o sucursal.
+El sistema debe controlar que no se duplique el número de letra dentro de una misma razón social.
+Cada movimiento contable generado debe registrar: Fecha contable, Usuario, Documento relacionado y Cuentas contables afectadas.
+Las acciones de modificación o anulación solo podrán realizarse por usuarios con perfil autorizado.
+Todas las acciones deben registrarse en el log de auditoría contable (Usuario, Fecha, Hora, IP, Acción).
+Debe cumplir con las normas NIC 1, NIC 32 y NIIF 9, relacionadas con la presentación, instrumentos financieros y reconocimiento de activos financieros.
+10. Comentarios
+Esta funcionalidad permite documentar formalmente las cuentas por cobrar, facilitando el seguimiento de compromisos de pago de los clientes y su impacto en la contabilidad.
+Optimiza la gestión de cobranzas al brindar trazabilidad sobre cada letra emitida y su estado.
+Se recomienda incluir indicadores de gestión, como:
+               * Total de letras vigentes por cliente.
+
+               * Letras vencidas vs cobradas.
+
+               * Monto en protesto por periodo.
+
+Asimismo, se sugiere habilitar alertas automáticas para letras próximas a vencer y reportes periódicos de situación de cartera documentada.
+
+
+[a]@consultorexterno1@restaurant.pe @consultorexterno1@restaurant.pe
+Considerar un diagrama de flujo en los anexos, que represente el manejo de los estados de las Letras de Cambio.
+_Asignada a consultorexterno1@restaurant.pe_

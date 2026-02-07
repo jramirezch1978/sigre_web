@@ -1,0 +1,195 @@
+﻿HU-FIN-TAB-004 - Registro y Edición de las Cuentas Bancarias Usadas - v1.0
+1. Título
+Registro y Edición de las Cuentas Bancarias Usadas
+2. Descripción
+Como usuario financiero del sistema Restaurant.pe, quiero registrar, mantener y editar las cuentas bancarias utilizadas por la razón social activa, de manera que pueda gestionar correctamente los movimientos bancarios, conciliaciones y reportes de flujo de efectivo, garantizando que cada transacción esté vinculada a una cuenta bancaria válida y correctamente configurada.
+3. Proceso
+* Proceso: Tablas
+
+* Subproceso: Bancos
+
+* Módulo: Finanzas
+
+4. Narrativa de Usuario
+   * Quiero: Registrar y modificar las cuentas bancarias de cada empresa o sucursal.
+
+   * Para: Asegurar la correcta gestión y trazabilidad de los movimientos financieros.
+
+   * De manera que: Los pagos, cobros y conciliaciones se realicen con cuentas vigentes, auditables y asociadas a la contabilidad.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Tablas > Cuentas Bancarias
+6. Criterios de Aceptación
+      1. El sistema debe permitir registrar, editar, consultar y desactivar cuentas bancarias.
+
+      2. Cada registro debe contener los siguientes campos obligatorios:
+
+         * Banco (selector de tabla maestra de bancos ya predefinida por país) o permitirá crear un nuevo banco de ser necesario (Agregar nombre de banco). 
+
+         * Tipo de Cuenta (Corriente / Ahorros / Línea de Crédito / Otros)
+
+         * Moneda (Soles / Dólares / Moneda local del país)
+
+         * Número de Cuenta (validado según formato bancario local)
+
+         * Número de Cuenta Interbancaria (CCI o equivalente, si aplica)
+
+         * Descripción / Alias de la cuenta
+
+         * Titular de la cuenta (informativo)
+
+         * Código Contable Asociado (cuenta contable del plan contable)
+
+         * Estado (Activo / Inactivo)
+
+            3. El sistema debe validar que no se duplique una cuenta bancaria por banco y número.
+
+            4. El usuario podrá asociar una o más sucursales a una misma cuenta bancaria, según política de tesorería.
+
+            5. El sistema debe permitir marcar la cuenta principal por moneda para priorizarla en las operaciones automáticas.
+
+            6. Las cuentas desactivadas no deben poder ser utilizadas en nuevos movimientos financieros.
+
+            7. Cada cuenta debe poder vincularse a un flujo de caja o centro de costo, si aplica.
+
+            8. El sistema debe permitir exportar el listado de cuentas bancarias (Excel / PDF).
+
+            9. Toda creación, modificación o desactivación debe registrarse en el log de auditoría contable (usuario, fecha, hora, acción).
+
+            10. Las cuentas bancarias deben diferenciarse por razón social y país, manteniendo independencia contable multipaís.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos del Formulario:
+               * Banco (obligatorio, selector de lista)
+
+               * Tipo de Cuenta (Corriente / Ahorros / Línea de Crédito / Otros)
+
+               * Moneda (selector de lista, definida por país)
+
+               * Número de Cuenta (obligatorio, validado)
+
+               * CCI o Código Interbancario (opcional según país)
+
+               * Titular (informativo)
+
+               * Alias / Descripción (opcional)
+
+               * Sucursal(es) Asociada(s) (multi-selección)
+
+               * Código Contable Asociado (selector del plan contable)
+
+               * Flujo de Caja Asociado (opcional)
+
+               * Estado (Activo / Inactivo)
+
+               * País (informativo)
+
+               * Fecha de Creación / Última Modificación (automático)
+
+Columnas del Listado:
+                  * Banco
+
+                  * Tipo de Cuenta
+
+                  * Moneda
+
+                  * N° de Cuenta
+
+                  * CCI / Código Interbancario
+
+                  * Titular
+
+                  * Alias
+
+                  * Sucursal Asociada
+
+                  * Cuenta Contable
+
+                  * Estado
+
+                  * Usuario Responsable
+
+                  * Fecha de Creación
+
+Filtros disponibles:
+                     * Banco
+
+                     * Tipo de Cuenta
+
+                     * Moneda
+
+                     * Estado
+
+                     * País / Razón Social
+
+Acciones disponibles:
+                        * Nueva Cuenta
+
+                        * Editar
+
+                        * Desactivar
+
+                        * Exportar (Excel / PDF)
+
+                        * Ver Detalle: 
+La vista Listar (Listado de Cuentas Bancarias) 
+                           1. Nombre del banco
+                           2. Tipo de cuenta: Ahorros / Corriente / Maestra
+                           3. Número de cuenta (parcial o enmascarado)
+                           4. Moneda (PEN, USD, EUR)
+La acción Ver Detalle (Ficha completa de la cuenta bancaria)
+                           1. Código / ID interno de la cuenta
+                           2. Nombre del banco
+                           3. Tipo de cuenta: Ahorros / Corriente / Maestra
+                           4. Número de cuenta (sin enmascarado)
+                           5. Moneda (PEN, USD, EUR)
+                           6. Estad: Activa, Inactiva /Inactiva
+
+                              * Auditar Cambios: Ver detalles: 
+                              1. Usuario que creó el registro
+                              2. Fecha de creación
+                              3. Usuario que modificó
+                              4. Fecha y detalle de última modificación
+
+
+
+8. Detalle de Integración (opcional)
+                              * Integración con Tesorería: las cuentas estarán disponibles para registrar movimientos de ingreso, egreso y conciliación bancaria.
+
+                              * Integración con Contabilidad: las cuentas bancarias se vinculan automáticamente a las cuentas contables de bancos del plan contable.
+
+                              * Integración con Compras y Ventas: se usan para registrar pagos a proveedores y cobros de clientes.
+
+                              * Integración con Reportes Financieros: los saldos y movimientos de cada cuenta alimentan reportes de flujo de caja y saldos bancarios consolidados.
+
+9. Consideraciones Técnicas
+                                 * Los datos deben almacenarse en una tabla maestra de cuentas bancarias vinculada a la tabla de bancos.
+
+                                 * El sistema debe validar el formato de número de cuenta y CCI según el país (ej. Perú: 20 dígitos CCI, Chile: 11 dígitos cuenta corriente).
+
+                                 * No se podrá eliminar una cuenta con movimientos registrados; sólo podrá desactivarse.
+
+                                 * Toda acción (alta, edición o baja) debe registrarse en el log de auditoría contable.
+
+                                 * Permitir carga masiva de cuentas mediante importación Excel validada.
+
+                                 * El sistema debe mostrar alertas si una cuenta está inactiva o vinculada a transacciones pendientes.
+
+                                 * Soporte multipaís: cada cuenta debe tener su moneda local y país asociado.
+
+                                 * El sistema debe manejar cuentas en moneda local y extranjera, con conversión automática según tipo de cambio contable.
+
+10. Comentarios
+                                    * Esta funcionalidad es fundamental para la configuración inicial del módulo de Finanzas y Tesorería.
+
+                                    * Permite mantener una base bancaria centralizada y estandarizada para todas las razones sociales del grupo empresarial.
+
+                                    * Asegurar la trazabilidad de los fondos y la coherencia entre la gestión bancaria y contable.
+
+                                    * Facilita la conciliación bancaria automática y los reportes financieros multipaís.
+
+                                    * Se recomienda permitir marcar cuentas operativas, de reserva o de inversión, para mejorar la clasificación analítica.
+
+                                    * Los permisos de creación y edición deben estar restringidos a usuarios con rol financiero o contable.
+
+                                    * La adecuada parametrización de las cuentas bancarias garantiza la correcta integración de los módulos de Compras, Ventas y Contabilidad.

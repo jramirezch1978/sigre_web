@@ -1,0 +1,229 @@
+﻿HU-AF-OPE-002 - Gestión de Movimientos Físicos de Activos entre Ubicaciones - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Operaciones
+3. Subproceso
+Registro de Traslado de Activos Fijos
+4. Nombre de la Historia de Usuario
+Gestión de Movimientos Físicos de Activos entre Ubicaciones
+5. Descripción / Propósito
+Como Administrador o Responsable de Activos Fijos, quiero gestionar el proceso completo de traslado físico de activos entre ubicaciones, centros de costo o sucursales,para controlar las solicitudes, autorizaciones, ejecuciones y registros contables asociados, asegurando la trazabilidad total del movimiento y la integridad de la información contable y física del activo dentro del sistema Restaurant.pe.
+6. Alcance
+Esta funcionalidad permite ejecutar el ciclo completo del traslado interno de activos fijos, mediante un workflow de aprobación, que abarca las etapas de:
+1. Solicitud de Traslado (iniciada por usuario responsable del activo).
+
+2. Autorización (por supervisor o administrador contable).
+
+3. Ejecución del Traslado (actualización de ubicación física y generación del documento).
+El sistema registrará los traslados entre:
+   * Ubicaciones físicas (edificios, pisos, oficinas, almacenes).
+
+   * Centros de costo o unidades operativas.
+
+   * Sucursales o razones sociales (según configuración).
+
+Además, la funcionalidad generará automáticamente el Documento de Traslado con numeración correlativa (según HU-AF-TAB-008) y mantendrá historial completo de todos los movimientos del activo.
+7. Navegabilidad
+Ruta de acceso:
+Activos Fijos → Operaciones → Registro de Traslado de Activos Fijos → Gestión de Movimientos
+8. Campos del Formulario
+Campos Informativos (solo lectura):
+Campo
+	Descripción
+	Código del Activo
+[a]	
+Código único (según numerador de activos).
+	Descripción del Activo
+	Nombre del activo trasladado.
+	Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	N° Documento de Traslado
+	Alfanumérico (20)
+	Generado automáticamente (HU-AF-TAB-008).
+	No duplicado.
+	Fecha de Solicitud
+	Fecha
+	Fecha de inicio del proceso.
+	Obligatoria.
+	Solicitante
+	Usuario
+	Persona que solicita el traslado.
+	Debe tener activo asignado.
+	Origen
+	Lista jerárquica
+	Ubicación física actual.
+	Obligatorio.
+	Destino
+	Lista jerárquica
+	Nueva ubicación física.
+	Obligatorio. No igual al origen.
+	Motivo del Traslado
+	Texto (150)
+	Justificación del movimiento.
+	Obligatorio.
+	Fecha Programada
+	Fecha
+	Fecha prevista para ejecución.
+	Obligatoria.
+	Responsable de Aprobación
+	Usuario
+	Persona con rol autorizado.
+	Validar permisos.
+	Fecha de Aprobación
+	Fecha
+	Fecha efectiva de aprobación.
+	Automática.
+	Responsable de Ejecución
+	Usuario
+	Persona encargada de realizar el traslado físico.
+	Obligatorio.
+	Fecha de Ejecución
+	Fecha
+	Fecha real de movimiento.
+	Debe ser igual o posterior a la aprobación.
+	Estado del Traslado
+	Lista
+	Solicitud / Aprobado / Ejecutado / Anulado.
+	Flujo controlado.
+	Campos Opcionales:
+Campo
+	Descripción
+	Observaciones
+	Comentarios internos o detalles adicionales.
+	Documento Soporte
+	Archivo adjunto (PDF, imagen).
+	Confirmación de Recepción
+	Firma o validación del área receptora.
+	9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo Traslado
+	Crea una solicitud de traslado.
+	Registro en estado “Solicitud”.
+	Aprobar
+	Valida y aprueba el traslado.
+	Cambia de estado a “Aprobado”. Genera log.
+	Ejecutar Traslado
+	Realiza la actualización de ubicación y genera documento.
+	Estado cambia a “Ejecutado”.
+	Anular
+	Cancela traslado pendiente o aprobado.
+	Registro marcado como “Anulado”.
+	Buscar / Filtrar
+	Filtra por activo, estado, origen, destino o fechas.
+	Resultados listados.
+	Imprimir / Exportar
+	Genera el Documento de Traslado en PDF o Excel.
+	Incluye firmas y trazabilidad.
+	Ver Historial
+	Muestra los movimientos anteriores del activo.
+	Información completa y ordenada.
+	10. Reglas de Negocio
+      1. Solo los activos en estado “Activo” pueden ser trasladados.
+
+      2. Cada traslado requiere autorización previa antes de su ejecución.
+
+      3. No se permite trasladar un activo al mismo origen o ubicación actual.
+
+      4. El sistema debe bloquear traslados simultáneos del mismo activo.
+
+      5. Las fechas reales no pueden ser anteriores a las programadas.
+
+      6. Al ejecutar el traslado, se debe actualizar automáticamente la ubicación física en el registro maestro del activo (HU-AF-OPE-001).
+
+      7. Toda acción (solicitud, aprobación, ejecución, anulación) se registra en el Log de Auditoría Contable con usuario, fecha, hora y acción.
+
+      8. El sistema generará el Documento de Traslado con numeración automática (HU-AF-TAB-008).
+
+      9. Si el traslado involucra centros de costo diferentes, se debe actualizar la cuenta contable asociada al activo.
+
+      10. Los traslados anulados deben conservar su número y registro histórico.
+
+      11. La autorización sólo podrá realizarla un usuario con el rol “Administrador de Activos” o “Supervisor de Sucursal”.
+
+      12. El sistema debe conservar el historial completo de movimientos (ubicaciones anteriores y fechas de cambio).
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Maestro de Activos (HU-AF-OPE-001)
+	Actualiza automáticamente la ubicación y centro de costo del activo.
+	Numeradores de Traslados (HU-AF-TAB-008)
+	Genera la numeración consecutiva del documento.
+	Ubicaciones Físicas (HU-AF-TAB-005)
+	Proporciona las ubicaciones válidas de origen y destino.
+	Configuración Global (HU-AF-TAB-006)
+	Controla parámetros de validación de periodos y flujos.
+	Log de Auditoría Contable
+	Registra todas las acciones ejecutadas sobre el traslado.
+	Reportes de Movimientos de Activos
+	Usa los datos de traslados para reportes y conciliaciones físicas.
+	12. Consideraciones Técnicas
+         * Desarrollado en interfaz web con flujo guiado (wizard) para las etapas de solicitud, aprobación y ejecución.
+
+         * Implementación mediante API RESTful con endpoints para cada etapa del proceso.
+
+         * Tablas principales:
+
+            * AF_MOV_TRASLADOS (cabecera del traslado).
+
+            * AF_DET_TRASLADOS (detalle de activos trasladados).
+
+               * Control de concurrencia en la ejecución de movimientos.
+
+               * Integración con logs automáticos de auditoría y validación de roles.
+
+               * Generación de documento PDF con estructura estándar y código QR de validación.
+
+               * Soporte para carga/exportación masiva (Excel).
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido según roles (Solicitante, Aprobador, Ejecutor, Auditor).
+	Performance
+	Generación de documento y actualización ≤ 3 segundos.
+	Usabilidad
+	Interfaz con flujo claro, botones diferenciados por etapa y colores por estado.
+	Auditoría
+	Registro detallado de todas las etapas en log contable.
+	Disponibilidad
+	99.5% durante horario operativo.
+	Escalabilidad
+	Soporte para más de 100.000 traslados por país y año fiscal.
+	14. Criterios de Aceptación
+                  1. El usuario puede registrar una nueva solicitud con todos los campos obligatorios.
+
+                  2. Solo usuarios autorizados pueden aprobar un traslado.
+
+                  3. La ejecución actualiza automáticamente la ubicación del activo.
+
+                  4. El número de documento se genera automáticamente conforme a la secuencia configurada.
+
+                  5. El flujo de estados se cumple en orden: Solicitud → Aprobado → Ejecutado → Cerrado.
+
+                  6. Los registros se reflejan en el historial de movimientos del activo.
+
+                  7. Las anulaciones conservan la trazabilidad y no afectan la secuencia numérica.
+
+                  8. Las acciones y cambios quedan registrados en el Log Contable.
+
+                  9. El tiempo total del proceso no supera los 3 segundos por acción.
+
+15. Comentarios / Observaciones
+                     * Esta HU representa el flujo operativo más importante del control físico de activos, garantizando la trazabilidad completa del movimiento dentro del grupo empresarial.
+
+                     * Permite mantener el control físico-contable, soportando procesos de auditoría interna, conciliación y gestión patrimonial.
+
+                     * El workflow debe ser configurable, pudiendo variar el número de niveles de aprobación según la política de la empresa.
+
+                     * El diseño de la interfaz debe ser coherente con la HU HU-AF-OPE-001 (Registro Principal de Activos Fijos) y las tablas maestras asociadas (HU-AF-TAB-005, HU-AF-TAB-008).
+
+                     * Se recomienda incluir notificaciones automáticas por correo o panel interno ante cada cambio de estado (solicitud, aprobación o ejecución).
+
+
+[a]Campo obligatorio.

@@ -1,0 +1,144 @@
+﻿HU-RRHH-PN-CP-002 - Carga Masiva o Automática de Variables (Horas Extra, Bonos, Comisiones, Metas) - v1.0
+1. Título
+ Carga masiva o automática de variables (horas extra, bonos, comisiones, metas)
+2. Descripción
+ Como analista de nómina, quiero poder realizar la carga masiva o automática de variables que influyen en el cálculo de planilla, como horas extras, bonos, comisiones o cumplimiento de metas, para asegurar que el proceso de cálculo sea más ágil, preciso y consistente con la información proveniente de otros sistemas o áreas.
+3. Proceso
+ Proceso: Procesos de Nómina
+Subproceso: Cálculo de Planillas
+Módulo: RR.HH
+4. Narrativa de Usuario
+ Quiero: Incorporar fácilmente las variables que afectan la remuneración del personal mediante una carga masiva o automática.
+Para: Reducir errores manuales y ahorrar tiempo en la preparación de datos para el cálculo de planillas.
+De manera que: El sistema reconozca y aplique las variables correctamente, garantizando la exactitud en los pagos y reportes asociados.
+5. Regla de Navegabilidad
+ Ruta: Menú Principal > RR.HH > Procesos de Nómina > Cálculo de Planillas > Carga de Variables
+6. Criterios de Aceptación
+* Permitir la importación masiva desde archivos Excel, CSV o integraciones automáticas (POS, ERP, biométrico).
+
+* Validar estructura y tipos de datos antes de guardar.
+
+* Asociar las variables automáticamente al trabajador y periodo correspondiente.
+
+* Mostrar errores y permitir corrección manual.
+
+* Registrar usuario, fecha, fuente y tipo de variable cargada.
+
+* Integrar la información con el cálculo de planilla.
+
+* Permitir automatización programada (por fecha o frecuencia).
+
+* Registrar en log contable todas las cargas y modificaciones.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+Campo
+	Tipo de Dato / Control UX
+	Descripción Funcional
+	Ejemplo / Valores Permitidos
+	Validaciones / Reglas UI
+	Periodo / Fecha de Aplicación
+	Fecha (DatePicker)
+	Determina el periodo o fecha en la que se aplican las variables.
+	30/09/2025
+	Obligatorio. No puede ser posterior al cierre de planilla.
+	ID del Trabajador
+	Texto / Autocompletar
+	Código único que identifica al trabajador en el sistema.
+	EMP-000145
+	Debe existir en el maestro de empleados.
+	Nombre del Trabajador
+	Texto (Solo lectura)
+	Nombre completo del trabajador vinculado al ID.
+	Juan Pérez Gómez
+	Se llena automáticamente al seleccionar ID.
+	Tipo de Variable
+	Lista desplegable (ComboBox)
+	Define el tipo de concepto variable que se carga.
+	Horas Extra, Bono, Comisión, Meta, Otro
+	Obligatorio. Catálogo configurable.
+	Descripción
+	Texto (Multilínea)
+	Detalle o motivo de la variable cargada.
+	“Bono por cumplimiento de metas mensuales.”
+	Máximo 255 caracteres.
+	Monto / Cantidad / Valor
+	Numérico (Input Decimal)
+	Valor numérico asociado al concepto variable.
+	250.00
+	Validar formato numérico y límites máximos.
+	Unidad de Medida
+	Lista desplegable
+	Define la unidad aplicable a la variable.
+	Horas / % / Moneda / Puntos
+	Depende del tipo de variable seleccionada.
+	Fuente de Datos
+	ComboBox / Selector Automático
+	Indica el origen de la información cargada.
+	Manual, Archivo, Automática (API)
+	Automático si proviene de integración.
+	Estado
+	Etiqueta / Select
+	Estado actual de la variable en el proceso.
+	Pendiente, Validado, Aplicado
+	Solo se puede editar antes de aplicar.
+	Fecha de Carga
+	Fecha y Hora (Solo lectura)
+	Fecha en la que se cargó la variable.
+	30/09/2025 15:22
+	Generada automáticamente.
+	Usuario de Carga
+	Texto (Solo lectura)
+	Usuario que realizó la carga o integración.
+	jvillanueva
+	Llenado automático por el sistema.
+	Filtros disponibles (Vista Tabla):
+   * Periodo
+
+   * Tipo de Variable
+
+   * Estado
+
+   * Usuario de Carga
+
+   * Sede o Centro de Costo
+
+Acciones disponibles:
+      * Cargar Archivo
+
+      * Validar Datos
+
+      * Confirmar Carga
+
+      * Editar / Eliminar Registro
+
+      * Exportar Reporte
+
+      * Consultar Historial
+
+      * Programar Carga Automática
+
+
+
+8. Detalle de Integración (opcional)
+ Integración con:
+         * Módulo de Asistencia: para importar horas extras.
+
+         * Módulo de Ventas / POS: para obtener comisiones y bonos por desempeño.
+
+         * Módulo de RR.HH - Evaluaciones: para metas cumplidas.
+
+         * Módulo de Contabilidad: para registrar importes variables en los asientos de nómina.
+
+9. Consideraciones Técnicas
+            * Validación en tiempo real (formato, duplicados, rangos).
+
+            * Logs de auditoría (usuario, fecha, acción).
+
+            * Reversión controlada de cargas incorrectas.
+
+            * Parametrización multipaís y multiempresa.
+
+            * Visualización previa del impacto antes de aplicar.
+
+10. Comentarios
+ Esta funcionalidad optimiza la gestión de variables salariales reduciendo errores manuales, mejorando trazabilidad e integrando automáticamente información de diferentes fuentes operativas.

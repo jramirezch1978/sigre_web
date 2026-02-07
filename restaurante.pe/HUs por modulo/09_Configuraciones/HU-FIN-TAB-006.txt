@@ -1,0 +1,196 @@
+﻿HU-FIN-TAB-006 - Condiciones de Pago/Cobro (Contado, Crédito, Cuotas, etc.) - v1.0
+1. Título
+Condiciones de Pago/Cobro (Contado, Crédito, Cuotas, etc.)
+2. Descripción
+Como usuario del área contable o financiera de Restaurant.pe, quiero registrar y administrar las condiciones de pago y cobro que se aplican a las operaciones financieras y comerciales (ventas, compras, pagos, cobranzas), de manera que pueda controlar los plazos, modalidades y esquemas de financiamiento o cobro (contado, crédito, cuotas, mixto), asegurando la correcta integración con los módulos de cuentas por pagar y por cobrar.
+3. Proceso
+* Proceso: Tablas
+
+* Subproceso: Formas de Pago
+
+* Módulo: Finanzas
+
+4. Narrativa de Usuario
+   * Quiero: Registrar, editar y consultar las condiciones de pago y cobro vigentes.
+
+   * Para: Estandarizar la aplicación de plazos y modalidades financieras en todas las operaciones del sistema.
+
+   * De manera que: Se garantice la consistencia entre la política comercial y la contabilidad automatizada del sistema.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal → Finanzas → Tablas → Formas de Pago → Condiciones de Pago/Cobro
+6. Criterios de Aceptación
+      1. El sistema debe permitir crear, editar, consultar, activar e inactivar condiciones de pago y cobro.
+
+      2. Cada condición debe indicar si aplica a pagos, cobros o ambos.
+
+      3. Debe poder definirse si la condición es Contado, Crédito o Por cuotas.
+
+      4. En caso de crédito o cuotas, se deben especificar días de crédito, cantidad de cuotas, periodicidad y porcentaje por cuota (si aplica).
+
+      5. Las condiciones deben poder asociarse a tipos de documento (facturas, notas de crédito, recibos, etc.) y a tipos de transacción (venta, compra, pago, cobro).
+
+      6. No se permitirá la creación de condiciones duplicadas (mismo nombre y configuración).
+
+      7. Las condiciones podrán configurarse de manera diferenciada por país y razón social.
+
+      8. Todas las acciones (alta, edición, activación, inactivación) deberán registrarse en el log de auditoría contable.
+
+      9. Las condiciones inactivas no podrán seleccionarse en nuevas operaciones financieras.
+
+      10. Debe mostrarse una advertencia si se intenta eliminar una condición vinculada a documentos pendientes de pago o cobro.
+
+      11. El sistema debe permitir exportar el listado de condiciones en formato Excel o PDF.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos del Formulario
+Campo
+	Tipo / Control
+	Descripción
+	Validación
+	Código de Condición
+	Texto
+	Identificador único del registro.
+	Automático o manual, único
+	Nombre de la Condición
+	Texto
+	Nombre descriptivo (Ej. Contado, Crédito 30 días, 3 cuotas mensuales).
+	Obligatorio, único
+	Tipo de Aplicación
+	Selector (Pago / Cobro / Ambos)
+	Define el contexto de uso.
+	Obligatorio
+	Modalidad
+	Selector (Contado / Crédito / Cuotas)
+	Define la naturaleza de la condición.
+	Obligatorio
+	Días de Crédito
+	Numérico
+	Número de días para vencimiento.
+	Obligatorio si modalidad = Crédito
+	Número de Cuotas
+	Numérico
+	Cantidad de cuotas de pago o cobro.
+	Obligatorio si modalidad = Cuotas
+	Periodicidad de Cuotas
+	Selector (Diaria, Semanal, Quincenal, Mensual)
+	Frecuencia de pago/cobro.
+	Obligatorio si modalidad = Cuotas
+	Porcentaje por Cuota
+	Numérico (decimal)
+	Distribución del importe en cuotas.
+	Validación de 100% total
+	Interés Financiero (%)
+	Numérico (decimal)
+	Tasa aplicable, si la política lo contempla.
+	Opcional
+	Cuenta Contable Asociada
+	Selector
+	Cuenta que registra la operación.
+	Obligatorio
+	Estado
+	Activo / Inactivo
+	Define la disponibilidad de uso.
+	Obligatorio
+	País
+	Texto informativo
+	Determinado por la razón social en sesión.
+	Solo lectura
+	Razón Social
+	Texto informativo
+	Determinado por la sesión activa.
+	Solo lectura
+	Columnas del Listado
+Campo
+	Descripción
+	Código
+	Identificador interno
+	Nombre de la Condición
+	Descripción de la condición
+	Tipo de Aplicación
+	Pago / Cobro / Ambos
+	Modalidad
+	Contado / Crédito / Cuotas
+	Días de Crédito
+	Plazo de pago o cobro
+	N° de Cuotas
+	Cantidad de cuotas
+	Periodicidad
+	Frecuencia de cuotas
+	Interés Financiero (%)
+	Tasa aplicable
+	Cuenta Contable
+	Código y nombre de cuenta asociada
+	Estado
+	Activo / Inactivo
+	Usuario Últ. Modificación
+	Usuario que realizó la última edición
+	Fecha de Creación
+	Fecha del alta
+	Filtros disponibles
+         * Tipo de Aplicación
+
+         * Modalidad
+
+         * Estado
+
+         * País / Razón Social[a]
+
+Acciones disponibles
+            * Nueva Condición
+
+            * Editar Condición
+
+            * Ver Detalle
+
+            * Activar / Inactivar
+
+            * Eliminar (solo si no está en uso)
+
+            * Exportar Listado (Excel / PDF)
+
+            * Auditar Cambios
+
+            * Agrupar por Tipo de Aplicación o Modalidad
+
+
+8. Integraciones
+               * Compras: Asigna condiciones de pago a órdenes y facturas de compra.
+
+               * Ventas: Aplica condiciones de cobro a facturas, boletas y notas de crédito.
+
+               * Cuentas por Pagar / Cobrar: Permite la generación automática de vencimientos y cronogramas.
+
+               * Finanzas: Integra la información con flujos de caja y proyecciones de pagos y cobros.
+
+               * Contabilidad: Registra asientos automáticos según las condiciones y su calendario.
+
+9. Consideraciones Técnicas
+                  * Validar la suma del porcentaje por cuota = 100%.
+
+                  * Las condiciones de tipo crédito o cuotas deben generar automáticamente las fechas de vencimiento.
+
+                  * Registrar todas las acciones en el log de auditoría contable.
+
+                  * Permitir carga masiva desde archivo Excel.
+
+                  * En entornos multipaís, ajustar formato de moneda y parámetros de crédito según legislación local.
+
+                  * Controlar integridad referencial con facturas o documentos vinculados antes de eliminar o inactivar una condición.
+
+10. Comentarios
+                     * Esta HU define la tabla maestra base de condiciones financieras, indispensable para garantizar la coherencia entre las políticas comerciales y la gestión contable.
+
+                     * Su correcta configuración permitirá al sistema automatizar los plazos de cobro y pago, los flujos de caja y los asientos contables.
+
+                     * Solo los usuarios con perfil Administrador Financiero o Contable podrán realizar modificaciones.
+
+                     * La información registrada en esta tabla es utilizada de forma transversal por los módulos de Ventas, Compras, Tesorería y Contabilidad.
+
+                     * Se recomienda mantener una nomenclatura estandarizada para las condiciones (ej. CR30, CTD, 3C-15D).
+
+
+[a]@consultorexterno1@restaurant.pe 
+@igarcia@restaurant.pe 
+Según lo coordinado en reunión, no considerar país en los flujos funcionales del usuario. Ya que cuando se indica que el sistema contable es multipais, hace referencia a que soporta clientes de diferentes países, considerando lógica de negocio de cada país. El flujo debe acotarse a que una cliente gestiona razones sociales y sucursales en un determinado país.
+_Asignada a consultorexterno1@restaurant.pe_

@@ -1,0 +1,128 @@
+﻿HU-FIN-OP-CP-004 - Consulta y Edición de Registros por Proveedor con Visualización del Asiento Contable - v1.0
+1. Título
+Consulta y Edición de Registros por Proveedor con Visualización del Asiento Contable
+2. Descripción
+Como usuario del sistema contable de Restaurant.pe, quiero consultar los registros de cuentas por pagar agrupados por proveedor, con la posibilidad de editar ciertos datos grabados y visualizar el asiento contable asociado, para verificar la información registrada, corregir errores y mantener la integridad de los estados financieros.
+3. Proceso
+Proceso: Operaciones
+Subproceso: Cuentas por Pagar
+Módulo: Finanzas
+4. Narrativa de Usuario
+Quiero: Consultar las facturas, notas de débito o crédito y demás documentos por proveedor, pudiendo editar información autorizada y visualizar el asiento contable vinculado.
+Para: Asegurar que los registros contables sean correctos y reflejen fielmente las transacciones con cada proveedor.
+De manera que: Se garantice la trazabilidad contable, se reduzcan errores de registro y se facilite la auditoría financiera.
+5. Regla de Navegabilidad
+Ruta: Menú Principal > Finanzas > Operaciones > Cuentas por Pagar > Consulta de Registros por Proveedor
+6. Criterios de Aceptación
+El sistema debe permitir la consulta de todos los documentos registrados en cuentas por pagar, filtrados por proveedor, tipo de documento, fecha o estado.
+Debe mostrar un listado con los campos más relevantes: N° de Documento, Tipo, Fecha de Emisión, Fecha de Vencimiento, Monto, Moneda, Estado, y Asiento Contable Asociado.
+El usuario podrá hacer clic en un documento para ver el detalle del registro, incluyendo las líneas del asiento contable (cuentas debitadas y acreditadas).
+Las ediciones permitidas estarán limitadas a los siguientes campos:
+* Fecha de vencimiento (documento)
+
+* Centro de costo (documento)
+
+* Descripción / Glosa (asiento)
+
+* Observaciones (asiento)
+
+Solo los usuarios con rol Analista Contable o superior podrán editar los campos mencionados.
+Si se realiza una modificación, el sistema debe actualizar el asiento contable si el cambio afecta la imputación o centro de costo, generando un nuevo asiento con referencia al anterior.
+Toda modificación debe registrarse en el log de auditoría contable con: Usuario, Fecha, Hora, IP, Acción, Campo Modificado, Valor Anterior y Valor Nuevo.
+El sistema debe permitir visualizar el asiento contable asociado mediante un botón o enlace “Ver Asiento Contable”, que abrirá una vista detallada con los datos del asiento, cuentas, montos, descripciones y estado (Activo / Reversado).
+Solo se mostrarán los datos de la Razón Social y País activos en la sesión del usuario (campos de solo lectura).
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos principales del listado:
+
+   * Proveedor
+
+   * Tipo de Documento
+
+   * N° de Documento
+
+   * Fecha de Emisión
+
+   * Fecha de Vencimiento
+
+   * Monto Total
+
+   * Moneda
+
+   * Centro de Costo
+
+   * Estado (Pendiente /Compensado/ Pagado / Anulado)
+
+   * Usuario de Registro
+
+   * Fecha de Registro
+
+   * Asiento Contable Asociado (Código / N°)
+
+Campos del detalle del documento:
+      * Glosa Contable
+
+      * Observaciones
+
+      * Cuentas Contables Involucradas (Código, Descripción, Débito, Crédito)
+
+      * Fecha de Contabilización
+
+      * Estado del Asiento (Activo / Reversado)
+
+      * Usuario de Creación
+
+      * Fecha y Hora del Asiento
+
+Filtros disponibles:
+         * Proveedor
+
+         * Tipo de Documento
+
+         * Estado
+
+         * Fecha de Emisión
+
+         * Fecha de Vencimiento
+
+         * Moneda
+
+         * Centro de Costo
+
+         * Sucursal
+
+Acciones disponibles:
+            * Ver Detalle del Documento
+
+            * Editar Registro (según permisos)
+
+            * Ver Asiento Contable
+
+            * Exportar (Excel / PDF)
+
+            * Imprimir Asiento
+
+            * Revertir Asiento (solo Supervisor Financiero)
+
+8. Detalle de Integración (opcional)
+Integración con Contabilidad: Permite visualizar el asiento contable vinculado a cada registro y actualizarlo automáticamente si se realizan modificaciones.
+Integración con Tesorería: Refleja en tiempo real los documentos pagados o pendientes de pago.
+Integración con Proveedores: Sincroniza la información de identificación, condiciones de pago y moneda del proveedor.
+Integración con Reportes Financieros: Actualiza los saldos por proveedor y los indicadores de antigüedad de saldos.
+9. Consideraciones Técnicas
+El sistema debe implementar validaciones que eviten la modificación de registros ya pagados o anulados.
+Debe garantizar que toda modificación contable genere un nuevo asiento con referencia al original, preservando el historial de cambios.
+El botón “Ver Asiento Contable” debe mostrar los detalles del asiento en una ventana emergente o vista de solo lectura, con opción de exportar.
+Las acciones deben registrarse en el log de auditoría contable con los siguientes datos mínimos: Usuario, Fecha, Hora, IP, Acción, Documento Afectado, Campo y Valor Modificado.
+El sistema debe cumplir con las normas NIC 1, NIC 8 y NIC 37, asegurando consistencia en la presentación y corrección de errores contables.
+Debe ser compatible con entornos multipaís y multimoneda, mostrando los montos en moneda local y corporativa (USD).
+10. Comentarios
+Esta funcionalidad facilita la revisión, auditoría y mantenimiento de la información registrada en cuentas por pagar, proporcionando trazabilidad completa desde el documento hasta su asiento contable.
+Permite corregir errores menores sin necesidad de anular registros, manteniendo la consistencia contable y el historial de cambios.
+Se recomienda incorporar indicadores de control como:
+               * Número de modificaciones realizadas por periodo.
+
+               * Documentos con diferencias entre monto registrado y contabilizado.
+
+               * Proveedores con mayor volumen de ediciones o ajustes.
+
+Además, esta funcionalidad fortalece el cumplimiento de auditorías internas y externas, permitiendo una trazabilidad completa de la información contable.

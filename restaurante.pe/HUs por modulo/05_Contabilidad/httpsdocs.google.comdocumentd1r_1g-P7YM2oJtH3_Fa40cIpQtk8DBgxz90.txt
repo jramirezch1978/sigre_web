@@ -1,0 +1,236 @@
+﻿HU-CON-033 – Autorización de Modificaciones de Asientos – v1.0
+________________
+
+
+1. Identificación General
+Código HU: HU-CON-033
+Versión: 1.0
+Fecha: 31/10/2025
+Módulo: Contabilidad
+Subproceso: Procesos Contables
+Proceso: Contabilidad General
+Nombre de la Funcionalidad: Autorización de las Modificaciones de Asientos
+Tipo: Proceso (Autorización de Pre Asientos)
+Autor: Redactor de HU – Sistema Contable Multipaís
+________________
+
+
+2. Descripción General
+El sistema debe permitir ejecutar un proceso de autorización para validar que un pre asiento contable está correcto y cumple todas las reglas contables, de negocio y de consistencia para poder ser importado o convertido en un asiento contable definitivo.
+El proceso revisa información clave del pre asiento (cuadratura, cuentas válidas, centros de costo, glosas, documentos origen, montos, moneda, tipo de cambio, entre otros).
+Una vez aprobado, el pre asiento queda marcado como “Autorizado para Contabilización”, habilitando su ingreso al módulo de Registro de Asientos Contables.
+La autorización puede requerir uno o más tipos de validación según configuración del cliente o Razón Social.
+________________
+
+
+3. Actor(es)
+* Contador General
+
+* Jefe de Contabilidad
+
+* Auditor Interno
+
+* Administrador Contable
+
+________________
+
+
+4. Precondiciones
+   * El usuario debe tener permisos para ingresar a:
+Contabilidad → Procesos → Pre Asientos → Autorización de Modificaciones de Asientos.
+
+   * Deben existir pre asientos generados por otros módulos o importaciones.
+
+   * La Razón Social y el País están determinados por la sesión (solo lectura).
+
+   * Los pre asientos deben estar en estado “Pendiente de Autorización”.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Procesos → Pre Asientos → Autorización de Modificaciones de Asientos
+________________
+
+
+6. Historia de Usuario
+Como contador general,
+quiero ejecutar un proceso que autorice que un pre asiento contable está correcto,
+para permitir su importación o conversión a un asiento contable definitivo sin errores ni inconsistencias.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado esperado
+	1
+	El proceso debe validar la cuadratura del pre asiento
+	Si Debe ≠ Haber, no se permite autorizar.
+	2
+	Validar cuentas contables activas
+	No se autoriza si existen cuentas inactivas o no permitidas.
+	3
+	Validar centros de costo obligatorios
+	Si una cuenta requiere centro de costo y no lo tiene, el sistema debe bloquear la autorización.
+	4
+	Validar integridad documental
+	Verifica documentos origen (compras, ventas, almacén).
+	5
+	Marcar el pre asiento como “Autorizado para Contabilización”
+	Una vez validado, queda en estado apto para importación.
+	6
+	Permitir rechazar un pre asiento
+	El usuario puede ingresar observaciones obligatorias al rechazar.
+	7
+	Registrar auditoría
+	Usuario, fecha, hora, acción y motivo.
+	8
+	Solo usuarios autorizados pueden ejecutar el proceso
+	Permisos definidos en el perfil contable.
+	________________
+
+
+8. Requisitos Funcionales
+8.1 Filtros del Proceso
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Fecha Desde
+	Fecha
+	Sí
+	Inicio del rango de pre asientos.
+	Fecha Hasta
+	Fecha
+	Sí
+	Fin del rango.
+	Módulo Origen
+	Lista
+	No
+	Compras, Ventas, Almacén, RRHH, AF, Importaciones.
+	Estado
+	Lista
+	No
+	Pendiente, Observado, Rechazado, Autorizado.
+	Usuario Registrador
+	Lista
+	No
+	Permite auditar la fuente.
+	Número de Pre Asiento
+	Texto
+	No
+	Búsqueda puntual.
+	________________
+
+
+8.2 Acciones disponibles en el proceso
+Acción
+	Descripción
+	Validar Pre Asiento
+	Ejecuta la validación automática de reglas contables y de negocio.
+	Autorizar
+	Marca el pre asiento como apto para contabilizar.
+	Rechazar
+	Solicita una glosa obligatoria e indica motivo del rechazo.
+	Ver Detalle
+	Muestra ítems del pre asiento con cuentas, debe/haber, centros de costo, glosas.
+	Exportar Validación
+	Genera reporte de inconsistencias detectadas.
+	________________
+
+
+8.3 Reglas de Validación del Sistema
+      1. Cuadratura:
+
+         * El pre asiento debe cumplir: total debe = total haber.
+
+            2. Cuentas contables válidas:
+
+               * La cuenta debe estar activa, permitir movimientos y pertenecer al plan contable de la Razón Social.
+
+                  3. Centro de costo obligatorio:
+
+                     * Si la cuenta contable requiere centro de costo, debe existir uno asignado.
+
+                        4. Documentos relacionados según módulo origen:
+
+                           * Deben existir documentos válidos y vinculados correctamente.
+
+                              5. Moneda y tipo de cambio:
+
+                                 * El tipo de cambio debe corresponder a la fecha del pre asiento (según normativa del país).
+
+                                    6. Glosa General y Glosa Detalle:
+
+                                       * No pueden estar vacías.
+
+                                          7. Pre asientos observados:
+
+                                             * Si un pre asiento tiene errores previos, no se puede autorizar sin corregir.
+
+________________
+
+
+9. Flujo del Proceso (Descripción)
+                                                1. El usuario ingresa a la pantalla del proceso.
+
+                                                2. Selecciona filtros y presiona Buscar.
+
+                                                3. Se muestran los pre asientos encontrados.
+
+                                                4. El usuario selecciona uno o varios y presiona Validar.
+
+                                                5. El sistema ejecuta todas las reglas de negocio y muestra el resultado:
+
+                                                   * Correcto → Puede autorizarse.
+
+                                                   * Con observaciones → Debe corregirse.
+
+                                                      6. Si el pre asiento está correcto, el usuario presiona Autorizar.
+
+                                                      7. El estado cambia a: Autorizado para Contabilización.
+
+                                                      8. El sistema registra la auditoría.
+
+________________
+
+
+10. Integraciones
+                                                         * Módulo Compras: documentos de proveedores.
+
+                                                         * Módulo Ventas: comprobantes electrónicos.
+
+                                                         * Módulo Almacén: movimientos de salida/ingreso.
+
+                                                         * Módulo RRHH: planillas y provisiones.
+
+                                                         * Activos Fijos: depreciación y altas.
+
+                                                         * Importación de Pre Asientos: archivos externos.
+
+________________
+
+
+11. Aspectos Técnicos
+                                                            * Se requiere transacción ACID para cambios de estado del pre asiento.
+
+                                                            * Toda autorización debe registrarse en tabla de auditoría contable.
+
+                                                            * Validaciones deben estar parametrizadas por país según normativa (SUNAT, DIAN, SRI, etc.).
+
+                                                            * Debe existir una tabla de estados de pre asiento con trazabilidad completa.
+
+________________
+
+
+12. Mensajes del Sistema
+                                                               * “Pre asiento validado correctamente.”
+
+                                                               * “El pre asiento contiene inconsistencias y no puede autorizarse.”
+
+                                                               * “Debe seleccionar al menos un pre asiento.”
+
+                                                               * “Debe ingresar justificación para rechazar el pre asiento.”
+
+                                                               * “Autorización registrada exitosamente.”

@@ -1,0 +1,199 @@
+﻿HU-FIN-TAB-005 - Canales de Pago y Cobro (Efectivo, Transferencias, Niubiz, etc.) - v1.0
+1. Título
+Canales de Pago y Cobro (Efectivo, Transferencias, Niubiz, etc.)
+2. Descripción
+Como usuario financiero o contable del sistema Restaurant.pe, quiero registrar, consultar, editar y mantener actualizada la tabla maestra de canales de pago y cobro (efectivo, transferencias, POS, pasarelas digitales como Niubiz, Yape, Plin, etc.), para que todas las transacciones financieras del sistema (ventas, compras, pagos y cobranzas) se encuentren correctamente clasificadas y asociadas a sus cuentas contables y medios operativos.
+3. Proceso
+* Proceso: Tablas
+
+* Subproceso: Medios de Pago
+
+* Módulo: Finanzas
+
+4. Narrativa de Usuario
+   * Quiero: Registrar y administrar los diferentes canales de pago y cobro disponibles.
+
+   * Para: Asegurar la correcta imputación contable y conciliación bancaria de cada operación financiera.
+
+   * De manera que: Se mantenga un control centralizado, transparente y auditable de todos los medios financieros disponibles en la empresa.
+
+5. Regla de Navegabilidad
+Ruta: Menú Principal → Finanzas → Tablas → Medios de Pago → Canales de Pago y Cobro
+6. Criterios de Aceptación
+      1. El sistema debe permitir crear, editar, consultar, activar e inactivar canales de pago y cobro.
+
+      2. Cada canal deberá estar vinculado a un tipo de operación (Cobro / Pago).
+
+      3. Los canales predefinidos deben incluir, al menos:
+
+         * Efectivo
+
+         * Transferencia Bancaria
+
+         * Tarjeta de Crédito / Débito (POS)
+
+         * Pasarelas Digitales (Niubiz, Yape, Plin, PayU, etc.)
+
+         * Cheques
+
+         * Otros canales definidos por el usuario.
+
+            4. Cada canal deberá estar asociado a una cuenta contable del plan de cuentas.
+
+            5. Si aplica, deberá asociarse a una cuenta bancaria registrada en el módulo de Bancos.
+
+            6. Los canales deben poder configurarse por país y razón social.
+
+            7. El sistema debe validar que no existan canales duplicados (mismo nombre, medio, cuenta contable y moneda).
+
+            8. Debe registrarse en el log de auditoría contable toda acción (alta, modificación, baja, activación).
+
+            9. Los canales inactivos no podrán ser usados en nuevos registros de operaciones financieras.
+
+            10. Debe mostrarse un mensaje de advertencia si se intenta inactivar un canal con transacciones pendientes de conciliación.
+
+            11. Los registros deberán poder exportarse a Excel o PDF.
+
+7. Campos del Formulario / Columnas de Vista Tabla
+Campos del Formulario
+Campo
+	Tipo / Control
+	Descripción
+	Validación
+	Tipo de Canal
+	Selector (Cobro / Pago)
+	Define si el canal se usa para cobros o pagos.
+	Obligatorio
+	Medio de Pago / Cobro
+	Lista desplegable
+	Efectivo, Transferencia, POS, Niubiz, Yape, Plin, etc.[a]
+	Obligatorio
+	Nombre / Alias del Canal
+	Texto
+	Identificación del canal.
+	Obligatorio, único
+	Entidad Financiera
+	Selector
+	Banco o proveedor del servicio (opcional según medio).
+	Validación por país
+	Cuenta Bancaria Asociada
+	Selector
+	Cuenta registrada en módulo Bancos.
+	Obligatorio si aplica
+	Moneda
+	Selector
+	Moneda local o extranjera.
+	Obligatorio
+	Cuenta Contable Asociada
+	Selector del plan contable
+	Cuenta contable que registrará las operaciones.
+	Obligatorio
+	Descripción / Observaciones
+	Texto libre
+	Campo adicional informativo.
+	Opcional
+	Estado
+	Activo / Inactivo
+	Define si el canal está disponible.
+	Obligatorio
+	País
+	Texto informativo
+	País de la razón social en sesión.
+	Solo lectura
+	Razón Social
+	Texto informativo
+	Empresa actual.
+	Solo lectura
+	Columnas del Listado
+Campo
+	Descripción
+	Tipo de Canal
+	Cobro / Pago
+	Medio de Pago / Cobro
+	Efectivo, Transferencia, POS, Niubiz, etc.
+	Nombre / Alias
+	Nombre identificador
+	Entidad Financiera
+	Banco o pasarela asociada
+	Cuenta Bancaria
+	Cuenta vinculada
+	Moneda
+	Tipo de moneda
+	Cuenta Contable
+	Código contable asociado
+	Estado
+	Activo / Inactivo
+	Usuario Últ. Modificación
+	Usuario que realizó la última edición
+	Fecha de Creación
+	Fecha de alta
+	Filtros disponibles
+               * Tipo de Canal (Cobro / Pago)
+
+               * Medio de Pago / Cobro
+
+               * Entidad Financiera
+
+               * Moneda
+
+               * Estado
+
+               * País / Razón Social
+
+Acciones disponibles
+                  * Nuevo Canal
+
+                  * Editar Canal
+
+                  * Activar / Inactivar Canal
+
+                  * Ver Detalle
+
+                  * Exportar Listado (Excel / PDF)
+
+                  * Auditar Cambios
+
+                  * Agrupar por Tipo de Canal o Entidad Financiera
+
+                  * Ver gráfico comparativo de uso de canales (volumen de transacciones por canal, en integración con módulo de Tesorería) saldrá en el documento exportable
+
+8. Integraciones
+                     * Contabilidad: Cada canal se enlaza con su cuenta contable para el registro automático de asientos.
+
+                     * Bancos: Asociación directa a cuentas bancarias para conciliación.
+
+                     * Tesorería: Los canales son usados para registrar movimientos de caja y flujo de efectivo.
+
+                     * Ventas / Compras: Uso en cobros y pagos operativos.
+
+                     * Reportes Financieros: Permite agrupar transacciones por canal en reportes de flujo de caja y medios de pago.
+
+9. Consideraciones Técnicas
+                        * Validar unicidad del canal (medio + entidad + cuenta contable + moneda).
+
+                        * Registrar todas las acciones en el log de auditoría contable.
+
+                        * Permitir carga masiva desde archivo Excel (para migración).
+
+                        * Compatible con integración API de pasarelas digitales (Niubiz, Yape, etc.).
+
+                        * Manejo seguro de credenciales mediante cifrado.
+
+                        * Configuración adaptable a entornos multipaís (distintas pasarelas por país).
+
+10. Comentarios
+                           * Esta HU define la tabla maestra base que permitirá uniformizar el uso de medios de pago y cobro en todos los módulos operativos y financieros del sistema.
+
+                           * La correcta configuración de los canales es clave para la integridad de la conciliación bancaria y para la precisión de los asientos contables automáticos.
+
+                           * Se recomienda que solo usuarios con rol Administrador Financiero o Contable puedan crear o editar canales.
+
+                           * Los canales digitales deben estar preparados para autenticación por API key o token, según cada proveedor.
+
+                           * Permite reportes y análisis posteriores sobre el uso y participación de cada medio de pago, por país o razón social.
+
+
+
+
+[a]@consultorexterno1@restaurant.pe @igarcia@restaurant.pe Los valores de esta lista desplegable se filtrará por país? La lista se gestionará desde que sección de configuración, colocar referencia de HU
+_Asignada a consultorexterno1@restaurant.pe_

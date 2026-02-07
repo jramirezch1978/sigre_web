@@ -1,0 +1,189 @@
+﻿HU-AF-TAB-005 - Maestro de Ubicaciones Físicas de Activos - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Tablas
+3. Subproceso
+Ubicación de Activos
+4. Nombre de la Historia de Usuario
+Maestro de Ubicaciones Físicas de Activos
+5. Descripción / Propósito
+Como Administrador de Activos Fijos, quiero registrar, mantener y consultar una estructura jerárquica de ubicaciones físicas (edificios, pisos, oficinas, almacenes, áreas de trabajo), para garantizar el control físico, la trazabilidad de los traslados internos y la ejecución eficiente de inventarios periódicos, asegurando la identificación única de cada punto de ubicación donde se encuentren los activos del grupo empresarial.
+6. Alcance
+Esta funcionalidad permite la creación y mantenimiento de un catálogo jerárquico de ubicaciones físicas compuesto por niveles principal/detalle, donde cada registro define un espacio físico dentro de una razón social.
+La estructura podrá adaptarse a distintas realidades operativas (restaurantes, plantas, oficinas administrativas o almacenes), y será utilizada por los procesos de asignación, traslado, inventario físico y control patrimonial.
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Tablas → Ubicación de Activos → Maestro de Ubicaciones Físicas
+8. Campos del Formulario
+Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Código de Ubicación
+	Alfanumérico (10)
+	Identificador único de la ubicación.
+	No duplicado. Generado automáticamente si no se ingresa.
+	Nombre de Ubicación
+	Texto (100)
+	Denominación de la ubicación (Ej. “Edificio Central” o “Piso 2”).
+	Obligatorio.
+	Nivel Jerárquico
+	Selector(1)
+	Define si es ubicación principal o secundaria.
+	Validar jerarquía de 1, 2 o 3.
+	Ubicación Padre
+	Lista desplegable
+	Identificador de la ubicación superior.
+	Requerido si el nivel no es principal.
+	Descripción Detallada
+	Texto largo
+	Información descriptiva sobre la ubicación.
+	Obligatorio.
+	Estado
+	Lista (Activo / Inactivo)
+	Define vigencia de la ubicación.
+	Por defecto “Activo”.
+	Sucursal
+	Lista desplegable
+	Select que podrá vincular a las Ubicaciones de Nivel 1 a una Sucursal Activa
+	Por defecto la sucursal logueada
+	Campos Opcionales:
+Campo
+	Descripción
+	Responsable de Ubicación
+	Nombre o usuario responsable del área.
+	Código Interno / SIG
+	Código utilizado en sistemas externos o de geolocalización.
+	Observaciones
+	Comentarios adicionales o condiciones de acceso.
+	
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo
+	Permite crear una nueva ubicación física.
+	Registro guardado y visible en estructura jerárquica.
+	Editar
+	Permite modificar datos descriptivos y relaciones jerárquicas.
+	Cambios actualizados en tiempo real.
+	Consultar
+	Muestra la información completa en modo lectura.
+	—
+	Desactivar
+	Cambia el estado de la ubicación a Inactivo.
+	Impide su uso en nuevos registros de activos.
+	Buscar / Filtrar
+	Filtros por código, nombre, tipo o estado.
+	Resultados visibles jerárquicamente.
+	Exportar
+	Exporta la estructura completa o filtrada a Excel o PDF.
+	Conserva jerarquía.
+	
+
+10. Reglas de Negocio
+1. Una ubicación principal (nivel 1) puede tener múltiples ubicaciones detalle (nivel 2 o inferiores).
+
+2. No se pueden registrar ubicaciones duplicadas dentro de la misma razón social.
+
+3. Si se desactiva una ubicación principal, automáticamente se desactivan todas sus ubicaciones dependientes.
+
+4. Las ubicaciones inactivas no podrán seleccionarse para asignar activos ni registrar traslados.
+
+5. Todo activo debe estar asociado a una ubicación activa.
+
+6. No se permite eliminar ubicaciones que tengan activos asignados.
+
+7. Las modificaciones de jerarquía o estado deben registrarse en el Log de Auditoría Contable (usuario, fecha, hora, acción).
+
+8. Los inventarios físicos tomarán la estructura de ubicaciones como base para conteo y trazabilidad.
+
+9. Las ubicaciones se pueden importar de forma masiva mediante archivo Excel validado.
+
+10. Si la ubicación pertenece a otra razón social o país, debe crearse un registro nuevo (no compartido).
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Módulo de Activos Fijos (Altas, Traslados e Inventarios)
+	Usa las ubicaciones registradas para control físico.
+	Módulo de Auditoría Contable
+	Registra todas las operaciones realizadas sobre las ubicaciones.
+	Catálogo de Razones Sociales y Sucursales
+	Determina la empresa y país aplicables a la ubicación.
+	Reportes de Inventario Físico
+	Utiliza la jerarquía de ubicaciones como estructura base.
+	Módulo de Seguridad
+	Controla permisos de edición y consulta por rol.
+	
+
+
+
+
+
+
+
+12. Consideraciones Técnicas
+   * Implementación mediante servicios RESTful con estructura jerárquica tipo árbol (Tree View).
+
+   * Tablas sugeridas:
+
+      * AF_MA_UBICACION (cabecera principal)
+
+      * AF_MA_UBICACION_DETALLE (relaciones jerárquicas)
+
+         * Interfaz visual jerárquica con funciones de expandir/colapsar.
+
+         * Integración con módulo de inventarios y reportes de trazabilidad.
+
+         * Registro automático en Log de Auditoría Contable.
+
+         * Soporte para importación y exportación masiva vía Excel.
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a roles con permiso “Administrador de Activos Fijos”.
+	Performance
+	Tiempo máximo de carga o búsqueda: ≤ 3 segundos.
+	Usabilidad
+	Interfaz visual jerárquica y navegación intuitiva.
+	Auditoría
+	Registro automático de todas las acciones CRUD.
+	Disponibilidad
+	99.5% en horario operativo.
+	Escalabilidad
+	Soporte para más de 10.000 ubicaciones por razón social.
+	
+
+14. Criterios de Aceptación
+            1. El usuario puede crear una ubicación principal y agregar subniveles (detalle).
+
+            2. Se valida que no existan códigos o nombres duplicados.
+
+            3. Si una ubicación principal se desactiva, sus dependencias también se inactivan.
+
+            4. Solo se pueden asignar activos a ubicaciones activas.
+
+            5. Toda modificación o desactivación se registra en el log contable.
+
+            6. El sistema permite filtrar y exportar la estructura completa a Excel o PDF.
+
+            7. La jerarquía se visualiza correctamente con expandir/colapsar.
+
+            8. Las consultas responden en menos de 3 segundos.
+
+15. Comentarios / Observaciones
+               * Esta HU es clave para el control físico y patrimonial del módulo de Activos Fijos, asegurando coherencia entre la ubicación real y la contable de los bienes.
+
+               * Permite soportar procesos de auditoría, inventarios y trazabilidad de traslados internos.
+
+               * La estructura jerárquica propuesta (principal/detalle) es adaptable a distintos tipos de operaciones (restaurantes, oficinas, centros de producción).
+
+               * Debe garantizarse coherencia visual con las tablas jerárquicas del sistema (Clases/Subclases de Activos y Matrices Contables).
+
+               * Se recomienda incluir funcionalidad de búsqueda predictiva por nombre o código para facilitar la localización en jerarquías extensas.

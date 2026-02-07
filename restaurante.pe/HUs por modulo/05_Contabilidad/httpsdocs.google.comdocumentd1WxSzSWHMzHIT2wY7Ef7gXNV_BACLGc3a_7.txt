@@ -1,0 +1,267 @@
+﻿HU-CON-013 - Reportes de Validación / Consistencia de Preasientos Contables - v1.0
+________________
+
+
+1. Identificación General
+* Código HU: HU-CON-013
+
+* Versión: 1.0
+
+* Fecha de creación: 30/10/2025
+
+* Módulo: Contabilidad
+
+* Subproceso: Preasientos Contables
+
+* Proceso: Contabilidad General
+
+* Nombre de la Funcionalidad: Reportes de Validación / Consistencia de Preasientos Contables
+
+* Autor: Redactor de Historias de Usuario – Proyecto Sistema Contable Multipaís
+
+* Fuente: Documento de Alcance Global del Proyecto de Implementación Contable – v1.0
+
+________________
+
+
+2. Descripción General
+El sistema debe permitir generar reportes de validación y consistencia de preasientos contables antes de su confirmación definitiva.
+Estos reportes tienen como objetivo detectar inconsistencias, desbalances, cuentas no configuradas o centros de costo faltantes, asegurando que los preasientos cumplan con las reglas contables básicas antes de ser transformados en asientos contables finales.
+El reporte debe presentar información agrupada por origen, número de preasiento, periodo contable y estado de validación, con el detalle de las observaciones encontradas.
+Debe ser posible filtrar, revisar y exportar los resultados en formatos Excel o PDF para auditoría interna y control contable previo al cierre.
+________________
+
+
+3. Actor(es)
+   * Contador General: Supervisa la validación de preasientos antes de su aprobación.
+
+   * Analista Contable: Revisa y corrige los preasientos observados.
+
+   * Jefe de Contabilidad: Autoriza la confirmación de preasientos validados.
+
+   * Auditor Interno: Revisa la trazabilidad y consistencia previa a la contabilización definitiva.
+
+________________
+
+
+4. Precondiciones
+      * El usuario debe contar con permisos de acceso a Contabilidad – Preasientos.
+
+      * Deben existir preasientos generados (por procesos automáticos o importación) en estado pendiente o por confirmar.
+
+      * El periodo contable correspondiente debe estar abierto.
+
+      * Los catálogos contables (cuentas, centros de costo, tipos de cambio, impuestos) deben estar actualizados.
+
+________________
+
+
+5. Navegabilidad
+Menú Principal → Contabilidad → Reportes → Validación / Consistencia de Preasientos Contables
+________________
+
+
+6. Historia de Usuario
+Como contador analítico,
+quiero generar reportes de validación y consistencia de preasientos contables,
+para detectar errores o desbalances antes de su confirmación como asientos contables finales.
+________________
+
+
+7. Criterios de Aceptación
+Nº
+	Criterio
+	Resultado Esperado
+	1
+	Permitir seleccionar periodo contable, rango de fechas, origen y usuario.
+	Se muestran los preasientos generados dentro de los filtros.
+	2
+	Mostrar el estado de validación de cada preasiento (Correcto / Observado / Pendiente).
+	Clasificación visible en columna de resultados.
+	3
+	Calcular automáticamente el cuadre entre débitos y créditos.
+	Se resaltan los preasientos con diferencia mayor a ±0.01.
+	4
+	Mostrar observaciones automáticas (cuenta no configurada, CECO vacío, diferencia por tipo de cambio, etc.).
+	Cada observación se detalla por línea.
+	5
+	Permitir filtrar por estado de validación (solo observados o todos).
+	El reporte muestra los registros filtrados.
+	6
+	Incluir en el reporte las columnas: origen, número de preasiento, fecha, glosa, total débitos, total créditos, diferencia, usuario, estado.
+	Estructura uniforme para auditoría.
+	7
+	Permitir exportar los resultados en formato Excel (.xlsx) y PDF (.pdf).
+	Archivo exportado con los filtros aplicados.
+	8
+	Mostrar un resumen general del número de preasientos revisados, observados y correctos.
+	Indicadores al final del reporte.
+	9
+	Registrar en bitácora la generación del reporte (usuario, fecha, filtros, total de registros).
+	Auditoría automática.
+	________________
+
+
+8. Estructura del Reporte
+Vista: Pantalla de consulta y generación de reporte con filtros superiores y resultados tabulares.
+Naturaleza: Reporte de validación – No modifica datos contables.
+8.1 Filtros de Búsqueda
+Campo
+	Tipo
+	Obligatorio
+	Descripción
+	Periodo Contable (Año / Mes)
+	Numérico
+	Sí
+	Periodo a validar.
+	Rango de Fechas
+	Fecha
+	No
+	Fechas de creación de preasientos.
+	Origen
+	Lista desplegable
+	No
+	Indica el módulo o proceso que generó el preasiento (compras, ventas, nómina, etc.).
+	Usuario Registro
+	Lista desplegable
+	No
+	Filtra por usuario creador del preasiento.
+	Estado de Validación
+	Lista
+	No
+	Todos / Correctos / Observados / Pendientes.
+	Moneda
+	Lista
+	No
+	Moneda local o extranjera.
+	8.2 Resultados del Reporte
+Campo
+	Descripción
+	Origen
+	Módulo que generó el preasiento.
+	Periodo Contable
+	Año y mes del registro.
+	N° Preasiento
+	Identificador del preasiento.
+	Fecha de Registro
+	Fecha de generación del preasiento.
+	Glosa
+	Descripción o comentario del registro.
+	Total Débito
+	Suma total de débitos.
+	Total Crédito
+	Suma total de créditos.
+	Diferencia
+	Monto del desbalance (Débito – Crédito).
+	Estado de Validación
+	Correcto / Observado / Pendiente.
+	Usuario Registro
+	Usuario responsable.
+	Observaciones
+	Detalle de inconsistencias detectadas.
+	8.3 Totales y Resumen
+         * Total de Preasientos Revisados
+
+         * Total de Preasientos Correctos
+
+         * Total de Preasientos Observados
+
+         * Total de Preasientos Pendientes de Confirmación
+
+________________
+
+
+9. Reglas de Negocio
+            1. Validación de cuadre: Un preasiento se considera válido si la suma de débitos es igual a la suma de créditos, con tolerancia máxima de ±0.01.
+
+            2. Moneda de control: Las validaciones se efectúan en moneda local y extranjera si aplica.
+
+            3. Estado de validación:
+
+               * Correcto: Cuadre contable y sin observaciones.
+
+               * Observado: Diferencias, cuentas sin asignar o centros de costo faltantes.
+
+               * Pendiente: Preasientos sin validación automática.
+
+                  4. Sin modificaciones: El reporte no permite editar registros; es exclusivamente de consulta.
+
+                  5. Auditoría obligatoria: Cada ejecución del reporte se registra en LOG_VALIDACION_PREASIENTO.
+
+                  6. Seguridad: Solo perfiles contables o auditores pueden generar o exportar el reporte.
+
+                  7. Multipaís: Los resultados deben filtrarse según la razón social y país activos.
+
+                  8. Ejecución rápida: El reporte debe optimizar las consultas para periodos grandes.
+
+________________
+
+
+10. Integraciones
+                     * Módulo de Preasientos Contables: Fuente de los registros a validar.
+
+                     * Módulo de Contabilidad General: Para confirmación posterior de preasientos válidos.
+
+                     * Catálogo de Cuentas Contables: Validación de cuentas activas.
+
+                     * Centros de Costo: Validación de asignaciones analíticas.
+
+                     * Módulo de Auditoría: Registro de ejecución del reporte y exportaciones.
+
+________________
+
+
+11. Aspectos Técnicos
+                        * Tipo de Componente: Reporte de consulta y validación previa (solo lectura).
+
+                        * Tablas Fuente (solo lectura):
+
+                           * CNTBL_PREASIENTO (cabecera del preasiento).
+
+                           * CNTBL_PREASIENTO_DET (detalle contable del preasiento).
+
+                              * Lógica de validación (conceptual):
+
+                                 * Verifica diferencias entre débitos y créditos.
+
+                                 * Detecta cuentas o centros de costo vacíos.
+
+                                 * Señala registros con tipo de cambio nulo en moneda extranjera.
+
+                                    * Exportaciones: Formatos .xlsx y .pdf con encabezado institucional y filtros aplicados.
+
+                                    * Bitácora: Tabla LOG_VALIDACION_PREASIENTO (usuario, fecha, periodo, total revisados, total observados).
+
+________________
+
+
+12. Flujo Principal del Proceso (Consulta y Reporte)
+                                       1. Usuario accede a Contabilidad → Reportes → Validación / Consistencia de Preasientos Contables.
+
+                                       2. Selecciona filtros de búsqueda (periodo, origen, usuario, estado).
+
+                                       3. Presiona “Generar Reporte”.
+
+                                       4. El sistema realiza la validación automática de los preasientos y muestra los resultados.
+
+                                       5. Los preasientos observados se destacan visualmente (color o ícono de alerta).
+
+                                       6. El usuario puede exportar los resultados a Excel o PDF.
+
+                                       7. El sistema registra la ejecución del reporte en la bitácora contable.
+
+________________
+
+
+13. Mensajes de Validación
+                                          * “Debe seleccionar un periodo contable para generar el reporte.”
+
+                                          * “No existen preasientos en el rango de fechas indicado.”
+
+                                          * “Todos los preasientos del periodo están correctamente validados.”
+
+                                          * “El usuario no tiene permisos para generar este reporte.”
+
+                                          * “Reporte generado correctamente.”
+
+                                          * “Error en la generación del reporte. Contacte al administrador.”

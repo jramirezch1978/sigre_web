@@ -1,0 +1,175 @@
+﻿HU-AF-TAB-002 - Clasificación de Tipos de Seguros Aplicables a Activos - v1.1
+1. Módulo
+Activos Fijos
+2. Proceso
+Tablas
+3. Subproceso
+Tipos de Seguros
+4. Nombre de la Historia de Usuario
+Clasificación de Tipos de Seguros (Aplicables a Activos)
+5. Descripción / Propósito
+Como Analista de Activos Fijos, quiero registrar, consultar, modificar y administrar las clasificaciones de tipos de seguros aplicables a los activos, para definir los diferentes tipos de cobertura (todo riesgo, incendio, robo, responsabilidad civil, etc.) y sus parámetros de cobertura y condiciones, que servirán como base para la configuración de pólizas y el cálculo automático de primas dentro del sistema.
+6. Alcance
+Esta funcionalidad permitirá la gestión centralizada del catálogo maestro de Tipos de Seguros, utilizado por el Módulo de Pólizas de Activos Fijos para configurar pólizas de manera estandarizada.
+Cada tipo de seguro contendrá información clave sobre su modalidad, descripción, porcentaje de cobertura base, condiciones comerciales y vigencia.
+El catálogo será parametrizable por país y razón social, pero mantendrá consistencia contable y fiscal a nivel del sistema Restaurant.pe.
+7. Navegabilidad
+Ruta de acceso:
+ Activos Fijos → Tablas → Tipos de Seguros → Clasificación de Tipos de Seguros
+
+
+8. Campos del Formulario
+Campos Obligatorios:
+Campo
+	Tipo / Longitud
+	Descripción
+	Validaciones / Reglas
+	Código de Tipo de Seguro
+	Alfanumérico (10)
+	Identificador único del tipo de seguro.
+	Generado automáticamente si no se ingresa. No duplicado.
+	Nombre del Tipo de Seguro
+	Texto (100)
+	Denominación del tipo de cobertura.
+	Obligatorio. No duplicado.
+	Descripción
+	Texto largo
+	Detalle del tipo de seguro, su alcance y aplicabilidad.
+	Campo obligatorio.
+	Categoría de Riesgo
+	Lista desplegable
+	Nivel de riesgo asociado (Bajo, Medio, Alto).
+	Obligatorio. Determina condiciones base.
+	Porcentaje de Cobertura Base
+	Numérico (5,2)
+	Valor porcentual estándar de cobertura.
+	Validar rango entre 0 y 100.
+	Modalidad de Pago
+	Lista
+	Mensual / Trimestral / Anual.
+	Obligatorio.
+	Condiciones Generales
+	Texto largo
+	Condiciones contractuales base del tipo de seguro.
+	Obligatorio.
+	Estado
+	Lista (Activo / Inactivo)
+	Situación operativa del tipo de seguro.
+	Por defecto “Activo”.
+	Campos Opcionales:
+Campo
+	Descripción
+	Deducible Estándar (%)
+	Porcentaje deducible aplicado según tipo.
+	Vigencia Estándar (meses)
+	Período sugerido de duración del seguro.
+	Observaciones
+	Notas internas o comentarios adicionales.
+	
+
+9. Acciones Disponibles
+Acción
+	Descripción
+	Resultado Esperado
+	Nuevo
+	Permite registrar un nuevo tipo de seguro.
+	Se crea un registro activo disponible para configuración de pólizas.
+	Editar
+	Modifica parámetros o condiciones del tipo de seguro.
+	Se actualizan los datos y se registra en el log contable.
+	Consultar
+	Muestra información completa en modo lectura.
+	Sin opción de modificación.
+	Desactivar
+	Cambia el estado del tipo de seguro a Inactivo.
+	No podrá usarse en nuevas pólizas.
+	Buscar / Filtrar
+	Permite búsquedas por código, nombre o categoría.
+	Lista filtrada según criterios.
+	Exportar
+	Exporta el catálogo a Excel o PDF.
+	Incluye filtros aplicados.
+	
+
+10. Reglas de Negocio
+1. Cada Tipo de Seguro debe tener un Código y Nombre únicos dentro de la razón social.
+
+2. Los registros no se eliminan, sólo pueden desactivarse para mantener la trazabilidad.
+
+3. No se podrán crear pólizas con tipos de seguros en estado Inactivo.
+
+4. El Porcentaje de Cobertura Base debe estar entre 0 y 100, y será utilizado en el cálculo automático de primas.
+
+5. Si un tipo de seguro es modificado, las pólizas ya asociadas conservarán su configuración original (no retroactiva).
+
+6. Toda creación, edición o desactivación debe registrarse en el Log de Auditoría Contable con usuario, fecha, hora y acción.
+
+7. En entornos multi país, el sistema ajustará los nombres y terminologías de los seguros según el idioma y normativa local.
+
+8. Los deducibles y vigencias estándar son sugeridos, y pueden personalizarse al registrar pólizas específicas.
+
+9. Un tipo de seguro no podrá eliminarse mientras existan pólizas asociadas activas.
+
+10. Si el tipo de seguro se desactiva, el sistema alertará al usuario cuando existan pólizas vigentes vinculadas a dicho tipo.
+
+11. Integraciones
+Módulo / Servicio
+	Descripción
+	Módulo de Pólizas de Activos Fijos
+	Utiliza este catálogo para seleccionar el tipo de seguro en el registro de pólizas.
+	Log de Auditoría Contable
+	Registra automáticamente toda operación realizada sobre el maestro.
+	Catálogo de Países y Monedas
+	Valida campos y condiciones según parámetros regionales.
+	Módulo de Cálculo de Primas
+	Toma los parámetros base (porcentaje, deducible, vigencia) para determinar la prima inicial.
+	
+
+12. Consideraciones Técnicas
+   * Implementación mediante API REST con operaciones CRUD.
+
+   * Tabla destino: AF_MA_TIPO_SEGURO.
+
+   * Soporte para carga masiva mediante plantilla Excel validada.
+
+   * Los parámetros de cobertura y condiciones serán parametrizables por país.
+
+   * Integración directa con los componentes del módulo de Pólizas.
+
+   * Registro automático en log contable.
+
+   * Interfaz con buscador, paginación y validación en línea.
+
+13. Requisitos No Funcionales
+Categoría
+	Requisito
+	Seguridad
+	Acceso restringido a usuarios con rol “Administrador de Activos Fijos”.
+	Usabilidad
+	Interfaz unificada con diseño estándar de tablas maestras.
+	Auditoría
+	Registro obligatorio de acciones CRUD.
+	14. Criterios de Aceptación
+      1. El usuario puede crear un tipo de seguro con todos los campos obligatorios.
+
+      2. El sistema valida duplicidad de nombre o código.
+
+      3. Los porcentajes de cobertura deben estar en el rango permitido (0–100).
+
+      4. Los tipos de seguro creados aparecen disponibles en el módulo de Pólizas.
+
+      5. Al desactivar un tipo de seguro con pólizas activas, el sistema muestra advertencia.
+
+      6. Todas las acciones quedan registradas en el Log Contable.
+
+      7. La exportación del catálogo funciona correctamente en formato Excel y PDF.
+
+      8. El tiempo de búsqueda y carga no supera los 3 segundos.
+15. Comentarios / Observaciones
+         * Esta HU define un componente base y transversal del sistema contable de activos fijos, al servir de parámetro para la creación de pólizas y el cálculo de primas asegurables.
+
+         * Garantiza uniformidad en las modalidades de seguro a nivel multipaís y control contable.
+
+         * El diseño de la pantalla debe mantener coherencia con el Maestro de Aseguradoras (HU-AF-TAB-001).
+
+         * La gestión de estos registros debe formar parte del plan de auditoría funcional del sistema.
