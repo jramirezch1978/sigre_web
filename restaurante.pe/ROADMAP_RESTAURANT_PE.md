@@ -22,7 +22,8 @@ El roadmap ordena el desarrollo siguiendo la misma lógica de dependencias del E
 flowchart LR
     A["Fase 1\nFundación + Maestros"] --> B["Fase 2\nCompras + Almacén"]
     B --> C["Fase 3\nFinanzas + Activos Fijos"]
-    C --> D["Fase 4\nRRHH + Contabilidad + Producción\n(en paralelo)"]
+    C --> D["Fase 4\nProducción + Contabilidad"]
+    C --> E["Fase 4.1 (paralelo)\nRRHH"]
 ```
 
 ---
@@ -76,7 +77,7 @@ flowchart TB
     end
 ```
 
-> **Nota:** En la Fase 1 todo el equipo trabaja junto en fundación y maestros. En la Fase 2, el Equipo A (Compras+Almacén) toma el liderazgo mientras B apoya. En la Fase 3, el Equipo B lidera Finanzas+Activos. En la Fase 4, los tres equipos trabajan en paralelo: A (Producción), B (Contabilidad), C (RRHH).
+> **Nota:** En la Fase 1 todo el equipo trabaja junto en fundación y maestros. En la Fase 2, el Equipo A (Compras+Almacén) toma el liderazgo mientras B apoya. En la Fase 3, el Equipo B lidera Finanzas+Activos. En la Fase 4, Equipo A (Producción) y B (Contabilidad) trabajan juntos. En paralelo, la Fase 4.1 corre con el Equipo C (RRHH) de forma independiente.
 
 ---
 
@@ -176,16 +177,20 @@ flowchart TB
         F3A["Eq. B: Finanzas (CxP, CxC, Tesorería)"]
         F3B["Eq. A: Activos Fijos (depreciación, seguros)"]
     end
-    subgraph Fase4["Fase 4: RRHH ∥ Contabilidad + Producción (S15–S20)"]
+    subgraph Fase4["Fase 4: Producción + Contabilidad (S15–S20)"]
         direction LR
-        F4A["Eq. C: RRHH (planilla, asistencia, liquidaciones)"]
+        F4A["Eq. A: Producción (recetas, órdenes, costeo)"]
         F4B["Eq. B: Contabilidad (asientos, cierres, EEFF)"]
-        F4C["Eq. A: Producción (recetas, órdenes, costeo)"]
-        F4D[Integración + QA + Piloto]
+        F4C[Integración + QA + Piloto]
+    end
+    subgraph Fase41["Fase 4.1 (paralelo): RRHH (S15–S20)"]
+        direction LR
+        F41A["Eq. C: RRHH (planilla, asistencia, liquidaciones)"]
     end
     Fase1 --> Fase2
     Fase2 --> Fase3
     Fase3 --> Fase4
+    Fase3 --> Fase41
 ```
 
 ---
@@ -226,22 +231,25 @@ gantt
     Reportes Finanzas + Activos Fijos                         :f3a5, after f3a4, 1w
     Hito M3 — Finanzas + Activos operativos                   :milestone, m3, 2026-06-22, 0d
 
-    section Fase 4 — RRHH + Contabilidad + Producción (paralelo)
-    Eq.C RRHH: Ficha trabajador + contratos                   :f4c1, 2026-06-15, 2w
-    Eq.C RRHH: Asistencia (POS/App/GPS)                       :f4c2, after f4c1, 1w
-    Eq.C RRHH: Planilla + CTS + gratificaciones               :f4c3, after f4c2, 2w
-    Eq.C RRHH: Liquidaciones + propinas + regulatorios         :f4c4, after f4c3, 1w
-    Eq.C RRHH: Reportes + archivos (PLAME)                    :f4c5, after f4c4, 1w
+    section Fase 4 — Producción + Contabilidad
+    Eq.A Producción: Recetas + órdenes + costeo                :f4a1, 2026-06-15, 3w
+    Eq.A Producción: Consumo almacén + reportes                :f4a2, after f4a1, 1w
     Eq.B Contabilidad: Asientos manuales + automáticos         :f4b1, 2026-06-15, 2w
     Eq.B Contabilidad: Pre-asientos desde todos los módulos    :f4b2, after f4b1, 1w
     Eq.B Contabilidad: Cierres mensual + anual + EEFF          :f4b3, after f4b2, 2w
     Eq.B Contabilidad: Libros electrónicos (PLE/SIRE)          :f4b4, after f4b3, 1w
-    Eq.A Producción: Recetas + órdenes + costeo                :f4a1, 2026-06-15, 3w
-    Eq.A Producción: Consumo almacén + reportes                :f4a2, after f4a1, 1w
     Integración contable de TODOS los módulos                  :f4int, 2026-07-13, 1w
     QA integral + pruebas end-to-end                           :f4qa, after f4int, 1w
     Piloto con usuarios reales                                 :f4pilot, after f4qa, 1w
     Hito M4 — ERP completo en producción                       :milestone, m4, 2026-08-03, 0d
+
+    section Fase 4.1 — RRHH (en paralelo)
+    Eq.C RRHH: Ficha trabajador + contratos                   :f41c1, 2026-06-15, 2w
+    Eq.C RRHH: Asistencia (POS/App/GPS)                       :f41c2, after f41c1, 1w
+    Eq.C RRHH: Planilla + CTS + gratificaciones               :f41c3, after f41c2, 2w
+    Eq.C RRHH: Liquidaciones + propinas + regulatorios         :f41c4, after f41c3, 1w
+    Eq.C RRHH: Reportes + archivos (PLAME)                    :f41c5, after f41c4, 1w
+    Hito M4.1 — RRHH operativo                                :milestone, m41, 2026-08-03, 0d
 ```
 
 ---
@@ -356,24 +364,20 @@ gantt
 
 ---
 
-### Fase 4: RRHH ∥ Contabilidad + Producción (Semanas 15–20)
+### Fase 4: Producción + Contabilidad (Semanas 15–20)
 
 **Duración:** 6 semanas (con overlap de 1 semana sobre Fase 3)  
-**Equipos:** 3 equipos en paralelo — C (RRHH), B (Contabilidad), A (Producción)  
-**Referencia SIGRE:** RRHH necesita la infraestructura financiera (cuentas bancarias, formas de pago) que ya estará lista. Contabilidad es el receptor final de pre-asientos de todos los módulos. Producción solo necesita Almacén.
+**Equipos:** A (Producción) y B (Contabilidad)  
+**Referencia SIGRE:** Contabilidad es el receptor final de pre-asientos de todos los módulos. Producción solo necesita Almacén (ya listo desde Fase 2).
 
-> **Justificación del paralelismo:** RRHH y Contabilidad son funcionalmente independientes durante el desarrollo. RRHH gestiona personas y planilla; Contabilidad gestiona asientos y cierres. La integración (pre-asientos de planilla) se cierra en las últimas semanas.
-
-#### Equipo C: RRHH (2 Backend + 1 Frontend)
+#### Equipo A: Producción (3 Backend + 2 Frontend)
 
 | Semana | Backend | Frontend |
 |:------:|---------|----------|
-| S15–S16 | Ficha trabajador completa, contratos, renovaciones, historial | Pantalla ficha empleado |
-| S16 | Asistencia: marcaciones POS/App/biométrico, reglas tardanza/falta | Pantalla asistencia y marcación |
-| S17–S18 | Planilla: cálculo sueldo, horas extra, CTS, gratificaciones, AFP, EsSalud | Pantalla cálculo planilla |
-| S18 | Liquidaciones, beneficios sociales, propinas, recargo al consumo | Pantalla liquidaciones |
-| S19 | PLAME, archivos regulatorios, boletas de pago electrónicas | Generación archivos y boletas |
-| S19–S20 | Reportes: planilla, asistencia, headcount, rotación, KPIs | Reportes |
+| S15–S16 | Recetas (detalle insumos con merma), versiones de receta | Pantalla receta con drag & drop insumos |
+| S17 | Órdenes de producción, consumo automático de almacén | Pantalla orden de producción |
+| S18 | Costeo por receta (materia prima + mano de obra + indirectos) | Pantalla costeo consolidado |
+| S18 | Reportes: costos, consumos, rendimiento por receta | Reportes |
 
 #### Equipo B: Contabilidad (3 Backend + 2 Frontend + 1 QA)
 
@@ -386,16 +390,7 @@ gantt
 | S19 | EEFF: Balance General, Estado de Resultados, Flujo de Efectivo, Patrimonio | Pantalla EEFF con export |
 | S19 | Libros electrónicos (PLE/SIRE u equivalente por país) | Generación archivos |
 
-#### Equipo A: Producción (2 Backend + 1 Frontend)
-
-| Semana | Backend | Frontend |
-|:------:|---------|----------|
-| S15–S16 | Recetas (detalle insumos con merma), versiones de receta | Pantalla receta con drag & drop insumos |
-| S17 | Órdenes de producción, consumo automático de almacén | Pantalla orden de producción |
-| S18 | Costeo por receta (materia prima + mano de obra + indirectos) | Pantalla costeo consolidado |
-| S18 | Reportes: costos, consumos, rendimiento por receta | Reportes |
-
-#### Integración y cierre (Todo el equipo, Semanas 18–20)
+#### Integración y cierre (Equipos A + B, Semanas 18–20)
 
 | Semana | Actividad |
 |:------:|-----------|
@@ -404,7 +399,30 @@ gantt
 | S20 | Piloto con usuarios reales, corrección de bugs críticos |
 | S20 | Documentación operativa y entrega |
 
-**Criterio de salida (Hito M4):** ERP completo operativo. Planilla calculada y pagada. Cierre contable ejecutado. Producción con costeo. Al menos un piloto exitoso con usuarios reales.
+**Criterio de salida (Hito M4):** Cierre contable ejecutado. Producción con costeo. Integración de pre-asientos de todos los módulos. Al menos un piloto exitoso.
+
+---
+
+### Fase 4.1 (en paralelo): RRHH (Semanas 15–20)
+
+**Duración:** 6 semanas (corre en paralelo con la Fase 4)  
+**Equipo:** C (RRHH) — equipo independiente  
+**Referencia SIGRE:** RRHH necesita la infraestructura financiera (cuentas bancarias, formas de pago) que ya estará lista desde Fase 3. Es funcionalmente independiente de Contabilidad y Producción durante el desarrollo.
+
+> **Justificación del paralelismo:** RRHH gestiona personas y planilla; Contabilidad gestiona asientos y cierres. Son independientes entre sí. La integración (pre-asientos de planilla → Contabilidad) se cierra en las últimas semanas de la Fase 4.
+
+#### Equipo C: RRHH (2 Backend + 1 Frontend)
+
+| Semana | Backend | Frontend |
+|:------:|---------|----------|
+| S15–S16 | Ficha trabajador completa, contratos, renovaciones, historial | Pantalla ficha empleado |
+| S16 | Asistencia: marcaciones POS/App/biométrico, reglas tardanza/falta | Pantalla asistencia y marcación |
+| S17–S18 | Planilla: cálculo sueldo, horas extra, CTS, gratificaciones, AFP, EsSalud | Pantalla cálculo planilla |
+| S18 | Liquidaciones, beneficios sociales, propinas, recargo al consumo | Pantalla liquidaciones |
+| S19 | PLAME, archivos regulatorios, boletas de pago electrónicas | Generación archivos y boletas |
+| S19–S20 | Reportes: planilla, asistencia, headcount, rotación, KPIs | Reportes |
+
+**Criterio de salida (Hito M4.1):** Planilla calculada y pagada. Liquidaciones procesadas. Archivos regulatorios generados. RRHH operativo.
 
 ---
 
@@ -415,7 +433,8 @@ gantt
 | M1 | Maestros listos | S5 | Fin mes 1 | Todos los CRUD de maestros funcionales, auth + menú dinámico |
 | M2 | Compras + Almacén operativos | S11 | Fin mes 2.5 | Flujo OC → Aprobación → Recepción → Stock → Kardex cerrado |
 | M3 | Finanzas + Activos operativos | S16 | Fin mes 4 | CxP/CxC, tesorería, conciliación, depreciación de activos |
-| M4 | ERP completo en producción | S20 | Fin mes 5 | RRHH + Contabilidad + Producción cerrados, piloto exitoso |
+| M4 | Producción + Contabilidad operativos | S20 | Fin mes 5 | Contabilidad con cierres y EEFF, producción con costeo, piloto exitoso |
+| M4.1 | RRHH operativo | S20 | Fin mes 5 | Planilla calculada y pagada, liquidaciones, archivos regulatorios |
 
 ```mermaid
 timeline
@@ -423,7 +442,8 @@ timeline
     Semana 5  : M1 Maestros listos
     Semana 11 : M2 Compras + Almacen operativos
     Semana 16 : M3 Finanzas + Activos operativos
-    Semana 20 : M4 ERP completo — RRHH + Contabilidad + Produccion
+    Semana 20 : M4 Produccion + Contabilidad operativos
+             : M4.1 RRHH operativo (paralelo)
 ```
 
 ---
