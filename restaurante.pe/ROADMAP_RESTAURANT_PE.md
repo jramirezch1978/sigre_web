@@ -555,32 +555,33 @@ flowchart LR
 
 ### 9.1 Modelo de seguridad
 
-El sistema de acceso se basa en **roles creados a demanda por el usuario administrador**, con asignación granular de permisos a nivel de opción de menú.
+El sistema de acceso se basa en **roles creados a demanda por el usuario administrador**. Cada usuario tiene **un solo rol**, y de manera extraordinaria puede tener opciones de menú asignadas individualmente.
 
 ```mermaid
 flowchart TB
     subgraph Entidades
         USR[Usuario]
         ROL[Rol]
-        PERM[Permiso]
         MENU[Opción de menú]
         MOD[Módulo]
     end
-    USR -->|N:M| ROL
-    ROL -->|N:M| PERM
-    PERM -->|1:1| MENU
-    MENU -->|N:1| MOD
-    USR -->|N:M directo| PERM
+    USR -->|N:1 un usuario tiene un solo rol| ROL
+    ROL -->|N:M un rol tiene muchas opciones| MENU
+    MENU -->|N:1 una opción pertenece a un módulo| MOD
+    USR -.->|N:M extraordinario / individual| MENU
 ```
+
+> **Cardinalidades:** Un usuario tiene **un solo** rol. Un rol puede tener **muchos** usuarios. Un rol tiene **una o muchas** opciones de menú. Una opción de menú puede estar en **uno o muchos** roles. Una opción de menú pertenece a **un solo** módulo. Un módulo tiene **una o muchas** opciones de menú. De manera **extraordinaria**, un usuario puede tener asociadas opciones de menú de forma individual (línea punteada).
 
 ### 9.2 Reglas de negocio del control de acceso
 
 1. **Roles dinámicos:** Los roles NO son fijos en código. El usuario administrador crea, modifica y elimina roles a demanda (ej.: "Jefe de almacén Lima", "Contador corporativo", "Cajero sucursal X").
-2. **Opciones de menú por rol:** Cada rol tiene asociadas las opciones de menú que puede ver. Al iniciar sesión, el frontend carga **únicamente** las opciones que corresponden a los roles del usuario.
-3. **Asignación individual:** Además de los roles, se puede asignar o revocar opciones de menú a un usuario **de manera individual**, para excepciones (ej.: un usuario que necesita acceso a una sola pantalla de un módulo que no le corresponde por rol).
-4. **Menú cargado por módulo:** El frontend organiza las opciones de menú agrupadas por módulo. Solo se muestran los módulos que tengan al menos una opción permitida.
-5. **Permisos por acción:** Cada opción de menú puede tener permisos granulares: ver, crear, editar, eliminar, aprobar, imprimir, exportar.
-6. **Scope multiempresa:** Los permisos aplican dentro del contexto de la empresa/sucursal seleccionada. Un usuario puede tener roles distintos por empresa.
+2. **Un usuario = un rol:** Cada usuario tiene asignado **un solo rol**. Un rol puede tener asignados muchos usuarios. Esto simplifica la gestión y evita conflictos de permisos.
+3. **Opciones de menú por rol:** Cada rol tiene asociadas **una o muchas** opciones de menú. Una opción de menú puede estar asignada a **uno o muchos** roles. Al iniciar sesión, el frontend carga **únicamente** las opciones del rol del usuario.
+4. **Asignación individual (extraordinaria):** De manera excepcional, un usuario puede tener asociadas **una o muchas opciones de menú de forma individual**, sin que estén en su rol. Esto cubre casos como: un usuario que necesita acceso puntual a una pantalla que no corresponde a su rol.
+5. **Menú cargado por módulo:** El frontend organiza las opciones de menú agrupadas por módulo. Solo se muestran los módulos que tengan al menos una opción permitida (ya sea por rol o por asignación individual).
+6. **Permisos por acción:** Cada opción de menú puede tener permisos granulares: ver, crear, editar, eliminar, aprobar, imprimir, exportar.
+7. **Scope multiempresa:** Los permisos aplican dentro del contexto de la empresa/sucursal seleccionada.
 
 ### 9.3 Flujo de carga del menú dinámico
 
@@ -595,8 +596,8 @@ sequenceDiagram
     U->>FE: Inicia sesión (usuario + contraseña)
     FE->>GW: POST /api/auth/login
     GW->>AUTH: Validar credenciales
-    AUTH->>DB: Verificar usuario, obtener roles
-    DB-->>AUTH: Roles + permisos + opciones individuales
+    AUTH->>DB: Verificar usuario, obtener rol + opciones individuales
+    DB-->>AUTH: Rol + opciones del rol + opciones individuales
     AUTH-->>GW: JWT token + menú permitido
     GW-->>FE: JWT + estructura de menú por módulo
     FE->>FE: Renderizar menú dinámico (solo opciones permitidas)
@@ -611,15 +612,16 @@ sequenceDiagram
 
 | Tabla | Campos principales | Descripción |
 |-------|-------------------|-------------|
-| `usuario` | id, username, password_hash, email, nombre, activo, empresa_default_id | Usuarios del sistema |
-| `rol` | id, codigo, nombre, descripcion, empresa_id, activo | Roles creados a demanda |
-| `usuario_rol` | usuario_id, rol_id, empresa_id | Asignación de roles a usuario (por empresa) |
+| `usuario` | id, username, password_hash, email, nombre, **rol_id**, empresa_default_id, activo | Usuarios del sistema. Cada usuario tiene **un solo rol** (FK directo) |
+| `rol` | id, codigo, nombre, descripcion, empresa_id, activo | Roles creados a demanda. Un rol agrupa opciones de menú |
 | `modulo` | id, codigo, nombre, icono, orden | Módulos del ERP (Almacén, Compras, etc.) |
-| `opcion_menu` | id, modulo_id, padre_id, codigo, nombre, ruta_frontend, icono, orden, activo | Opciones del menú (jerárquicas) |
+| `opcion_menu` | id, modulo_id, padre_id, codigo, nombre, ruta_frontend, icono, orden, activo | Opciones del menú (jerárquicas). Una opción pertenece a **un solo módulo** |
 | `accion` | id, codigo, nombre | Acciones posibles (ver, crear, editar, eliminar, aprobar, imprimir, exportar) |
-| `permiso` | id, opcion_menu_id, accion_id | Permiso = opción + acción |
-| `rol_permiso` | rol_id, permiso_id | Permisos asignados al rol |
-| `usuario_permiso` | usuario_id, permiso_id, tipo (CONCEDER/REVOCAR) | Permisos individuales (excepciones) |
+| `permiso` | id, opcion_menu_id, accion_id | Permiso = opción de menú + acción |
+| `rol_opcion_menu` | rol_id, opcion_menu_id | Opciones de menú asignadas al rol (N:M). Un rol tiene muchas opciones; una opción puede estar en muchos roles |
+| `rol_permiso` | rol_id, permiso_id | Permisos granulares (acciones) asignados al rol |
+| `usuario_opcion_menu` | usuario_id, opcion_menu_id | Opciones de menú asignadas de forma **individual/extraordinaria** al usuario (N:M) |
+| `usuario_permiso` | usuario_id, permiso_id | Permisos granulares individuales del usuario (excepciones) |
 | `sesion` | id, usuario_id, token, ip, fecha_inicio, fecha_fin, activa | Control de sesiones |
 
 ---
@@ -919,12 +921,13 @@ erDiagram
     RECETA ||--o{ RECETA_DETALLE : contiene
     RECETA_DETALLE }o--|| ARTICULO : usa
     ORDEN_PRODUCCION }o--|| RECETA : ejecuta
-    USUARIO ||--o{ USUARIO_ROL : tiene
-    USUARIO_ROL }o--|| ROL : es
+    USUARIO }o--|| ROL : "tiene un solo"
+    ROL }o--o{ OPCION_MENU : "tiene muchas / está en muchos"
+    OPCION_MENU }o--|| MODULO : "pertenece a uno"
     ROL ||--o{ ROL_PERMISO : tiene
     ROL_PERMISO }o--|| PERMISO : es
     PERMISO }o--|| OPCION_MENU : sobre
-    OPCION_MENU }o--|| MODULO : pertenece
+    USUARIO }o--o{ OPCION_MENU : "individual extraordinario"
     CONFIG_CLAVE ||--o{ CONFIG_EMPRESA : configura
     CONFIG_CLAVE ||--o{ CONFIG_PAIS : configura
     CONFIG_CLAVE ||--o{ CONFIG_SUCURSAL : configura
