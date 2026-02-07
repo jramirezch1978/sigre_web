@@ -1464,7 +1464,1174 @@ erDiagram
 
 ---
 
-## 23. Decisiones de arquitectura (ADR)
+## 23. Endpoints por microservicio
+
+A continuación se detallan **todos los endpoints REST** de cada microservicio. Convención: `{id}` = path variable, query params para filtros y paginación.
+
+> **Headers obligatorios en todas las peticiones (excepto login):**  
+> `Authorization: Bearer {jwt_token}`  
+> `X-Empresa-Id: {empresaId}`  
+> `X-Sucursal-Id: {sucursalId}`
+
+---
+
+### 23.1 ms-auth-security (:9001)
+
+#### Autenticación
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| POST | `/api/auth/login` | Iniciar sesión (devuelve JWT + menú) |
+| POST | `/api/auth/refresh` | Renovar token con refresh token |
+| POST | `/api/auth/logout` | Cerrar sesión (invalidar token) |
+| GET | `/api/auth/me` | Obtener datos del usuario autenticado |
+| PUT | `/api/auth/cambiar-password` | Cambiar contraseña del usuario autenticado |
+
+#### Usuarios
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/auth/usuarios` | Listar usuarios (paginado, filtros) |
+| GET | `/api/auth/usuarios/{id}` | Obtener usuario por ID |
+| POST | `/api/auth/usuarios` | Crear usuario |
+| PUT | `/api/auth/usuarios/{id}` | Actualizar usuario |
+| DELETE | `/api/auth/usuarios/{id}` | Desactivar usuario (soft delete) |
+| PUT | `/api/auth/usuarios/{id}/reset-password` | Resetear contraseña |
+| GET | `/api/auth/usuarios/{id}/sucursales` | Sucursales asignadas al usuario |
+| PUT | `/api/auth/usuarios/{id}/sucursales` | Asignar sucursales al usuario |
+| GET | `/api/auth/usuarios/{id}/opciones-menu` | Opciones de menú individuales del usuario |
+| PUT | `/api/auth/usuarios/{id}/opciones-menu` | Asignar opciones de menú individuales |
+
+#### Roles
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/auth/roles` | Listar roles |
+| GET | `/api/auth/roles/{id}` | Obtener rol por ID |
+| POST | `/api/auth/roles` | Crear rol |
+| PUT | `/api/auth/roles/{id}` | Actualizar rol |
+| DELETE | `/api/auth/roles/{id}` | Desactivar rol |
+| GET | `/api/auth/roles/{id}/opciones-menu` | Opciones de menú del rol |
+| PUT | `/api/auth/roles/{id}/opciones-menu` | Asignar opciones de menú al rol |
+| GET | `/api/auth/roles/{id}/permisos` | Permisos granulares del rol |
+| PUT | `/api/auth/roles/{id}/permisos` | Asignar permisos al rol |
+
+#### Módulos y menú
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/auth/modulos` | Listar módulos del ERP |
+| GET | `/api/auth/opciones-menu` | Listar todas las opciones de menú |
+| GET | `/api/auth/opciones-menu/arbol` | Árbol jerárquico de opciones por módulo |
+| GET | `/api/auth/acciones` | Listar acciones posibles (VER, CREAR, EDITAR...) |
+
+#### Sesiones
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/auth/sesiones` | Listar sesiones activas |
+| DELETE | `/api/auth/sesiones/{id}` | Cerrar sesión específica |
+
+---
+
+### 23.2 ms-core-maestros (:9002)
+
+#### Empresa y estructura organizacional
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/core/empresas` | Listar empresas |
+| GET | `/api/core/empresas/{id}` | Obtener empresa |
+| POST | `/api/core/empresas` | Crear empresa |
+| PUT | `/api/core/empresas/{id}` | Actualizar empresa |
+| GET | `/api/core/sucursales` | Listar sucursales (filtro por empresa) |
+| GET | `/api/core/sucursales/{id}` | Obtener sucursal |
+| POST | `/api/core/sucursales` | Crear sucursal |
+| PUT | `/api/core/sucursales/{id}` | Actualizar sucursal |
+
+#### Geografía
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/core/paises` | Listar países |
+| GET | `/api/core/paises/{id}/departamentos` | Departamentos de un país |
+| GET | `/api/core/departamentos/{id}/provincias` | Provincias de un departamento |
+| GET | `/api/core/provincias/{id}/distritos` | Distritos de una provincia |
+
+#### Monedas y tipo de cambio
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/core/monedas` | Listar monedas |
+| POST | `/api/core/monedas` | Crear moneda |
+| PUT | `/api/core/monedas/{id}` | Actualizar moneda |
+| GET | `/api/core/tipos-cambio` | Listar tipos de cambio (filtro por fecha, moneda) |
+| GET | `/api/core/tipos-cambio/fecha/{fecha}` | Tipo de cambio de una fecha |
+| POST | `/api/core/tipos-cambio` | Registrar tipo de cambio |
+
+#### Relaciones comerciales (proveedor/cliente unificado)
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/core/relaciones-comerciales` | Listar (filtro: esProveedor, esCliente, documento) |
+| GET | `/api/core/relaciones-comerciales/{id}` | Obtener relación comercial |
+| POST | `/api/core/relaciones-comerciales` | Crear relación comercial |
+| PUT | `/api/core/relaciones-comerciales/{id}` | Actualizar relación comercial |
+| DELETE | `/api/core/relaciones-comerciales/{id}` | Desactivar |
+| GET | `/api/core/relaciones-comerciales/{id}/contactos` | Contactos de la relación |
+| POST | `/api/core/relaciones-comerciales/{id}/contactos` | Agregar contacto |
+| GET | `/api/core/relaciones-comerciales/{id}/cuentas-bancarias` | Cuentas bancarias |
+| POST | `/api/core/relaciones-comerciales/{id}/cuentas-bancarias` | Agregar cuenta bancaria |
+| GET | `/api/core/tipos-documento-identidad` | Listar tipos (RUC, DNI, NIT...) |
+
+#### Artículos y clasificación
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/core/articulos` | Listar artículos (paginado, filtros) |
+| GET | `/api/core/articulos/{id}` | Obtener artículo completo |
+| POST | `/api/core/articulos` | Crear artículo |
+| PUT | `/api/core/articulos/{id}` | Actualizar artículo |
+| DELETE | `/api/core/articulos/{id}` | Desactivar artículo |
+| GET | `/api/core/articulos/{id}/proveedores` | Proveedores del artículo |
+| POST | `/api/core/articulos/{id}/proveedores` | Asociar proveedor a artículo |
+| GET | `/api/core/articulos/{id}/almacenes` | Config de stock por almacén |
+| POST | `/api/core/articulos/{id}/almacenes` | Configurar artículo en almacén |
+| GET | `/api/core/categorias` | Listar categorías (jerárquico) |
+| GET | `/api/core/categorias/arbol` | Árbol completo de categorías |
+| POST | `/api/core/categorias` | Crear categoría |
+| PUT | `/api/core/categorias/{id}` | Actualizar categoría |
+| GET | `/api/core/unidades-medida` | Listar unidades de medida |
+| POST | `/api/core/unidades-medida` | Crear unidad |
+| GET | `/api/core/conversiones-unidad` | Listar conversiones |
+| POST | `/api/core/conversiones-unidad` | Crear conversión |
+| GET | `/api/core/naturalezas-contables` | Listar naturalezas contables |
+| POST | `/api/core/naturalezas-contables` | Crear naturaleza contable |
+
+#### Impuestos y retenciones
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/core/impuestos` | Listar impuestos (filtro por país) |
+| POST | `/api/core/impuestos` | Crear impuesto |
+| PUT | `/api/core/impuestos/{id}` | Actualizar impuesto |
+| GET | `/api/core/retenciones` | Listar retenciones |
+| POST | `/api/core/retenciones` | Crear retención |
+| GET | `/api/core/detracciones` | Listar detracciones |
+| POST | `/api/core/detracciones` | Crear detracción |
+
+#### Numeradores, condiciones y formas de pago
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/core/numeradores` | Listar numeradores |
+| POST | `/api/core/numeradores` | Crear numerador |
+| POST | `/api/core/numeradores/siguiente` | Obtener siguiente número |
+| GET | `/api/core/condiciones-pago` | Listar condiciones de pago |
+| POST | `/api/core/condiciones-pago` | Crear condición de pago |
+| GET | `/api/core/formas-pago` | Listar formas de pago |
+| POST | `/api/core/formas-pago` | Crear forma de pago |
+
+#### Configuración jerárquica
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/core/config/claves` | Catálogo de claves de configuración |
+| GET | `/api/core/config/resolver?clave={clave}` | Resolver valor (busca en los 4 niveles) |
+| GET | `/api/core/config/empresa` | Configuraciones a nivel empresa |
+| PUT | `/api/core/config/empresa` | Guardar configuración empresa |
+| GET | `/api/core/config/pais/{paisId}` | Configuraciones a nivel país |
+| PUT | `/api/core/config/pais/{paisId}` | Guardar configuración país |
+| GET | `/api/core/config/sucursal/{sucursalId}` | Configuraciones a nivel sucursal |
+| PUT | `/api/core/config/sucursal/{sucursalId}` | Guardar configuración sucursal |
+| GET | `/api/core/config/usuario/{usuarioId}` | Configuraciones a nivel usuario |
+| PUT | `/api/core/config/usuario/{usuarioId}` | Guardar configuración usuario |
+
+#### Tablas auxiliares
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/core/ejercicios-periodos` | Listar ejercicios y períodos |
+| POST | `/api/core/ejercicios-periodos` | Crear ejercicio/período |
+| PUT | `/api/core/ejercicios-periodos/{id}` | Actualizar estado (ABIERTO/CERRADO) |
+| GET | `/api/core/parametros-sistema` | Listar parámetros del sistema |
+| PUT | `/api/core/parametros-sistema` | Actualizar parámetros |
+
+---
+
+### 23.3 ms-almacen (:9003)
+
+#### Almacenes
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/almacen/almacenes` | Listar almacenes (filtro por sucursal) |
+| GET | `/api/almacen/almacenes/{id}` | Obtener almacén |
+| POST | `/api/almacen/almacenes` | Crear almacén |
+| PUT | `/api/almacen/almacenes/{id}` | Actualizar almacén |
+
+#### Tipos de movimiento
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/almacen/tipos-movimiento` | Listar tipos de movimiento |
+| POST | `/api/almacen/tipos-movimiento` | Crear tipo de movimiento |
+| PUT | `/api/almacen/tipos-movimiento/{id}` | Actualizar tipo |
+
+#### Movimientos de almacén
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/almacen/movimientos` | Listar movimientos (paginado, filtros: almacén, fecha, tipo) |
+| GET | `/api/almacen/movimientos/{id}` | Obtener movimiento con detalle |
+| POST | `/api/almacen/movimientos` | Crear movimiento (borrador) |
+| PUT | `/api/almacen/movimientos/{id}` | Actualizar movimiento (solo borrador) |
+| POST | `/api/almacen/movimientos/{id}/confirmar` | Confirmar movimiento (actualiza stock y kardex) |
+| POST | `/api/almacen/movimientos/{id}/anular` | Anular movimiento |
+
+#### Stock y kardex
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/almacen/stock` | Consultar stock (filtros: almacén, artículo, categoría) |
+| GET | `/api/almacen/stock/{articuloId}/almacen/{almacenId}` | Stock de un artículo en un almacén |
+| GET | `/api/almacen/kardex` | Consultar kardex (filtros: artículo, almacén, fechaDesde, fechaHasta) |
+| GET | `/api/almacen/stock/bajo-minimo` | Artículos con stock bajo mínimo |
+| POST | `/api/almacen/stock/reprocesar` | Reprocesar saldos de inventario |
+
+#### Inventario físico
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/almacen/inventarios-fisicos` | Listar tomas de inventario |
+| GET | `/api/almacen/inventarios-fisicos/{id}` | Obtener inventario con detalle |
+| POST | `/api/almacen/inventarios-fisicos` | Iniciar toma de inventario |
+| PUT | `/api/almacen/inventarios-fisicos/{id}/detalle` | Registrar conteo físico |
+| POST | `/api/almacen/inventarios-fisicos/{id}/comparar` | Comparar físico vs sistema |
+| POST | `/api/almacen/inventarios-fisicos/{id}/ajustar` | Aplicar ajustes de inventario |
+
+#### Traslados y devoluciones
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| POST | `/api/almacen/traslados` | Crear traslado entre almacenes |
+| POST | `/api/almacen/traslados/{id}/confirmar-recepcion` | Confirmar recepción de traslado |
+| POST | `/api/almacen/devoluciones` | Registrar devolución a proveedor |
+| GET | `/api/almacen/devoluciones` | Consultar devoluciones |
+
+#### Reportes
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/almacen/reportes/stock-actual` | Reporte de stock actual |
+| GET | `/api/almacen/reportes/kardex` | Reporte de kardex valorizado |
+| GET | `/api/almacen/reportes/movimientos` | Reporte de movimientos por período |
+| GET | `/api/almacen/reportes/valorizacion` | Valorización económica del stock |
+
+---
+
+### 23.4 ms-compras (:9004)
+
+#### Órdenes de compra
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/compras/ordenes-compra` | Listar OC (paginado, filtros) |
+| GET | `/api/compras/ordenes-compra/{id}` | Obtener OC con detalle |
+| POST | `/api/compras/ordenes-compra` | Crear OC |
+| PUT | `/api/compras/ordenes-compra/{id}` | Actualizar OC (solo borrador) |
+| DELETE | `/api/compras/ordenes-compra/{id}` | Anular OC |
+| POST | `/api/compras/ordenes-compra/{id}/enviar-aprobacion` | Enviar a aprobación |
+| POST | `/api/compras/ordenes-compra/{id}/aprobar` | Aprobar OC |
+| POST | `/api/compras/ordenes-compra/{id}/rechazar` | Rechazar OC |
+| GET | `/api/compras/ordenes-compra/pendientes-aprobacion` | Bandeja de aprobación |
+
+#### Órdenes de servicio
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/compras/ordenes-servicio` | Listar OS |
+| GET | `/api/compras/ordenes-servicio/{id}` | Obtener OS con detalle |
+| POST | `/api/compras/ordenes-servicio` | Crear OS |
+| PUT | `/api/compras/ordenes-servicio/{id}` | Actualizar OS |
+| POST | `/api/compras/ordenes-servicio/{id}/aprobar` | Aprobar OS |
+
+#### Recepción de mercadería
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/compras/recepciones` | Listar recepciones |
+| GET | `/api/compras/recepciones/{id}` | Obtener recepción con detalle |
+| POST | `/api/compras/recepciones` | Crear recepción (vinculada a OC) |
+| POST | `/api/compras/recepciones/{id}/confirmar` | Confirmar recepción (genera mov. almacén) |
+
+#### Reportes
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/compras/reportes/oc-pendientes` | OC pendientes de recepción |
+| GET | `/api/compras/reportes/compras-por-proveedor` | Compras agrupadas por proveedor |
+| GET | `/api/compras/reportes/compras-por-periodo` | Compras por período |
+
+---
+
+### 23.5 ms-finanzas (:9005)
+
+#### Cuentas por pagar (CxP)
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/finanzas/cuentas-pagar` | Listar documentos por pagar |
+| GET | `/api/finanzas/cuentas-pagar/{id}` | Obtener documento |
+| POST | `/api/finanzas/cuentas-pagar` | Registrar factura/documento |
+| PUT | `/api/finanzas/cuentas-pagar/{id}` | Actualizar documento |
+| POST | `/api/finanzas/cuentas-pagar/{id}/anular` | Anular documento |
+| GET | `/api/finanzas/cuentas-pagar/{id}/pagos` | Pagos aplicados al documento |
+
+#### Cuentas por cobrar (CxC)
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/finanzas/cuentas-cobrar` | Listar documentos por cobrar |
+| GET | `/api/finanzas/cuentas-cobrar/{id}` | Obtener documento |
+| POST | `/api/finanzas/cuentas-cobrar` | Registrar documento |
+| PUT | `/api/finanzas/cuentas-cobrar/{id}` | Actualizar documento |
+| GET | `/api/finanzas/cuentas-cobrar/{id}/cobros` | Cobros aplicados |
+
+#### Pagos y cobros
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| POST | `/api/finanzas/pagos` | Registrar pago a proveedor |
+| POST | `/api/finanzas/pagos/{id}/anular` | Anular pago |
+| POST | `/api/finanzas/cobros` | Registrar cobro a cliente |
+| POST | `/api/finanzas/cobros/{id}/anular` | Anular cobro |
+
+#### Tesorería
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/finanzas/cuentas-bancarias` | Listar cuentas bancarias |
+| POST | `/api/finanzas/cuentas-bancarias` | Crear cuenta bancaria |
+| PUT | `/api/finanzas/cuentas-bancarias/{id}` | Actualizar cuenta |
+| GET | `/api/finanzas/movimientos-bancarios` | Listar movimientos bancarios |
+| POST | `/api/finanzas/movimientos-bancarios` | Registrar movimiento |
+| GET | `/api/finanzas/cajas` | Listar cajas |
+| POST | `/api/finanzas/cajas` | Crear caja |
+| PUT | `/api/finanzas/cajas/{id}` | Actualizar caja |
+
+#### Conciliación bancaria
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/finanzas/conciliaciones` | Listar conciliaciones |
+| POST | `/api/finanzas/conciliaciones` | Iniciar conciliación |
+| PUT | `/api/finanzas/conciliaciones/{id}` | Actualizar conciliación (marcar partidas) |
+| POST | `/api/finanzas/conciliaciones/{id}/finalizar` | Finalizar conciliación |
+
+#### Adelantos
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/finanzas/adelantos` | Listar adelantos |
+| POST | `/api/finanzas/adelantos` | Crear solicitud de adelanto |
+| POST | `/api/finanzas/adelantos/{id}/aprobar` | Aprobar adelanto |
+| POST | `/api/finanzas/adelantos/{id}/liquidar` | Liquidar adelanto |
+
+#### Reportes
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/finanzas/reportes/estado-cuenta-proveedor` | Estado de cuenta por proveedor |
+| GET | `/api/finanzas/reportes/estado-cuenta-cliente` | Estado de cuenta por cliente |
+| GET | `/api/finanzas/reportes/flujo-caja` | Flujo de caja |
+| GET | `/api/finanzas/reportes/antiguedad-saldos` | Antigüedad de saldos |
+| GET | `/api/finanzas/reportes/programacion-pagos` | Programación de pagos |
+
+---
+
+### 23.6 ms-contabilidad (:9006)
+
+#### Plan contable
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/contabilidad/cuentas-contables` | Listar cuentas (jerárquico) |
+| GET | `/api/contabilidad/cuentas-contables/arbol` | Árbol completo del plan |
+| POST | `/api/contabilidad/cuentas-contables` | Crear cuenta |
+| PUT | `/api/contabilidad/cuentas-contables/{id}` | Actualizar cuenta |
+| GET | `/api/contabilidad/centros-costo` | Listar centros de costo |
+| POST | `/api/contabilidad/centros-costo` | Crear centro de costo |
+| GET | `/api/contabilidad/libros-contables` | Listar libros contables |
+
+#### Asientos contables
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/contabilidad/asientos` | Listar asientos (filtros: período, libro, tipo) |
+| GET | `/api/contabilidad/asientos/{id}` | Obtener asiento con detalle |
+| POST | `/api/contabilidad/asientos` | Crear asiento manual |
+| PUT | `/api/contabilidad/asientos/{id}` | Actualizar asiento (solo borrador) |
+| POST | `/api/contabilidad/asientos/{id}/confirmar` | Confirmar asiento |
+| POST | `/api/contabilidad/asientos/{id}/anular` | Anular asiento |
+
+#### Pre-asientos
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/contabilidad/pre-asientos` | Listar pre-asientos (filtros: estado, módulo) |
+| POST | `/api/contabilidad/pre-asientos/procesar` | Procesar pre-asientos pendientes |
+| POST | `/api/contabilidad/pre-asientos/{id}/reprocesar` | Reprocesar un pre-asiento con error |
+
+#### Matrices contables
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/contabilidad/matrices` | Listar matrices contables |
+| POST | `/api/contabilidad/matrices` | Crear regla de contabilización |
+| PUT | `/api/contabilidad/matrices/{id}` | Actualizar regla |
+
+#### Cierres
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| POST | `/api/contabilidad/cierres/mensual` | Ejecutar cierre mensual |
+| POST | `/api/contabilidad/cierres/anual` | Ejecutar cierre anual |
+| GET | `/api/contabilidad/cierres/estado` | Estado de cierre por período |
+
+#### Reportes / EEFF
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/contabilidad/reportes/balance-general` | Balance General |
+| GET | `/api/contabilidad/reportes/estado-resultados` | Estado de Resultados |
+| GET | `/api/contabilidad/reportes/flujo-efectivo` | Flujo de Efectivo |
+| GET | `/api/contabilidad/reportes/patrimonio` | Estado de Patrimonio |
+| GET | `/api/contabilidad/reportes/libro-diario` | Libro diario |
+| GET | `/api/contabilidad/reportes/libro-mayor` | Libro mayor |
+| POST | `/api/contabilidad/reportes/libros-electronicos` | Generar libros electrónicos (PLE/SIRE) |
+
+---
+
+### 23.7 ms-rrhh (:9007)
+
+#### Trabajadores
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/rrhh/trabajadores` | Listar trabajadores (paginado, filtros) |
+| GET | `/api/rrhh/trabajadores/{id}` | Obtener ficha completa |
+| POST | `/api/rrhh/trabajadores` | Crear trabajador |
+| PUT | `/api/rrhh/trabajadores/{id}` | Actualizar trabajador |
+| POST | `/api/rrhh/trabajadores/{id}/cesar` | Registrar cese |
+| GET | `/api/rrhh/trabajadores/{id}/contratos` | Contratos del trabajador |
+| POST | `/api/rrhh/trabajadores/{id}/contratos` | Crear contrato |
+| PUT | `/api/rrhh/trabajadores/{id}/contratos/{contratoId}/renovar` | Renovar contrato |
+
+#### Estructura organizacional
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/rrhh/areas` | Listar áreas (jerárquico) |
+| POST | `/api/rrhh/areas` | Crear área |
+| GET | `/api/rrhh/cargos` | Listar cargos |
+| POST | `/api/rrhh/cargos` | Crear cargo |
+| GET | `/api/rrhh/afps` | Listar AFPs |
+
+#### Asistencia
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/rrhh/asistencias` | Consultar asistencias (filtros: trabajador, fecha) |
+| POST | `/api/rrhh/asistencias/marcar` | Registrar marcación (entrada/salida) |
+| POST | `/api/rrhh/asistencias/carga-masiva` | Carga masiva desde Excel |
+| GET | `/api/rrhh/asistencias/resumen-mensual` | Resumen mensual por trabajador |
+
+#### Planilla
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/rrhh/conceptos-planilla` | Listar conceptos de planilla |
+| POST | `/api/rrhh/conceptos-planilla` | Crear concepto |
+| GET | `/api/rrhh/planillas` | Listar planillas |
+| POST | `/api/rrhh/planillas` | Crear planilla (período + tipo) |
+| POST | `/api/rrhh/planillas/{id}/calcular` | Calcular planilla |
+| POST | `/api/rrhh/planillas/{id}/aprobar` | Aprobar planilla |
+| POST | `/api/rrhh/planillas/{id}/pagar` | Registrar pago de planilla |
+| POST | `/api/rrhh/planillas/{id}/cerrar` | Cerrar planilla |
+| GET | `/api/rrhh/planillas/{id}/detalle` | Detalle por trabajador y concepto |
+
+#### Liquidaciones y beneficios
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| POST | `/api/rrhh/liquidaciones` | Calcular liquidación de beneficios |
+| GET | `/api/rrhh/liquidaciones/{id}` | Obtener liquidación |
+| GET | `/api/rrhh/vacaciones` | Consultar saldos de vacaciones |
+| POST | `/api/rrhh/vacaciones` | Registrar goce vacacional |
+
+#### Reportes y regulatorios
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/rrhh/reportes/planilla` | Reporte de planilla |
+| GET | `/api/rrhh/reportes/asistencia` | Reporte de asistencia |
+| GET | `/api/rrhh/reportes/headcount` | Reporte de headcount |
+| POST | `/api/rrhh/reportes/plame` | Generar archivo PLAME |
+| POST | `/api/rrhh/reportes/boletas-pago` | Generar boletas de pago (PDF) |
+
+---
+
+### 23.8 ms-activos-fijos (:9008)
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/activos/clases-activo` | Listar clases de activo |
+| POST | `/api/activos/clases-activo` | Crear clase |
+| GET | `/api/activos/ubicaciones` | Listar ubicaciones físicas (jerárquico) |
+| POST | `/api/activos/ubicaciones` | Crear ubicación |
+| GET | `/api/activos/activos-fijos` | Listar activos fijos (paginado, filtros) |
+| GET | `/api/activos/activos-fijos/{id}` | Obtener ficha del activo |
+| POST | `/api/activos/activos-fijos` | Registrar activo |
+| PUT | `/api/activos/activos-fijos/{id}` | Actualizar activo |
+| POST | `/api/activos/activos-fijos/{id}/baja` | Dar de baja activo |
+| POST | `/api/activos/activos-fijos/{id}/revaluar` | Revaluar activo |
+| POST | `/api/activos/depreciacion/ejecutar` | Ejecutar depreciación mensual masiva |
+| GET | `/api/activos/depreciacion/{activoId}` | Historial de depreciación de un activo |
+| GET | `/api/activos/aseguradoras` | Listar aseguradoras |
+| POST | `/api/activos/aseguradoras` | Crear aseguradora |
+| GET | `/api/activos/polizas` | Listar pólizas |
+| POST | `/api/activos/polizas` | Crear póliza |
+| POST | `/api/activos/traslados` | Solicitar traslado de activo |
+| POST | `/api/activos/traslados/{id}/aprobar` | Aprobar traslado |
+| POST | `/api/activos/traslados/{id}/ejecutar` | Ejecutar traslado |
+| GET | `/api/activos/reportes/depreciacion-acumulada` | Reporte depreciación acumulada |
+| GET | `/api/activos/reportes/activos-por-ubicacion` | Activos por ubicación |
+| GET | `/api/activos/reportes/seguros-vigentes` | Seguros vigentes |
+
+---
+
+### 23.9 ms-produccion (:9009)
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/produccion/recetas` | Listar recetas |
+| GET | `/api/produccion/recetas/{id}` | Obtener receta con detalle de insumos |
+| POST | `/api/produccion/recetas` | Crear receta |
+| PUT | `/api/produccion/recetas/{id}` | Actualizar receta |
+| POST | `/api/produccion/recetas/{id}/nueva-version` | Crear nueva versión de receta |
+| GET | `/api/produccion/recetas/{id}/costo-estimado` | Calcular costo estimado de la receta |
+| GET | `/api/produccion/ordenes-produccion` | Listar órdenes de producción |
+| GET | `/api/produccion/ordenes-produccion/{id}` | Obtener orden con detalle |
+| POST | `/api/produccion/ordenes-produccion` | Crear orden de producción |
+| POST | `/api/produccion/ordenes-produccion/{id}/iniciar` | Iniciar producción |
+| POST | `/api/produccion/ordenes-produccion/{id}/completar` | Completar producción (consume almacén) |
+| POST | `/api/produccion/ordenes-produccion/{id}/cancelar` | Cancelar orden |
+| GET | `/api/produccion/ordenes-produccion/{id}/costeo` | Costeo de la orden |
+| GET | `/api/produccion/reportes/costos-por-receta` | Reporte de costos por receta |
+| GET | `/api/produccion/reportes/consumos` | Reporte de consumos |
+| GET | `/api/produccion/reportes/rendimiento` | Reporte de rendimiento |
+
+---
+
+### 23.10 Servicios de soporte
+
+#### ms-auditoria (:9010)
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/auditoria/logs` | Consultar logs de auditoría (filtros: usuario, módulo, entidad, fecha) |
+| GET | `/api/auditoria/logs/{id}` | Detalle de un log (datos antes/después) |
+| GET | `/api/auditoria/accesos` | Consultar logs de acceso (login/logout) |
+| GET | `/api/auditoria/reportes/actividad-usuario` | Actividad por usuario |
+
+#### ms-reportes (:9011)
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| POST | `/api/reportes/generar` | Generar reporte (params: módulo, tipo, filtros, formato PDF/Excel) |
+| GET | `/api/reportes/plantillas` | Listar plantillas de reportes disponibles |
+| GET | `/api/reportes/descargar/{id}` | Descargar reporte generado |
+
+#### ms-notificaciones (:9012)
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/notificaciones` | Listar notificaciones del usuario |
+| PUT | `/api/notificaciones/{id}/leer` | Marcar como leída |
+| PUT | `/api/notificaciones/leer-todas` | Marcar todas como leídas |
+| GET | `/api/notificaciones/no-leidas/count` | Contador de no leídas |
+
+---
+
+## 24. Docker — Compose completo
+
+Archivo `docker-compose.yml` para levantar **todo el ecosistema** en entorno local de desarrollo:
+
+```yaml
+version: '3.9'
+
+services:
+  # ============================================================
+  # INFRAESTRUCTURA
+  # ============================================================
+  
+  postgres:
+    image: postgres:16-alpine
+    container_name: rpe-postgres
+    environment:
+      POSTGRES_DB: restaurant_pe
+      POSTGRES_USER: rpe_admin
+      POSTGRES_PASSWORD: rpe_secret_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init-schemas.sql:/docker-entrypoint-initdb.d/01-init-schemas.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rpe_admin -d restaurant_pe"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rpe-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rpe-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rpe_mq
+      RABBITMQ_DEFAULT_PASS: rpe_mq_2026
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - rpe-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: rpe-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass rpe_redis_2026
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "rpe_redis_2026", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rpe-network
+
+  # ============================================================
+  # SPRING CLOUD INFRASTRUCTURE
+  # ============================================================
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: rpe-eureka
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - rpe-network
+
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    container_name: rpe-config
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: rpe-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATA_REDIS_HOST: rpe-redis
+      SPRING_DATA_REDIS_PASSWORD: rpe_redis_2026
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  # ============================================================
+  # MICROSERVICIOS DE NEGOCIO
+  # ============================================================
+
+  ms-auth-security:
+    build:
+      context: ./ms-auth-security
+      dockerfile: Dockerfile
+    container_name: rpe-auth
+    ports:
+      - "9001:9001"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=auth
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_DATA_REDIS_HOST: rpe-redis
+      SPRING_DATA_REDIS_PASSWORD: rpe_redis_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  ms-core-maestros:
+    build:
+      context: ./ms-core-maestros
+      dockerfile: Dockerfile
+    container_name: rpe-core
+    ports:
+      - "9002:9002"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=core
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  ms-almacen:
+    build:
+      context: ./ms-almacen
+      dockerfile: Dockerfile
+    container_name: rpe-almacen
+    ports:
+      - "9003:9003"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=almacen
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  ms-compras:
+    build:
+      context: ./ms-compras
+      dockerfile: Dockerfile
+    container_name: rpe-compras
+    ports:
+      - "9004:9004"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=compras
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  ms-finanzas:
+    build:
+      context: ./ms-finanzas
+      dockerfile: Dockerfile
+    container_name: rpe-finanzas
+    ports:
+      - "9005:9005"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=finanzas
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  ms-contabilidad:
+    build:
+      context: ./ms-contabilidad
+      dockerfile: Dockerfile
+    container_name: rpe-contabilidad
+    ports:
+      - "9006:9006"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=contabilidad
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  ms-rrhh:
+    build:
+      context: ./ms-rrhh
+      dockerfile: Dockerfile
+    container_name: rpe-rrhh
+    ports:
+      - "9007:9007"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=rrhh
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  ms-activos-fijos:
+    build:
+      context: ./ms-activos-fijos
+      dockerfile: Dockerfile
+    container_name: rpe-activos
+    ports:
+      - "9008:9008"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=activos
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  ms-produccion:
+    build:
+      context: ./ms-produccion
+      dockerfile: Dockerfile
+    container_name: rpe-produccion
+    ports:
+      - "9009:9009"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=produccion
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  # ============================================================
+  # MICROSERVICIOS DE SOPORTE
+  # ============================================================
+
+  ms-auditoria:
+    build:
+      context: ./ms-auditoria
+      dockerfile: Dockerfile
+    container_name: rpe-auditoria
+    ports:
+      - "9010:9010"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=auditoria
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  ms-reportes:
+    build:
+      context: ./ms-reportes
+      dockerfile: Dockerfile
+    container_name: rpe-reportes
+    ports:
+      - "9011:9011"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  ms-notificaciones:
+    build:
+      context: ./ms-notificaciones
+      dockerfile: Dockerfile
+    container_name: rpe-notificaciones
+    ports:
+      - "9012:9012"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
+  # ============================================================
+  # FRONTEND
+  # ============================================================
+
+  frontend:
+    build:
+      context: ./restaurant-pe-frontend
+      dockerfile: Dockerfile
+    container_name: rpe-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks:
+      - rpe-network
+
+# ============================================================
+# VOLÚMENES Y REDES
+# ============================================================
+
+volumes:
+  pgdata:
+    driver: local
+  rabbitmqdata:
+    driver: local
+  redisdata:
+    driver: local
+
+networks:
+  rpe-network:
+    driver: bridge
+    name: rpe-network
+```
+
+### Script de inicialización de esquemas PostgreSQL
+
+Archivo `docker/postgres/init-schemas.sql`:
+
+```sql
+-- ============================================================
+-- Restaurant.pe ERP — Inicialización de esquemas
+-- ============================================================
+
+CREATE SCHEMA IF NOT EXISTS auth;
+CREATE SCHEMA IF NOT EXISTS core;
+CREATE SCHEMA IF NOT EXISTS almacen;
+CREATE SCHEMA IF NOT EXISTS compras;
+CREATE SCHEMA IF NOT EXISTS finanzas;
+CREATE SCHEMA IF NOT EXISTS contabilidad;
+CREATE SCHEMA IF NOT EXISTS rrhh;
+CREATE SCHEMA IF NOT EXISTS activos;
+CREATE SCHEMA IF NOT EXISTS produccion;
+CREATE SCHEMA IF NOT EXISTS auditoria;
+
+-- Permisos para el usuario de la aplicación
+GRANT ALL PRIVILEGES ON SCHEMA auth TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA core TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA almacen TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA compras TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA finanzas TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA contabilidad TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA rrhh TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA activos TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA produccion TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA auditoria TO rpe_admin;
+```
+
+### Resumen de puertos
+
+| Puerto | Servicio | Tipo |
+|:------:|----------|------|
+| 5432 | PostgreSQL | Base de datos |
+| 5672 | RabbitMQ (AMQP) | Mensajería |
+| 15672 | RabbitMQ (Management) | UI admin |
+| 6379 | Redis | Caché |
+| 8761 | Eureka Server | Service Discovery |
+| 8888 | Config Server | Configuración |
+| 8080 | API Gateway | Entry point backend |
+| 9001 | ms-auth-security | Auth y seguridad |
+| 9002 | ms-core-maestros | Maestros |
+| 9003 | ms-almacen | Almacén |
+| 9004 | ms-compras | Compras |
+| 9005 | ms-finanzas | Finanzas |
+| 9006 | ms-contabilidad | Contabilidad |
+| 9007 | ms-rrhh | RRHH |
+| 9008 | ms-activos-fijos | Activos Fijos |
+| 9009 | ms-produccion | Producción |
+| 9010 | ms-auditoria | Auditoría |
+| 9011 | ms-reportes | Reportes |
+| 9012 | ms-notificaciones | Notificaciones |
+| 4200 | Frontend Angular | SPA |
+
+### Comandos útiles
+
+```bash
+# Levantar todo el ecosistema
+docker compose up -d
+
+# Ver logs de un servicio específico
+docker compose logs -f ms-compras
+
+# Reconstruir un servicio después de cambios
+docker compose up -d --build ms-compras
+
+# Ver estado de todos los servicios
+docker compose ps
+
+# Detener todo
+docker compose down
+
+# Detener todo y eliminar volúmenes (CUIDADO: borra datos)
+docker compose down -v
+```
+
+---
+
+## 25. Decisiones de arquitectura (ADR)
 
 ### ADR-001: Microservicios vs Monolito
 
