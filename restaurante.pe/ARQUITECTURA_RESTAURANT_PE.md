@@ -31,7 +31,15 @@
 20. [Modelo de datos completo](#20-modelo-de-datos-completo)
 21. [Patrones de diseño aplicados](#21-patrones-de-diseño-aplicados)
 22. [Requisitos no funcionales](#22-requisitos-no-funcionales)
-23. [Decisiones de arquitectura (ADR)](#23-decisiones-de-arquitectura-adr)
+23. [Endpoints por microservicio](#23-endpoints-por-microservicio)
+24. [Docker — Compose completo](#24-docker--compose-completo)
+25. [Decisiones de arquitectura (ADR)](#25-decisiones-de-arquitectura-adr)
+26. [Diagramas de arquitectura (C4 Model)](#26-diagramas-de-arquitectura-c4-model)
+27. [Diagramas de entidades (ER) por microservicio](#27-diagramas-de-entidades-er-por-microservicio)
+28. [Diagrama de comunicación entre microservicios](#28-diagrama-de-comunicación-entre-microservicios)
+29. [Diagramas de interacción (secuencia)](#29-diagramas-de-interacción-secuencia)
+30. [Diagramas de flujo de negocio](#30-diagramas-de-flujo-de-negocio)
+31. [Diagramas de estado](#31-diagramas-de-estado)
 
 ---
 
@@ -1676,39 +1684,77 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
-| GET | `/api/almacen/almacenes` | Listar almacenes (filtro por sucursal) |
-| GET | `/api/almacen/almacenes/{id}` | Obtener almacén |
+| GET | `/api/almacen/almacenes` | Listar almacenes (filtro por sucursal, tipo) |
+| GET | `/api/almacen/almacenes/{id}` | Obtener almacén con ubicaciones |
 | POST | `/api/almacen/almacenes` | Crear almacén |
 | PUT | `/api/almacen/almacenes/{id}` | Actualizar almacén |
+| DELETE | `/api/almacen/almacenes/{id}` | Desactivar almacén |
+
+#### Ubicaciones dentro de almacén
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/almacen/almacenes/{id}/ubicaciones` | Listar ubicaciones (pasillos, estantes, niveles) |
+| POST | `/api/almacen/almacenes/{id}/ubicaciones` | Crear ubicación |
+| PUT | `/api/almacen/ubicaciones/{id}` | Actualizar ubicación |
+| DELETE | `/api/almacen/ubicaciones/{id}` | Eliminar ubicación (si no tiene stock) |
 
 #### Tipos de movimiento
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
 | GET | `/api/almacen/tipos-movimiento` | Listar tipos de movimiento |
+| GET | `/api/almacen/tipos-movimiento/{id}` | Obtener tipo de movimiento |
 | POST | `/api/almacen/tipos-movimiento` | Crear tipo de movimiento |
 | PUT | `/api/almacen/tipos-movimiento/{id}` | Actualizar tipo |
+| DELETE | `/api/almacen/tipos-movimiento/{id}` | Desactivar tipo |
 
 #### Movimientos de almacén
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
-| GET | `/api/almacen/movimientos` | Listar movimientos (paginado, filtros: almacén, fecha, tipo) |
-| GET | `/api/almacen/movimientos/{id}` | Obtener movimiento con detalle |
+| GET | `/api/almacen/movimientos` | Listar movimientos (paginado, filtros: almacén, fecha, tipo, estado) |
+| GET | `/api/almacen/movimientos/{id}` | Obtener movimiento con detalle completo |
 | POST | `/api/almacen/movimientos` | Crear movimiento (borrador) |
 | PUT | `/api/almacen/movimientos/{id}` | Actualizar movimiento (solo borrador) |
 | POST | `/api/almacen/movimientos/{id}/confirmar` | Confirmar movimiento (actualiza stock y kardex) |
-| POST | `/api/almacen/movimientos/{id}/anular` | Anular movimiento |
+| POST | `/api/almacen/movimientos/{id}/anular` | Anular movimiento (genera contra-movimiento) |
+| POST | `/api/almacen/movimientos/importar` | Importar movimientos desde Excel |
+| GET | `/api/almacen/movimientos/exportar` | Exportar movimientos a Excel |
+| GET | `/api/almacen/movimientos/{id}/pdf` | Descargar movimiento en PDF |
 
 #### Stock y kardex
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
-| GET | `/api/almacen/stock` | Consultar stock (filtros: almacén, artículo, categoría) |
+| GET | `/api/almacen/stock` | Consultar stock consolidado (filtros: almacén, artículo, categoría) |
 | GET | `/api/almacen/stock/{articuloId}/almacen/{almacenId}` | Stock de un artículo en un almacén |
-| GET | `/api/almacen/kardex` | Consultar kardex (filtros: artículo, almacén, fechaDesde, fechaHasta) |
+| GET | `/api/almacen/stock/{articuloId}/todos-almacenes` | Stock del artículo en todos los almacenes |
 | GET | `/api/almacen/stock/bajo-minimo` | Artículos con stock bajo mínimo |
+| GET | `/api/almacen/stock/sobre-maximo` | Artículos con stock sobre máximo |
+| GET | `/api/almacen/stock/sin-movimiento` | Artículos sin movimiento (N días) |
 | POST | `/api/almacen/stock/reprocesar` | Reprocesar saldos de inventario |
+| GET | `/api/almacen/kardex` | Consultar kardex (filtros: artículo, almacén, fechaDesde, fechaHasta) |
+| GET | `/api/almacen/kardex/valorizado` | Kardex valorizado (promedio ponderado) |
+| GET | `/api/almacen/kardex/exportar` | Exportar kardex a Excel |
+
+#### Lotes y series
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/almacen/lotes` | Listar lotes (filtro: artículo, almacén) |
+| GET | `/api/almacen/lotes/{id}` | Detalle de lote |
+| GET | `/api/almacen/lotes/por-vencer` | Lotes próximos a vencer |
+| GET | `/api/almacen/lotes/vencidos` | Lotes vencidos |
+
+#### Reservas de stock
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/almacen/reservas` | Listar reservas activas |
+| POST | `/api/almacen/reservas` | Crear reserva de stock |
+| DELETE | `/api/almacen/reservas/{id}` | Liberar reserva |
+| GET | `/api/almacen/stock/{articuloId}/disponible` | Stock disponible (total - reservado) |
 
 #### Inventario físico
 
@@ -1716,46 +1762,108 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 |:------:|----------|-------------|
 | GET | `/api/almacen/inventarios-fisicos` | Listar tomas de inventario |
 | GET | `/api/almacen/inventarios-fisicos/{id}` | Obtener inventario con detalle |
-| POST | `/api/almacen/inventarios-fisicos` | Iniciar toma de inventario |
+| POST | `/api/almacen/inventarios-fisicos` | Iniciar toma de inventario (bloquea almacén) |
 | PUT | `/api/almacen/inventarios-fisicos/{id}/detalle` | Registrar conteo físico |
+| POST | `/api/almacen/inventarios-fisicos/{id}/segundo-conteo` | Registrar segundo conteo (verificación) |
 | POST | `/api/almacen/inventarios-fisicos/{id}/comparar` | Comparar físico vs sistema |
 | POST | `/api/almacen/inventarios-fisicos/{id}/ajustar` | Aplicar ajustes de inventario |
+| POST | `/api/almacen/inventarios-fisicos/{id}/cerrar` | Cerrar toma y desbloquear almacén |
+| GET | `/api/almacen/inventarios-fisicos/{id}/diferencias` | Informe de diferencias |
 
-#### Traslados y devoluciones
+#### Traslados entre almacenes
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
+| GET | `/api/almacen/traslados` | Listar traslados |
+| GET | `/api/almacen/traslados/{id}` | Detalle de traslado |
 | POST | `/api/almacen/traslados` | Crear traslado entre almacenes |
-| POST | `/api/almacen/traslados/{id}/confirmar-recepcion` | Confirmar recepción de traslado |
-| POST | `/api/almacen/devoluciones` | Registrar devolución a proveedor |
+| POST | `/api/almacen/traslados/{id}/despachar` | Despachar traslado (salida origen) |
+| POST | `/api/almacen/traslados/{id}/confirmar-recepcion` | Confirmar recepción (ingreso destino) |
+| POST | `/api/almacen/traslados/{id}/anular` | Anular traslado |
+| GET | `/api/almacen/traslados/{id}/guia-remision` | Generar guía de remisión |
+
+#### Devoluciones a proveedor
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
 | GET | `/api/almacen/devoluciones` | Consultar devoluciones |
+| GET | `/api/almacen/devoluciones/{id}` | Detalle de devolución |
+| POST | `/api/almacen/devoluciones` | Registrar devolución a proveedor |
+| POST | `/api/almacen/devoluciones/{id}/confirmar` | Confirmar devolución (salida de almacén) |
+| POST | `/api/almacen/devoluciones/{id}/anular` | Anular devolución |
+
+#### Solicitudes de reposición
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/almacen/solicitudes-reposicion` | Listar solicitudes |
+| POST | `/api/almacen/solicitudes-reposicion/generar-automatica` | Generar solicitudes automáticas por stock mínimo |
+| POST | `/api/almacen/solicitudes-reposicion/{id}/aprobar` | Aprobar solicitud |
+| POST | `/api/almacen/solicitudes-reposicion/{id}/convertir-oc` | Convertir a OC en ms-compras |
 
 #### Reportes
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
-| GET | `/api/almacen/reportes/stock-actual` | Reporte de stock actual |
+| GET | `/api/almacen/reportes/stock-actual` | Reporte de stock actual por almacén |
+| GET | `/api/almacen/reportes/stock-consolidado` | Stock consolidado todos los almacenes |
 | GET | `/api/almacen/reportes/kardex` | Reporte de kardex valorizado |
 | GET | `/api/almacen/reportes/movimientos` | Reporte de movimientos por período |
 | GET | `/api/almacen/reportes/valorizacion` | Valorización económica del stock |
+| GET | `/api/almacen/reportes/rotacion` | Rotación de inventario (ABC) |
+| GET | `/api/almacen/reportes/stock-bajo-minimo` | Artículos bajo mínimo |
+| GET | `/api/almacen/reportes/lotes-por-vencer` | Lotes próximos a vencer |
+| GET | `/api/almacen/reportes/guias-remision` | Guías de remisión emitidas |
 
 ---
 
 ### 23.4 ms-compras (:9004)
 
+#### Solicitudes de compra
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/compras/solicitudes` | Listar solicitudes de compra |
+| GET | `/api/compras/solicitudes/{id}` | Obtener solicitud con detalle |
+| POST | `/api/compras/solicitudes` | Crear solicitud de compra |
+| PUT | `/api/compras/solicitudes/{id}` | Actualizar solicitud |
+| POST | `/api/compras/solicitudes/{id}/enviar` | Enviar solicitud para cotización |
+| POST | `/api/compras/solicitudes/{id}/aprobar` | Aprobar solicitud |
+| POST | `/api/compras/solicitudes/{id}/rechazar` | Rechazar solicitud |
+| DELETE | `/api/compras/solicitudes/{id}` | Anular solicitud |
+
+#### Cotizaciones a proveedores
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/compras/cotizaciones` | Listar cotizaciones |
+| GET | `/api/compras/cotizaciones/{id}` | Obtener cotización con detalle |
+| POST | `/api/compras/cotizaciones` | Registrar cotización recibida |
+| PUT | `/api/compras/cotizaciones/{id}` | Actualizar cotización |
+| POST | `/api/compras/cotizaciones/{id}/seleccionar` | Seleccionar cotización ganadora |
+| GET | `/api/compras/cotizaciones/comparativo` | Cuadro comparativo de cotizaciones (por solicitud) |
+| POST | `/api/compras/cotizaciones/{id}/convertir-oc` | Convertir cotización en OC |
+
 #### Órdenes de compra
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
-| GET | `/api/compras/ordenes-compra` | Listar OC (paginado, filtros) |
-| GET | `/api/compras/ordenes-compra/{id}` | Obtener OC con detalle |
+| GET | `/api/compras/ordenes-compra` | Listar OC (paginado, filtros: estado, proveedor, fecha) |
+| GET | `/api/compras/ordenes-compra/{id}` | Obtener OC con detalle completo |
 | POST | `/api/compras/ordenes-compra` | Crear OC |
 | PUT | `/api/compras/ordenes-compra/{id}` | Actualizar OC (solo borrador) |
-| DELETE | `/api/compras/ordenes-compra/{id}` | Anular OC |
 | POST | `/api/compras/ordenes-compra/{id}/enviar-aprobacion` | Enviar a aprobación |
 | POST | `/api/compras/ordenes-compra/{id}/aprobar` | Aprobar OC |
-| POST | `/api/compras/ordenes-compra/{id}/rechazar` | Rechazar OC |
+| POST | `/api/compras/ordenes-compra/{id}/rechazar` | Rechazar OC (con motivo) |
+| POST | `/api/compras/ordenes-compra/{id}/devolver` | Devolver OC para corrección |
+| POST | `/api/compras/ordenes-compra/{id}/anular` | Anular OC |
+| GET | `/api/compras/ordenes-compra/{id}/historial-aprobaciones` | Historial de aprobaciones |
+| GET | `/api/compras/ordenes-compra/{id}/recepciones` | Recepciones vinculadas |
+| GET | `/api/compras/ordenes-compra/{id}/saldo-pendiente` | Saldo pendiente de recepción |
+| GET | `/api/compras/ordenes-compra/{id}/pdf` | Descargar OC en PDF |
+| POST | `/api/compras/ordenes-compra/{id}/enviar-proveedor` | Enviar OC al proveedor por email |
 | GET | `/api/compras/ordenes-compra/pendientes-aprobacion` | Bandeja de aprobación |
+| GET | `/api/compras/ordenes-compra/exportar` | Exportar OC a Excel |
 
 #### Órdenes de servicio
 
@@ -1765,7 +1873,23 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 | GET | `/api/compras/ordenes-servicio/{id}` | Obtener OS con detalle |
 | POST | `/api/compras/ordenes-servicio` | Crear OS |
 | PUT | `/api/compras/ordenes-servicio/{id}` | Actualizar OS |
+| POST | `/api/compras/ordenes-servicio/{id}/enviar-aprobacion` | Enviar a aprobación |
 | POST | `/api/compras/ordenes-servicio/{id}/aprobar` | Aprobar OS |
+| POST | `/api/compras/ordenes-servicio/{id}/rechazar` | Rechazar OS |
+| POST | `/api/compras/ordenes-servicio/{id}/completar` | Marcar servicio como completado |
+| POST | `/api/compras/ordenes-servicio/{id}/anular` | Anular OS |
+| GET | `/api/compras/ordenes-servicio/{id}/pdf` | Descargar OS en PDF |
+
+#### Contratos marco
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/compras/contratos-marco` | Listar contratos marco |
+| GET | `/api/compras/contratos-marco/{id}` | Obtener contrato con detalle |
+| POST | `/api/compras/contratos-marco` | Crear contrato marco |
+| PUT | `/api/compras/contratos-marco/{id}` | Actualizar contrato |
+| GET | `/api/compras/contratos-marco/{id}/oc-generadas` | OC generadas bajo el contrato |
+| GET | `/api/compras/contratos-marco/por-vencer` | Contratos próximos a vencer |
 
 #### Recepción de mercadería
 
@@ -1774,7 +1898,27 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 | GET | `/api/compras/recepciones` | Listar recepciones |
 | GET | `/api/compras/recepciones/{id}` | Obtener recepción con detalle |
 | POST | `/api/compras/recepciones` | Crear recepción (vinculada a OC) |
-| POST | `/api/compras/recepciones/{id}/confirmar` | Confirmar recepción (genera mov. almacén) |
+| PUT | `/api/compras/recepciones/{id}` | Actualizar recepción (borrador) |
+| POST | `/api/compras/recepciones/{id}/confirmar` | Confirmar recepción (genera mov. almacén + CxP) |
+| POST | `/api/compras/recepciones/{id}/anular` | Anular recepción |
+| GET | `/api/compras/recepciones/{id}/pdf` | Descargar recepción en PDF |
+
+#### Evaluación de proveedores
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/compras/evaluacion-proveedores` | Listar evaluaciones |
+| GET | `/api/compras/evaluacion-proveedores/{proveedorId}` | Evaluación de un proveedor |
+| POST | `/api/compras/evaluacion-proveedores` | Registrar evaluación del período |
+| GET | `/api/compras/evaluacion-proveedores/ranking` | Ranking de proveedores (A, B, C, D) |
+
+#### Planificación de abastecimiento
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/compras/abastecimiento/sugerencias` | Sugerencias de compra (basado en stock mínimo y consumo) |
+| POST | `/api/compras/abastecimiento/generar-solicitudes` | Generar solicitudes de compra automáticas |
+| GET | `/api/compras/abastecimiento/proyeccion` | Proyección de abastecimiento (N semanas) |
 
 #### Reportes
 
@@ -1783,6 +1927,11 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 | GET | `/api/compras/reportes/oc-pendientes` | OC pendientes de recepción |
 | GET | `/api/compras/reportes/compras-por-proveedor` | Compras agrupadas por proveedor |
 | GET | `/api/compras/reportes/compras-por-periodo` | Compras por período |
+| GET | `/api/compras/reportes/compras-por-articulo` | Compras por artículo |
+| GET | `/api/compras/reportes/cumplimiento-proveedores` | Cumplimiento de entregas |
+| GET | `/api/compras/reportes/comparativo-precios` | Comparativo de precios (histórico) |
+| GET | `/api/compras/reportes/contratos-vigentes` | Contratos marco vigentes |
+| GET | `/api/compras/reportes/aprobaciones-pendientes` | Resumen de aprobaciones pendientes |
 
 ---
 
@@ -1809,45 +1958,107 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 | PUT | `/api/finanzas/cuentas-cobrar/{id}` | Actualizar documento |
 | GET | `/api/finanzas/cuentas-cobrar/{id}/cobros` | Cobros aplicados |
 
-#### Pagos y cobros
+#### Pagos
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
+| GET | `/api/finanzas/pagos` | Listar pagos realizados |
+| GET | `/api/finanzas/pagos/{id}` | Detalle de pago |
 | POST | `/api/finanzas/pagos` | Registrar pago a proveedor |
+| POST | `/api/finanzas/pagos/masivo` | Pago masivo (múltiples documentos) |
 | POST | `/api/finanzas/pagos/{id}/anular` | Anular pago |
+| GET | `/api/finanzas/pagos/{id}/voucher` | Generar voucher de pago PDF |
+
+#### Cobros
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/finanzas/cobros` | Listar cobros realizados |
+| GET | `/api/finanzas/cobros/{id}` | Detalle de cobro |
 | POST | `/api/finanzas/cobros` | Registrar cobro a cliente |
 | POST | `/api/finanzas/cobros/{id}/anular` | Anular cobro |
+| GET | `/api/finanzas/cobros/{id}/recibo` | Generar recibo de cobro PDF |
+
+#### Letras (CxC)
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/finanzas/letras` | Listar letras por cobrar |
+| POST | `/api/finanzas/letras/canje` | Canjear documentos por letras |
+| POST | `/api/finanzas/letras/{id}/renovar` | Renovar letra |
+| POST | `/api/finanzas/letras/{id}/protestar` | Protestar letra |
+| POST | `/api/finanzas/letras/{id}/cobrar` | Registrar cobro de letra |
 
 #### Tesorería
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
 | GET | `/api/finanzas/cuentas-bancarias` | Listar cuentas bancarias |
+| GET | `/api/finanzas/cuentas-bancarias/{id}` | Detalle de cuenta bancaria |
 | POST | `/api/finanzas/cuentas-bancarias` | Crear cuenta bancaria |
 | PUT | `/api/finanzas/cuentas-bancarias/{id}` | Actualizar cuenta |
+| GET | `/api/finanzas/cuentas-bancarias/{id}/saldo` | Saldo actual de cuenta |
 | GET | `/api/finanzas/movimientos-bancarios` | Listar movimientos bancarios |
-| POST | `/api/finanzas/movimientos-bancarios` | Registrar movimiento |
+| GET | `/api/finanzas/movimientos-bancarios/{id}` | Detalle de movimiento |
+| POST | `/api/finanzas/movimientos-bancarios` | Registrar movimiento manual |
+| POST | `/api/finanzas/movimientos-bancarios/importar-extracto` | Importar extracto bancario (Excel/CSV) |
+| GET | `/api/finanzas/movimientos-bancarios/exportar` | Exportar movimientos a Excel |
+
+#### Cajas y fondo fijo
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
 | GET | `/api/finanzas/cajas` | Listar cajas |
 | POST | `/api/finanzas/cajas` | Crear caja |
 | PUT | `/api/finanzas/cajas/{id}` | Actualizar caja |
+| GET | `/api/finanzas/fondos-fijos` | Listar fondos fijos |
+| POST | `/api/finanzas/fondos-fijos` | Crear fondo fijo |
+| PUT | `/api/finanzas/fondos-fijos/{id}` | Actualizar fondo fijo |
+| GET | `/api/finanzas/fondos-fijos/{id}/rendiciones` | Listar rendiciones del fondo |
+| POST | `/api/finanzas/fondos-fijos/{id}/rendiciones` | Registrar rendición de gasto |
+| POST | `/api/finanzas/fondos-fijos/{id}/rendiciones/{rendId}/aprobar` | Aprobar rendición |
+| POST | `/api/finanzas/fondos-fijos/{id}/reponer` | Solicitar reposición de fondo |
 
 #### Conciliación bancaria
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
 | GET | `/api/finanzas/conciliaciones` | Listar conciliaciones |
-| POST | `/api/finanzas/conciliaciones` | Iniciar conciliación |
-| PUT | `/api/finanzas/conciliaciones/{id}` | Actualizar conciliación (marcar partidas) |
+| GET | `/api/finanzas/conciliaciones/{id}` | Detalle de conciliación |
+| POST | `/api/finanzas/conciliaciones` | Iniciar conciliación (cuenta + período) |
+| POST | `/api/finanzas/conciliaciones/{id}/comparar-automatico` | Comparación automática |
+| PUT | `/api/finanzas/conciliaciones/{id}/partidas` | Marcar/desmarcar partidas manualmente |
 | POST | `/api/finanzas/conciliaciones/{id}/finalizar` | Finalizar conciliación |
+| GET | `/api/finanzas/conciliaciones/{id}/diferencias` | Detalle de diferencias |
 
-#### Adelantos
+#### Conciliación con pasarelas digitales
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| POST | `/api/finanzas/conciliacion-pasarelas/importar` | Importar movimientos de pasarela (Niubiz/Yape/Plin) |
+| POST | `/api/finanzas/conciliacion-pasarelas/conciliar` | Conciliar pagos de pasarela vs ventas |
+| GET | `/api/finanzas/conciliacion-pasarelas/diferencias` | Diferencias encontradas |
+
+#### Adelantos y órdenes de giro
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
 | GET | `/api/finanzas/adelantos` | Listar adelantos |
+| GET | `/api/finanzas/adelantos/{id}` | Detalle de adelanto |
 | POST | `/api/finanzas/adelantos` | Crear solicitud de adelanto |
 | POST | `/api/finanzas/adelantos/{id}/aprobar` | Aprobar adelanto |
+| POST | `/api/finanzas/adelantos/{id}/desembolsar` | Registrar desembolso |
 | POST | `/api/finanzas/adelantos/{id}/liquidar` | Liquidar adelanto |
+
+#### Programación de pagos
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/finanzas/programacion-pagos` | Listar programaciones |
+| POST | `/api/finanzas/programacion-pagos` | Crear programación de pagos |
+| PUT | `/api/finanzas/programacion-pagos/{id}` | Editar programación |
+| POST | `/api/finanzas/programacion-pagos/{id}/ejecutar` | Ejecutar programación |
+| GET | `/api/finanzas/programacion-pagos/sugerencia` | Sugerencia automática (documentos por vencer) |
 
 #### Reportes
 
@@ -1855,9 +2066,16 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 |:------:|----------|-------------|
 | GET | `/api/finanzas/reportes/estado-cuenta-proveedor` | Estado de cuenta por proveedor |
 | GET | `/api/finanzas/reportes/estado-cuenta-cliente` | Estado de cuenta por cliente |
-| GET | `/api/finanzas/reportes/flujo-caja` | Flujo de caja |
-| GET | `/api/finanzas/reportes/antiguedad-saldos` | Antigüedad de saldos |
-| GET | `/api/finanzas/reportes/programacion-pagos` | Programación de pagos |
+| GET | `/api/finanzas/reportes/flujo-caja` | Flujo de caja real |
+| GET | `/api/finanzas/reportes/flujo-caja-proyectado` | Flujo de caja proyectado |
+| GET | `/api/finanzas/reportes/antiguedad-saldos-pagar` | Antigüedad saldos CxP |
+| GET | `/api/finanzas/reportes/antiguedad-saldos-cobrar` | Antigüedad saldos CxC |
+| GET | `/api/finanzas/reportes/programacion-pagos` | Programación de pagos pendientes |
+| GET | `/api/finanzas/reportes/movimientos-bancarios` | Resumen movimientos bancarios |
+| GET | `/api/finanzas/reportes/cxp-por-vencer` | CxP por vencer (próximos N días) |
+| GET | `/api/finanzas/reportes/cxc-vencidas` | CxC vencidas |
+| GET | `/api/finanzas/reportes/letras-cartera` | Cartera de letras |
+| GET | `/api/finanzas/reportes/fondos-fijos-pendientes` | Fondos fijos con rendiciones pendientes |
 
 ---
 
@@ -1908,7 +2126,20 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 |:------:|----------|-------------|
 | POST | `/api/contabilidad/cierres/mensual` | Ejecutar cierre mensual |
 | POST | `/api/contabilidad/cierres/anual` | Ejecutar cierre anual |
+| POST | `/api/contabilidad/cierres/{periodoId}/reabrir` | Reabrir período cerrado (requiere auditoría) |
 | GET | `/api/contabilidad/cierres/estado` | Estado de cierre por período |
+| GET | `/api/contabilidad/cierres/validar-pre-cierre` | Validar pre-requisitos de cierre |
+| POST | `/api/contabilidad/cierres/asiento-apertura` | Generar asiento de apertura |
+
+#### Balance de comprobación
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/contabilidad/balance-comprobacion` | Balance de comprobación (filtros: período, nivel) |
+| GET | `/api/contabilidad/balance-comprobacion/exportar` | Exportar a Excel |
+| GET | `/api/contabilidad/analisis-cuenta/{cuentaId}` | Análisis de cuenta (movimientos) |
+| GET | `/api/contabilidad/mayor-analitico` | Mayor analítico |
+| GET | `/api/contabilidad/hoja-trabajo` | Hoja de trabajo |
 
 #### Reportes / EEFF
 
@@ -1917,10 +2148,19 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 | GET | `/api/contabilidad/reportes/balance-general` | Balance General |
 | GET | `/api/contabilidad/reportes/estado-resultados` | Estado de Resultados |
 | GET | `/api/contabilidad/reportes/flujo-efectivo` | Flujo de Efectivo |
-| GET | `/api/contabilidad/reportes/patrimonio` | Estado de Patrimonio |
+| GET | `/api/contabilidad/reportes/patrimonio` | Estado de Cambios en el Patrimonio |
+| GET | `/api/contabilidad/reportes/notas-eeff` | Notas a los Estados Financieros |
 | GET | `/api/contabilidad/reportes/libro-diario` | Libro diario |
 | GET | `/api/contabilidad/reportes/libro-mayor` | Libro mayor |
-| POST | `/api/contabilidad/reportes/libros-electronicos` | Generar libros electrónicos (PLE/SIRE) |
+| GET | `/api/contabilidad/reportes/libro-caja-bancos` | Libro caja y bancos |
+| GET | `/api/contabilidad/reportes/registro-compras` | Registro de compras |
+| GET | `/api/contabilidad/reportes/registro-ventas` | Registro de ventas |
+| GET | `/api/contabilidad/reportes/balance-comprobacion` | Balance de comprobación PDF |
+| GET | `/api/contabilidad/reportes/comparativo-periodos` | Comparativo entre períodos |
+| GET | `/api/contabilidad/reportes/presupuesto-vs-real` | Presupuesto vs ejecución real |
+| POST | `/api/contabilidad/reportes/libros-electronicos/ple` | Generar PLE (Programa de Libros Electrónicos) |
+| POST | `/api/contabilidad/reportes/libros-electronicos/sire` | Generar SIRE (Sistema Integrado de Registros Electrónicos) |
+| GET | `/api/contabilidad/reportes/libros-electronicos/estado` | Estado de generación de libros |
 
 ---
 
@@ -1972,76 +2212,293 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 | POST | `/api/rrhh/planillas/{id}/cerrar` | Cerrar planilla |
 | GET | `/api/rrhh/planillas/{id}/detalle` | Detalle por trabajador y concepto |
 
+#### Horarios y turnos
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/rrhh/horarios` | Listar horarios |
+| POST | `/api/rrhh/horarios` | Crear horario |
+| PUT | `/api/rrhh/horarios/{id}` | Actualizar horario |
+| POST | `/api/rrhh/trabajadores/{id}/asignar-horario` | Asignar horario a trabajador |
+
+#### Permisos y licencias
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/rrhh/permisos-licencias` | Listar permisos y licencias |
+| GET | `/api/rrhh/permisos-licencias/{id}` | Detalle de permiso/licencia |
+| POST | `/api/rrhh/permisos-licencias` | Solicitar permiso/licencia |
+| POST | `/api/rrhh/permisos-licencias/{id}/aprobar` | Aprobar permiso |
+| POST | `/api/rrhh/permisos-licencias/{id}/rechazar` | Rechazar permiso |
+
+#### Horas extra y subsidios
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/rrhh/horas-extra` | Listar horas extra registradas |
+| POST | `/api/rrhh/horas-extra` | Registrar horas extra |
+| POST | `/api/rrhh/horas-extra/{id}/aprobar` | Aprobar horas extra |
+| GET | `/api/rrhh/subsidios` | Listar subsidios |
+| POST | `/api/rrhh/subsidios` | Registrar subsidio |
+
+#### Préstamos
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/rrhh/prestamos` | Listar préstamos |
+| GET | `/api/rrhh/prestamos/{id}` | Detalle de préstamo con cuotas |
+| POST | `/api/rrhh/prestamos` | Crear préstamo a trabajador |
+| POST | `/api/rrhh/prestamos/{id}/aprobar` | Aprobar préstamo |
+| GET | `/api/rrhh/prestamos/{id}/cuotas` | Listar cuotas del préstamo |
+
 #### Liquidaciones y beneficios
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
 | POST | `/api/rrhh/liquidaciones` | Calcular liquidación de beneficios |
-| GET | `/api/rrhh/liquidaciones/{id}` | Obtener liquidación |
+| GET | `/api/rrhh/liquidaciones/{id}` | Obtener liquidación detallada |
+| POST | `/api/rrhh/liquidaciones/{id}/aprobar` | Aprobar liquidación |
+| POST | `/api/rrhh/liquidaciones/{id}/pagar` | Registrar pago de liquidación |
+| GET | `/api/rrhh/liquidaciones/{id}/pdf` | Descargar liquidación en PDF |
 | GET | `/api/rrhh/vacaciones` | Consultar saldos de vacaciones |
-| POST | `/api/rrhh/vacaciones` | Registrar goce vacacional |
+| POST | `/api/rrhh/vacaciones` | Programar goce vacacional |
+| POST | `/api/rrhh/vacaciones/{id}/aprobar` | Aprobar vacaciones |
+| GET | `/api/rrhh/cts` | Consultar CTS acumulada por trabajador |
+| POST | `/api/rrhh/cts/calcular` | Calcular CTS del semestre |
+| GET | `/api/rrhh/gratificaciones` | Consultar gratificaciones |
+| POST | `/api/rrhh/gratificaciones/calcular` | Calcular gratificaciones del período |
+
+#### Propinas y recargo al consumo
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/rrhh/propinas` | Listar distribución de propinas |
+| POST | `/api/rrhh/propinas/distribuir` | Distribuir propinas del período |
+| GET | `/api/rrhh/recargo-consumo` | Listar distribución de recargo al consumo |
+| POST | `/api/rrhh/recargo-consumo/distribuir` | Distribuir recargo del período |
 
 #### Reportes y regulatorios
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
 | GET | `/api/rrhh/reportes/planilla` | Reporte de planilla |
+| GET | `/api/rrhh/reportes/planilla-resumen` | Resumen de planilla por concepto |
 | GET | `/api/rrhh/reportes/asistencia` | Reporte de asistencia |
+| GET | `/api/rrhh/reportes/asistencia-consolidado` | Asistencia consolidada mensual |
 | GET | `/api/rrhh/reportes/headcount` | Reporte de headcount |
+| GET | `/api/rrhh/reportes/rotacion` | Índice de rotación de personal |
+| GET | `/api/rrhh/reportes/costos-laborales` | Costos laborales por área/sucursal |
+| GET | `/api/rrhh/reportes/horas-extra` | Reporte de horas extra |
+| GET | `/api/rrhh/reportes/vacaciones-pendientes` | Vacaciones pendientes |
+| GET | `/api/rrhh/reportes/cts-depositos` | CTS pendientes de depósito |
+| GET | `/api/rrhh/reportes/prestamos-activos` | Préstamos activos |
 | POST | `/api/rrhh/reportes/plame` | Generar archivo PLAME |
-| POST | `/api/rrhh/reportes/boletas-pago` | Generar boletas de pago (PDF) |
+| POST | `/api/rrhh/reportes/t-registro` | Generar T-Registro |
+| POST | `/api/rrhh/reportes/boletas-pago` | Generar boletas de pago (PDF masivo) |
+| POST | `/api/rrhh/reportes/boletas-pago/{trabajadorId}` | Generar boleta individual |
+| POST | `/api/rrhh/reportes/certificado-trabajo/{trabajadorId}` | Generar certificado de trabajo |
+| POST | `/api/rrhh/reportes/constancia-ingresos/{trabajadorId}` | Constancia de ingresos 5ta categoría |
 
 ---
 
 ### 23.8 ms-activos-fijos (:9008)
 
+#### Clases y clasificación
+
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
 | GET | `/api/activos/clases-activo` | Listar clases de activo |
-| POST | `/api/activos/clases-activo` | Crear clase |
+| GET | `/api/activos/clases-activo/{id}` | Obtener clase |
+| POST | `/api/activos/clases-activo` | Crear clase (con cuentas contables y tasa depreciación) |
+| PUT | `/api/activos/clases-activo/{id}` | Actualizar clase |
+
+#### Ubicaciones físicas
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
 | GET | `/api/activos/ubicaciones` | Listar ubicaciones físicas (jerárquico) |
+| GET | `/api/activos/ubicaciones/arbol` | Árbol completo de ubicaciones |
 | POST | `/api/activos/ubicaciones` | Crear ubicación |
-| GET | `/api/activos/activos-fijos` | Listar activos fijos (paginado, filtros) |
-| GET | `/api/activos/activos-fijos/{id}` | Obtener ficha del activo |
-| POST | `/api/activos/activos-fijos` | Registrar activo |
+| PUT | `/api/activos/ubicaciones/{id}` | Actualizar ubicación |
+
+#### Activos fijos
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/activos/activos-fijos` | Listar activos fijos (paginado, filtros: clase, ubicación, estado) |
+| GET | `/api/activos/activos-fijos/{id}` | Obtener ficha completa del activo |
+| POST | `/api/activos/activos-fijos` | Registrar activo (vinculado a compra/factura) |
 | PUT | `/api/activos/activos-fijos/{id}` | Actualizar activo |
-| POST | `/api/activos/activos-fijos/{id}/baja` | Dar de baja activo |
+| POST | `/api/activos/activos-fijos/{id}/baja` | Dar de baja activo (venta/donación/siniestro) |
 | POST | `/api/activos/activos-fijos/{id}/revaluar` | Revaluar activo |
+| GET | `/api/activos/activos-fijos/{id}/historial` | Historial completo (depreciación, traslados, mejoras) |
+| GET | `/api/activos/activos-fijos/{id}/componentes` | Listar componentes del activo |
+| POST | `/api/activos/activos-fijos/{id}/componentes` | Agregar componente |
+| GET | `/api/activos/activos-fijos/{id}/qr` | Generar código QR del activo |
+| GET | `/api/activos/activos-fijos/buscar-qr/{codigo}` | Buscar activo por código QR |
+| POST | `/api/activos/activos-fijos/importar` | Importar activos desde Excel |
+| GET | `/api/activos/activos-fijos/exportar` | Exportar activos a Excel |
+
+#### Mejoras de activos
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/activos/mejoras` | Listar mejoras registradas |
+| POST | `/api/activos/activos-fijos/{id}/mejoras` | Registrar mejora (incrementa valor del activo) |
+| PUT | `/api/activos/mejoras/{id}` | Actualizar mejora |
+
+#### Depreciación
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
 | POST | `/api/activos/depreciacion/ejecutar` | Ejecutar depreciación mensual masiva |
+| POST | `/api/activos/depreciacion/simular` | Simular depreciación (sin aplicar) |
 | GET | `/api/activos/depreciacion/{activoId}` | Historial de depreciación de un activo |
+| GET | `/api/activos/depreciacion/resumen-mensual` | Resumen de depreciación del mes |
+| GET | `/api/activos/depreciacion/proyeccion/{activoId}` | Proyección de depreciación futura |
+
+#### Seguros y pólizas
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
 | GET | `/api/activos/aseguradoras` | Listar aseguradoras |
 | POST | `/api/activos/aseguradoras` | Crear aseguradora |
+| PUT | `/api/activos/aseguradoras/{id}` | Actualizar aseguradora |
 | GET | `/api/activos/polizas` | Listar pólizas |
+| GET | `/api/activos/polizas/{id}` | Detalle de póliza con activos cubiertos |
 | POST | `/api/activos/polizas` | Crear póliza |
+| PUT | `/api/activos/polizas/{id}` | Actualizar póliza |
+| POST | `/api/activos/polizas/{id}/activos` | Agregar activos a la póliza |
+| DELETE | `/api/activos/polizas/{id}/activos/{activoId}` | Remover activo de la póliza |
+| GET | `/api/activos/polizas/por-vencer` | Pólizas próximas a vencer |
+
+#### Traslados
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/activos/traslados` | Listar traslados |
+| GET | `/api/activos/traslados/{id}` | Detalle de traslado |
 | POST | `/api/activos/traslados` | Solicitar traslado de activo |
 | POST | `/api/activos/traslados/{id}/aprobar` | Aprobar traslado |
-| POST | `/api/activos/traslados/{id}/ejecutar` | Ejecutar traslado |
+| POST | `/api/activos/traslados/{id}/rechazar` | Rechazar traslado |
+| POST | `/api/activos/traslados/{id}/ejecutar` | Ejecutar traslado (cambiar ubicación) |
+
+#### Mantenimientos
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/activos/mantenimientos` | Listar mantenimientos |
+| POST | `/api/activos/mantenimientos` | Programar mantenimiento |
+| PUT | `/api/activos/mantenimientos/{id}` | Actualizar mantenimiento |
+| POST | `/api/activos/mantenimientos/{id}/completar` | Marcar como completado |
+| GET | `/api/activos/mantenimientos/proximos` | Mantenimientos próximos (próximos N días) |
+
+#### Inventario de activos
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| POST | `/api/activos/inventario/iniciar` | Iniciar toma de inventario de activos |
+| PUT | `/api/activos/inventario/{id}/registrar` | Registrar activo encontrado (por QR) |
+| POST | `/api/activos/inventario/{id}/comparar` | Comparar inventario vs sistema |
+| POST | `/api/activos/inventario/{id}/cerrar` | Cerrar toma de inventario |
+
+#### Reportes
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
 | GET | `/api/activos/reportes/depreciacion-acumulada` | Reporte depreciación acumulada |
+| GET | `/api/activos/reportes/depreciacion-mensual` | Depreciación del mes |
 | GET | `/api/activos/reportes/activos-por-ubicacion` | Activos por ubicación |
+| GET | `/api/activos/reportes/activos-por-clase` | Activos por clase |
 | GET | `/api/activos/reportes/seguros-vigentes` | Seguros vigentes |
+| GET | `/api/activos/reportes/bajas-periodo` | Bajas del período |
+| GET | `/api/activos/reportes/valor-patrimonial` | Valor patrimonial total |
+| GET | `/api/activos/reportes/mantenimientos-pendientes` | Mantenimientos pendientes |
+| GET | `/api/activos/reportes/activos-totalmente-depreciados` | Activos totalmente depreciados |
 
 ---
 
 ### 23.9 ms-produccion (:9009)
 
+#### Recetas (BOM gastronómico)
+
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
-| GET | `/api/produccion/recetas` | Listar recetas |
+| GET | `/api/produccion/recetas` | Listar recetas (filtros: tipo, estado, artículo) |
 | GET | `/api/produccion/recetas/{id}` | Obtener receta con detalle de insumos |
 | POST | `/api/produccion/recetas` | Crear receta |
 | PUT | `/api/produccion/recetas/{id}` | Actualizar receta |
+| DELETE | `/api/produccion/recetas/{id}` | Desactivar receta |
 | POST | `/api/produccion/recetas/{id}/nueva-version` | Crear nueva versión de receta |
-| GET | `/api/produccion/recetas/{id}/costo-estimado` | Calcular costo estimado de la receta |
-| GET | `/api/produccion/ordenes-produccion` | Listar órdenes de producción |
-| GET | `/api/produccion/ordenes-produccion/{id}` | Obtener orden con detalle |
+| GET | `/api/produccion/recetas/{id}/versiones` | Listar versiones de una receta |
+| GET | `/api/produccion/recetas/{id}/costo-estimado` | Calcular costo estimado actual |
+| POST | `/api/produccion/recetas/{id}/duplicar` | Duplicar receta (para variantes) |
+| GET | `/api/produccion/recetas/{id}/subrecetas` | Listar sub-recetas incluidas |
+| POST | `/api/produccion/recetas/{id}/subrecetas` | Agregar sub-receta |
+| GET | `/api/produccion/recetas/{id}/insumos-alternativos` | Listar insumos alternativos |
+| POST | `/api/produccion/recetas/{id}/insumos-alternativos` | Registrar insumo alternativo |
+| POST | `/api/produccion/recetas/importar` | Importar recetas desde Excel |
+| GET | `/api/produccion/recetas/exportar` | Exportar recetas a Excel |
+
+#### Órdenes de producción
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/produccion/ordenes-produccion` | Listar órdenes (filtros: estado, fecha, receta) |
+| GET | `/api/produccion/ordenes-produccion/{id}` | Obtener orden con detalle completo |
 | POST | `/api/produccion/ordenes-produccion` | Crear orden de producción |
+| PUT | `/api/produccion/ordenes-produccion/{id}` | Actualizar orden (solo PLANIFICADA) |
 | POST | `/api/produccion/ordenes-produccion/{id}/iniciar` | Iniciar producción |
-| POST | `/api/produccion/ordenes-produccion/{id}/completar` | Completar producción (consume almacén) |
+| POST | `/api/produccion/ordenes-produccion/{id}/completar` | Completar producción (consume almacén, ingresa PT) |
 | POST | `/api/produccion/ordenes-produccion/{id}/cancelar` | Cancelar orden |
-| GET | `/api/produccion/ordenes-produccion/{id}/costeo` | Costeo de la orden |
+| GET | `/api/produccion/ordenes-produccion/{id}/costeo` | Costeo detallado (MP + MO + CI) |
+| GET | `/api/produccion/ordenes-produccion/{id}/insumos-consumidos` | Insumos realmente consumidos |
+| GET | `/api/produccion/ordenes-produccion/{id}/merma` | Detalle de merma |
+| POST | `/api/produccion/ordenes-produccion/{id}/registrar-merma` | Registrar merma real |
+
+#### Control de calidad
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/produccion/control-calidad` | Listar inspecciones |
+| POST | `/api/produccion/control-calidad` | Registrar inspección de calidad |
+| GET | `/api/produccion/control-calidad/{ordenId}` | Inspecciones de una orden |
+| PUT | `/api/produccion/control-calidad/{id}` | Actualizar resultado de inspección |
+
+#### Programación de producción
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/produccion/programacion` | Listar programación (filtros: fecha, sucursal, turno) |
+| POST | `/api/produccion/programacion` | Crear programación |
+| PUT | `/api/produccion/programacion/{id}` | Actualizar programación |
+| DELETE | `/api/produccion/programacion/{id}` | Cancelar programación |
+| POST | `/api/produccion/programacion/{id}/ejecutar` | Ejecutar (generar orden de producción) |
+| GET | `/api/produccion/programacion/semanal` | Vista semanal de programación |
+| POST | `/api/produccion/programacion/generar-automatica` | Generar programación automática (basada en ventas históricas) |
+
+#### Costeo
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/produccion/costeo/resumen` | Resumen de costeo por receta (período) |
+| GET | `/api/produccion/costeo/comparativo` | Costo estimado vs real |
+| GET | `/api/produccion/costeo/tendencia/{recetaId}` | Tendencia de costo (últimos N meses) |
+| POST | `/api/produccion/costeo/recalcular` | Recalcular costos estimados (con precios actuales) |
+
+#### Reportes
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
 | GET | `/api/produccion/reportes/costos-por-receta` | Reporte de costos por receta |
-| GET | `/api/produccion/reportes/consumos` | Reporte de consumos |
-| GET | `/api/produccion/reportes/rendimiento` | Reporte de rendimiento |
+| GET | `/api/produccion/reportes/consumos` | Reporte de consumos de insumos |
+| GET | `/api/produccion/reportes/rendimiento` | Reporte de rendimiento vs esperado |
+| GET | `/api/produccion/reportes/merma` | Reporte de merma por receta/período |
+| GET | `/api/produccion/reportes/produccion-diaria` | Producción diaria por sucursal |
+| GET | `/api/produccion/reportes/eficiencia` | Eficiencia de producción (tiempo, merma, rendimiento) |
+| GET | `/api/produccion/reportes/insumos-mas-consumidos` | Top insumos más consumidos |
+| GET | `/api/produccion/reportes/costo-por-plato` | Food cost por plato |
+| GET | `/api/produccion/reportes/recetas-sin-uso` | Recetas sin producción (N días) |
 
 ---
 
@@ -2098,10 +2555,17 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
-| GET | `/api/auditoria/logs` | Consultar logs de auditoría (filtros: usuario, módulo, entidad, fecha) |
-| GET | `/api/auditoria/logs/{id}` | Detalle de un log (datos antes/después) |
-| GET | `/api/auditoria/accesos` | Consultar logs de acceso (login/logout) |
-| GET | `/api/auditoria/reportes/actividad-usuario` | Actividad por usuario |
+| GET | `/api/auditoria/logs` | Consultar logs de auditoría (filtros: usuario, módulo, entidad, fecha, acción) |
+| GET | `/api/auditoria/logs/{id}` | Detalle de un log (datos antes/después en JSON) |
+| GET | `/api/auditoria/logs/entidad/{entidad}/{entidadId}` | Historial de cambios de una entidad específica |
+| GET | `/api/auditoria/accesos` | Consultar logs de acceso (login/logout/fallos) |
+| GET | `/api/auditoria/accesos/sesiones-activas` | Sesiones activas en el sistema |
+| GET | `/api/auditoria/reportes/actividad-usuario` | Actividad por usuario (período) |
+| GET | `/api/auditoria/reportes/actividad-modulo` | Actividad por módulo |
+| GET | `/api/auditoria/reportes/accesos-fallidos` | Intentos de acceso fallidos |
+| GET | `/api/auditoria/reportes/cambios-criticos` | Cambios en entidades críticas (usuarios, roles, config) |
+| GET | `/api/auditoria/reportes/operaciones-por-periodo` | Resumen de operaciones por período |
+| GET | `/api/auditoria/exportar` | Exportar logs a Excel/CSV |
 
 #### ms-reportes (:9012)
 
@@ -2109,16 +2573,30 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 |:------:|----------|-------------|
 | POST | `/api/reportes/generar` | Generar reporte (params: módulo, tipo, filtros, formato PDF/Excel) |
 | GET | `/api/reportes/plantillas` | Listar plantillas de reportes disponibles |
+| GET | `/api/reportes/plantillas/{modulo}` | Plantillas por módulo |
 | GET | `/api/reportes/descargar/{id}` | Descargar reporte generado |
+| GET | `/api/reportes/historial` | Historial de reportes generados |
+| DELETE | `/api/reportes/{id}` | Eliminar reporte generado |
+| POST | `/api/reportes/programar` | Programar generación automática de reporte |
+| GET | `/api/reportes/programados` | Listar reportes programados |
+| DELETE | `/api/reportes/programados/{id}` | Cancelar programación |
+| POST | `/api/reportes/favoritos/{plantillaId}` | Marcar plantilla como favorita |
 
 #### ms-notificaciones (:9013)
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
-| GET | `/api/notificaciones` | Listar notificaciones del usuario |
+| GET | `/api/notificaciones` | Listar notificaciones del usuario (paginado) |
+| GET | `/api/notificaciones/{id}` | Detalle de notificación |
 | PUT | `/api/notificaciones/{id}/leer` | Marcar como leída |
 | PUT | `/api/notificaciones/leer-todas` | Marcar todas como leídas |
+| DELETE | `/api/notificaciones/{id}` | Eliminar notificación |
 | GET | `/api/notificaciones/no-leidas/count` | Contador de no leídas |
+| GET | `/api/notificaciones/preferencias` | Obtener preferencias de notificación del usuario |
+| PUT | `/api/notificaciones/preferencias` | Actualizar preferencias (qué recibir, cómo) |
+| POST | `/api/notificaciones/enviar-correo` | Enviar correo manual (admin) |
+| POST | `/api/notificaciones/enviar-masivo` | Envío masivo (admin) |
+| GET | `/api/notificaciones/correos-enviados` | Historial de correos enviados |
 
 ---
 
@@ -2769,4 +3247,2247 @@ docker compose down -v
 
 ---
 
-*Documento de arquitectura técnica del proyecto Restaurant.pe. Cubre microservicios, base de datos, seguridad, comunicación, DevOps y estándares de desarrollo. Basado en el análisis de 279 HUs y la experiencia del ERP SIGRE.*
+---
+
+## 26. Diagramas de arquitectura (C4 Model)
+
+### 26.1 Nivel 1 — Diagrama de contexto
+
+Muestra el sistema Restaurant.pe ERP, los actores y los sistemas externos con los que interactúa.
+
+```mermaid
+flowchart TB
+    subgraph Actores
+        ADM["👤 Administrador ERP\n(Configuración, maestros,\npermisos, cierres)"]
+        OPE["👤 Operador\n(Compras, almacén,\nventas, producción)"]
+        CONT["👤 Contador\n(Contabilidad, EEFF,\nlibros electrónicos)"]
+        RRHH_U["👤 Analista RRHH\n(Planilla, asistencia,\nbeneficios)"]
+        GER["👤 Gerente\n(Reportes, dashboards,\naprobaciones)"]
+    end
+    subgraph Sistema["Restaurant.pe ERP"]
+        ERP["🏢 Restaurant.pe ERP\n\nPlataforma integral de gestión\nempresarial para la industria\ngastronómica\n\n10 microservicios de negocio\n3 microservicios de soporte"]
+    end
+    subgraph Externos["Sistemas externos"]
+        SUNAT["🏛️ SUNAT / OSE\nFacturación electrónica\n(envío CPE, CDR)"]
+        BANCOS["🏦 Bancos\nExtractos bancarios\n(importación)"]
+        PASARELAS["💳 Pasarelas de pago\nNiubiz, Yape, Plin\n(conciliación)"]
+        POS_EXT["🖥️ POS Restaurant.pe\nPunto de venta existente\n(integración ventas)"]
+        SMTP["📧 Servidor SMTP\nEnvío de correos\n(notificaciones, boletas)"]
+        BIOMETRICO["🔒 Dispositivo biométrico\nMarcación de asistencia\n(importación)"]
+    end
+    ADM --> ERP
+    OPE --> ERP
+    CONT --> ERP
+    RRHH_U --> ERP
+    GER --> ERP
+    ERP --> SUNAT
+    ERP <--> BANCOS
+    ERP <--> PASARELAS
+    ERP <--> POS_EXT
+    ERP --> SMTP
+    ERP <-- BIOMETRICO
+```
+
+### 26.2 Nivel 2 — Diagrama de contenedores
+
+Detalla los contenedores (aplicaciones, servicios, almacenes de datos) que componen el sistema.
+
+```mermaid
+flowchart TB
+    subgraph Frontend
+        SPA["Angular 20 SPA\n(puerto 4200)\nUI responsive,\nlazy loading por módulo"]
+    end
+    subgraph Edge_Layer["Capa Edge"]
+        NGINX["Nginx / CDN\nArchivos estáticos,\nSSL termination"]
+    end
+    subgraph Spring_Cloud["Spring Cloud (infraestructura)"]
+        GW["API Gateway\n:8080\nRuteo, rate limiting,\nvalidación JWT, CORS"]
+        EU["Eureka Server\n:8761\nService Discovery,\nregistro dinámico"]
+        CFG["Config Server\n:8888\nConfiguración centralizada\n(Git-backed)"]
+    end
+    subgraph Negocio["Microservicios de negocio (10)"]
+        AUTH["ms-auth-security\n:9001\nJWT, usuarios,\nroles, permisos"]
+        CORE["ms-core-maestros\n:9002\nEmpresas, maestros,\nconfiguración"]
+        ALM["ms-almacen\n:9003\nInventario, kardex,\nstock, traslados"]
+        COM["ms-compras\n:9004\nOC, OS, recepción,\naprobaciones"]
+        VEN["ms-ventas\n:9010\nPOS, documentos,\nmesas, cierres"]
+        FIN["ms-finanzas\n:9005\nCxP, CxC, tesorería,\nconciliación"]
+        CNT["ms-contabilidad\n:9006\nAsientos, EEFF,\nlibros, cierres"]
+        RRHH["ms-rrhh\n:9007\nPlanilla, asistencia,\ncontratos"]
+        AF["ms-activos-fijos\n:9008\nActivos, depreciación,\nseguros"]
+        PROD["ms-produccion\n:9009\nRecetas, órdenes,\ncosteo"]
+    end
+    subgraph Soporte["Microservicios de soporte (3)"]
+        AUD["ms-auditoria\n:9011\nLogs de auditoría"]
+        RPT["ms-reportes\n:9012\nJasperReports,\nPDF/Excel"]
+        NOTIF["ms-notificaciones\n:9013\nCorreos, alertas,\npush"]
+    end
+    subgraph Datos["Almacenes de datos"]
+        PG[("PostgreSQL 16\n:5432\n11 esquemas aislados\n94+ tablas")]
+        REDIS[("Redis 7\n:6379\nCaché, sesiones,\nblacklist JWT")]
+    end
+    subgraph Mensajeria["Mensajería"]
+        MQ[["RabbitMQ 3\n:5672\nEventos asincrónicos\npre-asientos, auditoría"]]
+    end
+    SPA --> NGINX --> GW
+    GW --> EU
+    GW --> AUTH & CORE & ALM & COM & VEN & FIN & CNT & RRHH & AF & PROD & RPT
+    AUTH & CORE & ALM & COM & VEN & FIN & CNT & RRHH & AF & PROD & AUD --> PG
+    AUTH & GW --> REDIS
+    ALM & COM & VEN & FIN & RRHH & AF & PROD --> MQ
+    MQ --> CNT & AUD & NOTIF
+    EU --> CFG
+```
+
+### 26.3 Nivel 3 — Componentes internos de un microservicio típico
+
+```mermaid
+flowchart TB
+    subgraph ms_compras["ms-compras (ejemplo representativo)"]
+        subgraph API["Capa API (Controller)"]
+            OCC[OrdenCompraController]
+            OSC[OrdenServicioController]
+            RECC[RecepcionController]
+            RPTC[ReporteComprasController]
+        end
+        subgraph Service["Capa Servicio (Business Logic)"]
+            OCS[OrdenCompraService]
+            OSS[OrdenServicioService]
+            RECS[RecepcionService]
+            APRS[AprobacionService]
+            VALIDS[ValidacionService]
+        end
+        subgraph Event["Capa Eventos"]
+            PUB[EventPublisher\nRabbitMQ]
+            SUB[EventListener\nRecibe eventos]
+        end
+        subgraph Integration["Capa Integración"]
+            CORE_F[CoreMaestrosFeign\nConsulta proveedores,\nartículos]
+            ALM_F[AlmacenFeign\nValida stock,\ngenera movimientos]
+        end
+        subgraph Persistence["Capa Persistencia"]
+            OCR[OrdenCompraRepository]
+            OSR[OrdenServicioRepository]
+            RECR[RecepcionRepository]
+            SPEC[JPA Specifications\nFiltros dinámicos]
+        end
+        subgraph Domain["Capa Dominio"]
+            OCE[OrdenCompra\nEntity]
+            OSE[OrdenServicio\nEntity]
+            RECE[Recepcion\nEntity]
+            DTO[DTOs\nRequest/Response]
+            MAP[MapStruct\nMappers]
+        end
+    end
+    OCC --> OCS
+    OSC --> OSS
+    RECC --> RECS
+    OCS --> VALIDS
+    OCS --> APRS
+    OCS --> CORE_F
+    RECS --> ALM_F
+    OCS --> PUB
+    RECS --> PUB
+    OCS --> OCR
+    OSS --> OSR
+    RECS --> RECR
+    OCR --> OCE
+    OCS --> MAP
+    MAP --> DTO
+```
+
+---
+
+## 27. Diagramas de entidades (ER) por microservicio
+
+### 27.1 ms-auth-security — Esquema `auth`
+
+```mermaid
+erDiagram
+    USUARIO {
+        bigint id PK
+        varchar username UK
+        varchar email UK
+        varchar password_hash
+        bigint rol_id FK
+        bigint empresa_id FK
+        varchar nombre_completo
+        boolean requiere_cambio_password
+        boolean habilitado_2fa
+        varchar secret_2fa
+        timestamp ultimo_acceso
+        int intentos_fallidos
+        boolean bloqueado
+        boolean activo
+        timestamp created_at
+        timestamp updated_at
+    }
+    ROL {
+        bigint id PK
+        bigint empresa_id FK
+        varchar codigo UK
+        varchar nombre
+        varchar descripcion
+        boolean es_admin
+        boolean activo
+    }
+    MODULO {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        varchar icono
+        int orden
+        boolean activo
+    }
+    OPCION_MENU {
+        bigint id PK
+        bigint modulo_id FK
+        bigint padre_id FK
+        varchar codigo UK
+        varchar nombre
+        varchar ruta_frontend
+        varchar icono
+        int orden
+        varchar tipo "MENU|SUBMENU|ACCION"
+        boolean activo
+    }
+    ACCION {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre "VER|CREAR|EDITAR|ELIMINAR|APROBAR|IMPRIMIR|EXPORTAR"
+    }
+    ROL_OPCION_MENU {
+        bigint rol_id FK
+        bigint opcion_menu_id FK
+    }
+    ROL_OPCION_ACCION {
+        bigint rol_id FK
+        bigint opcion_menu_id FK
+        bigint accion_id FK
+    }
+    USUARIO_OPCION_MENU {
+        bigint usuario_id FK
+        bigint opcion_menu_id FK
+        varchar tipo "ADICIONAL|RESTRINGIDA"
+    }
+    SESION {
+        bigint id PK
+        bigint usuario_id FK
+        varchar token_jti UK
+        varchar ip_address
+        varchar user_agent
+        varchar dispositivo
+        timestamp inicio
+        timestamp expiracion
+        timestamp fin
+        boolean activa
+    }
+    LOG_ACCESO {
+        bigint id PK
+        bigint usuario_id FK
+        varchar accion "LOGIN|LOGOUT|LOGIN_FALLIDO|BLOQUEO"
+        varchar ip_address
+        varchar user_agent
+        timestamp fecha
+    }
+    USUARIO }o--|| ROL : "tiene un solo"
+    USUARIO ||--o{ SESION : "tiene"
+    USUARIO ||--o{ LOG_ACCESO : "registra"
+    USUARIO }o--o{ OPCION_MENU : "individual"
+    ROL }o--o{ OPCION_MENU : "asigna"
+    ROL }o--o{ ACCION : "permite"
+    OPCION_MENU }o--|| MODULO : "pertenece"
+    OPCION_MENU }o--o| OPCION_MENU : "hijo de"
+```
+
+### 27.2 ms-core-maestros — Esquema `core`
+
+```mermaid
+erDiagram
+    EMPRESA {
+        bigint id PK
+        varchar ruc UK
+        varchar razon_social
+        varchar nombre_comercial
+        varchar direccion_fiscal
+        bigint pais_id FK
+        varchar logo_url
+        boolean activo
+    }
+    PAIS {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        varchar moneda_id FK
+        varchar formato_fecha
+        varchar zona_horaria
+        boolean activo
+    }
+    SUCURSAL {
+        bigint id PK
+        bigint empresa_id FK
+        bigint pais_id FK
+        varchar codigo UK
+        varchar nombre
+        varchar direccion
+        varchar telefono
+        varchar ubigeo
+        boolean activo
+    }
+    MONEDA {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        varchar simbolo
+        int decimales
+        boolean activo
+    }
+    TIPO_CAMBIO {
+        bigint id PK
+        bigint moneda_origen_id FK
+        bigint moneda_destino_id FK
+        date fecha
+        decimal tc_compra
+        decimal tc_venta
+    }
+    RELACION_COMERCIAL {
+        bigint id PK
+        bigint empresa_id FK
+        varchar tipo_documento
+        varchar numero_documento UK
+        varchar razon_social
+        varchar nombre_comercial
+        varchar direccion
+        varchar telefono
+        varchar email
+        boolean es_proveedor
+        boolean es_cliente
+        boolean es_empleado
+        bigint condicion_pago_id FK
+        boolean activo
+    }
+    CONTACTO {
+        bigint id PK
+        bigint relacion_comercial_id FK
+        varchar nombre
+        varchar cargo
+        varchar telefono
+        varchar email
+        boolean principal
+    }
+    CUENTA_BANCARIA_RC {
+        bigint id PK
+        bigint relacion_comercial_id FK
+        varchar banco
+        varchar numero_cuenta
+        varchar cci
+        varchar tipo_cuenta
+        bigint moneda_id FK
+    }
+    ARTICULO {
+        bigint id PK
+        bigint empresa_id FK
+        varchar codigo UK
+        varchar nombre
+        varchar descripcion
+        bigint categoria_id FK
+        bigint unidad_medida_id FK
+        bigint impuesto_id FK
+        varchar tipo "PRODUCTO|SERVICIO|INSUMO|ACTIVO"
+        decimal precio_venta
+        decimal costo_promedio
+        decimal stock_minimo
+        decimal stock_maximo
+        varchar codigo_barras
+        varchar imagen_url
+        boolean es_inventariable
+        boolean activo
+    }
+    CATEGORIA {
+        bigint id PK
+        bigint empresa_id FK
+        varchar codigo
+        varchar nombre
+        bigint padre_id FK
+        int nivel
+        boolean activo
+    }
+    UNIDAD_MEDIDA {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        varchar abreviatura
+    }
+    CONVERSION_UNIDAD {
+        bigint id PK
+        bigint unidad_origen_id FK
+        bigint unidad_destino_id FK
+        decimal factor_conversion
+    }
+    IMPUESTO {
+        bigint id PK
+        bigint pais_id FK
+        varchar codigo
+        varchar nombre
+        decimal porcentaje
+        varchar tipo "IGV|ISC|PERCEPCION"
+        boolean activo
+    }
+    NUMERADOR {
+        bigint id PK
+        bigint empresa_id FK
+        bigint sucursal_id FK
+        varchar tipo_documento
+        varchar serie
+        int ultimo_numero
+        varchar formato
+    }
+    CONDICION_PAGO {
+        bigint id PK
+        varchar codigo
+        varchar nombre
+        int dias
+        boolean activo
+    }
+    FORMA_PAGO {
+        bigint id PK
+        varchar codigo
+        varchar nombre
+        varchar tipo "EFECTIVO|TARJETA|TRANSFERENCIA|DIGITAL"
+        boolean activo
+    }
+    CONFIG_CLAVE {
+        bigint id PK
+        varchar clave UK
+        varchar descripcion
+        varchar tipo_dato
+        varchar valor_default
+        varchar modulo
+    }
+    CONFIG_EMPRESA {
+        bigint id PK
+        bigint config_clave_id FK
+        bigint empresa_id FK
+        varchar valor
+    }
+    CONFIG_PAIS {
+        bigint id PK
+        bigint config_clave_id FK
+        bigint pais_id FK
+        varchar valor
+    }
+    CONFIG_SUCURSAL {
+        bigint id PK
+        bigint config_clave_id FK
+        bigint sucursal_id FK
+        varchar valor
+    }
+    CONFIG_USUARIO {
+        bigint id PK
+        bigint config_clave_id FK
+        bigint usuario_id FK
+        varchar valor
+    }
+    EMPRESA ||--o{ SUCURSAL : tiene
+    SUCURSAL }o--|| PAIS : pertenece
+    EMPRESA ||--o{ RELACION_COMERCIAL : tiene
+    EMPRESA ||--o{ ARTICULO : tiene
+    ARTICULO }o--|| CATEGORIA : pertenece
+    ARTICULO }o--|| UNIDAD_MEDIDA : usa
+    ARTICULO }o--|| IMPUESTO : aplica
+    RELACION_COMERCIAL ||--o{ CONTACTO : tiene
+    RELACION_COMERCIAL ||--o{ CUENTA_BANCARIA_RC : tiene
+    RELACION_COMERCIAL }o--|| CONDICION_PAGO : "condición default"
+    MONEDA ||--o{ TIPO_CAMBIO : origen
+    CONFIG_CLAVE ||--o{ CONFIG_EMPRESA : configura
+    CONFIG_CLAVE ||--o{ CONFIG_PAIS : configura
+    CONFIG_CLAVE ||--o{ CONFIG_SUCURSAL : configura
+    CONFIG_CLAVE ||--o{ CONFIG_USUARIO : configura
+    CATEGORIA }o--o| CATEGORIA : "padre"
+```
+
+### 27.3 ms-almacen — Esquema `almacen`
+
+```mermaid
+erDiagram
+    ALMACEN {
+        bigint id PK
+        bigint empresa_id FK
+        bigint sucursal_id FK
+        varchar codigo UK
+        varchar nombre
+        varchar direccion
+        varchar tipo "PRINCIPAL|TRANSITO|DEVOLUCION|PRODUCCION"
+        boolean activo
+    }
+    UBICACION_ALMACEN {
+        bigint id PK
+        bigint almacen_id FK
+        varchar codigo
+        varchar nombre
+        varchar pasillo
+        varchar estante
+        varchar nivel
+    }
+    TIPO_MOVIMIENTO {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        varchar naturaleza "INGRESO|SALIDA"
+        varchar tipo_sunat
+        boolean afecta_costo
+        boolean genera_pre_asiento
+        boolean activo
+    }
+    MOVIMIENTO_ALMACEN {
+        bigint id PK
+        bigint empresa_id FK
+        bigint almacen_id FK
+        bigint tipo_movimiento_id FK
+        varchar numero UK
+        date fecha
+        varchar referencia_tipo
+        bigint referencia_id
+        varchar observacion
+        varchar estado "BORRADOR|CONFIRMADO|ANULADO"
+        bigint usuario_id FK
+        timestamp created_at
+    }
+    MOVIMIENTO_DETALLE {
+        bigint id PK
+        bigint movimiento_id FK
+        bigint articulo_id FK
+        decimal cantidad
+        decimal costo_unitario
+        decimal costo_total
+        bigint ubicacion_id FK
+        varchar lote
+        date fecha_vencimiento
+    }
+    STOCK {
+        bigint id PK
+        bigint almacen_id FK
+        bigint articulo_id FK
+        decimal cantidad_disponible
+        decimal cantidad_reservada
+        decimal costo_promedio
+        timestamp ultima_actualizacion
+    }
+    KARDEX {
+        bigint id PK
+        bigint almacen_id FK
+        bigint articulo_id FK
+        bigint movimiento_detalle_id FK
+        date fecha
+        varchar tipo "INGRESO|SALIDA"
+        decimal cantidad
+        decimal costo_unitario
+        decimal costo_total
+        decimal saldo_cantidad
+        decimal saldo_costo_unitario
+        decimal saldo_costo_total
+    }
+    INVENTARIO_FISICO {
+        bigint id PK
+        bigint almacen_id FK
+        date fecha
+        varchar estado "EN_PROCESO|COMPARADO|AJUSTADO|CERRADO"
+        bigint usuario_id FK
+    }
+    INVENTARIO_FISICO_DETALLE {
+        bigint id PK
+        bigint inventario_fisico_id FK
+        bigint articulo_id FK
+        decimal cantidad_sistema
+        decimal cantidad_fisica
+        decimal diferencia
+        varchar observacion
+    }
+    RESERVA_STOCK {
+        bigint id PK
+        bigint almacen_id FK
+        bigint articulo_id FK
+        decimal cantidad
+        varchar origen_tipo
+        bigint origen_id
+        timestamp fecha_reserva
+        timestamp fecha_expiracion
+        varchar estado "ACTIVA|CONSUMIDA|EXPIRADA"
+    }
+    ALMACEN ||--o{ UBICACION_ALMACEN : contiene
+    ALMACEN ||--o{ STOCK : registra
+    ALMACEN ||--o{ MOVIMIENTO_ALMACEN : tiene
+    MOVIMIENTO_ALMACEN }o--|| TIPO_MOVIMIENTO : es
+    MOVIMIENTO_ALMACEN ||--o{ MOVIMIENTO_DETALLE : contiene
+    MOVIMIENTO_DETALLE --> KARDEX : genera
+    STOCK }o--|| ARTICULO : de
+    ALMACEN ||--o{ INVENTARIO_FISICO : ejecuta
+    INVENTARIO_FISICO ||--o{ INVENTARIO_FISICO_DETALLE : contiene
+    ALMACEN ||--o{ RESERVA_STOCK : tiene
+```
+
+### 27.4 ms-compras — Esquema `compras`
+
+```mermaid
+erDiagram
+    SOLICITUD_COMPRA {
+        bigint id PK
+        bigint empresa_id FK
+        bigint sucursal_id FK
+        varchar numero UK
+        date fecha
+        bigint solicitante_id FK
+        varchar prioridad "BAJA|MEDIA|ALTA|URGENTE"
+        varchar estado "BORRADOR|ENVIADA|APROBADA|RECHAZADA|EN_OC"
+        varchar justificacion
+    }
+    SOLICITUD_COMPRA_DETALLE {
+        bigint id PK
+        bigint solicitud_id FK
+        bigint articulo_id FK
+        decimal cantidad
+        varchar especificaciones
+    }
+    COTIZACION {
+        bigint id PK
+        bigint solicitud_id FK
+        bigint proveedor_id FK
+        varchar numero UK
+        date fecha
+        date fecha_validez
+        decimal subtotal
+        decimal igv
+        decimal total
+        bigint moneda_id FK
+        varchar estado "PENDIENTE|RECIBIDA|SELECCIONADA|DESCARTADA"
+    }
+    COTIZACION_DETALLE {
+        bigint id PK
+        bigint cotizacion_id FK
+        bigint articulo_id FK
+        decimal cantidad
+        decimal precio_unitario
+        decimal descuento
+        int plazo_entrega_dias
+    }
+    ORDEN_COMPRA {
+        bigint id PK
+        bigint empresa_id FK
+        bigint sucursal_id FK
+        bigint proveedor_id FK
+        varchar numero UK
+        date fecha
+        date fecha_entrega
+        bigint moneda_id FK
+        bigint condicion_pago_id FK
+        decimal subtotal
+        decimal igv
+        decimal total
+        decimal tc
+        varchar estado "BORRADOR|PENDIENTE_APROBACION|APROBADA|RECHAZADA|PARCIAL|COMPLETADA|ANULADA"
+        varchar observaciones
+        bigint cotizacion_id FK
+    }
+    ORDEN_COMPRA_DETALLE {
+        bigint id PK
+        bigint orden_compra_id FK
+        bigint articulo_id FK
+        varchar descripcion
+        decimal cantidad
+        decimal precio_unitario
+        decimal descuento_porcentaje
+        decimal subtotal
+        decimal cantidad_recibida
+        decimal cantidad_pendiente
+    }
+    ORDEN_SERVICIO {
+        bigint id PK
+        bigint empresa_id FK
+        bigint proveedor_id FK
+        varchar numero UK
+        date fecha
+        varchar descripcion_servicio
+        decimal total
+        bigint moneda_id FK
+        varchar estado "BORRADOR|APROBADA|EN_EJECUCION|COMPLETADA|ANULADA"
+    }
+    APROBACION {
+        bigint id PK
+        varchar tipo_documento
+        bigint documento_id
+        int nivel
+        bigint aprobador_id FK
+        varchar accion "APROBADO|RECHAZADO"
+        varchar comentario
+        timestamp fecha
+    }
+    RECEPCION {
+        bigint id PK
+        bigint orden_compra_id FK
+        bigint almacen_id FK
+        varchar numero UK
+        date fecha
+        varchar guia_remision
+        varchar estado "BORRADOR|CONFIRMADA|ANULADA"
+        varchar observaciones
+    }
+    RECEPCION_DETALLE {
+        bigint id PK
+        bigint recepcion_id FK
+        bigint oc_detalle_id FK
+        bigint articulo_id FK
+        decimal cantidad_recibida
+        decimal cantidad_rechazada
+        varchar motivo_rechazo
+    }
+    CONTRATO_MARCO {
+        bigint id PK
+        bigint empresa_id FK
+        bigint proveedor_id FK
+        varchar numero UK
+        date fecha_inicio
+        date fecha_fin
+        varchar condiciones
+        varchar estado "VIGENTE|VENCIDO|CANCELADO"
+    }
+    EVALUACION_PROVEEDOR {
+        bigint id PK
+        bigint proveedor_id FK
+        bigint periodo_id FK
+        int calidad_puntaje
+        int entrega_puntaje
+        int precio_puntaje
+        int servicio_puntaje
+        decimal puntaje_total
+        varchar clasificacion "A|B|C|D"
+    }
+    SOLICITUD_COMPRA ||--o{ SOLICITUD_COMPRA_DETALLE : contiene
+    SOLICITUD_COMPRA ||--o{ COTIZACION : genera
+    COTIZACION ||--o{ COTIZACION_DETALLE : contiene
+    COTIZACION }o--o| ORDEN_COMPRA : "se convierte en"
+    ORDEN_COMPRA ||--o{ ORDEN_COMPRA_DETALLE : contiene
+    ORDEN_COMPRA ||--o{ RECEPCION : genera
+    ORDEN_COMPRA ||--o{ APROBACION : requiere
+    RECEPCION ||--o{ RECEPCION_DETALLE : contiene
+```
+
+### 27.5 ms-ventas — Esquema `ventas`
+
+```mermaid
+erDiagram
+    ZONA {
+        bigint id PK
+        bigint sucursal_id FK
+        varchar nombre
+        int capacidad
+        boolean activo
+    }
+    MESA {
+        bigint id PK
+        bigint zona_id FK
+        varchar numero UK
+        int capacidad
+        varchar estado "LIBRE|OCUPADA|RESERVADA|MANTENIMIENTO"
+        boolean activo
+    }
+    TURNO {
+        bigint id PK
+        bigint sucursal_id FK
+        bigint cajero_id FK
+        decimal fondo_inicial
+        timestamp apertura
+        timestamp cierre
+        varchar estado "ABIERTO|CERRADO"
+    }
+    ORDEN_VENTA {
+        bigint id PK
+        bigint sucursal_id FK
+        bigint mesa_id FK
+        bigint mesero_id FK
+        bigint turno_id FK
+        varchar numero UK
+        int comensales
+        timestamp apertura
+        timestamp cierre
+        varchar estado "ABIERTA|CERRADA|ANULADA"
+        varchar observaciones
+    }
+    COMANDA {
+        bigint id PK
+        bigint orden_id FK
+        bigint articulo_id FK
+        decimal cantidad
+        decimal precio_unitario
+        decimal descuento
+        decimal subtotal
+        varchar estado "PENDIENTE|EN_PREPARACION|SERVIDA|ANULADA"
+        varchar observaciones
+        timestamp hora_pedido
+        timestamp hora_entrega
+    }
+    DOCUMENTO_VENTA {
+        bigint id PK
+        bigint empresa_id FK
+        bigint sucursal_id FK
+        bigint orden_id FK
+        bigint cliente_id FK
+        bigint turno_id FK
+        varchar tipo "BOLETA|FACTURA|NOTA_VENTA"
+        varchar serie
+        varchar numero UK
+        date fecha
+        bigint moneda_id FK
+        decimal tc
+        decimal subtotal
+        decimal igv
+        decimal isc
+        decimal descuento_total
+        decimal propina
+        decimal recargo_consumo
+        decimal total
+        varchar estado "EMITIDA|ANULADA|BAJA"
+        bigint forma_pago_id FK
+    }
+    DOCUMENTO_VENTA_DETALLE {
+        bigint id PK
+        bigint documento_id FK
+        bigint articulo_id FK
+        varchar descripcion
+        decimal cantidad
+        decimal precio_unitario
+        decimal descuento
+        decimal igv
+        decimal subtotal
+        decimal total
+    }
+    NOTA_CREDITO_VENTA {
+        bigint id PK
+        bigint documento_original_id FK
+        varchar serie
+        varchar numero UK
+        date fecha
+        varchar motivo
+        decimal total
+        varchar estado "EMITIDA|ANULADA"
+    }
+    NOTA_DEBITO_VENTA {
+        bigint id PK
+        bigint documento_original_id FK
+        varchar serie
+        varchar numero UK
+        date fecha
+        varchar motivo
+        decimal total
+        varchar estado "EMITIDA|ANULADA"
+    }
+    PAGO_VENTA {
+        bigint id PK
+        bigint documento_id FK
+        bigint forma_pago_id FK
+        decimal monto
+        varchar referencia
+        varchar estado "COMPLETADO|ANULADO"
+    }
+    DESCUENTO_PROMOCION {
+        bigint id PK
+        bigint empresa_id FK
+        varchar nombre
+        varchar tipo "PORCENTAJE|MONTO_FIJO|2X1|COMBO"
+        decimal valor
+        date fecha_inicio
+        date fecha_fin
+        varchar dias_aplicacion
+        time hora_inicio
+        time hora_fin
+        decimal monto_minimo
+        boolean activo
+    }
+    FACTURACION_ELECTRONICA {
+        bigint id PK
+        bigint documento_venta_id FK
+        varchar xml_enviado
+        varchar xml_cdr
+        varchar hash_cpe
+        varchar ticket_ose
+        varchar estado_sunat "PENDIENTE|ACEPTADO|RECHAZADO|OBSERVADO"
+        timestamp fecha_envio
+        timestamp fecha_respuesta
+        varchar mensaje_respuesta
+    }
+    CIERRE_CAJA {
+        bigint id PK
+        bigint turno_id FK
+        decimal ventas_efectivo
+        decimal ventas_tarjeta
+        decimal ventas_digital
+        decimal ventas_total
+        decimal propinas_total
+        decimal fondo_inicial
+        decimal fondo_final
+        decimal diferencia
+        varchar observaciones
+        timestamp fecha_cierre
+    }
+    PROPINA {
+        bigint id PK
+        bigint documento_venta_id FK
+        bigint trabajador_id FK
+        decimal monto
+        date fecha
+    }
+    ZONA ||--o{ MESA : contiene
+    MESA ||--o{ ORDEN_VENTA : atiende
+    ORDEN_VENTA ||--o{ COMANDA : contiene
+    ORDEN_VENTA ||--o| DOCUMENTO_VENTA : genera
+    DOCUMENTO_VENTA ||--o{ DOCUMENTO_VENTA_DETALLE : contiene
+    DOCUMENTO_VENTA ||--o{ PAGO_VENTA : recibe
+    DOCUMENTO_VENTA ||--o| NOTA_CREDITO_VENTA : "puede tener"
+    DOCUMENTO_VENTA ||--o| NOTA_DEBITO_VENTA : "puede tener"
+    DOCUMENTO_VENTA ||--o| FACTURACION_ELECTRONICA : "se envía"
+    DOCUMENTO_VENTA ||--o{ PROPINA : registra
+    TURNO ||--o{ ORDEN_VENTA : contiene
+    TURNO ||--o| CIERRE_CAJA : genera
+```
+
+### 27.6 ms-finanzas — Esquema `finanzas`
+
+```mermaid
+erDiagram
+    CUENTA_BANCARIA {
+        bigint id PK
+        bigint empresa_id FK
+        varchar banco
+        varchar numero_cuenta UK
+        varchar cci
+        varchar tipo "AHORRO|CORRIENTE"
+        bigint moneda_id FK
+        decimal saldo_contable
+        boolean activo
+    }
+    DOCUMENTO_PAGAR {
+        bigint id PK
+        bigint empresa_id FK
+        bigint proveedor_id FK
+        varchar tipo "FACTURA|RECIBO|NC|ND"
+        varchar serie_numero UK
+        date fecha_emision
+        date fecha_vencimiento
+        bigint moneda_id FK
+        decimal tc
+        decimal subtotal
+        decimal igv
+        decimal retencion
+        decimal detraccion
+        decimal total
+        decimal saldo
+        varchar estado "PENDIENTE|PARCIAL|PAGADO|ANULADO"
+        bigint oc_id FK
+    }
+    DOCUMENTO_COBRAR {
+        bigint id PK
+        bigint empresa_id FK
+        bigint cliente_id FK
+        varchar tipo "FACTURA|BOLETA|LETRA|NC|ND"
+        varchar serie_numero UK
+        date fecha_emision
+        date fecha_vencimiento
+        bigint moneda_id FK
+        decimal total
+        decimal saldo
+        varchar estado "PENDIENTE|PARCIAL|COBRADO|ANULADO|PROTESTADA"
+    }
+    PAGO {
+        bigint id PK
+        bigint documento_pagar_id FK
+        bigint cuenta_bancaria_id FK
+        bigint forma_pago_id FK
+        date fecha
+        decimal monto
+        varchar referencia
+        varchar numero_operacion
+        varchar estado "APLICADO|ANULADO"
+    }
+    COBRO {
+        bigint id PK
+        bigint documento_cobrar_id FK
+        bigint cuenta_bancaria_id FK
+        bigint forma_pago_id FK
+        date fecha
+        decimal monto
+        varchar referencia
+        varchar estado "APLICADO|ANULADO"
+    }
+    MOVIMIENTO_BANCARIO {
+        bigint id PK
+        bigint cuenta_bancaria_id FK
+        date fecha
+        varchar tipo "DEPOSITO|RETIRO|TRANSFERENCIA|COMISION|ITF"
+        varchar referencia
+        decimal monto
+        decimal saldo_despues
+        boolean conciliado
+    }
+    CONCILIACION_BANCARIA {
+        bigint id PK
+        bigint cuenta_bancaria_id FK
+        int periodo_anio
+        int periodo_mes
+        decimal saldo_banco
+        decimal saldo_libros
+        decimal diferencia
+        varchar estado "EN_PROCESO|CONCILIADO|CERRADO"
+    }
+    CONCILIACION_DETALLE {
+        bigint id PK
+        bigint conciliacion_id FK
+        bigint movimiento_bancario_id FK
+        boolean conciliado
+        varchar observacion
+    }
+    ADELANTO {
+        bigint id PK
+        bigint empresa_id FK
+        bigint solicitante_id FK
+        bigint proveedor_id FK
+        varchar numero UK
+        date fecha
+        decimal monto
+        varchar motivo
+        varchar estado "SOLICITADO|APROBADO|DESEMBOLSADO|LIQUIDADO|RECHAZADO"
+    }
+    PROGRAMACION_PAGO {
+        bigint id PK
+        bigint empresa_id FK
+        date fecha_programada
+        varchar estado "PROGRAMADO|EJECUTADO|CANCELADO"
+    }
+    PROGRAMACION_PAGO_DETALLE {
+        bigint id PK
+        bigint programacion_id FK
+        bigint documento_pagar_id FK
+        decimal monto_programado
+    }
+    FONDO_FIJO {
+        bigint id PK
+        bigint sucursal_id FK
+        bigint responsable_id FK
+        decimal monto_autorizado
+        decimal monto_disponible
+        varchar estado "ACTIVO|RENDICION|REPOSICION"
+    }
+    RENDICION_GASTO {
+        bigint id PK
+        bigint fondo_fijo_id FK
+        date fecha
+        decimal monto
+        varchar concepto
+        varchar comprobante
+        varchar estado "PENDIENTE|APROBADO|RECHAZADO"
+    }
+    CUENTA_BANCARIA ||--o{ MOVIMIENTO_BANCARIO : tiene
+    CUENTA_BANCARIA ||--o{ CONCILIACION_BANCARIA : genera
+    CONCILIACION_BANCARIA ||--o{ CONCILIACION_DETALLE : contiene
+    DOCUMENTO_PAGAR ||--o{ PAGO : recibe
+    DOCUMENTO_COBRAR ||--o{ COBRO : recibe
+    PROGRAMACION_PAGO ||--o{ PROGRAMACION_PAGO_DETALLE : contiene
+    FONDO_FIJO ||--o{ RENDICION_GASTO : registra
+```
+
+### 27.7 ms-contabilidad — Esquema `contabilidad`
+
+```mermaid
+erDiagram
+    CUENTA_CONTABLE {
+        bigint id PK
+        bigint empresa_id FK
+        varchar codigo UK
+        varchar nombre
+        int nivel
+        bigint padre_id FK
+        varchar naturaleza "DEUDORA|ACREEDORA"
+        varchar tipo "TITULO|MOVIMIENTO"
+        boolean requiere_cc
+        boolean requiere_documento
+        boolean activo
+    }
+    CENTRO_COSTO {
+        bigint id PK
+        bigint empresa_id FK
+        varchar codigo UK
+        varchar nombre
+        int nivel
+        bigint padre_id FK
+        varchar tipo "ADMINISTRATIVO|OPERATIVO|VENTAS|PRODUCCION"
+        boolean activo
+    }
+    LIBRO_CONTABLE {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        varchar tipo "DIARIO|MAYOR|CAJA|COMPRAS|VENTAS|BANCOS"
+    }
+    ASIENTO {
+        bigint id PK
+        bigint empresa_id FK
+        bigint libro_id FK
+        varchar numero UK
+        date fecha
+        varchar glosa
+        varchar tipo "MANUAL|AUTOMATICO|APERTURA|CIERRE|AJUSTE"
+        varchar modulo_origen
+        bigint documento_origen_id
+        varchar estado "BORRADOR|CONFIRMADO|ANULADO"
+        bigint moneda_id FK
+        decimal tc
+    }
+    ASIENTO_DETALLE {
+        bigint id PK
+        bigint asiento_id FK
+        bigint cuenta_contable_id FK
+        bigint centro_costo_id FK
+        varchar glosa_detalle
+        decimal debe
+        decimal haber
+        decimal debe_me
+        decimal haber_me
+        varchar referencia
+    }
+    PRE_ASIENTO {
+        bigint id PK
+        varchar modulo_origen
+        varchar tipo_operacion
+        bigint documento_id
+        varchar referencia
+        date fecha
+        jsonb data_contable
+        varchar estado "PENDIENTE|PROCESADO|ERROR|IGNORADO"
+        varchar error_mensaje
+        bigint asiento_generado_id FK
+        timestamp fecha_recepcion
+        timestamp fecha_procesamiento
+    }
+    MATRIZ_CONTABLE {
+        bigint id PK
+        bigint empresa_id FK
+        varchar modulo
+        varchar tipo_operacion
+        bigint cuenta_debe_id FK
+        bigint cuenta_haber_id FK
+        bigint centro_costo_id FK
+        varchar descripcion
+        boolean activo
+    }
+    CIERRE_CONTABLE {
+        bigint id PK
+        bigint empresa_id FK
+        int anio
+        int mes
+        varchar tipo "MENSUAL|ANUAL"
+        varchar estado "ABIERTO|CERRADO|REABIERTO"
+        bigint usuario_id FK
+        timestamp fecha_cierre
+    }
+    CUENTA_CONTABLE }o--o| CUENTA_CONTABLE : "padre"
+    CENTRO_COSTO }o--o| CENTRO_COSTO : "padre"
+    ASIENTO }o--|| LIBRO_CONTABLE : "registrado en"
+    ASIENTO ||--o{ ASIENTO_DETALLE : contiene
+    ASIENTO_DETALLE }o--|| CUENTA_CONTABLE : "debita/acredita"
+    ASIENTO_DETALLE }o--o| CENTRO_COSTO : asigna
+    PRE_ASIENTO }o--o| ASIENTO : "genera"
+    MATRIZ_CONTABLE }o--|| CUENTA_CONTABLE : "cuenta debe"
+```
+
+### 27.8 ms-rrhh — Esquema `rrhh`
+
+```mermaid
+erDiagram
+    TRABAJADOR {
+        bigint id PK
+        bigint empresa_id FK
+        bigint relacion_comercial_id FK
+        varchar codigo_trabajador UK
+        varchar nombres
+        varchar apellido_paterno
+        varchar apellido_materno
+        varchar tipo_documento
+        varchar numero_documento UK
+        date fecha_nacimiento
+        varchar sexo
+        varchar estado_civil
+        varchar direccion
+        varchar telefono
+        varchar email
+        varchar cuenta_bancaria_sueldo
+        varchar cuenta_cts
+        bigint afp_id FK
+        varchar cuspp
+        varchar regimen_laboral
+        bigint area_id FK
+        bigint cargo_id FK
+        bigint sucursal_id FK
+        date fecha_ingreso
+        date fecha_cese
+        varchar motivo_cese
+        varchar estado "ACTIVO|VACACIONES|LICENCIA|CESADO"
+        boolean activo
+    }
+    CONTRATO {
+        bigint id PK
+        bigint trabajador_id FK
+        varchar tipo "INDEFINIDO|PLAZO_FIJO|PARCIAL|FORMATIVO"
+        date fecha_inicio
+        date fecha_fin
+        decimal remuneracion
+        boolean asignacion_familiar
+        varchar estado "VIGENTE|VENCIDO|RENOVADO|RESUELTO"
+    }
+    AREA {
+        bigint id PK
+        bigint empresa_id FK
+        varchar nombre
+        bigint padre_id FK
+        bigint responsable_id FK
+    }
+    CARGO {
+        bigint id PK
+        varchar nombre
+        varchar nivel
+        decimal sueldo_minimo
+        decimal sueldo_maximo
+    }
+    AFP {
+        bigint id PK
+        varchar nombre
+        decimal comision_porcentaje
+        decimal prima_seguro
+        decimal aporte_obligatorio
+    }
+    HORARIO {
+        bigint id PK
+        varchar nombre
+        time hora_entrada
+        time hora_salida
+        int minutos_tolerancia
+        boolean aplica_lunes
+        boolean aplica_martes
+        boolean aplica_miercoles
+        boolean aplica_jueves
+        boolean aplica_viernes
+        boolean aplica_sabado
+        boolean aplica_domingo
+    }
+    ASISTENCIA {
+        bigint id PK
+        bigint trabajador_id FK
+        date fecha
+        time hora_entrada
+        time hora_salida
+        varchar tipo_marca "BIOMETRICO|MANUAL|APP|GPS"
+        decimal horas_trabajadas
+        decimal horas_extra
+        varchar estado "ASISTIO|FALTA|TARDANZA|PERMISO|VACACIONES|LICENCIA"
+    }
+    PERMISO_LICENCIA {
+        bigint id PK
+        bigint trabajador_id FK
+        varchar tipo "PERMISO|LICENCIA_MEDICA|LICENCIA_PATERNIDAD|LICENCIA_SIN_GOCE"
+        date fecha_inicio
+        date fecha_fin
+        int dias
+        varchar estado "SOLICITADO|APROBADO|RECHAZADO"
+        varchar sustento
+    }
+    CONCEPTO_PLANILLA {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        varchar tipo "INGRESO|DESCUENTO|APORTE_EMPLEADOR"
+        varchar formula
+        decimal valor_fijo
+        boolean afecto_quinta
+        boolean afecto_essalud
+        boolean aplica_todos
+    }
+    PLANILLA {
+        bigint id PK
+        bigint empresa_id FK
+        int anio
+        int mes
+        varchar tipo "MENSUAL|QUINCENAL|SEMANAL|GRATIFICACION|CTS|LIQUIDACION"
+        varchar estado "BORRADOR|CALCULADA|APROBADA|PAGADA|CERRADA"
+        decimal total_ingresos
+        decimal total_descuentos
+        decimal total_neto
+        decimal total_aportes
+    }
+    PLANILLA_DETALLE {
+        bigint id PK
+        bigint planilla_id FK
+        bigint trabajador_id FK
+        bigint concepto_id FK
+        decimal monto
+        decimal dias_trabajados
+        decimal horas_extra
+    }
+    VACACION {
+        bigint id PK
+        bigint trabajador_id FK
+        int periodo_anio
+        int dias_derecho
+        int dias_gozados
+        int dias_pendientes
+        date fecha_inicio
+        date fecha_fin
+        varchar estado "PROGRAMADA|EN_GOCE|COMPLETADA"
+    }
+    LIQUIDACION {
+        bigint id PK
+        bigint trabajador_id FK
+        date fecha_cese
+        decimal cts_pendiente
+        decimal vacaciones_truncas
+        decimal gratificacion_trunca
+        decimal indemnizacion
+        decimal total_beneficios
+        decimal total_descuentos
+        decimal neto_pagar
+        varchar estado "CALCULADA|APROBADA|PAGADA"
+    }
+    PRESTAMO {
+        bigint id PK
+        bigint trabajador_id FK
+        decimal monto_total
+        int cuotas
+        decimal cuota_mensual
+        decimal saldo
+        varchar estado "ACTIVO|PAGADO"
+    }
+    TRABAJADOR ||--o{ CONTRATO : tiene
+    TRABAJADOR }o--|| AREA : pertenece
+    TRABAJADOR }o--|| CARGO : ocupa
+    TRABAJADOR }o--o| AFP : "aporta a"
+    TRABAJADOR ||--o{ ASISTENCIA : registra
+    TRABAJADOR ||--o{ PERMISO_LICENCIA : solicita
+    TRABAJADOR ||--o{ VACACION : tiene
+    TRABAJADOR ||--o| LIQUIDACION : "puede tener"
+    TRABAJADOR ||--o{ PRESTAMO : tiene
+    PLANILLA ||--o{ PLANILLA_DETALLE : contiene
+    PLANILLA_DETALLE }o--|| TRABAJADOR : de
+    PLANILLA_DETALLE }o--|| CONCEPTO_PLANILLA : aplica
+    AREA }o--o| AREA : "padre"
+```
+
+### 27.9 ms-activos-fijos — Esquema `activos`
+
+```mermaid
+erDiagram
+    CLASE_ACTIVO {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        decimal vida_util_anios
+        decimal tasa_depreciacion
+        varchar metodo_depreciacion "LINEAL|DECRECIENTE|UNIDADES"
+        bigint cuenta_activo_id FK
+        bigint cuenta_depreciacion_id FK
+        bigint cuenta_gasto_id FK
+    }
+    UBICACION_FISICA {
+        bigint id PK
+        bigint sucursal_id FK
+        varchar codigo
+        varchar nombre
+        bigint padre_id FK
+        int nivel
+    }
+    ACTIVO_FIJO {
+        bigint id PK
+        bigint empresa_id FK
+        varchar codigo_activo UK
+        varchar descripcion
+        bigint clase_id FK
+        bigint ubicacion_id FK
+        bigint responsable_id FK
+        date fecha_adquisicion
+        date fecha_inicio_depreciacion
+        bigint proveedor_id FK
+        varchar factura_referencia
+        bigint moneda_id FK
+        decimal costo_adquisicion
+        decimal valor_residual
+        decimal depreciacion_acumulada
+        decimal valor_neto
+        varchar codigo_qr
+        varchar estado "ACTIVO|BAJA|TRANSFERIDO|EN_MANTENIMIENTO"
+        boolean activo
+    }
+    COMPONENTE_ACTIVO {
+        bigint id PK
+        bigint activo_fijo_id FK
+        varchar descripcion
+        decimal costo
+        date fecha_instalacion
+    }
+    DEPRECIACION {
+        bigint id PK
+        bigint activo_fijo_id FK
+        int anio
+        int mes
+        decimal monto_depreciacion
+        decimal depreciacion_acumulada
+        decimal valor_neto
+        boolean procesado
+    }
+    MEJORA_ACTIVO {
+        bigint id PK
+        bigint activo_fijo_id FK
+        date fecha
+        varchar descripcion
+        decimal costo
+        decimal nueva_vida_util
+    }
+    REVALUACION {
+        bigint id PK
+        bigint activo_fijo_id FK
+        date fecha
+        decimal valor_anterior
+        decimal valor_nuevo
+        varchar sustento
+        bigint perito_id FK
+    }
+    ASEGURADORA {
+        bigint id PK
+        varchar nombre
+        varchar ruc
+        varchar contacto
+        boolean activo
+    }
+    POLIZA_SEGURO {
+        bigint id PK
+        bigint aseguradora_id FK
+        varchar numero_poliza UK
+        date fecha_inicio
+        date fecha_fin
+        decimal prima
+        decimal cobertura
+        varchar estado "VIGENTE|VENCIDA|CANCELADA"
+    }
+    POLIZA_ACTIVO {
+        bigint id PK
+        bigint poliza_id FK
+        bigint activo_fijo_id FK
+        decimal valor_asegurado
+    }
+    TRASLADO_ACTIVO {
+        bigint id PK
+        bigint activo_fijo_id FK
+        bigint ubicacion_origen_id FK
+        bigint ubicacion_destino_id FK
+        bigint solicitante_id FK
+        bigint aprobador_id FK
+        date fecha_solicitud
+        date fecha_ejecucion
+        varchar motivo
+        varchar estado "SOLICITADO|APROBADO|EJECUTADO|RECHAZADO"
+    }
+    MANTENIMIENTO_ACTIVO {
+        bigint id PK
+        bigint activo_fijo_id FK
+        varchar tipo "PREVENTIVO|CORRECTIVO"
+        date fecha_programada
+        date fecha_ejecucion
+        decimal costo
+        varchar proveedor_servicio
+        varchar estado "PROGRAMADO|EN_EJECUCION|COMPLETADO"
+    }
+    ACTIVO_FIJO }o--|| CLASE_ACTIVO : es
+    ACTIVO_FIJO }o--|| UBICACION_FISICA : "ubicado en"
+    ACTIVO_FIJO ||--o{ COMPONENTE_ACTIVO : tiene
+    ACTIVO_FIJO ||--o{ DEPRECIACION : calcula
+    ACTIVO_FIJO ||--o{ MEJORA_ACTIVO : recibe
+    ACTIVO_FIJO ||--o{ REVALUACION : "se revalúa"
+    ACTIVO_FIJO ||--o{ TRASLADO_ACTIVO : "se traslada"
+    ACTIVO_FIJO ||--o{ MANTENIMIENTO_ACTIVO : requiere
+    POLIZA_SEGURO }o--|| ASEGURADORA : emite
+    POLIZA_SEGURO ||--o{ POLIZA_ACTIVO : cubre
+    POLIZA_ACTIVO }o--|| ACTIVO_FIJO : asegura
+    UBICACION_FISICA }o--o| UBICACION_FISICA : "padre"
+```
+
+### 27.10 ms-produccion — Esquema `produccion`
+
+```mermaid
+erDiagram
+    RECETA {
+        bigint id PK
+        bigint empresa_id FK
+        bigint articulo_producido_id FK
+        varchar codigo UK
+        varchar nombre
+        int version
+        decimal rendimiento_esperado
+        decimal porcentaje_merma
+        varchar tipo "PLATO|BEBIDA|POSTRE|PREPARACION_BASE"
+        varchar estado "ACTIVA|INACTIVA|EN_REVISION"
+        decimal costo_mano_obra
+        decimal costo_indirecto
+        decimal costo_total_estimado
+    }
+    RECETA_DETALLE {
+        bigint id PK
+        bigint receta_id FK
+        bigint articulo_insumo_id FK
+        decimal cantidad_bruta
+        decimal cantidad_neta
+        decimal porcentaje_merma
+        bigint unidad_medida_id FK
+        boolean es_opcional
+        bigint alternativa_id FK
+    }
+    RECETA_SUBRECETA {
+        bigint id PK
+        bigint receta_padre_id FK
+        bigint receta_hija_id FK
+        decimal cantidad
+    }
+    ORDEN_PRODUCCION {
+        bigint id PK
+        bigint empresa_id FK
+        bigint sucursal_id FK
+        bigint receta_id FK
+        varchar numero UK
+        date fecha
+        decimal cantidad_planificada
+        decimal cantidad_producida
+        decimal cantidad_merma
+        varchar estado "PLANIFICADA|EN_PROCESO|COMPLETADA|CANCELADA"
+        bigint responsable_id FK
+        timestamp inicio_real
+        timestamp fin_real
+    }
+    ORDEN_PRODUCCION_INSUMO {
+        bigint id PK
+        bigint orden_id FK
+        bigint articulo_id FK
+        decimal cantidad_requerida
+        decimal cantidad_consumida
+        decimal costo_unitario
+        decimal costo_total
+    }
+    COSTEO_PRODUCCION {
+        bigint id PK
+        bigint orden_id FK
+        decimal costo_materia_prima
+        decimal costo_mano_obra
+        decimal costo_indirecto
+        decimal costo_total
+        decimal costo_unitario
+        decimal rendimiento_real
+        decimal porcentaje_merma_real
+    }
+    CONTROL_CALIDAD {
+        bigint id PK
+        bigint orden_id FK
+        bigint inspector_id FK
+        date fecha
+        varchar resultado "APROBADO|RECHAZADO|OBSERVADO"
+        varchar observaciones
+    }
+    PROGRAMACION_PRODUCCION {
+        bigint id PK
+        bigint sucursal_id FK
+        date fecha
+        bigint receta_id FK
+        decimal cantidad
+        varchar turno "MANANA|TARDE|NOCHE"
+        varchar estado "PROGRAMADO|EJECUTADO|CANCELADO"
+    }
+    RECETA ||--o{ RECETA_DETALLE : contiene
+    RECETA ||--o{ RECETA_SUBRECETA : "incluye sub-recetas"
+    RECETA ||--o{ ORDEN_PRODUCCION : ejecuta
+    ORDEN_PRODUCCION ||--o{ ORDEN_PRODUCCION_INSUMO : consume
+    ORDEN_PRODUCCION ||--o| COSTEO_PRODUCCION : genera
+    ORDEN_PRODUCCION ||--o{ CONTROL_CALIDAD : verifica
+    RECETA ||--o{ PROGRAMACION_PRODUCCION : programa
+```
+
+---
+
+## 28. Diagrama de comunicación entre microservicios
+
+### 28.1 Matriz de comunicación sincrónica (REST / OpenFeign)
+
+```mermaid
+flowchart LR
+    subgraph Consumidor["Consumidor (quien llama)"]
+        COM_C[ms-compras]
+        ALM_C[ms-almacen]
+        VEN_C[ms-ventas]
+        FIN_C[ms-finanzas]
+        CNT_C[ms-contabilidad]
+        RRHH_C[ms-rrhh]
+        AF_C[ms-activos-fijos]
+        PROD_C[ms-produccion]
+        RPT_C[ms-reportes]
+    end
+    subgraph Proveedor["Proveedor (quien responde)"]
+        CORE_P[ms-core-maestros]
+        ALM_P[ms-almacen]
+        AUTH_P[ms-auth-security]
+        FIN_P[ms-finanzas]
+    end
+    COM_C -->|"proveedor, artículo,\nimpuesto, moneda"| CORE_P
+    COM_C -->|"validar stock,\ngenerar ingreso"| ALM_P
+    ALM_C -->|"artículo, unidad,\ncategoría"| CORE_P
+    VEN_C -->|"cliente, artículo,\nimpuesto, moneda"| CORE_P
+    VEN_C -->|"validar stock\ndisponible"| ALM_P
+    VEN_C -->|"generar CxC"| FIN_P
+    FIN_C -->|"proveedor, cliente,\nmoneda, TC"| CORE_P
+    FIN_C -->|"datos OC"| COM_C
+    CNT_C -->|"empresa, moneda"| CORE_P
+    RRHH_C -->|"trabajador como RC,\nsucursal"| CORE_P
+    AF_C -->|"proveedor, moneda,\nsucursal"| CORE_P
+    PROD_C -->|"artículo, unidad"| CORE_P
+    PROD_C -->|"stock, consumir\ninsumos"| ALM_P
+    RPT_C -->|"datos de cualquier\nmicroservicio"| CORE_P
+    RPT_C -->|"datos"| ALM_P
+    RPT_C -->|"datos"| FIN_P
+```
+
+### 28.2 Flujo de eventos asincrónicos (RabbitMQ)
+
+```mermaid
+flowchart TB
+    subgraph Productores["Productores de eventos"]
+        ALM_E["ms-almacen\n• movimiento.confirmado\n• stock.bajo_minimo\n• traslado.completado"]
+        COM_E["ms-compras\n• oc.aprobada\n• recepcion.confirmada\n• oc.completada"]
+        VEN_E["ms-ventas\n• venta.emitida\n• venta.anulada\n• cierre_caja.completado\n• nc.emitida"]
+        FIN_E["ms-finanzas\n• pago.registrado\n• cobro.registrado\n• adelanto.liquidado\n• conciliacion.cerrada"]
+        RRHH_E["ms-rrhh\n• planilla.cerrada\n• liquidacion.pagada\n• asistencia.procesada"]
+        AF_E["ms-activos\n• depreciacion.ejecutada\n• activo.baja\n• activo.revaluado"]
+        PROD_E["ms-produccion\n• produccion.completada\n• produccion.cancelada"]
+    end
+    subgraph RMQ["RabbitMQ (Exchange: rpe.events)"]
+        EX{{"Topic Exchange\nrpe.events"}}
+    end
+    subgraph Consumidores["Consumidores"]
+        CNT_CON["ms-contabilidad\n(routing: *.pre_asiento)\nGenera asientos automáticos"]
+        AUD_CON["ms-auditoria\n(routing: #)\nRegistra TODO en log"]
+        NOTIF_CON["ms-notificaciones\n(routing: *.alerta.*)\nEnvía correos y alertas"]
+        ALM_CON["ms-almacen\n(routing: produccion.*)\nConsume insumos"]
+        FIN_CON["ms-finanzas\n(routing: venta.emitida)\nGenera CxC automático"]
+    end
+    ALM_E --> EX
+    COM_E --> EX
+    VEN_E --> EX
+    FIN_E --> EX
+    RRHH_E --> EX
+    AF_E --> EX
+    PROD_E --> EX
+    EX --> CNT_CON
+    EX --> AUD_CON
+    EX --> NOTIF_CON
+    EX --> ALM_CON
+    EX --> FIN_CON
+```
+
+### 28.3 Catálogo de eventos
+
+| Evento | Productor | Consumidores | Datos principales |
+|--------|-----------|-------------|-------------------|
+| `movimiento.confirmado` | ms-almacen | ms-contabilidad, ms-auditoria | almacen_id, tipo, artículos, costos |
+| `stock.bajo_minimo` | ms-almacen | ms-notificaciones | artículo, almacén, stock_actual, stock_minimo |
+| `oc.aprobada` | ms-compras | ms-auditoria, ms-notificaciones | oc_id, proveedor, monto |
+| `recepcion.confirmada` | ms-compras | ms-contabilidad, ms-almacen, ms-auditoria | recepcion_id, oc_id, artículos |
+| `venta.emitida` | ms-ventas | ms-contabilidad, ms-finanzas, ms-auditoria | documento_id, tipo, monto, cliente |
+| `venta.anulada` | ms-ventas | ms-contabilidad, ms-finanzas, ms-auditoria | documento_id, motivo |
+| `nc.emitida` | ms-ventas | ms-contabilidad, ms-finanzas | nc_id, documento_original, monto |
+| `cierre_caja.completado` | ms-ventas | ms-contabilidad, ms-auditoria | turno_id, totales por forma de pago |
+| `pago.registrado` | ms-finanzas | ms-contabilidad, ms-auditoria | pago_id, proveedor, monto, cuenta |
+| `cobro.registrado` | ms-finanzas | ms-contabilidad, ms-auditoria | cobro_id, cliente, monto |
+| `conciliacion.cerrada` | ms-finanzas | ms-auditoria | cuenta, periodo, diferencias |
+| `planilla.cerrada` | ms-rrhh | ms-contabilidad, ms-auditoria | planilla_id, periodo, totales |
+| `liquidacion.pagada` | ms-rrhh | ms-contabilidad, ms-auditoria | trabajador, montos |
+| `depreciacion.ejecutada` | ms-activos | ms-contabilidad, ms-auditoria | periodo, total_depreciacion |
+| `activo.baja` | ms-activos | ms-contabilidad, ms-auditoria | activo_id, valor_neto |
+| `produccion.completada` | ms-produccion | ms-contabilidad, ms-almacen, ms-auditoria | orden_id, receta, costos |
+
+---
+
+## 29. Diagramas de interacción (secuencia)
+
+### 29.1 Flujo completo de compra
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant FE as Angular
+    participant GW as Gateway
+    participant COM as ms-compras
+    participant CORE as ms-core
+    participant ALM as ms-almacen
+    participant FIN as ms-finanzas
+    participant MQ as RabbitMQ
+    participant CNT as ms-contabilidad
+    participant AUD as ms-auditoria
+
+    U->>FE: Crear Orden de Compra
+    FE->>GW: POST /api/compras/ordenes-compra
+    GW->>COM: Forward
+    COM->>CORE: GET proveedor + artículos + impuestos
+    CORE-->>COM: Datos validados
+    COM->>COM: Crear OC (estado: BORRADOR)
+    COM-->>FE: 201 Created
+
+    U->>FE: Enviar a aprobación
+    FE->>GW: POST /api/compras/ordenes-compra/{id}/enviar-aprobacion
+    GW->>COM: Forward
+    COM->>COM: Cambiar estado → PENDIENTE_APROBACION
+    COM->>MQ: Publicar "oc.pendiente_aprobacion"
+    MQ-->>AUD: Log auditoría
+
+    Note over COM: Aprobador recibe notificación
+
+    U->>FE: Aprobar OC
+    FE->>GW: POST /api/compras/ordenes-compra/{id}/aprobar
+    GW->>COM: Forward
+    COM->>COM: Validar nivel de aprobación
+    COM->>COM: Estado → APROBADA
+    COM->>MQ: Publicar "oc.aprobada"
+    MQ-->>AUD: Log auditoría
+
+    Note over COM: Llega la mercadería
+
+    U->>FE: Registrar recepción
+    FE->>GW: POST /api/compras/recepciones
+    GW->>COM: Forward
+    COM->>ALM: POST generar movimiento de ingreso
+    ALM->>ALM: Actualizar stock + kardex
+    ALM->>MQ: Publicar "movimiento.confirmado"
+    MQ-->>CNT: Generar pre-asiento (ingreso almacén)
+    COM-->>FE: 201 Recepción creada
+
+    Note over FIN: Proveedor envía factura
+
+    U->>FE: Registrar factura CxP
+    FE->>GW: POST /api/finanzas/cuentas-pagar
+    GW->>FIN: Forward (vinculada a OC)
+    FIN->>FIN: Crear documento por pagar
+    FIN->>MQ: Publicar "cxp.registrada"
+    MQ-->>CNT: Pre-asiento (CxP)
+
+    U->>FE: Registrar pago
+    FE->>GW: POST /api/finanzas/pagos
+    GW->>FIN: Forward
+    FIN->>FIN: Aplicar pago al documento
+    FIN->>MQ: Publicar "pago.registrado"
+    MQ-->>CNT: Pre-asiento (pago)
+    MQ-->>AUD: Log auditoría
+```
+
+### 29.2 Flujo completo de venta (restaurante)
+
+```mermaid
+sequenceDiagram
+    participant M as Mesero
+    participant POS as POS/Angular
+    participant GW as Gateway
+    participant VEN as ms-ventas
+    participant ALM as ms-almacen
+    participant CORE as ms-core
+    participant MQ as RabbitMQ
+    participant FIN as ms-finanzas
+    participant CNT as ms-contabilidad
+    participant SUNAT as SUNAT/OSE
+
+    M->>POS: Abrir mesa (4 comensales)
+    POS->>GW: POST /api/ventas/ordenes
+    GW->>VEN: Forward
+    VEN->>VEN: Crear orden + cambiar mesa → OCUPADA
+    VEN-->>POS: Orden #123 creada
+
+    M->>POS: Tomar pedido
+    POS->>GW: POST /api/ventas/ordenes/123/comandas
+    GW->>VEN: Forward
+    VEN->>ALM: Validar stock de artículos
+    ALM-->>VEN: Stock OK
+    VEN->>VEN: Agregar comanda (estado: PENDIENTE)
+    VEN-->>POS: Comanda registrada
+
+    Note over VEN: Cocina prepara, mesero sirve
+
+    M->>POS: Pedir la cuenta
+    POS->>GW: POST /api/ventas/ordenes/123/cerrar
+    GW->>VEN: Forward
+    VEN->>CORE: GET datos cliente + impuestos
+    VEN->>VEN: Generar documento de venta (factura/boleta)
+    VEN->>VEN: Calcular subtotal + IGV + propina + recargo
+
+    M->>POS: Registrar pago (efectivo + Yape)
+    POS->>GW: POST /api/ventas/documentos/{id}/pagar
+    GW->>VEN: Forward
+    VEN->>VEN: Registrar pagos (split payment)
+    VEN->>VEN: Estado → EMITIDA, mesa → LIBRE
+
+    VEN->>MQ: Publicar "venta.emitida"
+    MQ-->>ALM: Descontar stock (salida automática)
+    MQ-->>FIN: Generar CxC (si es crédito)
+    MQ-->>CNT: Pre-asiento contable de venta
+    MQ-->>SUNAT: Enviar CPE a OSE/SUNAT
+
+    SUNAT-->>VEN: CDR (aceptado/rechazado)
+    VEN->>VEN: Actualizar estado facturación electrónica
+```
+
+### 29.3 Flujo de producción
+
+```mermaid
+sequenceDiagram
+    participant U as Jefe Producción
+    participant FE as Angular
+    participant GW as Gateway
+    participant PROD as ms-produccion
+    participant CORE as ms-core
+    participant ALM as ms-almacen
+    participant RRHH as ms-rrhh
+    participant MQ as RabbitMQ
+    participant CNT as ms-contabilidad
+
+    U->>FE: Crear orden de producción
+    FE->>GW: POST /api/produccion/ordenes-produccion
+    GW->>PROD: Forward
+    PROD->>CORE: GET receta + insumos
+    PROD->>ALM: Validar stock de insumos
+    ALM-->>PROD: Stock disponible
+    PROD->>ALM: Reservar insumos
+    PROD->>PROD: Crear orden (PLANIFICADA)
+    PROD-->>FE: Orden creada
+
+    U->>FE: Iniciar producción
+    FE->>GW: POST /api/produccion/ordenes-produccion/{id}/iniciar
+    GW->>PROD: Forward
+    PROD->>PROD: Estado → EN_PROCESO
+    PROD->>PROD: Registrar hora inicio
+
+    Note over PROD: Proceso de producción...
+
+    U->>FE: Completar producción
+    FE->>GW: POST /api/produccion/ordenes-produccion/{id}/completar
+    GW->>PROD: Forward
+    PROD->>ALM: Consumir insumos (salida)
+    ALM->>ALM: Actualizar stock + kardex
+    PROD->>ALM: Registrar ingreso producto terminado
+    PROD->>RRHH: Consultar costo mano de obra
+    PROD->>PROD: Calcular costeo (MP + MO + CI)
+    PROD->>PROD: Estado → COMPLETADA
+    PROD->>MQ: Publicar "produccion.completada"
+    MQ-->>CNT: Pre-asiento (producción)
+    PROD-->>FE: Producción completada + costeo
+```
+
+### 29.4 Flujo contable (pre-asientos → cierre)
+
+```mermaid
+sequenceDiagram
+    participant MOD as Módulo operativo
+    participant MQ as RabbitMQ
+    participant CNT as ms-contabilidad
+    participant DB as PostgreSQL
+    participant CONT as Contador
+
+    MOD->>MQ: Publicar evento con data contable
+    MQ->>CNT: Consumir evento
+    CNT->>CNT: Crear pre-asiento (PENDIENTE)
+    CNT->>DB: INSERT pre_asiento
+
+    Note over CNT: Procesamiento batch (configurable)
+
+    CNT->>CNT: Buscar matriz contable
+    alt Matriz encontrada
+        CNT->>CNT: Aplicar regla de contabilización
+        CNT->>CNT: Generar asiento (CONFIRMADO)
+        CNT->>DB: INSERT asiento + detalles
+        CNT->>CNT: Pre-asiento → PROCESADO
+    else Sin matriz
+        CNT->>CNT: Pre-asiento → ERROR
+        CNT->>MQ: Publicar "pre_asiento.error"
+    end
+
+    Note over CONT: Fin de mes
+
+    CONT->>CNT: POST /cierres/mensual
+    CNT->>CNT: Verificar pre-asientos pendientes
+    CNT->>CNT: Validar cuadre debe = haber
+    CNT->>CNT: Generar asiento de cierre
+    CNT->>DB: Marcar período como CERRADO
+    CNT-->>CONT: Cierre exitoso
+
+    CONT->>CNT: GET /reportes/balance-general
+    CNT->>DB: Consultar saldos por cuenta
+    CNT-->>CONT: Balance General PDF/Excel
+```
+
+### 29.5 Flujo de planilla RRHH
+
+```mermaid
+sequenceDiagram
+    participant RH as Analista RRHH
+    participant FE as Angular
+    participant GW as Gateway
+    participant RRHH as ms-rrhh
+    participant CORE as ms-core
+    participant MQ as RabbitMQ
+    participant CNT as ms-contabilidad
+    participant FIN as ms-finanzas
+
+    RH->>FE: Crear planilla del mes
+    FE->>GW: POST /api/rrhh/planillas
+    GW->>RRHH: Forward
+    RRHH->>RRHH: Crear planilla (BORRADOR)
+
+    RH->>FE: Calcular planilla
+    FE->>GW: POST /api/rrhh/planillas/{id}/calcular
+    GW->>RRHH: Forward
+    RRHH->>RRHH: Obtener trabajadores activos
+    RRHH->>RRHH: Procesar asistencias del mes
+    RRHH->>RRHH: Calcular horas extra
+    RRHH->>RRHH: Aplicar conceptos de ingreso
+    RRHH->>RRHH: Calcular descuentos (AFP, quinta, préstamos)
+    RRHH->>RRHH: Calcular aportes empleador (EsSalud)
+    RRHH->>RRHH: Estado → CALCULADA
+    RRHH-->>FE: Planilla calculada + resumen
+
+    RH->>FE: Aprobar planilla
+    FE->>GW: POST /api/rrhh/planillas/{id}/aprobar
+    GW->>RRHH: Forward
+    RRHH->>RRHH: Estado → APROBADA
+
+    RH->>FE: Registrar pago
+    FE->>GW: POST /api/rrhh/planillas/{id}/pagar
+    GW->>RRHH: Forward
+    RRHH->>RRHH: Estado → PAGADA
+
+    RH->>FE: Cerrar planilla
+    FE->>GW: POST /api/rrhh/planillas/{id}/cerrar
+    GW->>RRHH: Forward
+    RRHH->>RRHH: Estado → CERRADA
+    RRHH->>MQ: Publicar "planilla.cerrada"
+    MQ-->>CNT: Pre-asiento contable de planilla
+    MQ-->>FIN: Generar CxP de nómina
+    RRHH-->>FE: Planilla cerrada
+```
+
+---
+
+## 30. Diagramas de flujo de negocio
+
+### 30.1 Proceso de aprobación multinivel
+
+```mermaid
+flowchart TD
+    A[Documento creado\nBORRADOR] --> B{¿Enviar a\naprobación?}
+    B -->|No| A
+    B -->|Sí| C[PENDIENTE_APROBACIÓN]
+    C --> D{¿Determinar nivel\nde aprobación?}
+    D -->|"Monto ≤ 5,000"| E[Nivel 1:\nJefe de área]
+    D -->|"5,000 < Monto ≤ 20,000"| F[Nivel 2:\nGerente de área]
+    D -->|"Monto > 20,000"| G[Nivel 3:\nGerente general]
+    E --> H{¿Decisión?}
+    F --> H
+    G --> H
+    H -->|Aprobar| I{¿Requiere\nnivel superior?}
+    H -->|Rechazar| J[RECHAZADO]
+    I -->|Sí| D
+    I -->|No| K[APROBADO]
+    J --> L{¿Reenviar?}
+    L -->|Sí| M[Corregir\ndocumento] --> B
+    L -->|No| N[Fin]
+    K --> O[Procesar\ndocumento]
+```
+
+### 30.2 Proceso de conciliación bancaria
+
+```mermaid
+flowchart TD
+    A[Inicio: Seleccionar\ncuenta + período] --> B[Importar extracto\nbancario]
+    B --> C[Cargar movimientos\ndel sistema]
+    C --> D[Comparación\nautomática]
+    D --> E{¿Coincidencia\nexacta?}
+    E -->|Sí| F[Marcar como\nconciliado ✓]
+    E -->|No| G{¿Coincidencia\nparcial?}
+    G -->|Sí| H[Mostrar\nsugerencia]
+    H --> I{¿Usuario\nconfirma?}
+    I -->|Sí| F
+    I -->|No| J[Marcar como\npendiente ⚠]
+    G -->|No| J
+    J --> K{¿Todas las\npartidas revisadas?}
+    F --> K
+    K -->|No| D
+    K -->|Sí| L[Calcular\ndiferencias]
+    L --> M{¿Diferencia\n= 0?}
+    M -->|Sí| N[Estado:\nCONCILIADO ✓]
+    M -->|No| O[Registrar partidas\npendientes]
+    O --> P{¿Generar ajuste\ncontable?}
+    P -->|Sí| Q[Crear asiento\nde ajuste]
+    P -->|No| R[Dejar pendiente\npara siguiente mes]
+    N --> S[Cerrar\nconciliación]
+    Q --> S
+```
+
+### 30.3 Proceso de facturación electrónica
+
+```mermaid
+flowchart TD
+    A[Documento de venta\nemitido] --> B[Generar XML\nUBL 2.1]
+    B --> C[Firmar XML\ncon certificado digital]
+    C --> D[Enviar a\nOSE/SUNAT]
+    D --> E{¿Respuesta?}
+    E -->|Timeout| F[Reintentar\nmáx 3 veces]
+    F --> D
+    E -->|CDR recibido| G{¿Estado CDR?}
+    G -->|Aceptado| H[Estado:\nACEPTADO ✓]
+    G -->|Observado| I[Estado:\nOBSERVADO ⚠\nGuardar observaciones]
+    G -->|Rechazado| J[Estado:\nRECHAZADO ✗]
+    J --> K{¿Error\ncorregible?}
+    K -->|Sí| L[Corregir datos\ny reenviar]
+    L --> B
+    K -->|No| M[Emitir nota\nde crédito]
+    H --> N[Guardar CDR\nen repositorio]
+    I --> N
+    N --> O[Enviar CPE\nal cliente por email]
+    O --> P[Fin]
+```
+
+### 30.4 Proceso de cierre contable mensual
+
+```mermaid
+flowchart TD
+    A[Inicio: Seleccionar\nperíodo a cerrar] --> B{¿Existen pre-asientos\nPENDIENTES?}
+    B -->|Sí| C[Procesar pre-asientos\npendientes]
+    C --> D{¿Alguno con\nERROR?}
+    D -->|Sí| E[Corregir matrices\no reprocesar]
+    E --> C
+    D -->|No| F[Todos procesados ✓]
+    B -->|No| F
+    F --> G[Verificar cuadre:\nDebe = Haber\npor libro]
+    G --> H{¿Cuadrado?}
+    H -->|No| I[Identificar\ndescuadres]
+    I --> J[Generar asiento\nde ajuste]
+    J --> G
+    H -->|Sí| K[Calcular saldos\nacumulados por cuenta]
+    K --> L[Generar asiento\nde cierre mensual]
+    L --> M[Generar Balance\nde Comprobación]
+    M --> N[Marcar período\ncomo CERRADO]
+    N --> O[Bloquear registro\nen período cerrado]
+    O --> P{¿Es diciembre?}
+    P -->|Sí| Q[Proceso de\ncierre anual]
+    Q --> R[Asiento de cierre\nde resultados]
+    R --> S[Generar EEFF\nanuales]
+    S --> T[Asiento de\napertura nuevo año]
+    P -->|No| U[Fin cierre mensual]
+    T --> U
+```
+
+### 30.5 Proceso de inventario físico
+
+```mermaid
+flowchart TD
+    A[Iniciar toma\nde inventario] --> B[Seleccionar almacén\ny fecha de corte]
+    B --> C[Bloquear movimientos\nen el almacén]
+    C --> D[Generar listado\nde artículos a contar]
+    D --> E[Asignar equipos\nde conteo]
+    E --> F[Primer conteo\n"Conteo ciego"]
+    F --> G[Registrar cantidades\nfísicas]
+    G --> H[Segundo conteo\n"Verificación"]
+    H --> I{¿Coincide con\nprimer conteo?}
+    I -->|No| J[Tercer conteo\n"Desempate"]
+    J --> G
+    I -->|Sí| K[Comparar: Sistema\nvs Físico]
+    K --> L{¿Hay\ndiferencias?}
+    L -->|No| M[Inventario OK ✓]
+    L -->|Sí| N[Generar informe\nde diferencias]
+    N --> O{¿Aprobar\najustes?}
+    O -->|Sí| P[Generar movimientos\nde ajuste]
+    P --> Q[Actualizar stock\nen sistema]
+    Q --> R[Generar pre-asiento\nde ajuste inventario]
+    O -->|No| S[Investigar\ncausas]
+    S --> O
+    M --> T[Desbloquear\nalmacén]
+    R --> T
+    T --> U[Cerrar toma\nde inventario]
+```
+
+---
+
+## 31. Diagramas de estado
+
+### 31.1 Estados de una Orden de Compra
+
+```mermaid
+stateDiagram-v2
+    [*] --> BORRADOR: Crear OC
+    BORRADOR --> BORRADOR: Editar
+    BORRADOR --> PENDIENTE_APROBACION: Enviar a aprobación
+    BORRADOR --> ANULADA: Anular
+    PENDIENTE_APROBACION --> APROBADA: Aprobar (último nivel)
+    PENDIENTE_APROBACION --> RECHAZADA: Rechazar
+    PENDIENTE_APROBACION --> BORRADOR: Devolver para corrección
+    RECHAZADA --> BORRADOR: Corregir y reenviar
+    RECHAZADA --> ANULADA: Descartar
+    APROBADA --> RECEPCION_PARCIAL: Recepción parcial
+    APROBADA --> COMPLETADA: Recepción total
+    APROBADA --> ANULADA: Anular OC aprobada
+    RECEPCION_PARCIAL --> RECEPCION_PARCIAL: Otra recepción parcial
+    RECEPCION_PARCIAL --> COMPLETADA: Última recepción
+    COMPLETADA --> [*]
+    ANULADA --> [*]
+```
+
+### 31.2 Estados de un Documento de Venta
+
+```mermaid
+stateDiagram-v2
+    [*] --> EMITIDA: Generar boleta/factura
+    EMITIDA --> ENVIADA_SUNAT: Enviar a OSE/SUNAT
+    ENVIADA_SUNAT --> ACEPTADA: CDR aceptado
+    ENVIADA_SUNAT --> OBSERVADA: CDR con observaciones
+    ENVIADA_SUNAT --> RECHAZADA: CDR rechazado
+    OBSERVADA --> ACEPTADA: Subsanada
+    RECHAZADA --> CORREGIDA: Corregir y reenviar
+    CORREGIDA --> ENVIADA_SUNAT: Reenviar
+    ACEPTADA --> ANULADA: Emitir NC completa
+    ACEPTADA --> CON_NC_PARCIAL: Emitir NC parcial
+    CON_NC_PARCIAL --> ANULADA: NC por saldo restante
+    EMITIDA --> ANULADA: Anular (mismo día)
+    ANULADA --> [*]
+    ACEPTADA --> [*]
+```
+
+### 31.3 Estados de una Orden de Producción
+
+```mermaid
+stateDiagram-v2
+    [*] --> PLANIFICADA: Crear orden
+    PLANIFICADA --> PLANIFICADA: Editar
+    PLANIFICADA --> EN_PROCESO: Iniciar producción
+    PLANIFICADA --> CANCELADA: Cancelar
+    EN_PROCESO --> EN_CONTROL_CALIDAD: Producción terminada
+    EN_CONTROL_CALIDAD --> COMPLETADA: QC aprobado
+    EN_CONTROL_CALIDAD --> EN_PROCESO: QC rechazado (reproceso)
+    EN_PROCESO --> CANCELADA: Cancelar en proceso
+    COMPLETADA --> [*]
+    CANCELADA --> [*]
+
+    note right of EN_PROCESO
+        Al iniciar:
+        - Reservar insumos
+        - Registrar hora inicio
+    end note
+
+    note right of COMPLETADA
+        Al completar:
+        - Consumir insumos (almacén)
+        - Ingresar producto terminado
+        - Calcular costeo real
+        - Emitir pre-asiento
+    end note
+```
+
+### 31.4 Estados de un Asiento Contable
+
+```mermaid
+stateDiagram-v2
+    [*] --> BORRADOR: Crear asiento manual
+    [*] --> CONFIRMADO: Asiento automático\n(desde pre-asiento)
+    BORRADOR --> BORRADOR: Editar
+    BORRADOR --> CONFIRMADO: Confirmar\n(validar Debe=Haber)
+    BORRADOR --> ELIMINADO: Eliminar borrador
+    CONFIRMADO --> ANULADO: Anular\n(genera contra-asiento)
+    CONFIRMADO --> [*]: Cierre de período
+    ANULADO --> [*]
+    ELIMINADO --> [*]
+
+    note right of CONFIRMADO
+        Validaciones:
+        - Debe = Haber
+        - Cuentas de movimiento
+        - Período abierto
+        - Centro de costo si requerido
+    end note
+```
+
+### 31.5 Estados de un Activo Fijo
+
+```mermaid
+stateDiagram-v2
+    [*] --> ACTIVO: Registrar activo
+    ACTIVO --> ACTIVO: Depreciación mensual
+    ACTIVO --> EN_MANTENIMIENTO: Enviar a mantenimiento
+    ACTIVO --> EN_TRASLADO: Solicitar traslado
+    ACTIVO --> REVALUADO: Revaluar
+    ACTIVO --> BAJA: Dar de baja
+    EN_MANTENIMIENTO --> ACTIVO: Mantenimiento completado
+    EN_TRASLADO --> ACTIVO: Traslado ejecutado\n(nueva ubicación)
+    REVALUADO --> ACTIVO: Continuar depreciación\ncon nuevo valor
+    BAJA --> [*]
+
+    note right of BAJA
+        Tipos de baja:
+        - Venta
+        - Donación
+        - Siniestro
+        - Obsolescencia
+        Genera pre-asiento
+    end note
+```
+
+### 31.6 Estados de una Planilla
+
+```mermaid
+stateDiagram-v2
+    [*] --> BORRADOR: Crear planilla
+    BORRADOR --> CALCULADA: Calcular\n(procesar conceptos)
+    CALCULADA --> BORRADOR: Recalcular\n(ajustes manuales)
+    CALCULADA --> APROBADA: Aprobar
+    APROBADA --> PAGADA: Registrar pago
+    PAGADA --> CERRADA: Cerrar planilla
+    CERRADA --> [*]
+
+    note right of CALCULADA
+        Procesa:
+        - Días trabajados (asistencia)
+        - Horas extra
+        - Ingresos fijos y variables
+        - Descuentos legales
+        - Aportes empleador
+    end note
+
+    note right of CERRADA
+        Al cerrar:
+        - Emite pre-asiento contable
+        - Genera boletas de pago
+        - Bloquea edición
+    end note
+```
+
+### 31.7 Estados de un Documento CxP / CxC
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDIENTE: Registrar documento
+    PENDIENTE --> PARCIAL: Pago/cobro parcial
+    PARCIAL --> PARCIAL: Otro pago/cobro parcial
+    PARCIAL --> PAGADO_COBRADO: Pago/cobro total
+    PENDIENTE --> PAGADO_COBRADO: Pago/cobro total
+    PENDIENTE --> EN_LETRAS: Canje por letras\n(solo CxC)
+    EN_LETRAS --> PAGADO_COBRADO: Letra pagada
+    EN_LETRAS --> PROTESTADA: Letra protestada
+    PROTESTADA --> PAGADO_COBRADO: Regularización
+    PENDIENTE --> ANULADO: Anular documento
+    PAGADO_COBRADO --> [*]
+    ANULADO --> [*]
+```
+
+---
+
+*Documento de arquitectura técnica del proyecto Restaurant.pe. Cubre microservicios, base de datos, seguridad, comunicación, DevOps, estándares de desarrollo, diagramas de arquitectura, entidades, comunicación, interacción, flujos y estados. Basado en el análisis de las HUs y la experiencia del ERP SIGRE.*
