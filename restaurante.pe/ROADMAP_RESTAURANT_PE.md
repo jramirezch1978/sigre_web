@@ -726,11 +726,36 @@ Estos maestros son consumidos por todos los demás microservicios.
 |-------|--------|-------------|
 | **numerador** | id, empresa_id, sucursal_id, tipo_documento, serie, correlativo_actual, formato, longitud, reinicio (ANUAL/MENSUAL/NUNCA), activo | Numeración automática por tipo de documento, empresa y sucursal |
 
-#### 11.1.8 Tablas auxiliares generales
+#### 11.1.8 Configuración jerárquica (4 niveles)
+
+El sistema maneja configuraciones en **4 niveles jerárquicos** con herencia y sobreescritura. El valor más específico siempre prevalece: **Usuario > Sucursal > País > Empresa (global)**.
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **parametro_sistema** | id, empresa_id, modulo, clave, valor, tipo_dato, descripcion | Parámetros de configuración por empresa y módulo |
+| **config_clave** | id, modulo, clave, nombre, descripcion, tipo_dato (TEXT/NUMBER/BOOLEAN/JSON/DATE), valor_default, es_obligatorio, es_visible_usuario, grupo, orden, activo | Catálogo maestro de todas las claves de configuración posibles. Define qué se puede configurar, su tipo de dato y valor por defecto |
+| **config_empresa** | id, empresa_id, config_clave_id, valor, observaciones | Configuración **global** a nivel de empresa. Aplica a todas las sucursales, países y usuarios de la empresa. Ej.: razón social, logo, moneda base, política de aprobaciones |
+| **config_pais** | id, empresa_id, pais_id, config_clave_id, valor, observaciones | Configuración por **país**. Sobreescribe la configuración global de la empresa para un país específico. Ej.: tipo de impuesto (IGV/IVA/ITBIS), formato de RUC/NIT, libros contables requeridos, regulaciones laborales |
+| **config_sucursal** | id, empresa_id, sucursal_id, config_clave_id, valor, observaciones | Configuración por **sucursal**. Sobreescribe la configuración del país y empresa. Ej.: almacén por defecto, impresora por defecto, turno de operación, caja por defecto |
+| **config_usuario** | id, empresa_id, usuario_id, config_clave_id, valor, observaciones | Configuración por **usuario**. Sobreescribe todas las anteriores. Ej.: idioma, tema visual, formato fecha, sucursal preferida, reporte por defecto, atajos personalizados |
+
+> **Resolución de configuración:** Cuando el sistema necesita un valor de configuración, busca en orden: `config_usuario` → `config_sucursal` → `config_pais` → `config_empresa` → `config_clave.valor_default`. El primer valor encontrado es el que aplica.
+
+```mermaid
+flowchart TB
+    subgraph Jerarquía["Jerarquía de configuración (precedencia ↑)"]
+        direction BT
+        CE["config_empresa\n(global para toda la empresa)"]
+        CP["config_pais\n(sobreescribe empresa por país)"]
+        CS["config_sucursal\n(sobreescribe país por sucursal)"]
+        CU["config_usuario\n(sobreescribe todo por usuario)"]
+        CE --> CP --> CS --> CU
+    end
+```
+
+#### 11.1.9 Tablas auxiliares generales
+
+| Tabla | Campos | Descripción |
+|-------|--------|-------------|
 | **ejercicio_periodo** | id, empresa_id, anio, mes, estado (ABIERTO/CERRADO/EN_CIERRE), fecha_cierre | Ejercicios y períodos contables |
 | **condicion_pago** | id, empresa_id, codigo, nombre, dias, tipo (CONTADO/CREDITO), numero_cuotas, activo | Condiciones de pago/cobro |
 | **forma_pago** | id, codigo, nombre, tipo (EFECTIVO/TRANSFERENCIA/CHEQUE/TARJETA/YAPE/PLIN/NIUBIZ/OTRO), requiere_referencia, activo | Formas/medios de pago |
@@ -900,6 +925,14 @@ erDiagram
     ROL_PERMISO }o--|| PERMISO : es
     PERMISO }o--|| OPCION_MENU : sobre
     OPCION_MENU }o--|| MODULO : pertenece
+    CONFIG_CLAVE ||--o{ CONFIG_EMPRESA : configura
+    CONFIG_CLAVE ||--o{ CONFIG_PAIS : configura
+    CONFIG_CLAVE ||--o{ CONFIG_SUCURSAL : configura
+    CONFIG_CLAVE ||--o{ CONFIG_USUARIO : configura
+    EMPRESA ||--o{ CONFIG_EMPRESA : tiene
+    PAIS ||--o{ CONFIG_PAIS : tiene
+    SUCURSAL ||--o{ CONFIG_SUCURSAL : tiene
+    USUARIO ||--o{ CONFIG_USUARIO : tiene
 ```
 
 ---
