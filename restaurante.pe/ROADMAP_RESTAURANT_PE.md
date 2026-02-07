@@ -856,7 +856,9 @@ Estos maestros son consumidos por todos los demás microservicios.
 ```mermaid
 erDiagram
     EMPRESA ||--o{ SUCURSAL : tiene
+    SUCURSAL }o--|| PAIS : pertenece
     SUCURSAL ||--o{ ALMACEN : tiene
+    USUARIO }o--o{ SUCURSAL : asignado
     EMPRESA ||--o{ RELACION_COMERCIAL : tiene
     RELACION_COMERCIAL }o--o{ ARTICULO_PROVEEDOR : suministra
     EMPRESA ||--o{ ARTICULO : tiene
