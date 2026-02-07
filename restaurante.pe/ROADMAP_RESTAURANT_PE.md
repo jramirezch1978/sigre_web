@@ -9,19 +9,20 @@
 
 ## 1. Visión y objetivo del roadmap
 
-El roadmap ordena el desarrollo priorizando:
+El roadmap ordena el desarrollo siguiendo la misma lógica de dependencias del ERP SIGRE:
 
-1. **Maestros primero:** Todos los maestros de todos los módulos se construyen en la primera fase.
-2. **Lógica de negocio después:** Los procesos y transacciones arrancan una vez los maestros estén listos.
-3. **Orden de módulos:** Compras → Almacén → Finanzas → Activos Fijos → Contabilidad (al final, porque recibe de todos).
-4. **RRHH en paralelo:** Arranca junto con los procesos de negocio y corre en un equipo independiente.
-5. **Plazo total:** Máximo **5 meses** (20 semanas).
+1. **Maestros primero:** Todos los maestros de todos los módulos se construyen en la primera fase. Sin datos maestros, ningún proceso puede operar.
+2. **Compras + Almacén:** Son el motor operativo del ERP. Compras genera documentos de adquisición, Almacén recibe mercadería y controla stock. Son inseparables.
+3. **Finanzas + Activos Fijos:** Finanzas necesita que Compras genere documentos por pagar (CxP). Activos Fijos se alimenta de las compras de activos y requiere la estructura financiera.
+4. **RRHH en paralelo con Contabilidad:** RRHH necesita la infraestructura financiera lista (cuentas bancarias, formas de pago). Contabilidad necesita que todos los módulos generen pre-asientos. Ambos son independientes entre sí y se desarrollan en paralelo.
+5. **Producción** se desarrolla junto con RRHH/Contabilidad, ya que solo necesita Almacén (que ya está listo).
+6. **Plazo total:** Máximo **5 meses** (20 semanas).
 
 ```mermaid
 flowchart LR
-    A[Fundación + Maestros] --> B[Compras + Almacén + RRHH]
-    B --> C[Finanzas + Activos Fijos]
-    C --> D[Contabilidad + Producción + Piloto]
+    A["Fase 1\nFundación + Maestros"] --> B["Fase 2\nCompras + Almacén"]
+    B --> C["Fase 3\nFinanzas + Activos Fijos"]
+    C --> D["Fase 4\nRRHH + Contabilidad + Producción\n(en paralelo)"]
 ```
 
 ---
@@ -54,17 +55,17 @@ flowchart TB
         I4[1 DevOps]
         I5[1 DBA]
     end
-    subgraph Equipo_A["Equipo A: Compras + Almacén → Producción"]
+    subgraph Equipo_A["Equipo A: Compras + Almacén (F2) → Producción (F4)"]
         A1[3 Backend Sr]
         A2[2 Frontend]
         A3[1 QA]
     end
-    subgraph Equipo_B["Equipo B: Finanzas + Activos Fijos → Contabilidad"]
+    subgraph Equipo_B["Equipo B: Finanzas + Activos (F3) → Contabilidad (F4)"]
         B1[3 Backend Sr]
         B2[2 Frontend]
         B3[1 QA]
     end
-    subgraph Equipo_C["Equipo C: RRHH (paralelo)"]
+    subgraph Equipo_C["Equipo C: RRHH (F4, paralelo a Contabilidad)"]
         C1[2 Backend Sr]
         C2[1 Frontend]
     end
@@ -75,7 +76,7 @@ flowchart TB
     end
 ```
 
-> **Nota:** En la Fase 1 todo el equipo trabaja junto en fundación y maestros. A partir de la Fase 2 se dividen en los 3 equipos funcionales (A, B, C).
+> **Nota:** En la Fase 1 todo el equipo trabaja junto en fundación y maestros. En la Fase 2, el Equipo A (Compras+Almacén) toma el liderazgo mientras B apoya. En la Fase 3, el Equipo B lidera Finanzas+Activos. En la Fase 4, los tres equipos trabajan en paralelo: A (Producción), B (Contabilidad), C (RRHH).
 
 ---
 
@@ -160,27 +161,27 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph Fase1["Fase 1: Fundación + Maestros (S1–S5)"]
+    subgraph Fase1["Fase 1: Fundación + TODOS los Maestros (S1–S5)"]
         direction LR
         F1A[Infraestructura y Auth]
         F1B[Todos los maestros de todos los módulos]
     end
-    subgraph Fase2["Fase 2: Procesos Core (S5–S11)"]
+    subgraph Fase2["Fase 2: Compras + Almacén (S6–S11)"]
         direction LR
-        F2A["Eq. A: Compras + Almacén"]
-        F2C["Eq. C: RRHH maestros + asistencia + nómina"]
+        F2A["Eq. A+B: Compras (OC, OS, aprobaciones, recepción)"]
+        F2B["Eq. A+B: Almacén (movimientos, kardex, stock)"]
     end
-    subgraph Fase3["Fase 3: Finanzas y Extensiones (S10–S16)"]
+    subgraph Fase3["Fase 3: Finanzas + Activos Fijos (S11–S16)"]
         direction LR
         F3A["Eq. B: Finanzas (CxP, CxC, Tesorería)"]
-        F3B["Eq. B: Activos Fijos"]
-        F3C["Eq. C: RRHH procesos + liquidaciones"]
+        F3B["Eq. A: Activos Fijos (depreciación, seguros)"]
     end
-    subgraph Fase4["Fase 4: Contabilidad + Cierre (S15–S20)"]
+    subgraph Fase4["Fase 4: RRHH ∥ Contabilidad + Producción (S15–S20)"]
         direction LR
-        F4A["Eq. B: Contabilidad + cierres"]
-        F4B["Eq. A: Producción"]
-        F4C[Integración + QA + Piloto]
+        F4A["Eq. C: RRHH (planilla, asistencia, liquidaciones)"]
+        F4B["Eq. B: Contabilidad (asientos, cierres, EEFF)"]
+        F4C["Eq. A: Producción (recetas, órdenes, costeo)"]
+        F4D[Integración + QA + Piloto]
     end
     Fase1 --> Fase2
     Fase2 --> Fase3
@@ -197,7 +198,7 @@ gantt
     dateFormat YYYY-MM-DD
     axisFormat %d/%m
 
-    section Fase 1 — Fundación y Maestros
+    section Fase 1 — Fundación + TODOS los Maestros
     Infraestructura (Eureka, Gateway, Config, Auth)          :f1a, 2026-03-02, 2w
     Maestros Core (empresa, sucursal, país, moneda, TC)      :f1b, 2026-03-02, 2w
     Maestros Relaciones Comerciales (prov/cli unificado)     :f1c, 2026-03-16, 2w
@@ -207,38 +208,40 @@ gantt
     Frontend Shell + Login + Menú dinámico + CRUDs           :f1fe, 2026-03-02, 5w
     Hito M1 — Maestros listos                                :milestone, m1, 2026-04-06, 0d
 
-    section Fase 2 — Procesos Core (paralelo)
-    Eq.A Compras: OC + OS + aprobaciones                     :f2a1, 2026-04-06, 3w
-    Eq.A Compras: Recepción + integración almacén            :f2a2, after f2a1, 1w
-    Eq.A Almacén: Movimientos + kardex + valorización        :f2a3, 2026-04-06, 3w
-    Eq.A Almacén: Inventario físico + ajustes + devoluciones :f2a4, after f2a3, 1w
-    Eq.A Reportes Compras + Almacén                          :f2a5, after f2a2, 2w
-    Eq.C RRHH: Ficha trabajador + contratos                  :f2c1, 2026-04-06, 2w
-    Eq.C RRHH: Asistencia (POS/App/GPS)                      :f2c2, after f2c1, 2w
-    Eq.C RRHH: Nómina conceptos fijos + variables            :f2c3, after f2c2, 2w
+    section Fase 2 — Compras + Almacén
+    Compras: OC + OS + aprobaciones multinivel               :f2a1, 2026-04-06, 3w
+    Compras: Recepción + integración almacén                 :f2a2, after f2a1, 1w
+    Almacén: Movimientos + kardex + valorización             :f2a3, 2026-04-06, 3w
+    Almacén: Inventario físico + ajustes + devoluciones      :f2a4, after f2a3, 1w
+    Reportes Compras + Almacén                               :f2a5, after f2a2, 2w
     Hito M2 — Compras + Almacén operativos                   :milestone, m2, 2026-05-18, 0d
 
-    section Fase 3 — Finanzas y Extensiones (paralelo)
-    Eq.B Finanzas: CxP (facturas, pagos, NC/ND)             :f3b1, 2026-05-11, 2w
-    Eq.B Finanzas: CxC (cobros, aplicación, letras)          :f3b2, 2026-05-11, 2w
-    Eq.B Finanzas: Tesorería + conciliaciones                :f3b3, after f3b1, 2w
-    Eq.B Finanzas: Adelantos + fondo fijo + caja chica       :f3b4, after f3b3, 1w
-    Eq.B Activos: Registro + depreciación + seguros + bajas  :f3b5, 2026-05-25, 2w
-    Eq.B Reportes Finanzas + Activos                         :f3b6, after f3b4, 1w
-    Eq.C RRHH: Planilla + CTS + gratificaciones              :f3c1, 2026-05-18, 2w
-    Eq.C RRHH: Liquidaciones + propinas + regulatorios       :f3c2, after f3c1, 3w
-    Eq.C RRHH: Reportes + archivos (PLAME)                   :f3c3, after f3c2, 1w
-    Hito M3 — Finanzas + Activos + RRHH operativos           :milestone, m3, 2026-06-29, 0d
+    section Fase 3 — Finanzas + Activos Fijos
+    Finanzas: CxP (facturas, pagos, NC/ND)                   :f3a1, 2026-05-11, 2w
+    Finanzas: CxC (cobros, aplicación, letras)               :f3a2, 2026-05-11, 2w
+    Finanzas: Tesorería + conciliaciones bancarias            :f3a3, after f3a1, 2w
+    Finanzas: Adelantos + fondo fijo + caja chica             :f3a4, after f3a3, 1w
+    Activos: Registro + depreciación + revaluación            :f3b1, 2026-05-11, 2w
+    Activos: Seguros + pólizas + bajas + traslados            :f3b2, after f3b1, 2w
+    Reportes Finanzas + Activos Fijos                         :f3a5, after f3a4, 1w
+    Hito M3 — Finanzas + Activos operativos                   :milestone, m3, 2026-06-22, 0d
 
-    section Fase 4 — Contabilidad + Producción + Cierre
-    Eq.B Contabilidad: Asientos manuales + automáticos       :f4b1, 2026-06-22, 2w
-    Eq.B Contabilidad: Pre-asientos desde todos los módulos  :f4b2, after f4b1, 1w
-    Eq.B Contabilidad: Cierres mensual + anual + EEFF        :f4b3, after f4b2, 2w
-    Eq.A Producción: Recetas + órdenes + costeo              :f4a1, 2026-06-22, 3w
-    Integración contable de todos los módulos                :f4int, 2026-07-06, 2w
-    QA integral + pruebas end-to-end                         :f4qa, 2026-07-13, 1w
-    Piloto con usuarios reales                               :f4pilot, after f4qa, 1w
-    Hito M4 — ERP completo en producción                     :milestone, m4, 2026-07-27, 0d
+    section Fase 4 — RRHH + Contabilidad + Producción (paralelo)
+    Eq.C RRHH: Ficha trabajador + contratos                   :f4c1, 2026-06-15, 2w
+    Eq.C RRHH: Asistencia (POS/App/GPS)                       :f4c2, after f4c1, 1w
+    Eq.C RRHH: Planilla + CTS + gratificaciones               :f4c3, after f4c2, 2w
+    Eq.C RRHH: Liquidaciones + propinas + regulatorios         :f4c4, after f4c3, 1w
+    Eq.C RRHH: Reportes + archivos (PLAME)                    :f4c5, after f4c4, 1w
+    Eq.B Contabilidad: Asientos manuales + automáticos         :f4b1, 2026-06-15, 2w
+    Eq.B Contabilidad: Pre-asientos desde todos los módulos    :f4b2, after f4b1, 1w
+    Eq.B Contabilidad: Cierres mensual + anual + EEFF          :f4b3, after f4b2, 2w
+    Eq.B Contabilidad: Libros electrónicos (PLE/SIRE)          :f4b4, after f4b3, 1w
+    Eq.A Producción: Recetas + órdenes + costeo                :f4a1, 2026-06-15, 3w
+    Eq.A Producción: Consumo almacén + reportes                :f4a2, after f4a1, 1w
+    Integración contable de TODOS los módulos                  :f4int, 2026-07-13, 1w
+    QA integral + pruebas end-to-end                           :f4qa, after f4int, 1w
+    Piloto con usuarios reales                                 :f4pilot, after f4qa, 1w
+    Hito M4 — ERP completo en producción                       :milestone, m4, 2026-08-03, 0d
 ```
 
 ---
@@ -292,103 +295,116 @@ gantt
 
 ---
 
-### Fase 2: Procesos Core — Compras + Almacén + RRHH inicio (Semanas 5–11)
+### Fase 2: Compras + Almacén (Semanas 6–11)
 
 **Duración:** 6 semanas  
-**Equipos:** A (Compras+Almacén) y C (RRHH) en paralelo
+**Equipos:** A lidera, B apoya (todo el equipo técnico concentrado en los procesos core)  
+**Referencia SIGRE:** Estos son los módulos con mayor volumen transaccional. En SIGRE, Compras y Almacén comparten más de 1,500 objetos de código fuente.
 
-#### Equipo A: Compras + Almacén (3 Backend + 2 Frontend + 1 QA)
+#### Compras (5 Backend + 3 Frontend + 1 QA)
 
 | Semana | Backend | Frontend |
 |:------:|---------|----------|
-| S5–S7 | OC: emisión, detalle, estados, numeración automática | Pantalla OC con búsqueda proveedor/artículos |
-| S5–S7 | Almacén: movimientos ingreso/salida/traslado, confirmación | Pantalla de movimientos con detalle |
-| S7 | OC: workflow aprobación multinivel | Pantalla aprobación con bandeja |
-| S7 | OS: emisión, detalle, aprobación | Pantalla OS |
-| S8 | Recepción: vinculación con OC, generación mov. almacén | Pantalla recepción |
-| S8–S9 | Kardex valorizado, cálculo stock, precio promedio | Consulta de kardex y stock |
-| S9 | Inventario físico: toma, comparación, ajustes | Pantalla inventario físico |
+| S6–S8 | OC: emisión, detalle, estados, numeración automática por sucursal | Pantalla OC con búsqueda proveedor/artículos |
+| S6–S8 | OS: emisión, detalle, vinculación a proveedor de servicio | Pantalla OS |
+| S8 | Workflow aprobación multinivel (configurable por monto/tipo) | Bandeja de aprobaciones |
+| S9 | Recepción: vinculación con OC, generación automática mov. almacén | Pantalla recepción con validación contra OC |
 | S10 | Devoluciones a proveedores, solicitudes de reposición | Pantallas devolución y reposición |
-| S10–S11 | Reportes: stock, movimientos, OC pendientes, compras por proveedor | Pantallas de reportes con filtros y export Excel/PDF |
+| S10–S11 | Reportes: OC pendientes, compras por proveedor, por período | Reportes con filtros y export Excel/PDF |
 
-#### Equipo C: RRHH inicio (2 Backend + 1 Frontend)
+#### Almacén (3 Backend + 2 Frontend + 1 QA)
 
 | Semana | Backend | Frontend |
 |:------:|---------|----------|
-| S5–S6 | Ficha trabajador completa, contratos, renovaciones | Pantalla ficha empleado |
-| S7–S8 | Asistencia: marcaciones, reglas tardanza/falta, integración POS/App | Pantalla asistencia y marcación |
-| S9–S10 | Nómina: conceptos fijos y variables, carga masiva | Pantalla conceptos y carga Excel |
+| S6–S8 | Movimientos ingreso/salida/traslado, confirmación, validación stock | Pantalla de movimientos con detalle |
+| S8–S9 | Kardex valorizado (promedio ponderado), cálculo stock, precio promedio | Consulta de kardex y stock |
+| S9 | Inventario físico: toma, comparación con stock sistema, ajustes | Pantalla inventario físico |
+| S10 | Traslados entre almacenes, stock en tránsito | Pantalla traslados |
+| S10–S11 | Reportes: stock actual, movimientos por período, valorización | Reportes con filtros y export |
 
-**Criterio de salida (Hito M2):** Flujo Proveedor → OC → Aprobación → Recepción → Stock. Kardex operativo. Ficha trabajador y asistencia funcionales.
+**Criterio de salida (Hito M2):** Flujo completo Proveedor → OC → Aprobación → Recepción → Movimiento Almacén → Stock → Kardex operativo. Devoluciones y ajustes funcionales.
 
 ---
 
-### Fase 3: Finanzas + Activos Fijos + RRHH procesos (Semanas 10–16)
+### Fase 3: Finanzas + Activos Fijos (Semanas 11–16)
 
 **Duración:** 6 semanas  
-**Equipos:** B (Finanzas+Activos) y C (RRHH procesos) en paralelo  
-**Nota:** Al terminar Fase 2, el Equipo A se reintegra al Equipo B para reforzar Finanzas.
+**Equipos:** B lidera Finanzas, A lidera Activos Fijos  
+**Referencia SIGRE:** Finanzas es el módulo más complejo después de Compras/Almacén. Involucra CxP, CxC, Tesorería, conciliaciones y adelantos. Activos Fijos gestiona depreciación, seguros y control patrimonial.
 
-#### Equipo B: Finanzas + Activos Fijos (5 Backend + 2 Frontend + 1 QA)
-
-| Semana | Backend | Frontend |
-|:------:|---------|----------|
-| S10–S11 | CxP: registro facturas (desde OC y directas), estados, NC/ND | Pantalla CxP con vinculación a OC |
-| S10–S11 | CxC: registro cobros, aplicación a documentos, letras | Pantalla CxC |
-| S12–S13 | Tesorería: movimientos bancarios, transferencias, programación pagos | Pantalla tesorería |
-| S13 | Conciliación bancaria + conciliación con pasarelas (Niubiz, Yape, Plin) | Pantalla conciliación |
-| S14 | Adelantos/OG, fondo fijo por PdV, caja chica | Pantallas adelantos y cajas |
-| S13–S14 | Activos: registro, depreciación mensual, revaluación | Pantalla ficha activo + depreciación |
-| S15 | Activos: seguros/pólizas, bajas, traslados con workflow | Pantallas seguros y traslados |
-| S16 | Reportes: estado cuenta proveedor/cliente, flujo caja, depreciación | Reportes con filtros y export |
-
-#### Equipo C: RRHH procesos (2 Backend + 1 Frontend)
+#### Equipo B: Finanzas (4 Backend + 2 Frontend + 1 QA)
 
 | Semana | Backend | Frontend |
 |:------:|---------|----------|
-| S10–S11 | Cálculo de planilla, horas extra, CTS, gratificaciones | Pantalla cálculo planilla |
-| S12–S13 | Liquidaciones, beneficios sociales | Pantalla liquidaciones |
-| S14 | Propinas, recargo al consumo, distribución | Pantalla distribución propinas |
-| S15 | PLAME, archivos regulatorios, boletas de pago | Generación archivos y boletas |
-| S16 | Reportes RRHH: planilla, asistencia, KPIs | Reportes |
+| S11–S12 | CxP: registro facturas (desde OC y directas), estados, NC/ND | Pantalla CxP con vinculación a OC |
+| S11–S12 | CxC: registro cobros, aplicación a documentos, letras | Pantalla CxC |
+| S13–S14 | Tesorería: movimientos bancarios, transferencias, programación pagos | Pantalla tesorería |
+| S14 | Conciliación bancaria + conciliación con pasarelas (Niubiz, Yape, Plin) | Pantalla conciliación |
+| S15 | Adelantos/OG, fondo fijo por PdV, caja chica, liquidaciones | Pantallas adelantos y cajas |
+| S16 | Reportes: estado cuenta proveedor/cliente, flujo caja, antigüedad saldos | Reportes con filtros y export |
 
-**Criterio de salida (Hito M3):** Ciclo CxP (factura→pago) y CxC (venta→cobro) operativos. Activos con depreciación. Planilla calculada y pagada.
+#### Equipo A: Activos Fijos (3 Backend + 2 Frontend)
+
+| Semana | Backend | Frontend |
+|:------:|---------|----------|
+| S11–S12 | Registro de activos, vinculación a compra/factura, datos técnicos | Pantalla ficha activo completa |
+| S13–S14 | Depreciación mensual automática, revaluación, cálculo valor neto | Pantalla depreciación + ejecución masiva |
+| S14–S15 | Seguros/pólizas, traslados con workflow, bajas | Pantallas seguros y traslados |
+| S16 | Reportes: depreciación acumulada, activos por ubicación, seguros vigentes | Reportes |
+
+**Criterio de salida (Hito M3):** Ciclo CxP (factura → programación → pago) y CxC (documento → cobro → aplicación) operativos. Conciliación bancaria funcional. Activos con depreciación mensual calculada.
 
 ---
 
-### Fase 4: Contabilidad + Producción + Cierre (Semanas 15–20)
+### Fase 4: RRHH ∥ Contabilidad + Producción (Semanas 15–20)
 
-**Duración:** 5 semanas  
-**Equipos:** B (Contabilidad) y A (Producción) en paralelo. QA integral al final.
+**Duración:** 6 semanas (con overlap de 1 semana sobre Fase 3)  
+**Equipos:** 3 equipos en paralelo — C (RRHH), B (Contabilidad), A (Producción)  
+**Referencia SIGRE:** RRHH necesita la infraestructura financiera (cuentas bancarias, formas de pago) que ya estará lista. Contabilidad es el receptor final de pre-asientos de todos los módulos. Producción solo necesita Almacén.
 
-#### Equipo B: Contabilidad (3 Backend + 2 Frontend)
+> **Justificación del paralelismo:** RRHH y Contabilidad son funcionalmente independientes durante el desarrollo. RRHH gestiona personas y planilla; Contabilidad gestiona asientos y cierres. La integración (pre-asientos de planilla) se cierra en las últimas semanas.
+
+#### Equipo C: RRHH (2 Backend + 1 Frontend)
 
 | Semana | Backend | Frontend |
 |:------:|---------|----------|
-| S15–S16 | Asientos manuales + asientos automáticos desde matrices | Pantalla asiento contable |
-| S17 | Pre-asientos: recepción desde Compras, Finanzas, RRHH, Activos, Almacén | Motor de pre-asientos |
-| S18 | Cierres: mensual (bloqueo período) y anual (traslado resultados) | Pantalla cierre contable |
-| S19 | EEFF: Balance, Resultados, Flujos de Efectivo, Patrimonio | Pantalla EEFF con export |
+| S15–S16 | Ficha trabajador completa, contratos, renovaciones, historial | Pantalla ficha empleado |
+| S16 | Asistencia: marcaciones POS/App/biométrico, reglas tardanza/falta | Pantalla asistencia y marcación |
+| S17–S18 | Planilla: cálculo sueldo, horas extra, CTS, gratificaciones, AFP, EsSalud | Pantalla cálculo planilla |
+| S18 | Liquidaciones, beneficios sociales, propinas, recargo al consumo | Pantalla liquidaciones |
+| S19 | PLAME, archivos regulatorios, boletas de pago electrónicas | Generación archivos y boletas |
+| S19–S20 | Reportes: planilla, asistencia, headcount, rotación, KPIs | Reportes |
+
+#### Equipo B: Contabilidad (3 Backend + 2 Frontend + 1 QA)
+
+| Semana | Backend | Frontend |
+|:------:|---------|----------|
+| S15–S16 | Asientos manuales + asientos automáticos desde matrices contables | Pantalla asiento contable |
+| S17 | Motor de pre-asientos: recepción desde Compras, Almacén, Finanzas, Activos | Motor de procesamiento |
+| S17–S18 | Pre-asientos desde RRHH (planilla) y Producción (costos) | Integración asincrónica |
+| S18–S19 | Cierres: mensual (bloqueo período), anual (traslado resultados) | Pantalla cierre contable |
+| S19 | EEFF: Balance General, Estado de Resultados, Flujo de Efectivo, Patrimonio | Pantalla EEFF con export |
 | S19 | Libros electrónicos (PLE/SIRE u equivalente por país) | Generación archivos |
 
 #### Equipo A: Producción (2 Backend + 1 Frontend)
 
 | Semana | Backend | Frontend |
 |:------:|---------|----------|
-| S15–S16 | Recetas (detalle insumos con merma), órdenes de producción | Pantalla receta y orden |
-| S17 | Consumo de almacén desde orden, costeo por receta | Integración almacén |
-| S18 | Reportes producción: costos, consumos, rendimiento | Reportes |
+| S15–S16 | Recetas (detalle insumos con merma), versiones de receta | Pantalla receta con drag & drop insumos |
+| S17 | Órdenes de producción, consumo automático de almacén | Pantalla orden de producción |
+| S18 | Costeo por receta (materia prima + mano de obra + indirectos) | Pantalla costeo consolidado |
+| S18 | Reportes: costos, consumos, rendimiento por receta | Reportes |
 
-#### Integración y cierre (Todo el equipo)
+#### Integración y cierre (Todo el equipo, Semanas 18–20)
 
 | Semana | Actividad |
 |:------:|-----------|
 | S18–S19 | Integración contable de TODOS los módulos (verificar que todos generen pre-asientos correctos) |
-| S19 | QA integral: pruebas end-to-end de flujos completos (compra→almacén→CxP→pago→asiento) |
+| S19 | QA integral: pruebas end-to-end de flujos completos (compra → almacén → CxP → pago → asiento contable) |
 | S20 | Piloto con usuarios reales, corrección de bugs críticos |
 | S20 | Documentación operativa y entrega |
 
-**Criterio de salida (Hito M4):** ERP completo operativo. Cierre contable ejecutado. Al menos un piloto exitoso.
+**Criterio de salida (Hito M4):** ERP completo operativo. Planilla calculada y pagada. Cierre contable ejecutado. Producción con costeo. Al menos un piloto exitoso con usuarios reales.
 
 ---
 
@@ -397,17 +413,17 @@ gantt
 | # | Hito | Semana | Fecha estimada | Descripción |
 |---|------|:------:|:--------------:|-------------|
 | M1 | Maestros listos | S5 | Fin mes 1 | Todos los CRUD de maestros funcionales, auth + menú dinámico |
-| M2 | Compras + Almacén operativos | S11 | Fin mes 2.5 | Flujo OC→Recepción→Stock cerrado, kardex operativo |
-| M3 | Finanzas + Activos + RRHH operativos | S16 | Fin mes 4 | CxP/CxC, tesorería, depreciación, planilla calculada |
-| M4 | ERP completo en producción | S20 | Fin mes 5 | Contabilidad con cierres, producción, piloto exitoso |
+| M2 | Compras + Almacén operativos | S11 | Fin mes 2.5 | Flujo OC → Aprobación → Recepción → Stock → Kardex cerrado |
+| M3 | Finanzas + Activos operativos | S16 | Fin mes 4 | CxP/CxC, tesorería, conciliación, depreciación de activos |
+| M4 | ERP completo en producción | S20 | Fin mes 5 | RRHH + Contabilidad + Producción cerrados, piloto exitoso |
 
 ```mermaid
 timeline
     title Hitos Restaurant.pe (20 semanas)
-    Semana 5 : M1 Maestros listos
+    Semana 5  : M1 Maestros listos
     Semana 11 : M2 Compras + Almacen operativos
-    Semana 16 : M3 Finanzas + Activos + RRHH operativos
-    Semana 20 : M4 ERP completo en produccion
+    Semana 16 : M3 Finanzas + Activos operativos
+    Semana 20 : M4 ERP completo — RRHH + Contabilidad + Produccion
 ```
 
 ---
