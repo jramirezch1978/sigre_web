@@ -83,78 +83,38 @@ flowchart TB
 
 ## 3. Diagrama de dependencias entre módulos
 
-El orden de las fases respeta las dependencias funcionales: Contabilidad **recibe** información de todos los módulos operativos (Almacén, Compras, Finanzas, RRHH, Activos Fijos, Producción). Los módulos de Fundación (Auth, Multiempresa, Configuraciones) son transversales y requeridos por todos.
+El orden de las fases respeta las dependencias funcionales del ERP. Contabilidad es el receptor final de todos los módulos operativos.
 
 ```mermaid
 flowchart TB
-    subgraph Fundación["Fundación (transversal a todos los módulos)"]
-        AUTH[Autenticación y permisos]
-        EMP[Multiempresa / Sucursales]
-        CONF[Configuraciones base]
-    end
-    subgraph Core
-        ALM[Almacén]
-        COM[Compras]
-    end
-    subgraph Finanzas
-        TES[Tesorería]
-        CxC[Cuentas por cobrar]
-        CxP[Cuentas por pagar]
-    end
-    subgraph Contabilidad
-        CNT[Contabilidad]
-    end
-    subgraph Extensión
-        RRHH[RRHH]
-        AF[Activos fijos]
-        PROD[Producción]
-    end
+    FUND["Fundación\n(Auth + Multiempresa + Config)"]
+    ALM[Almacén]
+    COM[Compras]
+    CxP[Cuentas por pagar]
+    CxC[Cuentas por cobrar]
+    TES[Tesorería]
+    AF[Activos fijos]
+    PROD[Producción]
+    RRHH[RRHH]
+    CNT[Contabilidad]
 
-    %% Fundación es transversal — se conecta con TODOS los módulos
-    AUTH -.->|seguridad| ALM
-    AUTH -.->|seguridad| COM
-    AUTH -.->|seguridad| TES
-    AUTH -.->|seguridad| CxC
-    AUTH -.->|seguridad| CxP
-    AUTH -.->|seguridad| CNT
-    AUTH -.->|seguridad| RRHH
-    AUTH -.->|seguridad| AF
-    AUTH -.->|seguridad| PROD
-    EMP -.->|contexto| ALM
-    EMP -.->|contexto| COM
-    EMP -.->|contexto| TES
-    EMP -.->|contexto| CxC
-    EMP -.->|contexto| CxP
-    EMP -.->|contexto| CNT
-    EMP -.->|contexto| RRHH
-    EMP -.->|contexto| AF
-    EMP -.->|contexto| PROD
-    CONF -.->|config| ALM
-    CONF -.->|config| COM
-    CONF -.->|config| TES
-    CONF -.->|config| CxC
-    CONF -.->|config| CxP
-    CONF -.->|config| CNT
-    CONF -.->|config| RRHH
-    CONF -.->|config| AF
-    CONF -.->|config| PROD
-
-    %% Dependencias de negocio (flujo de datos operativos)
-    ALM -->|stock, mov.| COM
+    FUND -->|transversal a todos| ALM
+    FUND -->|transversal a todos| COM
+    ALM -->|stock| COM
     COM -->|facturas| CxP
-    ALM -->|pre-asientos| CNT
-    COM -->|pre-asientos| CNT
-    TES -->|pre-asientos| CNT
-    CxC -->|pre-asientos| CNT
-    CxP -->|pre-asientos| CNT
-    RRHH -->|planilla, pre-asientos| CNT
-    AF -->|depreciación, pre-asientos| CNT
-    PROD -->|costos, pre-asientos| CNT
-    ALM -->|insumos, stock| PROD
-    RRHH <-->|mano de obra / costos| PROD
+    ALM --> CNT
+    COM --> CNT
+    CxP --> CNT
+    CxC --> CNT
+    TES --> CNT
+    AF --> CNT
+    PROD --> CNT
+    RRHH --> CNT
+    ALM -->|insumos| PROD
+    RRHH <-->|mano de obra| PROD
 ```
 
-> **Leyenda:** Las líneas punteadas (`-.->`） representan dependencias transversales de Fundación (seguridad, contexto multiempresa, configuraciones). Las líneas sólidas (`-->`) representan flujo de datos operativos entre módulos. Contabilidad es el receptor final de todos los módulos.
+> **Nota:** Fundación (Auth, Multiempresa, Configuraciones) es **transversal a todos los módulos** — no se grafican todas las flechas para mantener el diagrama limpio. Contabilidad recibe pre-asientos de todos los módulos operativos.
 
 ---
 
