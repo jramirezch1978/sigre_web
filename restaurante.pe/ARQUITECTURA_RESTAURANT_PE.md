@@ -64,6 +64,7 @@ flowchart TB
             RRHH[ms-rrhh]
             AF[ms-activos-fijos]
             PROD[ms-produccion]
+            VEN[ms-ventas]
         end
         subgraph Servicios_Soporte["Servicios de soporte"]
             AUD[ms-auditoria]
@@ -93,6 +94,7 @@ flowchart TB
     GW --> RRHH
     GW --> AF
     GW --> PROD
+    GW --> VEN
     GW --> AUD
     GW --> RPT
     GW --> NOTIF
@@ -105,6 +107,7 @@ flowchart TB
     RRHH --> PG
     AF --> PG
     PROD --> PG
+    VEN --> PG
     AUD --> PG
     ALM --> MQ
     COM --> MQ
@@ -112,6 +115,7 @@ flowchart TB
     RRHH --> MQ
     AF --> MQ
     PROD --> MQ
+    VEN --> MQ
     MQ --> CNT
     MQ --> AUD
     MQ --> NOTIF
@@ -246,11 +250,12 @@ flowchart TB
         RRHH[ms-rrhh :9007]
         AF[ms-activos-fijos :9008]
         PROD[ms-produccion :9009]
+        VEN[ms-ventas :9010]
     end
     subgraph Soporte["Microservicios de soporte"]
-        AUD[ms-auditoria :9010]
-        RPT[ms-reportes :9011]
-        NOTIF[ms-notificaciones :9012]
+        AUD[ms-auditoria :9011]
+        RPT[ms-reportes :9012]
+        NOTIF[ms-notificaciones :9013]
     end
     subgraph Bus["Bus de eventos"]
         MQ[[RabbitMQ]]
@@ -264,6 +269,7 @@ flowchart TB
     GW -->|REST| RRHH
     GW -->|REST| AF
     GW -->|REST| PROD
+    GW -->|REST| VEN
     GW -->|REST| RPT
     COM -->|OpenFeign| CORE
     COM -->|OpenFeign| ALM
@@ -275,12 +281,16 @@ flowchart TB
     AF -->|OpenFeign| CORE
     PROD -->|OpenFeign| CORE
     PROD -->|OpenFeign| ALM
+    VEN -->|OpenFeign| CORE
+    VEN -->|OpenFeign| ALM
+    VEN -->|OpenFeign| FIN
     ALM -->|evento| MQ
     COM -->|evento| MQ
     FIN -->|evento| MQ
     RRHH -->|evento| MQ
     AF -->|evento| MQ
     PROD -->|evento| MQ
+    VEN -->|evento| MQ
     MQ -->|pre-asiento| CNT
     MQ -->|log| AUD
     MQ -->|alerta| NOTIF
@@ -327,7 +337,7 @@ sequenceDiagram
 | 2 | **config-server** | 8888 | Configuración centralizada. Almacena properties por servicio, por entorno (dev/qa/prod) y por país. Fuente: repositorio Git |
 | 3 | **api-gateway** | 8080 | Punto de entrada único. Ruteo dinámico basado en Eureka. Rate limiting, CORS, balanceo de carga, validación de JWT |
 
-### 5.2 Servicios de negocio (9)
+### 5.2 Servicios de negocio (10)
 
 | # | Servicio | Puerto | Esquema BD | Responsabilidad |
 |---|----------|:------:|:----------:|-----------------|
@@ -340,14 +350,15 @@ sequenceDiagram
 | 10 | **ms-rrhh** | 9007 | `rrhh` | Ficha del trabajador, contratos laborales, áreas y cargos, asistencia (POS/App/biométrico/GPS), conceptos de planilla, cálculo de planilla (sueldo, horas extra, CTS, gratificaciones, AFP, EsSalud), liquidaciones, beneficios sociales, propinas, recargo al consumo, archivos regulatorios (PLAME), boletas de pago |
 | 11 | **ms-activos-fijos** | 9008 | `activos` | Registro de activos fijos vinculados a compra/factura, clasificación por clase/subclase, ubicación física jerárquica, depreciación mensual automática (lineal/decreciente/unidades), revaluación, seguros y pólizas, traslados con workflow, bajas |
 | 12 | **ms-produccion** | 9009 | `produccion` | Recetas (BOM gastronómico) con merma, versiones de receta, órdenes de producción, consumo automático de almacén, costeo por receta (materia prima + mano de obra + indirectos) |
+| 13 | **ms-ventas** | 9010 | `ventas` | Integración con POS (Restaurant.pe), documentos de venta (boletas, facturas electrónicas), notas de crédito/débito, cierre de caja, propinas, recargo al consumo, descuentos y promociones, mesas/órdenes/comandas, facturación electrónica (SUNAT/OSE), generación de CxC, pre-asientos contables de ventas |
 
 ### 5.3 Servicios de soporte (3)
 
 | # | Servicio | Puerto | Esquema BD | Responsabilidad |
 |---|----------|:------:|:----------:|-----------------|
-| 13 | **ms-auditoria** | 9010 | `auditoria` | Registro centralizado de auditoría. Consume eventos de todos los servicios. Log: quién, cuándo, qué entidad, qué acción, datos anteriores/nuevos (JSON), IP, user-agent |
-| 14 | **ms-reportes** | 9011 | — | Motor de reportes (JasperReports). Exportación PDF/Excel. Consulta datos de otros servicios vía OpenFeign. Reportes compartidos entre módulos |
-| 15 | **ms-notificaciones** | 9012 | — | Envío de correos electrónicos, alertas del sistema, recordatorios, notificaciones push. Consume eventos de RabbitMQ |
+| 14 | **ms-auditoria** | 9011 | `auditoria` | Registro centralizado de auditoría. Consume eventos de todos los servicios. Log: quién, cuándo, qué entidad, qué acción, datos anteriores/nuevos (JSON), IP, user-agent |
+| 15 | **ms-reportes** | 9012 | — | Motor de reportes (JasperReports). Exportación PDF/Excel. Consulta datos de otros servicios vía OpenFeign. Reportes compartidos entre módulos |
+| 16 | **ms-notificaciones** | 9013 | — | Envío de correos electrónicos, alertas del sistema, recordatorios, notificaciones push. Consume eventos de RabbitMQ |
 
 ---
 
@@ -2034,9 +2045,56 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 
 ---
 
-### 23.10 Servicios de soporte
+### 23.10 ms-ventas (:9010)
 
-#### ms-auditoria (:9010)
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/api/ventas/documentos` | Listar documentos de venta (filtros: fecha, sucursal, tipo, estado) |
+| GET | `/api/ventas/documentos/{id}` | Obtener documento de venta con detalle |
+| POST | `/api/ventas/documentos` | Crear documento de venta (boleta/factura) |
+| POST | `/api/ventas/documentos/{id}/anular` | Anular documento de venta |
+| POST | `/api/ventas/notas-credito` | Emitir nota de crédito |
+| POST | `/api/ventas/notas-debito` | Emitir nota de débito |
+| GET | `/api/ventas/mesas` | Listar mesas con estado (libre/ocupada/reservada) |
+| POST | `/api/ventas/mesas` | Crear/configurar mesa |
+| PUT | `/api/ventas/mesas/{id}` | Actualizar mesa |
+| PUT | `/api/ventas/mesas/{id}/estado` | Cambiar estado de mesa |
+| GET | `/api/ventas/ordenes` | Listar órdenes activas |
+| GET | `/api/ventas/ordenes/{id}` | Obtener orden con comandas |
+| POST | `/api/ventas/ordenes` | Crear orden (apertura de mesa) |
+| POST | `/api/ventas/ordenes/{id}/cerrar` | Cerrar orden (generar documento de venta) |
+| POST | `/api/ventas/ordenes/{id}/comandas` | Agregar comanda a orden |
+| PUT | `/api/ventas/ordenes/{id}/comandas/{comandaId}` | Modificar comanda |
+| DELETE | `/api/ventas/ordenes/{id}/comandas/{comandaId}` | Eliminar comanda |
+| POST | `/api/ventas/ordenes/{id}/dividir-cuenta` | Dividir cuenta entre comensales |
+| POST | `/api/ventas/ordenes/{id}/unir-mesas` | Unir mesas en una sola cuenta |
+| GET | `/api/ventas/cierres-caja` | Listar cierres de caja |
+| GET | `/api/ventas/cierres-caja/{id}` | Detalle de cierre de caja |
+| POST | `/api/ventas/cierres-caja/abrir` | Abrir caja (inicio de turno) |
+| POST | `/api/ventas/cierres-caja/{id}/cerrar` | Cerrar caja (arqueo final) |
+| GET | `/api/ventas/cierres-caja/{id}/arqueo` | Obtener arqueo detallado de caja |
+| GET | `/api/ventas/descuentos` | Listar descuentos y promociones |
+| POST | `/api/ventas/descuentos` | Crear descuento/promoción |
+| PUT | `/api/ventas/descuentos/{id}` | Actualizar descuento/promoción |
+| POST | `/api/ventas/descuentos/{id}/activar` | Activar descuento |
+| POST | `/api/ventas/descuentos/{id}/desactivar` | Desactivar descuento |
+| POST | `/api/ventas/facturacion-electronica/enviar/{documentoId}` | Enviar documento a OSE/SUNAT |
+| GET | `/api/ventas/facturacion-electronica/estado/{documentoId}` | Consultar estado de facturación electrónica |
+| GET | `/api/ventas/facturacion-electronica/cdr/{documentoId}` | Descargar CDR (Constancia de Recepción) |
+| GET | `/api/ventas/propinas` | Listar propinas (filtros: fecha, trabajador) |
+| POST | `/api/ventas/propinas` | Registrar propina |
+| GET | `/api/ventas/recargos-consumo` | Listar recargos al consumo |
+| GET | `/api/ventas/reportes/ventas-diarias` | Reporte de ventas del día por sucursal |
+| GET | `/api/ventas/reportes/ventas-por-articulo` | Ventas agrupadas por artículo |
+| GET | `/api/ventas/reportes/ventas-por-mesero` | Ventas por mesero/vendedor |
+| GET | `/api/ventas/reportes/cierre-caja-resumen` | Resumen de cierre de caja |
+| GET | `/api/ventas/reportes/propinas-periodo` | Propinas por período |
+
+---
+
+### 23.11 Servicios de soporte
+
+#### ms-auditoria (:9011)
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
@@ -2045,7 +2103,7 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 | GET | `/api/auditoria/accesos` | Consultar logs de acceso (login/logout) |
 | GET | `/api/auditoria/reportes/actividad-usuario` | Actividad por usuario |
 
-#### ms-reportes (:9011)
+#### ms-reportes (:9012)
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
@@ -2053,7 +2111,7 @@ A continuación se detallan **todos los endpoints REST** de cada microservicio. 
 | GET | `/api/reportes/plantillas` | Listar plantillas de reportes disponibles |
 | GET | `/api/reportes/descargar/{id}` | Descargar reporte generado |
 
-#### ms-notificaciones (:9012)
+#### ms-notificaciones (:9013)
 
 | Método | Endpoint | Descripción |
 |:------:|----------|-------------|
@@ -2440,6 +2498,37 @@ services:
     networks:
       - rpe-network
 
+  ms-ventas:
+    build:
+      context: ./ms-ventas
+      dockerfile: Dockerfile
+    container_name: rpe-ventas
+    ports:
+      - "9010:9010"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=ventas
+      SPRING_DATASOURCE_USERNAME: rpe_admin
+      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_DATA_REDIS_HOST: rpe-redis
+      SPRING_DATA_REDIS_PASSWORD: rpe_redis_2026
+      SPRING_RABBITMQ_HOST: rpe-rabbitmq
+      SPRING_RABBITMQ_USERNAME: rpe_mq
+      SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rpe-network
+
   # ============================================================
   # MICROSERVICIOS DE SOPORTE
   # ============================================================
@@ -2450,7 +2539,7 @@ services:
       dockerfile: Dockerfile
     container_name: rpe-auditoria
     ports:
-      - "9010:9010"
+      - "9011:9011"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
@@ -2477,7 +2566,7 @@ services:
       dockerfile: Dockerfile
     container_name: rpe-reportes
     ports:
-      - "9011:9011"
+      - "9012:9012"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
@@ -2494,7 +2583,7 @@ services:
       dockerfile: Dockerfile
     container_name: rpe-notificaciones
     ports:
-      - "9012:9012"
+      - "9013:9013"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
@@ -2567,6 +2656,7 @@ CREATE SCHEMA IF NOT EXISTS contabilidad;
 CREATE SCHEMA IF NOT EXISTS rrhh;
 CREATE SCHEMA IF NOT EXISTS activos;
 CREATE SCHEMA IF NOT EXISTS produccion;
+CREATE SCHEMA IF NOT EXISTS ventas;
 CREATE SCHEMA IF NOT EXISTS auditoria;
 
 -- Permisos para el usuario de la aplicación
@@ -2579,6 +2669,7 @@ GRANT ALL PRIVILEGES ON SCHEMA contabilidad TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA rrhh TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA activos TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA produccion TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA ventas TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA auditoria TO rpe_admin;
 ```
 
@@ -2602,9 +2693,10 @@ GRANT ALL PRIVILEGES ON SCHEMA auditoria TO rpe_admin;
 | 9007 | ms-rrhh | RRHH |
 | 9008 | ms-activos-fijos | Activos Fijos |
 | 9009 | ms-produccion | Producción |
-| 9010 | ms-auditoria | Auditoría |
-| 9011 | ms-reportes | Reportes |
-| 9012 | ms-notificaciones | Notificaciones |
+| 9010 | ms-ventas | Ventas |
+| 9011 | ms-auditoria | Auditoría |
+| 9012 | ms-reportes | Reportes |
+| 9013 | ms-notificaciones | Notificaciones |
 | 4200 | Frontend Angular | SPA |
 
 ### Comandos útiles

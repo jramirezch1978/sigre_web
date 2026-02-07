@@ -95,6 +95,7 @@ flowchart TB
     subgraph Core
         ALM[Almacén]
         COM[Compras]
+        VEN[Ventas]
     end
     subgraph Finanzas
         TES[Tesorería]
@@ -126,6 +127,12 @@ flowchart TB
     PROD --> CNT
     ALM --> PROD
     RRHH <--> PROD
+    AUTH --> VEN
+    EMP --> VEN
+    CONF --> VEN
+    VEN --> CxC
+    VEN --> CNT
+    ALM -->|stock| VEN
 ```
 
 > **Nota:** Fundación (Auth, Multiempresa, Configuraciones) es transversal a todos los módulos. Contabilidad recibe pre-asientos de todos los módulos operativos.
@@ -448,6 +455,7 @@ flowchart TB
         MS_RRHH[ms-rrhh]
         MS_AF[ms-activos-fijos]
         MS_PROD[ms-produccion]
+        MS_VEN[ms-ventas]
         MS_AUD[ms-auditoria]
         MS_RPT[ms-reportes]
         MS_NOTIF[ms-notificaciones]
@@ -462,7 +470,8 @@ flowchart TB
         DB7[(schema: rrhh)]
         DB8[(schema: activos)]
         DB9[(schema: produccion)]
-        DB10[(schema: auditoria)]
+        DB10[(schema: ventas)]
+        DB11[(schema: auditoria)]
     end
     ANG --> GW
     GW --> EU
@@ -475,6 +484,7 @@ flowchart TB
     GW --> MS_RRHH
     GW --> MS_AF
     GW --> MS_PROD
+    GW --> MS_VEN
     GW --> MS_AUD
     GW --> MS_RPT
     GW --> MS_NOTIF
@@ -487,7 +497,8 @@ flowchart TB
     MS_RRHH --> DB7
     MS_AF --> DB8
     MS_PROD --> DB9
-    MS_AUD --> DB10
+    MS_VEN --> DB10
+    MS_AUD --> DB11
     MS_AUTH --> EU
     MS_CORE --> EU
     MS_ALM --> EU
@@ -497,6 +508,7 @@ flowchart TB
     MS_RRHH --> EU
     MS_AF --> EU
     MS_PROD --> EU
+    MS_VEN --> EU
     MS_AUD --> EU
     MS_RPT --> EU
     MS_NOTIF --> EU
@@ -505,7 +517,7 @@ flowchart TB
     CFG --> MS_ALM
 ```
 
-### 8.2 Catálogo de microservicios (15 servicios)
+### 8.2 Catálogo de microservicios (16 servicios)
 
 | # | Microservicio | Puerto base | Responsabilidad | Fase |
 |---|--------------|:-----------:|----------------|:----:|
@@ -521,9 +533,10 @@ flowchart TB
 | 10 | **ms-rrhh** | 9007 | Trabajadores, contratos, asistencia, nómina, beneficios, liquidaciones, reclutamiento, talento, archivos regulatorios | 2–3 |
 | 11 | **ms-activos-fijos** | 9008 | Registro de activos, depreciación, revaluación, seguros, bajas, traslados | 3 |
 | 12 | **ms-produccion** | 9009 | Recetas, órdenes de producción, costeo por receta, consumo de inventario | 4 |
-| 13 | **ms-auditoria** | 9010 | Registro centralizado de auditoría: quién, cuándo, qué, desde dónde (todos los servicios envían eventos) | 1 |
-| 14 | **ms-reportes** | 9011 | Motor de reportes (JasperReports o similar), exportación PDF/Excel, reportes compartidos entre módulos | 2 |
-| 15 | **ms-notificaciones** | 9012 | Envío de correos, alertas del sistema, recordatorios, notificaciones push | 2 |
+| 13 | **ms-ventas** | 9010 | Integración con POS, documentos de venta, notas de crédito/débito, cierre de caja, propinas, descuentos, mesas/comandas, facturación electrónica | 2 |
+| 14 | **ms-auditoria** | 9011 | Registro centralizado de auditoría: quién, cuándo, qué, desde dónde (todos los servicios envían eventos) | 1 |
+| 15 | **ms-reportes** | 9012 | Motor de reportes (JasperReports o similar), exportación PDF/Excel, reportes compartidos entre módulos | 2 |
+| 16 | **ms-notificaciones** | 9013 | Envío de correos, alertas del sistema, recordatorios, notificaciones push | 2 |
 
 ### 8.3 Comunicación entre microservicios
 
