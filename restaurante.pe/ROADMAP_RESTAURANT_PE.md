@@ -87,34 +87,48 @@ El orden de las fases respeta las dependencias funcionales del ERP. Contabilidad
 
 ```mermaid
 flowchart TB
-    FUND["Fundación\n(Auth + Multiempresa + Config)"]
-    ALM[Almacén]
-    COM[Compras]
-    CxP[Cuentas por pagar]
-    CxC[Cuentas por cobrar]
-    TES[Tesorería]
-    AF[Activos fijos]
-    PROD[Producción]
-    RRHH[RRHH]
-    CNT[Contabilidad]
-
-    FUND -->|transversal a todos| ALM
-    FUND -->|transversal a todos| COM
-    ALM -->|stock| COM
-    COM -->|facturas| CxP
+    subgraph Fundación
+        AUTH[Autenticación y permisos]
+        EMP[Multiempresa / Sucursales]
+        CONF[Configuraciones base]
+    end
+    subgraph Core
+        ALM[Almacén]
+        COM[Compras]
+    end
+    subgraph Finanzas
+        TES[Tesorería]
+        CxC[Cuentas por cobrar]
+        CxP[Cuentas por pagar]
+    end
+    subgraph Contabilidad
+        CNT[Contabilidad]
+    end
+    subgraph Extensión
+        RRHH[RRHH]
+        AF[Activos fijos]
+        PROD[Producción]
+    end
+    AUTH --> ALM
+    AUTH --> COM
+    EMP --> ALM
+    EMP --> COM
+    CONF --> ALM
+    ALM --> COM
     ALM --> CNT
+    COM --> CxP
     COM --> CNT
-    CxP --> CNT
-    CxC --> CNT
     TES --> CNT
+    CxC --> CNT
+    CxP --> CNT
+    RRHH --> CNT
     AF --> CNT
     PROD --> CNT
-    RRHH --> CNT
-    ALM -->|insumos| PROD
-    RRHH <-->|mano de obra| PROD
+    ALM --> PROD
+    RRHH <--> PROD
 ```
 
-> **Nota:** Fundación (Auth, Multiempresa, Configuraciones) es **transversal a todos los módulos** — no se grafican todas las flechas para mantener el diagrama limpio. Contabilidad recibe pre-asientos de todos los módulos operativos.
+> **Nota:** Fundación (Auth, Multiempresa, Configuraciones) es transversal a todos los módulos. Contabilidad recibe pre-asientos de todos los módulos operativos.
 
 ---
 
