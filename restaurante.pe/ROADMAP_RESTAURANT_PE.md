@@ -39,7 +39,7 @@ Para cumplir con el plazo de 5 meses se requieren **3 equipos funcionales** trab
 | **Tech Lead / Arquitecto** | 1 | 100% todo el proyecto | Arquitectura de microservicios, revisiones de código, decisiones técnicas, integración entre equipos |
 | **Scrum Master / PM** | 1 | 100% todo el proyecto | Gestión de sprints, seguimiento de hitos, gestión de impedimentos |
 | **Analista Funcional / BA** | 2 | 100% todo el proyecto | Refinamiento de HUs, validación funcional, criterios de aceptación, pruebas UAT |
-| **DevOps** | 1 | 100% todo el proyecto | CI/CD, entornos, Docker, despliegues, monitoreo |
+| **DevOps** | 1 | 100% todo el proyecto | Jenkins (build + test + SonarQube), entornos, Docker, despliegues manuales, monitoreo |
 | **DBA** | 1 | 100% Fases 1–2, 50% Fases 3–4 | Modelo de datos, migraciones Flyway, performance, índices, backup/restore, streaming replication |
 | **Backend Senior (Java/Spring Boot)** | 8 | 100% asignados a equipos | Desarrollo de microservicios, APIs REST, lógica de negocio |
 | **Frontend (Angular 20)** | 5 | 100% asignados a equipos | Pantallas, componentes, integración con APIs, UX |
@@ -249,7 +249,7 @@ gantt
 
 | Responsable | Tarea |
 |-------------|-------|
-| Tech Lead + DevOps | Eureka Server, Config Server, API Gateway, Redis, MinIO (storage dev). CI/CD pipelines con SonarQube + JaCoCo (quality gates: cobertura ≥70%, 0 bugs). ELK Stack base (Elasticsearch + Logstash + Kibana). Prometheus + Grafana (dashboards infra). Zipkin (tracing distribuido) |
+| Tech Lead + DevOps | Eureka Server, Config Server, API Gateway, Redis, MinIO (storage dev). Jenkins (build + test automático) con SonarQube + JaCoCo (quality gates: cobertura ≥70%, 0 bugs). Despliegues manuales con Docker. ELK Stack base (Elasticsearch + Logstash + Kibana). Prometheus + Grafana (dashboards infra). Zipkin (tracing distribuido) |
 | Backend 1–2 | ms-auth-security: login, JWT, usuarios, roles dinámicos, permisos, opciones de menú |
 | Backend 3–4 | ms-core-maestros: empresa, sucursal, país, departamento, provincia, distrito, moneda, tipo de cambio |
 | Backend 5–6 | ms-core-maestros: impuestos, retenciones, detracciones, parámetros del sistema, ejercicios/períodos |
@@ -283,7 +283,7 @@ gantt
 | Analistas | UAT de maestros con reglas de negocio |
 | Backend (migración) | Desarrollar scripts ETL (Python + Pandas) para migración de maestros desde SIGRE: relaciones comerciales, artículos, categorías, unidades. Endpoints de importación masiva (CSV/Excel) |
 
-**Criterio de salida (Hito M1):** Todos los maestros con CRUD funcional en backend y frontend. Menú dinámico cargando por roles. Auth + multiempresa operativo. Infraestructura de observabilidad operativa (ELK + Prometheus/Grafana + Zipkin). CI/CD con quality gates SonarQube pasando (cobertura ≥70%). Redis y MinIO configurados.
+**Criterio de salida (Hito M1):** Todos los maestros con CRUD funcional en backend y frontend. Menú dinámico cargando por roles. Auth + multiempresa operativo. Infraestructura de observabilidad operativa (ELK + Prometheus/Grafana + Zipkin). Jenkins operativo con quality gates SonarQube pasando (cobertura ≥70%). Despliegues manuales documentados. Redis y MinIO configurados.
 
 ---
 
@@ -1145,7 +1145,7 @@ erDiagram
 3. **Detallar la arquitectura** de cada microservicio (paquetes, capas, contratos de API) en documentos técnicos por servicio.
 4. **Fijar hitos** en fechas concretas y revisar el roadmap cada mes.
 5. **Definir estándares de API** (OpenAPI/Swagger), patrones de error, paginación y versionado.
-6. **Implementar CI/CD** desde la Semana 1: build, test, análisis de código (SonarQube + JaCoCo, quality gates obligatorios) y deploy automatizado por microservicio.
+6. **Configurar Jenkins** desde la Semana 1: build automático, tests (JUnit + Testcontainers), análisis de calidad (SonarQube + JaCoCo con quality gates obligatorios). Despliegues manuales con Docker. Automatización de despliegues (CD) como mejora futura opcional.
 7. **Configurar stack de observabilidad** desde Semana 1: ELK Stack (logs JSON), Prometheus + Grafana (dashboards de infra, JVM, gateway, negocio, BD, RabbitMQ), Zipkin/Jaeger (tracing distribuido).
 8. **Configurar Redis** desde Semana 1 para caché de sesiones, menú, configuraciones y rate limiting en API Gateway.
 9. **Configurar MinIO** (dev) / **S3** (prod) para gestión de archivos aislados por tenant (logos, fotos, documentos, regulatorios).
@@ -1157,4 +1157,4 @@ erDiagram
 
 ---
 
-*Roadmap para el proyecto Restaurant.pe. Stack: Backend Java/Spring Boot (microservicios con API Gateway y Eureka), Frontend Angular 20, Base de datos PostgreSQL con estrategia Database-per-Tenant. Infraestructura: Redis (caché/rate limiting), RabbitMQ (eventos), ELK (logs), Prometheus/Grafana (monitoreo), Zipkin (tracing), MinIO/S3 (archivos). Plazo: 5 meses, 21 personas, 3 equipos en paralelo. Incluye arquitectura de microservicios, modelo de seguridad centralizado en BD Master, roles dinámicos por empresa, menú por permisos, numeración atómica sin gaps, WebSocket/STOMP para tiempo real, testing (JUnit/Testcontainers/Cypress/SonarQube), backup/restore por tenant, streaming replication y plan de Disaster Recovery.*
+*Roadmap para el proyecto Restaurant.pe. Stack: Backend Java/Spring Boot (microservicios con API Gateway y Eureka), Frontend Angular 20, Base de datos PostgreSQL con estrategia Database-per-Tenant. Infraestructura: Redis (caché/rate limiting), RabbitMQ (eventos), ELK (logs), Prometheus/Grafana (monitoreo), Zipkin (tracing), MinIO/S3 (archivos). Integración continua con Jenkins + SonarQube + JaCoCo (despliegues manuales). Plazo: 5 meses, 21 personas, 3 equipos en paralelo. Incluye arquitectura de microservicios, modelo de seguridad centralizado en BD Master, roles dinámicos por empresa, menú por permisos, numeración atómica sin gaps, WebSocket/STOMP para tiempo real, testing (JUnit/Testcontainers/Cypress/SonarQube), backup/restore por tenant, streaming replication y plan de Disaster Recovery.*

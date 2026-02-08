@@ -243,8 +243,9 @@ flowchart TB
 | **Docker Compose** | latest | Orquestación local de servicios |
 | **Nginx** | latest | Reverse proxy / load balancer / serving del SPA |
 | **Git** | latest | Control de versiones |
-| **GitHub Actions** | latest | CI/CD pipelines |
-| **SonarQube** | latest | Análisis estático de código |
+| **Jenkins** | LTS | Servidor de integración continua (build, test, análisis de calidad). Despliegues manuales |
+| **SonarQube** | latest | Análisis estático de código, quality gates, métricas de calidad |
+| **JaCoCo** | latest | Cobertura de código (integrado con Maven y SonarQube) |
 | **Prometheus + Grafana** | latest | Monitoreo y observabilidad |
 | **ELK Stack** | latest | Centralización de logs (Elasticsearch + Logstash + Kibana) |
 
@@ -1482,21 +1483,172 @@ services:
   # ... (demás microservicios)
 ```
 
-### 16.3 CI/CD Pipeline (GitHub Actions)
+### 16.3 Integración continua (Jenkins) y despliegue manual
+
+> **Nota:** En esta primera versión, los **despliegues son manuales**. Jenkins se utiliza exclusivamente para **build, testing y análisis de calidad**. La automatización de despliegues (CD) se implementará en una fase posterior como mejora opcional.
+
+#### Flujo de integración continua
 
 ```mermaid
 flowchart LR
-    A[Push / PR] --> B[Build + Test]
-    B --> C[SonarQube Analysis]
-    C --> D{¿Quality Gate OK?}
-    D -->|Sí| E[Build Docker Image]
-    D -->|No| F[Fallar pipeline]
-    E --> G[Push a Registry]
-    G --> H{¿Branch?}
-    H -->|develop| I[Deploy a DEV]
-    H -->|release| J[Deploy a QA]
-    H -->|main| K[Deploy a PROD]
+    A[Push a Git] --> B[Jenkins detecta\ncambio webhook/poll]
+    B --> C[Build Maven\nmvn clean package]
+    C --> D[Unit Tests\nJUnit 5 + Mockito]
+    D --> E[Integration Tests\nTestcontainers]
+    E --> F[JaCoCo\nCobertura de código]
+    F --> G[SonarQube Analysis\nQuality Gate]
+    G --> H{¿Quality Gate OK?}
+    H -->|✅ Sí| I[Artefacto .jar listo\nen Jenkins artifacts]
+    H -->|❌ No| J[Notificar al equipo\nSonar + email]
 ```
+
+#### Despliegue manual
+
+```mermaid
+flowchart LR
+    A[Artefacto .jar\naprobado] --> B[DevOps construye\nDocker image manualmente]
+    B --> C[docker build + tag]
+    C --> D{¿Entorno destino?}
+    D -->|DEV| E["docker-compose up\n(entorno local/dev)"]
+    D -->|QA| F["Deploy manual\nal servidor QA"]
+    D -->|PROD| G["Deploy manual\ncon checklist de release"]
+```
+
+#### Jenkinsfile (pipeline declarativo)
+
+```groovy
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven-3.9'
+        jdk 'JDK-21'
+    }
+
+    environment {
+        SONAR_HOST = 'http://sonarqube:9000'
+        SONAR_TOKEN = credentials('sonar-token')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean compile -DskipTests'
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Integration Tests') {
+            steps {
+                sh 'mvn verify -Pintegration-tests'
+            }
+            post {
+                always {
+                    junit '**/target/failsafe-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Code Coverage (JaCoCo)') {
+            steps {
+                sh 'mvn jacoco:report'
+            }
+            post {
+                always {
+                    jacoco(
+                        execPattern: '**/target/jacoco.exec',
+                        classPattern: '**/target/classes',
+                        sourcePattern: '**/src/main/java',
+                        minimumLineCoverage: '70',
+                        minimumBranchCoverage: '60'
+                    )
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                sh """
+                    mvn sonar:sonar \
+                        -Dsonar.host.url=${SONAR_HOST} \
+                        -Dsonar.login=${SONAR_TOKEN} \
+                        -Dsonar.projectKey=${env.JOB_NAME} \
+                        -Dsonar.java.coveragePlugin=jacoco
+                """
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                sh 'mvn package -DskipTests'
+                archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+            }
+        }
+    }
+
+    post {
+        failure {
+            mail to: 'equipo-dev@restaurant.pe',
+                 subject: "❌ Build fallido: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "Revisar: ${env.BUILD_URL}"
+        }
+        success {
+            mail to: 'equipo-dev@restaurant.pe',
+                 subject: "✅ Build exitoso: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "Artefacto listo para despliegue manual."
+        }
+    }
+}
+```
+
+#### Quality gates (umbrales obligatorios en SonarQube)
+
+| Métrica | Umbral | Acción si falla |
+|---------|:------:|-----------------|
+| **Cobertura de líneas** | ≥ 70% | Build fallido |
+| **Cobertura de ramas** | ≥ 60% | Build fallido |
+| **Bugs** | 0 nuevos | Build fallido |
+| **Vulnerabilidades** | 0 nuevas | Build fallido |
+| **Code smells bloqueantes** | 0 | Build fallido |
+| **Duplicación de código** | < 3% | Warning |
+| **Technical debt ratio** | < 5% | Warning |
+
+#### Proceso de despliegue manual (checklist)
+
+| Paso | Responsable | Acción |
+|:----:|:-----------:|--------|
+| 1 | Desarrollador | Verificar que Jenkins build + quality gate estén en verde |
+| 2 | DevOps | `docker build -t ms-compras:v1.2.3 .` |
+| 3 | DevOps | `docker tag` y push a registry interno (si aplica) |
+| 4 | DevOps | `docker-compose up -d ms-compras` en el entorno destino |
+| 5 | QA | Ejecutar smoke tests en el entorno |
+| 6 | QA | Confirmar despliegue exitoso |
+
+> **Evolución futura (opcional):** Cuando el equipo madure, se puede automatizar el despliegue continuo (CD) agregando stages de `docker build`, `docker push` y `deploy` al Jenkinsfile, o migrar a GitHub Actions / GitLab CI.
 
 ### 16.4 Monitoreo
 
@@ -5096,29 +5248,31 @@ describe('Orden de Compra', () => {
 
 ```mermaid
 flowchart LR
-    subgraph CI["Pipeline CI"]
-        A[Push/PR] --> B[Unit Tests]
+    subgraph Jenkins["Jenkins — Integración Continua"]
+        A[Push a Git] --> B[Unit Tests]
         B --> C[Integration Tests\nTestcontainers]
         C --> D[Contract Tests]
-        D --> E[SonarQube\nQuality Gate]
+        D --> E[JaCoCo\nCobertura]
+        E --> F[SonarQube\nQuality Gate]
+        F --> G[Artefacto .jar]
     end
-    subgraph CD["Pipeline CD — post merge"]
-        E --> F[Build Docker Image]
-        F --> G[Deploy to DEV]
-        G --> H[E2E Tests\nCypress]
-        H --> I{¿Tests OK?}
-        I -->|Sí| J[Deploy to QA]
-        I -->|No| K[Rollback + Notificar]
+    subgraph Manual["Despliegue Manual"]
+        G --> H[DevOps: docker build]
+        H --> I[Deploy a entorno]
+        I --> J[QA: E2E Tests\nCypress]
+        J --> K[QA: Smoke Tests]
     end
 ```
 
-| Tipo de test | Cuándo se ejecuta | Duración estimada |
-|--------------|-------------------|:-----------------:|
-| **Unit tests** | Cada push / PR | ~30 segundos |
-| **Integration tests** | Cada push / PR | ~2 minutos |
-| **Contract tests** | Cada push / PR | ~1 minuto |
-| **E2E tests** | Después de deploy a DEV | ~5 minutos |
-| **Performance tests** | Semanal (ambiente QA) | ~15 minutos |
+| Tipo de test | Cuándo se ejecuta | Duración estimada | Herramienta |
+|--------------|-------------------|:-----------------:|-------------|
+| **Unit tests** | Cada push (Jenkins automático) | ~30 segundos | JUnit 5 + Mockito |
+| **Integration tests** | Cada push (Jenkins automático) | ~2 minutos | Testcontainers |
+| **Contract tests** | Cada push (Jenkins automático) | ~1 minuto | Spring Cloud Contract |
+| **Cobertura de código** | Cada push (Jenkins automático) | ~30 segundos | JaCoCo |
+| **Análisis de calidad** | Cada push (Jenkins automático) | ~2 minutos | SonarQube |
+| **E2E tests** | Después de despliegue manual a DEV | ~5 minutos | Cypress |
+| **Performance tests** | Semanal (manual en QA) | ~15 minutos | JMeter / Gatling |
 
 ---
 

@@ -446,13 +446,12 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('  ],');
 
     -- ========================================================================
-    -- 8. VISTAS
+    -- 8. VISTAS (compatible con Oracle 11gR2 — columna TEXT es LONG)
     -- ========================================================================
     DBMS_OUTPUT.PUT_LINE('  "views": [');
     v_first := TRUE;
 
     FOR vw IN (SELECT v.VIEW_NAME, v.TEXT_LENGTH,
-                      DBMS_LOB.SUBSTR(TO_LOB(v.TEXT), 4000, 1) AS VIEW_TEXT,
                       c.COMMENTS
                  FROM ALL_VIEWS v
                  LEFT JOIN ALL_TAB_COMMENTS c
@@ -467,8 +466,8 @@ BEGIN
 
         DBMS_OUTPUT.PUT_LINE('    {');
         DBMS_OUTPUT.PUT_LINE('      "view_name": "' || vw.VIEW_NAME || '",');
-        DBMS_OUTPUT.PUT_LINE('      "comment": ' || json_str(vw.COMMENTS) || ',');
-        DBMS_OUTPUT.PUT_LINE('      "text": ' || json_str(SUBSTR(vw.VIEW_TEXT, 1, 3000)));
+        DBMS_OUTPUT.PUT_LINE('      "text_length": ' || json_num(vw.TEXT_LENGTH) || ',');
+        DBMS_OUTPUT.PUT_LINE('      "comment": ' || json_str(vw.COMMENTS));
         DBMS_OUTPUT.PUT_LINE('    }');
     END LOOP;
 
