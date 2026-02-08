@@ -1503,9 +1503,10 @@ flowchart LR
 ### 12.3 Tabla pre_asiento
 
 ```sql
+-- En cada BD de empresa (restaurant_pe_emp_{id})
 CREATE TABLE contabilidad.pre_asiento (
     id              BIGSERIAL PRIMARY KEY,
-    empresa_id      BIGINT NOT NULL,
+    -- No necesita empresa_id (la BD ya es de una sola empresa)
     modulo_origen   VARCHAR(20) NOT NULL,    -- ALMACEN, COMPRAS, FINANZAS...
     tipo_operacion  VARCHAR(50) NOT NULL,    -- INGRESO_ALMACEN, FACTURA_PROVEEDOR...
     documento_tipo  VARCHAR(20),             -- OC, FACTURA, PLANILLA...
@@ -3938,17 +3939,29 @@ flowchart TB
 
 ## 27. Diagramas de entidades (ER) por microservicio
 
-### 27.1 ms-auth-security — Esquema `auth`
+> **NOTA IMPORTANTE (Database-per-Tenant):** Las entidades de las secciones 27.2 a 27.10 representan tablas que residen en la **BD por Empresa** (`restaurant_pe_emp_{id}`). Como cada BD es de una sola empresa, estas tablas **NO tienen columna `empresa_id`**. La sección 27.1 muestra las tablas de la **BD Master** (`restaurant_pe_master`), donde sí existe la referencia a empresa a través de `usuario_empresa.empresa_id`.
+
+### 27.1 ms-auth-security — Esquemas `auth` + `master` (en BD Master)
 
 ```mermaid
 erDiagram
+    TENANT {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        varchar db_name UK
+        varchar db_host
+        int db_port
+        varchar db_username
+        varchar db_password "AES encrypted"
+        boolean activo
+        timestamp fecha_creacion
+    }
     USUARIO {
         bigint id PK
         varchar username UK
         varchar email UK
         varchar password_hash
-        bigint rol_id FK
-        bigint empresa_id FK
         varchar nombre_completo
         boolean requiere_cambio_password
         boolean habilitado_2fa
@@ -3960,9 +3973,16 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+    USUARIO_EMPRESA {
+        bigint id PK
+        bigint usuario_id FK
+        bigint empresa_id FK "→ tenant.id"
+        bigint rol_id FK
+        bigint sucursal_default_id
+        boolean activo
+    }
     ROL {
         bigint id PK
-        bigint empresa_id FK
         varchar codigo UK
         varchar nombre
         varchar descripcion
@@ -4028,17 +4048,19 @@ erDiagram
         varchar user_agent
         timestamp fecha
     }
-    USUARIO }o--|| ROL : "tiene un solo"
+    USUARIO ||--o{ USUARIO_EMPRESA : "accede a"
+    TENANT ||--o{ USUARIO_EMPRESA : "tiene usuarios"
+    USUARIO_EMPRESA }o--|| ROL : "tiene un rol por empresa"
     USUARIO ||--o{ SESION : "tiene"
     USUARIO ||--o{ LOG_ACCESO : "registra"
-    USUARIO }o--o{ OPCION_MENU : "individual"
+    USUARIO }o--o{ OPCION_MENU : "individual por empresa"
     ROL }o--o{ OPCION_MENU : "asigna"
     ROL }o--o{ ACCION : "permite"
     OPCION_MENU }o--|| MODULO : "pertenece"
     OPCION_MENU }o--o| OPCION_MENU : "hijo de"
 ```
 
-### 27.2 ms-core-maestros — Esquema `core`
+### 27.2 ms-core-maestros — Esquema `core` (en BD por Empresa)
 
 ```mermaid
 erDiagram
@@ -4063,7 +4085,6 @@ erDiagram
     }
     SUCURSAL {
         bigint id PK
-        bigint empresa_id FK
         bigint pais_id FK
         varchar codigo UK
         varchar nombre
@@ -4090,7 +4111,6 @@ erDiagram
     }
     RELACION_COMERCIAL {
         bigint id PK
-        bigint empresa_id FK
         varchar tipo_documento
         varchar numero_documento UK
         varchar razon_social
@@ -4124,7 +4144,6 @@ erDiagram
     }
     ARTICULO {
         bigint id PK
-        bigint empresa_id FK
         varchar codigo UK
         varchar nombre
         varchar descripcion
@@ -4143,7 +4162,6 @@ erDiagram
     }
     CATEGORIA {
         bigint id PK
-        bigint empresa_id FK
         varchar codigo
         varchar nombre
         bigint padre_id FK
@@ -4171,13 +4189,13 @@ erDiagram
         varchar tipo "IGV|ISC|PERCEPCION"
         boolean activo
     }
-    NUMERADOR {
+    SECUENCIA_DOCUMENTO {
         bigint id PK
-        bigint empresa_id FK
         bigint sucursal_id FK
         varchar tipo_documento
         varchar serie
-        int ultimo_numero
+        int anio
+        bigint ultimo_numero
         varchar formato
     }
     CONDICION_PAGO {
@@ -4205,7 +4223,7 @@ erDiagram
     CONFIG_EMPRESA {
         bigint id PK
         bigint config_clave_id FK
-        bigint empresa_id FK
+
         varchar valor
     }
     CONFIG_PAIS {
@@ -4244,13 +4262,13 @@ erDiagram
     CATEGORIA }o--o| CATEGORIA : "padre"
 ```
 
-### 27.3 ms-almacen — Esquema `almacen`
+### 27.3 ms-almacen — Esquema `almacen` (en BD por Empresa)
 
 ```mermaid
 erDiagram
     ALMACEN {
         bigint id PK
-        bigint empresa_id FK
+
         bigint sucursal_id FK
         varchar codigo UK
         varchar nombre
@@ -4279,7 +4297,7 @@ erDiagram
     }
     MOVIMIENTO_ALMACEN {
         bigint id PK
-        bigint empresa_id FK
+
         bigint almacen_id FK
         bigint tipo_movimiento_id FK
         varchar numero UK
@@ -4364,13 +4382,13 @@ erDiagram
     ALMACEN ||--o{ RESERVA_STOCK : tiene
 ```
 
-### 27.4 ms-compras — Esquema `compras`
+### 27.4 ms-compras — Esquema `compras` (en BD por Empresa)
 
 ```mermaid
 erDiagram
     SOLICITUD_COMPRA {
         bigint id PK
-        bigint empresa_id FK
+
         bigint sucursal_id FK
         varchar numero UK
         date fecha
@@ -4410,7 +4428,7 @@ erDiagram
     }
     ORDEN_COMPRA {
         bigint id PK
-        bigint empresa_id FK
+
         bigint sucursal_id FK
         bigint proveedor_id FK
         varchar numero UK
@@ -4440,7 +4458,7 @@ erDiagram
     }
     ORDEN_SERVICIO {
         bigint id PK
-        bigint empresa_id FK
+
         bigint proveedor_id FK
         varchar numero UK
         date fecha
@@ -4480,7 +4498,7 @@ erDiagram
     }
     CONTRATO_MARCO {
         bigint id PK
-        bigint empresa_id FK
+
         bigint proveedor_id FK
         varchar numero UK
         date fecha_inicio
@@ -4509,7 +4527,7 @@ erDiagram
     RECEPCION ||--o{ RECEPCION_DETALLE : contiene
 ```
 
-### 27.5 ms-ventas — Esquema `ventas`
+### 27.5 ms-ventas — Esquema `ventas` (en BD por Empresa)
 
 ```mermaid
 erDiagram
@@ -4565,7 +4583,7 @@ erDiagram
     }
     DOCUMENTO_VENTA {
         bigint id PK
-        bigint empresa_id FK
+
         bigint sucursal_id FK
         bigint orden_id FK
         bigint cliente_id FK
@@ -4628,7 +4646,7 @@ erDiagram
     }
     DESCUENTO_PROMOCION {
         bigint id PK
-        bigint empresa_id FK
+
         varchar nombre
         varchar tipo "PORCENTAJE|MONTO_FIJO|2X1|COMBO"
         decimal valor
@@ -4687,13 +4705,13 @@ erDiagram
     TURNO ||--o| CIERRE_CAJA : genera
 ```
 
-### 27.6 ms-finanzas — Esquema `finanzas`
+### 27.6 ms-finanzas — Esquema `finanzas` (en BD por Empresa)
 
 ```mermaid
 erDiagram
     CUENTA_BANCARIA {
         bigint id PK
-        bigint empresa_id FK
+
         varchar banco
         varchar numero_cuenta UK
         varchar cci
@@ -4704,7 +4722,7 @@ erDiagram
     }
     DOCUMENTO_PAGAR {
         bigint id PK
-        bigint empresa_id FK
+
         bigint proveedor_id FK
         varchar tipo "FACTURA|RECIBO|NC|ND"
         varchar serie_numero UK
@@ -4723,7 +4741,7 @@ erDiagram
     }
     DOCUMENTO_COBRAR {
         bigint id PK
-        bigint empresa_id FK
+
         bigint cliente_id FK
         varchar tipo "FACTURA|BOLETA|LETRA|NC|ND"
         varchar serie_numero UK
@@ -4784,7 +4802,7 @@ erDiagram
     }
     ADELANTO {
         bigint id PK
-        bigint empresa_id FK
+
         bigint solicitante_id FK
         bigint proveedor_id FK
         varchar numero UK
@@ -4795,7 +4813,7 @@ erDiagram
     }
     PROGRAMACION_PAGO {
         bigint id PK
-        bigint empresa_id FK
+
         date fecha_programada
         varchar estado "PROGRAMADO|EJECUTADO|CANCELADO"
     }
@@ -4831,13 +4849,13 @@ erDiagram
     FONDO_FIJO ||--o{ RENDICION_GASTO : registra
 ```
 
-### 27.7 ms-contabilidad — Esquema `contabilidad`
+### 27.7 ms-contabilidad — Esquema `contabilidad` (en BD por Empresa)
 
 ```mermaid
 erDiagram
     CUENTA_CONTABLE {
         bigint id PK
-        bigint empresa_id FK
+
         varchar codigo UK
         varchar nombre
         int nivel
@@ -4850,7 +4868,7 @@ erDiagram
     }
     CENTRO_COSTO {
         bigint id PK
-        bigint empresa_id FK
+
         varchar codigo UK
         varchar nombre
         int nivel
@@ -4866,7 +4884,7 @@ erDiagram
     }
     ASIENTO {
         bigint id PK
-        bigint empresa_id FK
+
         bigint libro_id FK
         varchar numero UK
         date fecha
@@ -4906,7 +4924,7 @@ erDiagram
     }
     MATRIZ_CONTABLE {
         bigint id PK
-        bigint empresa_id FK
+
         varchar modulo
         varchar tipo_operacion
         bigint cuenta_debe_id FK
@@ -4917,7 +4935,7 @@ erDiagram
     }
     CIERRE_CONTABLE {
         bigint id PK
-        bigint empresa_id FK
+
         int anio
         int mes
         varchar tipo "MENSUAL|ANUAL"
@@ -4935,13 +4953,13 @@ erDiagram
     MATRIZ_CONTABLE }o--|| CUENTA_CONTABLE : "cuenta debe"
 ```
 
-### 27.8 ms-rrhh — Esquema `rrhh`
+### 27.8 ms-rrhh — Esquema `rrhh` (en BD por Empresa)
 
 ```mermaid
 erDiagram
     TRABAJADOR {
         bigint id PK
-        bigint empresa_id FK
+
         bigint relacion_comercial_id FK
         varchar codigo_trabajador UK
         varchar nombres
@@ -4981,7 +4999,7 @@ erDiagram
     }
     AREA {
         bigint id PK
-        bigint empresa_id FK
+
         varchar nombre
         bigint padre_id FK
         bigint responsable_id FK
@@ -5048,7 +5066,7 @@ erDiagram
     }
     PLANILLA {
         bigint id PK
-        bigint empresa_id FK
+
         int anio
         int mes
         varchar tipo "MENSUAL|QUINCENAL|SEMANAL|GRATIFICACION|CTS|LIQUIDACION"
@@ -5115,7 +5133,7 @@ erDiagram
     AREA }o--o| AREA : "padre"
 ```
 
-### 27.9 ms-activos-fijos — Esquema `activos`
+### 27.9 ms-activos-fijos — Esquema `activos` (en BD por Empresa)
 
 ```mermaid
 erDiagram
@@ -5140,7 +5158,7 @@ erDiagram
     }
     ACTIVO_FIJO {
         bigint id PK
-        bigint empresa_id FK
+
         varchar codigo_activo UK
         varchar descripcion
         bigint clase_id FK
@@ -5252,13 +5270,13 @@ erDiagram
     UBICACION_FISICA }o--o| UBICACION_FISICA : "padre"
 ```
 
-### 27.10 ms-produccion — Esquema `produccion`
+### 27.10 ms-produccion — Esquema `produccion` (en BD por Empresa)
 
 ```mermaid
 erDiagram
     RECETA {
         bigint id PK
-        bigint empresa_id FK
+
         bigint articulo_producido_id FK
         varchar codigo UK
         varchar nombre
@@ -5290,7 +5308,7 @@ erDiagram
     }
     ORDEN_PRODUCCION {
         bigint id PK
-        bigint empresa_id FK
+
         bigint sucursal_id FK
         bigint receta_id FK
         varchar numero UK
@@ -6198,14 +6216,14 @@ erDiagram
 
     USUARIO_OPCION_MENU {
         bigint usuario_id FK
-        bigint empresa_id FK
+
         bigint opcion_menu_id FK
     }
 
     SESION {
         bigint id PK
         bigint usuario_id FK
-        bigint empresa_id FK
+
         varchar token
         varchar ip
         timestamp fecha_inicio

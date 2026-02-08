@@ -767,7 +767,7 @@ flowchart TB
 
 A continuación se detallan **todas las tablas maestras** del sistema, agrupadas por esquema/microservicio.
 
-> **NOTA IMPORTANTE (Database-per-Tenant):** Con la estrategia Database-per-Tenant, las tablas de negocio listadas a continuación **no necesitan la columna `empresa_id`**, ya que cada base de datos es de una sola empresa. La columna `empresa_id` que aparece en algunas definiciones se mantiene como referencia histórica, pero en la implementación real se **omite** de las tablas dentro de `restaurant_pe_emp_{id}`. Las tablas de seguridad (`usuario`, `rol`, etc.) residen en la BD Master (`restaurant_pe_master.auth`) y sí mantienen la referencia a empresa a través de `usuario_empresa.empresa_id`.
+> **NOTA IMPORTANTE (Database-per-Tenant):** Todas las tablas listadas a continuación residen en la **BD por Empresa** (`restaurant_pe_emp_{id}`). Como cada BD es de una sola empresa, estas tablas **NO tienen columna `empresa_id`**. Las tablas de seguridad (`usuario`, `rol`, etc.) residen en la BD Master (`restaurant_pe_master.auth`) y sí mantienen la referencia a empresa a través de `usuario_empresa.empresa_id`.
 
 ### 11.1 Esquema `core` — Maestros compartidos (ms-core-maestros)
 
@@ -778,8 +778,8 @@ Estos maestros residen en cada BD de empresa y son consumidos por todos los dem�
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
 | **empresa** | id, ruc_nit, razon_social, nombre_comercial, pais_id, moneda_base_id, logo_url, direccion, telefono, email, regimen_tributario, activo | Empresa o razón social (multiempresa) |
-| **sucursal** | id, empresa_id, codigo, nombre, direccion, telefono, pais_id, ciudad, departamento, ubigeo, tipo (PROPIA/FRANQUICIA), activo | Sucursal, local o punto de operación |
-| **almacen** | id, sucursal_id, empresa_id, codigo, nombre, tipo (FISICO/VIRTUAL/TRANSITO), direccion, responsable_id, activo | Almacenes por sucursal (un local puede tener varios almacenes) |
+| **sucursal** | id, codigo, nombre, direccion, telefono, pais_id, ciudad, departamento, ubigeo, tipo (PROPIA/FRANQUICIA), activo | Sucursal, local o punto de operación |
+| **almacen** | id, sucursal_id, codigo, nombre, tipo (FISICO/VIRTUAL/TRANSITO), direccion, responsable_id, activo | Almacenes por sucursal (un local puede tener varios almacenes) |
 
 #### 11.1.2 Geografía y localización
 
@@ -795,13 +795,13 @@ Estos maestros residen en cada BD de empresa y son consumidos por todos los dem�
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
 | **moneda** | id, codigo_iso (PEN, USD, COP, CLP, DOP), nombre, simbolo, decimales, activo | Catálogo de monedas |
-| **tipo_cambio** | id, empresa_id, moneda_origen_id, moneda_destino_id, fecha, tasa_compra, tasa_venta, fuente | Tipo de cambio diario |
+| **tipo_cambio** | id, moneda_origen_id, moneda_destino_id, fecha, tasa_compra, tasa_venta, fuente | Tipo de cambio diario |
 
 #### 11.1.4 Relaciones comerciales (maestro unificado proveedor/cliente)
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **relacion_comercial** | id, empresa_id, tipo_documento_identidad, numero_documento, razon_social, nombre_comercial, direccion, telefono, email, contacto_nombre, contacto_telefono, contacto_email, pais_id, departamento_id, provincia_id, distrito_id, es_proveedor, es_cliente, es_empleado, es_otro, condicion_pago_default_id, moneda_default_id, observaciones, activo | **Maestro unificado.** Una misma entidad puede ser proveedor Y cliente. El campo booleano define su naturaleza. Equivalente al "Código de Relación" de SIGRE |
+| **relacion_comercial** | id, tipo_documento_identidad, numero_documento, razon_social, nombre_comercial, direccion, telefono, email, contacto_nombre, contacto_telefono, contacto_email, pais_id, departamento_id, provincia_id, distrito_id, es_proveedor, es_cliente, es_empleado, es_otro, condicion_pago_default_id, moneda_default_id, observaciones, activo | **Maestro unificado.** Una misma entidad puede ser proveedor Y cliente. El campo booleano define su naturaleza. Equivalente al "Código de Relación" de SIGRE |
 | **tipo_documento_identidad** | id, pais_id, codigo, nombre, longitud, validacion_regex | Tipos: RUC, DNI, NIT, Cédula, Pasaporte, RNC, RFC, etc. |
 | **contacto_relacion** | id, relacion_comercial_id, nombre, cargo, telefono, email, es_principal | Contactos adicionales de la relación comercial |
 | **cuenta_bancaria_relacion** | id, relacion_comercial_id, banco, numero_cuenta, cci, moneda_id, tipo_cuenta, es_principal | Cuentas bancarias del proveedor/cliente |
@@ -810,13 +810,13 @@ Estos maestros residen en cada BD de empresa y son consumidos por todos los dem�
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **categoria** | id, empresa_id, codigo, nombre, padre_id, nivel (1=Cat, 2=SubCat, 3=Familia, 4=Línea), activo | Clasificación jerárquica de artículos (hasta 4 niveles) |
+| **categoria** | id, codigo, nombre, padre_id, nivel (1=Cat, 2=SubCat, 3=Familia, 4=Línea), activo | Clasificación jerárquica de artículos (hasta 4 niveles) |
 | **unidad_medida** | id, codigo, nombre, abreviatura, activo | Unidades: KG, LT, UND, CJ, BLS, etc. |
 | **conversion_unidad** | id, unidad_origen_id, unidad_destino_id, factor, articulo_id (nullable) | Factor de conversión entre unidades (global o por artículo) |
-| **articulo** | id, empresa_id, codigo, nombre, descripcion, categoria_id, unidad_medida_id, unidad_compra_id, factor_compra, marca, modelo, codigo_barras, peso_neto, peso_bruto, volumen, es_inventariable, es_comprable, es_vendible, es_producible, es_servicio, imagen_url, stock_minimo, stock_maximo, punto_reorden, precio_ultima_compra, precio_promedio, precio_venta, naturaleza_contable_id, cuenta_contable_inventario, cuenta_contable_costo, cuenta_contable_gasto, impuesto_id, activo | Maestro central de artículos (productos, insumos, servicios) |
+| **articulo** | id, codigo, nombre, descripcion, categoria_id, unidad_medida_id, unidad_compra_id, factor_compra, marca, modelo, codigo_barras, peso_neto, peso_bruto, volumen, es_inventariable, es_comprable, es_vendible, es_producible, es_servicio, imagen_url, stock_minimo, stock_maximo, punto_reorden, precio_ultima_compra, precio_promedio, precio_venta, naturaleza_contable_id, cuenta_contable_inventario, cuenta_contable_costo, cuenta_contable_gasto, impuesto_id, activo | Maestro central de artículos (productos, insumos, servicios) |
 | **articulo_proveedor** | id, articulo_id, relacion_comercial_id, codigo_proveedor, precio_referencia, moneda_id, tiempo_entrega_dias, es_preferido | Relación artículo-proveedor con precio y tiempos |
 | **articulo_almacen** | id, articulo_id, almacen_id, ubicacion, stock_minimo, stock_maximo, punto_reorden | Configuración de stock por artículo y almacén |
-| **naturaleza_contable** | id, empresa_id, codigo, nombre, descripcion, cuenta_inventario, cuenta_costo, cuenta_gasto, cuenta_ingreso, activo | Naturaleza contable (clase de artículo con cuentas asociadas) |
+| **naturaleza_contable** | id, codigo, nombre, descripcion, cuenta_inventario, cuenta_costo, cuenta_gasto, cuenta_ingreso, activo | Naturaleza contable (clase de artículo con cuentas asociadas) |
 
 #### 11.1.6 Impuestos y retenciones
 
@@ -869,10 +869,10 @@ El sistema maneja configuraciones en **4 niveles jerárquicos** con herencia y s
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
 | **config_clave** | id, modulo, clave, nombre, descripcion, tipo_dato (TEXT/NUMBER/BOOLEAN/JSON/DATE), valor_default, es_obligatorio, es_visible_usuario, grupo, orden, activo | Catálogo maestro de todas las claves de configuración posibles. Define qué se puede configurar, su tipo de dato y valor por defecto |
-| **config_empresa** | id, empresa_id, config_clave_id, valor, observaciones | Configuración **global** a nivel de empresa. Aplica a todas las sucursales, países y usuarios de la empresa. Ej.: razón social, logo, moneda base, política de aprobaciones |
-| **config_pais** | id, empresa_id, pais_id, config_clave_id, valor, observaciones | Configuración por **país**. Sobreescribe la configuración global de la empresa para un país específico. Ej.: tipo de impuesto (IGV/IVA/ITBIS), formato de RUC/NIT, libros contables requeridos, regulaciones laborales |
-| **config_sucursal** | id, empresa_id, sucursal_id, config_clave_id, valor, observaciones | Configuración por **sucursal**. Sobreescribe la configuración del país y empresa. Ej.: almacén por defecto, impresora por defecto, turno de operación, caja por defecto |
-| **config_usuario** | id, empresa_id, usuario_id, config_clave_id, valor, observaciones | Configuración por **usuario**. Sobreescribe todas las anteriores. Ej.: idioma, tema visual, formato fecha, sucursal preferida, reporte por defecto, atajos personalizados |
+| **config_empresa** | id, config_clave_id, valor, observaciones | Configuración **global** a nivel de empresa. Aplica a todas las sucursales, países y usuarios de la empresa. Ej.: razón social, logo, moneda base, política de aprobaciones |
+| **config_pais** | id, pais_id, config_clave_id, valor, observaciones | Configuración por **país**. Sobreescribe la configuración global de la empresa para un país específico. Ej.: tipo de impuesto (IGV/IVA/ITBIS), formato de RUC/NIT, libros contables requeridos, regulaciones laborales |
+| **config_sucursal** | id, sucursal_id, config_clave_id, valor, observaciones | Configuración por **sucursal**. Sobreescribe la configuración del país y empresa. Ej.: almacén por defecto, impresora por defecto, turno de operación, caja por defecto |
+| **config_usuario** | id, usuario_id, config_clave_id, valor, observaciones | Configuración por **usuario**. Sobreescribe todas las anteriores. Ej.: idioma, tema visual, formato fecha, sucursal preferida, reporte por defecto, atajos personalizados |
 
 > **Resolución de configuración:** Cuando el sistema necesita un valor de configuración, busca en orden: `config_usuario` → `config_sucursal` → `config_pais` → `config_empresa` → `config_clave.valor_default`. El primer valor encontrado es el que aplica.
 
@@ -892,8 +892,8 @@ flowchart TB
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **ejercicio_periodo** | id, empresa_id, anio, mes, estado (ABIERTO/CERRADO/EN_CIERRE), fecha_cierre | Ejercicios y períodos contables |
-| **condicion_pago** | id, empresa_id, codigo, nombre, dias, tipo (CONTADO/CREDITO), numero_cuotas, activo | Condiciones de pago/cobro |
+| **ejercicio_periodo** | id, anio, mes, estado (ABIERTO/CERRADO/EN_CIERRE), fecha_cierre | Ejercicios y períodos contables |
+| **condicion_pago** | id, codigo, nombre, dias, tipo (CONTADO/CREDITO), numero_cuotas, activo | Condiciones de pago/cobro |
 | **forma_pago** | id, codigo, nombre, tipo (EFECTIVO/TRANSFERENCIA/CHEQUE/TARJETA/YAPE/PLIN/NIUBIZ/OTRO), requiere_referencia, activo | Formas/medios de pago |
 
 ---
@@ -902,12 +902,12 @@ flowchart TB
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **tipo_movimiento** | id, empresa_id, codigo, nombre, naturaleza (INGRESO/SALIDA), afecta_costo, requiere_referencia, tipo_referencia (OC/OS/TRASLADO/AJUSTE/PRODUCCION/VENTA/DEVOLUCION), cuenta_contable_debe, cuenta_contable_haber, activo | Tipos de movimiento de almacén configurables |
-| **movimiento_almacen** | id, empresa_id, sucursal_id, almacen_id, tipo_movimiento_id, numero, fecha, estado (BORRADOR/CONFIRMADO/ANULADO), referencia_tipo, referencia_id, referencia_numero, almacen_destino_id (para traslados), observaciones, total_valorizado | Cabecera de movimiento de inventario |
+| **tipo_movimiento** | id, codigo, nombre, naturaleza (INGRESO/SALIDA), afecta_costo, requiere_referencia, tipo_referencia (OC/OS/TRASLADO/AJUSTE/PRODUCCION/VENTA/DEVOLUCION), cuenta_contable_debe, cuenta_contable_haber, activo | Tipos de movimiento de almacén configurables |
+| **movimiento_almacen** | id, sucursal_id, almacen_id, tipo_movimiento_id, numero, fecha, estado (BORRADOR/CONFIRMADO/ANULADO), referencia_tipo, referencia_id, referencia_numero, almacen_destino_id (para traslados), observaciones, total_valorizado | Cabecera de movimiento de inventario |
 | **movimiento_detalle** | id, movimiento_almacen_id, articulo_id, cantidad, unidad_medida_id, costo_unitario, costo_total, lote, fecha_vencimiento, ubicacion | Detalle del movimiento (cada artículo) |
-| **kardex** | id, empresa_id, almacen_id, articulo_id, fecha, tipo_movimiento_id, movimiento_id, cantidad_entrada, cantidad_salida, costo_unitario, costo_total, saldo_cantidad, saldo_valorizado, metodo_costeo (PROMEDIO/PEPS/UEPS) | Kardex valorizado por artículo y almacén |
-| **stock** | id, empresa_id, almacen_id, articulo_id, cantidad_disponible, cantidad_reservada, cantidad_transito, costo_promedio, costo_ultima_compra, fecha_ultima_entrada, fecha_ultima_salida | Saldo de stock en tiempo real |
-| **inventario_fisico** | id, empresa_id, almacen_id, fecha, estado (EN_PROCESO/FINALIZADO/AJUSTADO), responsable_id | Cabecera de toma de inventario |
+| **kardex** | id, almacen_id, articulo_id, fecha, tipo_movimiento_id, movimiento_id, cantidad_entrada, cantidad_salida, costo_unitario, costo_total, saldo_cantidad, saldo_valorizado, metodo_costeo (PROMEDIO/PEPS/UEPS) | Kardex valorizado por artículo y almacén |
+| **stock** | id, almacen_id, articulo_id, cantidad_disponible, cantidad_reservada, cantidad_transito, costo_promedio, costo_ultima_compra, fecha_ultima_entrada, fecha_ultima_salida | Saldo de stock en tiempo real |
+| **inventario_fisico** | id, almacen_id, fecha, estado (EN_PROCESO/FINALIZADO/AJUSTADO), responsable_id | Cabecera de toma de inventario |
 | **inventario_fisico_detalle** | id, inventario_fisico_id, articulo_id, stock_sistema, stock_fisico, diferencia, costo_unitario, costo_diferencia, ajuste_aplicado | Detalle con diferencias por artículo |
 
 ---
@@ -916,12 +916,12 @@ flowchart TB
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **orden_compra** | id, empresa_id, sucursal_id, numero, fecha, proveedor_id, condicion_pago_id, moneda_id, tipo_cambio, almacen_destino_id, estado (BORRADOR/PENDIENTE_APROBACION/APROBADA/PARCIAL/COMPLETADA/ANULADA), subtotal, impuesto_total, total, observaciones, fecha_entrega_estimada | Cabecera de orden de compra |
+| **orden_compra** | id, sucursal_id, numero, fecha, proveedor_id, condicion_pago_id, moneda_id, tipo_cambio, almacen_destino_id, estado (BORRADOR/PENDIENTE_APROBACION/APROBADA/PARCIAL/COMPLETADA/ANULADA), subtotal, impuesto_total, total, observaciones, fecha_entrega_estimada | Cabecera de orden de compra |
 | **orden_compra_detalle** | id, orden_compra_id, articulo_id, descripcion, cantidad, unidad_medida_id, precio_unitario, descuento_porcentaje, descuento_monto, impuesto_id, impuesto_monto, subtotal, total, cantidad_recibida, cantidad_pendiente | Detalle de OC |
-| **orden_servicio** | id, empresa_id, sucursal_id, numero, fecha, proveedor_id, condicion_pago_id, moneda_id, tipo_cambio, estado, subtotal, impuesto_total, total, descripcion_servicio, fecha_inicio, fecha_fin, observaciones | Cabecera de orden de servicio |
+| **orden_servicio** | id, sucursal_id, numero, fecha, proveedor_id, condicion_pago_id, moneda_id, tipo_cambio, estado, subtotal, impuesto_total, total, descripcion_servicio, fecha_inicio, fecha_fin, observaciones | Cabecera de orden de servicio |
 | **orden_servicio_detalle** | id, orden_servicio_id, descripcion, cantidad, unidad_medida_id, precio_unitario, descuento_porcentaje, impuesto_id, impuesto_monto, subtotal, total | Detalle de OS |
 | **aprobacion** | id, documento_tipo (OC/OS), documento_id, nivel, aprobador_id, estado (PENDIENTE/APROBADO/RECHAZADO), fecha, comentario | Workflow de aprobación multinivel |
-| **recepcion** | id, empresa_id, sucursal_id, numero, fecha, orden_compra_id, proveedor_id, almacen_id, estado (BORRADOR/CONFIRMADA/ANULADA), guia_remision, observaciones | Recepción de mercadería vinculada a OC |
+| **recepcion** | id, sucursal_id, numero, fecha, orden_compra_id, proveedor_id, almacen_id, estado (BORRADOR/CONFIRMADA/ANULADA), guia_remision, observaciones | Recepción de mercadería vinculada a OC |
 | **recepcion_detalle** | id, recepcion_id, orden_compra_detalle_id, articulo_id, cantidad_recibida, cantidad_rechazada, motivo_rechazo, costo_unitario | Detalle de recepción |
 
 ---
@@ -930,17 +930,17 @@ flowchart TB
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **cuenta_bancaria** | id, empresa_id, banco, numero_cuenta, cci, moneda_id, tipo_cuenta (CORRIENTE/AHORRO/MAESTRA), cuenta_contable_id, saldo_actual, activo | Cuentas bancarias de la empresa |
-| **caja** | id, empresa_id, sucursal_id, codigo, nombre, tipo (PRINCIPAL/CHICA/PDV), moneda_id, saldo_actual, fondo_fijo, responsable_id, activo | Cajas de la empresa (por sucursal y PdV) |
-| **documento_pagar** | id, empresa_id, proveedor_id, tipo_documento, serie, numero, fecha_emision, fecha_vencimiento, moneda_id, tipo_cambio, subtotal, impuesto, total, saldo_pendiente, estado (PENDIENTE/PARCIAL/PAGADO/ANULADO), orden_compra_id, orden_servicio_id, concepto_financiero_id | Facturas y documentos por pagar |
-| **documento_cobrar** | id, empresa_id, cliente_id, tipo_documento, serie, numero, fecha_emision, fecha_vencimiento, moneda_id, tipo_cambio, subtotal, impuesto, total, saldo_pendiente, estado, concepto_financiero_id | Facturas y documentos por cobrar |
-| **pago** | id, empresa_id, documento_pagar_id, fecha, monto, moneda_id, tipo_cambio, forma_pago_id, cuenta_bancaria_id, caja_id, referencia, estado (CONFIRMADO/ANULADO) | Registro de pagos a proveedores |
-| **cobro** | id, empresa_id, documento_cobrar_id, fecha, monto, moneda_id, tipo_cambio, forma_pago_id, cuenta_bancaria_id, caja_id, referencia, estado | Registro de cobros a clientes |
+| **cuenta_bancaria** | id, banco, numero_cuenta, cci, moneda_id, tipo_cuenta (CORRIENTE/AHORRO/MAESTRA), cuenta_contable_id, saldo_actual, activo | Cuentas bancarias de la empresa |
+| **caja** | id, sucursal_id, codigo, nombre, tipo (PRINCIPAL/CHICA/PDV), moneda_id, saldo_actual, fondo_fijo, responsable_id, activo | Cajas de la empresa (por sucursal y PdV) |
+| **documento_pagar** | id, proveedor_id, tipo_documento, serie, numero, fecha_emision, fecha_vencimiento, moneda_id, tipo_cambio, subtotal, impuesto, total, saldo_pendiente, estado (PENDIENTE/PARCIAL/PAGADO/ANULADO), orden_compra_id, orden_servicio_id, concepto_financiero_id | Facturas y documentos por pagar |
+| **documento_cobrar** | id, cliente_id, tipo_documento, serie, numero, fecha_emision, fecha_vencimiento, moneda_id, tipo_cambio, subtotal, impuesto, total, saldo_pendiente, estado, concepto_financiero_id | Facturas y documentos por cobrar |
+| **pago** | id, documento_pagar_id, fecha, monto, moneda_id, tipo_cambio, forma_pago_id, cuenta_bancaria_id, caja_id, referencia, estado (CONFIRMADO/ANULADO) | Registro de pagos a proveedores |
+| **cobro** | id, documento_cobrar_id, fecha, monto, moneda_id, tipo_cambio, forma_pago_id, cuenta_bancaria_id, caja_id, referencia, estado | Registro de cobros a clientes |
 | **movimiento_bancario** | id, cuenta_bancaria_id, fecha, tipo (INGRESO/EGRESO), concepto, referencia, monto, saldo, conciliado, conciliacion_id | Movimientos de cuenta bancaria |
-| **conciliacion** | id, empresa_id, cuenta_bancaria_id, periodo_anio, periodo_mes, estado (EN_PROCESO/FINALIZADA), saldo_banco, saldo_sistema, diferencia, fecha_conciliacion | Conciliación bancaria |
-| **concepto_financiero** | id, empresa_id, codigo, nombre, grupo, tipo (INGRESO/EGRESO), cuenta_contable_id, flujo_caja_id, activo | Conceptos financieros para clasificar operaciones |
-| **flujo_caja_concepto** | id, empresa_id, codigo, nombre, grupo_id, tipo (INGRESO/EGRESO), orden, activo | Estructura de flujo de caja |
-| **adelanto** | id, empresa_id, numero, fecha, solicitante_id, monto, moneda_id, motivo, estado (SOLICITADO/APROBADO/LIQUIDADO/CERRADO/RECHAZADO), aprobador_id, fecha_aprobacion | Adelantos / órdenes de giro |
+| **conciliacion** | id, cuenta_bancaria_id, periodo_anio, periodo_mes, estado (EN_PROCESO/FINALIZADA), saldo_banco, saldo_sistema, diferencia, fecha_conciliacion | Conciliación bancaria |
+| **concepto_financiero** | id, codigo, nombre, grupo, tipo (INGRESO/EGRESO), cuenta_contable_id, flujo_caja_id, activo | Conceptos financieros para clasificar operaciones |
+| **flujo_caja_concepto** | id, codigo, nombre, grupo_id, tipo (INGRESO/EGRESO), orden, activo | Estructura de flujo de caja |
+| **adelanto** | id, numero, fecha, solicitante_id, monto, moneda_id, motivo, estado (SOLICITADO/APROBADO/LIQUIDADO/CERRADO/RECHAZADO), aprobador_id, fecha_aprobacion | Adelantos / órdenes de giro |
 | **adelanto_liquidacion** | id, adelanto_id, fecha, monto_gastado, monto_devuelto, estado (PENDIENTE/APROBADO/CERRADO) | Liquidación de adelantos |
 
 ---
@@ -949,13 +949,13 @@ flowchart TB
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **cuenta_contable** | id, empresa_id, codigo, nombre, nivel, tipo (ACTIVO/PASIVO/PATRIMONIO/INGRESO/GASTO/COSTO), naturaleza (DEUDORA/ACREEDORA), padre_id, acepta_movimiento, moneda_id, cuenta_sunat, activo | Plan de cuentas contable jerárquico |
-| **centro_costo** | id, empresa_id, codigo, nombre, nivel, padre_id, tipo (ADMINISTRATIVO/OPERATIVO/VENTAS/PRODUCCION), responsable_id, activo | Centros de costo jerárquicos |
-| **asiento** | id, empresa_id, libro_id, numero, fecha, periodo_anio, periodo_mes, glosa, tipo (MANUAL/AUTOMATICO/APERTURA/CIERRE), origen_modulo, origen_documento_tipo, origen_documento_id, estado (BORRADOR/CONFIRMADO/ANULADO), total_debe, total_haber | Cabecera de asiento contable |
+| **cuenta_contable** | id, codigo, nombre, nivel, tipo (ACTIVO/PASIVO/PATRIMONIO/INGRESO/GASTO/COSTO), naturaleza (DEUDORA/ACREEDORA), padre_id, acepta_movimiento, moneda_id, cuenta_sunat, activo | Plan de cuentas contable jerárquico |
+| **centro_costo** | id, codigo, nombre, nivel, padre_id, tipo (ADMINISTRATIVO/OPERATIVO/VENTAS/PRODUCCION), responsable_id, activo | Centros de costo jerárquicos |
+| **asiento** | id, libro_id, numero, fecha, periodo_anio, periodo_mes, glosa, tipo (MANUAL/AUTOMATICO/APERTURA/CIERRE), origen_modulo, origen_documento_tipo, origen_documento_id, estado (BORRADOR/CONFIRMADO/ANULADO), total_debe, total_haber | Cabecera de asiento contable |
 | **asiento_detalle** | id, asiento_id, cuenta_contable_id, centro_costo_id, relacion_comercial_id, debe, haber, moneda_id, tipo_cambio, debe_me, haber_me, glosa_detalle, documento_tipo, documento_serie, documento_numero, documento_fecha | Líneas del asiento |
-| **pre_asiento** | id, empresa_id, modulo_origen, tipo_operacion, documento_tipo, documento_id, fecha, estado (PENDIENTE/PROCESADO/ERROR), datos_json, error_mensaje | Pre-asientos generados por otros módulos, pendientes de convertir en asientos |
-| **matriz_contable** | id, empresa_id, modulo, tipo_operacion, descripcion, cuenta_debe_id, cuenta_haber_id, centro_costo_id, activo | Reglas para generación automática de asientos |
-| **libro_contable** | id, empresa_id, codigo, nombre, tipo (DIARIO/MAYOR/CAJA/COMPRAS/VENTAS), activo | Libros contables |
+| **pre_asiento** | id, modulo_origen, tipo_operacion, documento_tipo, documento_id, fecha, estado (PENDIENTE/PROCESADO/ERROR), datos_json, error_mensaje | Pre-asientos generados por otros módulos, pendientes de convertir en asientos |
+| **matriz_contable** | id, modulo, tipo_operacion, descripcion, cuenta_debe_id, cuenta_haber_id, centro_costo_id, activo | Reglas para generación automática de asientos |
+| **libro_contable** | id, codigo, nombre, tipo (DIARIO/MAYOR/CAJA/COMPRAS/VENTAS), activo | Libros contables |
 
 ---
 
@@ -963,12 +963,12 @@ flowchart TB
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **trabajador** | id, empresa_id, relacion_comercial_id, codigo, fecha_ingreso, fecha_cese, estado (ACTIVO/CESADO/SUSPENDIDO/VACACIONES), sucursal_id, area_id, cargo_id, centro_costo_id, tipo_trabajador, regimen_laboral, regimen_pensionario, afp_id, eps_id, cuenta_bancaria_sueldo, tipo_contrato, remuneracion_basica, moneda_id, foto_url | Ficha del trabajador |
-| **area** | id, empresa_id, codigo, nombre, padre_id, nivel, responsable_id, activo | Áreas organizacionales (jerárquicas) |
-| **cargo** | id, empresa_id, codigo, nombre, area_id, nivel, banda_salarial_min, banda_salarial_max, activo | Cargos / puestos |
+| **trabajador** | id, relacion_comercial_id, codigo, fecha_ingreso, fecha_cese, estado (ACTIVO/CESADO/SUSPENDIDO/VACACIONES), sucursal_id, area_id, cargo_id, centro_costo_id, tipo_trabajador, regimen_laboral, regimen_pensionario, afp_id, eps_id, cuenta_bancaria_sueldo, tipo_contrato, remuneracion_basica, moneda_id, foto_url | Ficha del trabajador |
+| **area** | id, codigo, nombre, padre_id, nivel, responsable_id, activo | Áreas organizacionales (jerárquicas) |
+| **cargo** | id, codigo, nombre, area_id, nivel, banda_salarial_min, banda_salarial_max, activo | Cargos / puestos |
 | **contrato** | id, trabajador_id, tipo, fecha_inicio, fecha_fin, renovacion_numero, remuneracion, moneda_id, estado (VIGENTE/VENCIDO/RENOVADO/TERMINADO), documento_url | Contratos laborales |
-| **concepto_planilla** | id, empresa_id, codigo, nombre, tipo (INGRESO/DESCUENTO/APORTE_EMPLEADOR), naturaleza (FIJO/VARIABLE), afecto_renta, afecto_essalud, afecto_pension, cuenta_contable_id, activo | Conceptos de planilla (sueldo, bonos, AFP, etc.) |
-| **planilla** | id, empresa_id, periodo_anio, periodo_mes, tipo (MENSUAL/QUINCENAL/SEMANAL/GRATIFICACION/CTS/LIQUIDACION/UTILIDADES), estado (BORRADOR/CALCULADA/APROBADA/PAGADA/CERRADA), fecha_calculo, fecha_pago | Cabecera de planilla |
+| **concepto_planilla** | id, codigo, nombre, tipo (INGRESO/DESCUENTO/APORTE_EMPLEADOR), naturaleza (FIJO/VARIABLE), afecto_renta, afecto_essalud, afecto_pension, cuenta_contable_id, activo | Conceptos de planilla (sueldo, bonos, AFP, etc.) |
+| **planilla** | id, periodo_anio, periodo_mes, tipo (MENSUAL/QUINCENAL/SEMANAL/GRATIFICACION/CTS/LIQUIDACION/UTILIDADES), estado (BORRADOR/CALCULADA/APROBADA/PAGADA/CERRADA), fecha_calculo, fecha_pago | Cabecera de planilla |
 | **planilla_detalle** | id, planilla_id, trabajador_id, concepto_id, monto, dias, horas, base_calculo, porcentaje | Detalle por trabajador y concepto |
 | **asistencia** | id, trabajador_id, fecha, hora_entrada, hora_salida, tipo_marcacion (POS/APP/BIOMETRICO/MANUAL), latitud, longitud, dispositivo, estado (PRESENTE/TARDANZA/FALTA/PERMISO/VACACION) | Registro de asistencia |
 | **vacacion** | id, trabajador_id, periodo_desde, periodo_hasta, dias_derecho, dias_gozados, dias_pendientes, estado | Control de vacaciones |
@@ -981,9 +981,9 @@ flowchart TB
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **clase_activo** | id, empresa_id, codigo, nombre, padre_id, nivel (CLASE/SUBCLASE), vida_util_anios, tasa_depreciacion, metodo_depreciacion (LINEAL/DECRECIENTE/UNIDADES), cuenta_activo, cuenta_depreciacion_acum, cuenta_gasto_depreciacion, activo | Clasificación de activos con cuentas contables |
-| **ubicacion_fisica** | id, empresa_id, sucursal_id, codigo, nombre, tipo (EDIFICIO/PISO/OFICINA/ALMACEN/COCINA/SALON), padre_id, activo | Ubicaciones físicas jerárquicas |
-| **activo_fijo** | id, empresa_id, codigo, nombre, descripcion, clase_activo_id, ubicacion_id, responsable_id, sucursal_id, centro_costo_id, fecha_adquisicion, fecha_alta, proveedor_id, orden_compra_id, factura_numero, valor_adquisicion, moneda_id, valor_residual, vida_util_restante, depreciacion_acumulada, valor_neto, estado (ACTIVO/BAJA/EN_TRASLADO/REVALUADO), marca, modelo, serie, placa, foto_url | Ficha del activo fijo |
+| **clase_activo** | id, codigo, nombre, padre_id, nivel (CLASE/SUBCLASE), vida_util_anios, tasa_depreciacion, metodo_depreciacion (LINEAL/DECRECIENTE/UNIDADES), cuenta_activo, cuenta_depreciacion_acum, cuenta_gasto_depreciacion, activo | Clasificación de activos con cuentas contables |
+| **ubicacion_fisica** | id, sucursal_id, codigo, nombre, tipo (EDIFICIO/PISO/OFICINA/ALMACEN/COCINA/SALON), padre_id, activo | Ubicaciones físicas jerárquicas |
+| **activo_fijo** | id, codigo, nombre, descripcion, clase_activo_id, ubicacion_id, responsable_id, sucursal_id, centro_costo_id, fecha_adquisicion, fecha_alta, proveedor_id, orden_compra_id, factura_numero, valor_adquisicion, moneda_id, valor_residual, vida_util_restante, depreciacion_acumulada, valor_neto, estado (ACTIVO/BAJA/EN_TRASLADO/REVALUADO), marca, modelo, serie, placa, foto_url | Ficha del activo fijo |
 | **depreciacion** | id, activo_fijo_id, periodo_anio, periodo_mes, valor_inicio_periodo, tasa, monto_depreciacion, depreciacion_acumulada, valor_neto, asiento_id | Cálculo mensual de depreciación |
 | **aseguradora** | id, nombre, ruc, contacto, telefono, email, activo | Compañías aseguradoras |
 | **poliza_seguro** | id, activo_fijo_id, aseguradora_id, numero_poliza, tipo_seguro, fecha_inicio, fecha_fin, prima_total, prima_mensual, deducible, cobertura_monto, estado (VIGENTE/VENCIDA/SINIESTRADA) | Pólizas de seguro de activos |
@@ -995,9 +995,9 @@ flowchart TB
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **receta** | id, empresa_id, codigo, nombre, articulo_producto_id, categoria_id, rendimiento_cantidad, rendimiento_unidad_id, costo_estandar, tiempo_preparacion_min, instrucciones, version, estado (ACTIVA/INACTIVA/BORRADOR), activo | Receta = lista de materiales (BOM gastronómico) |
+| **receta** | id, codigo, nombre, articulo_producto_id, categoria_id, rendimiento_cantidad, rendimiento_unidad_id, costo_estandar, tiempo_preparacion_min, instrucciones, version, estado (ACTIVA/INACTIVA/BORRADOR), activo | Receta = lista de materiales (BOM gastronómico) |
 | **receta_detalle** | id, receta_id, articulo_insumo_id, cantidad, unidad_medida_id, costo_unitario_estandar, merma_porcentaje, es_opcional, observaciones | Ingredientes de la receta con merma |
-| **orden_produccion** | id, empresa_id, sucursal_id, numero, fecha, receta_id, cantidad_a_producir, cantidad_producida, estado (PLANIFICADA/EN_PROCESO/COMPLETADA/CANCELADA), almacen_consumo_id, almacen_destino_id, costo_total, observaciones | Orden de producción |
+| **orden_produccion** | id, sucursal_id, numero, fecha, receta_id, cantidad_a_producir, cantidad_producida, estado (PLANIFICADA/EN_PROCESO/COMPLETADA/CANCELADA), almacen_consumo_id, almacen_destino_id, costo_total, observaciones | Orden de producción |
 | **orden_produccion_detalle** | id, orden_produccion_id, articulo_id, cantidad_requerida, cantidad_consumida, costo_unitario, costo_total, almacen_id | Consumo real de insumos |
 | **costeo_produccion** | id, orden_produccion_id, costo_materia_prima, costo_mano_obra, costo_indirecto, costo_total, costo_unitario, fecha_costeo | Costeo consolidado por orden |
 
@@ -1007,7 +1007,7 @@ flowchart TB
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **log_auditoria** | id, empresa_id, usuario_id, modulo, entidad, entidad_id, accion (CREAR/EDITAR/ELIMINAR/APROBAR/ANULAR/IMPRIMIR), datos_anteriores_json, datos_nuevos_json, ip, user_agent, fecha | Log detallado de todas las acciones |
+| **log_auditoria** | id, usuario_id, modulo, entidad, entidad_id, accion (CREAR/EDITAR/ELIMINAR/APROBAR/ANULAR/IMPRIMIR), datos_anteriores_json, datos_nuevos_json, ip, user_agent, fecha | Log detallado de todas las acciones |
 | **log_acceso** | id, usuario_id, tipo (LOGIN/LOGOUT/LOGIN_FALLIDO), ip, user_agent, fecha | Control de accesos al sistema |
 
 ---
