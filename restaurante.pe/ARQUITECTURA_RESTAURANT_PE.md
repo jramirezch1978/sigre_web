@@ -40,6 +40,7 @@
 29. [Diagramas de interacción (secuencia)](#29-diagramas-de-interacción-secuencia)
 30. [Diagramas de flujo de negocio](#30-diagramas-de-flujo-de-negocio)
 31. [Diagramas de estado](#31-diagramas-de-estado)
+32. [Estrategia de multitenancy — Database-per-Tenant](#32-estrategia-de-multitenancy--database-per-tenant)
 
 ---
 
@@ -83,8 +84,9 @@ flowchart TB
     subgraph Mensajería
         MQ[RabbitMQ]
     end
-    subgraph Datos
-        PG[(PostgreSQL 16)]
+    subgraph Datos["Datos (Database-per-Tenant)"]
+        PG_MASTER[(BD Master\nrestaurant_pe_master)]
+        PG_TENANT[(BD por Empresa\nrestaurant_pe_emp_N)]
         REDIS[(Redis - Cache)]
         S3[Object Storage - archivos]
     end
@@ -106,17 +108,17 @@ flowchart TB
     GW --> AUD
     GW --> RPT
     GW --> NOTIF
-    AUTH --> PG
-    CORE --> PG
-    ALM --> PG
-    COM --> PG
-    FIN --> PG
-    CNT --> PG
-    RRHH --> PG
-    AF --> PG
-    PROD --> PG
-    VEN --> PG
-    AUD --> PG
+    AUTH --> PG_MASTER
+    CORE --> PG_TENANT
+    ALM --> PG_TENANT
+    COM --> PG_TENANT
+    FIN --> PG_TENANT
+    CNT --> PG_TENANT
+    RRHH --> PG_TENANT
+    AF --> PG_TENANT
+    PROD --> PG_TENANT
+    VEN --> PG_TENANT
+    AUD --> PG_TENANT
     ALM --> MQ
     COM --> MQ
     FIN --> MQ
@@ -299,9 +301,12 @@ flowchart TB
     AF -->|evento| MQ
     PROD -->|evento| MQ
     VEN -->|evento| MQ
+    AUTH -->|evento tenant.created| MQ
     MQ -->|pre-asiento| CNT
     MQ -->|log| AUD
     MQ -->|alerta| NOTIF
+    MQ -->|tenant.created| CORE & ALM & COM & FIN & CNT & RRHH & AF & PROD & VEN & AUD
+    AUTH -.->|"GET /internal/tenants\n(provisión connection strings)"| CORE & ALM & COM & FIN & CNT & RRHH & AF & PROD & VEN & AUD
 ```
 
 ### 4.2 Flujo de una petición típica
@@ -613,68 +618,428 @@ Cada ruta del frontend está protegida por un `AuthGuard` que verifica:
 
 ---
 
-## 8. Base de datos — PostgreSQL
+## 8. Base de datos — PostgreSQL (Database-per-Tenant)
 
-### 8.1 Estrategia de esquemas
+### 8.1 Estrategia de multitenancy: Database-per-Tenant
 
-Se usa **una sola instancia de PostgreSQL** con **esquemas separados por microservicio**:
+El sistema utiliza el patrón **Database-per-Tenant** de PostgreSQL, aprovechando la función nativa `CREATE DATABASE ... TEMPLATE`. Cada empresa (tenant) tiene su **propia base de datos**, lo que garantiza aislamiento total de datos.
 
 ```mermaid
-flowchart LR
-    subgraph PostgreSQL["PostgreSQL 16"]
-        S1[schema: auth]
-        S2[schema: core]
-        S3[schema: almacen]
-        S4[schema: compras]
-        S5[schema: finanzas]
-        S6[schema: contabilidad]
-        S7[schema: rrhh]
-        S8[schema: activos]
-        S9[schema: produccion]
-        S10[schema: auditoria]
+flowchart TB
+    subgraph PostgreSQL_Server["PostgreSQL 16 Server"]
+        subgraph Master["restaurant_pe_master"]
+            direction LR
+            M_AUTH["schema: auth\n(usuarios, roles, permisos,\nopciones de menú)"]
+            M_TENANT["schema: master\n(registro de tenants,\nconnection strings)"]
+        end
+        subgraph Template["restaurant_pe_template"]
+            direction LR
+            T1["schema: core"]
+            T2["schema: almacen"]
+            T3["schema: compras"]
+            T4["schema: ventas"]
+            T5["schema: finanzas"]
+            T6["schema: contabilidad"]
+            T7["schema: rrhh"]
+            T8["schema: activos"]
+            T9["schema: produccion"]
+            T10["schema: auditoria"]
+        end
+        subgraph Emp1["restaurant_pe_emp_1"]
+            direction LR
+            E1["Clon exacto del template\n(Restaurante Lima SAC)"]
+        end
+        subgraph Emp2["restaurant_pe_emp_2"]
+            direction LR
+            E2["Clon exacto del template\n(Restaurante Bogotá SAS)"]
+        end
+        subgraph EmpN["restaurant_pe_emp_N"]
+            direction LR
+            EN["Clon exacto del template\n(N empresas...)"]
+        end
+        Template -.->|TEMPLATE| Emp1
+        Template -.->|TEMPLATE| Emp2
+        Template -.->|TEMPLATE| EmpN
     end
 ```
 
-| Ventaja | Descripción |
-|---------|-------------|
-| Aislamiento lógico | Cada servicio solo accede a su esquema |
-| Backup unificado | Un solo punto de backup y administración |
-| Consultas cruzadas | Posibles cuando sea estrictamente necesario (DBA) |
-| Migraciones independientes | Cada servicio versiona su esquema con Flyway |
+### 8.2 Estructura de bases de datos
 
-### 8.2 Convenciones de la base de datos
+| Base de datos | Propósito | Esquemas | Quién conecta |
+|---------------|-----------|----------|---------------|
+| `restaurant_pe_master` | BD administrativa central | `auth`, `master` | Solo **ms-auth-security** |
+| `restaurant_pe_template` | Modelo/plantilla (nunca se usa en producción) | `core`, `almacen`, `compras`, `ventas`, `finanzas`, `contabilidad`, `rrhh`, `activos`, `produccion`, `auditoria` | Solo Flyway (migraciones) |
+| `restaurant_pe_emp_{id}` | BD de cada empresa (clon del template) | Mismos 10 esquemas del template | **Todos los ms de negocio** (excepto auth) |
+
+#### BD Master — Esquema `master` (registro de tenants)
+
+```sql
+CREATE TABLE master.tenant (
+    id              BIGSERIAL PRIMARY KEY,
+    codigo          VARCHAR(20) NOT NULL UNIQUE,
+    nombre          VARCHAR(200) NOT NULL,
+    db_name         VARCHAR(100) NOT NULL UNIQUE,
+    db_host         VARCHAR(200) NOT NULL DEFAULT 'localhost',
+    db_port         INT NOT NULL DEFAULT 5432,
+    db_username     VARCHAR(100) NOT NULL DEFAULT 'rpe_admin',
+    db_password     VARCHAR(200) NOT NULL,  -- encriptado con AES
+    activo          BOOLEAN NOT NULL DEFAULT true,
+    fecha_creacion  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    creado_por      VARCHAR(100),
+    CONSTRAINT uk_tenant_db UNIQUE (db_host, db_port, db_name)
+);
+```
+
+#### BD Master — Esquema `auth` (seguridad centralizada)
+
+El esquema `auth` reside en la BD master porque **usuarios, roles y permisos son transversales a todas las empresas**. Un usuario puede tener acceso a más de una empresa.
+
+```sql
+-- Relación usuario ↔ empresa
+CREATE TABLE auth.usuario_empresa (
+    id              BIGSERIAL PRIMARY KEY,
+    usuario_id      BIGINT NOT NULL REFERENCES auth.usuario(id),
+    empresa_id      BIGINT NOT NULL REFERENCES master.tenant(id),
+    rol_id          BIGINT NOT NULL REFERENCES auth.rol(id),
+    sucursal_default_id BIGINT,
+    activo          BOOLEAN NOT NULL DEFAULT true,
+    UNIQUE(usuario_id, empresa_id)
+);
+```
+
+> **Nota:** Un usuario tiene **un rol por empresa**. Al hacer login, selecciona la empresa y el sistema carga el rol correspondiente a esa empresa.
+
+### 8.3 Flujo de resolución de tenant
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant FE as Angular 20
+    participant GW as API Gateway
+    participant AUTH as ms-auth-security
+    participant MASTER as BD Master
+    participant MS as ms-compras / ms-almacen / etc.
+    participant TENANT_DB as BD Empresa (tenant)
+
+    U->>FE: Login (usuario + contraseña)
+    FE->>GW: POST /api/auth/login
+    GW->>AUTH: Forward
+    AUTH->>MASTER: Verificar credenciales (schema auth)
+    MASTER-->>AUTH: Usuario + empresas disponibles
+    AUTH-->>FE: JWT parcial + lista de empresas
+
+    U->>FE: Selecciona empresa
+    FE->>GW: POST /api/auth/seleccionar-empresa
+    GW->>AUTH: Forward
+    AUTH->>MASTER: Obtener rol + permisos + connection string
+    MASTER-->>AUTH: Rol, permisos, tenant info
+    AUTH->>AUTH: Generar JWT completo (con empresaId)
+    AUTH-->>FE: JWT definitivo + menú dinámico
+
+    Note over FE,TENANT_DB: Peticiones de negocio posteriores
+
+    FE->>GW: GET /api/compras/ordenes (Header: Authorization + X-Empresa-Id)
+    GW->>MS: Forward (con JWT validado)
+    MS->>MS: TenantFilter → TenantContext.set(empresaId)
+    MS->>MS: TenantRoutingDataSource → selecciona pool
+    MS->>TENANT_DB: SELECT * FROM compras.orden_compra
+    TENANT_DB-->>MS: Datos (solo de esa empresa)
+    MS-->>FE: Response
+```
+
+### 8.4 Provisión de connection strings vía ms-auth-security
+
+**ms-auth-security** es el **único microservicio** que conecta directamente a `restaurant_pe_master`. Los demás microservicios obtienen la información de tenants a través de un endpoint interno:
+
+```java
+// ms-auth-security expone endpoint interno para otros microservicios
+@RestController
+@RequestMapping("/internal/tenants")
+public class TenantInternalController {
+
+    @Autowired
+    private TenantService tenantService;
+
+    // Endpoint que retorna todos los tenants activos con sus connection strings
+    @GetMapping("/active")
+    public ResponseEntity<List<TenantConnectionInfo>> getActiveTenants() {
+        return ResponseEntity.ok(tenantService.getActiveTenantsWithConnection());
+    }
+
+    // Endpoint para obtener un tenant específico
+    @GetMapping("/{empresaId}")
+    public ResponseEntity<TenantConnectionInfo> getTenant(
+            @PathVariable Long empresaId) {
+        return ResponseEntity.ok(tenantService.getTenantConnection(empresaId));
+    }
+}
+```
+
+```java
+// DTO que retorna ms-auth a los otros microservicios
+@Data
+public class TenantConnectionInfo {
+    private Long empresaId;
+    private String codigo;
+    private String nombre;
+    private String jdbcUrl;     // jdbc:postgresql://host:port/db_name
+    private String username;
+    private String password;    // desencriptado
+    private boolean activo;
+}
+```
+
+Los microservicios de negocio consumen este endpoint al **arrancar**:
+
+```java
+// Cada microservicio de negocio obtiene tenants del ms-auth
+@FeignClient(name = "ms-auth-security")
+public interface TenantFeignClient {
+
+    @GetMapping("/internal/tenants/active")
+    List<TenantConnectionInfo> getActiveTenants();
+}
+```
+
+### 8.5 Ruteo dinámico con AbstractRoutingDataSource
+
+Cada microservicio de negocio crea un pool de conexiones (HikariCP) por cada tenant y usa `AbstractRoutingDataSource` para elegir dinámicamente:
+
+```java
+// 1. Contexto del tenant (ThreadLocal por request)
+public class TenantContext {
+    private static final ThreadLocal<Long> CURRENT_TENANT = new ThreadLocal<>();
+
+    public static void setEmpresaId(Long empresaId) {
+        CURRENT_TENANT.set(empresaId);
+    }
+
+    public static Long getEmpresaId() {
+        return CURRENT_TENANT.get();
+    }
+
+    public static void clear() {
+        CURRENT_TENANT.remove();
+    }
+}
+
+// 2. Filtro que intercepta cada request y setea el tenant
+@Component
+public class TenantFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                     HttpServletResponse response,
+                                     FilterChain chain) throws Exception {
+        String empresaId = request.getHeader("X-Empresa-Id");
+        if (empresaId != null) {
+            TenantContext.setEmpresaId(Long.parseLong(empresaId));
+        }
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            TenantContext.clear();
+        }
+    }
+}
+
+// 3. DataSource que elige la BD según el tenant
+public class TenantRoutingDataSource extends AbstractRoutingDataSource {
+
+    @Override
+    protected Object determineCurrentLookupKey() {
+        return TenantContext.getEmpresaId();
+    }
+}
+
+// 4. Configuración del DataSource con pools por tenant
+@Configuration
+public class TenantDataSourceConfig {
+
+    @Autowired
+    private TenantFeignClient tenantClient;
+
+    @Bean
+    public DataSource dataSource() {
+        TenantRoutingDataSource routingDS = new TenantRoutingDataSource();
+        Map<Object, Object> dataSources = new HashMap<>();
+
+        for (TenantConnectionInfo tenant : tenantClient.getActiveTenants()) {
+            HikariDataSource ds = new HikariDataSource();
+            ds.setJdbcUrl(tenant.getJdbcUrl());
+            ds.setUsername(tenant.getUsername());
+            ds.setPassword(tenant.getPassword());
+            ds.setMaximumPoolSize(10);
+            ds.setMinimumIdle(2);
+            ds.setPoolName("pool-tenant-" + tenant.getEmpresaId());
+            dataSources.put(tenant.getEmpresaId(), ds);
+        }
+
+        routingDS.setTargetDataSources(dataSources);
+        return routingDS;
+    }
+}
+```
+
+#### Flujo de un request de negocio
+
+```
+Cajero (Empresa 2, Bogotá) → POST /api/ventas/documentos
+    │
+    ├── Header: Authorization: Bearer <JWT>
+    ├── Header: X-Empresa-Id: 2
+    │
+    ▼
+API Gateway → Valida JWT → Forward a ms-ventas
+    │
+    ▼
+TenantFilter → TenantContext.set(2)
+    │
+    ▼
+TenantRoutingDataSource → empresaId=2 → pool: restaurant_pe_emp_2
+    │
+    ▼
+VentaService.confirmarDocumento()
+    │
+    ├── UPDATE ventas.secuencia_documento SET ...  (en restaurant_pe_emp_2)
+    ├── INSERT ventas.documento_venta ...           (en restaurant_pe_emp_2)
+    └── COMMIT  ← Todo en la misma BD, misma transacción
+```
+
+### 8.6 Evento de nuevo tenant (sincronización dinámica)
+
+Cuando se crea una nueva empresa, **ms-auth-security** publica un evento en RabbitMQ para que los demás microservicios actualicen su pool de conexiones **sin reinicio**:
+
+```java
+// ms-auth-security publica cuando se crea/modifica un tenant
+@Service
+public class TenantProvisioningService {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    public void crearNuevoTenant(CrearEmpresaRequest request) {
+        // 1. Crear BD clonando el template
+        jdbcTemplate.execute(
+            "CREATE DATABASE restaurant_pe_emp_" + request.getId()
+            + " TEMPLATE restaurant_pe_template");
+
+        // 2. Registrar en master.tenant
+        tenantRepository.save(new Tenant(
+            request.getCodigo(), request.getNombre(),
+            "restaurant_pe_emp_" + request.getId()));
+
+        // 3. Ejecutar migraciones Flyway en la nueva BD
+        flywayMigrator.migrate("restaurant_pe_emp_" + request.getId());
+
+        // 4. Notificar a todos los microservicios
+        rabbitTemplate.convertAndSend(
+            "tenant-exchange", "tenant.created",
+            new TenantCreatedEvent(request.getId()));
+    }
+}
+
+// Cada ms de negocio escucha y agrega el pool dinámicamente
+@Component
+public class TenantEventListener {
+
+    @Autowired
+    private TenantRoutingDataSource routingDataSource;
+
+    @RabbitListener(queues = "#{tenantQueue.name}")
+    public void onTenantCreated(TenantCreatedEvent event) {
+        TenantConnectionInfo info = authClient.getTenant(event.getEmpresaId());
+        routingDataSource.addTenantDataSource(
+            event.getEmpresaId(), createDataSource(info));
+    }
+}
+```
+
+### 8.7 Ventajas del enfoque Database-per-Tenant
+
+| Aspecto | Con `empresa_id` (enfoque anterior) | Database-per-Tenant (enfoque actual) |
+|---------|--------------------------------------|--------------------------------------|
+| **Aislamiento de datos** | Depende de `WHERE` y RLS | Total — son BDs separadas |
+| **`empresa_id` en cada tabla** | Obligatorio en TODAS las tablas | **No necesario** (la BD ya es de una empresa) |
+| **Queries** | `WHERE empresa_id = X` siempre | Query limpio, sin filtro adicional |
+| **Riesgo de ver datos ajenos** | Posible si se olvida el `WHERE` | Imposible por diseño |
+| **Backup/Restore** | Todo junto, difícil aislar | Backup independiente por empresa |
+| **Performance** | Una empresa grande afecta a todas | Cada empresa tiene sus propios índices |
+| **Eliminar una empresa** | `DELETE` masivo + riesgo de FK | `DROP DATABASE` y listo |
+| **Numeración** | Necesita `empresa_id` en secuencia | Secuencia simple, sin `empresa_id` |
+| **Escalabilidad** | Vertical (más potencia al servidor) | Horizontal (mover BD a otro servidor) |
+| **Regulaciones (GDPR, etc.)** | Difícil aislar datos de un tenant | Total control, BD aislada |
+
+### 8.8 Convenciones de la base de datos
 
 | Aspecto | Convención |
 |---------|------------|
 | **Tablas y columnas** | `snake_case`: `orden_compra`, `fecha_emision` |
 | **Claves primarias** | `id BIGSERIAL PRIMARY KEY` (autoincremental) |
 | **Claves foráneas** | `{tabla}_id`: `proveedor_id`, `almacen_id` |
-| **Multiempresa** | `empresa_id NOT NULL` en todas las tablas de negocio |
+| **Multiempresa** | **No se usa `empresa_id`** en tablas de negocio (cada BD es de una empresa) |
 | **Multisucursal** | `sucursal_id` donde aplique (tablas operativas) |
 | **Auditoría por registro** | `creado_por`, `creado_en`, `modificado_por`, `modificado_en` |
 | **Soft delete** | `activo BOOLEAN DEFAULT true` (nunca DELETE físico) |
-| **Índices** | Obligatorios en: `empresa_id`, FKs, campos de búsqueda frecuente |
+| **Índices** | Obligatorios en: FKs, campos de búsqueda frecuente, `sucursal_id` |
 | **Timestamps** | `TIMESTAMP WITH TIME ZONE` para todos los campos de fecha-hora |
 | **Migraciones** | Flyway: `V{version}__{descripcion}.sql` |
 | **Enums** | Almacenados como `VARCHAR`, no como tipo ENUM de PostgreSQL (portabilidad) |
 
-### 8.3 Estrategia de índices
+### 8.9 Estrategia de índices
+
+> **Nota:** Como cada BD es de una sola empresa, **no se necesita `empresa_id`** en los índices de tablas de negocio.
 
 ```sql
--- Índice compuesto para multiempresa (TODAS las tablas)
-CREATE INDEX idx_{tabla}_empresa ON {tabla} (empresa_id);
+-- Índices para búsquedas frecuentes (sin empresa_id)
+CREATE INDEX idx_articulo_codigo ON articulo (codigo);
+CREATE INDEX idx_articulo_categoria ON articulo (categoria_id);
+CREATE INDEX idx_relacion_comercial_doc ON relacion_comercial (numero_documento);
 
--- Índice para búsquedas frecuentes
-CREATE INDEX idx_articulo_codigo ON articulo (empresa_id, codigo);
-CREATE INDEX idx_articulo_categoria ON articulo (empresa_id, categoria_id);
-CREATE INDEX idx_relacion_comercial_doc ON relacion_comercial (empresa_id, numero_documento);
+-- Índice para multisucursal
+CREATE INDEX idx_movimiento_sucursal ON movimiento_almacen (sucursal_id, fecha);
+CREATE INDEX idx_documento_venta_sucursal ON documento_venta (sucursal_id, fecha_emision);
 
 -- Índice para reportes por período
-CREATE INDEX idx_movimiento_fecha ON movimiento_almacen (empresa_id, fecha);
-CREATE INDEX idx_asiento_periodo ON asiento (empresa_id, periodo_anio, periodo_mes);
+CREATE INDEX idx_movimiento_fecha ON movimiento_almacen (fecha);
+CREATE INDEX idx_asiento_periodo ON asiento (periodo_anio, periodo_mes);
+
+-- Índice parcial para registros activos (soft delete)
+CREATE INDEX idx_articulo_activo ON articulo (id) WHERE activo = true;
+CREATE INDEX idx_relacion_comercial_activo ON relacion_comercial (id) WHERE activo = true;
 ```
 
-### 8.4 Migraciones Flyway
+### 8.10 Migraciones Flyway (Multi-Tenant)
+
+Las migraciones se escriben **una sola vez** pero se ejecutan contra **todas las bases de datos de tenant**:
+
+```java
+@Component
+public class MultiTenantMigrationRunner implements CommandLineRunner {
+
+    @Autowired
+    private TenantFeignClient tenantClient;
+
+    @Override
+    public void run(String... args) {
+        // 1. Migrar la plantilla primero (modelo)
+        migrate("restaurant_pe_template");
+
+        // 2. Migrar TODAS las bases de datos de empresas activas
+        for (TenantConnectionInfo tenant : tenantClient.getActiveTenants()) {
+            migrate(tenant.getJdbcUrl(), tenant.getUsername(), tenant.getPassword());
+        }
+    }
+
+    private void migrate(String jdbcUrl, String user, String pass) {
+        Flyway flyway = Flyway.configure()
+            .dataSource(jdbcUrl, user, pass)
+            .locations("classpath:db/migration")
+            .load();
+        flyway.migrate();
+    }
+}
+```
 
 Cada microservicio tiene su carpeta de migraciones:
 
@@ -689,6 +1054,100 @@ ms-compras/
         ├── V5__create_table_recepcion.sql
         └── V6__add_index_orden_compra.sql
 ```
+
+Cuando se despliega una nueva versión, el runner aplica las migraciones pendientes a **template + todas las empresas** automáticamente. Si una BD ya tiene esas versiones, Flyway las salta.
+
+### 8.11 Numeración atómica sin `empresa_id`
+
+Como cada empresa tiene su propia BD, la tabla de secuencias **ya no necesita `empresa_id`**:
+
+```sql
+-- En cada BD de empresa (esquemas ventas, compras, etc.)
+CREATE TABLE {schema}.secuencia_documento (
+    id              BIGSERIAL PRIMARY KEY,
+    sucursal_id     BIGINT NOT NULL,
+    tipo_documento  VARCHAR(50) NOT NULL,
+    serie           VARCHAR(10) NOT NULL,
+    anio            INT NOT NULL,
+    ultimo_numero   BIGINT NOT NULL DEFAULT 0,
+    UNIQUE(sucursal_id, tipo_documento, serie, anio)
+);
+
+-- Función atómica para obtener el siguiente número (sin gaps)
+CREATE OR REPLACE FUNCTION {schema}.siguiente_numero(
+    p_sucursal_id BIGINT,
+    p_tipo_doc    VARCHAR,
+    p_serie       VARCHAR,
+    p_anio        INT
+) RETURNS BIGINT AS $$
+DECLARE
+    v_numero BIGINT;
+BEGIN
+    UPDATE {schema}.secuencia_documento
+    SET ultimo_numero = ultimo_numero + 1
+    WHERE sucursal_id = p_sucursal_id
+      AND tipo_documento = p_tipo_doc
+      AND serie = p_serie
+      AND anio = p_anio
+    RETURNING ultimo_numero INTO v_numero;
+
+    IF v_numero IS NULL THEN
+        INSERT INTO {schema}.secuencia_documento
+            (sucursal_id, tipo_documento, serie, anio, ultimo_numero)
+        VALUES (p_sucursal_id, p_tipo_doc, p_serie, p_anio, 1)
+        RETURNING ultimo_numero INTO v_numero;
+    END IF;
+
+    RETURN v_numero;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+> La función usa `UPDATE ... RETURNING` dentro de la misma transacción del documento. Si la transacción falla, el número se revierte automáticamente — **sin gaps**.
+
+### 8.12 Alta de nueva empresa (proceso completo)
+
+```sql
+-- 1. Clonar la plantilla (PostgreSQL nativo)
+CREATE DATABASE restaurant_pe_emp_4 TEMPLATE restaurant_pe_template;
+
+-- 2. Registrar en la BD master
+INSERT INTO master.tenant (codigo, nombre, db_name, db_host, db_port, db_username, db_password, activo)
+VALUES ('EMP4', 'Nueva Cadena SRL', 'restaurant_pe_emp_4', 'localhost', 5432, 'rpe_admin', 'encrypted_pass', true);
+
+-- 3. Insertar datos iniciales (seed) en la nueva BD
+-- Ejecutado por un endpoint administrativo de ms-auth-security:
+--   • Datos de la empresa (razón social, RUC, logo)
+--   • País, monedas, impuestos del país
+--   • Sucursal principal
+--   • Configuraciones default
+--   • Plan contable base del país
+--   • Secuencias de numeración iniciales
+```
+
+### 8.13 Reportes cruzados entre empresas
+
+Para reportes corporativos que consoliden datos de múltiples empresas:
+
+```java
+// Endpoint especial que itera sobre las BDs de cada empresa
+@GetMapping("/api/reportes/consolidado/ventas")
+public ConsolidadoVentas ventasConsolidadas(
+        @RequestParam List<Long> empresaIds) {
+    List<ResumenVentas> resultados = new ArrayList<>();
+
+    for (Long empresaId : empresaIds) {
+        TenantContext.setEmpresaId(empresaId);
+        ResumenVentas resumen = ventaService.resumenDelMes();
+        resumen.setEmpresaId(empresaId);
+        resultados.add(resumen);
+    }
+
+    return ConsolidadoVentas.consolidar(resultados);
+}
+```
+
+A futuro, un **Data Warehouse** que consolide datos de todas las empresas para reportes analíticos avanzados.
 
 ---
 
@@ -719,7 +1178,9 @@ flowchart TB
 - Una opción de menú pertenece a **un solo** módulo.
 - Un usuario puede tener opciones de menú asignadas de forma **individual/extraordinaria** (N:M vía `usuario_opcion_menu`).
 
-### 9.2 Flujo de autenticación
+### 9.2 Flujo de autenticación (con selección de empresa)
+
+El flujo se divide en **dos pasos**: primero se autentica al usuario y luego se selecciona la empresa.
 
 ```mermaid
 sequenceDiagram
@@ -727,22 +1188,39 @@ sequenceDiagram
     participant FE as Angular 20
     participant GW as API Gateway
     participant AUTH as ms-auth-security
-    participant DB as PostgreSQL
+    participant MASTER as BD Master
     participant REDIS as Redis
 
-    U->>FE: Login (usuario + contraseña)
-    FE->>GW: POST /api/auth/login
-    GW->>AUTH: Forward
-    AUTH->>DB: Verificar credenciales
-    DB-->>AUTH: Usuario + rol + opciones del rol + opciones individuales
-    AUTH->>AUTH: Generar JWT (access + refresh)
-    AUTH->>REDIS: Almacenar sesión activa
-    AUTH->>DB: Registrar log_acceso (LOGIN)
-    AUTH-->>GW: JWT + estructura de menú
-    GW-->>FE: Response
-    FE->>FE: Guardar JWT en memoria (NgRx)
-    FE->>FE: Renderizar menú dinámico
+    rect rgb(240, 248, 255)
+        Note over U,MASTER: PASO 1 — Autenticación
+        U->>FE: Login (usuario + contraseña)
+        FE->>GW: POST /api/auth/login
+        GW->>AUTH: Forward
+        AUTH->>MASTER: Verificar credenciales (auth.usuario)
+        MASTER-->>AUTH: Usuario válido
+        AUTH->>MASTER: Obtener empresas del usuario (auth.usuario_empresa)
+        MASTER-->>AUTH: Lista de empresas [{id, nombre, rol}]
+        AUTH-->>FE: Token temporal + lista de empresas
+    end
+
+    rect rgb(255, 248, 240)
+        Note over U,REDIS: PASO 2 — Selección de empresa
+        U->>FE: Selecciona empresa (ej: "Restaurante Lima SAC")
+        FE->>GW: POST /api/auth/seleccionar-empresa {empresaId: 1}
+        GW->>AUTH: Forward (con token temporal)
+        AUTH->>MASTER: Obtener rol + permisos + opciones de menú para esa empresa
+        MASTER-->>AUTH: Rol, permisos del rol, opciones individuales, connection string
+        AUTH->>AUTH: Generar JWT completo (access + refresh)
+        AUTH->>REDIS: Almacenar sesión activa
+        AUTH->>MASTER: Registrar log_acceso (LOGIN, empresaId)
+        AUTH-->>GW: JWT definitivo + estructura de menú dinámico
+        GW-->>FE: Response
+        FE->>FE: Guardar JWT en memoria (NgRx)
+        FE->>FE: Renderizar menú dinámico según permisos
+    end
 ```
+
+> Si el usuario solo tiene acceso a **una empresa**, el paso 2 se ejecuta automáticamente.
 
 ### 9.3 Estructura del JWT
 
@@ -751,6 +1229,7 @@ sequenceDiagram
   "sub": "jramirez",
   "userId": 42,
   "empresaId": 1,
+  "empresaCodigo": "LIMA_SAC",
   "sucursalId": 3,
   "rolId": 7,
   "rolCodigo": "JEFE_ALMACEN",
@@ -764,12 +1243,15 @@ sequenceDiagram
 |-------|-------------|
 | `sub` | Username del usuario |
 | `userId` | ID del usuario |
-| `empresaId` | Empresa seleccionada en el login |
-| `sucursalId` | Sucursal seleccionada |
-| `rolId` | ID del rol asignado |
+| `empresaId` | ID de la empresa seleccionada (tenant) — se usa como `X-Empresa-Id` |
+| `empresaCodigo` | Código de la empresa (para display) |
+| `sucursalId` | Sucursal seleccionada dentro de la empresa |
+| `rolId` | ID del rol asignado **en esa empresa** |
 | `rolCodigo` | Código del rol (para validaciones rápidas) |
 | `permisos` | Array de códigos de permiso (opción_menú + acción) |
 | `exp` | Expiración (configurable, default: 24 horas) |
+
+> **Nota:** El `empresaId` del JWT se propaga como header `X-Empresa-Id` en todas las llamadas internas entre microservicios, permitiendo el ruteo dinámico del `TenantRoutingDataSource`.
 
 ### 9.4 Validación de permisos en el backend
 
@@ -796,22 +1278,32 @@ public class OrdenCompraController {
 }
 ```
 
-### 9.5 Tablas de seguridad (esquema `auth`)
+### 9.5 Tablas de seguridad (esquema `auth` en BD Master)
+
+> **Importante:** Todas las tablas de seguridad residen en `restaurant_pe_master.auth`, ya que son transversales a todas las empresas.
 
 | Tabla | Descripción |
 |-------|-------------|
-| `usuario` | id, username, password_hash, email, nombre, **rol_id** (FK), empresa_default_id, activo |
-| `rol` | id, codigo, nombre, descripcion, empresa_id, activo |
+| `usuario` | id, username, password_hash, email, nombre, activo |
+| `usuario_empresa` | id, usuario_id, **empresa_id** (FK a master.tenant), **rol_id** (FK), sucursal_default_id, activo |
+| `rol` | id, codigo, nombre, descripcion, activo |
 | `modulo` | id, codigo, nombre, icono, orden |
 | `opcion_menu` | id, modulo_id, padre_id, codigo, nombre, ruta_frontend, icono, orden, activo |
 | `accion` | id, codigo, nombre (VER, CREAR, EDITAR, ELIMINAR, APROBAR, IMPRIMIR, EXPORTAR) |
 | `permiso` | id, opcion_menu_id, accion_id |
 | `rol_opcion_menu` | rol_id, opcion_menu_id (N:M) |
 | `rol_permiso` | rol_id, permiso_id |
-| `usuario_opcion_menu` | usuario_id, opcion_menu_id (individual/extraordinario) |
-| `usuario_permiso` | usuario_id, permiso_id |
-| `usuario_sucursal` | usuario_id, sucursal_id (sucursales asignadas al usuario) |
-| `sesion` | id, usuario_id, token, ip, fecha_inicio, fecha_fin, activa |
+| `usuario_opcion_menu` | usuario_id, empresa_id, opcion_menu_id (individual/extraordinario por empresa) |
+| `usuario_permiso` | usuario_id, empresa_id, permiso_id |
+| `usuario_sucursal` | usuario_id, empresa_id, sucursal_id (sucursales asignadas) |
+| `sesion` | id, usuario_id, empresa_id, token, ip, fecha_inicio, fecha_fin, activa |
+| `log_acceso` | id, usuario_id, empresa_id, accion, ip, fecha, detalle |
+
+**Tabla de tenants** (esquema `master` en BD Master):
+
+| Tabla | Descripción |
+|-------|-------------|
+| `tenant` | id, codigo, nombre, db_name, db_host, db_port, db_username, db_password (AES), activo, fecha_creacion |
 
 ---
 
@@ -2616,16 +3108,16 @@ services:
     image: postgres:16-alpine
     container_name: rpe-postgres
     environment:
-      POSTGRES_DB: restaurant_pe
+      POSTGRES_DB: restaurant_pe_master
       POSTGRES_USER: rpe_admin
       POSTGRES_PASSWORD: rpe_secret_2026
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./docker/postgres/init-schemas.sql:/docker-entrypoint-initdb.d/01-init-schemas.sql
+      - ./docker/postgres/init-databases.sql:/docker-entrypoint-initdb.d/01-init-databases.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rpe_admin -d restaurant_pe"]
+      test: ["CMD-SHELL", "pg_isready -U rpe_admin -d restaurant_pe_master"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -2742,9 +3234,11 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=auth
+      # Conecta SOLO a la BD Master (auth + tenant registry)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe_master
       SPRING_DATASOURCE_USERNAME: rpe_admin
       SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: auth
       SPRING_DATA_REDIS_HOST: rpe-redis
       SPRING_DATA_REDIS_PASSWORD: rpe_redis_2026
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
@@ -2773,9 +3267,9 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=core
-      SPRING_DATASOURCE_USERNAME: rpe_admin
-      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      # Conexión dinámica via TenantRoutingDataSource (obtiene tenants de ms-auth)
+      RPE_TENANT_PROVIDER_URL: http://rpe-auth:9001/internal/tenants/active
+      RPE_DEFAULT_SCHEMA: core
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
       SPRING_RABBITMQ_USERNAME: rpe_mq
       SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
@@ -2798,15 +3292,16 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=almacen
-      SPRING_DATASOURCE_USERNAME: rpe_admin
-      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      RPE_TENANT_PROVIDER_URL: http://rpe-auth:9001/internal/tenants/active
+      RPE_DEFAULT_SCHEMA: almacen
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
       SPRING_RABBITMQ_USERNAME: rpe_mq
       SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
     depends_on:
       postgres:
         condition: service_healthy
+      ms-auth-security:
+        condition: service_started
       eureka-server:
         condition: service_healthy
       rabbitmq:
@@ -2825,9 +3320,8 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=compras
-      SPRING_DATASOURCE_USERNAME: rpe_admin
-      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      RPE_TENANT_PROVIDER_URL: http://rpe-auth:9001/internal/tenants/active
+      RPE_DEFAULT_SCHEMA: compras
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
       SPRING_RABBITMQ_USERNAME: rpe_mq
       SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
@@ -2852,9 +3346,8 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=finanzas
-      SPRING_DATASOURCE_USERNAME: rpe_admin
-      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      RPE_TENANT_PROVIDER_URL: http://rpe-auth:9001/internal/tenants/active
+      RPE_DEFAULT_SCHEMA: finanzas
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
       SPRING_RABBITMQ_USERNAME: rpe_mq
       SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
@@ -2879,9 +3372,8 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=contabilidad
-      SPRING_DATASOURCE_USERNAME: rpe_admin
-      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      RPE_TENANT_PROVIDER_URL: http://rpe-auth:9001/internal/tenants/active
+      RPE_DEFAULT_SCHEMA: contabilidad
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
       SPRING_RABBITMQ_USERNAME: rpe_mq
       SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
@@ -2906,9 +3398,8 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=rrhh
-      SPRING_DATASOURCE_USERNAME: rpe_admin
-      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      RPE_TENANT_PROVIDER_URL: http://rpe-auth:9001/internal/tenants/active
+      RPE_DEFAULT_SCHEMA: rrhh
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
       SPRING_RABBITMQ_USERNAME: rpe_mq
       SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
@@ -2933,9 +3424,8 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=activos
-      SPRING_DATASOURCE_USERNAME: rpe_admin
-      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      RPE_TENANT_PROVIDER_URL: http://rpe-auth:9001/internal/tenants/active
+      RPE_DEFAULT_SCHEMA: activos
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
       SPRING_RABBITMQ_USERNAME: rpe_mq
       SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
@@ -2960,9 +3450,8 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=produccion
-      SPRING_DATASOURCE_USERNAME: rpe_admin
-      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      RPE_TENANT_PROVIDER_URL: http://rpe-auth:9001/internal/tenants/active
+      RPE_DEFAULT_SCHEMA: produccion
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
       SPRING_RABBITMQ_USERNAME: rpe_mq
       SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
@@ -2987,9 +3476,8 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=ventas
-      SPRING_DATASOURCE_USERNAME: rpe_admin
-      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      RPE_TENANT_PROVIDER_URL: http://rpe-auth:9001/internal/tenants/active
+      RPE_DEFAULT_SCHEMA: ventas
       SPRING_DATA_REDIS_HOST: rpe-redis
       SPRING_DATA_REDIS_PASSWORD: rpe_redis_2026
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
@@ -3022,9 +3510,8 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rpe-eureka:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://rpe-config:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rpe-postgres:5432/restaurant_pe?currentSchema=auditoria
-      SPRING_DATASOURCE_USERNAME: rpe_admin
-      SPRING_DATASOURCE_PASSWORD: rpe_secret_2026
+      RPE_TENANT_PROVIDER_URL: http://rpe-auth:9001/internal/tenants/active
+      RPE_DEFAULT_SCHEMA: auditoria
       SPRING_RABBITMQ_HOST: rpe-rabbitmq
       SPRING_RABBITMQ_USERNAME: rpe_mq
       SPRING_RABBITMQ_PASSWORD: rpe_mq_2026
@@ -3116,39 +3603,87 @@ networks:
     name: rpe-network
 ```
 
-### Script de inicialización de esquemas PostgreSQL
+### Script de inicialización de bases de datos (Database-per-Tenant)
 
-Archivo `docker/postgres/init-schemas.sql`:
+Archivo `docker/postgres/init-databases.sql`:
 
 ```sql
 -- ============================================================
--- Restaurant.pe ERP — Inicialización de esquemas
+-- Restaurant.pe ERP — Inicialización Database-per-Tenant
 -- ============================================================
 
+-- =============================================
+-- 1. BD MASTER (ya creada por POSTGRES_DB env)
+--    Contiene: auth + registro de tenants
+-- =============================================
+
+-- Esquema auth (usuarios, roles, permisos, menú)
 CREATE SCHEMA IF NOT EXISTS auth;
+GRANT ALL PRIVILEGES ON SCHEMA auth TO rpe_admin;
+
+-- Esquema master (registro de tenants y connection strings)
+CREATE SCHEMA IF NOT EXISTS master;
+GRANT ALL PRIVILEGES ON SCHEMA master TO rpe_admin;
+
+-- Tabla de tenants (empresas registradas)
+CREATE TABLE master.tenant (
+    id              BIGSERIAL PRIMARY KEY,
+    codigo          VARCHAR(20) NOT NULL UNIQUE,
+    nombre          VARCHAR(200) NOT NULL,
+    db_name         VARCHAR(100) NOT NULL UNIQUE,
+    db_host         VARCHAR(200) NOT NULL DEFAULT 'rpe-postgres',
+    db_port         INT NOT NULL DEFAULT 5432,
+    db_username     VARCHAR(100) NOT NULL DEFAULT 'rpe_admin',
+    db_password     VARCHAR(200) NOT NULL DEFAULT 'rpe_secret_2026',
+    activo          BOOLEAN NOT NULL DEFAULT true,
+    fecha_creacion  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    creado_por      VARCHAR(100)
+);
+
+-- =============================================
+-- 2. BD TEMPLATE (modelo para clonar empresas)
+--    Contiene: esquemas de negocio vacíos
+-- =============================================
+
+CREATE DATABASE restaurant_pe_template OWNER rpe_admin;
+
+-- Conectar al template para crear esquemas
+\connect restaurant_pe_template;
+
 CREATE SCHEMA IF NOT EXISTS core;
 CREATE SCHEMA IF NOT EXISTS almacen;
 CREATE SCHEMA IF NOT EXISTS compras;
+CREATE SCHEMA IF NOT EXISTS ventas;
 CREATE SCHEMA IF NOT EXISTS finanzas;
 CREATE SCHEMA IF NOT EXISTS contabilidad;
 CREATE SCHEMA IF NOT EXISTS rrhh;
 CREATE SCHEMA IF NOT EXISTS activos;
 CREATE SCHEMA IF NOT EXISTS produccion;
-CREATE SCHEMA IF NOT EXISTS ventas;
 CREATE SCHEMA IF NOT EXISTS auditoria;
 
--- Permisos para el usuario de la aplicación
-GRANT ALL PRIVILEGES ON SCHEMA auth TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA core TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA almacen TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA compras TO rpe_admin;
+GRANT ALL PRIVILEGES ON SCHEMA ventas TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA finanzas TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA contabilidad TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA rrhh TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA activos TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA produccion TO rpe_admin;
-GRANT ALL PRIVILEGES ON SCHEMA ventas TO rpe_admin;
 GRANT ALL PRIVILEGES ON SCHEMA auditoria TO rpe_admin;
+
+-- =============================================
+-- 3. BD para empresa demo (desarrollo local)
+-- =============================================
+
+\connect restaurant_pe_master;
+
+-- Clonar template para empresa demo
+CREATE DATABASE restaurant_pe_emp_1 TEMPLATE restaurant_pe_template OWNER rpe_admin;
+
+-- Registrar en el catálogo de tenants
+INSERT INTO master.tenant (codigo, nombre, db_name, db_host, db_port, db_username, db_password)
+VALUES ('DEMO', 'Restaurante Demo SAC', 'restaurant_pe_emp_1', 'rpe-postgres', 5432, 'rpe_admin', 'rpe_secret_2026');
 ```
 
 ### Resumen de puertos
@@ -3209,11 +3744,12 @@ docker compose down -v
 **Justificación:** 9 módulos funcionales con equipos paralelos. Cada módulo tiene ciclo de vida independiente. Escalabilidad horizontal requerida. Múltiples equipos de desarrollo simultáneos.  
 **Consecuencia:** Mayor complejidad operativa, requiere DevOps dedicado y service discovery.
 
-### ADR-002: Una base de datos con esquemas vs múltiples bases de datos
+### ADR-002: Database-per-Tenant (multitenancy)
 
-**Decisión:** Una instancia PostgreSQL con esquemas separados  
-**Justificación:** Simplifica operaciones (un solo backup, un solo servidor), permite consultas cruzadas cuando sea necesario, menor costo de infraestructura. Los esquemas proveen aislamiento lógico suficiente.  
-**Consecuencia:** Acoplamiento a nivel de infraestructura de datos; si un esquema tiene problemas de performance, afecta a todos.
+**Decisión:** Patrón Database-per-Tenant con PostgreSQL `TEMPLATE`  
+**Justificación:** Aislamiento total de datos entre empresas. Elimina la necesidad de `empresa_id` en todas las tablas. Permite backup, restore y escalado independiente por empresa. Cumple con regulaciones de privacidad (GDPR). PostgreSQL soporta nativamente `CREATE DATABASE ... TEMPLATE` para clonación instantánea.  
+**Consecuencia:** Mayor complejidad operativa (múltiples BDs). Requiere `AbstractRoutingDataSource` para ruteo dinámico y pool de conexiones por tenant. Los reportes cruzados entre empresas requieren iteración sobre BDs o un Data Warehouse.  
+**Mitigación:** ms-auth-security centraliza el registro de tenants y provee connection strings. Los eventos RabbitMQ sincronizan dinámicamente los pools al crear nuevas empresas.
 
 ### ADR-003: RabbitMQ vs Kafka
 
@@ -3322,17 +3858,19 @@ flowchart TB
         RPT["ms-reportes\n:9012\nJasperReports,\nPDF/Excel"]
         NOTIF["ms-notificaciones\n:9013\nCorreos, alertas,\npush"]
     end
-    subgraph Datos["Almacenes de datos"]
-        PG[("PostgreSQL 16\n:5432\n11 esquemas aislados\n94+ tablas")]
+    subgraph Datos["Almacenes de datos (Database-per-Tenant)"]
+        PG_MASTER[("BD Master\nrestaurant_pe_master\n:5432\nauth + tenant registry")]
+        PG_TENANT[("BD por Empresa\nrestaurant_pe_emp_N\n:5432\n10 schemas de negocio")]
         REDIS[("Redis 7\n:6379\nCaché, sesiones,\nblacklist JWT")]
     end
     subgraph Mensajeria["Mensajería"]
-        MQ[["RabbitMQ 3\n:5672\nEventos asincrónicos\npre-asientos, auditoría"]]
+        MQ[["RabbitMQ 3\n:5672\nEventos asincrónicos\npre-asientos, auditoría,\ntenant.created"]]
     end
     SPA --> NGINX --> GW
     GW --> EU
     GW --> AUTH & CORE & ALM & COM & VEN & FIN & CNT & RRHH & AF & PROD & RPT
-    AUTH & CORE & ALM & COM & VEN & FIN & CNT & RRHH & AF & PROD & AUD --> PG
+    AUTH --> PG_MASTER
+    CORE & ALM & COM & VEN & FIN & CNT & RRHH & AF & PROD & AUD --> PG_TENANT
     AUTH & GW --> REDIS
     ALM & COM & VEN & FIN & RRHH & AF & PROD --> MQ
     MQ --> CNT & AUD & NOTIF
@@ -5490,4 +6028,421 @@ stateDiagram-v2
 
 ---
 
-*Documento de arquitectura técnica del proyecto Restaurant.pe. Cubre microservicios, base de datos, seguridad, comunicación, DevOps, estándares de desarrollo, diagramas de arquitectura, entidades, comunicación, interacción, flujos y estados. Basado en el análisis de las HUs y la experiencia del ERP SIGRE.*
+## 32. Estrategia de multitenancy — Database-per-Tenant
+
+### 32.1 Visión general
+
+Restaurant.pe implementa el patrón **Database-per-Tenant** para lograr aislamiento total de datos entre empresas. PostgreSQL soporta nativamente este patrón mediante `CREATE DATABASE ... TEMPLATE`, permitiendo clonar bases de datos de forma instantánea.
+
+```mermaid
+flowchart TB
+    subgraph Usuarios["Usuarios del sistema"]
+        U1["👤 Admin Empresa 1\n(Lima SAC)"]
+        U2["👤 Admin Empresa 2\n(Bogotá SAS)"]
+        U3["👤 Superadmin\n(acceso a ambas)"]
+    end
+
+    subgraph Frontend["Angular 20"]
+        FE["SPA\n(selección de empresa en login)"]
+    end
+
+    subgraph Gateway["API Gateway :8080"]
+        GW["Ruteo + validación JWT\nPropaga X-Empresa-Id"]
+    end
+
+    subgraph Auth_Service["ms-auth-security :9001"]
+        AUTH["Autenticación\nGestión de tenants\nProvisión de connections"]
+    end
+
+    subgraph Business_Services["Microservicios de negocio"]
+        MS1["ms-compras"]
+        MS2["ms-almacen"]
+        MS3["ms-ventas"]
+        MSN["... otros ms"]
+    end
+
+    subgraph Routing["TenantRoutingDataSource"]
+        TR["Pool HikariCP\npor cada tenant\n(dinámico)"]
+    end
+
+    subgraph PostgreSQL["PostgreSQL 16 Server"]
+        MASTER["restaurant_pe_master\n━━━━━━━━━━━━━━\nschema: auth\n(usuarios, roles, permisos)\n━━━━━━━━━━━━━━\nschema: master\n(tenant registry +\nconnection strings)"]
+
+        TEMPLATE["restaurant_pe_template\n━━━━━━━━━━━━━━\nMODELO — No se usa\nen producción\n━━━━━━━━━━━━━━\n10 schemas de negocio"]
+
+        DB1["restaurant_pe_emp_1\n━━━━━━━━━━━━━━\nLima SAC\n(clon del template)"]
+
+        DB2["restaurant_pe_emp_2\n━━━━━━━━━━━━━━\nBogotá SAS\n(clon del template)"]
+    end
+
+    U1 --> FE
+    U2 --> FE
+    U3 --> FE
+    FE --> GW
+    GW --> AUTH
+    GW --> MS1
+    GW --> MS2
+    GW --> MS3
+    GW --> MSN
+
+    AUTH -->|"conexión directa"| MASTER
+    AUTH -.->|"GET /internal/tenants"| MS1
+    AUTH -.->|"GET /internal/tenants"| MS2
+    AUTH -.->|"GET /internal/tenants"| MS3
+
+    MS1 --> TR
+    MS2 --> TR
+    MS3 --> TR
+    MSN --> TR
+
+    TR -->|"X-Empresa-Id: 1"| DB1
+    TR -->|"X-Empresa-Id: 2"| DB2
+
+    TEMPLATE -.->|"CREATE DATABASE ... TEMPLATE"| DB1
+    TEMPLATE -.->|"CREATE DATABASE ... TEMPLATE"| DB2
+
+    style MASTER fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style TEMPLATE fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style DB1 fill:#e3f2fd,stroke:#1565c0
+    style DB2 fill:#e3f2fd,stroke:#1565c0
+```
+
+### 32.2 Arquitectura de la BD Master
+
+La BD `restaurant_pe_master` es la **única base de datos administrativa** del sistema. Contiene dos esquemas:
+
+```mermaid
+erDiagram
+    %% Esquema master
+    TENANT {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        varchar db_name UK
+        varchar db_host
+        int db_port
+        varchar db_username
+        varchar db_password "AES encrypted"
+        boolean activo
+        timestamp fecha_creacion
+    }
+
+    %% Esquema auth
+    USUARIO {
+        bigint id PK
+        varchar username UK
+        varchar password_hash
+        varchar email
+        varchar nombre
+        boolean activo
+    }
+
+    USUARIO_EMPRESA {
+        bigint id PK
+        bigint usuario_id FK
+        bigint empresa_id FK "→ tenant.id"
+        bigint rol_id FK
+        bigint sucursal_default_id
+        boolean activo
+    }
+
+    ROL {
+        bigint id PK
+        varchar codigo
+        varchar nombre
+        varchar descripcion
+        boolean activo
+    }
+
+    MODULO {
+        bigint id PK
+        varchar codigo
+        varchar nombre
+        varchar icono
+        int orden
+    }
+
+    OPCION_MENU {
+        bigint id PK
+        bigint modulo_id FK
+        bigint padre_id FK "self-ref"
+        varchar codigo
+        varchar nombre
+        varchar ruta_frontend
+        varchar icono
+        int orden
+        boolean activo
+    }
+
+    ACCION {
+        bigint id PK
+        varchar codigo
+        varchar nombre
+    }
+
+    PERMISO {
+        bigint id PK
+        bigint opcion_menu_id FK
+        bigint accion_id FK
+    }
+
+    ROL_OPCION_MENU {
+        bigint rol_id FK
+        bigint opcion_menu_id FK
+    }
+
+    ROL_PERMISO {
+        bigint rol_id FK
+        bigint permiso_id FK
+    }
+
+    USUARIO_OPCION_MENU {
+        bigint usuario_id FK
+        bigint empresa_id FK
+        bigint opcion_menu_id FK
+    }
+
+    SESION {
+        bigint id PK
+        bigint usuario_id FK
+        bigint empresa_id FK
+        varchar token
+        varchar ip
+        timestamp fecha_inicio
+        timestamp fecha_fin
+        boolean activa
+    }
+
+    USUARIO ||--o{ USUARIO_EMPRESA : "tiene acceso a"
+    TENANT ||--o{ USUARIO_EMPRESA : "tiene usuarios"
+    ROL ||--o{ USUARIO_EMPRESA : "asignado como"
+    ROL ||--o{ ROL_OPCION_MENU : "tiene opciones"
+    OPCION_MENU ||--o{ ROL_OPCION_MENU : "asignada a roles"
+    MODULO ||--o{ OPCION_MENU : "contiene"
+    OPCION_MENU ||--o{ PERMISO : "tiene acciones"
+    ACCION ||--o{ PERMISO : "define"
+    ROL ||--o{ ROL_PERMISO : "tiene permisos"
+    PERMISO ||--o{ ROL_PERMISO : "asignado a"
+    USUARIO ||--o{ USUARIO_OPCION_MENU : "opciones individuales"
+    USUARIO ||--o{ SESION : "sesiones"
+```
+
+### 32.3 Modelo de seguridad centralizado
+
+Un usuario puede tener **acceso a múltiples empresas**, cada una con un **rol diferente**:
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    restaurant_pe_master                          │
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │ auth.usuario: jramirez                                      │ │
+│  │                                                              │ │
+│  │ ┌─────────────────────────────────┐                         │ │
+│  │ │ usuario_empresa                 │                         │ │
+│  │ │  → empresa_id: 1 (Lima SAC)    │  rol: ADMIN_ALMACEN     │ │
+│  │ │  → empresa_id: 2 (Bogotá SAS)  │  rol: JEFE_COMPRAS      │ │
+│  │ │  → empresa_id: 3 (Chile SpA)   │  rol: AUDITOR (solo ver)│ │
+│  │ └─────────────────────────────────┘                         │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
+│  │ master.tenant    │  │ master.tenant    │  │ master.tenant    │ │
+│  │ id: 1            │  │ id: 2            │  │ id: 3            │ │
+│  │ Lima SAC         │  │ Bogotá SAS       │  │ Chile SpA        │ │
+│  │ → restaurant_    │  │ → restaurant_    │  │ → restaurant_    │ │
+│  │   pe_emp_1       │  │   pe_emp_2       │  │   pe_emp_3       │ │
+│  └────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘ │
+│           │                      │                      │          │
+└───────────┼──────────────────────┼──────────────────────┼──────────┘
+            ▼                      ▼                      ▼
+    ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
+    │ restaurant_   │     │ restaurant_   │     │ restaurant_   │
+    │ pe_emp_1      │     │ pe_emp_2      │     │ pe_emp_3      │
+    │               │     │               │     │               │
+    │ 10 schemas    │     │ 10 schemas    │     │ 10 schemas    │
+    │ de negocio    │     │ de negocio    │     │ de negocio    │
+    └───────────────┘     └───────────────┘     └───────────────┘
+```
+
+### 32.4 ms-auth-security como proveedor de tenants
+
+**ms-auth-security** es el único servicio con acceso directo a `restaurant_pe_master` y actúa como **proveedor central de información de tenants** para todos los demás microservicios.
+
+```mermaid
+sequenceDiagram
+    participant MS as ms-compras (startup)
+    participant AUTH as ms-auth-security
+    participant MASTER as restaurant_pe_master
+    participant MQ as RabbitMQ
+
+    rect rgb(240, 248, 255)
+        Note over MS,MASTER: Inicialización del microservicio
+        MS->>AUTH: GET /internal/tenants/active
+        AUTH->>MASTER: SELECT * FROM master.tenant WHERE activo = true
+        MASTER-->>AUTH: Lista de tenants con connection strings
+        AUTH-->>MS: [{empresaId:1, jdbcUrl:..., user:..., pass:...}, ...]
+        MS->>MS: Crear HikariCP pool por cada tenant
+        MS->>MS: Registrar pools en TenantRoutingDataSource
+        Note over MS: ✅ Listo para recibir requests
+    end
+
+    rect rgb(255, 248, 240)
+        Note over AUTH,MQ: Cuando se crea una nueva empresa
+        AUTH->>MASTER: CREATE DATABASE ... TEMPLATE
+        AUTH->>MASTER: INSERT INTO master.tenant
+        AUTH->>MQ: Publicar evento: tenant.created
+        MQ-->>MS: Evento: tenant.created {empresaId: 4}
+        MS->>AUTH: GET /internal/tenants/4
+        AUTH-->>MS: {empresaId:4, jdbcUrl:..., user:..., pass:...}
+        MS->>MS: Agregar nuevo HikariCP pool (sin reinicio)
+        Note over MS: ✅ Nuevo tenant disponible dinámicamente
+    end
+```
+
+### 32.5 Endpoints internos de ms-auth-security para gestión de tenants
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| GET | `/internal/tenants/active` | Lista todos los tenants activos con connection strings |
+| GET | `/internal/tenants/{empresaId}` | Obtener connection info de un tenant específico |
+| POST | `/api/admin/tenants` | Crear nueva empresa (solo SUPERADMIN) |
+| PUT | `/api/admin/tenants/{id}` | Actualizar datos del tenant |
+| POST | `/api/admin/tenants/{id}/desactivar` | Desactivar empresa (bloquea acceso) |
+| POST | `/api/admin/tenants/{id}/activar` | Reactivar empresa |
+| GET | `/api/admin/tenants` | Listar todas las empresas registradas |
+| GET | `/api/admin/tenants/{id}/stats` | Estadísticas del tenant (tamaño BD, usuarios, etc.) |
+
+### 32.6 Proceso de onboarding de nueva empresa
+
+```mermaid
+flowchart TB
+    A[Superadmin solicita\ncrear empresa] --> B[POST /api/admin/tenants]
+    B --> C{Validar datos\nde la empresa}
+    C -->|❌ Inválido| D[Retornar error\n400 Bad Request]
+    C -->|✅ Válido| E["CREATE DATABASE\nrestaurant_pe_emp_N\nTEMPLATE restaurant_pe_template"]
+    E --> F["INSERT INTO\nmaster.tenant\n(con connection string)"]
+    F --> G["Ejecutar Flyway\nen la nueva BD\n(por si hay migraciones\nposteriores al template)"]
+    G --> H["Insertar seed data:\n• Datos empresa\n• País, monedas, impuestos\n• Sucursal principal\n• Plan contable base\n• Secuencias numeración\n• Config por defecto"]
+    H --> I["Crear usuario admin\nen auth.usuario_empresa\n(con rol ADMIN)"]
+    I --> J["Publicar evento\ntenant.created\nvía RabbitMQ"]
+    J --> K["Todos los ms\nagregan pool\ndinámicamente"]
+    K --> L["✅ Empresa lista\npara operar"]
+
+    style E fill:#e3f2fd,stroke:#1565c0
+    style J fill:#fff3e0,stroke:#ef6c00
+    style L fill:#e8f5e9,stroke:#2e7d32
+```
+
+### 32.7 Ventajas y consideraciones
+
+| Ventaja | Descripción |
+|---------|-------------|
+| **Aislamiento total** | Cada empresa es una BD independiente; imposible ver datos ajenos |
+| **Sin `empresa_id`** | Las tablas de negocio no necesitan columna `empresa_id` (queries más limpios) |
+| **Backup independiente** | Se puede hacer backup/restore de una sola empresa sin afectar las demás |
+| **Escalabilidad horizontal** | Una empresa con mucho volumen se puede mover a otro servidor PostgreSQL |
+| **Borrado seguro** | `DROP DATABASE restaurant_pe_emp_X` elimina todos los datos de una empresa |
+| **Compliance (GDPR, etc.)** | Datos de cada empresa totalmente aislados por diseño |
+| **Performance** | Los índices de una empresa no se ven afectados por el volumen de otra |
+| **Clonación instantánea** | `CREATE DATABASE ... TEMPLATE` clona toda la estructura en segundos |
+| **Numeración simplificada** | Las secuencias no necesitan `empresa_id` — ya son locales a la BD |
+
+| Consideración | Mitigación |
+|---------------|------------|
+| Múltiples conexiones (pools) | HikariCP con pools pequeños por tenant (2-10 conns cada uno) |
+| Migraciones en múltiples BDs | `MultiTenantMigrationRunner` automatiza la ejecución en todas |
+| Reportes cruzados | Endpoint de consolidación o Data Warehouse a futuro |
+| Complejidad operativa | Script automatizado de onboarding + eventos RabbitMQ |
+| Monitoreo | Métricas por tenant (tamaño BD, conexiones activas, queries lentos) |
+
+### 32.8 Diagrama de despliegue completo
+
+```mermaid
+flowchart TB
+    subgraph Docker_Host["Docker Compose — Entorno local"]
+        subgraph Infra["Infraestructura"]
+            PG["PostgreSQL 16\n:5432"]
+            MQ["RabbitMQ\n:5672 / :15672"]
+            REDIS["Redis\n:6379"]
+        end
+
+        subgraph Spring["Spring Cloud"]
+            EU["Eureka\n:8761"]
+            CFG["Config Server\n:8888"]
+            GW["API Gateway\n:8080"]
+        end
+
+        subgraph Auth["Servicio de Autenticación"]
+            AUTH_MS["ms-auth-security\n:9001\nConecta a: restaurant_pe_master"]
+        end
+
+        subgraph Negocio["Servicios de Negocio (con TenantRoutingDataSource)"]
+            CORE["ms-core-maestros :9002"]
+            ALM["ms-almacen :9003"]
+            COM["ms-compras :9004"]
+            FIN["ms-finanzas :9005"]
+            CNT["ms-contabilidad :9006"]
+            RRHH_S["ms-rrhh :9007"]
+            ACT["ms-activos-fijos :9008"]
+            PROD["ms-produccion :9009"]
+            VEN["ms-ventas :9010"]
+        end
+
+        subgraph Soporte["Servicios de Soporte"]
+            AUD["ms-auditoria :9011"]
+            RPT["ms-reportes :9012"]
+            NOTIF["ms-notificaciones :9013"]
+        end
+
+        subgraph Databases["Bases de datos en PostgreSQL"]
+            DB_MASTER["restaurant_pe_master\n(auth + tenants)"]
+            DB_TEMPLATE["restaurant_pe_template\n(modelo)"]
+            DB_EMP1["restaurant_pe_emp_1\n(empresa demo)"]
+        end
+
+        FE["Frontend Angular :4200"]
+    end
+
+    FE --> GW
+    GW --> AUTH_MS
+    GW --> CORE & ALM & COM & FIN & CNT & RRHH_S & ACT & PROD & VEN
+    GW --> AUD & RPT & NOTIF
+
+    AUTH_MS -->|"conexión directa"| DB_MASTER
+    AUTH_MS -.->|"provee tenants"| CORE & ALM & COM & FIN & CNT & RRHH_S & ACT & PROD & VEN & AUD
+
+    CORE & ALM & COM & FIN & CNT & RRHH_S & ACT & PROD & VEN & AUD -->|"TenantRouting"| DB_EMP1
+
+    DB_TEMPLATE -.->|"TEMPLATE"| DB_EMP1
+
+    AUTH_MS --> REDIS
+    AUTH_MS --> MQ
+    CORE & ALM & COM & FIN & CNT & RRHH_S & ACT & PROD & VEN --> MQ
+
+    style DB_MASTER fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style DB_TEMPLATE fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style DB_EMP1 fill:#e3f2fd,stroke:#1565c0
+    style AUTH_MS fill:#fce4ec,stroke:#c62828,stroke-width:2px
+```
+
+### 32.9 Resumen de la decisión arquitectónica
+
+| Decisión | Valor |
+|----------|-------|
+| **Estrategia multitenancy** | Database-per-Tenant |
+| **BD modelo** | `restaurant_pe_template` (nunca se usa en producción) |
+| **BD por empresa** | `restaurant_pe_emp_{id}` (clon del template) |
+| **BD administrativa** | `restaurant_pe_master` (auth + tenant registry) |
+| **Proveedor de tenants** | `ms-auth-security` vía endpoint `/internal/tenants/active` |
+| **Ruteo dinámico** | `AbstractRoutingDataSource` + header `X-Empresa-Id` |
+| **`empresa_id` en tablas** | **No necesario** (la BD ya es de una sola empresa) |
+| **Pool de conexiones** | HikariCP con pool independiente por tenant |
+| **Nueva empresa** | `CREATE DATABASE ... TEMPLATE` + seed data + evento RabbitMQ |
+| **Migraciones** | Flyway ejecutado contra template + todos los tenants activos |
+| **Sincronización** | Evento `tenant.created` vía RabbitMQ para agregar pools dinámicamente |
+| **Seguridad centralizada** | Usuarios, roles, permisos en BD master (transversales a empresas) |
+
+---
+
+*Documento de arquitectura técnica del proyecto Restaurant.pe. Cubre microservicios, base de datos Database-per-Tenant, seguridad centralizada, multitenancy, comunicación, DevOps, estándares de desarrollo, diagramas de arquitectura (C4), entidades, comunicación, interacción, flujos y estados. Basado en el análisis de las HUs y la experiencia del ERP SIGRE.*
