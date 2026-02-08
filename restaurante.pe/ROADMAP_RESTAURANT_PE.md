@@ -251,7 +251,7 @@ gantt
 | Backend 1–2 | ms-auth-security: login, JWT, usuarios, roles dinámicos, permisos, opciones de menú |
 | Backend 3–4 | ms-core-maestros: empresa, sucursal, país, departamento, provincia, distrito, moneda, tipo de cambio |
 | Backend 5–6 | ms-core-maestros: impuestos, retenciones, detracciones, parámetros del sistema, ejercicios/períodos |
-| DBA | Esquemas PostgreSQL, migraciones Flyway iniciales, índices base |
+| DBA | BD Master (auth + master), BD Template (10 schemas de negocio), migraciones Flyway multi-tenant, BD empresa demo |
 | Frontend 1–2 | Angular shell, layout principal, login, selección empresa/sucursal |
 | Frontend 3 | Componentes reutilizables (tablas, formularios, filtros, paginación) |
 | Analistas | Validación de campos y reglas de negocio de cada maestro |
@@ -267,7 +267,7 @@ gantt
 | Backend 7 | ms-contabilidad: cuenta_contable (plan contable jerárquico), centro_costo, libro_contable, matriz_contable |
 | Backend 8 | ms-rrhh: área, cargo, concepto_planilla, AFP · ms-activos-fijos: clase_activo, ubicación_física, aseguradora |
 | Frontend 1–5 | CRUD de todos los maestros (pantallas de mantenimiento) |
-| DBA | Migraciones de todos los esquemas, datos iniciales (países, monedas, impuestos) |
+| DBA | Migraciones Flyway multi-tenant, seed data en template (países, monedas, impuestos) |
 
 #### Semana 5: Maestros restantes + validación cruzada
 
@@ -460,18 +460,12 @@ flowchart TB
         MS_RPT[ms-reportes]
         MS_NOTIF[ms-notificaciones]
     end
-    subgraph BD["PostgreSQL (esquemas por servicio)"]
-        DB1[(schema: auth)]
-        DB2[(schema: core)]
-        DB3[(schema: almacen)]
-        DB4[(schema: compras)]
-        DB5[(schema: finanzas)]
-        DB6[(schema: contabilidad)]
-        DB7[(schema: rrhh)]
-        DB8[(schema: activos)]
-        DB9[(schema: produccion)]
-        DB10[(schema: ventas)]
-        DB11[(schema: auditoria)]
+    subgraph BD["PostgreSQL 16 — Database-per-Tenant"]
+        DB_MASTER[(BD Master\nrestaurant_pe_master\nauth + tenant registry)]
+        DB_TENANT[(BD por Empresa\nrestaurant_pe_emp_N\n10 schemas de negocio)]
+    end
+    subgraph Bus["Bus de eventos"]
+        MQ[[RabbitMQ]]
     end
     ANG --> GW
     GW --> EU
@@ -488,17 +482,19 @@ flowchart TB
     GW --> MS_AUD
     GW --> MS_RPT
     GW --> MS_NOTIF
-    MS_AUTH --> DB1
-    MS_CORE --> DB2
-    MS_ALM --> DB3
-    MS_COM --> DB4
-    MS_FIN --> DB5
-    MS_CNT --> DB6
-    MS_RRHH --> DB7
-    MS_AF --> DB8
-    MS_PROD --> DB9
-    MS_VEN --> DB10
-    MS_AUD --> DB11
+    MS_AUTH --> DB_MASTER
+    MS_CORE --> DB_TENANT
+    MS_ALM --> DB_TENANT
+    MS_COM --> DB_TENANT
+    MS_FIN --> DB_TENANT
+    MS_CNT --> DB_TENANT
+    MS_RRHH --> DB_TENANT
+    MS_AF --> DB_TENANT
+    MS_PROD --> DB_TENANT
+    MS_VEN --> DB_TENANT
+    MS_AUD --> DB_TENANT
+    MS_AUTH -.->|"provee tenants\n/internal/tenants"| MS_CORE
+    MS_AUTH -.->|provee tenants| MS_ALM
     MS_AUTH --> EU
     MS_CORE --> EU
     MS_ALM --> EU
@@ -515,6 +511,11 @@ flowchart TB
     CFG --> MS_AUTH
     CFG --> MS_CORE
     CFG --> MS_ALM
+    MS_ALM -->|evento| MQ
+    MS_COM -->|evento| MQ
+    MS_VEN -->|evento| MQ
+    MQ -->|pre-asiento| MS_CNT
+    MQ -->|log| MS_AUD
 ```
 
 ### 8.2 Catálogo de microservicios (16 servicios)
@@ -524,8 +525,8 @@ flowchart TB
 | 1 | **eureka-server** | 8761 | Service discovery. Todos los servicios se registran aquí | 1 |
 | 2 | **config-server** | 8888 | Configuración centralizada (perfiles dev/qa/prod, por país) | 1 |
 | 3 | **api-gateway** | 8080 | Punto de entrada único. Ruteo, rate limiting, CORS, balanceo | 1 |
-| 4 | **ms-auth-security** | 9001 | Autenticación (JWT), usuarios, roles, permisos, opciones de menú, auditoría de acceso | 1 |
-| 5 | **ms-core-maestros** | 9002 | Maestros compartidos: empresas, sucursales, países, monedas, tipo de cambio, impuestos, relaciones comerciales (proveedores/clientes), artículos, categorías, unidades de medida, numeradores | 1 |
+| 4 | **ms-auth-security** | 9001 | Autenticación (JWT), usuarios, roles, permisos, opciones de menú, auditoría de acceso. **Único servicio conectado a BD Master.** Provee connection strings de tenants a los demás ms | 1 |
+| 5 | **ms-core-maestros** | 9002 | Maestros compartidos: empresas, sucursales, países, monedas, tipo de cambio, impuestos, relaciones comerciales (proveedores/clientes), artículos, categorías, unidades de medida. Conecta a BD por empresa vía `TenantRoutingDataSource` | 1 |
 | 6 | **ms-almacen** | 9003 | Almacenes, tipos de movimiento, movimientos de inventario, kardex, valorización, stock, devoluciones, traslados | 2 |
 | 7 | **ms-compras** | 9004 | Condiciones de pago, OC, OS, aprobaciones, recepción, planificación de abastecimiento | 2 |
 | 8 | **ms-finanzas** | 9005 | Tesorería, CxC, CxP, adelantos, cuentas bancarias, conciliaciones, flujo de caja, programación de pagos | 3 |
@@ -562,35 +563,43 @@ flowchart LR
 
 ### 9.1 Modelo de seguridad
 
-El sistema de acceso se basa en **roles creados a demanda por el usuario administrador**. Cada usuario tiene **un solo rol**, y de manera extraordinaria puede tener opciones de menú asignadas individualmente.
+El sistema de acceso se basa en **roles creados a demanda por el usuario administrador**. Cada usuario tiene **un solo rol por empresa** (vía la tabla `usuario_empresa`), y de manera extraordinaria puede tener opciones de menú asignadas individualmente.
+
+> **Nota:** Con Database-per-Tenant, las tablas de seguridad residen en la BD Master (`restaurant_pe_master.auth`). Un usuario puede tener acceso a **múltiples empresas**, cada una con un rol diferente.
 
 ```mermaid
 flowchart TB
     subgraph Entidades
         USR[Usuario]
+        UE[Usuario-Empresa]
         ROL[Rol]
         MENU[Opción de menú]
         MOD[Módulo]
+        TENANT[Tenant / Empresa]
     end
-    USR -->|N:1 un usuario tiene un solo rol| ROL
+    USR -->|1:N accede a N empresas| UE
+    TENANT -->|1:N tiene N usuarios| UE
+    UE -->|N:1 un rol por empresa| ROL
     ROL -->|N:M un rol tiene muchas opciones| MENU
     MENU -->|N:1 una opción pertenece a un módulo| MOD
-    USR -.->|N:M extraordinario / individual| MENU
+    USR -.->|N:M extraordinario / individual por empresa| MENU
 ```
 
-> **Cardinalidades:** Un usuario tiene **un solo** rol. Un rol puede tener **muchos** usuarios. Un rol tiene **una o muchas** opciones de menú. Una opción de menú puede estar en **uno o muchos** roles. Una opción de menú pertenece a **un solo** módulo. Un módulo tiene **una o muchas** opciones de menú. De manera **extraordinaria**, un usuario puede tener asociadas opciones de menú de forma individual (línea punteada).
+> **Cardinalidades:** Un usuario puede tener acceso a **muchas empresas** (vía `usuario_empresa`). En cada empresa tiene **un solo rol**. Un rol tiene **una o muchas** opciones de menú. Una opción puede estar en **muchos** roles. Una opción pertenece a **un solo** módulo. De manera **extraordinaria**, un usuario puede tener opciones de menú individuales por empresa.
 
 ### 9.2 Reglas de negocio del control de acceso
 
 1. **Roles dinámicos:** Los roles NO son fijos en código. El usuario administrador crea, modifica y elimina roles a demanda (ej.: "Jefe de almacén Lima", "Contador corporativo", "Cajero sucursal X").
-2. **Un usuario = un rol:** Cada usuario tiene asignado **un solo rol**. Un rol puede tener asignados muchos usuarios. Esto simplifica la gestión y evita conflictos de permisos.
-3. **Opciones de menú por rol:** Cada rol tiene asociadas **una o muchas** opciones de menú. Una opción de menú puede estar asignada a **uno o muchos** roles. Al iniciar sesión, el frontend carga **únicamente** las opciones del rol del usuario.
-4. **Asignación individual (extraordinaria):** De manera excepcional, un usuario puede tener asociadas **una o muchas opciones de menú de forma individual**, sin que estén en su rol. Esto cubre casos como: un usuario que necesita acceso puntual a una pantalla que no corresponde a su rol.
+2. **Un usuario = un rol por empresa:** Cada usuario tiene asignado **un solo rol por empresa** (vía `usuario_empresa`). Un usuario puede tener roles diferentes en empresas diferentes. Al hacer login y seleccionar empresa, se carga el rol correspondiente.
+3. **Opciones de menú por rol:** Cada rol tiene asociadas **una o muchas** opciones de menú. Una opción de menú puede estar asignada a **uno o muchos** roles. Al seleccionar empresa, el frontend carga **únicamente** las opciones del rol del usuario en esa empresa.
+4. **Asignación individual (extraordinaria):** De manera excepcional, un usuario puede tener asociadas **una o muchas opciones de menú de forma individual por empresa**, sin que estén en su rol. Esto cubre casos como: un usuario que necesita acceso puntual a una pantalla que no corresponde a su rol.
 5. **Menú cargado por módulo:** El frontend organiza las opciones de menú agrupadas por módulo. Solo se muestran los módulos que tengan al menos una opción permitida (ya sea por rol o por asignación individual).
 6. **Permisos por acción:** Cada opción de menú puede tener permisos granulares: ver, crear, editar, eliminar, aprobar, imprimir, exportar.
-7. **Scope multiempresa:** Los permisos aplican dentro del contexto de la empresa/sucursal seleccionada.
+7. **Scope multiempresa (Database-per-Tenant):** Los permisos aplican dentro del contexto de la empresa seleccionada. El header `X-Empresa-Id` dirige cada request a la BD correcta. Las tablas de negocio **no tienen `empresa_id`** — cada BD es de una sola empresa.
 
-### 9.3 Flujo de carga del menú dinámico
+### 9.3 Flujo de carga del menú dinámico (con selección de empresa)
+
+El flujo se divide en **dos pasos**: primero autenticación y luego selección de empresa.
 
 ```mermaid
 sequenceDiagram
@@ -598,73 +607,159 @@ sequenceDiagram
     participant FE as Angular 20
     participant GW as API Gateway
     participant AUTH as ms-auth-security
-    participant DB as PostgreSQL
+    participant MASTER as BD Master
 
-    U->>FE: Inicia sesión (usuario + contraseña)
-    FE->>GW: POST /api/auth/login
-    GW->>AUTH: Validar credenciales
-    AUTH->>DB: Verificar usuario, obtener rol + opciones individuales
-    DB-->>AUTH: Rol + opciones del rol + opciones individuales
-    AUTH-->>GW: JWT token + menú permitido
-    GW-->>FE: JWT + estructura de menú por módulo
-    FE->>FE: Renderizar menú dinámico (solo opciones permitidas)
+    rect rgb(240, 248, 255)
+        Note over U,MASTER: PASO 1 — Autenticación
+        U->>FE: Inicia sesión (usuario + contraseña)
+        FE->>GW: POST /api/auth/login
+        GW->>AUTH: Validar credenciales
+        AUTH->>MASTER: Verificar usuario (auth.usuario)
+        MASTER-->>AUTH: Usuario válido + lista de empresas
+        AUTH-->>FE: Token temporal + lista de empresas
+    end
+
+    rect rgb(255, 248, 240)
+        Note over U,MASTER: PASO 2 — Selección de empresa
+        U->>FE: Selecciona empresa
+        FE->>GW: POST /api/auth/seleccionar-empresa {empresaId}
+        GW->>AUTH: Forward
+        AUTH->>MASTER: Obtener rol + permisos + opciones de menú (para esa empresa)
+        MASTER-->>AUTH: Rol, permisos, opciones del rol, opciones individuales
+        AUTH->>AUTH: Generar JWT definitivo (con empresaId)
+        AUTH-->>GW: JWT + estructura de menú por módulo
+        GW-->>FE: Response
+        FE->>FE: Renderizar menú dinámico (solo opciones permitidas)
+    end
+
+    Note over U,MASTER: Peticiones de negocio
     U->>FE: Navega a opción de menú
-    FE->>GW: GET /api/almacen/stock (con JWT)
-    GW->>AUTH: Validar JWT + verificar permiso sobre recurso
+    FE->>GW: GET /api/almacen/stock (JWT + X-Empresa-Id)
+    GW->>AUTH: Validar JWT + verificar permiso
     AUTH-->>GW: Autorizado
     GW->>FE: Respuesta del microservicio
 ```
 
-### 9.4 Estructura de datos de seguridad (esquema `auth`)
+> Si el usuario solo tiene acceso a **una empresa**, el paso 2 se ejecuta automáticamente.
+
+### 9.4 Estructura de datos de seguridad (esquema `auth` en BD Master)
+
+> **Importante:** Todas las tablas de seguridad residen en `restaurant_pe_master.auth`, ya que son transversales a todas las empresas. Un usuario puede tener acceso a múltiples empresas, cada una con un rol diferente.
 
 | Tabla | Campos principales | Descripción |
 |-------|-------------------|-------------|
-| `usuario` | id, username, password_hash, email, nombre, **rol_id**, empresa_default_id, activo | Usuarios del sistema. Cada usuario tiene **un solo rol** (FK directo) |
-| `rol` | id, codigo, nombre, descripcion, empresa_id, activo | Roles creados a demanda. Un rol agrupa opciones de menú |
+| `usuario` | id, username, password_hash, email, nombre, activo | Usuarios del sistema (sin `rol_id` directo) |
+| `usuario_empresa` | id, usuario_id, **empresa_id** (FK a master.tenant), **rol_id** (FK), sucursal_default_id, activo | Relación usuario ↔ empresa. **Un usuario tiene un rol por empresa** |
+| `rol` | id, codigo, nombre, descripcion, activo | Roles creados a demanda. Un rol agrupa opciones de menú |
 | `modulo` | id, codigo, nombre, icono, orden | Módulos del ERP (Almacén, Compras, etc.) |
 | `opcion_menu` | id, modulo_id, padre_id, codigo, nombre, ruta_frontend, icono, orden, activo | Opciones del menú (jerárquicas). Una opción pertenece a **un solo módulo** |
 | `accion` | id, codigo, nombre | Acciones posibles (ver, crear, editar, eliminar, aprobar, imprimir, exportar) |
 | `permiso` | id, opcion_menu_id, accion_id | Permiso = opción de menú + acción |
-| `rol_opcion_menu` | rol_id, opcion_menu_id | Opciones de menú asignadas al rol (N:M). Un rol tiene muchas opciones; una opción puede estar en muchos roles |
+| `rol_opcion_menu` | rol_id, opcion_menu_id | Opciones de menú asignadas al rol (N:M) |
 | `rol_permiso` | rol_id, permiso_id | Permisos granulares (acciones) asignados al rol |
-| `usuario_opcion_menu` | usuario_id, opcion_menu_id | Opciones de menú asignadas de forma **individual/extraordinaria** al usuario (N:M) |
-| `usuario_permiso` | usuario_id, permiso_id | Permisos granulares individuales del usuario (excepciones) |
-| `sesion` | id, usuario_id, token, ip, fecha_inicio, fecha_fin, activa | Control de sesiones |
+| `usuario_opcion_menu` | usuario_id, empresa_id, opcion_menu_id | Opciones de menú individuales **por empresa** (N:M extraordinario) |
+| `usuario_permiso` | usuario_id, empresa_id, permiso_id | Permisos granulares individuales por empresa |
+| `sesion` | id, usuario_id, empresa_id, token, ip, fecha_inicio, fecha_fin, activa | Control de sesiones (con empresa seleccionada) |
+
+**Tabla de tenants** (esquema `master` en BD Master):
+
+| Tabla | Campos principales | Descripción |
+|-------|-------------------|-------------|
+| `tenant` | id, codigo, nombre, db_name, db_host, db_port, db_username, db_password (AES), activo, fecha_creacion | Registro de empresas y sus connection strings |
 
 ---
 
-## 10. Base de datos — PostgreSQL
+## 10. Base de datos — PostgreSQL (Database-per-Tenant)
 
-### 10.1 Estrategia de esquemas
+### 10.1 Estrategia de multitenancy
 
-Se usa **una sola instancia de PostgreSQL** con **esquemas separados por microservicio**. Esto permite:
+El sistema utiliza el patrón **Database-per-Tenant** de PostgreSQL, aprovechando la función nativa `CREATE DATABASE ... TEMPLATE`. Cada empresa (tenant) tiene su **propia base de datos**, lo que garantiza aislamiento total.
 
-- Aislamiento lógico entre módulos.
-- Consultas cruzadas cuando sea necesario (con permisos controlados).
-- Un solo punto de backup y administración.
+```mermaid
+flowchart TB
+    subgraph PostgreSQL["PostgreSQL 16 Server"]
+        subgraph Master["restaurant_pe_master"]
+            direction LR
+            M_AUTH["schema: auth\n(usuarios, roles, permisos)"]
+            M_TENANT["schema: master\n(registro de tenants)"]
+        end
+        subgraph Template["restaurant_pe_template"]
+            direction LR
+            T1["core"] ~~~ T2["almacen"] ~~~ T3["compras"] ~~~ T4["ventas"] ~~~ T5["finanzas"]
+            T6["contabilidad"] ~~~ T7["rrhh"] ~~~ T8["activos"] ~~~ T9["produccion"] ~~~ T10["auditoria"]
+        end
+        subgraph Emp1["restaurant_pe_emp_1 (Lima SAC)"]
+            E1["Clon exacto del template"]
+        end
+        subgraph Emp2["restaurant_pe_emp_2 (Bogotá SAS)"]
+            E2["Clon exacto del template"]
+        end
+        Template -.->|TEMPLATE| Emp1
+        Template -.->|TEMPLATE| Emp2
+    end
+```
+
+| Base de datos | Propósito | Quién conecta |
+|---------------|-----------|---------------|
+| `restaurant_pe_master` | BD administrativa: auth (usuarios, roles, permisos, menú) + registro de tenants (connection strings) | Solo **ms-auth-security** |
+| `restaurant_pe_template` | Modelo/plantilla — nunca se usa en producción | Solo Flyway (migraciones) |
+| `restaurant_pe_emp_{id}` | BD de cada empresa (clon del template, 10 schemas de negocio) | **Todos los ms de negocio** vía `TenantRoutingDataSource` |
+
+### 10.2 Esquemas por BD
+
+**BD Master** (`restaurant_pe_master`):
 
 | Esquema | Microservicio | Tablas principales |
 |---------|---------------|--------------------|
-| `auth` | ms-auth-security | usuario, rol, permiso, opcion_menu, sesion |
-| `core` | ms-core-maestros | empresa, sucursal, pais, moneda, tipo_cambio, relacion_comercial, articulo, categoria, unidad_medida, impuesto, numerador |
-| `almacen` | ms-almacen | almacen, tipo_movimiento, movimiento_almacen, movimiento_detalle, kardex, stock, inventario_fisico |
-| `compras` | ms-compras | condicion_pago, orden_compra, orden_compra_detalle, orden_servicio, orden_servicio_detalle, aprobacion_oc, recepcion |
-| `finanzas` | ms-finanzas | cuenta_bancaria, movimiento_bancario, documento_cobrar, documento_pagar, pago, cobro, conciliacion, flujo_caja, adelanto |
-| `contabilidad` | ms-contabilidad | plan_contable, cuenta_contable, centro_costo, asiento, asiento_detalle, pre_asiento, matriz_contable, periodo_contable, libro_electronico |
-| `rrhh` | ms-rrhh | trabajador, contrato, cargo, area, concepto_planilla, planilla, planilla_detalle, asistencia, vacacion, liquidacion |
-| `activos` | ms-activos-fijos | activo_fijo, clase_activo, ubicacion, depreciacion, seguro, poliza, revaluacion, baja_activo |
-| `produccion` | ms-produccion | receta, receta_detalle, orden_produccion, orden_produccion_detalle, costeo_produccion |
-| `auditoria` | ms-auditoria | log_auditoria, log_acceso |
+| `auth` | ms-auth-security | usuario, usuario_empresa, rol, permiso, opcion_menu, sesion, log_acceso |
+| `master` | ms-auth-security | tenant (registro de empresas con connection strings) |
 
-### 10.2 Convenciones de la base de datos
+**BD por Empresa** (`restaurant_pe_emp_{id}`) — cada empresa tiene estos 10 esquemas:
 
-- **Naming:** snake_case para tablas y columnas.
+| Esquema | Microservicio | Tablas principales |
+|---------|---------------|--------------------|
+| `core` | ms-core-maestros | empresa, sucursal, pais, moneda, tipo_cambio, relacion_comercial, articulo, categoria, unidad_medida, impuesto |
+| `almacen` | ms-almacen | almacen, tipo_movimiento, movimiento_almacen, kardex, stock, inventario_fisico |
+| `compras` | ms-compras | condicion_pago, orden_compra, recepcion, secuencia_documento |
+| `ventas` | ms-ventas | documento_venta, mesa, orden, comanda, cierre_caja, secuencia_documento |
+| `finanzas` | ms-finanzas | cuenta_bancaria, documento_pagar, documento_cobrar, pago, cobro, conciliacion |
+| `contabilidad` | ms-contabilidad | cuenta_contable, centro_costo, asiento, pre_asiento, matriz_contable |
+| `rrhh` | ms-rrhh | trabajador, contrato, planilla, asistencia, vacacion, liquidacion |
+| `activos` | ms-activos-fijos | activo_fijo, clase_activo, depreciacion, poliza_seguro |
+| `produccion` | ms-produccion | receta, orden_produccion, costeo_produccion |
+| `auditoria` | ms-auditoria | log_auditoria |
+
+### 10.3 Provisión de connection strings
+
+**ms-auth-security** es el único servicio que conecta directamente a `restaurant_pe_master`. Los demás microservicios obtienen las conexiones de tenant a través de un endpoint interno:
+
+1. Al **arrancar**, cada ms de negocio llama a `GET /internal/tenants/active` de ms-auth-security
+2. Crea un **pool HikariCP por cada tenant** y los registra en `TenantRoutingDataSource`
+3. Cada request lleva header `X-Empresa-Id` → el `TenantFilter` setea el contexto → el `TenantRoutingDataSource` selecciona el pool correcto
+4. Cuando se **crea una nueva empresa**, ms-auth publica un evento `tenant.created` vía RabbitMQ → los demás ms agregan el pool dinámicamente (sin reinicio)
+
+### 10.4 Convenciones de la base de datos
+
+- **Naming:** `snake_case` para tablas y columnas.
 - **Claves primarias:** `id BIGSERIAL PRIMARY KEY` (autoincremental).
-- **Multiempresa:** todas las tablas de negocio llevan `empresa_id` como columna obligatoria.
-- **Multisucursal:** las tablas operativas llevan `sucursal_id` donde aplique.
+- **Multiempresa:** **No se usa `empresa_id`** en tablas de negocio (cada BD es de una sola empresa).
+- **Multisucursal:** `sucursal_id` donde aplique (tablas operativas).
 - **Auditoría mínima por registro:** `creado_por`, `creado_en`, `modificado_por`, `modificado_en` en todas las tablas.
-- **Soft delete:** `activo BOOLEAN DEFAULT true` (no se elimina físicamente).
-- **Migraciones:** Flyway o Liquibase para versionado de esquema.
+- **Soft delete:** `activo BOOLEAN DEFAULT true` (nunca DELETE físico).
+- **Migraciones:** Flyway con `MultiTenantMigrationRunner` (ejecuta contra template + todos los tenants).
+- **Numeración:** Tabla `secuencia_documento` local en cada BD de empresa (sin `empresa_id`, atómica con `UPDATE ... RETURNING`).
+
+### 10.5 Ventajas del enfoque Database-per-Tenant
+
+| Aspecto | Beneficio |
+|---------|-----------|
+| **Aislamiento total** | Imposible ver datos de otra empresa por diseño |
+| **Sin `empresa_id`** | Queries más limpios, menos índices, menos riesgo de error |
+| **Backup independiente** | Backup/restore por empresa sin afectar las demás |
+| **Escalabilidad** | Mover una BD a otro servidor si crece mucho |
+| **Borrado de empresa** | `DROP DATABASE restaurant_pe_emp_X` y listo |
+| **Compliance (GDPR)** | Datos de cada empresa totalmente aislados |
+| **Clonación instantánea** | `CREATE DATABASE ... TEMPLATE` en segundos |
 
 ---
 
@@ -672,9 +767,11 @@ Se usa **una sola instancia de PostgreSQL** con **esquemas separados por microse
 
 A continuación se detallan **todas las tablas maestras** del sistema, agrupadas por esquema/microservicio.
 
+> **NOTA IMPORTANTE (Database-per-Tenant):** Con la estrategia Database-per-Tenant, las tablas de negocio listadas a continuación **no necesitan la columna `empresa_id`**, ya que cada base de datos es de una sola empresa. La columna `empresa_id` que aparece en algunas definiciones se mantiene como referencia histórica, pero en la implementación real se **omite** de las tablas dentro de `restaurant_pe_emp_{id}`. Las tablas de seguridad (`usuario`, `rol`, etc.) residen en la BD Master (`restaurant_pe_master.auth`) y sí mantienen la referencia a empresa a través de `usuario_empresa.empresa_id`.
+
 ### 11.1 Esquema `core` — Maestros compartidos (ms-core-maestros)
 
-Estos maestros son consumidos por todos los demás microservicios.
+Estos maestros residen en cada BD de empresa y son consumidos por todos los demás microservicios.
 
 #### 11.1.1 Empresa y estructura organizacional
 
@@ -729,11 +826,41 @@ Estos maestros son consumidos por todos los demás microservicios.
 | **retencion** | id, pais_id, codigo, nombre, tipo (RENTA/IVA/ISR), porcentaje, monto_minimo, cuenta_contable, activo | Retenciones fiscales por país |
 | **detraccion** | id, pais_id, codigo, nombre, porcentaje, bien_servicio, cuenta_contable, activo | Detracciones (Perú - SPOT) |
 
-#### 11.1.7 Numeradores
+#### 11.1.7 Numeradores (secuencias de documentos)
+
+> Con Database-per-Tenant, la numeración **no necesita `empresa_id`** ya que la BD es de una sola empresa. Cada microservicio que emite documentos tiene su propia tabla `secuencia_documento` en su esquema.
 
 | Tabla | Campos | Descripción |
 |-------|--------|-------------|
-| **numerador** | id, empresa_id, sucursal_id, tipo_documento, serie, correlativo_actual, formato, longitud, reinicio (ANUAL/MENSUAL/NUNCA), activo | Numeración automática por tipo de documento, empresa y sucursal |
+| **secuencia_documento** | id, sucursal_id, tipo_documento, serie, anio, ultimo_numero, formato, longitud, reinicio (ANUAL/MENSUAL/NUNCA), activo | Numeración automática por sucursal, tipo, serie y año. **Sin `empresa_id`** — la BD ya es de una empresa. Usa `UPDATE ... RETURNING` para atomicidad sin gaps |
+
+```sql
+-- Función atómica para obtener el siguiente número (sin gaps)
+CREATE OR REPLACE FUNCTION {schema}.siguiente_numero(
+    p_sucursal_id BIGINT, p_tipo_doc VARCHAR,
+    p_serie VARCHAR, p_anio INT
+) RETURNS BIGINT AS $$
+DECLARE v_numero BIGINT;
+BEGIN
+    UPDATE {schema}.secuencia_documento
+    SET ultimo_numero = ultimo_numero + 1
+    WHERE sucursal_id = p_sucursal_id
+      AND tipo_documento = p_tipo_doc
+      AND serie = p_serie AND anio = p_anio
+    RETURNING ultimo_numero INTO v_numero;
+
+    IF v_numero IS NULL THEN
+        INSERT INTO {schema}.secuencia_documento
+            (sucursal_id, tipo_documento, serie, anio, ultimo_numero)
+        VALUES (p_sucursal_id, p_tipo_doc, p_serie, p_anio, 1)
+        RETURNING ultimo_numero INTO v_numero;
+    END IF;
+    RETURN v_numero;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+> La función se ejecuta dentro de la misma transacción del documento. Si la transacción falla, el número se revierte automáticamente — **sin gaps**.
 
 #### 11.1.8 Configuración jerárquica (4 niveles)
 
@@ -887,15 +1014,40 @@ flowchart TB
 
 ### 11.10 Diagrama resumen de relaciones entre maestros principales
 
+> **Nota:** Este diagrama distingue entre las entidades de la **BD Master** (seguridad, tenants) y las entidades de la **BD por Empresa** (negocio). Con Database-per-Tenant, las tablas de negocio no tienen `empresa_id`.
+
 ```mermaid
 erDiagram
+    %% ==========================================
+    %% BD MASTER (restaurant_pe_master)
+    %% ==========================================
+
+    TENANT {
+        bigint id PK
+        varchar codigo UK
+        varchar nombre
+        varchar db_name UK
+    }
+
+    USUARIO ||--o{ USUARIO_EMPRESA : "accede a"
+    TENANT ||--o{ USUARIO_EMPRESA : "tiene usuarios"
+    USUARIO_EMPRESA }o--|| ROL : "tiene un rol por empresa"
+    ROL }o--o{ OPCION_MENU : "tiene muchas / está en muchos"
+    OPCION_MENU }o--|| MODULO : "pertenece a uno"
+    ROL ||--o{ ROL_PERMISO : tiene
+    ROL_PERMISO }o--|| PERMISO : es
+    PERMISO }o--|| OPCION_MENU : sobre
+    USUARIO }o--o{ OPCION_MENU : "individual extraordinario"
+
+    %% ==========================================
+    %% BD EMPRESA (restaurant_pe_emp_N)
+    %% Sin empresa_id en las tablas
+    %% ==========================================
+
     EMPRESA ||--o{ SUCURSAL : tiene
     SUCURSAL }o--|| PAIS : pertenece
     SUCURSAL ||--o{ ALMACEN : tiene
-    USUARIO }o--o{ SUCURSAL : asignado
-    EMPRESA ||--o{ RELACION_COMERCIAL : tiene
     RELACION_COMERCIAL }o--o{ ARTICULO_PROVEEDOR : suministra
-    EMPRESA ||--o{ ARTICULO : tiene
     ARTICULO }o--|| CATEGORIA : pertenece
     ARTICULO }o--|| UNIDAD_MEDIDA : usa
     ARTICULO }o--o| NATURALEZA_CONTABLE : tiene
@@ -913,36 +1065,24 @@ erDiagram
     RELACION_COMERCIAL ||--o{ DOCUMENTO_COBRAR : genera
     DOCUMENTO_PAGAR ||--o{ PAGO : recibe
     DOCUMENTO_COBRAR ||--o{ COBRO : recibe
-    EMPRESA ||--o{ CUENTA_CONTABLE : tiene
-    EMPRESA ||--o{ CENTRO_COSTO : tiene
     CUENTA_CONTABLE ||--o{ ASIENTO_DETALLE : en
     ASIENTO ||--o{ ASIENTO_DETALLE : contiene
-    EMPRESA ||--o{ TRABAJADOR : emplea
     TRABAJADOR }o--|| CARGO : ocupa
     TRABAJADOR }o--|| AREA : pertenece
     PLANILLA ||--o{ PLANILLA_DETALLE : contiene
     PLANILLA_DETALLE }o--|| TRABAJADOR : de
-    EMPRESA ||--o{ ACTIVO_FIJO : posee
     ACTIVO_FIJO }o--|| CLASE_ACTIVO : es
     ACTIVO_FIJO ||--o{ DEPRECIACION : calcula
     RECETA ||--o{ RECETA_DETALLE : contiene
     RECETA_DETALLE }o--|| ARTICULO : usa
     ORDEN_PRODUCCION }o--|| RECETA : ejecuta
-    USUARIO }o--|| ROL : "tiene un solo"
-    ROL }o--o{ OPCION_MENU : "tiene muchas / está en muchos"
-    OPCION_MENU }o--|| MODULO : "pertenece a uno"
-    ROL ||--o{ ROL_PERMISO : tiene
-    ROL_PERMISO }o--|| PERMISO : es
-    PERMISO }o--|| OPCION_MENU : sobre
-    USUARIO }o--o{ OPCION_MENU : "individual extraordinario"
+    SECUENCIA_DOCUMENTO }o--|| SUCURSAL : "por sucursal"
     CONFIG_CLAVE ||--o{ CONFIG_EMPRESA : configura
     CONFIG_CLAVE ||--o{ CONFIG_PAIS : configura
     CONFIG_CLAVE ||--o{ CONFIG_SUCURSAL : configura
     CONFIG_CLAVE ||--o{ CONFIG_USUARIO : configura
-    EMPRESA ||--o{ CONFIG_EMPRESA : tiene
     PAIS ||--o{ CONFIG_PAIS : tiene
     SUCURSAL ||--o{ CONFIG_SUCURSAL : tiene
-    USUARIO ||--o{ CONFIG_USUARIO : tiene
 ```
 
 ---
@@ -957,6 +1097,7 @@ erDiagram
 | Dependencia de POS actual | Mantener contratos claros con el equipo POS; definir APIs de ventas/cobro desde Fase 1 |
 | Comunicación entre microservicios frágil | Definir contratos de API (OpenAPI) desde Fase 1; usar versionado de API |
 | Base de datos crece sin control | Aplicar migraciones versionadas (Flyway) desde el primer día; revisiones de esquema por sprint |
+| Complejidad Database-per-Tenant | `MultiTenantMigrationRunner` automatiza migraciones. Evento `tenant.created` sincroniza pools. ms-auth centraliza registro |
 | Plazo agresivo de 5 meses | Equipos paralelos, sprints de 1 semana, demos semanales, decisiones rápidas |
 
 ---
@@ -972,4 +1113,4 @@ erDiagram
 
 ---
 
-*Roadmap para el proyecto Restaurant.pe. Stack: Backend Java/Spring Boot (microservicios con API Gateway y Eureka), Frontend Angular 20, Base de datos PostgreSQL. Plazo: 5 meses, 21 personas, 3 equipos en paralelo. Incluye arquitectura de microservicios, modelo de seguridad con roles dinámicos y menú por permisos, y maestros detallados por módulo.*
+*Roadmap para el proyecto Restaurant.pe. Stack: Backend Java/Spring Boot (microservicios con API Gateway y Eureka), Frontend Angular 20, Base de datos PostgreSQL con estrategia Database-per-Tenant. Plazo: 5 meses, 21 personas, 3 equipos en paralelo. Incluye arquitectura de microservicios, modelo de seguridad centralizado en BD Master con roles dinámicos por empresa y menú por permisos, numeración atómica sin gaps, y maestros detallados por módulo.*
