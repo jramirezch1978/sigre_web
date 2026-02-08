@@ -41,6 +41,17 @@
 30. [Diagramas de flujo de negocio](#30-diagramas-de-flujo-de-negocio)
 31. [Diagramas de estado](#31-diagramas-de-estado)
 32. [Estrategia de multitenancy — Database-per-Tenant](#32-estrategia-de-multitenancy--database-per-tenant)
+33. [Estrategia de testing](#33-estrategia-de-testing)
+34. [Estrategia de logging y observabilidad](#34-estrategia-de-logging-y-observabilidad)
+35. [Estrategia de caché (Redis)](#35-estrategia-de-caché-redis)
+36. [Configuración CORS](#36-configuración-cors)
+37. [Rate limiting y throttling](#37-rate-limiting-y-throttling)
+38. [Gestión de archivos y almacenamiento](#38-gestión-de-archivos-y-almacenamiento)
+39. [Estrategia de migración de datos](#39-estrategia-de-migración-de-datos)
+40. [Comunicación en tiempo real (WebSocket)](#40-comunicación-en-tiempo-real-websocket)
+41. [Patrones de búsqueda y filtrado](#41-patrones-de-búsqueda-y-filtrado)
+42. [Estrategia de backup y restore](#42-estrategia-de-backup-y-restore)
+43. [Recuperación ante desastres (Disaster Recovery)](#43-recuperación-ante-desastres-disaster-recovery)
 
 ---
 
@@ -4906,4 +4917,1466 @@ flowchart TB
 
 ---
 
-*Documento de arquitectura técnica del proyecto Restaurant.pe. Cubre microservicios, estrategia Database-per-Tenant, seguridad centralizada, multitenancy, comunicación, DevOps, estándares de desarrollo, diagramas de arquitectura (C4), entidades (resumen), comunicación, interacción, flujos y estados. La definición detallada de tablas, columnas, índices, migraciones y ER completos se encuentra en [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md). Basado en el análisis de las HUs y la experiencia del ERP SIGRE.*
+## 33. Estrategia de testing
+
+### 33.1 Pirámide de testing
+
+```mermaid
+flowchart BT
+    subgraph Pirámide["Pirámide de tests"]
+        direction BT
+        UT["Unit Tests\n(JUnit 5 + Mockito)\n~70% cobertura"]
+        IT["Integration Tests\n(Testcontainers + Spring Boot Test)\n~20% cobertura"]
+        E2E["E2E Tests\n(Cypress)\n~10% cobertura"]
+    end
+    UT --> IT --> E2E
+```
+
+### 33.2 Tests unitarios (Backend)
+
+```java
+// Ejemplo: test de servicio de compras
+@ExtendWith(MockitoExtension.class)
+class OrdenCompraServiceTest {
+
+    @Mock private OrdenCompraRepository repository;
+    @Mock private CoreMaestrosClient maestrosClient;
+    @Mock private NumeradorService numeradorService;
+    @InjectMocks private OrdenCompraServiceImpl service;
+
+    @Test
+    @DisplayName("Debe crear OC con numeración automática")
+    void crearOrdenCompra_debeGenerarNumeroAutomatico() {
+        // Arrange
+        var request = OrdenCompraRequest.builder()
+            .proveedorId(1L).sucursalId(3L).build();
+        when(maestrosClient.obtenerProveedor(1L))
+            .thenReturn(new RelacionComercialResponse(1L, "Proveedor SAC"));
+        when(numeradorService.siguienteNumero(3L, "OC", "A", 2026))
+            .thenReturn(42L);
+
+        // Act
+        var result = service.crear(request);
+
+        // Assert
+        assertThat(result.getNumero()).isEqualTo("OC-A-000042");
+        verify(repository).save(any(OrdenCompra.class));
+    }
+
+    @Test
+    @DisplayName("Debe rechazar OC con monto cero")
+    void crearOrdenCompra_conMontoZero_debeRechazar() {
+        var request = OrdenCompraRequest.builder()
+            .total(BigDecimal.ZERO).build();
+
+        assertThrows(BusinessException.class, () -> service.crear(request));
+    }
+}
+```
+
+### 33.3 Tests de integración (Testcontainers)
+
+```java
+@SpringBootTest
+@Testcontainers
+@ActiveProfiles("test")
+class OrdenCompraIntegrationTest {
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+        .withDatabaseName("test_db")
+        .withInitScript("init-test-schema.sql");
+
+    @Container
+    static RabbitMQContainer rabbitMQ = new RabbitMQContainer("rabbitmq:3-management-alpine");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.rabbitmq.host", rabbitMQ::getHost);
+        registry.add("spring.rabbitmq.port", rabbitMQ::getAmqpPort);
+    }
+
+    @Autowired private TestRestTemplate restTemplate;
+    @Autowired private OrdenCompraRepository repository;
+
+    @Test
+    @DisplayName("POST /api/compras/ordenes-compra → 201 Created")
+    void crearOrdenCompra_debeRetornar201() {
+        var request = new OrdenCompraRequest(/* ... */);
+
+        var response = restTemplate.postForEntity(
+            "/api/compras/ordenes-compra", request, OrdenCompraResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(repository.count()).isEqualTo(1);
+    }
+}
+```
+
+### 33.4 Tests de contrato (API Gateway)
+
+Para validar que los contratos entre microservicios no se rompan:
+
+```java
+// Usando Spring Cloud Contract
+@AutoConfigureStubRunner(
+    stubsMode = StubRunnerProperties.StubsMode.LOCAL,
+    ids = "pe.restaurant:ms-core-maestros:+:stubs:9002"
+)
+class ComprasContractTest {
+
+    @Test
+    void debeObtenerProveedorDesdeStub() {
+        // El stub de ms-core-maestros responde automáticamente
+        var response = restTemplate.getForEntity(
+            "http://localhost:9002/api/core/relaciones-comerciales/1",
+            RelacionComercialResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getRazonSocial()).isNotBlank();
+    }
+}
+```
+
+### 33.5 Tests E2E (Cypress — Frontend)
+
+```typescript
+// cypress/e2e/compras/orden-compra.cy.ts
+describe('Orden de Compra', () => {
+  beforeEach(() => {
+    cy.login('jramirez', 'password123');
+    cy.seleccionarEmpresa('LIMA_SAC');
+  });
+
+  it('debe crear una OC completa', () => {
+    cy.visit('/compras/ordenes-compra/nuevo');
+    cy.get('[data-cy=proveedor-search]').click();
+    cy.get('[data-cy=search-dialog]').type('Distribuidora');
+    cy.get('[data-cy=search-result]').first().click();
+
+    cy.get('[data-cy=agregar-articulo]').click();
+    cy.get('[data-cy=articulo-search]').type('Arroz');
+    cy.get('[data-cy=search-result]').first().click();
+    cy.get('[data-cy=cantidad]').clear().type('100');
+
+    cy.get('[data-cy=btn-guardar]').click();
+
+    cy.get('[data-cy=alert-success]').should('contain', 'Orden de compra creada');
+    cy.url().should('match', /\/compras\/ordenes-compra\/\d+/);
+  });
+
+  it('debe aprobar una OC pendiente', () => {
+    cy.visit('/compras/ordenes-compra');
+    cy.get('[data-cy=filtro-estado]').select('PENDIENTE_APROBACION');
+    cy.get('[data-cy=row-action-aprobar]').first().click();
+    cy.get('[data-cy=confirm-dialog-ok]').click();
+
+    cy.get('[data-cy=alert-success]').should('contain', 'aprobada');
+  });
+});
+```
+
+### 33.6 Cobertura y quality gates
+
+| Métrica | Umbral mínimo | Herramienta |
+|---------|:-------------:|-------------|
+| **Cobertura de líneas** | ≥ 70% | JaCoCo |
+| **Cobertura de ramas** | ≥ 60% | JaCoCo |
+| **Code smells** | 0 bloqueantes | SonarQube |
+| **Duplicación de código** | < 3% | SonarQube |
+| **Bugs** | 0 | SonarQube |
+| **Vulnerabilidades** | 0 | SonarQube |
+| **Technical debt ratio** | < 5% | SonarQube |
+| **Tests E2E** | 100% flujos críticos | Cypress |
+
+### 33.7 Estrategia de ejecución
+
+```mermaid
+flowchart LR
+    subgraph CI["Pipeline CI"]
+        A[Push/PR] --> B[Unit Tests]
+        B --> C[Integration Tests\nTestcontainers]
+        C --> D[Contract Tests]
+        D --> E[SonarQube\nQuality Gate]
+    end
+    subgraph CD["Pipeline CD — post merge"]
+        E --> F[Build Docker Image]
+        F --> G[Deploy to DEV]
+        G --> H[E2E Tests\nCypress]
+        H --> I{¿Tests OK?}
+        I -->|Sí| J[Deploy to QA]
+        I -->|No| K[Rollback + Notificar]
+    end
+```
+
+| Tipo de test | Cuándo se ejecuta | Duración estimada |
+|--------------|-------------------|:-----------------:|
+| **Unit tests** | Cada push / PR | ~30 segundos |
+| **Integration tests** | Cada push / PR | ~2 minutos |
+| **Contract tests** | Cada push / PR | ~1 minuto |
+| **E2E tests** | Después de deploy a DEV | ~5 minutos |
+| **Performance tests** | Semanal (ambiente QA) | ~15 minutos |
+
+---
+
+## 34. Estrategia de logging y observabilidad
+
+### 34.1 Stack de observabilidad
+
+```mermaid
+flowchart TB
+    subgraph Microservicios
+        MS1[ms-compras]
+        MS2[ms-almacen]
+        MS3[ms-auth]
+        MS_N[ms-...]
+    end
+    subgraph Logging["Centralización de Logs"]
+        LS[Logstash\n:5044]
+        ES[(Elasticsearch\n:9200)]
+        KB[Kibana\n:5601]
+    end
+    subgraph Metrics["Métricas"]
+        PR[Prometheus\n:9090]
+        GF[Grafana\n:3000]
+    end
+    subgraph Tracing["Tracing distribuido"]
+        ZK[Zipkin / Jaeger\n:9411]
+    end
+
+    MS1 & MS2 & MS3 & MS_N -->|"logs (JSON)"| LS
+    LS --> ES
+    ES --> KB
+    MS1 & MS2 & MS3 & MS_N -->|"/actuator/prometheus"| PR
+    PR --> GF
+    MS1 & MS2 & MS3 & MS_N -->|"trace spans"| ZK
+```
+
+### 34.2 Formato de logs estructurado (JSON)
+
+Todos los microservicios usan `logback-spring.xml` con formato JSON para facilitar la indexación en Elasticsearch:
+
+```xml
+<!-- logback-spring.xml -->
+<configuration>
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>empresaId</includeMdcKeyName>
+            <includeMdcKeyName>usuarioId</includeMdcKeyName>
+            <customFields>
+                {"app":"ms-compras","env":"${SPRING_PROFILES_ACTIVE}"}
+            </customFields>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="JSON" />
+    </root>
+</configuration>
+```
+
+**Log de ejemplo (JSON):**
+
+```json
+{
+  "timestamp": "2026-03-15T10:30:00.123Z",
+  "level": "INFO",
+  "logger": "pe.restaurant.compras.service.OrdenCompraServiceImpl",
+  "message": "Orden de compra creada exitosamente",
+  "app": "ms-compras",
+  "env": "prod",
+  "traceId": "abc123def456",
+  "spanId": "789ghi012",
+  "empresaId": "1",
+  "usuarioId": "42",
+  "extra": {
+    "ordenCompraId": 1234,
+    "proveedorId": 15,
+    "total": 15000.00
+  }
+}
+```
+
+### 34.3 MDC (Mapped Diagnostic Context) por request
+
+Cada request propaga automáticamente contexto en los logs a través de un filtro:
+
+```java
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class LoggingContextFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                     HttpServletResponse response,
+                                     FilterChain chain) throws Exception {
+        try {
+            MDC.put("traceId", request.getHeader("X-Trace-Id"));
+            MDC.put("empresaId", request.getHeader("X-Empresa-Id"));
+            MDC.put("usuarioId", extractUserIdFromJwt(request));
+            MDC.put("ip", request.getRemoteAddr());
+            MDC.put("method", request.getMethod());
+            MDC.put("uri", request.getRequestURI());
+
+            chain.doFilter(request, response);
+        } finally {
+            MDC.clear();
+        }
+    }
+}
+```
+
+### 34.4 Niveles de log por entorno
+
+| Nivel | DEV | QA | PROD |
+|-------|:---:|:--:|:----:|
+| `TRACE` | ✅ | ❌ | ❌ |
+| `DEBUG` | ✅ | ✅ | ❌ |
+| `INFO` | ✅ | ✅ | ✅ |
+| `WARN` | ✅ | ✅ | ✅ |
+| `ERROR` | ✅ | ✅ | ✅ |
+
+### 34.5 Métricas de negocio personalizadas
+
+```java
+@Component
+public class BusinessMetrics {
+
+    private final MeterRegistry meterRegistry;
+
+    public BusinessMetrics(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
+
+    public void registrarOrdenCompraCreada(String sucursal, BigDecimal monto) {
+        meterRegistry.counter("ordenes_compra_creadas",
+            "sucursal", sucursal).increment();
+        meterRegistry.summary("ordenes_compra_monto",
+            "sucursal", sucursal).record(monto.doubleValue());
+    }
+
+    public void registrarTiempoProcesamientoPreAsiento(long millis) {
+        meterRegistry.timer("pre_asiento_procesamiento")
+            .record(Duration.ofMillis(millis));
+    }
+}
+```
+
+### 34.6 Dashboards de Grafana
+
+| Dashboard | Métricas |
+|-----------|----------|
+| **Infraestructura** | CPU, RAM, disco, network por contenedor |
+| **JVM** | Heap, GC, threads, class loading por microservicio |
+| **API Gateway** | Requests/s, latencia p50/p95/p99, errores 4xx/5xx |
+| **Negocio** | OC creadas/día, ventas/hora, stock bajo mínimo, pre-asientos pendientes |
+| **Base de datos** | Conexiones activas por tenant, queries lentos, tamaño BD |
+| **RabbitMQ** | Mensajes en cola, tasa de consumo, mensajes muertos (DLQ) |
+
+### 34.7 Alertas
+
+| Condición | Severidad | Canal | Acción |
+|-----------|:---------:|-------|--------|
+| Error rate > 5% en 5 min | **CRITICAL** | Slack + Email + PagerDuty | Investigar inmediatamente |
+| Latencia p99 > 5s en 5 min | **WARNING** | Slack | Revisar queries y performance |
+| CPU > 80% por 10 min | **WARNING** | Slack | Evaluar escalado |
+| Disco > 90% | **CRITICAL** | Email | Limpiar logs / expandir disco |
+| Mensajes en DLQ > 0 | **WARNING** | Slack | Revisar eventos fallidos |
+| Pool de conexiones agotado | **CRITICAL** | Slack + Email | Revisar tenant, incrementar pool |
+| Circuit breaker abierto | **WARNING** | Slack | Verificar servicio downstream |
+
+### 34.8 Retención de logs
+
+| Tipo | Hot (Elasticsearch) | Warm (S3/Glacier) | Eliminación |
+|------|:-------------------:|:-----------------:|:-----------:|
+| Logs aplicación | 30 días | 1 año | Después de 1 año |
+| Logs de auditoría | 90 días | 5 años | Después de 5 años |
+| Métricas Prometheus | 15 días | 6 meses | Después de 6 meses |
+| Traces (Zipkin) | 7 días | 3 meses | Después de 3 meses |
+
+---
+
+## 35. Estrategia de caché (Redis)
+
+### 35.1 Arquitectura de caché
+
+```mermaid
+flowchart LR
+    subgraph Request
+        FE[Angular] --> GW[API Gateway]
+    end
+    GW --> MS[Microservicio]
+    MS -->|1. Check cache| REDIS[(Redis\n:6379)]
+    REDIS -->|Hit ✅| MS
+    MS -->|2. Miss ❌| PG[(PostgreSQL)]
+    PG --> MS
+    MS -->|3. Set cache| REDIS
+```
+
+### 35.2 Datos cacheados por microservicio
+
+| Microservicio | Clave Redis | TTL | Dato cacheado |
+|---------------|-------------|:---:|---------------|
+| **ms-auth-security** | `session:{token}` | 24h | Sesión activa (usuario, empresa, permisos) |
+| **ms-auth-security** | `menu:{userId}:{empresaId}` | 1h | Estructura de menú por usuario/empresa |
+| **ms-auth-security** | `tenant:{empresaId}` | 30min | Connection string del tenant |
+| **ms-core-maestros** | `pais:all` | 24h | Lista de países (casi estática) |
+| **ms-core-maestros** | `moneda:all` | 24h | Lista de monedas |
+| **ms-core-maestros** | `tipo-cambio:{monedaId}:{fecha}` | 12h | Tipo de cambio del día |
+| **ms-core-maestros** | `config:{empresaId}:{clave}` | 5min | Valor de configuración resuelto |
+| **ms-core-maestros** | `articulo:{id}` | 15min | Datos del artículo (alta lectura) |
+| **ms-almacen** | `stock:{almacenId}:{articuloId}` | 1min | Stock disponible (TTL corto por alta variabilidad) |
+| **ms-contabilidad** | `cuenta-contable:tree:{empresaId}` | 1h | Árbol del plan contable |
+
+### 35.3 Implementación con Spring Cache + Redis
+
+```java
+// Configuración de Redis Cache
+@Configuration
+@EnableCaching
+public class RedisCacheConfig {
+
+    @Bean
+    public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
+        var defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofMinutes(15))
+            .serializeValuesWith(
+                SerializationPair.fromSerializer(
+                    new GenericJackson2JsonRedisSerializer()))
+            .disableCachingNullValues();
+
+        var cacheConfigs = Map.of(
+            "paises", RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(24)),
+            "monedas", RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(24)),
+            "tipoCambio", RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(12)),
+            "stock", RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(1)),
+            "sesiones", RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(24)),
+            "config", RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(5))
+        );
+
+        return RedisCacheManager.builder(factory)
+            .cacheDefaults(defaultConfig)
+            .withInitialCacheConfigurations(cacheConfigs)
+            .build();
+    }
+}
+```
+
+```java
+// Uso con anotaciones en el servicio
+@Service
+public class PaisServiceImpl implements PaisService {
+
+    @Cacheable(value = "paises", key = "'all'")
+    public List<PaisResponse> listarPaises() {
+        return paisRepository.findByActivoTrue().stream()
+            .map(paisMapper::toResponse).toList();
+    }
+
+    @CacheEvict(value = "paises", allEntries = true)
+    public PaisResponse actualizarPais(Long id, PaisRequest request) {
+        // actualizar...
+    }
+}
+```
+
+### 35.4 Invalidación de caché
+
+| Estrategia | Aplicación |
+|------------|------------|
+| **TTL automático** | Datos que pueden estar ligeramente desactualizados (tipo de cambio, stock) |
+| **Evict on write** | Al crear/actualizar/eliminar un maestro, se invalida su caché |
+| **Event-driven evict** | Evento RabbitMQ `cache.invalidate` para invalidar en múltiples instancias |
+| **Manual flush** | Endpoint admin `POST /internal/cache/flush` para emergencias |
+
+### 35.5 Patrón Cache-Aside con multitenancy
+
+```java
+// El caché incluye empresaId para aislar datos entre tenants
+@Cacheable(value = "articulos", key = "#empresaId + ':' + #articuloId")
+public ArticuloResponse obtenerArticulo(Long empresaId, Long articuloId) {
+    return articuloRepository.findById(articuloId)
+        .map(articuloMapper::toResponse)
+        .orElseThrow(() -> new ResourceNotFoundException("Artículo", articuloId));
+}
+```
+
+> **Importante:** Todas las claves de caché que contienen datos de negocio deben incluir el `empresaId` como prefijo para evitar filtraciones de datos entre tenants.
+
+---
+
+## 36. Configuración CORS
+
+### 36.1 CORS en API Gateway
+
+La configuración CORS se gestiona centralizadamente en el **API Gateway** para evitar duplicidad:
+
+```java
+@Configuration
+public class CorsConfig {
+
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        var config = new CorsConfiguration();
+
+        // Orígenes permitidos según entorno
+        config.setAllowedOrigins(List.of(
+            "http://localhost:4200",           // DEV local
+            "https://dev.restaurant.pe",       // DEV server
+            "https://qa.restaurant.pe",        // QA
+            "https://app.restaurant.pe"        // PRODUCCIÓN
+        ));
+
+        config.setAllowedMethods(List.of(
+            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+        ));
+
+        config.setAllowedHeaders(List.of(
+            "Authorization",
+            "Content-Type",
+            "X-Empresa-Id",
+            "X-Sucursal-Id",
+            "X-Requested-With",
+            "Accept",
+            "Origin"
+        ));
+
+        config.setExposedHeaders(List.of(
+            "X-Total-Count",          // Para paginación
+            "X-Page-Number",
+            "Content-Disposition"      // Para descargas
+        ));
+
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L); // 1 hora de preflight cache
+
+        var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", config);
+
+        return new CorsWebFilter(source);
+    }
+}
+```
+
+### 36.2 Configuración por entorno (Spring Cloud Config)
+
+```yaml
+# application-dev.yml
+cors:
+  allowed-origins:
+    - http://localhost:4200
+    - http://localhost:4201
+
+# application-qa.yml
+cors:
+  allowed-origins:
+    - https://qa.restaurant.pe
+
+# application-prod.yml
+cors:
+  allowed-origins:
+    - https://app.restaurant.pe
+```
+
+### 36.3 Reglas de CORS
+
+| Regla | Valor |
+|-------|-------|
+| Orígenes | Solo dominios específicos (nunca `*` en producción) |
+| Métodos | GET, POST, PUT, DELETE, PATCH, OPTIONS |
+| Headers permitidos | Authorization, Content-Type, X-Empresa-Id, X-Sucursal-Id |
+| Headers expuestos | X-Total-Count, Content-Disposition |
+| Credenciales | Sí (`allowCredentials = true`) |
+| Preflight cache | 3600 segundos (1 hora) |
+| Microservicios internos | No necesitan CORS (comunicación server-to-server) |
+
+---
+
+## 37. Rate limiting y throttling
+
+### 37.1 Estrategia de rate limiting
+
+El **rate limiting** se implementa en el **API Gateway** usando **Spring Cloud Gateway + Redis** para proteger los microservicios de abuso.
+
+```mermaid
+flowchart LR
+    FE[Cliente] --> GW[API Gateway]
+    GW -->|Check rate| REDIS[(Redis)]
+    REDIS -->|Dentro del límite ✅| MS[Microservicio]
+    REDIS -->|Límite excedido ❌| GW
+    GW -->|429 Too Many Requests| FE
+```
+
+### 37.2 Configuración en API Gateway
+
+```yaml
+# application.yml del API Gateway
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: ms-auth-security
+          uri: lb://ms-auth-security
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10    # 10 req/seg
+                redis-rate-limiter.burstCapacity: 20     # pico: 20 req
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
+
+        - id: ms-core-maestros
+          uri: lb://ms-core-maestros
+          predicates:
+            - Path=/api/core/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+                key-resolver: "#{@userKeyResolver}"
+```
+
+### 37.3 Key resolvers (quién se limita)
+
+```java
+@Configuration
+public class RateLimiterConfig {
+
+    // Rate limit por usuario autenticado
+    @Bean
+    public KeyResolver userKeyResolver() {
+        return exchange -> {
+            String userId = exchange.getRequest()
+                .getHeaders().getFirst("X-User-Id");
+            return Mono.justOrEmpty(userId)
+                .defaultIfEmpty("anonymous");
+        };
+    }
+
+    // Rate limit por IP (para endpoints públicos como login)
+    @Bean
+    public KeyResolver ipKeyResolver() {
+        return exchange -> Mono.justOrEmpty(
+            exchange.getRequest().getRemoteAddress())
+            .map(addr -> addr.getAddress().getHostAddress())
+            .defaultIfEmpty("unknown");
+    }
+
+    // Rate limit por empresa (tenant)
+    @Bean
+    public KeyResolver tenantKeyResolver() {
+        return exchange -> Mono.justOrEmpty(
+            exchange.getRequest().getHeaders().getFirst("X-Empresa-Id"))
+            .defaultIfEmpty("no-tenant");
+    }
+}
+```
+
+### 37.4 Límites por tipo de endpoint
+
+| Endpoint | Rate (req/seg) | Burst | Key resolver | Justificación |
+|----------|:--------------:|:-----:|-------------|---------------|
+| `POST /api/auth/login` | 5 | 10 | IP | Prevenir fuerza bruta |
+| `POST /api/auth/refresh` | 2 | 5 | Usuario | Limitar renovación de tokens |
+| `/api/core/**` (maestros) | 50 | 100 | Usuario | Alta lectura, datos compartidos |
+| `/api/compras/**` | 30 | 60 | Usuario | Operaciones transaccionales |
+| `/api/ventas/**` | 100 | 200 | Empresa | Alto volumen en hora pico |
+| `/api/reportes/**` | 5 | 10 | Usuario | Reportes pesados, proteger BD |
+| `/internal/**` | Sin límite | — | — | Comunicación entre servicios |
+
+### 37.5 Respuesta cuando se excede el límite
+
+```json
+HTTP/1.1 429 Too Many Requests
+Retry-After: 1
+X-RateLimit-Remaining: 0
+X-RateLimit-Limit: 50
+
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Ha excedido el límite de solicitudes. Intente nuevamente en 1 segundo.",
+    "retryAfter": 1
+  }
+}
+```
+
+---
+
+## 38. Gestión de archivos y almacenamiento
+
+### 38.1 Arquitectura de almacenamiento
+
+```mermaid
+flowchart TB
+    subgraph Cliente
+        FE[Angular 20]
+    end
+    subgraph Backend
+        GW[API Gateway]
+        MS[Microservicio de negocio]
+        STORAGE[Servicio de Storage]
+    end
+    subgraph Almacenamiento
+        LOCAL[Local Filesystem\nDEV]
+        S3[S3 / MinIO\nPROD]
+    end
+
+    FE -->|"multipart/form-data"| GW
+    GW --> MS
+    MS -->|"guardar archivo"| STORAGE
+    STORAGE -->|DEV| LOCAL
+    STORAGE -->|PROD| S3
+    MS -->|"devolver URL"| FE
+```
+
+### 38.2 Tipos de archivos soportados
+
+| Categoría | Extensiones | Tamaño máximo | Uso |
+|-----------|-------------|:-------------:|-----|
+| **Imágenes** | jpg, jpeg, png, webp | 5 MB | Logo empresa, foto artículo, foto trabajador, foto activo |
+| **Documentos** | pdf | 10 MB | Contratos laborales, pólizas de seguros, guías de remisión |
+| **Hojas de cálculo** | xlsx, csv | 20 MB | Importación masiva de maestros, carga de tipos de cambio |
+| **Archivos regulatorios** | txt, xml | 50 MB | PLAME, PLE/SIRE, facturas electrónicas XML |
+| **Reportes generados** | pdf, xlsx | Sin límite | Reportes de JasperReports/Apache POI (generados por el sistema) |
+
+### 38.3 Implementación del servicio de almacenamiento
+
+```java
+// Interfaz agnóstica al proveedor de storage
+public interface StorageService {
+    String upload(MultipartFile file, String directory);
+    byte[] download(String filePath);
+    void delete(String filePath);
+    String generatePresignedUrl(String filePath, Duration expiration);
+}
+
+// Implementación local (DEV)
+@Profile("dev")
+@Service
+public class LocalStorageService implements StorageService {
+    
+    @Value("${storage.local.path:/tmp/restaurant-pe/uploads}")
+    private String basePath;
+
+    @Override
+    public String upload(MultipartFile file, String directory) {
+        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path path = Paths.get(basePath, directory, filename);
+        Files.createDirectories(path.getParent());
+        Files.copy(file.getInputStream(), path);
+        return directory + "/" + filename;
+    }
+}
+
+// Implementación S3 / MinIO (QA/PROD)
+@Profile("!dev")
+@Service
+public class S3StorageService implements StorageService {
+
+    private final S3Client s3Client;
+
+    @Value("${storage.s3.bucket:restaurant-pe-files}")
+    private String bucket;
+
+    @Override
+    public String upload(MultipartFile file, String directory) {
+        String key = directory + "/" + UUID.randomUUID() + "_" 
+            + file.getOriginalFilename();
+        s3Client.putObject(
+            PutObjectRequest.builder()
+                .bucket(bucket).key(key)
+                .contentType(file.getContentType())
+                .build(),
+            RequestBody.fromInputStream(file.getInputStream(), file.getSize())
+        );
+        return key;
+    }
+}
+```
+
+### 38.4 Estructura de directorios por tenant
+
+```
+restaurant-pe-files/
+├── empresa-1/
+│   ├── logos/
+│   │   └── logo-principal.png
+│   ├── articulos/
+│   │   ├── art-001-foto.jpg
+│   │   └── art-002-foto.jpg
+│   ├── trabajadores/
+│   │   └── trab-042-foto.jpg
+│   ├── contratos/
+│   │   └── contrato-2026-001.pdf
+│   ├── polizas/
+│   │   └── poliza-seg-001.pdf
+│   ├── regulatorios/
+│   │   ├── plame-202603.txt
+│   │   └── ple-compras-202603.txt
+│   └── reportes/
+│       └── balance-general-202603.pdf
+├── empresa-2/
+│   └── ...
+```
+
+> **Aislamiento:** Los archivos se organizan por `empresaId` para mantener el aislamiento entre tenants, consistente con la estrategia Database-per-Tenant.
+
+### 38.5 Endpoints de archivos
+
+| Método | Endpoint | Descripción |
+|:------:|----------|-------------|
+| POST | `/api/{modulo}/archivos/upload` | Subir archivo |
+| GET | `/api/{modulo}/archivos/{id}/download` | Descargar archivo |
+| DELETE | `/api/{modulo}/archivos/{id}` | Eliminar archivo |
+| GET | `/api/{modulo}/archivos/{id}/url` | Obtener URL temporal (presigned) |
+
+### 38.6 Validaciones de seguridad
+
+| Validación | Implementación |
+|------------|----------------|
+| **Tipo de archivo** | Verificar extensión Y content-type (MIME type sniffing) |
+| **Tamaño máximo** | Configurado por tipo de archivo |
+| **Antivirus** | ClamAV scan antes de almacenar (producción) |
+| **Nombre de archivo** | Renombrar con UUID para evitar path traversal |
+| **Acceso** | Verificar que el usuario tenga permiso sobre la entidad asociada al archivo |
+| **Aislamiento tenant** | Prefijo obligatorio `empresa-{id}/` en la ruta |
+
+---
+
+## 39. Estrategia de migración de datos
+
+### 39.1 Escenarios de migración
+
+| Escenario | Origen | Herramienta | Estrategia |
+|-----------|--------|-------------|------------|
+| **Migración desde SIGRE (PowerBuilder)** | Sybase ASE / SQL Server | ETL custom (Python/Java) | Extracción → transformación → carga |
+| **Migración desde otros ERP** | Diversos | Scripts SQL + CSV | Importación vía API masiva |
+| **Carga inicial de maestros** | Excel/CSV | Endpoint de importación masiva | Validación → inserción batch |
+| **Evolución del esquema** | Template DB | Flyway | Migraciones versionadas |
+
+### 39.2 Pipeline de migración desde SIGRE
+
+```mermaid
+flowchart LR
+    subgraph Origen["SIGRE (Sybase ASE)"]
+        SYB[(Base de datos\nSIGRE)]
+    end
+    subgraph ETL["ETL (Python + Pandas)"]
+        EXT[1. Extracción\nSQLAlchemy]
+        TRN[2. Transformación\n• Mapeo de campos\n• Normalización\n• Limpieza]
+        VAL[3. Validación\n• Integridad referencial\n• Reglas de negocio\n• Deduplicación]
+    end
+    subgraph Destino["Restaurant.pe (PostgreSQL)"]
+        API[4. Carga vía API\nBatch endpoints]
+        PG[(BD por empresa\nrestaurant_pe_emp_N)]
+    end
+
+    SYB --> EXT --> TRN --> VAL --> API --> PG
+```
+
+### 39.3 Mapeo de entidades SIGRE → Restaurant.pe
+
+| Entidad SIGRE | Tabla Restaurant.pe | Transformaciones |
+|---------------|---------------------|------------------|
+| `tabprv` (proveedores) | `core.relacion_comercial` | Unificar prov/cli, normalizar RUC, mapear `es_proveedor = true` |
+| `tabcli` (clientes) | `core.relacion_comercial` | Merge con proveedores existentes, `es_cliente = true` |
+| `tabart` (artículos) | `core.articulo` | Mapear categorías (4 niveles), unidades de medida |
+| `tabmon` (monedas) | `core.moneda` | Mapear códigos ISO |
+| `tabmp` (movimientos) | `almacen.movimiento_almacen` + detalle | Separar cabecera/detalle, recalcular kardex |
+| `taboc` (órdenes compra) | `compras.orden_compra` + detalle | Mapear estados, vincular proveedor migrado |
+| `tabcca` (cuentas contables) | `contabilidad.cuenta_contable` | Mapear plan contable jerárquico |
+| `tabemp` (empleados) | `rrhh.trabajador` | Vincular con `relacion_comercial`, mapear contratos |
+
+### 39.4 Endpoints de importación masiva
+
+```java
+@RestController
+@RequestMapping("/api/core/importacion")
+public class ImportacionController {
+
+    @PostMapping("/articulos/csv")
+    @RequirePermission(modulo = "CORE", opcion = "IMPORT", accion = "CREAR")
+    public ResponseEntity<ImportResult> importarArticulos(
+            @RequestParam("file") MultipartFile file) {
+        // 1. Parsear CSV
+        // 2. Validar cada fila (tipo, longitud, referencias)
+        // 3. Insertar en batch (saveAll con @Transactional)
+        // 4. Retornar resumen: insertados, actualizados, errores
+        return ResponseEntity.ok(importService.importarArticulos(file));
+    }
+}
+
+// Resultado de importación
+@Data
+public class ImportResult {
+    private int totalRows;
+    private int inserted;
+    private int updated;
+    private int skipped;
+    private List<ImportError> errors; // [{row: 15, field: "codigo", message: "duplicado"}]
+}
+```
+
+### 39.5 Plan de migración por fases
+
+| Fase | Datos a migrar | Validación | Rollback |
+|------|---------------|------------|----------|
+| **Fase 0** | Maestros estáticos (países, monedas, impuestos) | Conteo de registros, integridad referencial | Truncar tablas seed |
+| **Fase 1** | Relaciones comerciales, artículos, categorías | Conteo, muestreo aleatorio (5%), validación manual | Restore de BD template |
+| **Fase 2** | Saldos iniciales (stock, CxP, CxC) | Cuadre de totales con sistema origen | Script de reversión |
+| **Fase 3** | Histórico transaccional (opcional) | Cuadre por período y módulo | No aplica (datos históricos) |
+| **Fase 4** | Plan contable y saldos contables | Cuadre de Balance General | Restore de esquema contabilidad |
+
+---
+
+## 40. Comunicación en tiempo real (WebSocket)
+
+### 40.1 Arquitectura WebSocket
+
+```mermaid
+flowchart TB
+    subgraph Clientes
+        FE1[Angular - Cajero 1]
+        FE2[Angular - Cocina]
+        FE3[Angular - Admin]
+    end
+    subgraph Backend
+        GW[API Gateway]
+        WS[WebSocket Handler\nen microservicio]
+        MQ[RabbitMQ\nSTOMP Broker]
+    end
+
+    FE1 -->|"ws://gateway/ws"| GW
+    FE2 -->|"ws://gateway/ws"| GW
+    FE3 -->|"ws://gateway/ws"| GW
+    GW --> WS
+    WS <--> MQ
+    MQ -->|"topic: /empresa/1/cocina"| FE2
+    MQ -->|"topic: /empresa/1/alertas"| FE3
+```
+
+### 40.2 Configuración de WebSocket con STOMP
+
+```java
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        // Usar RabbitMQ como broker STOMP externo
+        config.enableStompBrokerRelay("/topic", "/queue")
+            .setRelayHost("rabbitmq")
+            .setRelayPort(61613)
+            .setClientLogin("guest")
+            .setClientPasscode("guest");
+
+        config.setApplicationDestinationPrefixes("/app");
+    }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/ws")
+            .setAllowedOriginPatterns("*")
+            .withSockJS(); // Fallback para navegadores sin WebSocket nativo
+    }
+}
+```
+
+### 40.3 Casos de uso en tiempo real
+
+| Caso de uso | Canal (topic) | Productor | Consumidor | Datos |
+|-------------|---------------|-----------|------------|-------|
+| **Comanda nueva en cocina** | `/topic/empresa/{id}/cocina` | ms-ventas | Pantalla cocina | Orden + ítems + mesa |
+| **Estado de comanda actualizado** | `/topic/empresa/{id}/mesas` | ms-ventas | POS cajero | Estado de preparación |
+| **Stock bajo mínimo** | `/topic/empresa/{id}/alertas` | ms-almacen | Dashboard admin | Artículo + stock actual |
+| **OC pendiente de aprobación** | `/topic/empresa/{id}/aprobaciones` | ms-compras | Aprobador | OC + monto + proveedor |
+| **Notificación general** | `/queue/user/{userId}/notificaciones` | ms-notificaciones | Usuario específico | Mensaje personalizado |
+| **Cierre de caja completado** | `/topic/empresa/{id}/caja` | ms-ventas | Admin/supervisor | Resumen del turno |
+
+### 40.4 Implementación en backend (publicar mensaje)
+
+```java
+@Service
+public class ComandaNotificationService {
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    public void notificarNuevaComanda(Long empresaId, ComandaDTO comanda) {
+        String destination = "/topic/empresa/" + empresaId + "/cocina";
+        messagingTemplate.convertAndSend(destination, comanda);
+    }
+
+    public void notificarCambioEstadoMesa(Long empresaId, MesaStatusDTO status) {
+        String destination = "/topic/empresa/" + empresaId + "/mesas";
+        messagingTemplate.convertAndSend(destination, status);
+    }
+
+    public void notificarUsuarioEspecifico(Long userId, NotificacionDTO notif) {
+        String destination = "/queue/user/" + userId + "/notificaciones";
+        messagingTemplate.convertAndSend(destination, notif);
+    }
+}
+```
+
+### 40.5 Implementación en frontend (Angular)
+
+```typescript
+// services/websocket.service.ts
+@Injectable({ providedIn: 'root' })
+export class WebSocketService {
+  private stompClient: Client;
+
+  constructor(private authService: AuthService) {}
+
+  connect(): void {
+    const empresaId = this.authService.getEmpresaId();
+    
+    this.stompClient = new Client({
+      brokerURL: `ws://localhost:8080/ws`,
+      connectHeaders: {
+        Authorization: `Bearer ${this.authService.getToken()}`
+      },
+      reconnectDelay: 5000,  // Reconexión automática
+    });
+
+    this.stompClient.onConnect = () => {
+      // Suscribirse a alertas de la empresa
+      this.stompClient.subscribe(
+        `/topic/empresa/${empresaId}/alertas`,
+        (message) => this.handleAlerta(JSON.parse(message.body))
+      );
+
+      // Suscribirse a notificaciones personales
+      const userId = this.authService.getUserId();
+      this.stompClient.subscribe(
+        `/queue/user/${userId}/notificaciones`,
+        (message) => this.handleNotificacion(JSON.parse(message.body))
+      );
+    };
+
+    this.stompClient.activate();
+  }
+
+  private handleAlerta(alerta: any): void {
+    // Mostrar toast/snackbar con la alerta
+  }
+
+  private handleNotificacion(notif: any): void {
+    // Actualizar badge de notificaciones, mostrar popup
+  }
+
+  disconnect(): void {
+    this.stompClient?.deactivate();
+  }
+}
+```
+
+### 40.6 Seguridad en WebSocket
+
+| Aspecto | Implementación |
+|---------|----------------|
+| **Autenticación** | JWT validado en el handshake inicial |
+| **Autorización por empresa** | Solo puede suscribirse a topics de su empresa (validado en interceptor) |
+| **Heartbeat** | STOMP heartbeat cada 10 segundos |
+| **Reconexión** | Automática con backoff exponencial (5s, 10s, 20s, max 60s) |
+| **Desconexión** | Automática al hacer logout o cerrar sesión |
+
+---
+
+## 41. Patrones de búsqueda y filtrado
+
+### 41.1 Estrategia general
+
+Todos los endpoints de listado soportan **filtrado dinámico**, **paginación**, **ordenamiento** y **búsqueda por texto** de manera estandarizada.
+
+### 41.2 JPA Specifications (filtros dinámicos)
+
+```java
+// Especificación genérica reutilizable
+public class GenericSpecification<T> implements Specification<T> {
+
+    private final List<SearchCriteria> criteriaList;
+
+    @Override
+    public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query,
+                                  CriteriaBuilder cb) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        for (SearchCriteria criteria : criteriaList) {
+            switch (criteria.getOperator()) {
+                case EQUALS -> predicates.add(
+                    cb.equal(root.get(criteria.getField()), criteria.getValue()));
+                case LIKE -> predicates.add(
+                    cb.like(cb.lower(root.get(criteria.getField())),
+                        "%" + criteria.getValue().toString().toLowerCase() + "%"));
+                case GREATER_THAN -> predicates.add(
+                    cb.greaterThan(root.get(criteria.getField()),
+                        (Comparable) criteria.getValue()));
+                case LESS_THAN -> predicates.add(
+                    cb.lessThan(root.get(criteria.getField()),
+                        (Comparable) criteria.getValue()));
+                case IN -> predicates.add(
+                    root.get(criteria.getField()).in((Collection<?>) criteria.getValue()));
+                case BETWEEN -> {
+                    var range = (Range<?>) criteria.getValue();
+                    predicates.add(cb.between(root.get(criteria.getField()),
+                        (Comparable) range.getMin(), (Comparable) range.getMax()));
+                }
+            }
+        }
+
+        return cb.and(predicates.toArray(new Predicate[0]));
+    }
+}
+
+// DTO de criterio de búsqueda
+@Data
+public class SearchCriteria {
+    private String field;
+    private SearchOperator operator;
+    private Object value;
+}
+
+public enum SearchOperator {
+    EQUALS, LIKE, GREATER_THAN, LESS_THAN, IN, BETWEEN, IS_NULL, IS_NOT_NULL
+}
+```
+
+### 41.3 Uso en controlador
+
+```java
+@GetMapping
+public ResponseEntity<Page<OrdenCompraResponse>> listar(
+        @RequestParam(required = false) Long proveedorId,
+        @RequestParam(required = false) String estado,
+        @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate fechaDesde,
+        @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate fechaHasta,
+        @RequestParam(required = false) String search,  // Búsqueda por texto libre
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(defaultValue = "fecha,desc") String sort) {
+
+    var spec = OrdenCompraSpec.builder()
+        .proveedorId(proveedorId)
+        .estado(estado)
+        .fechaDesde(fechaDesde)
+        .fechaHasta(fechaHasta)
+        .search(search)
+        .build();
+
+    var pageable = PageRequest.of(page, size, Sort.by(parseSortOrders(sort)));
+
+    return ResponseEntity.ok(service.listar(spec, pageable));
+}
+```
+
+### 41.4 Búsqueda full-text (PostgreSQL)
+
+Para búsquedas de texto libre en campos como nombre, razón social y descripción:
+
+```sql
+-- Índice de búsqueda full-text (en migración Flyway)
+CREATE INDEX idx_articulo_search ON core.articulo
+    USING GIN(to_tsvector('spanish', coalesce(codigo,'') || ' ' || 
+              coalesce(nombre,'') || ' ' || coalesce(descripcion,'') || ' ' ||
+              coalesce(codigo_barras,'')));
+
+-- Índice para relaciones comerciales
+CREATE INDEX idx_relacion_search ON core.relacion_comercial
+    USING GIN(to_tsvector('spanish', coalesce(numero_documento,'') || ' ' || 
+              coalesce(razon_social,'') || ' ' || coalesce(nombre_comercial,'')));
+```
+
+```java
+// Repositorio con query nativa para full-text search
+@Query(value = """
+    SELECT * FROM core.articulo
+    WHERE activo = true
+      AND to_tsvector('spanish', coalesce(codigo,'') || ' ' || 
+          coalesce(nombre,'') || ' ' || coalesce(descripcion,'') || ' ' ||
+          coalesce(codigo_barras,''))
+      @@ plainto_tsquery('spanish', :search)
+    ORDER BY ts_rank(
+        to_tsvector('spanish', coalesce(codigo,'') || ' ' || coalesce(nombre,'')),
+        plainto_tsquery('spanish', :search)
+    ) DESC
+    """, nativeQuery = true)
+Page<Articulo> searchFullText(@Param("search") String search, Pageable pageable);
+```
+
+### 41.5 Convenciones de filtrado
+
+| Parámetro | Tipo | Ejemplo | Descripción |
+|-----------|------|---------|-------------|
+| `page` | int | `0` | Número de página (0-based) |
+| `size` | int | `20` | Elementos por página (max: 100) |
+| `sort` | string | `fecha,desc` | Campo y dirección de ordenamiento |
+| `search` | string | `"arroz"` | Búsqueda full-text en campos principales |
+| `{campo}` | varies | `estado=APROBADA` | Filtro por campo exacto |
+| `{campo}Desde` | date | `fechaDesde=2026-03-01` | Rango: desde |
+| `{campo}Hasta` | date | `fechaHasta=2026-03-31` | Rango: hasta |
+| `{campo}In` | list | `estadoIn=APROBADA,COMPLETADA` | Múltiples valores |
+
+---
+
+## 42. Estrategia de backup y restore
+
+### 42.1 Política de backup
+
+```mermaid
+flowchart TB
+    subgraph Backup_Policy["Política de backup"]
+        direction LR
+        FULL["Backup completo\n(pg_dump)\nDiario — 02:00 AM"]
+        WAL["WAL archiving\n(Point-in-Time Recovery)\nContinuo"]
+        SNAP["Snapshot de disco\n(Cloud)\nSemanal"]
+    end
+    subgraph Storage["Almacenamiento"]
+        LOCAL_BK["Disco local\n(7 días)"]
+        S3_BK["S3 / Object Storage\n(30 días)"]
+        GLACIER["Glacier / Cold Storage\n(1 año)"]
+    end
+    FULL --> LOCAL_BK
+    FULL --> S3_BK
+    WAL --> S3_BK
+    SNAP --> S3_BK
+    S3_BK -->|"Lifecycle policy"| GLACIER
+```
+
+### 42.2 Backup por tipo de base de datos
+
+| Base de datos | Estrategia | Frecuencia | Retención | Herramienta |
+|---------------|-----------|:----------:|:---------:|-------------|
+| `restaurant_pe_master` | Full dump + WAL | Diario + continuo | 90 días | `pg_dump` + `archive_command` |
+| `restaurant_pe_template` | Full dump | Semanal | 30 días | `pg_dump` |
+| `restaurant_pe_emp_{id}` (cada tenant) | Full dump + WAL | Diario + continuo | 30 días | `pg_dump` por cada BD |
+
+### 42.3 Scripts de backup automatizados
+
+```bash
+#!/bin/bash
+# backup-all-tenants.sh — Ejecuta backup de todas las BDs de tenant
+# Se ejecuta vía cron a las 02:00 AM
+
+BACKUP_DIR="/backups/postgresql/$(date +%Y-%m-%d)"
+PG_HOST="localhost"
+PG_USER="backup_user"
+LOG_FILE="/var/log/restaurant-pe/backup.log"
+
+mkdir -p "$BACKUP_DIR"
+
+echo "[$(date)] Iniciando backup de todas las BDs..." >> "$LOG_FILE"
+
+# 1. Backup de BD Master
+pg_dump -h "$PG_HOST" -U "$PG_USER" -Fc \
+    restaurant_pe_master > "$BACKUP_DIR/restaurant_pe_master.dump"
+echo "[$(date)] ✅ BD Master backupeada" >> "$LOG_FILE"
+
+# 2. Backup de cada tenant activo
+psql -h "$PG_HOST" -U "$PG_USER" -d restaurant_pe_master -t -c \
+    "SELECT db_name FROM master.tenant WHERE activo = true" | while read DB_NAME; do
+    DB_NAME=$(echo "$DB_NAME" | xargs)  # Trim whitespace
+    if [ -n "$DB_NAME" ]; then
+        pg_dump -h "$PG_HOST" -U "$PG_USER" -Fc \
+            "$DB_NAME" > "$BACKUP_DIR/${DB_NAME}.dump"
+        echo "[$(date)] ✅ $DB_NAME backupeada" >> "$LOG_FILE"
+    fi
+done
+
+# 3. Subir a S3
+aws s3 sync "$BACKUP_DIR" "s3://restaurant-pe-backups/$(date +%Y-%m-%d)/" \
+    --storage-class STANDARD_IA
+echo "[$(date)] ✅ Backups subidos a S3" >> "$LOG_FILE"
+
+# 4. Limpiar backups locales > 7 días
+find /backups/postgresql/ -type d -mtime +7 -exec rm -rf {} +
+echo "[$(date)] 🧹 Limpieza de backups locales completada" >> "$LOG_FILE"
+```
+
+### 42.4 Restore por tenant
+
+Una ventaja clave de Database-per-Tenant: se puede restaurar **una sola empresa** sin afectar las demás.
+
+```bash
+#!/bin/bash
+# restore-tenant.sh — Restaurar una empresa específica
+# Uso: ./restore-tenant.sh restaurant_pe_emp_3 2026-03-15
+
+DB_NAME=$1
+BACKUP_DATE=$2
+BACKUP_FILE="s3://restaurant-pe-backups/${BACKUP_DATE}/${DB_NAME}.dump"
+
+echo "⚠️  Restaurando $DB_NAME desde backup del $BACKUP_DATE..."
+
+# 1. Descargar backup desde S3
+aws s3 cp "$BACKUP_FILE" /tmp/restore.dump
+
+# 2. Terminar conexiones activas
+psql -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity 
+         WHERE datname = '${DB_NAME}' AND pid <> pg_backend_pid();"
+
+# 3. Eliminar BD actual y restaurar
+dropdb "$DB_NAME"
+pg_restore -C -d postgres /tmp/restore.dump
+
+echo "✅ $DB_NAME restaurada desde $BACKUP_DATE"
+
+# 4. Notificar a microservicios para refrescar pool
+curl -X POST http://localhost:9001/internal/tenants/refresh-pool \
+    -H "Content-Type: application/json" \
+    -d "{\"dbName\": \"${DB_NAME}\"}"
+```
+
+### 42.5 WAL Archiving (Point-in-Time Recovery)
+
+```ini
+# postgresql.conf
+wal_level = replica
+archive_mode = on
+archive_command = 'aws s3 cp %p s3://restaurant-pe-wal/%f'
+max_wal_senders = 5
+```
+
+Esto permite recuperar la BD a **cualquier punto en el tiempo**, no solo al último backup completo.
+
+### 42.6 Validación de backups
+
+| Validación | Frecuencia | Método |
+|------------|:----------:|--------|
+| **Integridad del dump** | Diaria | `pg_restore --list` sobre el archivo |
+| **Restore de prueba** | Semanal | Restaurar en servidor de staging y verificar consultas |
+| **Conteo de registros** | Diaria | Comparar conteos pre/post backup |
+| **Alerta de fallo** | Inmediata | Email + Slack si el script de backup falla |
+
+---
+
+## 43. Recuperación ante desastres (Disaster Recovery)
+
+### 43.1 Objetivos de recuperación
+
+| Métrica | Objetivo | Descripción |
+|---------|:--------:|-------------|
+| **RPO** (Recovery Point Objective) | **1 hora** | Pérdida máxima de datos aceptable |
+| **RTO** (Recovery Time Objective) | **4 horas** | Tiempo máximo para restaurar el servicio |
+| **MTTR** (Mean Time To Recover) | **2 horas** | Tiempo promedio de recuperación |
+
+### 43.2 Clasificación de desastres
+
+| Nivel | Escenario | Impacto | Estrategia |
+|:-----:|-----------|---------|------------|
+| **1** | Fallo de un microservicio | Módulo inoperativo | Reinicio automático (Docker restart policy) + Circuit Breaker |
+| **2** | Fallo de BD de un tenant | Una empresa sin servicio | Restore desde último backup (30 min) |
+| **3** | Fallo del servidor PostgreSQL | Todas las empresas sin BD | Failover a réplica (streaming replication) |
+| **4** | Fallo del servidor completo | Todo el sistema caído | Levantar en servidor de contingencia |
+| **5** | Desastre de data center | Pérdida total de infraestructura | Recuperar desde S3 en otra región |
+
+### 43.3 Arquitectura de alta disponibilidad
+
+```mermaid
+flowchart TB
+    subgraph Region_Principal["Región Principal"]
+        subgraph App_Servers["Servidores de aplicación"]
+            GW1[API Gateway]
+            MS1[Microservicios]
+        end
+        subgraph DB_Primary["Base de datos - Primario"]
+            PG1[(PostgreSQL Primary\nWAL Shipping)]
+        end
+        subgraph DB_Standby["Base de datos - Standby"]
+            PG2[(PostgreSQL Standby\nStreaming Replication)]
+        end
+        PG1 -->|"WAL streaming"| PG2
+    end
+
+    subgraph Region_DR["Región de contingencia (DR)"]
+        subgraph DR_Infra["Infraestructura DR"]
+            GW2[API Gateway DR\n(apagado)]
+            MS2[Microservicios DR\n(apagado)]
+        end
+        subgraph DR_DB["Base de datos DR"]
+            PG3[(PostgreSQL DR\nRestored from S3)]
+        end
+    end
+
+    subgraph Storage_Global["Almacenamiento global"]
+        S3_BK[S3 — Backups\nWAL Archives]
+    end
+
+    PG1 -->|"backup diario"| S3_BK
+    S3_BK -->|"restore en caso de DR"| PG3
+
+    DNS[DNS / Load Balancer\n(Route 53)]
+    DNS -->|"normal"| GW1
+    DNS -.->|"failover"| GW2
+```
+
+### 43.4 Streaming Replication (PostgreSQL)
+
+```ini
+# postgresql.conf (Primario)
+wal_level = replica
+max_wal_senders = 5
+synchronous_standby_names = 'standby1'
+archive_mode = on
+archive_command = 'aws s3 cp %p s3://restaurant-pe-wal/%f'
+
+# postgresql.conf (Standby)
+primary_conninfo = 'host=pg-primary port=5432 user=replicator password=xxx'
+hot_standby = on
+```
+
+### 43.5 Procedimiento de failover
+
+| Paso | Acción | Responsable | Tiempo est. |
+|:----:|--------|:-----------:|:-----------:|
+| 1 | Detectar fallo (monitoreo + alertas) | Automático (Prometheus) | 1 min |
+| 2 | Confirmar que no es un falso positivo | DevOps | 5 min |
+| 3 | Promover Standby a Primary (`pg_ctl promote`) | DBA | 5 min |
+| 4 | Actualizar connection strings en `master.tenant` | DBA | 5 min |
+| 5 | Reiniciar microservicios o refrescar pools | DevOps | 10 min |
+| 6 | Verificar acceso y funcionalidad | QA | 15 min |
+| 7 | Notificar a usuarios | PM / Soporte | 5 min |
+| 8 | Configurar nuevo Standby | DBA | 1-2 horas |
+| **Total RTO estimado** | | | **~45 min** |
+
+### 43.6 Plan de pruebas de DR
+
+| Prueba | Frecuencia | Objetivo |
+|--------|:----------:|----------|
+| **Restore de backup** (un tenant) | Mensual | Verificar integridad de backups y tiempo de restore |
+| **Failover a Standby** | Trimestral | Simular fallo de PostgreSQL primario |
+| **Recovery completo** | Semestral | Simular pérdida total y levantar en otro servidor |
+| **Test de comunicación** | Mensual | Verificar que el equipo conoce el procedimiento |
+
+### 43.7 Checklist de DR
+
+- [ ] Backups diarios verificados (automático)
+- [ ] WAL archiving activo y verificado
+- [ ] Streaming Replication funcionando (lag < 1 min)
+- [ ] Scripts de restore probados y documentados
+- [ ] Servidor de contingencia listo (o plan de provisión cloud)
+- [ ] Runbook de DR actualizado y accesible
+- [ ] Contactos de emergencia documentados
+- [ ] Última prueba de DR: ____________
+
+---
+
+*Documento de arquitectura técnica del proyecto Restaurant.pe. Cubre microservicios, estrategia Database-per-Tenant, seguridad centralizada, multitenancy, comunicación, DevOps, estándares de desarrollo, diagramas de arquitectura (C4), entidades (resumen), comunicación, interacción, flujos y estados. Incluye estrategias detalladas de testing, logging/observabilidad, caché (Redis), CORS, rate limiting, gestión de archivos, migración de datos, comunicación en tiempo real (WebSocket), patrones de búsqueda/filtrado, backup/restore y recuperación ante desastres. La definición detallada de tablas, columnas, índices, migraciones y ER completos se encuentra en [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md). Basado en el análisis de las HUs y la experiencia del ERP SIGRE.*

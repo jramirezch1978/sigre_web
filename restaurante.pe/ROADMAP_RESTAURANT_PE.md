@@ -40,10 +40,10 @@ Para cumplir con el plazo de 5 meses se requieren **3 equipos funcionales** trab
 | **Scrum Master / PM** | 1 | 100% todo el proyecto | Gestión de sprints, seguimiento de hitos, gestión de impedimentos |
 | **Analista Funcional / BA** | 2 | 100% todo el proyecto | Refinamiento de HUs, validación funcional, criterios de aceptación, pruebas UAT |
 | **DevOps** | 1 | 100% todo el proyecto | CI/CD, entornos, Docker, despliegues, monitoreo |
-| **DBA** | 1 | 100% Fases 1–2, 50% Fases 3–4 | Modelo de datos, migraciones Flyway, performance, índices |
+| **DBA** | 1 | 100% Fases 1–2, 50% Fases 3–4 | Modelo de datos, migraciones Flyway, performance, índices, backup/restore, streaming replication |
 | **Backend Senior (Java/Spring Boot)** | 8 | 100% asignados a equipos | Desarrollo de microservicios, APIs REST, lógica de negocio |
 | **Frontend (Angular 20)** | 5 | 100% asignados a equipos | Pantallas, componentes, integración con APIs, UX |
-| **QA / Tester** | 2 | 100% desde Fase 2 | Pruebas funcionales, regresión, automatización, pruebas de integración |
+| **QA / Tester** | 2 | 100% desde Fase 2 | Pruebas funcionales, regresión, automatización (Cypress E2E), tests de integración (Testcontainers), tests de contrato (Spring Cloud Contract), performance testing semanal |
 
 ### 2.2 Distribución por equipo
 
@@ -249,11 +249,11 @@ gantt
 
 | Responsable | Tarea |
 |-------------|-------|
-| Tech Lead + DevOps | Eureka Server, Config Server, API Gateway, CI/CD pipelines |
+| Tech Lead + DevOps | Eureka Server, Config Server, API Gateway, Redis, MinIO (storage dev). CI/CD pipelines con SonarQube + JaCoCo (quality gates: cobertura ≥70%, 0 bugs). ELK Stack base (Elasticsearch + Logstash + Kibana). Prometheus + Grafana (dashboards infra). Zipkin (tracing distribuido) |
 | Backend 1–2 | ms-auth-security: login, JWT, usuarios, roles dinámicos, permisos, opciones de menú |
 | Backend 3–4 | ms-core-maestros: empresa, sucursal, país, departamento, provincia, distrito, moneda, tipo de cambio |
 | Backend 5–6 | ms-core-maestros: impuestos, retenciones, detracciones, parámetros del sistema, ejercicios/períodos |
-| DBA | BD Master (auth + master), BD Template (10 schemas de negocio), migraciones Flyway multi-tenant, BD empresa demo |
+| DBA | BD Master (auth + master), BD Template (10 schemas de negocio), migraciones Flyway multi-tenant, BD empresa demo, backup automático (pg_dump diario + WAL archiving), scripts de restore por tenant |
 | Frontend 1–2 | Angular shell, layout principal, login, selección empresa/sucursal |
 | Frontend 3 | Componentes reutilizables (tablas, formularios, filtros, paginación) |
 | Analistas | Validación de campos y reglas de negocio de cada maestro |
@@ -281,8 +281,9 @@ gantt
 | Frontend todos | Menú dinámico funcional, CRUDs completos, validaciones |
 | QA | Pruebas de todos los maestros, validación de datos, permisos |
 | Analistas | UAT de maestros con reglas de negocio |
+| Backend (migración) | Desarrollar scripts ETL (Python + Pandas) para migración de maestros desde SIGRE: relaciones comerciales, artículos, categorías, unidades. Endpoints de importación masiva (CSV/Excel) |
 
-**Criterio de salida (Hito M1):** Todos los maestros con CRUD funcional en backend y frontend. Menú dinámico cargando por roles. Auth + multiempresa operativo.
+**Criterio de salida (Hito M1):** Todos los maestros con CRUD funcional en backend y frontend. Menú dinámico cargando por roles. Auth + multiempresa operativo. Infraestructura de observabilidad operativa (ELK + Prometheus/Grafana + Zipkin). CI/CD con quality gates SonarQube pasando (cobertura ≥70%). Redis y MinIO configurados.
 
 ---
 
@@ -318,13 +319,13 @@ gantt
 | Semana | Backend | Frontend |
 |:------:|---------|----------|
 | S6–S7 | Zonas, mesas, turnos, apertura/cierre de caja | Pantalla de gestión de mesas y turnos |
-| S7–S8 | Órdenes de venta, comandas, estados, impresión cocina/bar | POS: pantalla de toma de pedidos |
+| S7–S8 | Órdenes de venta, comandas, estados, WebSocket/STOMP para notificación en tiempo real a cocina/bar | POS: pantalla de toma de pedidos, pantalla cocina con recepción en tiempo real |
 | S8–S9 | Documentos de venta (boleta/factura), detalle, numeración automática | Pantalla emisión documentos, selección forma de pago |
 | S9–S10 | Notas de crédito/débito, anulaciones, propinas, descuentos/promociones | Pantallas de NC/ND, configuración descuentos |
 | S10 | Facturación electrónica (SUNAT): generación XML, envío OSE, CDR | Monitoreo de envío y estado SUNAT |
 | S10–S11 | Cierre de caja (cuadre), reportes: ventas por día/turno/mesero, ticket promedio | Dashboard de ventas, reporte de cierre |
 
-**Criterio de salida (Hito M2):** Flujo completo Proveedor → OC → Aprobación → Recepción → Movimiento Almacén → Stock → Kardex operativo. Flujo de venta: Mesa → Orden → Comanda → Documento → Facturación electrónica → Cierre de caja. Devoluciones y ajustes funcionales.
+**Criterio de salida (Hito M2):** Flujo completo Proveedor → OC → Aprobación → Recepción → Movimiento Almacén → Stock → Kardex operativo. Flujo de venta: Mesa → Orden → Comanda (con WebSocket a cocina en tiempo real) → Documento → Facturación electrónica → Cierre de caja. Devoluciones y ajustes funcionales. Quality gate SonarQube pasando (cobertura ≥70%, 0 bugs/vulnerabilidades).
 
 ---
 
@@ -389,11 +390,12 @@ gantt
 | Semana | Actividad |
 |:------:|-----------|
 | S18–S19 | Integración contable de TODOS los módulos (verificar que todos generen pre-asientos correctos) |
-| S19 | QA integral: pruebas end-to-end de flujos completos (compra → almacén → CxP → pago → asiento contable) |
+| S19 | QA integral: pruebas end-to-end con Cypress (flujos completos: compra → almacén → CxP → pago → asiento contable). Tests de contrato entre microservicios (Spring Cloud Contract). Performance testing |
+| S19 | DevOps/DBA: Configurar streaming replication (PostgreSQL Standby). Prueba de Disaster Recovery. Dashboards de monitoreo finales (Grafana: negocio + BD + RabbitMQ). Configurar alertas de producción |
 | S20 | Piloto con usuarios reales, corrección de bugs críticos |
-| S20 | Documentación operativa y entrega |
+| S20 | Documentación operativa, runbook de DR y entrega |
 
-**Criterio de salida (Hito M4):** Cierre contable ejecutado. Producción con costeo. Integración de pre-asientos de todos los módulos. Al menos un piloto exitoso.
+**Criterio de salida (Hito M4):** Cierre contable ejecutado. Producción con costeo. Integración de pre-asientos de todos los módulos. Backup automático y streaming replication configurados. Prueba de DR exitosa. Monitoreo y alertas operativos. Quality gates SonarQube pasando (cobertura ≥70%, 0 bugs). Al menos un piloto exitoso.
 
 ---
 
@@ -544,7 +546,7 @@ flowchart TB
 | 7 | **ms-compras** | 9004 | Condiciones de pago, OC, OS, aprobaciones, recepción, planificación de abastecimiento | 2 |
 | 8 | **ms-finanzas** | 9005 | Tesorería, CxC, CxP, adelantos, cuentas bancarias, conciliaciones, flujo de caja, programación de pagos | 3 |
 | 9 | **ms-contabilidad** | 9006 | Plan contable, centros de costo, asientos, pre-asientos, matrices contables, cierres, libros electrónicos, EEFF | 4 |
-| 10 | **ms-rrhh** | 9007 | Trabajadores, contratos, asistencia, nómina, beneficios, liquidaciones, reclutamiento, talento, archivos regulatorios | 2–3 |
+| 10 | **ms-rrhh** | 9007 | Trabajadores, contratos, asistencia, nómina, beneficios, liquidaciones, reclutamiento, talento, archivos regulatorios | 4.1 |
 | 11 | **ms-activos-fijos** | 9008 | Registro de activos, depreciación, revaluación, seguros, bajas, traslados | 3 |
 | 12 | **ms-produccion** | 9009 | Recetas, órdenes de producción, costeo por receta, consumo de inventario | 4 |
 | 13 | **ms-ventas** | 9010 | Integración con POS, documentos de venta, notas de crédito/débito, cierre de caja, propinas, descuentos, mesas/comandas, facturación electrónica | 2 |
@@ -552,7 +554,22 @@ flowchart TB
 | 15 | **ms-reportes** | 9012 | Motor de reportes (JasperReports o similar), exportación PDF/Excel, reportes compartidos entre módulos | 2 |
 | 16 | **ms-notificaciones** | 9013 | Envío de correos, alertas del sistema, recordatorios, notificaciones push | 2 |
 
-### 8.3 Comunicación entre microservicios
+### 8.3 Servicios de infraestructura (además de los microservicios)
+
+| Servicio | Puerto | Uso | Fase |
+|----------|:------:|-----|:----:|
+| **PostgreSQL 16** | 5432 | Base de datos (Master + Template + Tenants) | 1 |
+| **RabbitMQ** | 5672 / 15672 | Mensajería asincrónica (pre-asientos, auditoría, notificaciones, tenant sync) | 1 |
+| **Redis 7** | 6379 | Caché (sesiones, menú, config, stock), rate limiting en Gateway | 1 |
+| **MinIO** (dev) / **S3** (prod) | 9000 | Almacenamiento de archivos aislado por tenant (logos, fotos, documentos, regulatorios) | 1 |
+| **Elasticsearch** | 9200 | Indexación y búsqueda de logs centralizados | 1–2 |
+| **Logstash** | 5044 | Recolección y transformación de logs (JSON → Elasticsearch) | 1–2 |
+| **Kibana** | 5601 | Visualización y análisis de logs | 1–2 |
+| **Prometheus** | 9090 | Recolección de métricas de todos los microservicios (Spring Actuator) | 1–2 |
+| **Grafana** | 3000 | Dashboards de monitoreo (infra, JVM, gateway, negocio, BD, RabbitMQ) + alertas | 1–2 |
+| **Zipkin / Jaeger** | 9411 | Tracing distribuido entre microservicios | 2 |
+
+### 8.4 Comunicación entre microservicios
 
 ```mermaid
 flowchart LR
@@ -1111,6 +1128,12 @@ erDiagram
 | Comunicación entre microservicios frágil | Definir contratos de API (OpenAPI) desde Fase 1; usar versionado de API |
 | Base de datos crece sin control | Aplicar migraciones versionadas (Flyway) desde el primer día; revisiones de esquema por sprint |
 | Complejidad Database-per-Tenant | `MultiTenantMigrationRunner` automatiza migraciones. Evento `tenant.created` sincroniza pools. ms-auth centraliza registro |
+| Redis como punto único de fallo (caché + rate limiting) | Redis Sentinel o Redis Cluster en producción; fallback a BD directa en caso de caída |
+| Fallo de Elasticsearch/ELK impide análisis de logs | Logs también van a stdout (Docker logs como fallback); Elasticsearch con réplicas |
+| Pérdida de datos mayor al RPO (1 hora) | WAL archiving continuo + streaming replication (PostgreSQL Standby) |
+| Migración de datos SIGRE retrasada | Pipeline ETL definido (Python + Pandas), plan por fases con rollback; endpoints de importación masiva |
+| WebSocket desconexiones en redes inestables | Reconexión automática con backoff exponencial (5s, 10s, 20s, max 60s); SockJS como fallback |
+| Backups no validados o corruptos | Restore de prueba semanal, conteo de registros diario, alerta automática si backup falla |
 | Plazo agresivo de 5 meses | Equipos paralelos, sprints de 1 semana, demos semanales, decisiones rápidas |
 
 ---
@@ -1122,8 +1145,16 @@ erDiagram
 3. **Detallar la arquitectura** de cada microservicio (paquetes, capas, contratos de API) en documentos técnicos por servicio.
 4. **Fijar hitos** en fechas concretas y revisar el roadmap cada mes.
 5. **Definir estándares de API** (OpenAPI/Swagger), patrones de error, paginación y versionado.
-6. **Implementar CI/CD** desde la Semana 1: build, test, análisis de código y deploy automatizado por microservicio.
+6. **Implementar CI/CD** desde la Semana 1: build, test, análisis de código (SonarQube + JaCoCo, quality gates obligatorios) y deploy automatizado por microservicio.
+7. **Configurar stack de observabilidad** desde Semana 1: ELK Stack (logs JSON), Prometheus + Grafana (dashboards de infra, JVM, gateway, negocio, BD, RabbitMQ), Zipkin/Jaeger (tracing distribuido).
+8. **Configurar Redis** desde Semana 1 para caché de sesiones, menú, configuraciones y rate limiting en API Gateway.
+9. **Configurar MinIO** (dev) / **S3** (prod) para gestión de archivos aislados por tenant (logos, fotos, documentos, regulatorios).
+10. **Definir y automatizar pipeline de migración** de datos desde SIGRE (ETL Python + Pandas) alineado con las fases del roadmap: maestros (F1), stock (F2), CxP/CxC (F3), contabilidad (F4).
+11. **Configurar backup automático** (pg_dump diario + WAL archiving) y **streaming replication** (PostgreSQL Standby) antes de Fase 3.
+12. **Implementar WebSocket/STOMP** para comandas en tiempo real a cocina/bar, alertas de stock y notificaciones push desde Fase 2.
+13. **Planificar primera prueba de DR** antes del piloto (Semana 19): simular failover a Standby, verificar RPO ≤1h y RTO ≤4h.
+14. **Configurar tests de contrato** (Spring Cloud Contract) desde Fase 2 para validar comunicación entre microservicios.
 
 ---
 
-*Roadmap para el proyecto Restaurant.pe. Stack: Backend Java/Spring Boot (microservicios con API Gateway y Eureka), Frontend Angular 20, Base de datos PostgreSQL con estrategia Database-per-Tenant. Plazo: 5 meses, 21 personas, 3 equipos en paralelo. Incluye arquitectura de microservicios, modelo de seguridad centralizado en BD Master con roles dinámicos por empresa y menú por permisos, numeración atómica sin gaps, y maestros detallados por módulo.*
+*Roadmap para el proyecto Restaurant.pe. Stack: Backend Java/Spring Boot (microservicios con API Gateway y Eureka), Frontend Angular 20, Base de datos PostgreSQL con estrategia Database-per-Tenant. Infraestructura: Redis (caché/rate limiting), RabbitMQ (eventos), ELK (logs), Prometheus/Grafana (monitoreo), Zipkin (tracing), MinIO/S3 (archivos). Plazo: 5 meses, 21 personas, 3 equipos en paralelo. Incluye arquitectura de microservicios, modelo de seguridad centralizado en BD Master, roles dinámicos por empresa, menú por permisos, numeración atómica sin gaps, WebSocket/STOMP para tiempo real, testing (JUnit/Testcontainers/Cypress/SonarQube), backup/restore por tenant, streaming replication y plan de Disaster Recovery.*
