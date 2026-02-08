@@ -465,7 +465,7 @@ com.restaurantpe.{modulo}
 
 ### 6.3 Entidad base (herencia)
 
-Todas las entidades heredan de `BaseEntity` para garantizar auditoría y multiempresa:
+Todas las entidades de negocio heredan de `BaseEntity` para garantizar auditoría y soft delete. Con Database-per-Tenant, **no se incluye `empresa_id`** ya que cada BD es de una sola empresa:
 
 ```java
 @MappedSuperclass
@@ -475,9 +475,6 @@ public abstract class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(name = "empresa_id", nullable = false)
-    private Long empresaId;
     
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
@@ -499,6 +496,8 @@ public abstract class BaseEntity {
     private LocalDateTime modificadoEn;
 }
 ```
+
+> **Nota:** Las entidades del esquema `auth` en la BD Master (como `UsuarioEmpresa`) tienen su propia clase base que sí incluye la referencia a empresa.
 
 ---
 

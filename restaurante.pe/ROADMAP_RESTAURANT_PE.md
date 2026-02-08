@@ -194,13 +194,15 @@ gantt
     Frontend Shell + Login + Menú dinámico + CRUDs           :f1fe, 2026-03-02, 5w
     Hito M1 — Maestros listos                                :milestone, m1, 2026-04-06, 0d
 
-    section Fase 2 — Compras + Almacén
+    section Fase 2 — Compras + Almacén + Ventas
     Compras: OC + OS + aprobaciones multinivel               :f2a1, 2026-04-06, 3w
     Compras: Recepción + integración almacén                 :f2a2, after f2a1, 1w
     Almacén: Movimientos + kardex + valorización             :f2a3, 2026-04-06, 3w
     Almacén: Inventario físico + ajustes + devoluciones      :f2a4, after f2a3, 1w
-    Reportes Compras + Almacén                               :f2a5, after f2a2, 2w
-    Hito M2 — Compras + Almacén operativos                   :milestone, m2, 2026-05-18, 0d
+    Ventas: Mesas + órdenes + comandas + POS                 :f2v1, 2026-04-06, 3w
+    Ventas: Documentos + facturación electrónica + cierre    :f2v2, after f2v1, 3w
+    Reportes Compras + Almacén + Ventas                      :f2a5, after f2a2, 2w
+    Hito M2 — Compras + Almacén + Ventas operativos          :milestone, m2, 2026-05-18, 0d
 
     section Fase 3 — Finanzas + Activos Fijos
     Finanzas: CxP (facturas, pagos, NC/ND)                   :f3a1, 2026-05-11, 2w
@@ -262,7 +264,7 @@ gantt
 |-------------|-------|
 | Backend 1–2 | ms-core-maestros: relacion_comercial (unificado prov/cli), tipo_documento_identidad, contactos, cuentas bancarias |
 | Backend 3–4 | ms-core-maestros: artículo, categoría (4 niveles), unidad_medida, conversión, naturaleza_contable, artículo_proveedor, artículo_almacén |
-| Backend 5 | ms-core-maestros: condición_pago, forma_pago, numeradores |
+| Backend 5 | ms-core-maestros: condición_pago, forma_pago, secuencias de documentos |
 | Backend 6 | ms-almacen: almacén (maestro), tipo_movimiento |
 | Backend 7 | ms-contabilidad: cuenta_contable (plan contable jerárquico), centro_costo, libro_contable, matriz_contable |
 | Backend 8 | ms-rrhh: área, cargo, concepto_planilla, AFP · ms-activos-fijos: clase_activo, ubicación_física, aseguradora |
@@ -284,13 +286,13 @@ gantt
 
 ---
 
-### Fase 2: Compras + Almacén (Semanas 6–11)
+### Fase 2: Compras + Almacén + Ventas (Semanas 6–11)
 
 **Duración:** 6 semanas  
-**Equipos:** A lidera, B apoya (todo el equipo técnico concentrado en los procesos core)  
-**Referencia SIGRE:** Estos son los módulos con mayor volumen transaccional. En SIGRE, Compras y Almacén comparten más de 1,500 objetos de código fuente.
+**Equipos:** A lidera Compras + Almacén, B lidera Ventas (en paralelo)  
+**Referencia SIGRE:** Estos son los módulos con mayor volumen transaccional. En SIGRE, Compras y Almacén comparten más de 1,500 objetos de código fuente. Ventas se desarrolla en paralelo por su independencia funcional.
 
-#### Compras (5 Backend + 3 Frontend + 1 QA)
+#### Equipo A: Compras (5 Backend + 3 Frontend + 1 QA)
 
 | Semana | Backend | Frontend |
 |:------:|---------|----------|
@@ -301,7 +303,7 @@ gantt
 | S10 | Devoluciones a proveedores, solicitudes de reposición | Pantallas devolución y reposición |
 | S10–S11 | Reportes: OC pendientes, compras por proveedor, por período | Reportes con filtros y export Excel/PDF |
 
-#### Almacén (3 Backend + 2 Frontend + 1 QA)
+#### Equipo A: Almacén (3 Backend + 2 Frontend + 1 QA)
 
 | Semana | Backend | Frontend |
 |:------:|---------|----------|
@@ -311,7 +313,18 @@ gantt
 | S10 | Traslados entre almacenes, stock en tránsito | Pantalla traslados |
 | S10–S11 | Reportes: stock actual, movimientos por período, valorización | Reportes con filtros y export |
 
-**Criterio de salida (Hito M2):** Flujo completo Proveedor → OC → Aprobación → Recepción → Movimiento Almacén → Stock → Kardex operativo. Devoluciones y ajustes funcionales.
+#### Equipo B: Ventas (4 Backend + 3 Frontend + 1 QA)
+
+| Semana | Backend | Frontend |
+|:------:|---------|----------|
+| S6–S7 | Zonas, mesas, turnos, apertura/cierre de caja | Pantalla de gestión de mesas y turnos |
+| S7–S8 | Órdenes de venta, comandas, estados, impresión cocina/bar | POS: pantalla de toma de pedidos |
+| S8–S9 | Documentos de venta (boleta/factura), detalle, numeración automática | Pantalla emisión documentos, selección forma de pago |
+| S9–S10 | Notas de crédito/débito, anulaciones, propinas, descuentos/promociones | Pantallas de NC/ND, configuración descuentos |
+| S10 | Facturación electrónica (SUNAT): generación XML, envío OSE, CDR | Monitoreo de envío y estado SUNAT |
+| S10–S11 | Cierre de caja (cuadre), reportes: ventas por día/turno/mesero, ticket promedio | Dashboard de ventas, reporte de cierre |
+
+**Criterio de salida (Hito M2):** Flujo completo Proveedor → OC → Aprobación → Recepción → Movimiento Almacén → Stock → Kardex operativo. Flujo de venta: Mesa → Orden → Comanda → Documento → Facturación electrónica → Cierre de caja. Devoluciones y ajustes funcionales.
 
 ---
 
@@ -826,7 +839,7 @@ Estos maestros residen en cada BD de empresa y son consumidos por todos los dem�
 | **retencion** | id, pais_id, codigo, nombre, tipo (RENTA/IVA/ISR), porcentaje, monto_minimo, cuenta_contable, activo | Retenciones fiscales por país |
 | **detraccion** | id, pais_id, codigo, nombre, porcentaje, bien_servicio, cuenta_contable, activo | Detracciones (Perú - SPOT) |
 
-#### 11.1.7 Numeradores (secuencias de documentos)
+#### 11.1.7 Secuencias de documentos (numeración automática)
 
 > Con Database-per-Tenant, la numeración **no necesita `empresa_id`** ya que la BD es de una sola empresa. Cada microservicio que emite documentos tiene su propia tabla `secuencia_documento` en su esquema.
 
