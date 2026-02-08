@@ -281,9 +281,9 @@ gantt
 | Frontend todos | Menú dinámico funcional, CRUDs completos, validaciones |
 | QA | Pruebas de todos los maestros, validación de datos, permisos |
 | Analistas | UAT de maestros con reglas de negocio |
-| Backend (migración) | Desarrollar scripts ETL (Python + Pandas) para migración de maestros desde SIGRE: relaciones comerciales, artículos, categorías, unidades. Endpoints de importación masiva (CSV/Excel) |
+| Backend (migración) | Desarrollar scripts ETL (Python + cx_Oracle + Pandas) para migración de maestros desde SIGRE (Oracle 11gR2, 2,770 tablas): PROVEEDOR→relacion_comercial, ARTICULO→articulo, ARTICULO_CATEG→categoria, UNIDAD→unidad_medida, MONEDA→moneda, BANCO→banco, MARCA→marca, DOC_TIPO→tipo_documento_tributario. Endpoints de importación masiva (CSV/Excel). **Mapeo detallado:** [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md) sección 14 |
 
-**Criterio de salida (Hito M1):** Todos los maestros con CRUD funcional en backend y frontend. Menú dinámico cargando por roles. Auth + multiempresa operativo. Infraestructura de observabilidad operativa (ELK + Prometheus/Grafana + Zipkin). Jenkins operativo con quality gates SonarQube pasando (cobertura ≥70%). Despliegues manuales documentados. Redis y MinIO configurados.
+**Criterio de salida (Hito M1):** Todos los maestros con CRUD funcional en backend y frontend (incluyendo tablas adicionales: banco, marca, tipo_documento_tributario, catalogo_sunat). Menú dinámico cargando por roles. Auth + multiempresa operativo. Infraestructura de observabilidad operativa (ELK + Prometheus/Grafana + Zipkin). Jenkins operativo con quality gates SonarQube pasando (cobertura ≥70%). Despliegues manuales documentados. Redis y MinIO configurados. ETL de maestros SIGRE validado.
 
 ---
 
@@ -291,7 +291,7 @@ gantt
 
 **Duración:** 6 semanas  
 **Equipos:** A lidera Compras + Almacén, B lidera Ventas (en paralelo)  
-**Referencia SIGRE:** Estos son los módulos con mayor volumen transaccional. En SIGRE, Compras y Almacén comparten más de 1,500 objetos de código fuente. Ventas se desarrolla en paralelo por su independencia funcional.
+**Referencia SIGRE:** Estos son los módulos con mayor volumen transaccional. En SIGRE, Compras y Almacén comparten más de 1,500 objetos de código fuente (211+150 tablas referenciadas en ws_objects). Ventas se desarrolla en paralelo por su independencia funcional. Incluye tablas derivadas de SIGRE: guía de remisión (obligatoria SUNAT), comprador, aprobador configurado, punto de venta, reservación, carta del restaurante.
 
 #### Equipo A: Compras (5 Backend + 3 Frontend + 1 QA)
 
@@ -333,7 +333,7 @@ gantt
 
 **Duración:** 6 semanas  
 **Equipos:** B lidera Finanzas, A lidera Activos Fijos  
-**Referencia SIGRE:** Finanzas es el módulo más complejo después de Compras/Almacén. Involucra CxP, CxC, Tesorería, conciliaciones y adelantos. Activos Fijos gestiona depreciación, seguros y control patrimonial.
+**Referencia SIGRE:** Finanzas es el módulo más complejo después de Compras/Almacén (244 tablas referenciadas en ws_objects). Involucra CxP, CxC, Tesorería, conciliaciones y adelantos. Incluye tablas derivadas de SIGRE: detracción, retención IGV (obligatorias por normativa SUNAT), flujo de caja. Activos Fijos gestiona depreciación, seguros y control patrimonial (41 tablas referenciadas).
 
 #### Equipo B: Finanzas (4 Backend + 2 Frontend + 1 QA)
 
@@ -363,7 +363,7 @@ gantt
 
 **Duración:** 6 semanas (con overlap de 1 semana sobre Fase 3)  
 **Equipos:** A (Producción) y B (Contabilidad)  
-**Referencia SIGRE:** Contabilidad es el receptor final de pre-asientos de todos los módulos. Producción solo necesita Almacén (ya listo desde Fase 2).
+**Referencia SIGRE:** Contabilidad es el receptor final de pre-asientos de todos los módulos (251 tablas referenciadas en ws_objects). Incluye distribución contable (prorrateo de gastos entre centros de costo). Producción (263 tablas referenciadas) se adapta al contexto gastronómico: plantillas de producción → recetas, con ficha técnica (alérgenos, valores nutricionales).
 
 #### Equipo A: Producción (3 Backend + 2 Frontend)
 
@@ -403,7 +403,7 @@ gantt
 
 **Duración:** 6 semanas (corre en paralelo con la Fase 4)  
 **Equipo:** C (RRHH) — equipo independiente  
-**Referencia SIGRE:** RRHH necesita la infraestructura financiera (cuentas bancarias, formas de pago) que ya estará lista desde Fase 3. Es funcionalmente independiente de Contabilidad y Producción durante el desarrollo.
+**Referencia SIGRE:** RRHH es el módulo más grande del SIGRE (364 tablas referenciadas en ws_objects, 180 tablas en BD). Incluye tablas derivadas de SIGRE: gratificación (julio/diciembre), CTS, retención de quinta categoría, evaluación de desempeño — todas obligatorias por legislación laboral peruana. Necesita la infraestructura financiera (cuentas bancarias, formas de pago) que ya estará lista desde Fase 3.
 
 > **Justificación del paralelismo:** RRHH gestiona personas y planilla; Contabilidad gestiona asientos y cierres. Son independientes entre sí. La integración (pre-asientos de planilla → Contabilidad) se cierra en las últimas semanas de la Fase 4.
 
@@ -746,18 +746,20 @@ flowchart TB
 
 **BD por Empresa** (`restaurant_pe_emp_{id}`) — cada empresa tiene estos 10 esquemas:
 
-| Esquema | Microservicio | Tablas principales |
-|---------|---------------|--------------------|
-| `core` | ms-core-maestros | empresa, sucursal, pais, moneda, tipo_cambio, relacion_comercial, articulo, categoria, unidad_medida, impuesto |
-| `almacen` | ms-almacen | almacen, tipo_movimiento, movimiento_almacen, kardex, stock, inventario_fisico |
-| `compras` | ms-compras | condicion_pago, orden_compra, recepcion, secuencia_documento |
-| `ventas` | ms-ventas | documento_venta, mesa, orden, comanda, cierre_caja, secuencia_documento |
-| `finanzas` | ms-finanzas | cuenta_bancaria, documento_pagar, documento_cobrar, pago, cobro, conciliacion |
-| `contabilidad` | ms-contabilidad | cuenta_contable, centro_costo, asiento, pre_asiento, matriz_contable |
-| `rrhh` | ms-rrhh | trabajador, contrato, planilla, asistencia, vacacion, liquidacion |
-| `activos` | ms-activos-fijos | activo_fijo, clase_activo, depreciacion, poliza_seguro |
-| `produccion` | ms-produccion | receta, orden_produccion, costeo_produccion |
-| `auditoria` | ms-auditoria | log_auditoria |
+| Esquema | Microservicio | Tablas principales | Tablas SIGRE |
+|---------|---------------|--------------------|:------------:|
+| `core` | ms-core-maestros | empresa, sucursal, pais, moneda, tipo_cambio, relacion_comercial, articulo, categoria, unidad_medida, impuesto, condicion_pago, forma_pago, config_* | +banco, marca, tipo_doc_tributario, catalogo_sunat |
+| `almacen` | ms-almacen | almacen, tipo_movimiento, movimiento_almacen, kardex, stock, inventario_fisico, reserva_stock | +guia_remision, guia_remision_detalle |
+| `compras` | ms-compras | solicitud_compra, cotizacion, orden_compra, orden_servicio, recepcion, aprobacion, evaluacion_proveedor, contrato_marco | +comprador, aprobador_configurado |
+| `ventas` | ms-ventas | documento_venta, mesa, zona, orden_venta, comanda, turno, cierre_caja, facturacion_electronica | +punto_venta, reservacion, carta |
+| `finanzas` | ms-finanzas | cuenta_bancaria, documento_pagar, documento_cobrar, pago, cobro, conciliacion, adelanto, fondo_fijo | +detraccion, retencion, flujo_caja |
+| `contabilidad` | ms-contabilidad | cuenta_contable, centro_costo, asiento, pre_asiento, matriz_contable, cierre_contable | +distribucion_contable |
+| `rrhh` | ms-rrhh | trabajador, contrato, planilla, asistencia, vacacion, liquidacion, prestamo, permiso_licencia | +gratificacion, cts, quinta_categoria, evaluacion_desempeno |
+| `activos` | ms-activos-fijos | activo_fijo, clase_activo, depreciacion, poliza_seguro, traslado, mantenimiento | — |
+| `produccion` | ms-produccion | receta, orden_produccion, costeo_produccion, programacion_produccion, control_calidad | +ficha_tecnica |
+| `auditoria` | ms-auditoria | log_auditoria | — |
+
+> **Total:** 152 tablas (131 base + 21 derivadas del análisis SIGRE). Mapeo detallado SIGRE→Restaurant.pe en [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md), secciones 13-16.
 
 ### 10.3 Provisión de connection strings
 
@@ -926,6 +928,15 @@ flowchart TB
 | **condicion_pago** | id, codigo, nombre, dias, tipo (CONTADO/CREDITO), numero_cuotas, activo | Condiciones de pago/cobro |
 | **forma_pago** | id, codigo, nombre, tipo (EFECTIVO/TRANSFERENCIA/CHEQUE/TARJETA/YAPE/PLIN/NIUBIZ/OTRO), requiere_referencia, activo | Formas/medios de pago |
 
+#### 11.1.10 Tablas derivadas del análisis SIGRE
+
+| Tabla | Campos | Origen SIGRE | Descripción |
+|-------|--------|:------------:|-------------|
+| **banco** | id, codigo, nombre, nombre_corto, swift_code, activo | `BANCO` | Maestro de bancos. Referenciado en ~10 módulos SIGRE |
+| **marca** | id, codigo, nombre, activo | `MARCA` | Marcas de artículos/insumos |
+| **tipo_documento_tributario** | id, codigo, nombre, codigo_sunat, requiere_serie, activo | `DOC_TIPO` | Catálogo: 01=Factura, 03=Boleta, 07=NC, 08=ND, 09=Guía. Referenciado en ~16 módulos SIGRE |
+| **catalogo_sunat** | id, tipo, codigo, descripcion, activo | `SUNAT_*` (15 tablas) | Catálogos tributarios SUNAT consolidados (Tabla 10, 12, CUBSO, Ubigeo, etc.) |
+
 ---
 
 ### 11.2 Esquema `almacen` — Maestros y transaccionales
@@ -939,6 +950,8 @@ flowchart TB
 | **stock** | id, almacen_id, articulo_id, cantidad_disponible, cantidad_reservada, cantidad_transito, costo_promedio, costo_ultima_compra, fecha_ultima_entrada, fecha_ultima_salida | Saldo de stock en tiempo real |
 | **inventario_fisico** | id, almacen_id, fecha, estado (EN_PROCESO/FINALIZADO/AJUSTADO), responsable_id | Cabecera de toma de inventario |
 | **inventario_fisico_detalle** | id, inventario_fisico_id, articulo_id, stock_sistema, stock_fisico, diferencia, costo_unitario, costo_diferencia, ajuste_aplicado | Detalle con diferencias por artículo |
+| **guia_remision** *(SIGRE)* | id, sucursal_id, serie, numero, fecha_emision, fecha_traslado, motivo_traslado, destinatario_id, direccion_partida, direccion_llegada, transportista, placa_vehiculo, conductor_nombre, movimiento_almacen_id, estado | Guía de remisión (obligatoria SUNAT). Origen: `GUIA` |
+| **guia_remision_detalle** *(SIGRE)* | id, guia_id, articulo_id, descripcion, cantidad, unidad_medida_id, peso_bruto_kg | Detalle de guía. Origen: `GUIA_VALE` |
 
 ---
 
@@ -953,6 +966,9 @@ flowchart TB
 | **aprobacion** | id, documento_tipo (OC/OS), documento_id, nivel, aprobador_id, estado (PENDIENTE/APROBADO/RECHAZADO), fecha, comentario | Workflow de aprobación multinivel |
 | **recepcion** | id, sucursal_id, numero, fecha, orden_compra_id, proveedor_id, almacen_id, estado (BORRADOR/CONFIRMADA/ANULADA), guia_remision, observaciones | Recepción de mercadería vinculada a OC |
 | **recepcion_detalle** | id, recepcion_id, orden_compra_detalle_id, articulo_id, cantidad_recibida, cantidad_rechazada, motivo_rechazo, costo_unitario | Detalle de recepción |
+| **comprador** *(SIGRE)* | id, trabajador_id, nombre, activo | Compradores asignados. Origen: `COMPRADOR` |
+| **comprador_categoria** *(SIGRE)* | id, comprador_id, categoria_id | Categorías asignadas por comprador. Origen: `COMPRADOR_ARTICULO` |
+| **aprobador_configurado** *(SIGRE)* | id, tipo_documento, nivel, aprobador_id, monto_minimo, monto_maximo, moneda_id, activo | Configuración de aprobadores por monto. Origen: `APROBADORES_OC` + `LOGISTICA_APROBADOR` |
 
 ---
 
@@ -972,6 +988,9 @@ flowchart TB
 | **flujo_caja_concepto** | id, codigo, nombre, grupo_id, tipo (INGRESO/EGRESO), orden, activo | Estructura de flujo de caja |
 | **adelanto** | id, numero, fecha, solicitante_id, monto, moneda_id, motivo, estado (SOLICITADO/APROBADO/LIQUIDADO/CERRADO/RECHAZADO), aprobador_id, fecha_aprobacion | Adelantos / órdenes de giro |
 | **adelanto_liquidacion** | id, adelanto_id, fecha, monto_gastado, monto_devuelto, estado (PENDIENTE/APROBADO/CERRADO) | Liquidación de adelantos |
+| **detraccion** *(SIGRE)* | id, documento_pagar_id, tipo_bien_servicio, porcentaje, monto_detraccion, numero_constancia, fecha_pago, cuenta_detracciones, estado | Detracciones SUNAT. Origen: `DETRACCION` + `DETR_*` |
+| **retencion** *(SIGRE)* | id, documento_pagar_id, porcentaje, monto_retencion, numero_comprobante_retencion, fecha_emision, estado | Retenciones IGV. Origen: `RETENCION_IGV_CRT` |
+| **flujo_caja** *(SIGRE)* | id, sucursal_id, anio, mes, tipo (REAL/PROYECTADO), ingresos_operativos, egresos_operativos, flujo_operativo, saldo_inicial, saldo_final | Flujo de caja. Origen: `FLUJO_CAJA` + `FLUJO_CAJA_PROY` |
 
 ---
 
@@ -986,6 +1005,7 @@ flowchart TB
 | **pre_asiento** | id, modulo_origen, tipo_operacion, documento_tipo, documento_id, fecha, estado (PENDIENTE/PROCESADO/ERROR), datos_json, error_mensaje | Pre-asientos generados por otros módulos, pendientes de convertir en asientos |
 | **matriz_contable** | id, modulo, tipo_operacion, descripcion, cuenta_debe_id, cuenta_haber_id, centro_costo_id, activo | Reglas para generación automática de asientos |
 | **libro_contable** | id, codigo, nombre, tipo (DIARIO/MAYOR/CAJA/COMPRAS/VENTAS), activo | Libros contables |
+| **distribucion_contable** *(SIGRE)* | id, modulo_origen, documento_id, centro_costo_origen_id, centro_costo_destino_id, porcentaje, monto, anio, mes, estado | Distribución de gastos entre centros de costo. Origen: `DISTRIBUCION_CNTBLE` |
 
 ---
 
@@ -1004,6 +1024,10 @@ flowchart TB
 | **vacacion** | id, trabajador_id, periodo_desde, periodo_hasta, dias_derecho, dias_gozados, dias_pendientes, estado | Control de vacaciones |
 | **liquidacion** | id, trabajador_id, fecha, tipo (RENUNCIA/DESPIDO/MUTUO_ACUERDO/JUBILACION), estado, monto_total, detalle_json | Liquidación de beneficios sociales |
 | **afp** | id, pais_id, codigo, nombre, comision_porcentaje, prima_seguro, aporte_obligatorio, activo | Administradoras de fondos de pensiones |
+| **gratificacion** *(SIGRE)* | id, trabajador_id, anio, tipo (JULIO/DICIEMBRE), remuneracion_computable, meses_laborados, monto_gratificacion, bonificacion_extraordinaria, total, estado | Gratificaciones legales. Origen: `GRATIFICACION` |
+| **cts** *(SIGRE)* | id, trabajador_id, anio, periodo (MAYO/NOVIEMBRE), remuneracion_computable, meses_computables, monto_cts, entidad_financiera, numero_cuenta_cts, fecha_deposito, estado | CTS obligatoria. Origen: `CNTA_CRRTE_CTS` |
+| **quinta_categoria** *(SIGRE)* | id, trabajador_id, anio, mes, renta_bruta_acumulada, renta_bruta_proyectada, deduccion_7uit, renta_neta, impuesto_anual_proyectado, retencion_mensual, retencion_acumulada | Retención IR 5ta categoría. Origen: `QUINTA_CATEGORIA` |
+| **evaluacion_desempeno** *(SIGRE)* | id, trabajador_id, evaluador_id, anio, periodo, puntaje_total, clasificacion, observaciones, estado | Evaluación de desempeño. Origen: `RH_EVALUACION_PERSONAL` |
 
 ---
 
@@ -1030,6 +1054,7 @@ flowchart TB
 | **orden_produccion** | id, sucursal_id, numero, fecha, receta_id, cantidad_a_producir, cantidad_producida, estado (PLANIFICADA/EN_PROCESO/COMPLETADA/CANCELADA), almacen_consumo_id, almacen_destino_id, costo_total, observaciones | Orden de producción |
 | **orden_produccion_detalle** | id, orden_produccion_id, articulo_id, cantidad_requerida, cantidad_consumida, costo_unitario, costo_total, almacen_id | Consumo real de insumos |
 | **costeo_produccion** | id, orden_produccion_id, costo_materia_prima, costo_mano_obra, costo_indirecto, costo_total, costo_unitario, fecha_costeo | Costeo consolidado por orden |
+| **ficha_tecnica** *(SIGRE)* | id, receta_id, alergenos, calorias, proteinas_g, carbohidratos_g, grasas_g, tipo_dieta, foto_presentacion_url, instrucciones_emplatado, tiempo_preparacion_min, tiempo_coccion_min, temperatura_servicio | Ficha técnica del plato. Nuevo para Restaurant.pe (normativa sanitaria) |
 
 ---
 
@@ -1131,7 +1156,7 @@ erDiagram
 | Redis como punto único de fallo (caché + rate limiting) | Redis Sentinel o Redis Cluster en producción; fallback a BD directa en caso de caída |
 | Fallo de Elasticsearch/ELK impide análisis de logs | Logs también van a stdout (Docker logs como fallback); Elasticsearch con réplicas |
 | Pérdida de datos mayor al RPO (1 hora) | WAL archiving continuo + streaming replication (PostgreSQL Standby) |
-| Migración de datos SIGRE retrasada | Pipeline ETL definido (Python + Pandas), plan por fases con rollback; endpoints de importación masiva |
+| Migración de datos SIGRE retrasada | Pipeline ETL definido (Python + cx_Oracle + Pandas); mapeo validado: 2,770 tablas Oracle → 152 tablas PostgreSQL ([`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md) sección 14); plan por fases con rollback; endpoints de importación masiva |
 | WebSocket desconexiones en redes inestables | Reconexión automática con backoff exponencial (5s, 10s, 20s, max 60s); SockJS como fallback |
 | Backups no validados o corruptos | Restore de prueba semanal, conteo de registros diario, alerta automática si backup falla |
 | Plazo agresivo de 5 meses | Equipos paralelos, sprints de 1 semana, demos semanales, decisiones rápidas |
@@ -1149,7 +1174,7 @@ erDiagram
 7. **Configurar stack de observabilidad** desde Semana 1: ELK Stack (logs JSON), Prometheus + Grafana (dashboards de infra, JVM, gateway, negocio, BD, RabbitMQ), Zipkin/Jaeger (tracing distribuido).
 8. **Configurar Redis** desde Semana 1 para caché de sesiones, menú, configuraciones y rate limiting en API Gateway.
 9. **Configurar MinIO** (dev) / **S3** (prod) para gestión de archivos aislados por tenant (logos, fotos, documentos, regulatorios).
-10. **Definir y automatizar pipeline de migración** de datos desde SIGRE (ETL Python + Pandas) alineado con las fases del roadmap: maestros (F1), stock (F2), CxP/CxC (F3), contabilidad (F4).
+10. **Definir y automatizar pipeline de migración** de datos desde SIGRE Oracle 11gR2 (ETL Python + cx_Oracle + Pandas) alineado con las fases del roadmap: maestros (F1: PROVEEDOR, ARTICULO, MONEDA, BANCO → 30 tablas core), stock (F2: VALE_MOV, ARTICULO_ALMACEN → 11 tablas almacen), CxP/CxC (F3: CNTAS_PAGAR, CNTAS_COBRAR → 17 tablas finanzas), contabilidad (F4: CNTBL_CNTA, CNTBL_ASIENTO → 8 tablas). Mapeo detallado en [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md) secciones 14-16.
 11. **Configurar backup automático** (pg_dump diario + WAL archiving) y **streaming replication** (PostgreSQL Standby) antes de Fase 3.
 12. **Implementar WebSocket/STOMP** para comandas en tiempo real a cocina/bar, alertas de stock y notificaciones push desde Fase 2.
 13. **Planificar primera prueba de DR** antes del piloto (Semana 19): simular failover a Standby, verificar RPO ≤1h y RTO ≤4h.
@@ -1157,4 +1182,4 @@ erDiagram
 
 ---
 
-*Roadmap para el proyecto Restaurant.pe. Stack: Backend Java/Spring Boot (microservicios con API Gateway y Eureka), Frontend Angular 20, Base de datos PostgreSQL con estrategia Database-per-Tenant. Infraestructura: Redis (caché/rate limiting), RabbitMQ (eventos), ELK (logs), Prometheus/Grafana (monitoreo), Zipkin (tracing), MinIO/S3 (archivos). Integración continua con Jenkins + SonarQube + JaCoCo (despliegues manuales). Plazo: 5 meses, 21 personas, 3 equipos en paralelo. Incluye arquitectura de microservicios, modelo de seguridad centralizado en BD Master, roles dinámicos por empresa, menú por permisos, numeración atómica sin gaps, WebSocket/STOMP para tiempo real, testing (JUnit/Testcontainers/Cypress/SonarQube), backup/restore por tenant, streaming replication y plan de Disaster Recovery.*
+*Roadmap para el proyecto Restaurant.pe. Stack: Backend Java/Spring Boot (microservicios con API Gateway y Eureka), Frontend Angular 20, Base de datos PostgreSQL 16 con estrategia Database-per-Tenant (152 tablas en 11 esquemas, consolidadas desde las 2,770 tablas del ERP SIGRE en Oracle 11gR2). Infraestructura: Redis (caché/rate limiting), RabbitMQ (eventos), ELK (logs), Prometheus/Grafana (monitoreo), Zipkin (tracing), MinIO/S3 (archivos). Integración continua con Jenkins + SonarQube + JaCoCo (despliegues manuales). Plazo: 5 meses, 21 personas, 3 equipos en paralelo. Migración ETL desde SIGRE con mapeo detallado tabla por tabla (ver DISENO_BASE_DATOS.md secciones 13-16). Incluye arquitectura de microservicios, modelo de seguridad centralizado en BD Master, roles dinámicos por empresa, menú por permisos, numeración atómica sin gaps, WebSocket/STOMP para tiempo real, testing (JUnit/Testcontainers/Cypress/SonarQube), backup/restore por tenant, streaming replication y plan de Disaster Recovery.*

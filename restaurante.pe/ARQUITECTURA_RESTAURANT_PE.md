@@ -1833,11 +1833,14 @@ public class GlobalExceptionHandler {
 
 ### 20.1 Diagrama ER resumen
 
+> Incluye las 21 tablas adicionales derivadas del análisis del ERP SIGRE (Oracle 11gR2, 2,770 tablas → 152 tablas Restaurant.pe).
+
 ```mermaid
 erDiagram
     EMPRESA ||--o{ SUCURSAL : tiene
     SUCURSAL }o--|| PAIS : pertenece
     SUCURSAL ||--o{ ALMACEN : tiene
+    SUCURSAL ||--o{ PUNTO_VENTA : tiene
     USUARIO }o--o{ SUCURSAL : asignado
     USUARIO }o--|| ROL : "tiene un solo"
     ROL }o--o{ OPCION_MENU : asigna
@@ -1847,30 +1850,42 @@ erDiagram
     EMPRESA ||--o{ ARTICULO : tiene
     ARTICULO }o--|| CATEGORIA : pertenece
     ARTICULO }o--|| UNIDAD_MEDIDA : usa
-    RELACION_COMERCIAL }o--o{ ARTICULO_PROVEEDOR : suministra
+    ARTICULO }o--o| MARCA : tiene
     ALMACEN ||--o{ STOCK : contiene
     STOCK }o--|| ARTICULO : de
     ALMACEN ||--o{ MOVIMIENTO_ALMACEN : registra
     MOVIMIENTO_ALMACEN }o--|| TIPO_MOVIMIENTO : es
+    MOVIMIENTO_ALMACEN ||--o| GUIA_REMISION : genera
     RELACION_COMERCIAL ||--o{ ORDEN_COMPRA : recibe
     ORDEN_COMPRA ||--o{ RECEPCION : genera
     RECEPCION ||--o{ MOVIMIENTO_ALMACEN : genera
     RELACION_COMERCIAL ||--o{ DOCUMENTO_PAGAR : genera
     RELACION_COMERCIAL ||--o{ DOCUMENTO_COBRAR : genera
     DOCUMENTO_PAGAR ||--o{ PAGO : recibe
+    DOCUMENTO_PAGAR ||--o| DETRACCION : "puede tener"
+    DOCUMENTO_PAGAR ||--o| RETENCION : "puede tener"
     DOCUMENTO_COBRAR ||--o{ COBRO : recibe
+    BANCO ||--o{ CUENTA_BANCARIA : registra
     EMPRESA ||--o{ CUENTA_CONTABLE : tiene
     ASIENTO ||--o{ ASIENTO_DETALLE : contiene
     CUENTA_CONTABLE ||--o{ ASIENTO_DETALLE : en
     EMPRESA ||--o{ TRABAJADOR : emplea
     TRABAJADOR }o--|| CARGO : ocupa
+    TRABAJADOR ||--o{ GRATIFICACION : recibe
+    TRABAJADOR ||--o{ CTS : acumula
     PLANILLA ||--o{ PLANILLA_DETALLE : contiene
     EMPRESA ||--o{ ACTIVO_FIJO : posee
     ACTIVO_FIJO }o--|| CLASE_ACTIVO : es
     ACTIVO_FIJO ||--o{ DEPRECIACION : calcula
     RECETA ||--o{ RECETA_DETALLE : contiene
+    RECETA ||--o| FICHA_TECNICA : tiene
     RECETA_DETALLE }o--|| ARTICULO : usa
     ORDEN_PRODUCCION }o--|| RECETA : ejecuta
+    ZONA ||--o{ MESA : contiene
+    MESA ||--o{ RESERVACION : reserva
+    MESA ||--o{ ORDEN_VENTA : atiende
+    ORDEN_VENTA ||--o| DOCUMENTO_VENTA : genera
+    CARTA ||--o{ CARTA_DETALLE : contiene
     CONFIG_CLAVE ||--o{ CONFIG_EMPRESA : configura
     CONFIG_CLAVE ||--o{ CONFIG_PAIS : configura
     CONFIG_CLAVE ||--o{ CONFIG_SUCURSAL : configura
@@ -1879,22 +1894,24 @@ erDiagram
 
 ### 20.2 Conteo de tablas por esquema
 
-| Esquema | Tablas | Descripción |
-|---------|:------:|-------------|
-| `auth` *(BD Master)* | 11 | Usuarios, roles, permisos, menú, sesiones |
-| `master` *(BD Master)* | 1 | Registro de tenants |
-| `core` | 25+ | Empresa, sucursal, país, moneda, artículos, categorías, impuestos, configuración |
-| `almacen` | 7 | Movimientos, kardex, stock, inventario físico |
-| `compras` | 7 | OC, OS, aprobaciones, recepción |
-| `ventas` | 14 | Documentos de venta, mesas, comandas, facturación electrónica |
-| `finanzas` | 12 | CxP, CxC, tesorería, conciliación, adelantos |
-| `contabilidad` | 7 | Asientos, pre-asientos, matrices, cierres |
-| `rrhh` | 11 | Trabajadores, planilla, asistencia, liquidaciones |
-| `activos` | 7 | Activos, depreciación, seguros, traslados |
-| `produccion` | 5 | Recetas, órdenes, costeo |
-| `auditoria` | 2 | Log de auditoría |
-| **Total** | **94+** | |
+| Esquema | Tablas base | + SIGRE | Total | Descripción |
+|---------|:-----------:|:-------:|:-----:|-------------|
+| `auth` *(BD Master)* | 14 | — | 14 | Usuarios, roles, permisos, menú, sesiones, log acceso |
+| `master` *(BD Master)* | 1 | — | 1 | Registro de tenants |
+| `core` | 25 | +5 | 30 | Empresa, sucursal, país, moneda, artículos, categorías, impuestos, configuración, **banco, marca, tipo doc. tributario** |
+| `almacen` | 9 | +2 | 11 | Movimientos, kardex, stock, inventario físico, **guía remisión** |
+| `compras` | 12 | +2 | 14 | SC, OC, OS, cotización, aprobaciones, recepción, evaluación, **comprador, aprobador** |
+| `ventas` | 16 | +3 | 19 | Documentos de venta, mesas, comandas, facturación electrónica, **punto de venta, reservación, carta** |
+| `finanzas` | 14 | +3 | 17 | CxP, CxC, tesorería, conciliación, adelantos, **flujo caja, detracción, retención** |
+| `contabilidad` | 7 | +1 | 8 | Asientos, pre-asientos, matrices, cierres, **distribución contable** |
+| `rrhh` | 13 | +4 | 17 | Trabajadores, planilla, asistencia, liquidaciones, **gratificación, CTS, 5ta categoría, evaluación** |
+| `activos` | 12 | — | 12 | Activos, depreciación, seguros, traslados, mantenimiento |
+| `produccion` | 7 | +1 | 8 | Recetas, órdenes, costeo, **ficha técnica** |
+| `auditoria` | 2 | — | 2 | Log de auditoría |
+| **Total** | **132** | **+21** | **152** | Incluye tablas derivadas del análisis SIGRE |
 
+> **Origen de los datos:** El ERP SIGRE cuenta con **2,770 tablas** en Oracle 11gR2, de las cuales ~2,004 están activamente referenciadas en el código fuente. Restaurant.pe consolida esta funcionalidad en **152 tablas** (reducción del 94.5%). El mapeo detallado tabla por tabla se encuentra en [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md), secciones 13-16.
+>
 > **Detalle completo:** Diagramas ER con todas las columnas y relaciones en [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md), sección 11.
 
 ---
@@ -3934,16 +3951,22 @@ erDiagram
     ARTICULO }o--|| CATEGORIA : pertenece
     ARTICULO }o--|| UNIDAD_MEDIDA : usa
     ARTICULO }o--|| IMPUESTO : aplica
+    ARTICULO }o--o| MARCA : tiene
     RELACION_COMERCIAL ||--o{ CONTACTO : tiene
     RELACION_COMERCIAL ||--o{ CUENTA_BANCARIA_RC : tiene
     RELACION_COMERCIAL }o--|| CONDICION_PAGO : "condición default"
     MONEDA ||--o{ TIPO_CAMBIO : origen
+    BANCO ||--o{ CUENTA_BANCARIA_RC : emite
     CONFIG_CLAVE ||--o{ CONFIG_EMPRESA : configura
     CONFIG_CLAVE ||--o{ CONFIG_PAIS : configura
     CONFIG_CLAVE ||--o{ CONFIG_SUCURSAL : configura
     CONFIG_CLAVE ||--o{ CONFIG_USUARIO : configura
     CATEGORIA }o--o| CATEGORIA : "padre"
+    TIPO_DOCUMENTO_TRIBUTARIO ||--o{ DOCUMENTO_VENTA : define
+    CATALOGO_SUNAT }o--|| TIPO_DOCUMENTO_TRIBUTARIO : complementa
 ```
+
+> **Tablas derivadas de SIGRE:** `BANCO` (≡ SIGRE `BANCO`), `MARCA` (≡ SIGRE `MARCA`), `TIPO_DOCUMENTO_TRIBUTARIO` (≡ SIGRE `DOC_TIPO`), `CATALOGO_SUNAT` (≡ SIGRE `SUNAT_*`).
 
 ### 27.3 ms-almacen — Esquema `almacen` (BD por Empresa)
 
@@ -3954,12 +3977,16 @@ erDiagram
     ALMACEN ||--o{ MOVIMIENTO_ALMACEN : tiene
     MOVIMIENTO_ALMACEN }o--|| TIPO_MOVIMIENTO : es
     MOVIMIENTO_ALMACEN ||--o{ MOVIMIENTO_DETALLE : contiene
+    MOVIMIENTO_ALMACEN ||--o| GUIA_REMISION : genera
     MOVIMIENTO_DETALLE --> KARDEX : genera
     STOCK }o--|| ARTICULO : de
     ALMACEN ||--o{ INVENTARIO_FISICO : ejecuta
     INVENTARIO_FISICO ||--o{ INVENTARIO_FISICO_DETALLE : contiene
     ALMACEN ||--o{ RESERVA_STOCK : tiene
+    GUIA_REMISION ||--o{ GUIA_REMISION_DETALLE : contiene
 ```
+
+> **Tablas derivadas de SIGRE:** `GUIA_REMISION` + `GUIA_REMISION_DETALLE` (≡ SIGRE `GUIA` + `GUIA_VALE`). Obligatoria por SUNAT para traslado de bienes.
 
 ### 27.4 ms-compras — Esquema `compras` (BD por Empresa)
 
@@ -3973,14 +4000,20 @@ erDiagram
     ORDEN_COMPRA ||--o{ RECEPCION : genera
     ORDEN_COMPRA ||--o{ APROBACION : requiere
     RECEPCION ||--o{ RECEPCION_DETALLE : contiene
+    COMPRADOR ||--o{ COMPRADOR_CATEGORIA : "asignado a"
+    APROBADOR_CONFIGURADO }o--|| ORDEN_COMPRA : "configura niveles"
 ```
+
+> **Tablas derivadas de SIGRE:** `COMPRADOR` + `COMPRADOR_CATEGORIA` (≡ SIGRE `COMPRADOR` + `COMPRADOR_ARTICULO`), `APROBADOR_CONFIGURADO` (≡ SIGRE `APROBADORES_OC` + `LOGISTICA_APROBADOR`).
 
 ### 27.5 ms-ventas — Esquema `ventas` (BD por Empresa)
 
 ```mermaid
 erDiagram
+    PUNTO_VENTA }o--|| SUCURSAL : pertenece
     ZONA ||--o{ MESA : contiene
     MESA ||--o{ ORDEN_VENTA : atiende
+    MESA ||--o{ RESERVACION : "reservada para"
     ORDEN_VENTA ||--o{ COMANDA : contiene
     ORDEN_VENTA ||--o| DOCUMENTO_VENTA : genera
     DOCUMENTO_VENTA ||--o{ DOCUMENTO_VENTA_DETALLE : contiene
@@ -3991,7 +4024,10 @@ erDiagram
     DOCUMENTO_VENTA ||--o{ PROPINA : registra
     TURNO ||--o{ ORDEN_VENTA : contiene
     TURNO ||--o| CIERRE_CAJA : genera
+    CARTA ||--o{ CARTA_DETALLE : contiene
 ```
+
+> **Tablas derivadas de SIGRE:** `PUNTO_VENTA` (≡ SIGRE `PUNTOS_VENTA`). Tablas nuevas para restaurantes: `RESERVACION`, `CARTA`, `CARTA_DETALLE`.
 
 ### 27.6 ms-finanzas — Esquema `finanzas` (BD por Empresa)
 
@@ -4001,10 +4037,15 @@ erDiagram
     CUENTA_BANCARIA ||--o{ CONCILIACION_BANCARIA : genera
     CONCILIACION_BANCARIA ||--o{ CONCILIACION_DETALLE : contiene
     DOCUMENTO_PAGAR ||--o{ PAGO : recibe
+    DOCUMENTO_PAGAR ||--o| DETRACCION : "puede tener"
+    DOCUMENTO_PAGAR ||--o| RETENCION : "puede tener"
     DOCUMENTO_COBRAR ||--o{ COBRO : recibe
     PROGRAMACION_PAGO ||--o{ PROGRAMACION_PAGO_DETALLE : contiene
     FONDO_FIJO ||--o{ RENDICION_GASTO : registra
+    FLUJO_CAJA }o--|| SUCURSAL : "por sucursal"
 ```
+
+> **Tablas derivadas de SIGRE:** `DETRACCION` (≡ SIGRE `DETRACCION` + `DETR_*`), `RETENCION` (≡ SIGRE `RETENCION_IGV_CRT`), `FLUJO_CAJA` (≡ SIGRE `FLUJO_CAJA` + `FLUJO_CAJA_PROY`). Obligatorias por normativa tributaria peruana.
 
 ### 27.7 ms-contabilidad — Esquema `contabilidad` (BD por Empresa)
 
@@ -4018,7 +4059,10 @@ erDiagram
     ASIENTO_DETALLE }o--o| CENTRO_COSTO : asigna
     PRE_ASIENTO }o--o| ASIENTO : "genera"
     MATRIZ_CONTABLE }o--|| CUENTA_CONTABLE : "cuenta debe"
+    DISTRIBUCION_CONTABLE }o--|| CENTRO_COSTO : "origen/destino"
 ```
+
+> **Tabla derivada de SIGRE:** `DISTRIBUCION_CONTABLE` (≡ SIGRE `DISTRIBUCION_CNTBLE`). Prorrateo de gastos indirectos entre centros de costo.
 
 ### 27.8 ms-rrhh — Esquema `rrhh` (BD por Empresa)
 
@@ -4033,11 +4077,17 @@ erDiagram
     TRABAJADOR ||--o{ VACACION : tiene
     TRABAJADOR ||--o| LIQUIDACION : "puede tener"
     TRABAJADOR ||--o{ PRESTAMO : tiene
+    TRABAJADOR ||--o{ GRATIFICACION : "recibe"
+    TRABAJADOR ||--o{ CTS : "acumula"
+    TRABAJADOR ||--o{ QUINTA_CATEGORIA : "retención"
+    TRABAJADOR ||--o{ EVALUACION_DESEMPENO : evaluado
     PLANILLA ||--o{ PLANILLA_DETALLE : contiene
     PLANILLA_DETALLE }o--|| TRABAJADOR : de
     PLANILLA_DETALLE }o--|| CONCEPTO_PLANILLA : aplica
     AREA }o--o| AREA : "padre"
 ```
+
+> **Tablas derivadas de SIGRE:** `GRATIFICACION` (≡ SIGRE `GRATIFICACION`), `CTS` (≡ SIGRE `CNTA_CRRTE_CTS`), `QUINTA_CATEGORIA` (≡ SIGRE `QUINTA_CATEGORIA`), `EVALUACION_DESEMPENO` (≡ SIGRE `RH_EVALUACION_PERSONAL`). Todas obligatorias por legislación laboral peruana.
 
 ### 27.9 ms-activos-fijos — Esquema `activos` (BD por Empresa)
 
@@ -4063,12 +4113,15 @@ erDiagram
 erDiagram
     RECETA ||--o{ RECETA_DETALLE : contiene
     RECETA ||--o{ RECETA_SUBRECETA : "incluye sub-recetas"
+    RECETA ||--o| FICHA_TECNICA : "tiene"
     RECETA ||--o{ ORDEN_PRODUCCION : ejecuta
     ORDEN_PRODUCCION ||--o{ ORDEN_PRODUCCION_INSUMO : consume
     ORDEN_PRODUCCION ||--o| COSTEO_PRODUCCION : genera
     ORDEN_PRODUCCION ||--o{ CONTROL_CALIDAD : verifica
     RECETA ||--o{ PROGRAMACION_PRODUCCION : programa
 ```
+
+> **Tabla derivada de SIGRE:** `FICHA_TECNICA` (nueva para Restaurant.pe — alérgenos, valores nutricionales, instrucciones de emplatado, tiempos). No existe equivalente directo en SIGRE.
 
 ---
 
@@ -5919,7 +5972,7 @@ restaurant-pe-files/
 
 | Escenario | Origen | Herramienta | Estrategia |
 |-----------|--------|-------------|------------|
-| **Migración desde SIGRE (PowerBuilder)** | Sybase ASE / SQL Server | ETL custom (Python/Java) | Extracción → transformación → carga |
+| **Migración desde SIGRE** | Oracle 11gR2 (2,770 tablas) | ETL custom (Python + cx_Oracle + Pandas) | Extracción JSON → transformación → carga vía API batch |
 | **Migración desde otros ERP** | Diversos | Scripts SQL + CSV | Importación vía API masiva |
 | **Carga inicial de maestros** | Excel/CSV | Endpoint de importación masiva | Validación → inserción batch |
 | **Evolución del esquema** | Template DB | Flyway | Migraciones versionadas |
@@ -5928,34 +5981,57 @@ restaurant-pe-files/
 
 ```mermaid
 flowchart LR
-    subgraph Origen["SIGRE (Sybase ASE)"]
-        SYB[(Base de datos\nSIGRE)]
+    subgraph Origen["SIGRE (Oracle 11gR2)"]
+        ORA[(Base de datos\nSIGRE\n2,770 tablas)]
     end
     subgraph ETL["ETL (Python + Pandas)"]
-        EXT[1. Extracción\nSQLAlchemy]
-        TRN[2. Transformación\n• Mapeo de campos\n• Normalización\n• Limpieza]
+        EXT[1. Extracción\ncx_Oracle / SQLAlchemy\nschema_export.json]
+        TRN[2. Transformación\n• Mapeo 2,770→152 tablas\n• Normalización snake_case\n• Unificación maestros]
         VAL[3. Validación\n• Integridad referencial\n• Reglas de negocio\n• Deduplicación]
     end
-    subgraph Destino["Restaurant.pe (PostgreSQL)"]
+    subgraph Destino["Restaurant.pe (PostgreSQL 16)"]
         API[4. Carga vía API\nBatch endpoints]
-        PG[(BD por empresa\nrestaurant_pe_emp_N)]
+        PG[(BD por empresa\nrestaurant_pe_emp_N\n152 tablas)]
     end
 
-    SYB --> EXT --> TRN --> VAL --> API --> PG
+    ORA --> EXT --> TRN --> VAL --> API --> PG
 ```
+
+> **Nota:** La estructura del SIGRE fue extraída mediante el script `scripts/oracle_extract_schema.sql` y está documentada en `metadata SIGRE/schema_export.json` (2,770 tablas, 315 vistas). El mapeo detallado tabla por tabla se encuentra en [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md), secciones 14-16.
 
 ### 39.3 Mapeo de entidades SIGRE → Restaurant.pe
 
-| Entidad SIGRE | Tabla Restaurant.pe | Transformaciones |
-|---------------|---------------------|------------------|
-| `tabprv` (proveedores) | `core.relacion_comercial` | Unificar prov/cli, normalizar RUC, mapear `es_proveedor = true` |
-| `tabcli` (clientes) | `core.relacion_comercial` | Merge con proveedores existentes, `es_cliente = true` |
-| `tabart` (artículos) | `core.articulo` | Mapear categorías (4 niveles), unidades de medida |
-| `tabmon` (monedas) | `core.moneda` | Mapear códigos ISO |
-| `tabmp` (movimientos) | `almacen.movimiento_almacen` + detalle | Separar cabecera/detalle, recalcular kardex |
-| `taboc` (órdenes compra) | `compras.orden_compra` + detalle | Mapear estados, vincular proveedor migrado |
-| `tabcca` (cuentas contables) | `contabilidad.cuenta_contable` | Mapear plan contable jerárquico |
-| `tabemp` (empleados) | `rrhh.trabajador` | Vincular con `relacion_comercial`, mapear contratos |
+> **Referencia completa:** El mapeo tabla por tabla se encuentra en [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md), sección 14.
+
+| Entidad SIGRE (Oracle) | Tabla Restaurant.pe (PostgreSQL) | Transformaciones |
+|-------------------------|----------------------------------|------------------|
+| `PROVEEDOR` + `PROVEEDOR_TIPO` | `core.relacion_comercial` | Unificar prov/cli, normalizar RUC, `es_proveedor = true` |
+| `CLIENTE` | `core.relacion_comercial` | Merge con proveedores existentes, `es_cliente = true` |
+| `ARTICULO` + `ARTICULO_CATEG` + `ARTICULO_GRUPO` + `ARTICULO_SUB_CATEG` | `core.articulo` + `core.categoria` | Mapear 3 niveles SIGRE → categoría jerárquica con `padre_id` |
+| `UNIDAD` + `UNIDAD_CONV` | `core.unidad_medida` + `core.conversion_unidad` | Mapear códigos, factores de conversión |
+| `MONEDA` + `TIPO_CAMBIO` | `core.moneda` + `core.tipo_cambio` | Mapear códigos ISO, TC compra/venta |
+| `BANCO` + `BANCO_CNTA` | `core.banco` + `finanzas.cuenta_bancaria` | Separar maestro de bancos de cuentas por empresa |
+| `DOC_TIPO` | `core.tipo_documento_tributario` | Mapear códigos SUNAT (01=Factura, 03=Boleta, etc.) |
+| `ALMACEN` + `ALMACEN_TIPO_MOV` | `almacen.almacen` + `almacen.tipo_movimiento` | Agregar `naturaleza` (INGRESO/SALIDA), `tipo` |
+| `VALE_MOV` | `almacen.movimiento_almacen` + `almacen.movimiento_detalle` | Separar cabecera/detalle, recalcular kardex |
+| `ARTICULO_ALMACEN` + `ARTICULO_SALDO_MENSUAL` | `almacen.stock` + `almacen.kardex` | Stock actual + histórico valorizado |
+| `ORDEN_COMPRA` + `ORDEN_COMPRA_DET` | `compras.orden_compra` + detalle | Mapear estados, vincular proveedor migrado |
+| `ORDEN_SERVICIO` + `ORDEN_SERVICIO_DET` | `compras.orden_servicio` | Simplificar estructura |
+| `SOL_COMPRA` + `SOL_COMP_DET` | `compras.solicitud_compra` + detalle | Agregar `prioridad`, workflow |
+| `CNTAS_PAGAR` + `CNTAS_PAGAR_DET` | `finanzas.documento_pagar` | Renombrar, calcular `saldo` dinámicamente |
+| `CNTAS_COBRAR` + `CNTAS_COBRAR_DET` | `finanzas.documento_cobrar` | Renombrar, calcular `saldo` |
+| `CAJA_BANCOS` + `CAJA_BANCOS_DET` | `finanzas.movimiento_bancario` | Simplificar, separar de conciliación |
+| `CNTBL_CNTA` | `contabilidad.cuenta_contable` | Mapear plan contable jerárquico (niveles 1-6) |
+| `CENTROS_COSTO` + `CENCOS_NIV1..3` | `contabilidad.centro_costo` | Unificar 3 niveles → `padre_id` jerárquico |
+| `CNTBL_ASIENTO` + `CNTBL_ASIENTO_DET` | `contabilidad.asiento` + `asiento_detalle` | Agregar `moneda_id`, `tc`, `modulo_origen` |
+| `EMPLEADOS` / `MAESTRO` (trabajador) | `rrhh.trabajador` | Vincular con `core.relacion_comercial`, mapear contratos |
+| `CONCEPTO` | `rrhh.concepto_planilla` | Agregar `formula`, `afecto_quinta`, `afecto_essalud` |
+| `CALCULO` | `rrhh.planilla` + `planilla_detalle` | Separar cabecera/detalle, agregar estados |
+| `AF_MAESTRO` / `ACTIVO_FIJO` | `activos.activo_fijo` | Agregar `codigo_qr`, `valor_residual` |
+| `ARTICULO_COMPOSICION` + `PLANT_PROD` | `produccion.receta` + `receta_detalle` | Composición → Receta (adaptado a gastronomía) |
+| `USUARIO` + `PERFIL` | `auth.usuario` + `auth.rol` | "Perfil" → "Rol", agregar 2FA, bloqueo |
+| `CONFIGURACION` + `*PARAM` (13 tablas) | `core.config_clave` + `config_*` (4 niveles) | 13 tablas de parámetros → 1 sistema jerárquico |
+| `NUM_*` (130 tablas) | `{schema}.secuencia_documento` | 130 numeradores → 1 tabla parametrizada con función atómica |
 
 ### 39.4 Endpoints de importación masiva
 
@@ -6533,4 +6609,4 @@ hot_standby = on
 
 ---
 
-*Documento de arquitectura técnica del proyecto Restaurant.pe. Cubre microservicios, estrategia Database-per-Tenant, seguridad centralizada, multitenancy, comunicación, DevOps, estándares de desarrollo, diagramas de arquitectura (C4), entidades (resumen), comunicación, interacción, flujos y estados. Incluye estrategias detalladas de testing, logging/observabilidad, caché (Redis), CORS, rate limiting, gestión de archivos, migración de datos, comunicación en tiempo real (WebSocket), patrones de búsqueda/filtrado, backup/restore y recuperación ante desastres. La definición detallada de tablas, columnas, índices, migraciones y ER completos se encuentra en [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md). Basado en el análisis de las HUs y la experiencia del ERP SIGRE.*
+*Documento de arquitectura técnica del proyecto Restaurant.pe. Cubre microservicios, estrategia Database-per-Tenant, seguridad centralizada, multitenancy, comunicación, DevOps, estándares de desarrollo, diagramas de arquitectura (C4), entidades (resumen), comunicación, interacción, flujos y estados. Incluye estrategias detalladas de testing, logging/observabilidad, caché (Redis), CORS, rate limiting, gestión de archivos, migración de datos, comunicación en tiempo real (WebSocket), patrones de búsqueda/filtrado, backup/restore y recuperación ante desastres. La definición detallada de tablas, columnas, índices, migraciones, ER completos y el mapeo SIGRE→Restaurant.pe se encuentra en [`DISENO_BASE_DATOS.md`](./DISENO_BASE_DATOS.md). Consolidación: 2,770 tablas SIGRE (Oracle 11gR2) → 152 tablas Restaurant.pe (PostgreSQL 16).*
