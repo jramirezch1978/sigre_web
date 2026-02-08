@@ -12,15 +12,15 @@
 El roadmap ordena el desarrollo siguiendo la misma lógica de dependencias del ERP SIGRE:
 
 1. **Maestros primero:** Todos los maestros de todos los módulos se construyen en la primera fase. Sin datos maestros, ningún proceso puede operar.
-2. **Compras + Almacén:** Son el motor operativo del ERP. Compras genera documentos de adquisición, Almacén recibe mercadería y controla stock. Son inseparables.
-3. **Finanzas + Activos Fijos:** Finanzas necesita que Compras genere documentos por pagar (CxP). Activos Fijos se alimenta de las compras de activos y requiere la estructura financiera.
+2. **Compras + Almacén + Ventas:** Son el motor operativo del ERP. Compras genera documentos de adquisición, Almacén recibe mercadería y controla stock (inseparables). Ventas se desarrolla en paralelo: gestiona mesas, órdenes, comandas, facturación electrónica y cierre de caja. Ventas genera CxC para Finanzas y descarga stock de Almacén.
+3. **Finanzas + Activos Fijos:** Finanzas necesita que Compras genere documentos por pagar (CxP) y que Ventas genere documentos por cobrar (CxC). Activos Fijos se alimenta de las compras de activos y requiere la estructura financiera.
 4. **RRHH en paralelo con Contabilidad:** RRHH necesita la infraestructura financiera lista (cuentas bancarias, formas de pago). Contabilidad necesita que todos los módulos generen pre-asientos. Ambos son independientes entre sí y se desarrollan en paralelo.
 5. **Producción** se desarrolla junto con RRHH/Contabilidad, ya que solo necesita Almacén (que ya está listo).
 6. **Plazo total:** Máximo **5 meses** (20 semanas).
 
 ```mermaid
 flowchart LR
-    A["Fase 1\nFundación + Maestros"] --> B["Fase 2\nCompras + Almacén"]
+    A["Fase 1\nFundación + Maestros"] --> B["Fase 2\nCompras + Almacén + Ventas"]
     B --> C["Fase 3\nFinanzas + Activos Fijos"]
     C --> D["Fase 4\nProducción + Contabilidad"]
     C --> E["Fase 4.1 (paralelo)\nRRHH"]
