@@ -67,6 +67,12 @@ public class AuthController {
                     .build();
             }
             
+            if (request.getIpLocal() == null || request.getIpLocal().trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(TokenResponse.error("La IP local es requerida"))
+                    .build();
+            }
+            
             // Generar token
             TokenResponse response = authService.generarToken(request);
             

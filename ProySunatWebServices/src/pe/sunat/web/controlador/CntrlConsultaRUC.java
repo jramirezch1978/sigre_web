@@ -92,11 +92,21 @@ public class CntrlConsultaRUC extends CntrlAncestorWS{
 	}
 
 	public void registrarConsulta(String pRucConsulta, 
-									 String pRucOrigen, 
-									 String pEmpresa, 
-									 String pComputerName,
-									 BeanUsuario beanUsuario, 
-									 BeanPadronRuc beanPadronRUC) throws Exception {
+								 String pRucOrigen, 
+								 String pEmpresa, 
+								 String pComputerName,
+								 BeanUsuario beanUsuario, 
+								 BeanPadronRuc beanPadronRUC) throws Exception {
+		registrarConsulta(pRucConsulta, pRucOrigen, pEmpresa, pComputerName, null, beanUsuario, beanPadronRUC);
+	}
+
+	public void registrarConsulta(String pRucConsulta, 
+								 String pRucOrigen, 
+								 String pEmpresa, 
+								 String pComputerName,
+								 String pIpLocal,
+								 BeanUsuario beanUsuario, 
+								 BeanPadronRuc beanPadronRUC) throws Exception {
 		
 		DbAccess db = null;
         String lsSQL = "", lsFlagOK = "0";
@@ -106,7 +116,6 @@ public class CntrlConsultaRUC extends CntrlAncestorWS{
         try {
         	db = DbAccess.getInstance();
         	
-        	// Obtengo el nro de Item
         	lsSQL = "select nvl(max(l.nro_item),0) " + 
         			"from log_consultas l " + 
         			"where l.cod_usr = ? " + 
@@ -116,19 +125,13 @@ public class CntrlConsultaRUC extends CntrlAncestorWS{
             param.add(beanUsuario.getCodUsuario());
             
             liNroItem = Integer.parseInt(db.ExecuteScalar(lsSQL, param).toString());
-            
-            //Incremente el nro de item
             liNroItem ++;
             
-            if (beanPadronRUC.getIsOk())
-            	lsFlagOK = "1";
-            else
-            	lsFlagOK = "0";
+            lsFlagOK = beanPadronRUC.getIsOk() ? "1" : "0";
             
-        	//insertamos en el log de consultas
         	lsSQL = "insert into log_consultas("
-        			+ "cod_usr, ruc_origen, ruc_consulta, computer_name, fec_registro, nro_item, flag_ok, empresa) "
-        			+ "values(?, ?, ?, ?, sysdate, ?, ?, ?)";
+        			+ "cod_usr, ruc_origen, ruc_consulta, computer_name, fec_registro, nro_item, flag_ok, empresa, ip_local) "
+        			+ "values(?, ?, ?, ?, sysdate, ?, ?, ?, ?)";
         	
         	param.clear();
             param.add(beanUsuario.getCodUsuario());
@@ -138,11 +141,9 @@ public class CntrlConsultaRUC extends CntrlAncestorWS{
             param.add(liNroItem);
             param.add(lsFlagOK);
             param.add(pEmpresa);
-        	
+            param.add(pIpLocal);
         	
             db.ExecuteNonQuery(lsSQL, param);
-
-                        
             
         }catch(Exception ex) {
         	

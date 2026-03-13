@@ -24,13 +24,15 @@ public interface AuthPort {
     public static class TokenClaims {
         private String usuario;
         private String empresa;
+        private String ipLocal;
         private boolean valid;
         private String error;
         
-        public static TokenClaims valid(String usuario, String empresa) {
+        public static TokenClaims valid(String usuario, String empresa, String ipLocal) {
             TokenClaims claims = new TokenClaims();
             claims.usuario = usuario;
             claims.empresa = empresa;
+            claims.ipLocal = ipLocal;
             claims.valid = true;
             return claims;
         }
@@ -44,6 +46,7 @@ public interface AuthPort {
         
         public String getUsuario() { return usuario; }
         public String getEmpresa() { return empresa; }
+        public String getIpLocal() { return ipLocal; }
         public boolean isValid() { return valid; }
         public String getError() { return error; }
     }

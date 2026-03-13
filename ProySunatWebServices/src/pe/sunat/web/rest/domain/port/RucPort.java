@@ -17,5 +17,5 @@ public interface RucPort {
      */
     void registrarConsulta(String rucConsulta, String rucOrigen, 
                            String empresa, String computerName, 
-                           String usuario, boolean exitoso) throws Exception;
+                           String usuario, String ipLocal, boolean exitoso) throws Exception;
 }

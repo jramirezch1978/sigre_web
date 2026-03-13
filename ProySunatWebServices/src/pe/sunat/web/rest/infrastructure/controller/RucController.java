@@ -27,6 +27,7 @@ import pe.sunat.web.rest.domain.port.AuthPort.TokenClaims;
  * - pUsuario      -> en JWT (token)
  * - pClave        -> validado al generar token
  * - pEmpresa      -> en JWT (token)
+ * - ipLocal       -> en JWT (token)
  */
 @Path("/ruc")
 public class RucController {
@@ -93,10 +94,8 @@ public class RucController {
         }
         
         try {
-            // Consultar RUC
             RucData data = rucService.consultarRuc(request.getRucConsulta());
             
-            // Registrar consulta exitosa
             try {
                 rucService.registrarConsulta(
                     request.getRucConsulta(), 
@@ -104,6 +103,7 @@ public class RucController {
                     claims.getEmpresa(), 
                     request.getComputerName(), 
                     claims.getUsuario(), 
+                    claims.getIpLocal(),
                     true
                 );
             } catch (Exception e) {
@@ -113,7 +113,6 @@ public class RucController {
             return Response.ok(RucResponse.ok(data)).build();
             
         } catch (Exception e) {
-            // Registrar consulta fallida
             try {
                 rucService.registrarConsulta(
                     request.getRucConsulta(), 
@@ -121,10 +120,11 @@ public class RucController {
                     claims.getEmpresa(), 
                     request.getComputerName(), 
                     claims.getUsuario(), 
+                    claims.getIpLocal(),
                     false
                 );
             } catch (Exception ex) {
-                // Ignorar
+                System.err.println("Error registrando consulta fallida: " + ex.getMessage());
             }
             
             return Response.status(Response.Status.NOT_FOUND)

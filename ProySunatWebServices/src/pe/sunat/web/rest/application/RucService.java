@@ -32,18 +32,16 @@ public class RucService implements RucPort {
     @Override
     public void registrarConsulta(String rucConsulta, String rucOrigen, 
                                    String empresa, String computerName, 
-                                   String usuario, boolean exitoso) throws Exception {
+                                   String usuario, String ipLocal, boolean exitoso) throws Exception {
         
-        // Crear un BeanUsuario minimo para el registro
         BeanUsuario beanUsuario = new BeanUsuario();
         beanUsuario.setCodUsuario(usuario);
         
-        // Crear un BeanPadronRuc minimo para el registro
         BeanPadronRuc beanRuc = new BeanPadronRuc();
         beanRuc.setIsOk(exitoso);
         beanRuc.setRuc(rucConsulta);
         
         cntrlConsultaRUC.registrarConsulta(rucConsulta, rucOrigen, empresa, 
-                                           computerName, beanUsuario, beanRuc);
+                                           computerName, ipLocal, beanUsuario, beanRuc);
     }
 }
