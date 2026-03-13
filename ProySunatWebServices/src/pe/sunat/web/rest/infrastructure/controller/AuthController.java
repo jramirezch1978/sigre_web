@@ -32,7 +32,9 @@ public class AuthController {
      * {
      *   "usuario": "usuario",
      *   "clave": "clave123",
-     *   "empresa": "EMPRESA01"
+     *   "empresa": "EMPRESA01",
+     *   "ipLocal": "192.168.1.50",
+     *   "computerName": "PC-COMPRAS01"
      * }
      * 
      * Response:
@@ -70,6 +72,12 @@ public class AuthController {
             if (request.getIpLocal() == null || request.getIpLocal().trim().isEmpty()) {
                 return Response.status(Response.Status.BAD_REQUEST)
                     .entity(TokenResponse.error("La IP local es requerida"))
+                    .build();
+            }
+            
+            if (request.getComputerName() == null || request.getComputerName().trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(TokenResponse.error("El nombre del equipo es requerido"))
                     .build();
             }
             

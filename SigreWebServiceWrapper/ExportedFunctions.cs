@@ -11,9 +11,9 @@ namespace SigreWebServiceWrapper
     /// Usar con: FUNCTION string NombreFuncion(...) LIBRARY "SigreWebServiceWrapper.dll"
     /// 
     /// FLUJO RECOMENDADO PARA CONSULTA RUC:
-    /// 1. Al iniciar la aplicación: ConfigurarCredencialesRuc(usuario, clave, empresa, ipLocal)
-    /// 2. Cada consulta: ConsultarRuc(ruc, rucOrigen, computerName)
-    ///    - El DLL maneja automáticamente el token JWT (incluye ipLocal)
+    /// 1. Al iniciar la aplicación: ConfigurarCredencialesRuc(usuario, clave, empresa, ipLocal, computerName)
+    /// 2. Cada consulta: ConsultarRuc(ruc, rucOrigen)
+    ///    - El DLL maneja automáticamente el token JWT (incluye ipLocal y computerName)
     ///    - Si el token expiró, lo renueva automáticamente
     ///    - El token se guarda en disco para persistir entre sesiones
     /// </summary>
@@ -110,8 +110,8 @@ namespace SigreWebServiceWrapper
         // ============================================================
         //
         // FLUJO AUTOMÁTICO:
-        // 1. ConfigurarCredencialesRuc(usuario, clave, empresa, ipLocal) - Una vez al iniciar app
-        // 2. ConsultarRuc(ruc, rucOrigen, computerName) - El DLL maneja token automáticamente
+        // 1. ConfigurarCredencialesRuc(usuario, clave, empresa, ipLocal, computerName) - Una vez al iniciar app
+        // 2. ConsultarRuc(ruc, rucOrigen) - El DLL maneja token automáticamente (ipLocal y computerName en JWT)
         //
         // El token se guarda en: [Carpeta DLL]\token.json
         // Se renueva automáticamente cuando expira (cada 15 min)
@@ -125,7 +125,7 @@ namespace SigreWebServiceWrapper
         /// Llamar UNA VEZ al iniciar la aplicación.
         /// Las credenciales se guardan y el token se renueva automáticamente.
         /// 
-        /// PowerBuilder: FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, string empresa, string ipLocal) LIBRARY "SigreWebServiceWrapper.dll"
+        /// PowerBuilder: FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, string empresa, string ipLocal, string computerName) LIBRARY "SigreWebServiceWrapper.dll"
         /// 
         /// Retorna: {"exitoso":true} o {"exitoso":false,"mensaje":"..."}
         /// </summary>
@@ -135,9 +135,10 @@ namespace SigreWebServiceWrapper
             [MarshalAs(UnmanagedType.LPWStr)] string usuario,
             [MarshalAs(UnmanagedType.LPWStr)] string clave,
             [MarshalAs(UnmanagedType.LPWStr)] string empresa,
-            [MarshalAs(UnmanagedType.LPWStr)] string ipLocal)
+            [MarshalAs(UnmanagedType.LPWStr)] string ipLocal,
+            [MarshalAs(UnmanagedType.LPWStr)] string computerName)
         {
-            Logger.Info("ConfigurarCredencialesRuc: usuario=" + (usuario ?? "null") + ", empresa=" + (empresa ?? "null") + ", ipLocal=" + (ipLocal ?? "null"));
+            Logger.Info("ConfigurarCredencialesRuc: usuario=" + (usuario ?? "null") + ", empresa=" + (empresa ?? "null") + ", ipLocal=" + (ipLocal ?? "null") + ", computerName=" + (computerName ?? "null"));
             try
             {
                 if (string.IsNullOrEmpty(usuario) || string.IsNullOrEmpty(clave) || string.IsNullOrEmpty(empresa))
@@ -150,7 +151,12 @@ namespace SigreWebServiceWrapper
                     return FormatResult(false, "La IP local es requerida");
                 }
 
-                TokenManager.Configurar(usuario, clave, empresa, ipLocal);
+                if (string.IsNullOrEmpty(computerName))
+                {
+                    return FormatResult(false, "El nombre del equipo es requerido");
+                }
+
+                TokenManager.Configurar(usuario, clave, empresa, ipLocal, computerName);
 
                 if (_restClient == null)
                 {
@@ -173,22 +179,21 @@ namespace SigreWebServiceWrapper
         /// - Si no hay token, lo obtiene
         /// - Si el token expiró, lo renueva
         /// - El token se guarda en disco
+        /// - ipLocal y computerName viajan en el JWT
         /// 
         /// REQUISITO: Llamar ConfigurarCredencialesRuc() primero (una vez al iniciar app)
         /// 
-        /// PowerBuilder: FUNCTION string ConsultarRuc(string ruc, string rucOrigen, string computerName) LIBRARY "SigreWebServiceWrapper.dll"
+        /// PowerBuilder: FUNCTION string ConsultarRuc(string ruc, string rucOrigen) LIBRARY "SigreWebServiceWrapper.dll"
         /// </summary>
         [DllExport("ConsultarRuc", CallingConvention = CallingConvention.StdCall)]
         [return: MarshalAs(UnmanagedType.LPWStr)]
         public static string ConsultarRuc(
             [MarshalAs(UnmanagedType.LPWStr)] string rucConsulta,
-            [MarshalAs(UnmanagedType.LPWStr)] string rucOrigen,
-            [MarshalAs(UnmanagedType.LPWStr)] string computerName)
+            [MarshalAs(UnmanagedType.LPWStr)] string rucOrigen)
         {
             Logger.Info("ConsultarRuc: ruc=" + (rucConsulta ?? "null"));
             try
             {
-                // Obtener token válido (automáticamente renueva si expiró)
                 string token = TokenManager.ObtenerTokenValido();
                 
                 if (string.IsNullOrEmpty(token))
@@ -202,13 +207,12 @@ namespace SigreWebServiceWrapper
                     _restClient = new ConsultaRUCRest();
                 }
 
-                // Establecer el token en el cliente
                 _restClient.EstablecerToken(token);
 
                 var resultado = _restClient.ConsultarRUC(
                     rucConsulta ?? "",
                     rucOrigen ?? "",
-                    computerName ?? "");
+                    "");
 
                 if (resultado.IsOk)
                 {
@@ -276,19 +280,20 @@ namespace SigreWebServiceWrapper
             [MarshalAs(UnmanagedType.LPWStr)] string usuario,
             [MarshalAs(UnmanagedType.LPWStr)] string clave,
             [MarshalAs(UnmanagedType.LPWStr)] string empresa,
-            [MarshalAs(UnmanagedType.LPWStr)] string ipLocal)
+            [MarshalAs(UnmanagedType.LPWStr)] string ipLocal,
+            [MarshalAs(UnmanagedType.LPWStr)] string computerName)
         {
             Logger.Info("ObtenerTokenRest: usuario=" + (usuario ?? "null"));
             try
             {
-                TokenManager.Configurar(usuario ?? "", clave ?? "", empresa ?? "", ipLocal ?? "");
+                TokenManager.Configurar(usuario ?? "", clave ?? "", empresa ?? "", ipLocal ?? "", computerName ?? "");
                 
                 if (_restClient == null)
                 {
                     _restClient = new ConsultaRUCRest();
                 }
 
-                string token = _restClient.ObtenerToken(usuario ?? "", clave ?? "", empresa ?? "", ipLocal ?? "");
+                string token = _restClient.ObtenerToken(usuario ?? "", clave ?? "", empresa ?? "", ipLocal ?? "", computerName ?? "");
                 
                 if (token != null && !token.StartsWith("ERROR:"))
                 {
@@ -325,7 +330,7 @@ namespace SigreWebServiceWrapper
         {
             try
             {
-                TokenManager.Configurar(usuario ?? "", clave ?? "", empresa ?? "", ipLocal ?? "");
+                TokenManager.Configurar(usuario ?? "", clave ?? "", empresa ?? "", ipLocal ?? "", computerName ?? "");
                 
                 if (_restClient == null)
                 {
@@ -360,7 +365,7 @@ namespace SigreWebServiceWrapper
         [return: MarshalAs(UnmanagedType.LPWStr)]
         public static string ObtenerVersion()
         {
-            return "1.2.0";
+            return "1.3.0";
         }
 
 

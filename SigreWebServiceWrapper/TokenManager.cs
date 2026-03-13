@@ -21,6 +21,7 @@ namespace SigreWebServiceWrapper
         private static string _clave = null;
         private static string _empresa = null;
         private static string _ipLocal = null;
+        private static string _computerName = null;
 
         /// <summary>
         /// Ruta de la carpeta de tokens
@@ -74,7 +75,7 @@ namespace SigreWebServiceWrapper
         /// <summary>
         /// Configura las credenciales para obtener/renovar el token automáticamente
         /// </summary>
-        public static void Configurar(string usuario, string clave, string empresa, string ipLocal = "")
+        public static void Configurar(string usuario, string clave, string empresa, string ipLocal = "", string computerName = "")
         {
             lock (_lock)
             {
@@ -82,7 +83,8 @@ namespace SigreWebServiceWrapper
                 _clave = clave;
                 _empresa = empresa;
                 _ipLocal = ipLocal;
-                Logger.Debug($"TokenManager: Credenciales configuradas para usuario={usuario}, empresa={empresa}, ipLocal={ipLocal}");
+                _computerName = computerName;
+                Logger.Debug($"TokenManager: Credenciales configuradas para usuario={usuario}, empresa={empresa}, ipLocal={ipLocal}, computerName={computerName}");
             }
         }
 
@@ -132,7 +134,7 @@ namespace SigreWebServiceWrapper
                 Logger.Info($"TokenManager: Obteniendo nuevo token para usuario={_usuario}");
                 
                 var restClient = new ConsultaRUCRest();
-                string tokenResponse = restClient.ObtenerToken(_usuario, _clave, _empresa, _ipLocal ?? "");
+                string tokenResponse = restClient.ObtenerToken(_usuario, _clave, _empresa, _ipLocal ?? "", _computerName ?? "");
 
                 if (tokenResponse != null && !tokenResponse.StartsWith("ERROR:"))
                 {

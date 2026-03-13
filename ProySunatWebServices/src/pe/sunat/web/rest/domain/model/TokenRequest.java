@@ -9,14 +9,16 @@ public class TokenRequest {
     private String clave;
     private String empresa;
     private String ipLocal;
+    private String computerName;
     
     public TokenRequest() {}
     
-    public TokenRequest(String usuario, String clave, String empresa, String ipLocal) {
+    public TokenRequest(String usuario, String clave, String empresa, String ipLocal, String computerName) {
         this.usuario = usuario;
         this.clave = clave;
         this.empresa = empresa;
         this.ipLocal = ipLocal;
+        this.computerName = computerName;
     }
     
     public String getUsuario() {
@@ -49,5 +51,13 @@ public class TokenRequest {
     
     public void setIpLocal(String ipLocal) {
         this.ipLocal = ipLocal;
+    }
+    
+    public String getComputerName() {
+        return computerName;
+    }
+    
+    public void setComputerName(String computerName) {
+        this.computerName = computerName;
     }
 }

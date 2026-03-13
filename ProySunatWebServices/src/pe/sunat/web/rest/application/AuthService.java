@@ -43,11 +43,11 @@ public class AuthService implements AuthPort {
                 return TokenResponse.error("Credenciales invalidas");
             }
             
-            // Generar token JWT
             String token = crearJWT(
                 request.getUsuario(),
                 request.getEmpresa(),
                 request.getIpLocal(),
+                request.getComputerName(),
                 EXPIRATION_TIME
             );
             
@@ -69,13 +69,13 @@ public class AuthService implements AuthPort {
             String usuario = claims.getSubject();
             String empresa = claims.get("empresa", String.class);
             String ipLocal = claims.get("ipLocal", String.class);
+            String computerName = claims.get("computerName", String.class);
             
-            // Verificar expiracion
             if (claims.getExpiration().before(new Date())) {
                 return TokenClaims.invalid("Token expirado");
             }
             
-            return TokenClaims.valid(usuario, empresa, ipLocal);
+            return TokenClaims.valid(usuario, empresa, ipLocal, computerName);
             
         } catch (Exception e) {
             return TokenClaims.invalid("Token invalido: " + e.getMessage());
@@ -85,7 +85,7 @@ public class AuthService implements AuthPort {
     /**
      * Crea un JWT
      */
-    private String crearJWT(String usuario, String empresa, String ipLocal, long ttlMillis) {
+    private String crearJWT(String usuario, String empresa, String ipLocal, String computerName, long ttlMillis) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         
         long nowMillis = System.currentTimeMillis();
@@ -100,6 +100,7 @@ public class AuthService implements AuthPort {
             .setSubject(usuario)
             .claim("empresa", empresa)
             .claim("ipLocal", ipLocal)
+            .claim("computerName", computerName)
             .setIssuer("SunatWebServices")
             .signWith(signatureAlgorithm, signingKey);
         

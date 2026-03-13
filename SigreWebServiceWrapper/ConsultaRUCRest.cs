@@ -49,8 +49,9 @@ namespace SigreWebServiceWrapper
         /// <param name="clave">Clave del servicio</param>
         /// <param name="empresa">Código de empresa</param>
         /// <param name="ipLocal">IP local del equipo que consulta</param>
+        /// <param name="computerName">Nombre del equipo que consulta</param>
         /// <returns>Token JWT o mensaje de error</returns>
-        public string ObtenerToken(string usuario, string clave, string empresa, string ipLocal = "")
+        public string ObtenerToken(string usuario, string clave, string empresa, string ipLocal = "", string computerName = "")
         {
             try
             {
@@ -64,7 +65,8 @@ namespace SigreWebServiceWrapper
                     usuario = usuario,
                     clave = clave,
                     empresa = empresa,
-                    ipLocal = ipLocal ?? ""
+                    ipLocal = ipLocal ?? "",
+                    computerName = computerName ?? ""
                 };
 
                 string jsonBody = JsonConvert.SerializeObject(requestBody);
@@ -242,7 +244,7 @@ namespace SigreWebServiceWrapper
         {
             try
             {
-                string tokenResult = ObtenerToken(usuario, clave, empresa, ipLocal);
+                string tokenResult = ObtenerToken(usuario, clave, empresa, ipLocal, computerName);
                 
                 if (tokenResult.StartsWith("ERROR:"))
                 {

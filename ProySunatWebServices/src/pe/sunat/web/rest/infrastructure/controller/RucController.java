@@ -23,11 +23,11 @@ import pe.sunat.web.rest.domain.port.AuthPort.TokenClaims;
  * Parametros SOAP equivalentes:
  * - pRucConsulta  -> rucConsulta (body)
  * - pRucOrigen    -> rucOrigen (body)
- * - pComputerName -> computerName (body)
  * - pUsuario      -> en JWT (token)
  * - pClave        -> validado al generar token
  * - pEmpresa      -> en JWT (token)
  * - ipLocal       -> en JWT (token)
+ * - computerName  -> en JWT (token)
  */
 @Path("/ruc")
 public class RucController {
@@ -48,8 +48,7 @@ public class RucController {
      * Request Body:
      * {
      *   "rucConsulta": "20123456789",
-     *   "rucOrigen": "20100070970",
-     *   "computerName": "PC-COMPRAS01"
+     *   "rucOrigen": "20100070970"
      * }
      */
     @POST
@@ -87,12 +86,6 @@ public class RucController {
                 .build();
         }
         
-        if (request.getComputerName() == null || request.getComputerName().trim().isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity(RucResponse.error("El campo computerName es requerido"))
-                .build();
-        }
-        
         try {
             RucData data = rucService.consultarRuc(request.getRucConsulta());
             
@@ -101,7 +94,7 @@ public class RucController {
                     request.getRucConsulta(), 
                     request.getRucOrigen(), 
                     claims.getEmpresa(), 
-                    request.getComputerName(), 
+                    claims.getComputerName(), 
                     claims.getUsuario(), 
                     claims.getIpLocal(),
                     true
@@ -118,7 +111,7 @@ public class RucController {
                     request.getRucConsulta(), 
                     request.getRucOrigen(), 
                     claims.getEmpresa(), 
-                    request.getComputerName(), 
+                    claims.getComputerName(), 
                     claims.getUsuario(), 
                     claims.getIpLocal(),
                     false
