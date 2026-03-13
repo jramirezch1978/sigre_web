@@ -946,7 +946,7 @@ finally
 end try
 end function
 
-public function beanpadronruc of_leer_ruc_rest (string as_ruc);String ls_usuario, ls_clave, ls_ip_local, ls_json_result, ls_json_config
+public function beanpadronruc of_leer_ruc_rest (string as_ruc);String ls_usuario, ls_clave, ls_ip_local, ls_json_result, ls_json_config, ls_token
 String ls_ruc_empresa
 n_cst_api_sigre_dll lnvo_dll
 BeanPadronRUC lnvo_obj
@@ -969,10 +969,19 @@ try
 		return lnvo_obj
 	end if
 
+	ls_token = lnvo_dll.ObtenerTokenRest( &
+		ls_usuario, ls_clave, gs_empresa, ls_ip_local, gs_estacion)
+
+	if Pos(ls_token, 'ERROR') > 0 or trim(ls_token) = '' then
+		lnvo_obj.isOk = false
+		lnvo_obj.mensaje = 'Error al obtener token: ' + ls_token
+		return lnvo_obj
+	end if
+
 	ls_json_result = lnvo_dll.ConsultarRuc(as_ruc, ls_ruc_empresa)
 
-	if Pos(ls_json_result, '"exitoso":true') > 0 then
-		lnvo_obj.isOk       = true
+	if Pos(ls_json_result, '"success":true') > 0 then
+		lnvo_obj.isOk        = true
 		lnvo_obj.mensaje     = invo_util.of_json_string(ls_json_result, 'mensaje')
 		lnvo_obj.ruc         = invo_util.of_json_string(ls_json_result, 'ruc')
 		lnvo_obj.razonSocial = invo_util.of_json_string(ls_json_result, 'razonSocial')
