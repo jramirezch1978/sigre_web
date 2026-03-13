@@ -48,12 +48,12 @@ namespace SigreWebServiceWrapper
         /// <param name="usuario">Usuario del servicio</param>
         /// <param name="clave">Clave del servicio</param>
         /// <param name="empresa">Código de empresa</param>
+        /// <param name="ipLocal">IP local del equipo que consulta</param>
         /// <returns>Token JWT o mensaje de error</returns>
-        public string ObtenerToken(string usuario, string clave, string empresa)
+        public string ObtenerToken(string usuario, string clave, string empresa, string ipLocal = "")
         {
             try
             {
-                // Verificar si el token actual aún es válido (con 1 minuto de margen)
                 if (!string.IsNullOrEmpty(_token) && DateTime.Now.AddMinutes(1) < _tokenExpiration)
                 {
                     return _token;
@@ -63,7 +63,8 @@ namespace SigreWebServiceWrapper
                 {
                     usuario = usuario,
                     clave = clave,
-                    empresa = empresa
+                    empresa = empresa,
+                    ipLocal = ipLocal ?? ""
                 };
 
                 string jsonBody = JsonConvert.SerializeObject(requestBody);
@@ -229,27 +230,19 @@ namespace SigreWebServiceWrapper
 
         /// <summary>
         /// Consulta RUC en un solo paso (obtiene token y consulta)
-        /// Útil para consultas individuales sin reutilizar token
         /// </summary>
-        /// <param name="rucConsulta">RUC a consultar</param>
-        /// <param name="rucOrigen">RUC de la empresa que consulta</param>
-        /// <param name="usuario">Usuario del servicio</param>
-        /// <param name="clave">Clave del servicio</param>
-        /// <param name="empresa">Código de empresa</param>
-        /// <param name="computerName">Nombre del computador</param>
-        /// <returns>Objeto PadronRUC con la información</returns>
         public PadronRUC ConsultarRUCCompleto(
             string rucConsulta,
             string rucOrigen,
             string usuario,
             string clave,
             string empresa,
-            string computerName)
+            string computerName,
+            string ipLocal = "")
         {
             try
             {
-                // Obtener token
-                string tokenResult = ObtenerToken(usuario, clave, empresa);
+                string tokenResult = ObtenerToken(usuario, clave, empresa, ipLocal);
                 
                 if (tokenResult.StartsWith("ERROR:"))
                 {
@@ -260,7 +253,6 @@ namespace SigreWebServiceWrapper
                     };
                 }
 
-                // Consultar RUC
                 return ConsultarRUC(rucConsulta, rucOrigen, computerName);
             }
             catch (Exception ex)

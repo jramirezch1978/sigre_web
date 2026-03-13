@@ -11,9 +11,9 @@ namespace SigreWebServiceWrapper
     /// Usar con: FUNCTION string NombreFuncion(...) LIBRARY "SigreWebServiceWrapper.dll"
     /// 
     /// FLUJO RECOMENDADO PARA CONSULTA RUC:
-    /// 1. Al iniciar la aplicación: ConfigurarCredencialesRuc(usuario, clave, empresa)
+    /// 1. Al iniciar la aplicación: ConfigurarCredencialesRuc(usuario, clave, empresa, ipLocal)
     /// 2. Cada consulta: ConsultarRuc(ruc, rucOrigen, computerName)
-    ///    - El DLL maneja automáticamente el token JWT
+    ///    - El DLL maneja automáticamente el token JWT (incluye ipLocal)
     ///    - Si el token expiró, lo renueva automáticamente
     ///    - El token se guarda en disco para persistir entre sesiones
     /// </summary>
@@ -110,8 +110,8 @@ namespace SigreWebServiceWrapper
         // ============================================================
         //
         // FLUJO AUTOMÁTICO:
-        // 1. ConfigurarCredencialesRuc() - Una vez al iniciar app
-        // 2. ConsultarRuc() - El DLL maneja token automáticamente
+        // 1. ConfigurarCredencialesRuc(usuario, clave, empresa, ipLocal) - Una vez al iniciar app
+        // 2. ConsultarRuc(ruc, rucOrigen, computerName) - El DLL maneja token automáticamente
         //
         // El token se guarda en: [Carpeta DLL]\token.json
         // Se renueva automáticamente cuando expira (cada 15 min)
@@ -125,7 +125,7 @@ namespace SigreWebServiceWrapper
         /// Llamar UNA VEZ al iniciar la aplicación.
         /// Las credenciales se guardan y el token se renueva automáticamente.
         /// 
-        /// PowerBuilder: FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, string empresa) LIBRARY "SigreWebServiceWrapper.dll"
+        /// PowerBuilder: FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, string empresa, string ipLocal) LIBRARY "SigreWebServiceWrapper.dll"
         /// 
         /// Retorna: {"exitoso":true} o {"exitoso":false,"mensaje":"..."}
         /// </summary>
@@ -134,9 +134,10 @@ namespace SigreWebServiceWrapper
         public static string ConfigurarCredencialesRuc(
             [MarshalAs(UnmanagedType.LPWStr)] string usuario,
             [MarshalAs(UnmanagedType.LPWStr)] string clave,
-            [MarshalAs(UnmanagedType.LPWStr)] string empresa)
+            [MarshalAs(UnmanagedType.LPWStr)] string empresa,
+            [MarshalAs(UnmanagedType.LPWStr)] string ipLocal)
         {
-            Logger.Info("ConfigurarCredencialesRuc: usuario=" + (usuario ?? "null") + ", empresa=" + (empresa ?? "null"));
+            Logger.Info("ConfigurarCredencialesRuc: usuario=" + (usuario ?? "null") + ", empresa=" + (empresa ?? "null") + ", ipLocal=" + (ipLocal ?? "null"));
             try
             {
                 if (string.IsNullOrEmpty(usuario) || string.IsNullOrEmpty(clave) || string.IsNullOrEmpty(empresa))
@@ -144,10 +145,13 @@ namespace SigreWebServiceWrapper
                     return FormatResult(false, "Usuario, clave y empresa son requeridos");
                 }
 
-                // Configurar TokenManager
-                TokenManager.Configurar(usuario, clave, empresa);
+                if (string.IsNullOrEmpty(ipLocal))
+                {
+                    return FormatResult(false, "La IP local es requerida");
+                }
 
-                // Inicializar cliente REST
+                TokenManager.Configurar(usuario, clave, empresa, ipLocal);
+
                 if (_restClient == null)
                 {
                     _restClient = new ConsultaRUCRest();
@@ -271,20 +275,20 @@ namespace SigreWebServiceWrapper
         public static string ObtenerTokenRest(
             [MarshalAs(UnmanagedType.LPWStr)] string usuario,
             [MarshalAs(UnmanagedType.LPWStr)] string clave,
-            [MarshalAs(UnmanagedType.LPWStr)] string empresa)
+            [MarshalAs(UnmanagedType.LPWStr)] string empresa,
+            [MarshalAs(UnmanagedType.LPWStr)] string ipLocal)
         {
             Logger.Info("ObtenerTokenRest: usuario=" + (usuario ?? "null"));
             try
             {
-                // También configuramos TokenManager para futuras consultas
-                TokenManager.Configurar(usuario ?? "", clave ?? "", empresa ?? "");
+                TokenManager.Configurar(usuario ?? "", clave ?? "", empresa ?? "", ipLocal ?? "");
                 
                 if (_restClient == null)
                 {
                     _restClient = new ConsultaRUCRest();
                 }
 
-                string token = _restClient.ObtenerToken(usuario ?? "", clave ?? "", empresa ?? "");
+                string token = _restClient.ObtenerToken(usuario ?? "", clave ?? "", empresa ?? "", ipLocal ?? "");
                 
                 if (token != null && !token.StartsWith("ERROR:"))
                 {
@@ -316,12 +320,12 @@ namespace SigreWebServiceWrapper
             [MarshalAs(UnmanagedType.LPWStr)] string usuario,
             [MarshalAs(UnmanagedType.LPWStr)] string clave,
             [MarshalAs(UnmanagedType.LPWStr)] string empresa,
-            [MarshalAs(UnmanagedType.LPWStr)] string computerName)
+            [MarshalAs(UnmanagedType.LPWStr)] string computerName,
+            [MarshalAs(UnmanagedType.LPWStr)] string ipLocal)
         {
             try
             {
-                // Configurar credenciales
-                TokenManager.Configurar(usuario ?? "", clave ?? "", empresa ?? "");
+                TokenManager.Configurar(usuario ?? "", clave ?? "", empresa ?? "", ipLocal ?? "");
                 
                 if (_restClient == null)
                 {
@@ -334,7 +338,8 @@ namespace SigreWebServiceWrapper
                     usuario ?? "",
                     clave ?? "",
                     empresa ?? "",
-                    computerName ?? "");
+                    computerName ?? "",
+                    ipLocal ?? "");
 
                 return PadronRucToJson(resultado);
             }
@@ -355,7 +360,7 @@ namespace SigreWebServiceWrapper
         [return: MarshalAs(UnmanagedType.LPWStr)]
         public static string ObtenerVersion()
         {
-            return "1.1.0";
+            return "1.2.0";
         }
 
 
