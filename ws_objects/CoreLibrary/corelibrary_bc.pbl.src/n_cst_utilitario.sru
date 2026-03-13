@@ -1,4 +1,4 @@
-﻿$PBExportHeader$n_cst_utilitario.sru
+$PBExportHeader$n_cst_utilitario.sru
 forward
 global type n_cst_utilitario from nonvisualobject
 end type
@@ -51,6 +51,7 @@ public function string of_get_string (string as_titulo, string as_default_txt)
 public function string of_set_numera (string as_table_name, string as_origen, integer an_longitud, boolean ab_hex)
 public function string of_set_numera (string as_table_name, integer an_longitud)
 public function string of_set_numera (string as_table_name, integer an_longitud, boolean ab_hex)
+public function string of_json_string (string as_json, string as_key)
 end prototypes
 
 public function string of_replace (string as_cadena, string as_string1, string as_string2);//Utiliza esta sintáxis, 
@@ -838,6 +839,34 @@ public function string of_set_numera (string as_table_name, integer an_longitud)
 end function
 
 public function string of_set_numera (string as_table_name, integer an_longitud, boolean ab_hex);return this.of_set_numera(as_table_name, gs_origen, an_longitud, ab_hex)
+end function
+
+public function string of_json_string (string as_json, string as_key);String ls_search, ls_value
+Long ll_pos, ll_start, ll_end
+
+if IsNull(as_json) or IsNull(as_key) then return ''
+if trim(as_json) = '' or trim(as_key) = '' then return ''
+
+ls_search = '"' + as_key + '":"'
+ll_pos = Pos(as_json, ls_search)
+
+if ll_pos <= 0 then return ''
+
+ll_start = ll_pos + Len(ls_search)
+ll_end = ll_start
+
+DO WHILE ll_end <= Len(as_json)
+	if Mid(as_json, ll_end, 1) = '"' then
+		if ll_end <= ll_start or Mid(as_json, ll_end - 1, 1) <> '\' then
+			EXIT
+		end if
+	end if
+	ll_end ++
+LOOP
+
+ls_value = Mid(as_json, ll_start, ll_end - ll_start)
+
+return ls_value
 end function
 
 on n_cst_utilitario.create
