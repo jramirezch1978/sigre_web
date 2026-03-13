@@ -1,4 +1,4 @@
-﻿$PBExportHeader$n_cst_compras.sru
+$PBExportHeader$n_cst_compras.sru
 forward
 global type n_cst_compras from nonvisualobject
 end type
@@ -42,6 +42,7 @@ public function String of_get_email (string as_cod_relacion)
 public function boolean of_show_imagen (string path_imagen)
 public function boolean of_send_email_cambio_estado (u_dw_abc adw_master)
 public function beanpadronruc of_leer_ruc_externo (string as_ruc)
+public function beanpadronruc of_leer_ruc_rest (string as_ruc)
 public function string of_get_firma_autorizado (string as_ini_file, string as_user)
 public function string of_get_firma_usuario (string as_ini_file, string as_user)
 public function boolean of_send_email_activa_prov (u_dw_abc adw_master)
@@ -942,6 +943,78 @@ finally
 	
 	destroy conn
 	
+end try
+end function
+
+public function beanpadronruc of_leer_ruc_rest (string as_ruc);String ls_usuario, ls_clave, ls_ip_local, ls_json_result, ls_json_config
+String ls_ruc_empresa
+n_cst_api_sigre_dll lnvo_dll
+BeanPadronRUC lnvo_obj
+
+try
+	lnvo_obj = create BeanPadronRUC
+	lnvo_dll = create n_cst_api_sigre_dll
+
+	ls_usuario     = gnvo_app.of_get_parametro('USUARIO_REMOTO', 'sigre')
+	ls_clave       = gnvo_app.of_get_parametro('CLAVE_REMOTO', 'sigre1234')
+	ls_ruc_empresa = gnvo_app.empresa.is_ruc
+	ls_ip_local    = lnvo_dll.ObtenerIpLocal()
+
+	ls_json_config = lnvo_dll.ConfigurarCredencialesRuc( &
+		ls_usuario, ls_clave, gs_empresa, ls_ip_local, gs_estacion)
+
+	if Pos(ls_json_config, '"exitoso":true') <= 0 then
+		lnvo_obj.isOk = false
+		lnvo_obj.mensaje = 'Error al configurar credenciales DLL: ' + ls_json_config
+		return lnvo_obj
+	end if
+
+	ls_json_result = lnvo_dll.ConsultarRuc(as_ruc, ls_ruc_empresa)
+
+	if Pos(ls_json_result, '"exitoso":true') > 0 then
+		lnvo_obj.isOk       = true
+		lnvo_obj.mensaje     = f_json_string(ls_json_result, 'mensaje')
+		lnvo_obj.ruc         = f_json_string(ls_json_result, 'ruc')
+		lnvo_obj.razonSocial = f_json_string(ls_json_result, 'razonSocial')
+		lnvo_obj.estado      = f_json_string(ls_json_result, 'estado')
+		lnvo_obj.condicion   = f_json_string(ls_json_result, 'condicion')
+		lnvo_obj.ubigeo      = f_json_string(ls_json_result, 'ubigeo')
+		lnvo_obj.tipoVia     = f_json_string(ls_json_result, 'tipoVia')
+		lnvo_obj.nombreVia   = f_json_string(ls_json_result, 'nombreVia')
+		lnvo_obj.codigoZona  = f_json_string(ls_json_result, 'codigoZona')
+		lnvo_obj.tipoZona    = f_json_string(ls_json_result, 'tipoZona')
+		lnvo_obj.numero      = f_json_string(ls_json_result, 'numero')
+		lnvo_obj.interior    = f_json_string(ls_json_result, 'interior')
+		lnvo_obj.lote        = f_json_string(ls_json_result, 'lote')
+		lnvo_obj.departamento    = f_json_string(ls_json_result, 'departamento')
+		lnvo_obj.manzana         = f_json_string(ls_json_result, 'manzana')
+		lnvo_obj.kilometro       = f_json_string(ls_json_result, 'kilometro')
+		lnvo_obj.codProvincia    = f_json_string(ls_json_result, 'codProvincia')
+		lnvo_obj.descProvincia   = f_json_string(ls_json_result, 'descProvincia')
+		lnvo_obj.codDepartamento = f_json_string(ls_json_result, 'codDepartamento')
+		lnvo_obj.descDepartamento = f_json_string(ls_json_result, 'descDepartamento')
+		lnvo_obj.descDistrito    = f_json_string(ls_json_result, 'descDistrito')
+	else
+		lnvo_obj.isOk    = false
+		lnvo_obj.mensaje  = f_json_string(ls_json_result, 'mensaje')
+		if trim(lnvo_obj.mensaje) = '' then
+			lnvo_obj.mensaje = 'Error al consultar RUC. Respuesta: ' + ls_json_result
+		end if
+	end if
+
+	return lnvo_obj
+
+catch (Exception ex)
+
+	lnvo_obj = create BeanPadronRUC
+	lnvo_obj.isOk = false
+	lnvo_obj.mensaje = 'Exception en of_leer_ruc_rest(). Mensaje: ' + ex.getMessage()
+	return lnvo_obj
+
+finally
+
+	destroy lnvo_dll
+
 end try
 end function
 

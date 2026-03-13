@@ -1,4 +1,4 @@
-﻿$PBExportHeader$n_cst_api_sigre_dll.sru
+$PBExportHeader$n_cst_api_sigre_dll.sru
 forward
 global type n_cst_api_sigre_dll from nonvisualobject
 end type
@@ -22,17 +22,29 @@ FUNCTION boolean FreeLibrary(ulong hModule) LIBRARY "kernel32.dll" ALIAS FOR "Fr
 // Obtener version del DLL
 FUNCTION string ObtenerVersion() LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ObtenerVersion"
 
-// Configurar credenciales para consulta RUC
-FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, string empresa) &
+// Configurar credenciales para consulta RUC (v1.3.0)
+FUNCTION string ConfigurarCredencialesRuc(string usuario, string clave, string empresa, string ipLocal, string computerName) &
     LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ConfigurarCredencialesRuc"
 
-// Obtener token JWT
-FUNCTION string ObtenerTokenRest(string usuario, string clave, string empresa) &
+// Obtener token JWT (v1.3.0)
+FUNCTION string ObtenerTokenRest(string usuario, string clave, string empresa, string ipLocal, string computerName) &
     LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ObtenerTokenRest"
 
-// Consultar RUC (requiere token previo)
-FUNCTION string ConsultarRuc(string ruc, string rucOrigen, string computerName) &
+// Consultar RUC (requiere ConfigurarCredencialesRuc previo - v1.3.0)
+FUNCTION string ConsultarRuc(string ruc, string rucOrigen) &
     LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ConsultarRuc"
+
+// Obtener info del token (para debug)
+FUNCTION string ObtenerInfoToken() &
+    LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ObtenerInfoToken"
+
+// Forzar renovacion del token
+SUBROUTINE ForzarRenovacionToken() &
+    LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ForzarRenovacionToken"
+
+// Obtener IP local del equipo
+FUNCTION string ObtenerIpLocal() &
+    LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ObtenerIpLocal"
 
 // Envio de correo UNIFICADO
 // Formatos:

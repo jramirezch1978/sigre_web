@@ -406,11 +406,52 @@ namespace SigreWebServiceWrapper
             sb.AppendFormat("\"estado\":\"{0}\",", EscapeJson(p.Estado));
             sb.AppendFormat("\"condicion\":\"{0}\",", EscapeJson(p.Condicion));
             sb.AppendFormat("\"ubigeo\":\"{0}\",", EscapeJson(p.Ubigeo));
+            sb.AppendFormat("\"tipoVia\":\"{0}\",", EscapeJson(p.TipoVia));
+            sb.AppendFormat("\"nombreVia\":\"{0}\",", EscapeJson(p.NombreVia));
+            sb.AppendFormat("\"codigoZona\":\"{0}\",", EscapeJson(p.CodigoZona));
+            sb.AppendFormat("\"tipoZona\":\"{0}\",", EscapeJson(p.TipoZona));
+            sb.AppendFormat("\"numero\":\"{0}\",", EscapeJson(p.Numero));
+            sb.AppendFormat("\"interior\":\"{0}\",", EscapeJson(p.Interior));
+            sb.AppendFormat("\"lote\":\"{0}\",", EscapeJson(p.Lote));
+            sb.AppendFormat("\"departamento\":\"{0}\",", EscapeJson(p.Departamento));
+            sb.AppendFormat("\"manzana\":\"{0}\",", EscapeJson(p.Manzana));
+            sb.AppendFormat("\"kilometro\":\"{0}\",", EscapeJson(p.Kilometro));
+            sb.AppendFormat("\"codDepartamento\":\"{0}\",", EscapeJson(p.CodDepartamento));
+            sb.AppendFormat("\"descDepartamento\":\"{0}\",", EscapeJson(p.DescDepartamento));
+            sb.AppendFormat("\"codProvincia\":\"{0}\",", EscapeJson(p.CodProvincia));
+            sb.AppendFormat("\"descProvincia\":\"{0}\",", EscapeJson(p.DescProvincia));
+            sb.AppendFormat("\"descDistrito\":\"{0}\",", EscapeJson(p.DescDistrito));
             sb.AppendFormat("\"direccionCompleta\":\"{0}\",", EscapeJson(p.ObtenerDireccionCompleta()));
             sb.AppendFormat("\"ubicacionCompleta\":\"{0}\"", EscapeJson(p.ObtenerUbicacionCompleta()));
             sb.Append("}");
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Obtiene la IP local del equipo
+        /// PowerBuilder: FUNCTION string ObtenerIpLocal() LIBRARY "SigreWebServiceWrapper.dll"
+        /// </summary>
+        [DllExport("ObtenerIpLocal", CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        public static string ObtenerIpLocal()
+        {
+            try
+            {
+                var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        return ip.ToString();
+                    }
+                }
+                return "127.0.0.1";
+            }
+            catch
+            {
+                return "127.0.0.1";
+            }
         }
     }
 }
