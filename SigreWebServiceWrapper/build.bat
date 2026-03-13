@@ -79,17 +79,12 @@ if exist "%VS_PATH%\VC\Auxiliary\Build\vcvars64.bat" (
     echo    [SKIP] vcvars64.bat no encontrado, saltando x64
 )
 
-REM --- Copiar INI y verify.bat ---
+REM --- Copiar INI ---
 echo [4/4] Copiando archivos de configuracion...
 if exist "SigreWebServiceWrapper.ini" (
     copy /Y "SigreWebServiceWrapper.ini" "dll\x86\" >nul
     copy /Y "SigreWebServiceWrapper.ini" "dll\x64\" >nul
     echo    [OK] Archivo INI copiado
-)
-if exist "verify.bat" (
-    copy /Y "verify.bat" "dll\x86\" >nul
-    copy /Y "verify.bat" "dll\x64\" >nul
-    echo    [OK] Archivo verify.bat copiado
 )
 
 REM --- Verificar exportaciones ---
@@ -104,7 +99,7 @@ if errorlevel 1 (
 ) else (
     echo.
     echo --- DLL x86 ---
-    dumpbin /exports "dll\x86\SigreWebServiceWrapper.dll" 2>nul | findstr /C:"ObtenerVersion" /C:"EnviarEmail" /C:"ConsultarRuc" /C:"ObtenerTokenRest" /C:"ObtenerConfiguracion" /C:"ConfigurarCredencialesRuc"
+    dumpbin /exports "dll\x86\SigreWebServiceWrapper.dll" 2>nul | findstr /C:"ObtenerVersion" /C:"ObtenerIpLocal" /C:"ConfigurarCredencialesRuc" /C:"ObtenerTokenRest" /C:"ObtenerInfoToken" /C:"ForzarRenovacionToken" /C:"ConsultarRuc" /C:"EnviarEmail" /C:"ObtenerConfiguracion"
 )
 
 echo.
@@ -117,8 +112,6 @@ echo     - dll\x86\SigreWebServiceWrapper.dll (32 bits)
 echo     - dll\x64\SigreWebServiceWrapper.dll (64 bits)
 echo     - dll\x86\SigreWebServiceWrapper.ini
 echo     - dll\x64\SigreWebServiceWrapper.ini
-echo     - dll\x86\verify.bat (verificador)
-echo     - dll\x64\verify.bat (verificador)
 echo.
 echo   Para usar en PowerBuilder:
 echo     1. Copie dll\x86\SigreWebServiceWrapper.dll a su carpeta EXE

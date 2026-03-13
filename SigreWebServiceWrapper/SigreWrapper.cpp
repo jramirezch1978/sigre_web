@@ -35,6 +35,8 @@ static wchar_t g_token[4096];
 static wchar_t g_usuario[256];
 static wchar_t g_clave[256];
 static wchar_t g_empresa[256];
+static wchar_t g_ipLocal[256];
+static wchar_t g_computerName[256];
 static wchar_t g_dllPath[MAX_PATH];
 static wchar_t g_iniPath[MAX_PATH];
 
@@ -190,7 +192,7 @@ static BOOL HttpRequest(
     DWORD bytesRead = 0;
     char buffer[4096];
     
-    hSession = WinHttpOpen(L"SigreWrapper/1.2", 
+    hSession = WinHttpOpen(L"SigreWrapper/3.0", 
                            WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
                            WINHTTP_NO_PROXY_NAME, 
                            WINHTTP_NO_PROXY_BYPASS, 0);
@@ -1187,18 +1189,57 @@ extern "C" {
 
 __declspec(dllexport) const wchar_t* __stdcall ObtenerVersion()
 {
-    return L"2.0.0";
+    return L"3.0.0";
+}
+
+__declspec(dllexport) const wchar_t* __stdcall ObtenerIpLocal()
+{
+    if (!InitWinsock()) {
+        wcscpy_s(g_result, 16384, L"0.0.0.0");
+        return g_result;
+    }
+    
+    char hostname[256];
+    if (gethostname(hostname, sizeof(hostname)) != 0) {
+        wcscpy_s(g_result, 16384, L"0.0.0.0");
+        return g_result;
+    }
+    
+    struct addrinfo hints = {0}, *addrResult = NULL;
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    
+    if (getaddrinfo(hostname, NULL, &hints, &addrResult) != 0 || !addrResult) {
+        wcscpy_s(g_result, 16384, L"0.0.0.0");
+        return g_result;
+    }
+    
+    struct sockaddr_in* addr = (struct sockaddr_in*)addrResult->ai_addr;
+    char ipStr[64];
+    sprintf_s(ipStr, sizeof(ipStr), "%d.%d.%d.%d",
+              addr->sin_addr.S_un.S_un_b.s_b1,
+              addr->sin_addr.S_un.S_un_b.s_b2,
+              addr->sin_addr.S_un.S_un_b.s_b3,
+              addr->sin_addr.S_un.S_un_b.s_b4);
+    freeaddrinfo(addrResult);
+    
+    MultiByteToWideChar(CP_UTF8, 0, ipStr, -1, g_result, 16384);
+    return g_result;
 }
 
 __declspec(dllexport) const wchar_t* __stdcall ConfigurarCredencialesRuc(
-    const wchar_t* usuario, const wchar_t* clave, const wchar_t* empresa)
+    const wchar_t* usuario, const wchar_t* clave, const wchar_t* empresa,
+    const wchar_t* ipLocal, const wchar_t* computerName)
 {
     if (usuario) wcscpy_s(g_usuario, 256, usuario);
     if (clave) wcscpy_s(g_clave, 256, clave);
     if (empresa) wcscpy_s(g_empresa, 256, empresa);
+    if (ipLocal) wcscpy_s(g_ipLocal, 256, ipLocal);
+    if (computerName) wcscpy_s(g_computerName, 256, computerName);
     
     wchar_t logMsg[512];
-    swprintf_s(logMsg, 512, L"ConfigurarCredencialesRuc: usuario=%s, empresa=%s", g_usuario, g_empresa);
+    swprintf_s(logMsg, 512, L"ConfigurarCredencialesRuc: usuario=%s, empresa=%s, ip=%s, pc=%s",
+               g_usuario, g_empresa, g_ipLocal, g_computerName);
     LogInfo(logMsg);
     
     wcscpy_s(g_result, 16384, L"{\"exitoso\":true,\"mensaje\":\"Credenciales configuradas\"}");
@@ -1206,23 +1247,29 @@ __declspec(dllexport) const wchar_t* __stdcall ConfigurarCredencialesRuc(
 }
 
 __declspec(dllexport) const wchar_t* __stdcall ObtenerTokenRest(
-    const wchar_t* usuario, const wchar_t* clave, const wchar_t* empresa)
+    const wchar_t* usuario, const wchar_t* clave, const wchar_t* empresa,
+    const wchar_t* ipLocal, const wchar_t* computerName)
 {
     LogInfo(L"ObtenerTokenRest: iniciando");
     
     if (usuario) wcscpy_s(g_usuario, 256, usuario);
     if (clave) wcscpy_s(g_clave, 256, clave);
     if (empresa) wcscpy_s(g_empresa, 256, empresa);
+    if (ipLocal) wcscpy_s(g_ipLocal, 256, ipLocal);
+    if (computerName) wcscpy_s(g_computerName, 256, computerName);
     
-    char body[1024];
-    char user_utf8[256], pass_utf8[256], emp_utf8[256];
+    char body[2048];
+    char user_utf8[256], pass_utf8[256], emp_utf8[256], ip_utf8[256], pc_utf8[256];
     WideCharToMultiByte(CP_UTF8, 0, g_usuario, -1, user_utf8, 256, NULL, NULL);
     WideCharToMultiByte(CP_UTF8, 0, g_clave, -1, pass_utf8, 256, NULL, NULL);
     WideCharToMultiByte(CP_UTF8, 0, g_empresa, -1, emp_utf8, 256, NULL, NULL);
+    WideCharToMultiByte(CP_UTF8, 0, g_ipLocal, -1, ip_utf8, 256, NULL, NULL);
+    WideCharToMultiByte(CP_UTF8, 0, g_computerName, -1, pc_utf8, 256, NULL, NULL);
     
     sprintf_s(body, sizeof(body), 
-              "{\"usuario\":\"%s\",\"clave\":\"%s\",\"empresa\":\"%s\"}",
-              user_utf8, pass_utf8, emp_utf8);
+              "{\"usuario\":\"%s\",\"clave\":\"%s\",\"empresa\":\"%s\","
+              "\"ipLocal\":\"%s\",\"computerName\":\"%s\"}",
+              user_utf8, pass_utf8, emp_utf8, ip_utf8, pc_utf8);
     
     wchar_t response[4096] = {0};
     
@@ -1253,34 +1300,59 @@ __declspec(dllexport) const wchar_t* __stdcall ObtenerTokenRest(
     return g_result;
 }
 
-__declspec(dllexport) const wchar_t* __stdcall ConsultarRuc(
-    const wchar_t* ruc, const wchar_t* rucOrigen, const wchar_t* computerName)
+__declspec(dllexport) const wchar_t* __stdcall ObtenerInfoToken()
 {
-    wchar_t logMsg[512];
-    swprintf_s(logMsg, 512, L"ConsultarRuc: ruc=%s", ruc ? ruc : L"null");
-    LogInfo(logMsg);
-    
     if (wcslen(g_token) == 0) {
-        wcscpy_s(g_result, 16384, L"{\"exitoso\":false,\"mensaje\":\"No hay token\"}");
+        wcscpy_s(g_result, 16384, L"{\"tieneToken\":false}");
         return g_result;
     }
     
-    wchar_t path[512];
-    swprintf_s(path, 512, L"%s?ruc=%s&rucOrigen=%s&computerName=%s",
-               g_apiConsultaPath, ruc ? ruc : L"", rucOrigen ? rucOrigen : L"",
-               computerName ? computerName : L"PC");
+    swprintf_s(g_result, 16384,
+        L"{\"tieneToken\":true,\"usuario\":\"%s\",\"empresa\":\"%s\","
+        L"\"ipLocal\":\"%s\",\"computerName\":\"%s\",\"tokenLength\":%d}",
+        g_usuario, g_empresa, g_ipLocal, g_computerName, (int)wcslen(g_token));
+    return g_result;
+}
+
+__declspec(dllexport) void __stdcall ForzarRenovacionToken()
+{
+    g_token[0] = L'\0';
+    LogInfo(L"ForzarRenovacionToken: token limpiado");
+}
+
+__declspec(dllexport) const wchar_t* __stdcall ConsultarRuc(
+    const wchar_t* ruc, const wchar_t* rucOrigen)
+{
+    wchar_t logMsg[512];
+    swprintf_s(logMsg, 512, L"ConsultarRuc: ruc=%s, rucOrigen=%s",
+               ruc ? ruc : L"null", rucOrigen ? rucOrigen : L"null");
+    LogInfo(logMsg);
+    
+    if (wcslen(g_token) == 0) {
+        wcscpy_s(g_result, 16384, L"{\"exitoso\":false,\"mensaje\":\"No hay token. Llame ObtenerTokenRest primero.\"}");
+        return g_result;
+    }
+    
+    char body[1024];
+    char ruc_utf8[64], rucOrigen_utf8[64];
+    WideCharToMultiByte(CP_UTF8, 0, ruc ? ruc : L"", -1, ruc_utf8, 64, NULL, NULL);
+    WideCharToMultiByte(CP_UTF8, 0, rucOrigen ? rucOrigen : L"", -1, rucOrigen_utf8, 64, NULL, NULL);
+    
+    sprintf_s(body, sizeof(body),
+              "{\"rucConsulta\":\"%s\",\"rucOrigen\":\"%s\"}", ruc_utf8, rucOrigen_utf8);
     
     wchar_t headers[4096];
-    swprintf_s(headers, 4096, L"Authorization: Bearer %s\r\n", g_token);
+    swprintf_s(headers, 4096,
+        L"Authorization: Bearer %s\r\nContent-Type: application/json\r\n", g_token);
     
     wchar_t response[8192] = {0};
     
-    if (HttpRequest(g_apiHost, g_apiPort, path, L"GET", headers, NULL, response, sizeof(response), g_apiUseSSL)) {
+    if (HttpRequest(g_apiHost, g_apiPort, g_apiConsultaPath, L"POST", headers, body, response, sizeof(response), g_apiUseSSL)) {
         wcscpy_s(g_result, 16384, response);
         LogInfo(L"ConsultarRuc: exitoso");
     } else {
         wcscpy_s(g_result, 16384, L"{\"exitoso\":false,\"mensaje\":\"Error de conexion\"}");
-        LogError(L"ConsultarRuc: error");
+        LogError(L"ConsultarRuc: error de conexion");
     }
     
     return g_result;
@@ -1423,7 +1495,7 @@ __declspec(dllexport) const wchar_t* __stdcall ObtenerConfiguracion()
 {
     swprintf_s(g_result, 16384,
         L"{\"apiHost\":\"%s\",\"apiPort\":%d,\"smtpServer\":\"%s\",\"smtpPort\":%d,"
-        L"\"smtpUser\":\"%s\",\"logEnabled\":%s,\"logPath\":\"%s\",\"version\":\"2.1.0\"}",
+        L"\"smtpUser\":\"%s\",\"logEnabled\":%s,\"logPath\":\"%s\",\"version\":\"3.0.0\"}",
         g_apiHost, g_apiPort, g_smtpServer, g_smtpPort, g_smtpUser,
         g_logEnabled ? L"true" : L"false", g_logPath);
     return g_result;
@@ -1447,7 +1519,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
         g_comInitialized = SUCCEEDED(hr);
         
-        LogInfo(L"DLL cargada - SigreWebServiceWrapper v2.0.0 (SMTP nativo TLS)");
+        g_ipLocal[0] = L'\0';
+        g_computerName[0] = L'\0';
+        
+        LogInfo(L"DLL cargada - SigreWebServiceWrapper v3.0.0 (ipLocal/computerName en JWT)");
     }
     else if (ul_reason_for_call == DLL_PROCESS_DETACH) {
         LogInfo(L"DLL descargada");
