@@ -799,7 +799,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_choice_cartera_cobros | S/C | Opciones de cartera de cobros |
 | w_fi001_puntos_venta | FI001 | Puntos de venta |
 | w_fi002_tipo_impuesto | FI002 | Tipo de impuesto |
 | w_fi003_credito_fiscal | FI003 | Crédito fiscal |
@@ -2420,7 +2419,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 3 | Compras | 163 |
 | 4 | Comercialización / Ventas | 153 |
 | 5 | Contabilidad | 236 |
-| 6 | Finanzas | 159 |
+| 6 | Finanzas | 158 |
 | 7 | RRHH | 283 |
 | 8 | Presupuesto | 156 |
 | 9 | Producción | 194 |
@@ -2435,7 +2434,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,255** |
+| | **TOTAL** | **2,254** |
 
 ---
 
