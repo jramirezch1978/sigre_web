@@ -317,10 +317,17 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
       ]);
 
       const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF9FAFB';
-      row.eachCell(cell => {
+      row.eachCell((cell, colNumber) => {
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
         cell.border = thinBorder;
         cell.alignment = { vertical: 'middle' };
+
+        if ([9, 10, 11].includes(colNumber)) {
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        }
+        if (colNumber >= 12 && colNumber <= 20) {
+          cell.alignment = { horizontal: 'right', vertical: 'middle' };
+        }
       });
 
       if (!reg.horaSalida) {
