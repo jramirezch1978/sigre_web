@@ -4,13 +4,6 @@ Análisis de todas las ventanas (.srw) del módulo Almacen.
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_abc_ingreso_resumido | S/C | Ingreso simplificado de artículos |
-| w_abc_lista_zapatos_sugeridos | S/C | Listado de zapatos sugeridos |
-| w_abc_lista_zapatos_sugeridos_general | S/C | Listado de zapatos sugeridos (general) |
-| w_abc_seleccion | S/C | Ventana de selección genérica |
-| w_abc_seleccion_lista_search | S/C | Ventana de selección con búsqueda en lista |
-| w_abc_seleccion_md | S/C | Ventana de selección MD |
-| w_abc_seleccion_md2 | S/C | Ventana de selección MD (versión 2) |
 | w_al001_almacenes | AL001 | Mantenimiento de almacenes |
 | w_al002_articulo_mov_tipo | AL002 | Mantenimiento de tipo de movimientos |
 | w_al003_almacen_movimientos | AL003 | Movimientos permitidos por almacén |
@@ -166,20 +159,3 @@ Análisis de todas las ventanas (.srw) del módulo Almacen.
 | w_al913_libera_reservaciones | AL913 | Liberar reservaciones |
 | w_al914_inventario_conteo | S/C | Inventario por conteo |
 | w_cm311_orden_compra_frm | CM311 | Formato de orden de compra |
-| w_datos_consig | S/C | Datos artículos consignación |
-| w_datos_dev_pres | S/C | Datos artículos devolución/préstamo |
-| w_datos_transferencia | S/C | Datos artículos transferencia |
-| w_filtros | S/C | Filtros |
-| w_get_datos_ing_oc | S/C | Ingreso por compra |
-| w_get_rango_fechas | S/C | Ingrese rango de fechas |
-| w_get_reservacion | S/C | Reservación en OT - AMP |
-| w_get_tipo_doc_amp | S/C | Buscar documento en artículo mov proy |
-| w_get_tipo_doc_oper_sec | S/C | Buscar documento en artículo mov proy (operación secundaria) |
-| w_lectura_masiva | S/C | Lectura masiva de códigos |
-| w_logon | S/C | Ventana de inicio de sesión |
-| w_main | S/C | Sistema de almacenes (ventana principal) |
-| w_main_about | S/C | Acerca del sistema |
-| w_pop_articulos_x_almacen | S/C | Saldos por almacén (popup) |
-| w_rpt_preview_gr | S/C | Vista previa de reportes (Graph) |
-| w_rpt_preview_old | S/C | Vista previa de reportes (legacy) |
-| w_selecciona_formato | S/C | Seleccione tipo formato |

@@ -4,34 +4,13 @@ Análisis completo de todas las ventanas (.srw) del módulo Rrhh.
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_abc_fecha_concepto | S/C | Selección de fecha y concepto |
-| w_abc_seleccion | S/C | Ventana de selección genérica |
-| w_abc_seleccion_md | S/C | Ventana de selección múltiple |
-| w_about | S/C | Acerca de / Información del módulo |
 | w_cn002_plan_cuentas | CN002 | Plan de Cuentas |
 | w_cn009_tipo_cambio | CN009 | Tipo de cambio |
 | w_cn705_cntbl_rpt_pre_asiento | CN705 | Emisión de Reportes de los Pre Asientos |
-| w_cns_general | S/C | Consulta general |
-| w_descripcion | S/C | Descripción |
-| w_det_planilla_tripultante | S/C | Planilla de Tripulantes |
 | w_fi010_bancos | FI010 | Bancos |
 | w_fi011_cuentas_bancos | S/C | Cuentas de Banco |
-| w_help_response | S/C | Seleccionar Administración |
-| w_help_response_conceptos | S/C | Seleccionar Administración (conceptos) |
-| w_logon | S/C | Inicio de sesión |
-| w_mail_param | S/C | Parámetros de correo |
-| w_main | S/C | Módulo de Recursos Humanos (ventana principal) |
-| w_procesar_vacaciones | S/C | Procesar Vacaciones |
 | w_pt765_planilla | PT765 | Reporte de Planilla |
 | w_pt765_planilla_det | PT764 | Reporte de Planilla (detalle) |
-| w_rsp_descripcion | S/C | Descripción de Concepto |
-| w_rsp_popup | S/C | Descripción Amplia de Concepto |
-| w_search_afp | S/C | Búsqueda de AFP |
-| w_search_cencos | S/C | Búsqueda de centros de costo |
-| w_search_datos | S/C | Búsqueda de datos |
-| w_search_origen | S/C | Búsqueda de origen |
-| w_search_tiptra | S/C | Búsqueda de tipo de trabajador |
-| w_valida_origen | S/C | Validación de origen |
 | w_rh001_calendar_feriado_plla | RH001 | Calendario de feriados |
 | w_rh002_param_ctacte_new | RH002 | Parámetros de grupos de descuentos de cuenta corriente |
 | w_rh003_tipo_trabajador_user | RH003 | Tipo Trabajador - Usuario |
@@ -316,6 +295,6 @@ Análisis completo de todas las ventanas (.srw) del módulo Rrhh.
 
 ---
 
-**Total: 309 ventanas analizadas**
+**Total: 283 ventanas analizadas**
 
 *Nota: S/C = Sin Código en el título del objeto*

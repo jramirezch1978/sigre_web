@@ -4,7 +4,6 @@ Análisis completo de todas las ventanas (.srw) del módulo Contabilidad.
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_abc_seleccion_lista_search | S/C | Búsqueda y selección de elementos en lista |
 | w_cn001_tipo_nota | CN001 | Tipos de notas contables |
 | w_cn002_plan_cuentas | CN002 | Plan de cuentas contable |
 | w_cn003_moneda | CN003 | Mantenimiento de monedas |
@@ -290,17 +289,10 @@ Análisis completo de todas las ventanas (.srw) del módulo Contabilidad.
 | w_gxc_rpt_rebaja_cos_sem | S/C | Gastos por campos - Reporte rebaja cosecha semilla |
 | w_gxc_rpt_resumen_campo | S/C | Gastos por campos - Resumen campo |
 | w_gxc_rpt_resumen_rebaja | S/C | Gastos por campos - Resumen rebaja |
-| w_logon | S/C | Ventana de login/inicio de sesión |
-| w_main | S/C | Ventana principal del módulo Contabilidad |
-| w_main_about | S/C | Acerca de - Información del sistema |
-| w_prueba | S/C | Libro de retenciones (ventana de prueba) |
-| w_rpt_preview_old | S/C | Vista previa de reportes (versión antigua) |
 | w_saldo_cnta_cte | CN712 | Balance de comprobación / Saldos cuenta corriente |
-| w_search_documentos | S/C | Búsqueda de documentos |
-| w_seleccion_cnta_ctbl | S/C | Selección de cuentas contables / campos |
 
 ---
 
-**Total: 294 ventanas analizadas**
+**Total: 286 ventanas analizadas**
 
 *Nota: S/C = Sin Código explícito en el título del objeto*

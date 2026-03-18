@@ -1,9 +1,7 @@
 # Inventario de Ventanas del ERP SIGRE
 
-Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por módulo.
-
-- **S/C** = Sin Código explícito en el título de la ventana
-- **Código** = Extraído del título de la ventana (entre `[]` o `()`)
+Inventario de ventanas PowerBuilder (.srw) de negocio organizadas por módulo.
+Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups, búsquedas, etc.).
 
 ---
 
@@ -42,10 +40,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_af902_asiento_depreciacion | AF402 | Asiento de depreciaciones |
 | w_af903_asiento_revaluacion | AF403 | Asiento de revaluaciones |
 | w_af904_asiento_indexacion | AF404 | Asiento de indexación |
-| w_af_observacion | S/C | Ventana de observaciones (modal) |
-| w_logon | S/C | Ventana de inicio de sesión |
-| w_ma004_marca | MA004 | Marcas de máquinas o equipos |
-| w_main | S/C | Ventana principal del módulo |
 
 ---
 
@@ -53,25 +47,13 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_abc_ingreso_resumido | S/C | Ingreso simplificado de artículos |
-| w_abc_lista_zapatos_sugeridos | S/C | Listado de zapatos sugeridos |
-| w_abc_lista_zapatos_sugeridos_general | S/C | Listado de zapatos sugeridos (general) |
-| w_abc_seleccion | S/C | Ventana de selección genérica |
-| w_abc_seleccion_lista_search | S/C | Ventana de selección con búsqueda en lista |
-| w_abc_seleccion_md | S/C | Ventana de selección MD |
-| w_abc_seleccion_md2 | S/C | Ventana de selección MD (versión 2) |
 | w_al001_almacenes | AL001 | Mantenimiento de almacenes |
 | w_al002_articulo_mov_tipo | AL002 | Mantenimiento de tipo de movimientos |
 | w_al003_almacen_movimientos | AL003 | Movimientos permitidos por almacén |
-| w_al005_motivos_traslado | S/C | Motivos de traslado |
-| w_al006_forma_embarque | S/C | Formas de embarque |
-| w_al007_numeracion | S/C | Numeradores |
-| w_al008_logparam | S/C | Parámetros de almacenes |
 | w_al009_numeracion_origen | AL009 | Numeradores por origen |
 | w_al010_templa_saldo | AL010 | Mantenimiento de saldo de templas |
 | w_al012_motivo_traslado | AL012 | Motivo de traslado |
 | w_al013_almacenes_tacitos | AL013 | Almacenes tácitos |
-| w_al014_unidades_conversion | S/C | Unidades de conversión |
 | w_al020_logparam | AL020 | Mantenimiento Logparam |
 | w_al021_articulo_venta_precios | AL021 | Precios de venta de artículos |
 | w_al022_ubicacion_articulos | AL022 | Ubicación de artículos |
@@ -79,7 +61,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_al024_posiciones_almacen | AL024 | Posiciones por almacén |
 | w_al025_modificar_almacen_ov | AL025 | Modificar datos en orden de venta |
 | w_al301_solicitud_salida | AL301 | Solicitud de salida |
-| w_al301_solicitud_salida_frm | S/C | Formato de solicitud de salida |
 | w_al302_mov_almacen | AL302 | Movimiento de almacén |
 | w_al303_ajustes | AL303 | Ajustes al movimiento |
 | w_al304_consignaciones | AL304 | Consignaciones |
@@ -93,7 +74,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_al313_consig_liq | AL313 | Liquidación de consignaciones |
 | w_al314_prest_devol | AL314 | Devoluciones y préstamo |
 | w_al315_orden_traslado | AL315 | Orden de traslado |
-| w_al315_orden_traslado_frm | S/C | Formato orden de traslado |
 | w_al316_orden_tras_aprobar | AL316 | Aprobación de orden de traslado |
 | w_al317_ov_cerrar | AL317 | Cierre de OV |
 | w_al318_templas | AL318 | Ingreso de lotes / Templas |
@@ -117,7 +97,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_al501_lista_precios | AL501 | Lista de precios |
 | w_al502_movimiento_articulo | AL502 | Consulta de movimientos |
 | w_al503_proyeccion_pto | AL503 | Proyección presupuestal |
-| w_al503_sel_proyeccion_pto | S/C | Selección de proyección |
 | w_al504_devoluciones_prestamos | AL504 | Artículos prestados |
 | w_al506_consignacion | AL506 | Artículos en consignación |
 | w_al507_despachos | AL507 | Despachos |
@@ -125,15 +104,12 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_al509_guias_pend_ticket | AL509 | Guías faltantes de ticket de balanza |
 | w_al510_pendientes_atencion | AL510 | Requerimiento de artículos pendiente |
 | w_al511_ctacte_transportista | AL511 | Cuenta corriente de transportista |
-| w_al511_rpt_transporte_cana_tarifa | AL511 | Cuenta por cobrar transportista de caña (tarifa) |
-| w_al511_rpt_transporte_combustible | AL511 | Cuenta por cobrar transportista (combustible) |
 | w_al512_saldos_descuadrados | AL512 | Saldos descuadrados |
 | w_al513_precios_articulos_desc | AL513 | Saldos descuadrados (precios artículos) |
 | w_al514_precios_oc_ni | AL514 | Descuadre entre precio OC y NI |
 | w_al515_precios_acc_ni | AL515 | Descuadre entre Partes de Cosecha y NI |
 | w_al515_vale_mov | AL515 | Consulta de vales de almacén |
 | w_al701_movimiento_x_cencos | AL701 | Gastos por centros de costo |
-| w_al701_movimiento_x_cencos_bk | AL701 | Movimiento por centro de costo (backup) |
 | w_al702_movimiento_x_cnta_prsp | AL702 | Movimientos por cuenta presupuestal |
 | w_al703_movimiento_tipo_oper | AL703 | Movimientos por tipo de operación |
 | w_al704_movimiento_almacen | AL704 | Movimientos por tipo de operación |
@@ -150,7 +126,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_al715_relacion_ov | AL715 | Reporte documentos emitidos |
 | w_al716_articulos_programados | AL716 | Artículos programados |
 | w_al717_ov_fact_gr | AL717 | OV facturadas con guía de remisión |
-| w_al717_sel_clientes_ov_fac_gr | S/C | Selección de clientes OV factura guía |
 | w_al718_templas_mov | AL718 | Detalle del movimiento de templas |
 | w_al719_consumo_material_anual | AL719 | Consumo de material anual |
 | w_al720_sldos_consig_detalle | AL720 | Artículos en consignación (detalle) |
@@ -170,7 +145,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_al734_kardex_consig | AL734 | Kardex de consignación |
 | w_al735_disponibilidad_articulos | AL735 | Disponibilidad de artículos |
 | w_al736_saldos_reservados | AL736 | Saldos reservados |
-| w_al737_saldos_libres | S/C | Saldos libres |
 | w_al738_relacion_otr | AL738 | Relación de órdenes de traslado |
 | w_al739_mov_articulo_anual | AL739 | Movimientos anuales |
 | w_al740_res_x_tipo_x_alm | AL740 | Resumen por tipo de movimiento |
@@ -189,11 +163,9 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_al753_listado_codigos_barra | AL753 | Listado de códigos de barra |
 | w_al754_resumen_diario | AL754 | Resumen diario por comprobante |
 | w_al755_stock_posicion | AL755 | Saldo resumen de artículos por posición |
-| w_al756_fotosselect | AL756 | Stocks con listado de fotos |
 | w_al756_stock_pallet_posicion | AL756 | Saldo por posición, artículo y pallet |
 | w_al757_inventario_pallets | AL757 | Reporte de inventarios por pallets y posición |
 | w_al758_disponibilidad_articulos_subcat | AL758 | Stock subcategoría - Marca |
-| w_al759_copias_codigos_barra_cu | AL753 | Listado de códigos de barra (copias) |
 | w_al760_kardex_tabular | AL760 | Kardex formato tabular |
 | w_al761_res_movimiento_ov | AL761 | Despacho resumido por OV |
 | w_al762_consulta_detalle | AL762 | Modificación de datos por almacén/artículo |
@@ -213,91 +185,72 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_al910_generacion_guia_remision | AL910 | Generación de guías de remisión |
 | w_al912_act_saldo_lotes | AL912 | Actualiza el saldo por lotes |
 | w_al913_libera_reservaciones | AL913 | Liberar reservaciones |
-| w_al914_inventario_conteo | S/C | Inventario por conteo |
-| w_cm311_orden_compra_frm | CM311 | Formato de orden de compra |
-| w_datos_consig | S/C | Datos artículos consignación |
-| w_datos_dev_pres | S/C | Datos artículos devolución/préstamo |
-| w_datos_transferencia | S/C | Datos artículos transferencia |
-| w_filtros | S/C | Filtros |
-| w_get_datos_ing_oc | S/C | Ingreso por compra |
-| w_get_rango_fechas | S/C | Ingrese rango de fechas |
-| w_get_reservacion | S/C | Reservación en OT - AMP |
-| w_get_tipo_doc_amp | S/C | Buscar documento en artículo mov proy |
-| w_get_tipo_doc_oper_sec | S/C | Buscar documento (operación secundaria) |
-| w_lectura_masiva | S/C | Lectura masiva de códigos |
-| w_logon | S/C | Ventana de inicio de sesión |
-| w_main | S/C | Sistema de almacenes (ventana principal) |
-| w_main_about | S/C | Acerca del sistema |
-| w_pop_articulos_x_almacen | S/C | Saldos por almacén (popup) |
-| w_rpt_preview_gr | S/C | Vista previa de reportes (Graph) |
-| w_rpt_preview_old | S/C | Vista previa de reportes (legacy) |
-| w_selecciona_formato | S/C | Seleccione tipo formato |
 
 ---
 
 ## 3. Compras
 
-*(Ver archivo completo: 201 ventanas en `01. documentacion/ventanas_compras_analisis.md`)*
+*(Ver archivo detallado: `01. documentacion/ventanas_compras_analisis.md`)*
 
 ---
 
 ## 4. Comercialización / Ventas
 
-*(Ver archivo completo: 186 ventanas en `ws_objects/Comercializacion/VENTANAS_COMERCIALIZACION.md`)*
+*(Ver archivo detallado: `ws_objects/Comercializacion/VENTANAS_COMERCIALIZACION.md`)*
 
 ---
 
 ## 5. Contabilidad
 
-*(Ver archivo completo: 294 ventanas en `ws_objects/Contabilidad/VENTANAS_CONTABILIDAD.md`)*
+*(Ver archivo detallado: `ws_objects/Contabilidad/VENTANAS_CONTABILIDAD.md`)*
 
 ---
 
 ## 6. Finanzas
 
-*(Ver archivo completo: 185 ventanas en subagente)*
+*(Ver archivo detallado pendiente de generar)*
 
 ---
 
 ## 7. RRHH
 
-*(Ver archivo completo: 309 ventanas en `ws_objects/Rrhh/VENTANAS_RRHH.md`)*
+*(Ver archivo detallado: `ws_objects/Rrhh/VENTANAS_RRHH.md`)*
 
 ---
 
 ## 8. Presupuesto
 
-*(Ver archivo completo: 167 ventanas en `ws_objects/Presupuesto/VENTANAS_PRESUPUESTO.md`)*
+*(Ver archivo detallado: `ws_objects/Presupuesto/VENTANAS_PRESUPUESTO.md`)*
 
 ---
 
 ## 9. Producción
 
-*(Ver archivo completo: 215 ventanas en `ws_objects/Produccion/VENTANAS_PRODUCCION.md`)*
+*(Ver archivo detallado: `ws_objects/Produccion/VENTANAS_PRODUCCION.md`)*
 
 ---
 
 ## 10. Operaciones OT
 
-*(Ver archivo completo: 168 ventanas en subagente)*
+*(Ver archivo detallado pendiente de generar)*
 
 ---
 
 ## 11. Mantenimiento
 
-*(Ver archivo completo: 102 ventanas en subagente)*
+*(Ver archivo detallado pendiente de generar)*
 
 ---
 
 ## 12. Aprovisionamiento
 
-*(Ver archivo completo: 104 ventanas en subagente)*
+*(Ver archivo detallado pendiente de generar)*
 
 ---
 
 ## 13. Asistencia
 
-*(Ver archivo completo: 61 ventanas en subagente)*
+*(Ver archivo detallado pendiente de generar)*
 
 ---
 
@@ -324,8 +277,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_aud716_doc_por_pagar_directo_cebe | AUD716 | Documentos Por Pagar Directos |
 | w_aud717_doc_por_cobrar_cebe | AUD717 | Documentos Por Cobrar |
 | w_aud718_trazabilidad_articulo | AUD718 | Trazabilidad de artículo |
-| w_logon | S/C | Inicio de sesión |
-| w_main | S/C | Módulo de Auditoría |
 
 ---
 
@@ -333,7 +284,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_about | S/C | Acerca de |
 | w_ba100_articulos_basc | BA100 | Artículos controlados por BASC |
 | w_ba101_tipo_remolque | BA101 | Tipo de Remolque |
 | w_ba102_motivo_ingreso_salida | BA102 | Motivo Ingreso y Salida |
@@ -350,14 +300,12 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_ba703_ingreso_salida_trabajadores | BA703 | Control de Ingreso y Salida del Personal |
 | w_ba704_ingreso_salida_vehiculo_carga | BA704 | Control de Ingreso y Salida de Vehículos |
 | w_ba705_control_vehiculo_carga_ficha | BA705 | Ficha de Control de Vehículos de Carga |
-| w_logon | S/C | Inicio de sesión |
-| w_main | S/C | Ventana principal |
 
 ---
 
 ## 16. Campo
 
-*(Ver archivo completo: 100 ventanas en subagente)*
+*(Ver archivo detallado pendiente de generar)*
 
 ---
 
@@ -369,12 +317,8 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_cm001_proveedor_tipo | CM101 | Tipo de proveedores |
 | w_cm002_proveedor_ficha | CM002 | Ficha de Proveedor |
 | w_cm002_proveedor_ficha_visita | CM002 | Formato de Visitas |
-| w_cm002_proveedores | S/C | Proveedores |
 | w_cm003_proveedor_articulo | CM003 | Proveedores Calificados |
 | w_cm017_grupo_proveedor | CM017 | Grupo de proveedores |
-| w_logon | S/C | Inicio de sesión |
-| w_main | S/C | Ventana principal |
-| w_main_about | S/C | Acerca de |
 | w_ve027_zonas_venta | VE027 | Zonas de Venta |
 
 ---
@@ -383,9 +327,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_abc_seleccion_md | S/C | Selección múltiple |
-| w_about | S/C | Acerca de |
-| w_cm314_orden_servicio_frm | CM314 | Formato de orden de Servicio |
 | w_com001_zona_proceso | Com001 | Zonas de Proceso |
 | w_com002_tipo_com | COM002 | Tipo de Comedores |
 | w_com003_num_parte_rac | COM003 | Numerador de Parte de Ración |
@@ -415,12 +356,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_com902_asiento_contable | COM902 | Generar Asiento Contable |
 | w_com903_genera_os | COM903 | Generar Orden de Servicio |
 | w_com904_anular_os | COM904 | Anular Orden de Servicio |
-| w_lista | S/C | Lista |
-| w_logon | S/C | Inicio de sesión |
-| w_main | S/C | Ventana principal |
-| w_rpt_general | S/C | Reportes general |
-| w_search | S/C | Búsqueda |
-| w_seleccionar | S/C | Seleccionar |
 
 ---
 
@@ -428,27 +363,22 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_consola | S/C | Consola principal |
-| w_cw001_empresas | S/C | Registrar Empresa |
-| w_cw002_usuario_housing | S/C | Usuario Housing |
-| w_cw003_equipos_empresa | S/C | Equipo |
-| w_cw004_cuotas | w_cw004 | Cuota |
-| w_cw005_pago_cuota | w_cw005 | Pagar Cuota |
-| w_cw006_contacto_empresa | S/C | Contacto |
-| w_cw007_usuarios | S/C | Usuario |
-| w_cw008_venc_renta | w_cw008 | Cronograma Renta |
-| w_cw009_versiones | w_cw009 | Versión |
-| w_cw010_modulos | w_cw010 | Módulo |
-| w_cw300_modulo_empresa | S/C | Asignar módulos a empresa |
-| w_cw301_empresa_version | S/C | Asignar versión a empresa |
-| w_cw302_versiones_modulo | w_cw302 | Asignar módulos a versión |
-| w_cw500_empresas_autorizadas | S/C | Empresas autorizadas |
-| w_cw501_contactos | S/C | Contactos |
-| w_cw502_modulos | w_cw502 | Módulos |
-| w_login | S/C | Login |
-| w_logon | S/C | Inicio de sesión |
-| w_main | S/C | Ventana principal |
-| w_password_chg | S/C | Cambiar contraseña |
+| w_cw001_empresas | CW001 | Registrar Empresa |
+| w_cw002_usuario_housing | CW002 | Usuario Housing |
+| w_cw003_equipos_empresa | CW003 | Equipo |
+| w_cw004_cuotas | CW004 | Cuota |
+| w_cw005_pago_cuota | CW005 | Pagar Cuota |
+| w_cw006_contacto_empresa | CW006 | Contacto |
+| w_cw007_usuarios | CW007 | Usuario |
+| w_cw008_venc_renta | CW008 | Cronograma Renta |
+| w_cw009_versiones | CW009 | Versión |
+| w_cw010_modulos | CW010 | Módulo |
+| w_cw300_modulo_empresa | CW300 | Asignar módulos a empresa |
+| w_cw301_empresa_version | CW301 | Asignar versión a empresa |
+| w_cw302_versiones_modulo | CW302 | Asignar módulos a versión |
+| w_cw500_empresas_autorizadas | CW500 | Empresas autorizadas |
+| w_cw501_contactos | CW501 | Contactos |
+| w_cw502_modulos | CW502 | Módulos |
 
 ---
 
@@ -456,11 +386,8 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_abc_list_search | S/C | Búsqueda en lista |
-| w_abc_seleccion_lista | S/C | Selección de lista |
 | w_cd001_usuario_seccion | CD001 | Usuarios Recepcionistas |
 | w_cd301_registro_documentos | CD301 | Registro de Documentos |
-| w_cd302_transf_docum | S/C | Transferencia de documentos |
 | w_cd303_acepta_transf_doc | CD303 | Aceptación de documentos transferidos |
 | w_cd304_remesa | CD304 | Emite Remesa |
 | w_cd305_aceptar_remesa | CD305 | Aceptar remesa |
@@ -468,19 +395,12 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_cd502_consulta_fecha | CD502 | Consulta de documentos por fecha |
 | w_cd701_doc_transfer | CD701 | Formato de documentos transferidos |
 | w_cd702_doc_sin_prov | CD702 | Documentos sin Provisionar |
-| w_cd703_rpt_remesas | S/C | Formato de Remesa |
 | w_cd704_rpt_doc_transferidos | CD704 | Documentos Transferidos |
 | w_cd705_rpt_doc_proveedor | CD705 | Documentos por Proveedor |
 | w_cd706_dev_proveedor | CD706 | Devolución al proveedor |
 | w_cd707_rpt_doc_sin_provision | CD707 | Documentos sin provisionar |
 | w_cd708_doc_transf_sin_aceptar | CD708 | Documentos transferidos sin aceptar |
 | w_cd801_cerrar_documentos | CD801 | Cerrar Documentos |
-| w_logon | S/C | Inicio de sesión |
-| w_main | S/C | Ventana principal |
-| w_num_docum_recibidos | S/C | Numeración de Documentos Recibidos |
-| w_num_remesas | S/C | Numeración de Remesas |
-| w_pop_fecha | S/C | Parámetros de Búsqueda |
-| w_pop_help_edirecto | S/C | Ingrese Código de Relación |
 
 ---
 
@@ -488,45 +408,39 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_articulos | S/C | Artículos |
-| w_cartera_clientes | S/C | Registro de Cartera de Clientes |
-| w_categoria_articulo | S/C | Categorías |
-| w_clientes | S/C | Nuevo Cliente |
-| w_contactos_clientes | S/C | Contactos de clientes |
-| w_cotiza | S/C | Cotización |
-| w_cotizacion | S/C | Cotización |
-| w_crm001_seguimientos | S/C | Seguimiento |
-| w_logon | S/C | Inicio de sesión |
-| w_logon2 | S/C | Sistema de Cotización Sytco |
-| w_main | S/C | Ventana principal |
-| w_mantenimiento_clientes | S/C | Mantenimiento de clientes |
-| w_password_chg | S/C | Cambio de contraseña |
-| w_rpt_clientes | S/C | Reporte de Clientes |
-| w_rpt_cotizacion | S/C | Cotización Generada |
-| w_search_seguimientos | S/C | Búsqueda de seguimientos |
-| w_sub_categoria_articulo | S/C | Sub Categorías |
-| w_visitas | S/C | Visitas |
+| w_articulos | CRM | Artículos |
+| w_cartera_clientes | CRM | Registro de Cartera de Clientes |
+| w_categoria_articulo | CRM | Categorías |
+| w_clientes | CRM | Nuevo Cliente |
+| w_cotizacion | CRM | Cotización |
+| w_crm001_seguimientos | CRM001 | Seguimiento |
+| w_mantenimiento_clientes | CRM | Mantenimiento de clientes |
+| w_rpt_clientes | CRM | Reporte de Clientes |
+| w_rpt_cotizacion | CRM | Cotización Generada |
+| w_sub_categoria_articulo | CRM | Sub Categorías |
+| w_visitas | CRM | Visitas |
 
 ---
 
-## 22. Horeca
+## 22. Flota
+
+*(Ver archivo detallado pendiente de generar)*
+
+---
+
+## 23. Horeca
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
 | w_ho001_maestro_cuartos | HO001 | Maestro de Cuartos |
 | w_ho301_alojamiento_huespedes | HO301 | Alojamiento de Huéspedes y Servicios |
-| w_logon | S/C | Inicio de sesión |
-| w_main | S/C | Ventana principal |
 
 ---
 
-## 23. Seguridad
+## 24. Seguridad
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_logon | S/C | Inicio de sesión |
-| w_main | S/C | Ventana principal |
-| w_main_about | S/C | Acerca de |
 | w_sg001_configuracion | SG001 | Tabla de configuración |
 | w_sg010_usuario | SG010 | Mantenimiento de Usuarios |
 | w_sg020_grupo | SG020 | Mantenimiento de Roles |
@@ -544,9 +458,6 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 | w_sg710_grp_obj | SG710 | Accesos x Grupo |
 | w_sg720_obj_us | SG720 | Accesos x Objeto |
 | w_sg730_roles_superpuestos | SG730 | Roles super-puestos |
-| w_sg730_roles_superpuestos_det | S/C | Roles super-puestos detalle |
-| w_sg740_usu_sis | SG730 | Roles super-puestos |
-| w_sg740_usu_sis_det | S/C | Detalle |
 | w_sg745_usr_x_ventana | SG745 | Accesos x Ventana |
 | w_sg900_log_diario_limpieza | SG900 | Log Diario - Limpieza |
 | w_sg910_log_objeto_limpieza | SG910 | Log Objeto - Limpieza |
@@ -556,35 +467,36 @@ Inventario completo de todas las ventanas PowerBuilder (.srw) organizadas por m�
 
 ## Resumen por Módulo
 
-| # | Módulo | Ventanas |
-|---|--------|----------|
-| 1 | Activo Fijo | 35 |
-| 2 | Almacén | 175 |
-| 3 | Compras | 201 |
-| 4 | Comercialización / Ventas | 186 |
-| 5 | Contabilidad | 294 |
-| 6 | Finanzas | 185 |
-| 7 | RRHH | 309 |
-| 8 | Presupuesto | 167 |
-| 9 | Producción | 215 |
-| 10 | Operaciones OT | 168 |
-| 11 | Mantenimiento | 102 |
-| 12 | Aprovisionamiento | 104 |
-| 13 | Asistencia | 61 |
-| 14 | Auditoría | 21 |
-| 15 | BASC | 19 |
-| 16 | Campo | 100 |
-| 17 | CashLoan | 11 |
-| 18 | Comedor | 38 |
-| 19 | Consola Web | 21 |
-| 20 | Control de Documentos | 25 |
-| 21 | CRM Web | 18 |
-| 22 | Flota | 148 |
-| 23 | Horeca | 4 |
-| 24 | Seguridad | 27 |
-| | **TOTAL** | **~2,634** |
+| # | Módulo | Ventanas (aprox.) |
+|---|--------|-------------------|
+| 1 | Activo Fijo | 31 |
+| 2 | Almacén | 125 |
+| 3 | Compras | ~180 |
+| 4 | Comercialización / Ventas | ~160 |
+| 5 | Contabilidad | ~250 |
+| 6 | Finanzas | ~160 |
+| 7 | RRHH | ~280 |
+| 8 | Presupuesto | ~145 |
+| 9 | Producción | ~190 |
+| 10 | Operaciones OT | ~145 |
+| 11 | Mantenimiento | ~85 |
+| 12 | Aprovisionamiento | ~85 |
+| 13 | Asistencia | ~50 |
+| 14 | Auditoría | 19 |
+| 15 | BASC | 16 |
+| 16 | Campo | ~85 |
+| 17 | CashLoan | 7 |
+| 18 | Comedor | 29 |
+| 19 | Consola Web | 16 |
+| 20 | Control de Documentos | 15 |
+| 21 | CRM Web | 11 |
+| 22 | Flota | ~130 |
+| 23 | Horeca | 2 |
+| 24 | Seguridad | 21 |
+| | **TOTAL** | **~2,260** |
 
 ---
 
 *Documento generado el 08/02/2026*
-*Los módulos con la leyenda "Ver archivo completo" tienen sus tablas detalladas en archivos separados por su gran tamaño.*
+*Los módulos con "Ver archivo detallado" tienen sus tablas en archivos separados (ya limpiados).*
+*Se excluyen ventanas genéricas del framework: w_abc_*, w_logon, w_main, w_about, w_fondo, w_search*, w_help_*, w_pop_*, w_rpt_preview*, w_seleccion*, w_filtros, w_get_*, w_datos_*, w_password_chg, etc.*

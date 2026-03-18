@@ -4,11 +4,6 @@ Ventanas (.srw) analizadas en `e:\Work\sigre_web\ws_objects\Compras\`
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_abc_datos_ot | S/C | Datos de Orden de Trabajo - ventana para ingresar datos de OT |
-| w_abc_ingreso_resumido | S/C | Ingreso simplificado de artículos |
-| w_abc_lista_zapatos_sugeridos | S/C | Listado de zapatos sugeridos |
-| w_abc_seleccion | S/C | Ventana de selección (hereda de w_abc_list) |
-| w_abc_seleccion_md | S/C | Selección con master detalle |
 | w_cm001_proveedor_tipo | CM101 | Tipo de proveedores - maestro de tipos |
 | w_cm002_proveedor_ficha | CM002 | Ficha de proveedor |
 | w_cm002_proveedor_ficha_visita | S/C | Formato de visitas de cliente/proveedor |
@@ -184,28 +179,9 @@ Ventanas (.srw) analizadas en `e:\Work\sigre_web\ws_objects\Compras\`
 | w_cm913_importar_fotos | CM913 | Importar fotos de artículos |
 | w_cn009_tipo_cambio | CN009 | Tipo de cambio |
 | w_cn789_errores_gen_apertura | CN789 | Errores a corregir antes de generar apertura |
-| w_cns_datos_cm714 | S/C | Consulta de movimientos (datos CM714) |
-| w_cns_datos_ot | S/C | Consulta de movimientos (datos OT) |
-| w_cns_proyeccion_pto_doc | S/C | Consulta de movimientos (proyección) |
 | w_fi743_compras_proveedores | FI743 | Compra a proveedores |
-| w_get_rango_fecha | S/C | Rango de fechas |
-| w_get_ruc | S/C | Obtener RUC |
-| w_get_tipo_doc_amp | S/C | Buscar documento en artículo mov. proyectado |
-| w_logon | S/C | Ventana de inicio de sesión |
-| w_main | S/C | Sistema de compras - ventana principal |
-| w_main_about | S/C | Acerca del sistema |
 | w_rpt_servicio_proveedor_det | S/C | Detalle de servicios por proveedor |
-| w_search_documentos | S/C | Búsqueda de documentos |
-| w_search2 | S/C | Búsqueda genérica (versión 2) |
-| w_sel_compras_sugeridas | S/C | Selección de compras sugeridas |
-| w_sel_cotizacion_proveedor | S/C | Proveedores a cotizar |
-| w_sel_cotizacion_proveedor_email | S/C | Proveedores a cotizar por email |
-| w_seleccion_cencos | CM022 | Selección de centro de costo nivel 1 |
-| w_seleccion_cencos_niv1 | S/C | Selección de centro de costo nivel 1 |
-| w_seleccion_cencos_niv2 | S/C | Selección de centro de costo nivel 2 |
-| w_seleccion_cencos_niv3 | S/C | Selección de centro de costo nivel 3 |
-| w_seleccion_ot_adm | S/C | Selección de OT ADM |
 
 ---
-**Total: 201 ventanas** analizadas.
+**Total: 164 ventanas** analizadas.
 **S/C** = Sin código explícito en el título.

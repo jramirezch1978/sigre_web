@@ -2,9 +2,6 @@
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_abc_seleccion_lista_search | S/C | (Sin título) |
-| w_abc_seleccion_md | S/C | (Sin título) |
-| w_filtros | S/C | Filtros |
 | w_fl022_plant_nave_presup | FL022 | Asignación de plantillas preseupuestales por nave |
 | w_fl033_plant_presup | FL033 | Plantillas Presupuestales |
 | w_fl521_variacion_grafica | FL521 | Variaciones del Presupuesto |
@@ -13,12 +10,6 @@
 | w_fl909_generar_presupuesto | FL909 | Generación de Presupuesto de Flota |
 | w_fl910_prspto_variacion | FL910 | Variaciones Presupuestales |
 | w_fl911_generar_variaciones | FL911 | Generacion de Variaciones |
-| w_get_datos_copia | S/C | Ingrese los datos Solicitados |
-| w_get_plantilla | S/C | Buscar Documento en Articulo Mov Proy |
-| w_logon | S/C | (Sin título) |
-| w_main | S/C | Sistema de Presupuesto |
-| w_main_about | S/C | (Sin título) |
-| w_nro_copias | S/C | Nro de Copias |
 | w_pt001_partida_titulos | S/C | Cuentas Presupuestales - Titulo |
 | w_pt002_cnta_presupuestal | PT002 | Definición de Cuentas presupuestales |
 | w_pt003_presupuesto_grupo | S/C | Grupos - Cuentas Presupuestales |
@@ -163,9 +154,3 @@
 | w_pt922_genera_prsp_obreros | PT922 | Generación de Presupuesto de Obreros |
 | w_pt923_regenera_pto_part_x_det | PT923 | Regenera presupuesto partida en función de presupuesto detalle |
 | w_rh459_p_presupuesto_anual | RH459 | Generación de Presupuesto Anual de Planilla |
-| w_rpt_general | S/C | (Sin título) |
-| w_rpt_listas | S/C | (Sin título) |
-| w_rsp_descripcion | S/C | Descripción |
-| w_rsp_pry_costos | S/C | Untitled |
-| w_search_cencos | S/C | (Sin título) |
-| w_sel_tree | S/C | (Sin título) |

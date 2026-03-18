@@ -1,36 +1,12 @@
+# Ventanas del Módulo Comercialización
+
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_abc_graph_egres_flj_eje | S/C | Egresos de Flujo de Caja Ejecutado |
-| w_abc_graph_ing_flj_eje | S/C | Ingresos Flujo de Caja Ejecutado |
-| w_abc_numeracion_ve_origen | S/C | Numeradores |
-| w_abc_opcion_pesca | S/C | Facturación Pesca |
-| w_abc_seleccion_lista | S/C | S/C |
-| w_abc_seleccion_lista_search | S/C | S/C |
-| w_abc_seleccion_md | S/C | S/C |
-| w_abc_seleccion_md2 | S/C | S/C |
-| w_abc_totales_factura | S/C | Confirmar Totales de Factura |
 | w_cns_flujo_caja_eje_det_tbl | S/C | Consulta Detalle de Flujo de Caja |
-| w_cns_general | S/C | S/C |
-| w_datos_comunes | S/C | Datos Genericos |
-| w_datos_despacho | S/C | Ingrese los datos para el despacho |
 | w_fi301_notas_ventas_x_cobrar_frm | FI343 | Liquidación Semanal |
 | w_fl003_capit_puerto | FL003 | Capitanias de Puerto |
 | w_fl013_puertos | FL013 | Mantenimiento de puertos |
-| w_get_nro_ov | S/C | Ingrese Nro OV |
-| w_help_constacia_dep | S/C | Constancia Deposito |
-| w_help_const_dep_fact_simpl | S/C | Constancia Deposito |
-| w_help_datos | S/C | Ventana de Ayuda |
-| w_logon | S/C | S/C |
-| w_main | S/C | Módulo de Exportaciones |
-| w_main_about | S/C | S/C |
-| w_pop_help_edirecto | S/C | Ingrese Codigo de Relación |
-| w_pop_tipo_doc | S/C | Ingrese Cheque a Favor |
 | w_rpt_factura_exportacion | S/C | Factura de Exportación |
-| w_rpt_listas | S/C | S/C |
-| w_search_datos | S/C | S/C |
-| w_seleccion_canal | S/C | Seleccione de Canal de Distribucion |
-| w_seleccion_clientes_x_canal | S/C | Seleccione de Ordenes de Venta |
-| w_seleccion_sub_canal | S/C | Seleccione de Canal de Distribucion |
 | w_ve001_incoterm | VE001 | Terminos Internacionales de Comercializacion |
 | w_ve002_factor_embarque | VE002 | Factor de Embarque |
 | w_ve003_caracteristica_embarque | VE003 | Caracteristicas de Embarque |

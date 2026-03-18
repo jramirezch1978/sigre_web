@@ -2,32 +2,13 @@
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_abc_actualiza_costo_c | S/C | Actualiza Costo de Producción |
-| w_abc_actualiza_unds_p | S/C | Actualiza Costo de Producción |
-| w_abc_copia_control_lectura | S/C | Copias de Datos de Control / Lectura |
-| w_abc_enrolamiento | S/C | Registro y enrolamiento de tarjetas |
-| w_abc_ingreso_masivo | S/C | Actualiza Costo de Producción |
-| w_abc_leer_balanza | S/C | Registro y enrolamiento de tarjetas |
-| w_abc_pd_ot | S/C | Datos de PD OT |
-| w_abc_relacionar_ot | S/C | Actualiza Costo de Producción |
-| w_abc_seleccion | S/C | (sin título) |
-| w_abc_seleccion_md | S/C | (sin título) |
-| w_about | S/C | (sin título) |
 | w_accion_enrolamiento | S/C | Opciones para enrolamiento |
 | w_ap500_base | S/C | Captura de pesca |
 | w_ap501_base_det | S/C | (título vacío) |
 | w_asi705_carnet_identifica | RH621 | Reporte de Promedio General de las Evaluaciones |
 | w_cm314_orden_servicio_frm | CM314 | Formato de orden de Servicio |
-| w_cns_general | S/C | (título vacío) |
 | w_com709_documentos_cuenta | Com709 | Comprobantes de pago que han generado un Asiento Contable y que no están referenciados en un Parte de Costos |
 | w_com711_confin_cp_071 | Com711 | Documentos Provisionados con un confin diferente al de comedores |
-| w_dot_test | S/C | w_dot |
-| w_estructura_pop_preg | S/C | Datos para Centro Beneficio |
-| w_fondo | S/C | (sin título) |
-| w_logon | S/C | (sin título) |
-| w_main | S/C | (sin título) |
-| w_maq_estructura | S/C | TreeView |
-| w_numeracion | S/C | Numerador |
 | w_pr002_objeto | PR002 | Objetos para Control de Mediciones por Gráfico |
 | w_pr003_grupo_atributo | PR003 | Grupos de Atributos de Medición |
 | w_pr004_atrib_med | PR004 | Atributos de Medición |
@@ -215,5 +196,3 @@
 | w_pr917_valorizar_produccion | PR917 | Valorizacion de Ingreso por produccion por Grupo Contable |
 | w_pr918_importar_costos_ot | PR918 | Valorizacion por Orden de Trabajo |
 | w_pr919_imp_destajo | PR919 | Importar Destajo Masivo por Excel |
-| w_rpt_general | S/C | (título vacío) |
-| w_select_fecha | S/C | Untitled |
