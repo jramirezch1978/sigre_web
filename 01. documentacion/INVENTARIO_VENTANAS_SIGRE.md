@@ -398,7 +398,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_fi301_notas_ventas_x_cobrar_frm | FI343 | Liquidación Semanal |
 | w_fl003_capit_puerto | FL003 | Capitanías de Puerto |
 | w_fl013_puertos | FL013 | Mantenimiento de puertos |
-| w_rpt_factura_exportacion | S/C | Factura de Exportación |
 | w_ve001_incoterm | VE001 | Términos Internacionales de Comercialización |
 | w_ve002_factor_embarque | VE002 | Factor de Embarque |
 | w_ve003_caracteristica_embarque | VE003 | Características de Embarque |
@@ -2440,7 +2439,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 1 | Activo Fijo | 31 |
 | 2 | Almacén | 162 |
 | 3 | Compras | 163 |
-| 4 | Comercialización / Ventas | 154 |
+| 4 | Comercialización / Ventas | 153 |
 | 5 | Contabilidad | 257 |
 | 6 | Finanzas | 159 |
 | 7 | RRHH | 283 |
@@ -2457,7 +2456,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,277** |
+| | **TOTAL** | **2,276** |
 
 ---
 
