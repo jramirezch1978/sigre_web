@@ -19,7 +19,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { HttpClientModule } from '@angular/common/http';
 import { DashboardService, Origen } from '../../services/dashboard.service';
 import { MainLayoutComponent } from '../main-layout/main-layout.component';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 export class CustomDateAdapter extends NativeDateAdapter {
   override parse(value: any): Date | null {
@@ -113,8 +114,8 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar
   ) {
     const hoy = new Date();
-    this.fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-    this.fechaFin = hoy;
+    this.fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    this.fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
   }
 
   ngOnInit(): void {
@@ -216,31 +217,84 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
     });
   }
 
-  exportarExcel(): void {
-    const datosExcel = this.registrosFiltrados.map(reg => ({
-      'Nro': reg.nro,
-      'Código': reg.codigoTrabajador,
-      'DNI': reg.dni,
-      'Nombres': reg.nombres,
-      'Apellidos': reg.apellidos,
-      'Tipo Trabajador': reg.tipoTrabajador,
-      'Fecha': reg.fecha,
-      'Ingreso Planta': reg.horaIngresoPlanta,
-      'Ingreso Producción': reg.horaIngresoProduccion,
-      'Cambio Ropa (min)': reg.minutosCambioRopa,
-      'Salida Producción': reg.horaSalidaProduccion,
-      'Salida Planta': reg.horaSalidaPlanta,
-      'Hrs Efectivas Producción': reg.horasEfectivasProduccion,
-      'Hrs Total Planta': reg.horasTotalPlanta,
-      'Hrs Muertas': reg.horasMuertas
-    }));
+  async exportarExcel(): Promise<void> {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Reporte Producción');
 
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(datosExcel);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Reporte Producción');
+    const headers = ['N°', 'Código', 'DNI', 'Apellidos', 'Nombres', 'Tipo Trabajador',
+      'Fecha', 'Ingreso Planta', 'Ingreso Producción', 'Cambio Ropa (min)',
+      'Salida Producción', 'Salida Planta', 'Hrs Efect. Producción', 'Hrs Total Planta', 'Hrs Muertas'];
 
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell(cell => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF16A34A' } };
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+    });
+    headerRow.height = 30;
+
+    const thinBorder: Partial<ExcelJS.Borders> = {
+      top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }
+    };
+
+    const formatTime = (val: any): string => {
+      if (!val) return '';
+      try { return new Date(val).toLocaleTimeString('es-PE'); } catch { return ''; }
+    };
+
+    this.registrosFiltrados.forEach((reg, idx) => {
+      const salidaProd = reg.horaSalidaProduccion ? formatTime(reg.horaSalidaProduccion) : 'Pendiente';
+      const salidaPlanta = reg.horaSalidaPlanta ? formatTime(reg.horaSalidaPlanta) : 'Pendiente';
+
+      const row = ws.addRow([
+        reg.nro, reg.codigoTrabajador, reg.dni, reg.apellidos, reg.nombres, reg.tipoTrabajador,
+        reg.fecha ? new Date(reg.fecha).toLocaleDateString('es-PE') : '',
+        formatTime(reg.horaIngresoPlanta), formatTime(reg.horaIngresoProduccion),
+        reg.minutosCambioRopa ?? '', salidaProd, salidaPlanta,
+        reg.horasEfectivasProduccion ?? '-', reg.horasTotalPlanta ?? '-', reg.horasMuertas ?? '-'
+      ]);
+
+      const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF9FAFB';
+      row.eachCell((cell, colNumber) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+        cell.border = thinBorder;
+        cell.alignment = { vertical: 'middle' };
+
+        if ([8, 9, 11, 12].includes(colNumber)) {
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        }
+        if ([10, 13, 14, 15].includes(colNumber)) {
+          cell.alignment = { horizontal: 'right', vertical: 'middle' };
+        }
+      });
+
+      if (!reg.horaSalidaProduccion) {
+        const c = row.getCell(11);
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF9800' } };
+        c.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 10 };
+        c.alignment = { horizontal: 'center', vertical: 'middle' };
+      }
+      if (!reg.horaSalidaPlanta) {
+        const c = row.getCell(12);
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF9800' } };
+        c.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 10 };
+        c.alignment = { horizontal: 'center', vertical: 'middle' };
+      }
+    });
+
+    ws.columns.forEach(col => {
+      let maxLen = 10;
+      col.eachCell?.({ includeEmpty: true }, cell => {
+        const len = cell.value ? cell.value.toString().length : 0;
+        if (len > maxLen) maxLen = len;
+      });
+      col.width = Math.min(maxLen + 3, 35);
+    });
+
+    const buffer = await wb.xlsx.writeBuffer();
     const fileName = `reporte-produccion-${this.formatearFechaParaArchivo(this.fechaInicio)}-${this.formatearFechaParaArchivo(this.fechaFin)}.xlsx`;
-    XLSX.writeFile(wb, fileName);
+    saveAs(new Blob([buffer]), fileName);
     this.mostrarMensaje('Reporte exportado a Excel', 'success');
   }
 

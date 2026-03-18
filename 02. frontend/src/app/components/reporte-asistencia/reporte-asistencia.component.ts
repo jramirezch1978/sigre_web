@@ -19,7 +19,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { HttpClientModule } from '@angular/common/http';
 import { DashboardService, Origen } from '../../services/dashboard.service';
 import { MainLayoutComponent } from '../main-layout/main-layout.component';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 // Adaptador personalizado para formato dd/MM/yyyy
 export class CustomDateAdapter extends NativeDateAdapter {
@@ -155,8 +156,8 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
   ) {
     // Inicializar fechas: primer y último día del mes actual
     const hoy = new Date();
-    this.fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-    this.fechaFin = hoy;
+    this.fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    this.fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
   }
 
   ngOnInit(): void {
@@ -280,39 +281,74 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
     console.log('📊 Ordenado por:', columna, this.ordenAscendente ? 'ASC' : 'DESC');
   }
 
-  exportarExcel(): void {
-    console.log('📥 Exportando a Excel...');
-    
-    const datosExcel = this.registrosFiltrados.map(reg => ({
-      'Nro': reg.nro,
-      'Tipo': reg.tipoTrabajador,
-      'Código': reg.codigoTrabajador,
-      'DNI': reg.dni,
-      'Apellidos y Nombres': reg.apellidosNombres,
-      'Área': reg.area,
-      'Cargo': reg.cargoPuesto,
-      'Turno': reg.turno,
-      'Fecha': reg.fecha,
-      'Hora Ingreso': reg.horaIngreso,
-      'Hora Salida': reg.horaSalida,
-      'Horas Trabajadas': reg.horasTrabajadas,
-      'Horas Extras': reg.horasExtras,
-      'Tardanza (min)': reg.tardanzaMin,
-      'Total Hrs Semana': reg.totalHorasTrabajadasSemana,
-      'Total Extras Semana': reg.totalHorasExtrasSemana,
-      'Días Asistidos': reg.totalDiasAsistidos,
-      'Faltas': reg.totalFaltas,
-      '% Asistencia': reg.porcAsistencia,
-      '% Ausentismo': reg.porcAusentismo
-    }));
+  async exportarExcel(): Promise<void> {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Reporte Asistencia');
 
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(datosExcel);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Reporte Asistencia');
-    
+    const headers = ['N°', 'Tipo', 'Código', 'DNI', 'Apellidos y Nombres', 'Área',
+      'Cargo', 'Turno', 'Fecha', 'Hora Ingreso', 'Hora Salida', 'Hrs Trabajadas',
+      'Hrs Extras', 'Tardanza (min)', 'Total Hrs Semana', 'Total Extras Semana',
+      'Días Asistidos', 'Faltas', '% Asistencia', '% Ausentismo'];
+
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell(cell => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF667EEA' } };
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+    });
+    headerRow.height = 30;
+
+    const thinBorder: Partial<ExcelJS.Borders> = {
+      top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }
+    };
+
+    this.registrosFiltrados.forEach((reg, idx) => {
+      const horaSalida = reg.horaSalida ? new Date(reg.horaSalida).toLocaleTimeString('es-PE') : 'Pendiente';
+      const row = ws.addRow([
+        reg.nro, reg.tipoTrabajador, reg.codigoTrabajador, reg.dni, reg.apellidosNombres,
+        reg.area, reg.cargoPuesto, reg.turno,
+        reg.fecha ? new Date(reg.fecha).toLocaleDateString('es-PE') : '',
+        reg.horaIngreso ? new Date(reg.horaIngreso).toLocaleTimeString('es-PE') : '',
+        horaSalida,
+        reg.horasTrabajadas, reg.horasExtras, reg.tardanzaMin,
+        reg.totalHorasTrabajadasSemana, reg.totalHorasExtrasSemana,
+        reg.totalDiasAsistidos, reg.totalFaltas, reg.porcAsistencia, reg.porcAusentismo
+      ]);
+
+      const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF9FAFB';
+      row.eachCell(cell => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+        cell.border = thinBorder;
+        cell.alignment = { vertical: 'middle' };
+      });
+
+      if (!reg.horaSalida) {
+        const salidaCell = row.getCell(11);
+        salidaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF9800' } };
+        salidaCell.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 10 };
+        salidaCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      }
+
+      if (reg.tardanzaMin > 15) {
+        const tardanzaCell = row.getCell(14);
+        tardanzaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEBEE' } };
+        tardanzaCell.font = { color: { argb: 'FFDC2626' }, bold: true };
+      }
+    });
+
+    ws.columns.forEach(col => {
+      let maxLen = 10;
+      col.eachCell?.({ includeEmpty: true }, cell => {
+        const len = cell.value ? cell.value.toString().length : 0;
+        if (len > maxLen) maxLen = len;
+      });
+      col.width = Math.min(maxLen + 3, 35);
+    });
+
+    const buffer = await wb.xlsx.writeBuffer();
     const fileName = `reporte-asistencia-${this.formatearFechaParaArchivo(this.fechaInicio)}-${this.formatearFechaParaArchivo(this.fechaFin)}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-    
+    saveAs(new Blob([buffer]), fileName);
     this.mostrarMensaje('Reporte exportado a Excel', 'success');
   }
 
