@@ -244,9 +244,8 @@ public class TicketAsistenciaService {
                     ticket.marcarComoError(e.getMessage());
                     ticketRepository.save(ticket);
                     
-                    // Enviar notificación por email del error (si está configurado)
                     if (notificacionService != null) {
-                        notificacionService.enviarErrorProcesamiento(ticket, e.getMessage());
+                        notificacionService.enviarErrorProcesamiento(ticket, e.getMessage(), e);
                     } else {
                         log.info("📧 NotificacionErrorService no configurado - error registrado en logs");
                     }

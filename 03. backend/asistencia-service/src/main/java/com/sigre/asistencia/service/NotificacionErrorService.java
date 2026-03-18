@@ -53,10 +53,11 @@ public class NotificacionErrorService {
         }
     }
     
-    /**
-     * Enviar notificación de error en procesamiento
-     */
     public void enviarErrorProcesamiento(TicketAsistencia ticket, String mensajeError) {
+        enviarErrorProcesamiento(ticket, mensajeError, null);
+    }
+
+    public void enviarErrorProcesamiento(TicketAsistencia ticket, String mensajeError, Throwable excepcion) {
         if (!emailEnabled || mailSender == null) {
             log.info("📧 Notificaciones por email deshabilitadas o no configuradas");
             return;
@@ -64,7 +65,7 @@ public class NotificacionErrorService {
         
         try {
             String asunto = "[SIGRE-ASISTENCIA] ERROR - Procesamiento de Ticket";
-            String contenido = construirEmailErrorProcesamiento(ticket, mensajeError);
+            String contenido = construirEmailErrorProcesamiento(ticket, mensajeError, excepcion);
             
             enviarEmailAMultiplesDestinatarios(asunto, contenido);
             log.info("📧 Email de error de procesamiento enviado para ticket: {}", ticket.getNumeroTicket());
@@ -130,7 +131,46 @@ public class NotificacionErrorService {
     /**
      * Construir contenido HTML para error de procesamiento
      */
-    private String construirEmailErrorProcesamiento(TicketAsistencia ticket, String mensajeError) {
+    private String construirEmailErrorProcesamiento(TicketAsistencia ticket, String mensajeError, Throwable excepcion) {
+        // Extraer causa raíz
+        String causaRaiz = "";
+        if (excepcion != null) {
+            Throwable causa = excepcion;
+            while (causa.getCause() != null) {
+                causa = causa.getCause();
+            }
+            if (!causa.getMessage().equals(mensajeError)) {
+                causaRaiz = causa.getClass().getSimpleName() + ": " + causa.getMessage();
+            }
+        }
+
+        // Construir stack trace filtrado (solo clases com.sigre)
+        StringBuilder stackTrace = new StringBuilder();
+        if (excepcion != null) {
+            for (StackTraceElement ste : excepcion.getStackTrace()) {
+                if (ste.getClassName().startsWith("com.sigre")) {
+                    stackTrace.append(ste.getClassName()).append(".")
+                              .append(ste.getMethodName()).append("(")
+                              .append(ste.getFileName()).append(":")
+                              .append(ste.getLineNumber()).append(")<br/>");
+                }
+            }
+        }
+
+        String seccionCausaRaiz = causaRaiz.isEmpty() ? "" : String.format("""
+                            <div class="causa-box">
+                                <h4>Causa Raíz:</h4>
+                                <p>%s</p>
+                            </div>
+                            """, causaRaiz);
+
+        String seccionStackTrace = stackTrace.length() == 0 ? "" : String.format("""
+                            <div class="stack-box">
+                                <h4>Pila de Llamadas:</h4>
+                                <code style="font-size: 11px; line-height: 1.6;">%s</code>
+                            </div>
+                            """, stackTrace);
+
         return String.format("""
                 <!DOCTYPE html>
                 <html>
@@ -144,8 +184,10 @@ public class NotificacionErrorService {
                         .content { margin: 15px 0; }
                         .info-table { width: 100%%; border-collapse: collapse; margin: 15px 0; }
                         .info-table th, .info-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        .info-table th { background-color: #f2f2f2; }
-                        .error-box { background: #ffebee; border: 1px solid #f44336; padding: 15px; border-radius: 5px; }
+                        .info-table th { background-color: #f2f2f2; width: 180px; }
+                        .error-box { background: #ffebee; border: 1px solid #f44336; padding: 15px; border-radius: 5px; margin: 10px 0; }
+                        .causa-box { background: #fff3e0; border: 1px solid #ff9800; padding: 15px; border-radius: 5px; margin: 10px 0; }
+                        .stack-box { background: #f5f5f5; border: 1px solid #bdbdbd; padding: 15px; border-radius: 5px; margin: 10px 0; overflow-x: auto; }
                         .footer { margin-top: 30px; font-size: 12px; color: #666; }
                     </style>
                 </head>
@@ -174,6 +216,10 @@ public class NotificacionErrorService {
                                 <p>%s</p>
                             </div>
                             
+                            %s
+                            
+                            %s
+                            
                             <p><strong>Acción Requerida:</strong> Revisar el ticket en la base de datos y corregir manualmente si es necesario.</p>
                         </div>
                         
@@ -190,11 +236,13 @@ public class NotificacionErrorService {
                 ticket.getCodTrabajador(),
                 ticket.getCodigoInput(),
                 ticket.getTipoMarcaje(),
-                "Error en procesamiento", // No usar getTipoMovimiento(), campo eliminado
+                ticket.getTipoMovimiento() != null ? ticket.getTipoMovimiento() : "-",
                 ticket.getDireccionIp(),
                 ticket.getFechaMarcacion().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
                 ticket.getIntentosProcesamiento(),
-                mensajeError
+                mensajeError,
+                seccionCausaRaiz,
+                seccionStackTrace
         );
     }
     
