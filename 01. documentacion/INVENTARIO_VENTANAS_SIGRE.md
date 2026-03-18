@@ -816,34 +816,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_cv_pro_inicializa_mov | S/C | Contabilidad - Inicialización movimientos CV |
 | w_cv_pro_reversion_mov | S/C | Contabilidad - Costos de ventas - Reversión mov. |
 | w_cv_pro_ventas_azucar | S/C | Contabilidad - Ventas azúcar |
-| w_gxc_act_libro_mes | S/C | Gastos por campos - Actualización libro mes |
-| w_gxc_asi_cosecha_semilla | S/C | Gastos por campos - Asiento cosecha semilla |
-| w_gxc_asi_dist_semilla | S/C | Gastos por campos - Asiento distribución semilla |
-| w_gxc_asi_fusion_apertura | S/C | Gastos por campos - Asiento fusión apertura |
-| w_gxc_asi_indexacion | S/C | Gastos por campos - Asiento indexación |
-| w_gxc_fusion_apertura | S/C | Gastos por campos - Fusión apertura |
-| w_gxc_fusion_apertura_act | S/C | Gastos por campos - Fusión apertura actualización |
-| w_gxc_fusion_correlativos | S/C | Gastos por campos - Fusión correlativos |
-| w_gxc_indexacion | S/C | Gastos por campos - Indexación |
-| w_gxc_mov_cosecha_semilla | S/C | Gastos por campos - Movimiento cosecha semilla |
-| w_gxc_reb_cosecha_semilla | S/C | Gastos por campos - Rebaja cosecha semilla |
-| w_gxc_rpt_asi_cos_sem | S/C | Gastos por campos - Reporte asiento cosecha semilla |
-| w_gxc_rpt_asi_dist_semilla | S/C | Gastos por campos - Reporte asiento distribución semilla |
-| w_gxc_rpt_asi_fusion_apertura | S/C | Gastos por campos - Reporte asiento fusión apertura |
-| w_gxc_rpt_asi_indexacion | S/C | Gastos por campos - Reporte asiento indexación |
-| w_gxc_rpt_costos_agricolas | S/C | Gastos por campos - Costos agrícolas |
-| w_gxc_rpt_costos_agricolas_adm | S/C | Resumen de costos agrícolas por administraciones |
-| w_gxc_rpt_cuenta_presupuestal | S/C | Resumen por cuentas presupuestales - Gastos por campos |
-| w_gxc_rpt_dist_semilla | S/C | Gastos por campos - Reporte distribución semilla |
-| w_gxc_rpt_existencia_semilla | S/C | Gastos por campos - Reporte existencia semilla |
-| w_gxc_rpt_fusion_apertura | S/C | Gastos por campos - Reporte fusión apertura |
-| w_gxc_rpt_indexacion | S/C | Gastos por campos - Reporte indexación |
-| w_gxc_rpt_libro_gastos_campos | S/C | Gastos por campos - Libro de gastos |
-| w_gxc_rpt_libro_gastos_cosecha | S/C | Gastos por campos - Libro gastos cosecha |
-| w_gxc_rpt_presup_cana | S/C | Gastos por campos - Presupuesto caña |
-| w_gxc_rpt_rebaja_cos_sem | S/C | Gastos por campos - Reporte rebaja cosecha semilla |
-| w_gxc_rpt_resumen_campo | S/C | Gastos por campos - Resumen campo |
-| w_gxc_rpt_resumen_rebaja | S/C | Gastos por campos - Resumen rebaja |
 | w_saldo_cnta_cte | CN712 | Balance de comprobación / Saldos cuenta corriente |
 
 ---
@@ -2516,7 +2488,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 2 | Almacén | 162 |
 | 3 | Compras | 163 |
 | 4 | Comercialización / Ventas | 155 |
-| 5 | Contabilidad | 286 |
+| 5 | Contabilidad | 258 |
 | 6 | Finanzas | 159 |
 | 7 | RRHH | 283 |
 | 8 | Presupuesto | 156 |
@@ -2534,7 +2506,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 20 | Control de Documentos | 15 |
 | 21 | Flota | 138 |
 | 22 | Seguridad | 21 |
-| | **TOTAL** | **2,337** |
+| | **TOTAL** | **2,309** |
 
 ---
 
