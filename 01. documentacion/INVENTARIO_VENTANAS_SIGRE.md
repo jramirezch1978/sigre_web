@@ -410,16 +410,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ---
 
-## 22. Horeca
-
-| Ventana | Código | Descripción |
-|---------|--------|-------------|
-| w_ho001_maestro_cuartos | HO001 | Maestro de Cuartos |
-| w_ho301_alojamiento_huespedes | HO301 | Alojamiento de Huéspedes y Servicios |
-
----
-
-## 23. Seguridad
+## 22. Seguridad
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
@@ -472,9 +463,8 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 19 | Consola Web | 16 |
 | 20 | Control de Documentos | 15 |
 | 21 | Flota | ~130 |
-| 22 | Horeca | 2 |
-| 23 | Seguridad | 21 |
-| | **TOTAL** | **~2,249** |
+| 22 | Seguridad | 21 |
+| | **TOTAL** | **~2,247** |
 
 ---
 
