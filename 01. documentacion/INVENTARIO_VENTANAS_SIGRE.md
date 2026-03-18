@@ -1990,23 +1990,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_asi901_actualiza_asistencias | ASI902 | Transferencia de Asistencia |
 | w_asi902_subir_asist_ht580 | ASI902 | Subir Asistencia del HT580 |
 | w_asi903_upgrade_zktime | ASI903 | Actualizar datos de ZKTIME |
-| w_gen_actualiza_marcaciones_as302 | AS302 | Actualiza Consolidado de Marcaciones Diarias |
-| w_gen_elimina_registros_as304 | AS304 | Elimina Información de Tablas |
-| w_gen_genera_turnos | S/C | Generación de Turnos para Personal Rotativo |
-| w_gen_informacion_reloj_as301 | AS301 | Proceso Diario de Información de Reloj |
-| w_gen_transferencia_as303 | AS303 | Transfiere Inasistencias y Pagos por Sobretiempos |
-| w_rh079_maestro_tarjetas | RH079 | Maestro de Tarjetas |
-| w_rh621_rpt_promedio_evaluacion | RH621 | Reporte de Promedio General de Evaluaciones |
-| w_rpt_carnet_as405 | AS405 | Marcaciones con Carnet Inactivos |
-| w_rpt_consolidado_as406 | AS406 | Resumen de Marcaciones |
-| w_rpt_inasistencia_codigo_as410 | AS410 | Comparativo de Inasistencias por Código |
-| w_rpt_inasistencia_general_as409 | AS409 | Comparativo de Inasistencias por Fechas |
-| w_rpt_incidencias_codigo_as408 | AS408 | Movimiento Digitado por Usuario (por Código) |
-| w_rpt_incidencias_general_as407 | AS407 | Movimiento Digitado por Usuario (General) |
-| w_rpt_marc_det_irregular_as403 | AS403 | Detalle de Irregularidades en Marcaciones |
-| w_rpt_marc_det_regular_as404 | AS404 | Detalle de Regularidades en Marcaciones |
-| w_rpt_marcacion_irregular_as402 | AS402 | Personal con Marcaciones Irregulares |
-| w_rpt_padron_as415 | AS415 | Padrón de Obreros y Empleados |
 
 
 ---
@@ -2410,7 +2393,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 10 | Operaciones OT | 153 |
 | 11 | Mantenimiento | 85 |
 | 12 | Aprovisionamiento | 94 |
-| 13 | Asistencia | 38 |
+| 13 | Asistencia | 21 |
 | 14 | Auditoría | 19 |
 | 15 | BASC | 16 |
 | 16 | Campo | 96 |
@@ -2418,7 +2401,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,239** |
+| | **TOTAL** | **2,222** |
 
 ---
 
