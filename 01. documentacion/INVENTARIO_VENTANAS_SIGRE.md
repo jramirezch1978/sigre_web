@@ -387,7 +387,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_cn009_tipo_cambio | CN009 | Tipo de cambio |
 | w_cn789_errores_gen_apertura | CN789 | Errores a corregir antes de generar apertura |
 | w_fi743_compras_proveedores | FI743 | Compra a proveedores |
-| w_rpt_servicio_proveedor_det | S/C | Detalle de servicios por proveedor |
+
 
 ---
 
@@ -1010,8 +1010,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_fin503_programa_pagos | FI503 | Programa de pagos |
 | w_msg_deuda_tributaria | S/C | Deuda SUNAT |
 | w_ope315_envio_email | OPE315 | Envío correo electrónico |
-| w_rpt_comprobante_egreso | S/C | Documento por pagar directo (reporte) |
-| w_rpt_consistencia_reg_compras | S/C | Consistencia de registro de compras |
+
 | w_sig735_cuentas_cobrar_pendiente | SIG735 | Cuentas por cobrar pendientes |
 
 ---
@@ -1832,7 +1831,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_proceso_facturacion | S/C | Proceso de facturación de operaciones |
 | w_promp_plantilla_ot | S/C | Opciones avanzadas de copiado de plantillas |
 | w_reprogra_ope_ciclo_res | S/C | Campos sin cortes registrados |
-| w_rpt_prueba | S/C | Reporte de prueba |
+
 
 ---
 
@@ -2079,7 +2078,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_rpt_marc_det_regular_as404 | AS404 | Detalle de Regularidades en Marcaciones |
 | w_rpt_marcacion_irregular_as402 | AS402 | Personal con Marcaciones Irregulares |
 | w_rpt_padron_as415 | AS415 | Padrón de Obreros y Empleados |
-| w_rpt_records_as414 | S/C | Registro de Marcaciones Diarias |
+
 | w_rpt_sobretiempo_codigo_as412 | AS412 | Comparativo de Sobretiempos por Código |
 | w_rpt_sobretiempo_general_as411 | AS411 | Comparativo de Sobretiempos por Fechas |
 | w_rpt_tardanzas_as401 | AS401 | Minutos Acumulados de Tardanzas |
@@ -2515,17 +2514,17 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 |---|--------|----------|
 | 1 | Activo Fijo | 31 |
 | 2 | Almacén | 162 |
-| 3 | Compras | 164 |
-| 4 | Comercialización / Ventas | 156 |
+| 3 | Compras | 163 |
+| 4 | Comercialización / Ventas | 155 |
 | 5 | Contabilidad | 286 |
-| 6 | Finanzas | 161 |
+| 6 | Finanzas | 159 |
 | 7 | RRHH | 283 |
 | 8 | Presupuesto | 156 |
 | 9 | Producción | 195 |
-| 10 | Operaciones OT | 160 |
+| 10 | Operaciones OT | 159 |
 | 11 | Mantenimiento | 93 |
 | 12 | Aprovisionamiento | 94 |
-| 13 | Asistencia | 45 |
+| 13 | Asistencia | 44 |
 | 14 | Auditoría | 19 |
 | 15 | BASC | 16 |
 | 16 | Campo | 96 |
@@ -2535,7 +2534,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 20 | Control de Documentos | 15 |
 | 21 | Flota | 138 |
 | 22 | Seguridad | 21 |
-| | **TOTAL** | **2,343** |
+| | **TOTAL** | **2,337** |
 
 ---
 
