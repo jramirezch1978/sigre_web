@@ -322,7 +322,7 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
         cell.border = thinBorder;
         cell.alignment = { vertical: 'middle' };
 
-        if ([9, 10, 11].includes(colNumber)) {
+        if ([3, 4, 9, 10, 11].includes(colNumber)) {
           cell.alignment = { horizontal: 'center', vertical: 'middle' };
         }
         if (colNumber >= 12 && colNumber <= 20) {

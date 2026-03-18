@@ -251,8 +251,10 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
         reg.nro, reg.codigoTrabajador, reg.dni, reg.apellidos, reg.nombres, reg.tipoTrabajador,
         reg.fecha ? new Date(reg.fecha).toLocaleDateString('es-PE') : '',
         formatTime(reg.horaIngresoPlanta), formatTime(reg.horaIngresoProduccion),
-        reg.minutosCambioRopa ?? '', salidaProd, salidaPlanta,
-        reg.horasEfectivasProduccion ?? '-', reg.horasTotalPlanta ?? '-', reg.horasMuertas ?? '-'
+        reg.minutosCambioRopa != null ? Number(reg.minutosCambioRopa.toFixed(2)) : '', salidaProd, salidaPlanta,
+        reg.horasEfectivasProduccion != null ? Number(reg.horasEfectivasProduccion.toFixed(2)) : '-',
+        reg.horasTotalPlanta != null ? Number(reg.horasTotalPlanta.toFixed(2)) : '-',
+        reg.horasMuertas != null ? Number(reg.horasMuertas.toFixed(2)) : '-'
       ]);
 
       const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF9FAFB';
@@ -261,7 +263,7 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
         cell.border = thinBorder;
         cell.alignment = { vertical: 'middle' };
 
-        if ([8, 9, 11, 12].includes(colNumber)) {
+        if ([2, 3, 7, 8, 9, 11, 12].includes(colNumber)) {
           cell.alignment = { horizontal: 'center', vertical: 'middle' };
         }
         if ([10, 13, 14, 15].includes(colNumber)) {

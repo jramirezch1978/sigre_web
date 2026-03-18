@@ -245,7 +245,7 @@ public class ReportePDFService {
                 table.addCell(createCell(row.getFecha() != null ? row.getFecha().format(DATE_FORMATTER) : "", TextAlignment.CENTER, bgColor));
                 table.addCell(createCell(row.getHoraIngresoPlanta() != null ? row.getHoraIngresoPlanta().format(timeFormatter) : "", TextAlignment.CENTER, bgColor));
                 table.addCell(createCell(row.getHoraIngresoProduccion() != null ? row.getHoraIngresoProduccion().format(timeFormatter) : "", TextAlignment.CENTER, bgColor));
-                table.addCell(createCell(row.getMinutosCambioRopa() != null ? String.format("%.1f", row.getMinutosCambioRopa()) : "", TextAlignment.RIGHT, bgColor));
+                table.addCell(createCell(row.getMinutosCambioRopa() != null ? String.format("%.2f", row.getMinutosCambioRopa()) : "", TextAlignment.RIGHT, bgColor));
                 table.addCell(createCell(row.getHoraSalidaProduccion() != null ? row.getHoraSalidaProduccion().format(timeFormatter) : "Pendiente", TextAlignment.CENTER, bgColor));
                 table.addCell(createCell(row.getHoraSalidaPlanta() != null ? row.getHoraSalidaPlanta().format(timeFormatter) : "Pendiente", TextAlignment.CENTER, bgColor));
                 table.addCell(createCell(row.getHorasEfectivasProduccion() != null ? String.format("%.2f", row.getHorasEfectivasProduccion()) : "-", TextAlignment.RIGHT, bgColor));
