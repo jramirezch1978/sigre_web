@@ -280,14 +280,22 @@ public class TicketAsistenciaService {
                 log.info("📍 Tipo 01 - INGRESO_PLANTA | Turno calculado: {}", turnoAsignado);
                 
             } else if ("2".equals(tipoMovimiento)) {
-                // TIPO 02 (SALIDA_PLANTA): Validar que última marcación sea 01
+                // TIPO 02 (SALIDA_PLANTA): Validar secuencia
+                String ultimoTipo = ultimaMarcacion.isPresent() ? ultimaMarcacion.get().getFlagInOut().trim() : "";
+
+                if ("7".equals(ultimoTipo)) {
+                    throw new RuntimeException(
+                        "No puede marcar SALIDA DE PLANTA. Tiene pendiente una marcación de SALIDA DEL ÁREA DE PRODUCCIÓN. "
+                        + "Por favor, marque primero la salida de producción.");
+                }
+
                 validarUltimoMovimientoEs(ultimaMarcacion, "1", "Debe marcar INGRESO_PLANTA antes de marcar SALIDA_PLANTA");
                 turnoAsignado = ultimaMarcacion.get().getTurno();
                 reckeyRef = ultimaMarcacion.get().getReckey();
                 log.info("📍 Tipo 02 - SALIDA_PLANTA | Turno heredado: {} | Ref a 01", turnoAsignado);
                 
             } else if ("3".equals(tipoMovimiento)) {
-                // TIPO 03 (SALIDA_ALMORZAR): Validar que última marcación sea 01
+                validarNoTieneProduccionPendiente(ultimaMarcacion);
                 validarUltimoMovimientoEs(ultimaMarcacion, "1", "Debe marcar INGRESO_PLANTA antes de salir a almorzar");
                 turnoAsignado = ultimaMarcacion.get().getTurno();
                 reckeyRef = ultimaMarcacion.get().getReckey();
@@ -303,7 +311,7 @@ public class TicketAsistenciaService {
                 log.info("📍 Tipo 04 - REGRESO_ALMORZAR | Turno de 01: {} | Ref a 03", turnoAsignado);
                 
             } else if ("5".equals(tipoMovimiento)) {
-                // TIPO 05 (SALIDA_COMISION): Validar que última marcación sea 01
+                validarNoTieneProduccionPendiente(ultimaMarcacion);
                 validarUltimoMovimientoEs(ultimaMarcacion, "1", "Debe marcar INGRESO_PLANTA antes de salir de comisión");
                 turnoAsignado = ultimaMarcacion.get().getTurno();
                 reckeyRef = ultimaMarcacion.get().getReckey();
@@ -335,7 +343,7 @@ public class TicketAsistenciaService {
                 log.info("📍 Tipo 08 - SALIDA_PRODUCCION | Turno de 01: {} | Ref a 07", turnoAsignado);
                 
             } else if ("9".equals(tipoMovimiento)) {
-                // TIPO 09 (SALIDA_CENAR): Validar que última marcación sea 01
+                validarNoTieneProduccionPendiente(ultimaMarcacion);
                 validarUltimoMovimientoEs(ultimaMarcacion, "1", "Debe marcar INGRESO_PLANTA antes de salir a cenar");
                 turnoAsignado = ultimaMarcacion.get().getTurno();
                 reckeyRef = ultimaMarcacion.get().getReckey();
@@ -809,6 +817,14 @@ public class TicketAsistenciaService {
     /**
      * Validar que el último movimiento sea del tipo esperado
      */
+    private void validarNoTieneProduccionPendiente(Optional<AsistenciaHt580> ultimaMarcacion) {
+        if (ultimaMarcacion.isPresent() && "7".equals(ultimaMarcacion.get().getFlagInOut().trim())) {
+            throw new RuntimeException(
+                "No puede realizar este movimiento. Tiene pendiente una marcación de SALIDA DEL ÁREA DE PRODUCCIÓN. "
+                + "Por favor, marque primero la salida de producción.");
+        }
+    }
+
     private void validarUltimoMovimientoEs(Optional<AsistenciaHt580> ultimaMarcacion, String tipoEsperado, String mensajeError) {
         if (ultimaMarcacion.isEmpty()) {
             String error = "No se encontró ninguna marcación previa. " + mensajeError;
