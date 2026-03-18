@@ -2048,12 +2048,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_rpt_marcacion_irregular_as402 | AS402 | Personal con Marcaciones Irregulares |
 | w_rpt_padron_as415 | AS415 | Padrón de Obreros y Empleados |
 
-| w_rpt_sobretiempo_codigo_as412 | AS412 | Comparativo de Sobretiempos por Código |
-| w_rpt_sobretiempo_general_as411 | AS411 | Comparativo de Sobretiempos por Fechas |
-| w_rpt_tardanzas_as401 | AS401 | Minutos Acumulados de Tardanzas |
-| w_rpt_tardanzas_codigo_as413 | AS413 | Tardanzas por Código de Trabajador |
-| w_rpt_tardanzas_general_as401 | AS401 | Tardanzas General |
-| w_rpt_turnos_as416 | AS416 | Programación de Turnos |
 
 ---
 
@@ -2456,7 +2450,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 10 | Operaciones OT | 159 |
 | 11 | Mantenimiento | 93 |
 | 12 | Aprovisionamiento | 94 |
-| 13 | Asistencia | 44 |
+| 13 | Asistencia | 38 |
 | 14 | Auditoría | 19 |
 | 15 | BASC | 16 |
 | 16 | Campo | 96 |
@@ -2464,7 +2458,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,284** |
+| | **TOTAL** | **2,278** |
 
 ---
 
