@@ -400,15 +400,27 @@ public class SyncSchedulerService {
     
     private boolean ejecutarSyncLocalToRemote() {
         log.info("📤 [HILO 2] Iniciando sincronización Local → Remote");
-        
+
         try {
             boolean asistenciaOk = localToRemoteSync.sincronizarAsistencia();
             if (!asistenciaOk && maxRetries > 0) {
                 asistenciaOk = manejarErrorConReintento("asistencia_ht580", () -> localToRemoteSync.sincronizarAsistencia());
             }
             
-            log.info("✅ [HILO 2] Sincronización Local → Remote completada - Resultado: {}", asistenciaOk ? "ÉXITO" : "CON ERRORES");
-            return asistenciaOk;
+            // Sincronizar parámetros nuevos de CONFIGURACION (solo INSERT de parámetros que no existen en Oracle)
+            log.info("📍 [HILO 2] Sincronizando CONFIGURACION nuevos parámetros (Local → Remote)...");
+            boolean configOk = localToRemoteSync.sincronizarConfiguracionNuevosParametros();
+            if (!configOk && maxRetries > 0) {
+                configOk = manejarErrorConReintento("configuracion_local_to_remote", () -> localToRemoteSync.sincronizarConfiguracionNuevosParametros());
+            }
+            
+            if (!configOk) {
+                log.warn("⚠️ [HILO 2] Fallo en CONFIGURACION Local → Remote - No es crítico, continuando");
+            }
+
+            boolean resultadoFinal = asistenciaOk && configOk;
+            log.info("✅ [HILO 2] Sincronización Local → Remote completada - Resultado: {}", resultadoFinal ? "ÉXITO" : "CON ERRORES");
+            return resultadoFinal;
             
         } catch (Exception e) {
             log.error("❌ [HILO 2] Error en sincronización Local → Remote", e);

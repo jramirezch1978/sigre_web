@@ -1,9 +1,13 @@
 package com.sigre.sync.service;
 
 import com.sigre.sync.entity.local.AsistenciaHt580Local;
+import com.sigre.sync.entity.local.ConfiguracionLocal;
 import com.sigre.sync.entity.remote.AsistenciaHt580Remote;
+import com.sigre.sync.entity.remote.ConfiguracionRemote;
 import com.sigre.sync.repository.local.AsistenciaHt580LocalRepository;
+import com.sigre.sync.repository.local.ConfiguracionLocalRepository;
 import com.sigre.sync.repository.remote.AsistenciaHt580RemoteRepository;
+import com.sigre.sync.repository.remote.ConfiguracionRemoteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +21,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -26,17 +32,22 @@ public class LocalToRemoteSyncService {
     
     private final AsistenciaHt580LocalRepository asistenciaLocalRepository;
     private final AsistenciaHt580RemoteRepository asistenciaRemoteRepository;
+    private final ConfiguracionLocalRepository configuracionLocalRepository;
+    private final ConfiguracionRemoteRepository configuracionRemoteRepository;
     private final ObjectMapper objectMapper;
     private final JdbcTemplate jdbcTemplateRemote;
     
-    // Constructor para inyectar JdbcTemplate
     public LocalToRemoteSyncService(
             AsistenciaHt580LocalRepository asistenciaLocalRepository,
             AsistenciaHt580RemoteRepository asistenciaRemoteRepository,
+            ConfiguracionLocalRepository configuracionLocalRepository,
+            ConfiguracionRemoteRepository configuracionRemoteRepository,
             ObjectMapper objectMapper,
             @Qualifier("remoteDataSource") DataSource remoteDataSource) {
         this.asistenciaLocalRepository = asistenciaLocalRepository;
         this.asistenciaRemoteRepository = asistenciaRemoteRepository;
+        this.configuracionLocalRepository = configuracionLocalRepository;
+        this.configuracionRemoteRepository = configuracionRemoteRepository;
         this.objectMapper = objectMapper;
         this.jdbcTemplateRemote = new JdbcTemplate(remoteDataSource);
     }
@@ -639,6 +650,67 @@ public class LocalToRemoteSyncService {
         } catch (Exception e) {
             log.error("❌ Error en proceso de reseteo automático de registros bloqueados: {}", e.getMessage(), e);
             // No detener el proceso de sincronización por este error
+        }
+    }
+    
+    /**
+     * Sincronizar parámetros NUEVOS de configuracion: PostgreSQL → Oracle (solo INSERT)
+     * 
+     * Regla: Solo inserta en Oracle los parámetros que existen en PostgreSQL
+     * pero NO existen en Oracle (creados por sigre-config-common via auto-insert).
+     * NO actualiza ni elimina parámetros existentes en Oracle (Oracle es maestro para updates).
+     */
+    @Transactional("remoteTransactionManager")
+    public boolean sincronizarConfiguracionNuevosParametros() {
+        log.info("📤 Iniciando sincronización de CONFIGURACION nuevos parámetros (Local → Remote, solo INSERT)");
+        
+        int insertados = 0;
+        int errores = 0;
+        
+        try {
+            List<ConfiguracionLocal> parametrosLocal = configuracionLocalRepository.findAll();
+            List<ConfiguracionRemote> parametrosRemote = configuracionRemoteRepository.findAll();
+            
+            Set<String> keysRemote = parametrosRemote.stream()
+                    .map(ConfiguracionRemote::getParametro)
+                    .collect(Collectors.toSet());
+            
+            log.info("📊 Parámetros en PostgreSQL: {} | Oracle: {}", parametrosLocal.size(), parametrosRemote.size());
+            
+            for (ConfiguracionLocal local : parametrosLocal) {
+                if (!keysRemote.contains(local.getParametro())) {
+                    try {
+                        ConfiguracionRemote nuevo = ConfiguracionRemote.builder()
+                                .parametro(local.getParametro())
+                                .valorInt(local.getValorInt())
+                                .valorDec(local.getValorDec())
+                                .valorChar(local.getValorChar())
+                                .valorDate(local.getValorDate())
+                                .fecRegistro(local.getFecRegistro() != null ? local.getFecRegistro() : LocalDateTime.now())
+                                .build();
+                        configuracionRemoteRepository.save(nuevo);
+                        insertados++;
+                        log.info("➕ INSERTADO en Oracle parámetro nuevo: {}", local.getParametro());
+                    } catch (Exception e) {
+                        errores++;
+                        erroresSincronizacion.add("Error insertando parámetro " + local.getParametro() + " en Oracle: " + e.getMessage());
+                        log.error("❌ Error insertando parámetro {} en Oracle: {}", local.getParametro(), e.getMessage(), e);
+                    }
+                }
+            }
+            
+            if (insertados > 0) {
+                log.info("✅ Sincronización CONFIGURACION (Local → Remote) completada: {} nuevos parámetros insertados en Oracle", insertados);
+            } else {
+                log.info("✅ Sincronización CONFIGURACION (Local → Remote): sin parámetros nuevos para insertar");
+            }
+            
+            return errores == 0;
+            
+        } catch (Exception e) {
+            log.error("❌ Error crítico en sincronización de CONFIGURACION (Local → Remote)", e);
+            erroresSincronizacion.add("Error crítico en CONFIGURACION Local → Remote: " + e.getMessage());
+            return false;
         }
     }
     
