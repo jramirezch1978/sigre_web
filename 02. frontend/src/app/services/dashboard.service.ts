@@ -354,4 +354,16 @@ export class DashboardService {
     console.log('📄 Descargando PDF:', url);
     return this.http.get(url, { responseType: 'blob' });
   }
+
+  obtenerReporteProduccion(codOrigen: string, fechaInicio: string, fechaFin: string): Observable<any[]> {
+    const url = `${this.baseUrl}/reporte-produccion?codOrigen=${codOrigen}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+    console.log('📊 Llamando reporte de producción:', url);
+    return this.http.get<any[]>(url);
+  }
+
+  descargarReporteProduccionPDF(codOrigen: string, fechaInicio: string, fechaFin: string): Observable<Blob> {
+    const url = `${this.baseUrl}/reporte-produccion/pdf?codOrigen=${codOrigen}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+    console.log('📄 Descargando PDF producción:', url);
+    return this.http.get(url, { responseType: 'blob' });
+  }
 }

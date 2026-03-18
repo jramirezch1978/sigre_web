@@ -1,0 +1,189 @@
+<app-main-layout>
+  <div class="page-title">
+    <div class="title_left">
+      <h3>
+        <mat-icon style="vertical-align: middle; margin-right: 10px;">precision_manufacturing</mat-icon>
+        Reporte de Producción
+      </h3>
+      <p class="subtitle">Control de horas efectivas en área de producción</p>
+    </div>
+  </div>
+
+  <div class="clearfix"></div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h2>
+            <mat-icon class="panel-icon">filter_list</mat-icon>
+            Filtros de Búsqueda
+          </h2>
+          <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+
+              <div class="filter-row">
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Origen</mat-label>
+                  <mat-select [(ngModel)]="codOrigen" (selectionChange)="onFiltroChange()">
+                    <mat-option *ngFor="let origen of origenes" [value]="origen.codOrigen">
+                      {{ origen.codOrigen }} - {{ origen.nombre }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Fecha Inicio</mat-label>
+                  <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="fechaInicio" (dateChange)="onFiltroChange()">
+                  <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerInicio></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Fecha Fin</mat-label>
+                  <input matInput [matDatepicker]="pickerFin" [(ngModel)]="fechaFin" (dateChange)="onFiltroChange()">
+                  <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerFin></mat-datepicker>
+                </mat-form-field>
+
+                <button mat-raised-button color="primary" (click)="cargarReporte()" [disabled]="cargando">
+                  <mat-icon>refresh</mat-icon>
+                  Actualizar
+                </button>
+
+                <button mat-raised-button color="accent" (click)="exportarExcel()" [disabled]="cargando || registros.length === 0">
+                  <mat-icon>file_download</mat-icon>
+                  Excel
+                </button>
+
+                <button mat-raised-button (click)="exportarPDF()" [disabled]="cargando || registros.length === 0">
+                  <mat-icon>picture_as_pdf</mat-icon>
+                  PDF
+                </button>
+              </div>
+
+              <div class="filter-row" style="margin-top: 15px;">
+                <mat-form-field appearance="outline" class="filter-field-search">
+                  <mat-label>Buscar por Nombre, Código o DNI</mat-label>
+                  <input matInput [(ngModel)]="busquedaNombre" (ngModelChange)="onFiltroBusqueda()" placeholder="Búsqueda contextual...">
+                  <mat-icon matPrefix>search</mat-icon>
+                </mat-form-field>
+
+                <div class="results-info">
+                  <mat-icon>info</mat-icon>
+                  <span>Mostrando {{ registrosFiltrados.length }} de {{ registros.length }} registros</span>
+                </div>
+              </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="cargando" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Generando reporte de producción...</p>
+  </div>
+
+  <div *ngIf="error && !cargando" class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="cargarReporte()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+
+  <div *ngIf="!cargando && !error" class="row">
+    <div class="col-md-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h2>
+            <mat-icon class="panel-icon">table_chart</mat-icon>
+            Resultados: {{ registros.length }} registros
+          </h2>
+          <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+
+          <div class="table-responsive">
+            <table class="table table-striped jambo_table bulk_action">
+              <thead>
+                <tr class="headings">
+                  <th class="column-title sortable" (click)="ordenarPor('nro')">
+                    N°
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'nro'">{{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('codigoTrabajador')">Código</th>
+                  <th class="column-title sortable" (click)="ordenarPor('dni')">DNI</th>
+                  <th class="column-title sortable" (click)="ordenarPor('apellidos')">
+                    Apellidos
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'apellidos'">{{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('nombres')">Nombres</th>
+                  <th class="column-title sortable" (click)="ordenarPor('fecha')">
+                    Fecha
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'fecha'">{{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('horaIngresoPlanta')">Ingreso<br>Planta</th>
+                  <th class="column-title sortable" (click)="ordenarPor('horaIngresoProduccion')">Ingreso<br>Producción</th>
+                  <th class="column-title sortable" (click)="ordenarPor('minutosCambioRopa')">
+                    Cambio<br>Ropa (min)
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'minutosCambioRopa'">{{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('horaSalidaProduccion')">Salida<br>Producción</th>
+                  <th class="column-title sortable" (click)="ordenarPor('horaSalidaPlanta')">Salida<br>Planta</th>
+                  <th class="column-title sortable" (click)="ordenarPor('horasEfectivasProduccion')">
+                    Hrs Efect.<br>Producción
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'horasEfectivasProduccion'">{{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                  </th>
+                  <th class="column-title sortable" (click)="ordenarPor('horasTotalPlanta')">Hrs Total<br>Planta</th>
+                  <th class="column-title sortable" (click)="ordenarPor('horasMuertas')">
+                    Hrs<br>Muertas
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'horasMuertas'">{{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of registrosFiltrados" class="even pointer">
+                  <td>{{ row.nro }}</td>
+                  <td>{{ row.codigoTrabajador }}</td>
+                  <td>{{ row.dni }}</td>
+                  <td>{{ row.apellidos }}</td>
+                  <td>{{ row.nombres }}</td>
+                  <td>{{ row.fecha | date: 'dd/MM/yyyy' }}</td>
+                  <td>{{ row.horaIngresoPlanta | date: 'HH:mm:ss' }}</td>
+                  <td>{{ row.horaIngresoProduccion | date: 'HH:mm:ss' }}</td>
+                  <td>{{ row.minutosCambioRopa | number: '1.1-1' }}</td>
+                  <td>
+                    <span *ngIf="row.horaSalidaProduccion">{{ row.horaSalidaProduccion | date: 'HH:mm:ss' }}</span>
+                    <span *ngIf="!row.horaSalidaProduccion" class="label label-warning">Pendiente</span>
+                  </td>
+                  <td>
+                    <span *ngIf="row.horaSalidaPlanta">{{ row.horaSalidaPlanta | date: 'HH:mm:ss' }}</span>
+                    <span *ngIf="!row.horaSalidaPlanta" class="label label-warning">Pendiente</span>
+                  </td>
+                  <td>
+                    <span *ngIf="row.horasEfectivasProduccion">{{ row.horasEfectivasProduccion | number: '1.2-2' }}</span>
+                    <span *ngIf="!row.horasEfectivasProduccion">-</span>
+                  </td>
+                  <td>
+                    <span *ngIf="row.horasTotalPlanta">{{ row.horasTotalPlanta | number: '1.2-2' }}</span>
+                    <span *ngIf="!row.horasTotalPlanta">-</span>
+                  </td>
+                  <td>
+                    <span *ngIf="row.horasMuertas">{{ row.horasMuertas | number: '1.2-2' }}</span>
+                    <span *ngIf="!row.horasMuertas">-</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</app-main-layout>

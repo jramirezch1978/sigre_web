@@ -12,6 +12,7 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.sigre.asistencia.dto.ReporteAsistenciaDto;
+import com.sigre.asistencia.dto.ReporteProduccionDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -160,6 +161,118 @@ public class ReportePDFService {
         }
     }
     
+    public byte[] generarReporteProduccionPDF(List<ReporteProduccionDto> registros,
+                                               String codOrigen,
+                                               LocalDate fechaInicio,
+                                               LocalDate fechaFin) {
+        log.info("Generando PDF del reporte de producción | Registros: {}", registros.size());
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            PdfWriter writer = new PdfWriter(baos);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf, PageSize.A4.rotate());
+            document.setMargins(15, 10, 15, 10);
+
+            Paragraph titulo = new Paragraph("Reporte de Producción")
+                    .setFontSize(18)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(titulo);
+
+            Paragraph subtitulo = new Paragraph("Control de horas efectivas en área de producción")
+                    .setFontSize(10)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(5);
+            document.add(subtitulo);
+
+            Paragraph filtros = new Paragraph(String.format("Origen: %s | Período: %s - %s",
+                    codOrigen,
+                    fechaInicio.format(DATE_FORMATTER),
+                    fechaFin.format(DATE_FORMATTER)))
+                    .setFontSize(9)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(10);
+            document.add(filtros);
+
+            float[] columnWidths = {
+                1.5f,  // N°
+                3.0f,  // Código
+                3.0f,  // DNI
+                6.0f,  // Nombres
+                6.0f,  // Apellidos
+                3.0f,  // Fecha
+                3.0f,  // Ingreso Planta
+                3.0f,  // Ingreso Producción
+                2.5f,  // Cambio Ropa
+                3.0f,  // Salida Producción
+                3.0f,  // Salida Planta
+                3.0f,  // Hrs Efectivas
+                3.0f,  // Hrs Total
+                3.0f   // Hrs Muertas
+            };
+
+            Table table = new Table(columnWidths);
+            table.setWidth(UnitValue.createPercentValue(100));
+            table.setFontSize(7);
+
+            String[] headers = {"N°", "Código", "DNI", "Nombres", "Apellidos", "Fecha",
+                               "Ingreso\nPlanta", "Ingreso\nProducción", "Cambio\nRopa (min)",
+                               "Salida\nProducción", "Salida\nPlanta", "Hrs Efect.\nProducción",
+                               "Hrs Total\nPlanta", "Hrs\nMuertas"};
+
+            for (String header : headers) {
+                Cell cell = new Cell().add(new Paragraph(header))
+                        .setBackgroundColor(HEADER_COLOR)
+                        .setFontColor(com.itextpdf.kernel.colors.ColorConstants.WHITE)
+                        .setBold()
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setPadding(5);
+                table.addHeaderCell(cell);
+            }
+
+            DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss");
+            int rowIndex = 0;
+            for (ReporteProduccionDto row : registros) {
+                Color bgColor = rowIndex % 2 == 0 ? com.itextpdf.kernel.colors.ColorConstants.WHITE : ALT_ROW_COLOR;
+
+                table.addCell(createCell(String.valueOf(row.getNro()), TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(row.getCodigoTrabajador(), TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(row.getDni(), TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(row.getNombres(), TextAlignment.LEFT, bgColor));
+                table.addCell(createCell(row.getApellidos(), TextAlignment.LEFT, bgColor));
+                table.addCell(createCell(row.getFecha() != null ? row.getFecha().format(DATE_FORMATTER) : "", TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(row.getHoraIngresoPlanta() != null ? row.getHoraIngresoPlanta().format(timeFormatter) : "", TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(row.getHoraIngresoProduccion() != null ? row.getHoraIngresoProduccion().format(timeFormatter) : "", TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(row.getMinutosCambioRopa() != null ? String.format("%.1f", row.getMinutosCambioRopa()) : "", TextAlignment.RIGHT, bgColor));
+                table.addCell(createCell(row.getHoraSalidaProduccion() != null ? row.getHoraSalidaProduccion().format(timeFormatter) : "Pendiente", TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(row.getHoraSalidaPlanta() != null ? row.getHoraSalidaPlanta().format(timeFormatter) : "Pendiente", TextAlignment.CENTER, bgColor));
+                table.addCell(createCell(row.getHorasEfectivasProduccion() != null ? String.format("%.2f", row.getHorasEfectivasProduccion()) : "-", TextAlignment.RIGHT, bgColor));
+                table.addCell(createCell(row.getHorasTotalPlanta() != null ? String.format("%.2f", row.getHorasTotalPlanta()) : "-", TextAlignment.RIGHT, bgColor));
+                table.addCell(createCell(row.getHorasMuertas() != null ? String.format("%.2f", row.getHorasMuertas()) : "-", TextAlignment.RIGHT, bgColor));
+
+                rowIndex++;
+            }
+
+            document.add(table);
+
+            Paragraph footer = new Paragraph(String.format("Generado: %s | Total registros: %d",
+                    LocalDate.now().format(DATE_FORMATTER), registros.size()))
+                    .setFontSize(8)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(10);
+            document.add(footer);
+
+            document.close();
+
+            log.info("✅ PDF producción generado: {} bytes", baos.size());
+            return baos.toByteArray();
+
+        } catch (Exception e) {
+            log.error("❌ Error generando PDF producción", e);
+            throw new RuntimeException("Error al generar PDF del reporte de producción", e);
+        }
+    }
+
     private Cell createCell(String content, TextAlignment alignment, Color bgColor) {
         return new Cell()
                 .add(new Paragraph(content != null ? content : ""))

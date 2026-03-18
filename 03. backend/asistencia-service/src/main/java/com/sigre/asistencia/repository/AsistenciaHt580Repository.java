@@ -583,4 +583,75 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
         @Param("fechaInicio") LocalDate fechaInicio,
         @Param("fechaFin") LocalDate fechaFin
     );
+
+    @Query(value = """
+        WITH ingreso_planta AS (
+            SELECT reckey, codigo, cod_origen, fec_marcacion, fec_movimiento
+            FROM asistencia_ht580
+            WHERE TRIM(flag_in_out) = '1'
+              AND cod_origen = :codOrigen
+              AND fec_movimiento BETWEEN :fechaInicio AND :fechaFin
+        ),
+        ingreso_produccion AS (
+            SELECT reckey, codigo, cod_origen, fec_marcacion, reckey_ref
+            FROM asistencia_ht580
+            WHERE TRIM(flag_in_out) = '7'
+              AND cod_origen = :codOrigen
+              AND fec_movimiento BETWEEN :fechaInicio AND :fechaFin
+        ),
+        salida_produccion AS (
+            SELECT reckey, codigo, cod_origen, fec_marcacion, reckey_ref
+            FROM asistencia_ht580
+            WHERE TRIM(flag_in_out) = '8'
+              AND cod_origen = :codOrigen
+              AND fec_movimiento BETWEEN :fechaInicio AND :fechaFin
+        ),
+        salida_planta AS (
+            SELECT reckey, codigo, cod_origen, fec_marcacion, reckey_ref
+            FROM asistencia_ht580
+            WHERE TRIM(flag_in_out) = '2'
+              AND cod_origen = :codOrigen
+              AND fec_movimiento BETWEEN :fechaInicio AND :fechaFin
+        )
+        SELECT
+            ROW_NUMBER() OVER (ORDER BY ip.fec_marcacion, m.cod_trabajador) AS nro,
+            m.cod_trabajador,
+            COALESCE(TRIM(m.nro_doc_ident_rtps), TRIM(m.dni)) AS dni,
+            TRIM(m.nombre1) || ' ' || COALESCE(TRIM(m.nombre2), '') AS nombres,
+            TRIM(m.apel_paterno) || ' ' || TRIM(m.apel_materno) AS apellidos,
+            ip.fec_marcacion AS hora_ingreso_planta,
+            ipr.fec_marcacion AS hora_ingreso_produccion,
+            ROUND(EXTRACT(EPOCH FROM (ipr.fec_marcacion - ip.fec_marcacion)) / 60.0, 1) AS minutos_cambio_ropa,
+            spr.fec_marcacion AS hora_salida_produccion,
+            sp.fec_marcacion AS hora_salida_planta,
+            CASE
+                WHEN spr.fec_marcacion IS NOT NULL AND ipr.fec_marcacion IS NOT NULL
+                THEN ROUND(EXTRACT(EPOCH FROM (spr.fec_marcacion - ipr.fec_marcacion)) / 3600.0, 2)
+            END AS horas_efectivas_produccion,
+            CASE
+                WHEN sp.fec_marcacion IS NOT NULL AND ip.fec_marcacion IS NOT NULL
+                THEN ROUND(EXTRACT(EPOCH FROM (sp.fec_marcacion - ip.fec_marcacion)) / 3600.0, 2)
+            END AS horas_total_planta,
+            CASE
+                WHEN spr.fec_marcacion IS NOT NULL AND ipr.fec_marcacion IS NOT NULL
+                     AND sp.fec_marcacion IS NOT NULL AND ip.fec_marcacion IS NOT NULL
+                THEN ROUND(
+                    EXTRACT(EPOCH FROM (sp.fec_marcacion - ip.fec_marcacion)) / 3600.0
+                    - EXTRACT(EPOCH FROM (spr.fec_marcacion - ipr.fec_marcacion)) / 3600.0
+                , 2)
+            END AS horas_muertas,
+            ip.fec_movimiento AS fecha
+        FROM ingreso_planta ip
+        JOIN maestro m ON m.cod_trabajador = ip.codigo
+        INNER JOIN ingreso_produccion ipr ON ipr.reckey_ref = ip.reckey AND ipr.cod_origen = ip.cod_origen
+        LEFT JOIN salida_produccion spr ON spr.reckey_ref = ipr.reckey AND spr.cod_origen = ip.cod_origen
+        LEFT JOIN salida_planta sp ON sp.reckey_ref = ip.reckey AND sp.cod_origen = ip.cod_origen
+        ORDER BY ip.fec_marcacion, m.cod_trabajador
+        """,
+        nativeQuery = true)
+    List<Object[]> generarReporteProduccion(
+        @Param("codOrigen") String codOrigen,
+        @Param("fechaInicio") LocalDate fechaInicio,
+        @Param("fechaFin") LocalDate fechaFin
+    );
 }

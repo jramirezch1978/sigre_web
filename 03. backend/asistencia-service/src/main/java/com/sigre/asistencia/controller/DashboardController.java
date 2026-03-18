@@ -2,6 +2,7 @@ package com.sigre.asistencia.controller;
 
 import com.sigre.asistencia.dto.dashboard.*;
 import com.sigre.asistencia.dto.ReporteAsistenciaDto;
+import com.sigre.asistencia.dto.ReporteProduccionDto;
 import com.sigre.asistencia.dto.OrigenDto;
 import com.sigre.asistencia.service.DashboardService;
 import com.sigre.asistencia.service.ReportePDFService;
@@ -305,6 +306,55 @@ public class DashboardController {
                     
         } catch (Exception e) {
             log.error("❌ Error generando PDF: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/reporte-produccion")
+    public ResponseEntity<List<ReporteProduccionDto>> generarReporteProduccion(
+            @RequestParam(required = false, defaultValue = "SE") String codOrigen,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin
+    ) {
+        log.info("📊 Solicitando reporte de producción | Origen: {} | Rango: {} a {}",
+                codOrigen, fechaInicio, fechaFin);
+        try {
+            List<ReporteProduccionDto> reporte = dashboardService.generarReporteProduccion(codOrigen, fechaInicio, fechaFin);
+            log.info("✅ Reporte de producción generado: {} registros", reporte.size());
+            return ResponseEntity.ok(reporte);
+        } catch (Exception e) {
+            log.error("❌ Error generando reporte de producción: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/reporte-produccion/pdf")
+    public ResponseEntity<byte[]> descargarReporteProduccionPDF(
+            @RequestParam(required = false, defaultValue = "SE") String codOrigen,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin
+    ) {
+        log.info("📄 Solicitando reporte producción PDF | Origen: {} | Rango: {} a {}",
+                codOrigen, fechaInicio, fechaFin);
+        try {
+            List<ReporteProduccionDto> reporte = dashboardService.generarReporteProduccion(codOrigen, fechaInicio, fechaFin);
+            byte[] pdfBytes = reportePDFService.generarReporteProduccionPDF(reporte, codOrigen, fechaInicio, fechaFin);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment",
+                    String.format("Reporte_Produccion_%s_%s_%s.pdf",
+                            codOrigen,
+                            fechaInicio.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")),
+                            fechaFin.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"))));
+
+            log.info("✅ PDF producción generado: {} bytes", pdfBytes.length);
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
+
+        } catch (Exception e) {
+            log.error("❌ Error generando PDF producción: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }

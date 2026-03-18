@@ -2,6 +2,7 @@ package com.sigre.asistencia.service;
 
 import com.sigre.asistencia.dto.dashboard.*;
 import com.sigre.asistencia.dto.ReporteAsistenciaDto;
+import com.sigre.asistencia.dto.ReporteProduccionDto;
 import com.sigre.asistencia.dto.OrigenDto;
 import com.sigre.asistencia.entity.AsistenciaHt580;
 import com.sigre.asistencia.entity.Area;
@@ -846,5 +847,37 @@ public class DashboardService {
         if (obj == null) return 0;
         if (obj instanceof Number) return ((Number) obj).intValue();
         return 0;
+    }
+
+    public List<ReporteProduccionDto> generarReporteProduccion(String codOrigen, LocalDate fechaInicio, LocalDate fechaFin) {
+        log.info("Generando reporte de producción | Origen: {} | Rango: {} a {}",
+                codOrigen, fechaInicio, fechaFin);
+
+        List<Object[]> resultados = asistenciaRepository.generarReporteProduccion(codOrigen, fechaInicio, fechaFin);
+
+        log.info("Reporte de producción generado: {} registros", resultados.size());
+
+        return resultados.stream()
+                .map(this::convertirAReporteProduccionDto)
+                .collect(Collectors.toList());
+    }
+
+    private ReporteProduccionDto convertirAReporteProduccionDto(Object[] row) {
+        return ReporteProduccionDto.builder()
+                .nro(((Number) row[0]).intValue())
+                .codigoTrabajador((String) row[1])
+                .dni((String) row[2])
+                .nombres((String) row[3])
+                .apellidos((String) row[4])
+                .horaIngresoPlanta(convertirALocalDateTime(row[5]))
+                .horaIngresoProduccion(convertirALocalDateTime(row[6]))
+                .minutosCambioRopa(convertirADouble(row[7]))
+                .horaSalidaProduccion(convertirALocalDateTime(row[8]))
+                .horaSalidaPlanta(convertirALocalDateTime(row[9]))
+                .horasEfectivasProduccion(convertirADouble(row[10]))
+                .horasTotalPlanta(convertirADouble(row[11]))
+                .horasMuertas(convertirADouble(row[12]))
+                .fecha(convertirALocalDate(row[13]))
+                .build();
     }
 }

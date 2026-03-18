@@ -710,6 +710,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     console.log('📊 Navegando a Reporte de Asistencia');
     this.router.navigate(['/reporte-asistencia']);
   }
+
+  onReporteProduccion() {
+    console.log('📊 Navegando a Reporte de Producción');
+    this.router.navigate(['/reporte-produccion']);
+  }
   
   // 📋 MENU LATERAL - Opciones no implementadas
   onMetricasTiempoReal() { this.notImplementedService.menuNotImplemented('Métricas Tiempo Real'); }
