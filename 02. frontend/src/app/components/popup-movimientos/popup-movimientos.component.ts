@@ -84,26 +84,27 @@ export class PopupMovimientosComponent implements OnInit {
       return todosMovimientos.filter(m => m.numero === 2);
     }
     
-    // MODO COMPLETO: lógica original con todas las reglas
+    // ÁREA DE PRODUCCIÓN: solo movimientos 7 (ingreso) y 8 (salida)
+    if (this.tipoMarcaje === 'area-produccion') {
+      if (ultimo === 1 || ultimo === 8 || ultimo === 0 || ultimo === 2) {
+        return todosMovimientos.filter(m => m.numero === 7);
+      }
+      if (ultimo === 7) {
+        return todosMovimientos.filter(m => m.numero === 8);
+      }
+      return todosMovimientos.filter(m => m.numero === 7);
+    }
+
+    // MODO COMPLETO (puerta-principal): lógica con todas las reglas
 
     // REGLA 1: Si último = 2 (salida) O no tiene movimientos (0) → solo movimiento 1
     if (ultimo === 2 || ultimo === 0) {
       return todosMovimientos.filter(m => m.numero === 1);
     }
     
-    // REGLA 2: Si último = 1 (ingreso) → mostrar 2, 3, 5, 9 + (7 si tipo marcaje = area-produccion)  
+    // REGLA 2: Si último = 1 (ingreso) → mostrar 2, 3, 5, 9
     if (ultimo === 1) {
-      let movimientos = todosMovimientos.filter(m => [2, 3, 5, 9].includes(m.numero));
-      if (this.tipoMarcaje === 'area-produccion') {
-        const mov7 = todosMovimientos.find(m => m.numero === 7);
-        if (mov7) movimientos.push(mov7);
-      }
-      return movimientos;
-    }
-    
-    // REGLA 3: Si tipo marcaje = area-produccion Y último = 7 → solo mostrar 8
-    if (this.tipoMarcaje === 'area-produccion' && ultimo === 7) {
-      return todosMovimientos.filter(m => m.numero === 8);
+      return todosMovimientos.filter(m => [2, 3, 5, 9].includes(m.numero));
     }
     
     // REGLA 4: Si último = 3 (salida almorzar) → solo movimiento 4
