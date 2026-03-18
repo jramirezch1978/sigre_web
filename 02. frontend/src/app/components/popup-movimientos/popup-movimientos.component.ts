@@ -84,15 +84,15 @@ export class PopupMovimientosComponent implements OnInit {
       return todosMovimientos.filter(m => m.numero === 2);
     }
     
-    // ÁREA DE PRODUCCIÓN: solo movimientos 7 (ingreso) y 8 (salida)
+    // ÁREA DE PRODUCCIÓN: solo 7 después de 1, solo 8 después de 7
     if (this.tipoMarcaje === 'area-produccion') {
-      if (ultimo === 1 || ultimo === 8 || ultimo === 0 || ultimo === 2) {
+      if (ultimo === 1) {
         return todosMovimientos.filter(m => m.numero === 7);
       }
       if (ultimo === 7) {
         return todosMovimientos.filter(m => m.numero === 8);
       }
-      return todosMovimientos.filter(m => m.numero === 7);
+      return [];
     }
 
     // MODO COMPLETO (puerta-principal): lógica con todas las reglas
