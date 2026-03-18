@@ -217,17 +217,10 @@ public class MarcacionController {
                 log.info("✅ Sin marcaciones previas | Trabajador: {}", codTrabajador);
             }
             
-            // ✅ DETERMINAR ÚLTIMO MOVIMIENTO PARA FRONTEND (después del auto-cierre si aplicó)
-            AsistenciaHt580 ultimoMovimientoFinal = ultimaAsistencia;
-            
-            if (seProcesaAutoCierre) {
-                // Si se procesó auto-cierre, obtener el NUEVO último movimiento
-                ultimoMovimientoFinal = asistenciaRepository
-                        .findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(codTrabajador, codOrigen)
-                        .orElse(ultimaAsistencia);
-                        
-                log.info("🔄 Obteniendo último movimiento DESPUÉS del auto-cierre | Trabajador: {}", codTrabajador);
-            }
+            // Obtener el último movimiento REAL (todos los tipos, no solo 1 y 2)
+            AsistenciaHt580 ultimoMovimientoFinal = asistenciaRepository
+                    .findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(codTrabajador, codOrigen)
+                    .orElse(ultimaAsistencia);
             
             int numeroUltimoMovimiento = 0; // Por defecto = sin movimientos
             if (ultimoMovimientoFinal != null && ultimoMovimientoFinal.getFlagInOut() != null) {
