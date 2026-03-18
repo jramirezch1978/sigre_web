@@ -816,8 +816,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_cv_pro_inicializa_mov | S/C | Contabilidad - Inicialización movimientos CV |
 | w_cv_pro_reversion_mov | S/C | Contabilidad - Costos de ventas - Reversión mov. |
 | w_cv_pro_ventas_azucar | S/C | Contabilidad - Ventas azúcar |
-| w_saldo_cnta_cte | CN712 | Balance de comprobación / Saldos cuenta corriente |
-
 ---
 
 ## 6. Finanzas
@@ -2488,7 +2486,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 2 | Almacén | 162 |
 | 3 | Compras | 163 |
 | 4 | Comercialización / Ventas | 155 |
-| 5 | Contabilidad | 258 |
+| 5 | Contabilidad | 257 |
 | 6 | Finanzas | 159 |
 | 7 | RRHH | 283 |
 | 8 | Presupuesto | 156 |
@@ -2506,7 +2504,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 20 | Control de Documentos | 15 |
 | 21 | Flota | 138 |
 | 22 | Seguridad | 21 |
-| | **TOTAL** | **2,309** |
+| | **TOTAL** | **2,308** |
 
 ---
 
