@@ -56,8 +56,9 @@ export class AsistenciaComponent implements OnInit {
   @ViewChild('codigoInputRef') codigoInputRef!: ElementRef;
   
   // Propiedades principales
-  codigoInput: string = '';  // Cambié codigoTarjeta por codigoInput más general
+  codigoInput: string = '';
   tipoMarcaje: string = '';
+  modoMarcaje: string = 'completo';
   nombreTrabajador = '';
   codigoTrabajador = '';
   
@@ -93,8 +94,8 @@ export class AsistenciaComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    // Obtener el tipo de marcaje de los query params
     this.tipoMarcaje = this.route.snapshot.queryParams['tipoMarcaje'] || '';
+    this.modoMarcaje = this.route.snapshot.queryParams['modoMarcaje'] || 'completo';
     
     // Inicializar configuración
     await this.configService.waitForConfig();
@@ -358,7 +359,9 @@ export class AsistenciaComponent implements OnInit {
   getTituloSegunTipo(): string {
     switch (this.tipoMarcaje) {
       case 'puerta-principal':
-        return 'Marcaje Puerta Principal';
+        return this.modoMarcaje === 'simplificado'
+          ? 'Marcaje Simplificado'
+          : 'Marcaje Puerta Principal';
       case 'area-produccion':
         return 'Marcaje Área de Producción';
       case 'comedor':

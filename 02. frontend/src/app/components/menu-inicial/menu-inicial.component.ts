@@ -26,8 +26,8 @@ export class MenuInicialComponent implements OnInit {
   companyName = 'Transmarina del PERU SAC';
   companyLogo = 'assets/logo-transmarina.png';
   companySucursal = 'PIURA - SECHURA';
+  mostrarPopupModo = false;
 
-  // Propiedades observables para versión
   appVersion$!: Observable<string>;
   buildTimestamp$!: Observable<string>;
 
@@ -39,33 +39,40 @@ export class MenuInicialComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      // Esperar a que se cargue la configuración
       await this.configService.waitForConfig();
-
-      // Cargar configuración desde appsettings.json
       this.companyName = this.configService.getCompanyName();
       this.companyLogo = this.configService.getCompanyLogo();
       this.companySucursal = this.configService.getCompanySucursal();
     } catch (error) {
       console.warn('No se pudo cargar la configuración, usando valores por defecto:', error);
-      // Los valores por defecto ya están establecidos en las propiedades
     }
 
-    // Inicializar observables de versión
     this.appVersion$ = this.versionService.getAppVersion();
     this.buildTimestamp$ = this.versionService.getBuildTimestamp();
   }
 
   seleccionarTipoMarcaje(tipo: string) {
-    // Navegar al componente de asistencia con el tipo de marcaje
-    this.router.navigate(['/asistencia'], { 
-      queryParams: { tipoMarcaje: tipo } 
+    if (tipo === 'puerta-principal') {
+      this.mostrarPopupModo = true;
+      return;
+    }
+    this.router.navigate(['/asistencia'], {
+      queryParams: { tipoMarcaje: tipo }
     });
   }
 
-  irADashboard() {
-    // Navegar al dashboard de asistencia
-    this.router.navigate(['/dashboard']);
+  seleccionarModoPuertaPrincipal(modo: 'completo' | 'simplificado') {
+    this.mostrarPopupModo = false;
+    this.router.navigate(['/asistencia'], {
+      queryParams: { tipoMarcaje: 'puerta-principal', modoMarcaje: modo }
+    });
   }
 
+  cerrarPopupModo() {
+    this.mostrarPopupModo = false;
+  }
+
+  irADashboard() {
+    this.router.navigate(['/dashboard']);
+  }
 }

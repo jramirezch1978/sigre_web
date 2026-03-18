@@ -28,6 +28,7 @@ export interface TipoMovimiento {
 })
 export class PopupMovimientosComponent implements OnInit {
   @Input() tipoMarcaje: string = '';
+  @Input() modoMarcaje: string = 'completo';
   @Input() nombreTrabajador: string = '';
   @Input() ultimoMovimiento: number = 0;
   @Output() movimientoSeleccionado = new EventEmitter<TipoMovimiento>();
@@ -73,13 +74,24 @@ export class PopupMovimientosComponent implements OnInit {
   
   private filtrarMovimientosPorLogica(todosMovimientos: TipoMovimiento[]): TipoMovimiento[] {
     const ultimo = this.ultimoMovimiento;
+    const esSimplificado = this.modoMarcaje === 'simplificado';
     
+    // MODO SIMPLIFICADO: solo movimientos 1 (ingreso) y 2 (salida)
+    if (esSimplificado) {
+      if (ultimo === 0 || ultimo === 2) {
+        return todosMovimientos.filter(m => m.numero === 1);
+      }
+      return todosMovimientos.filter(m => m.numero === 2);
+    }
+    
+    // MODO COMPLETO: lógica original con todas las reglas
+
     // REGLA 1: Si último = 2 (salida) O no tiene movimientos (0) → solo movimiento 1
     if (ultimo === 2 || ultimo === 0) {
       return todosMovimientos.filter(m => m.numero === 1);
     }
     
-    // REGLA 2: Si último = 1 (ingreso) → mostrar 2, 3, 5, 9 + (7 si tipo marcaje = 2)  
+    // REGLA 2: Si último = 1 (ingreso) → mostrar 2, 3, 5, 9 + (7 si tipo marcaje = area-produccion)  
     if (ultimo === 1) {
       let movimientos = todosMovimientos.filter(m => [2, 3, 5, 9].includes(m.numero));
       if (this.tipoMarcaje === 'area-produccion') {
@@ -89,7 +101,7 @@ export class PopupMovimientosComponent implements OnInit {
       return movimientos;
     }
     
-    // REGLA 3: Si tipo marcaje = 2 Y último = 7 → solo mostrar 8
+    // REGLA 3: Si tipo marcaje = area-produccion Y último = 7 → solo mostrar 8
     if (this.tipoMarcaje === 'area-produccion' && ultimo === 7) {
       return todosMovimientos.filter(m => m.numero === 8);
     }
@@ -109,7 +121,6 @@ export class PopupMovimientosComponent implements OnInit {
       return todosMovimientos.filter(m => m.numero === 10);
     }
     
-    // Por defecto, si hay algún caso no contemplado, mostrar todos
     console.warn(`⚠️ Caso no contemplado: último movimiento ${ultimo} con tipo ${this.tipoMarcaje}`);
     return todosMovimientos;
   }
