@@ -404,31 +404,13 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ---
 
-## 21. CRM Web
-
-| Ventana | Código | Descripción |
-|---------|--------|-------------|
-| w_articulos | CRM | Artículos |
-| w_cartera_clientes | CRM | Registro de Cartera de Clientes |
-| w_categoria_articulo | CRM | Categorías |
-| w_clientes | CRM | Nuevo Cliente |
-| w_cotizacion | CRM | Cotización |
-| w_crm001_seguimientos | CRM001 | Seguimiento |
-| w_mantenimiento_clientes | CRM | Mantenimiento de clientes |
-| w_rpt_clientes | CRM | Reporte de Clientes |
-| w_rpt_cotizacion | CRM | Cotización Generada |
-| w_sub_categoria_articulo | CRM | Sub Categorías |
-| w_visitas | CRM | Visitas |
-
----
-
-## 22. Flota
+## 21. Flota
 
 *(Ver archivo detallado pendiente de generar)*
 
 ---
 
-## 23. Horeca
+## 22. Horeca
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
@@ -437,7 +419,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ---
 
-## 24. Seguridad
+## 23. Seguridad
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
@@ -489,11 +471,10 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Comedor | 29 |
 | 19 | Consola Web | 16 |
 | 20 | Control de Documentos | 15 |
-| 21 | CRM Web | 11 |
-| 22 | Flota | ~130 |
-| 23 | Horeca | 2 |
-| 24 | Seguridad | 21 |
-| | **TOTAL** | **~2,260** |
+| 21 | Flota | ~130 |
+| 22 | Horeca | 2 |
+| 23 | Seguridad | 21 |
+| | **TOTAL** | **~2,249** |
 
 ---
 
