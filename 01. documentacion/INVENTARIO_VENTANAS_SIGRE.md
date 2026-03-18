@@ -793,27 +793,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_cn983_exp_balance_comprobacion_pdt | CN983 | Balance de comprobación PDT |
 | w_cn984_asiento_redondeo | CN984 | Asiento de ajustes por redondeo |
 | w_cn985_ajuste_bancario | CN985 | Ajuste por diferencia bancaria - Saldos bancarios |
-| w_cntbl_mayorizacion_cta_cte | S/C | Mayorización cuenta corriente |
-| w_cntbl_mayorizacion_cuentas | S/C | Mayorización de cuentas |
-| w_cntbl_mayor_cencos | S/C | Mayor por centros de costos |
-| w_cntbl_mayor_cnta_crrte | S/C | Mayor cuenta corriente |
-| w_cntbl_rpt_cuenta_corriente | S/C | Reporte de saldos de cuenta corriente |
-| w_cntbl_rpt_detalle_gastos | S/C | Reporte del detalle de gastos |
-| w_cntbl_rpt_detalle_gastos_c | S/C | Resumen general a nivel de cuenta por divisiones |
-| w_cntbl_rpt_detalle_gastos_r | S/C | Resumen de gastos por centro de costo y cuenta contable |
-| w_cntbl_rpt_matrices | S/C | Reporte de matrices contables |
-| w_cntbl_saldos_banco | S/C | Saldos de banco |
-| w_cntbl_transf_automaticas | S/C | Transferencias automáticas |
-| w_cntbl_transf_factores | S/C | Genera factores de transferencias automáticas |
-| w_cn_error_asiento | S/C | Errores de proceso de asientos |
-| w_cp_pro_asiento | S/C | Contabilidad - Costos de producción |
-| w_cp_pro_inicializa_mov | S/C | Contabilidad - Inicialización movimientos |
-| w_cp_pro_produccion_azucar | S/C | Contabilidad - Producción azúcar |
-| w_cp_pro_reversion_mov | S/C | Contabilidad - Costos de producción - Reversión mov. |
-| w_cv_pro_asiento | S/C | Contabilidad - Costos de ventas |
-| w_cv_pro_inicializa_mov | S/C | Contabilidad - Inicialización movimientos CV |
-| w_cv_pro_reversion_mov | S/C | Contabilidad - Costos de ventas - Reversión mov. |
-| w_cv_pro_ventas_azucar | S/C | Contabilidad - Ventas azúcar |
 ---
 
 ## 6. Finanzas
@@ -2440,7 +2419,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 2 | Almacén | 162 |
 | 3 | Compras | 163 |
 | 4 | Comercialización / Ventas | 153 |
-| 5 | Contabilidad | 257 |
+| 5 | Contabilidad | 236 |
 | 6 | Finanzas | 159 |
 | 7 | RRHH | 283 |
 | 8 | Presupuesto | 156 |
@@ -2456,7 +2435,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,276** |
+| | **TOTAL** | **2,255** |
 
 ---
 
