@@ -2209,21 +2209,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ---
 
-## 17. CashLoan
-
-| Ventana | Código | Descripción |
-|---------|--------|-------------|
-| w_cas001_asesor_financiero | CAS001 | Asesores Financieros |
-| w_cm001_proveedor_tipo | CM101 | Tipo de proveedores |
-| w_cm002_proveedor_ficha | CM002 | Ficha de Proveedor |
-| w_cm002_proveedor_ficha_visita | CM002 | Formato de Visitas |
-| w_cm003_proveedor_articulo | CM003 | Proveedores Calificados |
-| w_cm017_grupo_proveedor | CM017 | Grupo de proveedores |
-| w_ve027_zonas_venta | VE027 | Zonas de Venta |
-
----
-
-## 18. Comedor
+## 17. Comedor
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
@@ -2259,7 +2245,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ---
 
-## 19. Control de Documentos
+## 18. Control de Documentos
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
@@ -2281,7 +2267,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ---
 
-## 20. Flota
+## 19. Flota
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
@@ -2426,7 +2412,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ---
 
-## 21. Seguridad
+## 20. Seguridad
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
@@ -2474,12 +2460,11 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 14 | Auditoría | 19 |
 | 15 | BASC | 16 |
 | 16 | Campo | 96 |
-| 17 | CashLoan | 7 |
-| 18 | Comedor | 29 |
-| 19 | Control de Documentos | 15 |
-| 20 | Flota | 138 |
-| 21 | Seguridad | 21 |
-| | **TOTAL** | **2,291** |
+| 17 | Comedor | 29 |
+| 18 | Control de Documentos | 15 |
+| 19 | Flota | 138 |
+| 20 | Seguridad | 21 |
+| | **TOTAL** | **2,284** |
 
 ---
 
