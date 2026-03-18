@@ -1862,12 +1862,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_ma900_mant_prog_ot | MA900 | Generación de órdenes de trabajo |
 | w_ma901_mntto_proyectado | MA901 | Mantenimiento proyectado |
 | w_ma902_generar_ot | AP900 | Generar orden de trabajo |
-| w_maq_estructura | S/C | Vista de estructura de máquina (TreeView) |
-| w_maxxx_causa_fallas_tbl | MAXXX | Causas de fallas (tabla) |
-| w_print_properties | S/C | Propiedades de impresión |
-| w_reprogra_ope_campo_res | S/C | Campos sin cortes registrados |
-| w_reprogra_ope_ciclo_res | S/C | Ciclos sin cortes registrados |
-| w_reprogra_ope_detalle_pop | S/C | Detalle de reprogramación de operación |
 ---
 
 ## 12. Aprovisionamiento
@@ -2414,7 +2408,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 8 | Presupuesto | 156 |
 | 9 | Producción | 194 |
 | 10 | Operaciones OT | 153 |
-| 11 | Mantenimiento | 91 |
+| 11 | Mantenimiento | 85 |
 | 12 | Aprovisionamiento | 94 |
 | 13 | Asistencia | 38 |
 | 14 | Auditoría | 19 |
@@ -2424,7 +2418,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,245** |
+| | **TOTAL** | **2,239** |
 
 ---
 
