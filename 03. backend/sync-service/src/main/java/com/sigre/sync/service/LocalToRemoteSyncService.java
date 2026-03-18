@@ -268,27 +268,54 @@ public class LocalToRemoteSyncService {
             }
             
         } catch (Exception e) {
-            // ✅ CAPTURAR ERROR ESPECÍFICO para notificación
+            String errorMsg = e.getMessage() != null ? e.getMessage() : "Error desconocido";
+            
+            // Si es error de constraint unique, el registro ya existe en Oracle
+            if (errorMsg.contains("IX_ASISTENCIA_HT5801") || errorMsg.contains("unique constraint")) {
+                log.warn("⚠️ Registro {} ya existe en Oracle (constraint unique). Buscando external_id...", asistenciaLocal.getReckey());
+                
+                try {
+                    AsistenciaHt580Remote existente = asistenciaRemoteRepository
+                            .findRegistroRecienInsertado(
+                                    asistenciaLocal.getCodOrigen(),
+                                    asistenciaLocal.getCodigo(),
+                                    asistenciaLocal.getFlagInOut(),
+                                    asistenciaLocal.getFechaMovimiento(),
+                                    asistenciaLocal.getFecMarcacion(),
+                                    asistenciaLocal.getCodUsuario(),
+                                    asistenciaLocal.getDireccionIp(),
+                                    asistenciaLocal.getTurno(),
+                                    asistenciaLocal.getLecturaPda()
+                            );
+                    
+                    if (existente != null) {
+                        asistenciaLocal.setExternalId(existente.getReckey());
+                        asistenciaLocal.setEstadoSync("S");
+                        asistenciaLocal.setFechaSync(LocalDateTime.now());
+                        asistenciaLocal.setObservaciones("Recuperado de Oracle (ya existía)");
+                        asistenciaLocalRepository.save(asistenciaLocal);
+                        log.info("✅ External_id recuperado de Oracle: {} → {}", asistenciaLocal.getReckey(), existente.getReckey());
+                        return;
+                    }
+                } catch (Exception recoverError) {
+                    log.error("❌ Error intentando recuperar external_id: {}", recoverError.getMessage());
+                }
+            }
+            
             registrosErrores++;
+            erroresSincronizacion.add(String.format("Error sincronizando asistencia RECKEY=%s, COD_ORIGEN=%s, CODIGO=%s: %s",
+                    asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(), asistenciaLocal.getCodigo(), errorMsg));
             
-            String errorDetallado = String.format(
-                "Error sincronizando asistencia RECKEY=%s, COD_ORIGEN=%s, CODIGO=%s: %s", 
-                asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(), asistenciaLocal.getCodigo(), e.getMessage()
-            );
-            
-            erroresSincronizacion.add(errorDetallado);
-            
-            log.error("❌ Error procesando asistencia {} (COD_ORIGEN={}): {}", 
-                     asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(), e.getMessage());
+            log.error("❌ Error procesando asistencia {} (COD_ORIGEN={}): {}",
+                     asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(), errorMsg);
             
             asistenciaLocal.setEstadoSync("E");
             asistenciaLocal.setIntentosSync(asistenciaLocal.getIntentosSync() + 1);
             asistenciaLocal.setFechaSync(LocalDateTime.now());
-            String msgError = e.getMessage() != null ? e.getMessage() : "Error desconocido";
-            asistenciaLocal.setObservaciones(msgError.length() > 200 ? msgError.substring(0, 200) : msgError);
+            asistenciaLocal.setObservaciones(errorMsg.length() > 200 ? errorMsg.substring(0, 200) : errorMsg);
             asistenciaLocalRepository.save(asistenciaLocal);
             
-            log.info("🔄 Registro marcado como ERROR para reintento | RECKEY: {} | Intento: {}", 
+            log.info("🔄 Registro marcado como ERROR para reintento | RECKEY: {} | Intento: {}",
                     asistenciaLocal.getReckey(), asistenciaLocal.getIntentosSync());
         }
     }
