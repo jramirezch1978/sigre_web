@@ -954,7 +954,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_fi917_change_fec_vencimiento | FI917 | Cambiar fecha de vencimiento y forma de pago |
 | w_fin501_letras_x_vencimiento | FI501 | Letras por fecha de vencimiento |
 | w_fin503_programa_pagos | FI503 | Programa de pagos |
-| w_msg_deuda_tributaria | S/C | Deuda SUNAT |
 | w_ope315_envio_email | OPE315 | Envío correo electrónico |
 
 | w_sig735_cuentas_cobrar_pendiente | SIG735 | Cuentas por cobrar pendientes |
@@ -2419,7 +2418,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 3 | Compras | 163 |
 | 4 | Comercialización / Ventas | 153 |
 | 5 | Contabilidad | 236 |
-| 6 | Finanzas | 158 |
+| 6 | Finanzas | 157 |
 | 7 | RRHH | 283 |
 | 8 | Presupuesto | 156 |
 | 9 | Producción | 194 |
@@ -2434,7 +2433,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,254** |
+| | **TOTAL** | **2,253** |
 
 ---
 
