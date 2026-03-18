@@ -1780,7 +1780,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_ca304_reprogra_operacion | CA304 | Reprogramación de operaciones |
 | w_ca703_rpt_presup_x_ejec_valoriz | CA718 | Resumen de presupuesto valorizado por ejecutor |
 | w_copia_plant_prod | S/C | Copia de plantillas de producción |
-| w_estructura_pop_preg | S/C | Ingreso de cantidad para estructura |
 | w_ma001_grupo_maquina | MA001 | Grupos de máquinas |
 | w_ma002_tipo_maquina | MA002 | Tipos de máquinas |
 | w_ma003_maquina | MA003 | Maestro de máquinas o equipos |
@@ -2417,7 +2416,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 8 | Presupuesto | 156 |
 | 9 | Producción | 194 |
 | 10 | Operaciones OT | 153 |
-| 11 | Mantenimiento | 93 |
+| 11 | Mantenimiento | 92 |
 | 12 | Aprovisionamiento | 94 |
 | 13 | Asistencia | 38 |
 | 14 | Auditoría | 19 |
@@ -2427,7 +2426,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,247** |
+| | **TOTAL** | **2,246** |
 
 ---
 
