@@ -162,14 +162,13 @@ public class MarcacionController {
                 boolean esIngreso = "1".equals(flagInOut != null ? flagInOut.trim() : "");
                 
                 if (esIngreso) {
-                    // PASO 2a: Es ingreso - verificar si >= 13h para auto-cierre (usar FEC_MARCACION)
+                    // PASO 2a: Es ingreso a planta (tipo 1) - verificar solo auto-cierre
                     long horasTranscurridas = java.time.Duration.between(
                             ultimaAsistencia.getFecMarcacion(), 
                             LocalDateTime.now()
                     ).toHours();
                     
                     if (horasTranscurridas >= autoCierreHoras) {
-                        // ✅ AUTO-CIERRE necesario
                         log.info("🔄 Ejecutando auto-cierre | Trabajador: {} | Horas: {}/{}", 
                                 codTrabajador, horasTranscurridas, autoCierreHoras);
                         
@@ -180,58 +179,38 @@ public class MarcacionController {
                         } catch (Exception e) {
                             log.error("❌ Error en auto-cierre | Trabajador: {}: {}", codTrabajador, e.getMessage(), e);
                         }
-                    } else {
-                        // PASO 2b: Es ingreso pero < 13h - validar tiempo mínimo (usar FEC_MARCACION)
-                        long minutosTranscurridos = java.time.Duration.between(
-                                ultimaAsistencia.getFecMarcacion(), 
-                                LocalDateTime.now()
-                        ).toMinutes();
-                        
-                        log.info("⏰ Ingreso reciente | Trabajador: {} | Horas: {}/{} | Validando tiempo mínimo: {} min", 
-                                codTrabajador, horasTranscurridas, autoCierreHoras, minutosTranscurridos);
-                        
-                        if (minutosTranscurridos < tiempoMinimoMinutos) {
-                            long minutosRestantes = tiempoMinimoMinutos - minutosTranscurridos;
-                            
-                            String mensajeTiempoMinimo = String.format(
-                                "TIEMPO_MINIMO_ERROR|%s|%s|%d|%s|%d", 
-                                codTrabajador, resultado.getTrabajador().getNombreCompleto(),
-                                tiempoMinimoMinutos, ultimaAsistencia.getFechaRegistro().toString(), minutosRestantes
-                            );
-                            
-                            return ResponseEntity.ok(ValidarCodigoResponse.builder()
-                                    .valido(false)
-                                    .mensajeError(mensajeTiempoMinimo)
-                                    .build());
-                        }
                     }
+                    // Después de tipo 1 NO se valida tiempo mínimo:
+                    // el siguiente movimiento siempre es de tipo diferente (2,3,5,7,9)
+                    // y el popup de movimientos ya controla la secuencia válida.
+                    // Esto permite que tras marcar ingreso a planta, el trabajador
+                    // pueda ingresar a producción sin esperar el tiempo mínimo.
+                    log.info("✅ Tipo 1 (INGRESO_PLANTA) - Sin validación de tiempo mínimo (siguiente movimiento será de tipo diferente)");
+                    
                 } else {
-                    // PASO 2c: NO es ingreso - validar tiempo mínimo (EXCEPTO tipo 7 - Ingreso a Producción)
-                    if (!"7".equals(flagInOut)) {
-                        long minutosTranscurridos = java.time.Duration.between(
-                                ultimaAsistencia.getFechaRegistro(), 
-                                LocalDateTime.now()
-                        ).toMinutes();
+                    // PASO 2b: NO es ingreso a planta - validar tiempo mínimo para TODOS los tipos
+                    // Incluye tipo 7 (ingreso producción) para evitar doble marcación accidental
+                    long minutosTranscurridos = java.time.Duration.between(
+                            ultimaAsistencia.getFecMarcacion(), 
+                            LocalDateTime.now()
+                    ).toMinutes();
+                    
+                    log.info("⏰ Último movimiento tipo {} | Trabajador: {} | Validando tiempo mínimo: {} min", 
+                            flagInOut, codTrabajador, minutosTranscurridos);
+                    
+                    if (minutosTranscurridos < tiempoMinimoMinutos) {
+                        long minutosRestantes = tiempoMinimoMinutos - minutosTranscurridos;
                         
-                        log.info("⏰ Último movimiento NO es ingreso (tipo {}) | Trabajador: {} | Validando tiempo mínimo: {} min", 
-                                flagInOut, codTrabajador, minutosTranscurridos);
+                        String mensajeTiempoMinimo = String.format(
+                            "TIEMPO_MINIMO_ERROR|%s|%s|%d|%s|%d", 
+                            codTrabajador, resultado.getTrabajador().getNombreCompleto(),
+                            tiempoMinimoMinutos, ultimaAsistencia.getFechaRegistro().toString(), minutosRestantes
+                        );
                         
-                        if (minutosTranscurridos < tiempoMinimoMinutos) {
-                            long minutosRestantes = tiempoMinimoMinutos - minutosTranscurridos;
-                            
-                            String mensajeTiempoMinimo = String.format(
-                                "TIEMPO_MINIMO_ERROR|%s|%s|%d|%s|%d", 
-                                codTrabajador, resultado.getTrabajador().getNombreCompleto(),
-                                tiempoMinimoMinutos, ultimaAsistencia.getFechaRegistro().toString(), minutosRestantes
-                            );
-                            
-                            return ResponseEntity.ok(ValidarCodigoResponse.builder()
-                                    .valido(false)
-                                    .mensajeError(mensajeTiempoMinimo)
-                                    .build());
-                        }
-                    } else {
-                        log.info("✅ Tipo 7 (INGRESO_PRODUCCION) - Sin validación de tiempo mínimo");
+                        return ResponseEntity.ok(ValidarCodigoResponse.builder()
+                                .valido(false)
+                                .mensajeError(mensajeTiempoMinimo)
+                                .build());
                     }
                 }
             } else {
