@@ -850,7 +850,169 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ## 6. Finanzas
 
-*(Pendiente de análisis detallado)*
+| Ventana | Código | Descripción |
+|---------|--------|-------------|
+| w_choice_cartera_cobros | S/C | Opciones de cartera de cobros |
+| w_fi001_puntos_venta | FI001 | Puntos de venta |
+| w_fi002_tipo_impuesto | FI002 | Tipo de impuesto |
+| w_fi003_credito_fiscal | FI003 | Crédito fiscal |
+| w_fi004_grupo_financiero | FI004 | Grupo financiero |
+| w_fi005_matriz_contable | FI005 | Matriz contable |
+| w_fi006_concepto_financiero | FI006 | Concepto financiero |
+| w_fi006_concepto_financiero_lista | FI006 | Maestro de conceptos financieros |
+| w_fi008_flujo_caja_grupos | FI008 | Flujo de caja - Grupos |
+| w_fi009_flujo_caja_concepto | FI009 | Flujo de caja - Concepto |
+| w_fi010_bancos | FI010 | Bancos |
+| w_fi011_cuentas_bancos | FI011 | Cuentas de banco |
+| w_fi012_personas_autoriz | FI012 | Personas autorizadas a aprobar adelantos |
+| w_fi013_param_autoriz | FI013 | Autorizados a generar adelantos |
+| w_fi014_tasa_interes | FI014 | Tasa de interés |
+| w_fi015_parametros_finanzas | FI015 | Parámetros de financiamiento |
+| w_fi016_grupo_relacion | FI016 | Grupo de relación |
+| w_fi017_grupo_articulo | FI016 | Grupo de artículo |
+| w_fi018_grupo_libros | FI016 | Grupo de libro |
+| w_fi021_abc_saldo_bancario | FI021 | Saldos mensuales de cuenta de banco |
+| w_fi022_forma_pago | FI022 | Formas de pago |
+| w_fi023_factura_rubro | FI023 | Rubros de documentos |
+| w_fi024_detraciones_bienes_serv_tbl | FI024 | Bienes y servicios detracción |
+| w_fi025_detraciones_operaciones_tbl | FI025 | Operaciones detracción |
+| w_fi026_tipo_deuda_financiera | FI026 | Tipos de deuda financiera |
+| w_fi027_concepto_deuda | FI027 | Conceptos de deuda financiera |
+| w_fi028_monto_cta_cte | FI028 | Límites de cuenta corriente x cliente |
+| w_fi029_motivo_nota | FI029 | Motivos de notas de crédito/débito |
+| w_fi030_documentos_usuarios | FI030 | Documentos por usuario |
+| w_fi031_documentos_grupo | FI031 | Grupos y relación con tipos de documentos |
+| w_fi032_documentos_tipo | FI032 | Tipo de documentos |
+| w_fi033_documentos_numeracion | FI033 | Numeración de documentos |
+| w_fi034_flujo_proveedor | FI034 | Código de flujo de caja vs proveedor |
+| w_fi035_sunat_tabla10 | FI035 | Documentos de SUNAT (Tabla 10) |
+| w_fi036_medios_pago | FI036 | Medios de pago |
+| w_fi037_bancos_ov | FI037 | Bancos para órdenes de venta |
+| w_fi302_warrant | FI302 | Warrant |
+| w_fi303_letras_x_cobrar_renovacion | FI303 | Renovación de letras x cobrar |
+| w_fi304_cnts_x_pagar | FI304 | Registro de cuentas x pagar |
+| w_fi305_letras_x_pagar_canje | FI305 | Canje de documentos x pagar |
+| w_fi307_genera_solicitud_giro | FI307 | Solicitud de giro |
+| w_fi308_aprobacion_sg | FI308 | Solicitud de adelanto |
+| w_fi309_cartera_de_cobros | FI309 | Cartera de cobros |
+| w_fi310_cartera_de_pagos | FI310 | Cartera de pagos |
+| w_fi310_choice_prsp_caja | FI310 | Elegir presupuesto de caja |
+| w_fi312_transferencias | FI312 | Transferencias |
+| w_fi318_financiamiento | FI318 | Financiamiento |
+| w_fi320_nota_debito_credito | FI320 | Nota de débito / crédito |
+| w_fi323_pre_liq_og_rpt | S/C | Liquidación de orden de giro (reporte) |
+| w_fi323_pre_liquidacion_og_ff | FI323 | Liquidación fondo fijo / orden de giro |
+| w_fi324_cierra_liquidacion_og | FI324 | Cierre de liquidación de solicitud de adelanto |
+| w_fi324_rpt_asiento_liq | FI324 | Reporte de asiento contable de liquidación |
+| w_fi325_aproba_prov_simpl | FI325 | Aprobación de facturación simplificada |
+| w_fi326_aplicacion_documentos | FI326 | Aplicación de documentos |
+| w_fi329_pagar_directo | FI329 | Documentos pagar directo |
+| w_fi331_eliminacion_cri | FI331 | Eliminar comprobante de retención de IGV |
+| w_fi331_generacion_cheques_masivos | FI331 | Generación de cheques masivos |
+| w_fi333_cierra_liquidacion_og_devolucion | FI333 | Devolución orden de giro |
+| w_fi334_lista_detraccion | FI334 | Detracción |
+| w_fi337_letras_x_cobrar_canje | FI337 | Canje / renovación de letras por cobrar |
+| w_fi338_cntas_cobrar_directo | FI338 | Cuentas x cobrar directo |
+| w_fi343_liquidacion_caja | FI343 | Liquidación de caja |
+| w_fi343_liquidacion_caja_frm | FI343 | Liquidación semanal |
+| w_fi347_conciliacion | FI347 | Conciliación bancaria |
+| w_fi348_conciliacion_automatic | FI348 | Conciliación automática |
+| w_fi349_conciliacion_no_registrado | FI349 | Conciliación de documentos no registrado |
+| w_fi350_detraccion_ope_bien_serv | S/C | Datos de detracción |
+| w_fi351_conciliacion_no_registrado | FI351 | Eliminación de conciliación no registrado |
+| w_fi352_change_number | FI352 | Cambiar número de documento |
+| w_fi353_provision_simplificada | FI353 | Provisión simplificada cuentas x pagar |
+| w_fi355_cambia_fec | FI355 | Cambio de fecha de presentación |
+| w_fi356_programacion_pagos | FI356 | Programación de pagos |
+| w_fi357_cheques_x_venc | FI357 | Cheques diferidos |
+| w_fi358_cntas_pagar_sin_control | FI358 | Proveedores sin control |
+| w_fi359_cntas_pagar_conciliar_provision | FI359 | Conciliación facturación |
+| w_fi361_cheque_emitidos | FI361 | Cheques emitidos |
+| w_fi362_deuda_financiera | FI362 | Deuda financiera |
+| w_fi363_aprob_deuda_financiera | FI308 | Aprobación deuda financiera |
+| w_fi364_lista_letras_print | S/C | Impresión de letras |
+| w_fi365_change_periodo | FI365 | Cambiar periodo en documentos provisionados |
+| w_fi366_dpd_masivo | FI366 | Generación de DPDs masivos |
+| w_fi504_cns_cntas_x_pagar_x_venc | FI504 | Cuentas x pagar pendientes por vencimiento |
+| w_fi507_cns_cntas_x_cobrar_x_venc | FI507 | Cuentas x cobrar pendientes por vencimiento |
+| w_fi508_consulta_oc_os | FI508 | Consulta de OC, OS x facturación |
+| w_fi509_doc_consulta_crelacion | FI509 | Documentos x finanzas |
+| w_fi510_cns_doc_x_plla_cobranza | FI510 | Documentos en planillas de cobranza |
+| w_fi511_cns_inconsistencias_pdb | FI510 | Inconsistencias en planillas de cobranza |
+| w_fi512_cns_carta_credito | FI512 | Consulta carta crédito |
+| w_fi513_cns_cancelac_documentos | FI504 | Consulta de cancelación de documentos |
+| w_fi700_rpt_libro_bancos | FI700 | Reporte de libro bancos |
+| w_fi701_rpt_saldo_mov_bancario | FI701 | Reporte de saldo de movimiento bancario |
+| w_fi702_cntas_pagar | FI702 | Listado de cuentas x pagar |
+| w_fi703_cntas_pagar_tesoreria | FI703 | Análisis detallado mensual de medios de pago |
+| w_fi704_resumen_bancario | S/C | Resumen bancario |
+| w_fi705_rpt_solic_giro | FI705 | Reporte de documentos emitidos |
+| w_fi706_comprob_egreso | FI306 | Reporte de comprobantes de egreso |
+| w_fi707_rpt_doc_generados_masivos | FI707 | Reporte de documentos generados masivos |
+| w_fi708_detalle_recibos_honorarios | FI708 | Detalle de recibo por honorarios |
+| w_fi710_rpt_trans_caja_bancos | FI710 | Reporte de voucher emitidos |
+| w_fi711_rpt_cb_detalle | FI711 | Reporte de movimiento detalle de caja bancos |
+| w_fi713_flujo_caja_ejt | FI713 | Reporte de flujo de caja ejecutado |
+| w_fi714_flujo_caja_proy | FI714 | Reporte de flujo mensual de caja proyectado |
+| w_fi715_detalle_pendientes_pago | FI715 | Detalle de pendientes x pagar |
+| w_fi716_rpt_cri | FI716 | Reporte de comprobante de retención |
+| w_fi717_rpt_x_confin | S/C | Reporte x concepto financiero |
+| w_fi718_rpt_letras_x_pagar | FI718 | Reporte de letras x pagar |
+| w_fi719_saldo_proveedor | FI719 | Reporte de saldos de proveedores |
+| w_fi722_rpt_pagar_directo | FI722 | Documentos pagar directo (reporte) |
+| w_fi723_rpt_programacion_pagos_det | FI723 | Programación de pagos detalle |
+| w_fi724_rpt_cobrar_directo | S/C | Impresión de cobrar directo |
+| w_fi725_rpt_programacion_pagos_res | FI725 | Programación de pagos resumen |
+| w_fi727_conciliacion_bancaria | FI727 | Conciliación bancaria (reporte) |
+| w_fi728_pagos_serv_financ | FI728 | Reporte pagos servicio financiero |
+| w_fi729_inf_sunat | FI729 | Registros de compras y pagos SUNAT |
+| w_fi732_envio_informacion | FI732 | Envío de información a caja |
+| w_fi733_doc_x_pagar_pend_tbl | FI733 | Documentos pendientes por pagar |
+| w_fi734_doc_x_pagar_pend_resumen_tbl | FI734 | Resumen documentos pendientes por pagar |
+| w_fi735_no_admitidos_coa | FI735 | No admitidos COA |
+| w_fi737_anticipos_oc_os | FI737 | Anticipos OC, OS |
+| w_fi738_compras_mensualizado | FI738 | Compras por proveedores mensualizado |
+| w_fi739_vouchers_masivos | FI739 | Impresión masiva de vouchers |
+| w_fi740_rpt_cartera_pagos | FI740 | Detalle de cartera de pagos |
+| w_fi741_resumen_pendientes_pago | FI741 | Resumen pendientes de pago |
+| w_fi742_rpt_cartera_cobros | FI742 | Detalle de cartera de cobros |
+| w_fi743_compras_proveedores | FI743 | Compra a proveedores |
+| w_fi745_rpt_detracciones | FI745 | Reporte de detracciones |
+| w_fi746_consolidado_mov_bancarios | FI746 | Consolidados de movimientos bancarios |
+| w_fi747_cntas_pagar_pend_x_prov | FI747 | Documentos pendientes por pagar x proveedor |
+| w_fi748_rpt_detalle_compras_prov | FI748 | Detalle de cuentas x pagar por proveedor |
+| w_fi749_registro_compras | FI749 | Reporte de registro de compras |
+| w_fi750_rpt_doc_sin_ref | FI750 | Documentos cancelados sin referencia |
+| w_fi751_rpt_doc_x_cobrar_sin_ref | FI751 | Cuentas x cobrar cancelados sin referencia |
+| w_fi752_rpt_transferencias | FI752 | Detalle de transferencias entre cuentas |
+| w_fi753_sldo_cta_cte | FI753 | Reporte analítico de cuenta corriente |
+| w_fi754_compras_detraccion | FI754 | Compras vs detracciones vs pagos |
+| w_fi755_matriz_grupo_financiero | FI755 | Matrices y grupos financieros |
+| w_fi756_cheque_vs_facturas | FI756 | Detalle de facturas por cheque |
+| w_fi900_saldo_banco_mensuales | FI900 | Actualización de saldo bancario |
+| w_fi901_proceso_impresion_cri | FI901 | Impresión masiva de comprobante de retención |
+| w_fi902_proceso_impresion_cheque_voucher | FI902 | Impresión masiva cheque-voucher |
+| w_fi903_pago_mas_detraccion | FI903 | Pago masivo detracción |
+| w_fi904_coa | FI904 | Generación de COA |
+| w_fi905_generacion_fact_cobrar | FI905 | Generación de facturas de materiales |
+| w_fi906_generacion_fact_cobrar_guias | FI905 | Reporte de guías a facturar |
+| w_fi907_pdb | FI907 | Generación de PDB |
+| w_fi908_ppagos_txt | FI908 | Generación de programa de pago |
+| w_fi910_actualiza_cntas_crrte_cliprov | FI910 | Actualización cuenta corriente |
+| w_fi911_imp_mas_voucher | FI911 | Impresión masiva voucher |
+| w_fi912_gen_pdt_3550 | FI912 | PDT 3550 |
+| w_fi913_change_nro_doc | FI913 | Cambiar proveedor, tipo o número de documento |
+| w_fi914_cierre_documentos | FI914 | Cierre de documentos de cuentas x pagar |
+| w_fi915_change_clase_bien_servicio | FI915 | Cambiar clase de bien o servicio (SUNAT) |
+| w_fi916_import_excel_crono_terrenos | FI916 | Importación de cronogramas de terrenos |
+| w_fi917_change_fec_vencimiento | FI917 | Cambiar fecha de vencimiento y forma de pago |
+| w_fin501_letras_x_vencimiento | FI501 | Letras por fecha de vencimiento |
+| w_fin503_programa_pagos | FI503 | Programa de pagos |
+| w_msg_deuda_tributaria | S/C | Deuda SUNAT |
+| w_ope315_envio_email | OPE315 | Envío correo electrónico |
+| w_rpt_comprobante_egreso | S/C | Documento por pagar directo (reporte) |
+| w_rpt_consistencia_reg_compras | S/C | Consistencia de registro de compras |
+| w_sig735_cuentas_cobrar_pendiente | SIG735 | Cuentas por cobrar pendientes |
 
 ---
 
@@ -1511,25 +1673,419 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ## 10. Operaciones OT
 
-*(Pendiente de análisis detallado)*
+| Ventana | Código | Descripción |
+|---------|--------|-------------|
+| w_aviso_err | S/C | Aviso de error |
+| w_cns_datos_ot | S/C | Consulta de movimientos de OT |
+| w_ma302_orden_trabajo_rpt | MA302RPT | Reporte de orden de trabajo |
+| w_ma302_orden_trabajo_rpt_prev | MA302RPT | Reporte de orden de trabajo (vista previa) |
+| w_op031_parametro_operac | OP031 | Parámetros de módulo de operaciones OT |
+| w_op310_repr_mov_proy | OP310 | Reprogramación de movimientos atrasados |
+| w_ope001_fase_etapa | OPE001 | Mantenimiento procesos y actividades |
+| w_ope002_ejecutor | OPE002 | Mantenimiento de ejecutor |
+| w_ope003_labor_ejecutor | OPE003 | Maestro de labores |
+| w_ope003_labor_ejecutor_rpt | OPE003RPT | Reporte de labores |
+| w_ope004_plant_operacion | OPE004 | Maestro de plantillas de operaciones |
+| w_ope005_repr_mov_proy | OP005 | Reprogramación de movimientos atrasados |
+| w_ope006_ot_tipo | OPE006 | Tipo de OT |
+| w_ope007_ot_usuario | OPE007 | Usuarios de OT ADM |
+| w_ope008_ot_parametros | OPE008 | Parámetros de administradores de OT |
+| w_ope009_grupo_relacion | OPE009 | Grupos de personal por OT ADM |
+| w_ope010_turnos_trabaj | OPE010 | Mantenimiento de turnos |
+| w_ope011_constructor_reportes | OPE011 | Constructor de reportes |
+| w_ope012_labor_grupo | OPE012 | Labor grupo - OT ADM |
+| w_ope013_numerador_reclamo | OPE013 | Numerador de reclamos |
+| w_ope014_tipo_reclamo_calidad | OPE014 | Tipo de reclamo de calidad |
+| w_ope015_plantilla_grupo | OPE015 | Grupo de plantillas |
+| w_ope016_incidencias | OPE016 | Maestro de incidencias |
+| w_ope017_incidencias_clase | OPE017 | Clase de incidencias |
+| w_ope018_incidencias_ot_adm | OPE018 | Incidencias por OT ADM |
+| w_ope019_labor_herramienta | OPE019 | Herramientas por labor |
+| w_ope020_labores_x_tipo_maquina | OPE020 | Costo de labor por tipo de máquina |
+| w_ope021_ot_adm_usuario_aprob | OP021 | Niveles de autorización de aprobaciones |
+| w_ope022_ot_tipo_seccion | OPE022 | Tipo de secciones |
+| w_ope023_ot_seccion | S/C | OT x tipo de secciones |
+| w_ope024_articulos_autorizacion_aprobac | OPE024 | Nivel de autorización de artículos |
+| w_ope025_aut_cencos | OPE025 | Autorizaciones de solicitud OT por centro costo |
+| w_ope026_plant_ot | OPE026 | Mantenimiento de plantillas de OT |
+| w_ope027_labor_trabajador | OPE027 | Trabajadores por labor ejecutor |
+| w_ope028_prod_vs_labores | OPE028 | Productos vs labores |
+| w_ope029_productos | OPE029 | Productos de pesaje |
+| w_ope030_clasificacion_productos | OPE030 | Clasificación de productos |
+| w_ope031_prodparam | OP031 | Parámetros de producción OT |
+| w_ope301_solicit_ot | OPE301 | Solicitud de orden de trabajo |
+| w_ope301_solicit_ot_acept | S/C | Confirmación de solicitud de OT |
+| w_ope301_solicit_ot_recha | S/C | Rechazo de solicitud de OT |
+| w_ope301_solicit_ot_rpt | OPE301RPT | Reporte de solicitud de OT |
+| w_ope302_orden_trabajo | OPE302 | Órdenes de trabajo |
+| w_ope302_orden_trabajo_rpt_pto | S/C | Reporte de presupuesto x artículos de OT |
+| w_ope303_ins_reprog_operac | OPE303 | Ingreso de operaciones |
+| w_ope303_reprogra_operacion | OPE303 | Reprogramación de operaciones |
+| w_ope304_prog_operaciones_rpt | MA302RPT | Reporte de programación de operaciones |
+| w_ope304_prog_operaciones_x_ot | OPE304 | Programación de orden de trabajo |
+| w_ope305_lista_trabaj | S/C | Lista de trabajadores por labor |
+| w_ope305_parte_ot | OPE305 | Parte diario de orden de trabajo |
+| w_ope306_reclamo_calidad | OPE306 | Reclamos de calidad de PPTT |
+| w_ope307_proceso_facturacion | OPE307 | Proceso de facturación de operaciones |
+| w_ope308_proceso_correcion | OPE308 | Corrección de facturación de operaciones |
+| w_ope309_estruct_ot | OPE309 | Estructura de órdenes de trabajo |
+| w_ope310_desaprobac_amp | OPE310 | Desaprobación de requerimientos a comprar |
+| w_ope311_aprobacion_material | OPE311 | Cambio de estado de materiales |
+| w_ope313_orden_trabajo_simplif | OPE313 | Orden de trabajo simplificada |
+| w_ope314_reversion_mov_act | S/C | Reversión de movimiento activo |
+| w_ope315_envio_email | OPE315 | Envío correo electrónico |
+| w_ope316_negociacion | OPE316 | Negociación |
+| w_ope317_reservacion_material | OPE317 | Reservación de materiales |
+| w_ope317_reservacion_material_rpt | MA317RPT | Reporte de reservación de materiales |
+| w_ope318_liberacion_amp | OPE318 | Liberación de requerimientos de la OT |
+| w_ope319_cierra_amp | OPE319 | Cierre de AMP |
+| w_ope320_cierra_opersec | OPE320 | Cierre de OPERSEC |
+| w_ope321_prod_x_ot | OPE321 | Producción destajo |
+| w_ope322_pesaje_balanza_manual_tbl | OPE322 | Pesaje manual |
+| w_ope323_modif_almacen | OPE323 | Modificación almacén |
+| w_ope324_desaprobac_operac | OPE324 | Desaprobación de operaciones de OT |
+| w_ope325_libera_reservaciones | AL326 | Liberación de reservaciones |
+| w_ope500_opersec | OPE500 | Consultas por OperSec |
+| w_ope501_orden_trabajo | OPE501 | Consulta por orden de trabajo |
+| w_ope502_labor | OPE502 | Consulta por labor |
+| w_ope503_cns_atencion_mat_ot | OPE503 | Atención de materiales por OT |
+| w_ope504_cns_cal_reclamo_graf | S/C | Consulta de reclamos de calidad |
+| w_ope506_cns_articulo_labor | OPE506 | Consulta de artículo por labor |
+| w_ope507_labor_x_art | S/C | Consulta de artículos por labor |
+| w_ope508_ot_adm | OPE508 | Consulta por administrador de OT |
+| w_ope700_solicitud_ot | OPE700 | Solicitud de orden de trabajo (reporte) |
+| w_ope701_orden_trabajo | OPE701 | Listado de órdenes de trabajo |
+| w_ope702_costo_ot | OPE702 | Reporte de costo de OT |
+| w_ope703_operaciones_proy | S/C | Operaciones proyectadas x OT |
+| w_ope704_oper_prog_x_cc_rsp | OPE704 | Operaciones programadas talleres |
+| w_ope705_material_program | OPE705 | Materiales programados |
+| w_ope706_oper_plan_x_cc_rsp | OPE706 | Operaciones proyectadas talleres |
+| w_ope707_material_planeado | OPE707 | Materiales planeado |
+| w_ope708_material_program_det | OPE708 | Materiales programados detalle |
+| w_ope709_material_proyec_det | OPE709 | Materiales planeados detalle |
+| w_ope710_plantilla_operaciones | OPE710 | Plantilla de operaciones |
+| w_ope711_costo_x_labor | OPE711 | Costo x máquina |
+| w_ope712_operaciones_no_program | OP712 | Operaciones no programadas x OT |
+| w_ope713_oper_program_a_facturar | OPE713 | Operaciones programadas a facturar |
+| w_ope714_operaciones_x_facturar | OPE714 | Operaciones pendientes a facturar |
+| w_ope714_operaciones_x_facturar_det | S/C | Detalle operaciones pendientes a facturar |
+| w_ope715_operaciones_facturadas | OPE715 | Operaciones facturadas |
+| w_ope716_reclamos | OPE716 | Reporte de reclamos |
+| w_ope717_tareas_pd | OPE717 | Costo estimado de tareas |
+| w_ope718_orden_trabajo_rpt | MA302RPT | Reporte de orden de trabajo |
+| w_ope719_oper_x_estado | OPE719 | Operaciones según estado |
+| w_ope720_partes_diarios | OPE720 | Partes diarios |
+| w_ope721_tareas_pd_x_tercero | OPE721 | Tareas de terceros por campo |
+| w_ope722_incidencias_maquina | OPE722 | Incidencias de equipos y/o maquinarias |
+| w_ope723_requerim_material_ot | OPE723 | Requerimientos de materiales por OT |
+| w_ope724_aprobaciones_materiales | OPE724 | Artículos y operaciones pendientes aprobación |
+| w_ope725_mat_ot_x_oc | OPE725 | Atención de materiales de OT |
+| w_ope726_mat_ot_x_cotizar | OPE726 | Materiales de OT a cotizar |
+| w_ope727_costo_real_est_x_ot | OPE727 | Reporte de costo real / estimado |
+| w_ope730_orden_trabajo | OPE730 | Orden de trabajo |
+| w_ope731_costo_x_maquina | OPE731 | Costo x máquina |
+| w_ope732_seleccion_maquina | S/C | Selección de máquina |
+| w_ope733_requerim_x_cotizar | OPE733 | Requerimientos solicitados a cotizar |
+| w_ope734_orden_trabajo_rpt | MA302RPT | Reporte de orden de trabajo |
+| w_ope740_ot_general | OPE740 | OT general |
+| w_ope741_rpt_error | OPE741 | Reporte de errores |
+| w_ope742_rpt_desaprob_mat | OPE742 | Desaprobación de materiales |
+| w_ope743_costo_ot_x_producion | OPE743 | Totales de costos de OT |
+| w_ope744_admin_usuario_aprob_req | S/C | Administración usuario aprobación requerimientos |
+| w_ope744_rend_labores_x_maq | OPE744 | Rendimiento de labores mecanizadas x campo |
+| w_ope745_presp_art_aprobados | OPE745 | Presupuesto proyectado aprobados |
+| w_ope746_presp_art_activos_pend | OPE746 | Partidas presupuestales x requerimiento |
+| w_ope747_rpt_pend_fac | OPE747 | Operaciones pendientes por facturar |
+| w_ope748_rpt_consumo_x_ot_adm | OPE748 | Consumos de materiales o servicios por OT ADM |
+| w_ope749_saldos_reservados | OPE749 | Saldos reservados por requerimiento |
+| w_ope750_saldos_libres | OPE750 | Saldos libres requerimiento |
+| w_ope751_costos_x_estructura | OPE751 | Costos por estructura |
+| w_ope752_costos_x_seccion | OPE752 | Costos por sección |
+| w_ope753_saldo_comprometido | OPE753 | Saldo comprometido en OT |
+| w_ope754_maestro_labor | OPE754 | Maestro de labores e insumos |
+| w_ope755_maestro_ejecutor | OPE755 | Maestro de ejecutores |
+| w_ope756_maestro_ot_adm | OPE756 | Maestro de administradores de OT |
+| w_ope757_usuarios_x_ot_adm | OPE757 | Administraciones de OT y usuarios anexados |
+| w_ope758_labor_cnta_prsp | OPE758 | Consultas de cuentas presupuestales por labor |
+| w_ope759_orden_trabajo_fmt_tbl | OPE759 | Formato de orden trabajo |
+| w_ope760_destajo_x_prod | OPE760 | Producción x producto x actividad |
+| w_ope761_prodc_x_trabajador | OPE761 | Producción por trabajador (costo) |
+| w_ope762_productividad_trabajador | OPE762 | Productividad x trabajador (costo) |
+| w_ope762_top_ten_old | OPE762 | Ranking de producción |
+| w_ope763_productividad_x_actividad | OPE763 | Productividad por actividad |
+| w_ope764_costo_actividad | OPE764 | Costo por actividad |
+| w_ope765_productividad_individual | OPE764 | Productividad individual |
+| w_ope766_atencion_materiales | OPE766 | Atención de materiales |
+| w_ope767_resumen_actividades | OPE767 | Resumen de actividades |
+| w_ope768_maestro_ot | OPE768 | Listado de órdenes de trabajo |
+| w_ope900_actualizar_ot_x_plantilla | OPE900 | Actualiza datos de OT según factor de plantilla |
+| w_ope901_abrir_cerrar_operaciones | OPE901 | Abrir y cerrar operaciones |
+| w_ope902_abrir_proyectar_articulos | OPE901 | Abrir y proyectar artículos |
+| w_ope904_aprobacion_operac_material | OPE904 | Aprobación de operaciones y materiales |
+| w_ope905_balanza_prod_x_dia | OPE905 | Transferencia de balanza por día |
+| w_ope906_balanza_prod_x_timer | OPE905 | Transferencia de balanza por timer |
+| w_ope907_aprob_material_prsp_det | S/C | Saldo comprometido detalle |
+| w_ope908_rpt_artic_no_autorizados | MA302RPT | Reporte de artículos no autorizados |
+| w_opexxx_aut_cencos | OPE002 | Autorizaciones de centro de costo |
+| w_opexxx_envio_email | S/C | Envío correo electrónico |
+| w_proceso_correcion | S/C | Corrección de facturación de operaciones |
+| w_proceso_facturacion | S/C | Proceso de facturación de operaciones |
+| w_promp_plantilla_ot | S/C | Opciones avanzadas de copiado de plantillas |
+| w_reprogra_ope_ciclo_res | S/C | Campos sin cortes registrados |
+| w_rpt_prueba | S/C | Reporte de prueba |
 
 ---
 
 ## 11. Mantenimiento
 
-*(Pendiente de análisis detallado)*
+| Ventana | Código | Descripción |
+|---------|--------|-------------|
+| w_ca304_reprogra_operacion | CA304 | Reprogramación de operaciones |
+| w_ca703_rpt_presup_x_ejec_valoriz | CA718 | Resumen de presupuesto valorizado por ejecutor |
+| w_copia_plant_prod | S/C | Copia de plantillas de producción |
+| w_estructura_pop_preg | S/C | Ingreso de cantidad para estructura |
+| w_ma001_grupo_maquina | MA001 | Grupos de máquinas |
+| w_ma002_tipo_maquina | MA002 | Tipos de máquinas |
+| w_ma003_maquina | MA003 | Maestro de máquinas o equipos |
+| w_ma004_marca | MA004 | Marcas de máquinas o equipos |
+| w_ma005_incidencias_mant | MA005 | Tipos de incidencias de mantenimiento |
+| w_ma006_mecanicos | MA006 | Mantenimiento de mecánicos |
+| w_ma007_operadores_maq | MA007 | Mantenimiento de operadores |
+| w_ma008_tipo_mantto | MA008 | Tipos de mantenimientos de maquinarias |
+| w_ma009_doc_tecnica | MA009 | Tipo de documentación técnica |
+| w_ma010_maq_labor_herramienta | MA010 | Equipos/máquinas por labor |
+| w_ma011_art_doc_tecnica | MA011 | Documentación técnica |
+| w_ma012_estructura | MA012 | Estructura de artículos |
+| w_ma013_articulos | MA013 | Artículos |
+| w_ma014_plant_operacion | MA014 | Plantillas de operaciones de producción |
+| w_ma015_plant_ratios | MA015 | Plantillas de ratios de producción |
+| w_ma016_caract_tec | MA016 | Características técnicas |
+| w_ma017_grupo_cencos | MA017 | Grupo de centros de costos |
+| w_ma018_causas_fallas | MA018 | Causas de fallas |
+| w_ma019_agruphor | MA019 | Agruphores de máquinas |
+| w_ma020_color | MA020 | Maestro de colores |
+| w_ma021_estruct_maquinas | MA021 | Estructura de máquinas |
+| w_ma022_med_acum_maq | MA022 | Actualizar horómetros de equipos |
+| w_ma300_manten_prog_maq | MA300 | Programa de mantenimiento de máquinas |
+| w_ma301_solicit_ot | MA301 | Solicitud de orden de trabajo |
+| w_ma301_solicit_ot_acept | S/C | Confirmación de solicitud de OT |
+| w_ma301_solicit_ot_recha | S/C | Rechazo de solicitud de OT |
+| w_ma301_solicit_ot_rpt | MA301RPT | Reporte de solicitud de OT |
+| w_ma303_parte_ot | MA303 | Parte diario de orden de trabajo |
+| w_ma304_prog_operaciones_x_ot | MA304 | Programación de operaciones por OT |
+| w_ma305_ciclo_frecuencia | MA305 | Frecuencia de mantenimiento |
+| w_ma306_pd_agruphor | MA306 | Parte diario de agruphores |
+| w_ma307_log_mantto | MA307 | Bitácora de mantenimiento |
+| w_ma500_costos_mantenimiento | MA500 | Costos de mantenimiento |
+| w_ma500_costos_mantenimiento_bkp | MA500 | Costos de mantenimiento (backup) |
+| w_ma501_prog_mntt_prev | MA501 | Programación de mantenimiento preventivo |
+| w_ma502_solic_ot | MA502 | Solicitud de órdenes de trabajo |
+| w_ma503_ord_trabaj | MA503 | Órdenes de trabajo |
+| w_ma505_recor_mant | MA505 | Récord de mantenimiento |
+| w_ma506_hoja_mantenimiento | MA506 | Hoja de mantenimiento |
+| w_ma507_gastos_mntto_maq | MA507 | Gastos de mantenimiento de máquina |
+| w_ma508_costo_x_orden_trabajo | MA508 | Operaciones por orden de trabajo |
+| w_ma509_articulo_estructura | MA509 | Estructura de artículos |
+| w_ma510_costos_mantenimiento_x_grp | MA510 | Costos de mantenimiento por grupo |
+| w_ma511_costos_mantenimiento_x_maq_anual | MA511 | Costos de mantenimiento anual por máquina |
+| w_ma512_costos_mantenimiento_x_grpmaq_an | MA512 | Costos de mantenimiento anual por grupo de máquina |
+| w_ma520_materiales_ot | S/C | Consulta de artículos faltantes por OT |
+| w_ma521_maquina_historial | MA521 | Historial de equipos o maquinarias |
+| w_ma521_programacion_operaciones | MA521 | Programación de operaciones |
+| w_ma522_detalle_consulta | PT501 | Detalle de variaciones |
+| w_ma700_estructura_articulo | MA700 | Reporte de estructuras |
+| w_ma701_rpt_prog_trabajo | MA701 | Programación semanal de labores de mantenimiento |
+| w_ma702_rpt_horas_x_seccion | MA702 | Horas trabajadas por sección |
+| w_ma703_rpt_presup_x_ejec_valoriz | MA703 | Presupuesto valorizado de talleres por ejecutor |
+| w_ma704_rpt_costo_materiales | MA704 | Costo de materiales por taller |
+| w_ma705_rpt_historial_reparac | MA705 | Historial de reparación de talleres |
+| w_ma706_rpt_efic_cc_solic | MA706 | Eficiencia por centro de costo solicitante |
+| w_ma707_rpt_costos_x_ejec_anual | MA707 | Costo valorizado de OT por ejecutor |
+| w_ma708_rpt_lab_pend_x_cc | MA708 | Labores pendientes por taller |
+| w_ma708_rpt_lab_pend_x_cc_bk | MA708 | Labores pendientes por CC/taller (backup) |
+| w_ma709_rpt_maquina_horometraje | MA709 | Consumo de combustible por máquina |
+| w_ma710_rpt_orden_trabajo | MA702 | Reporte de orden de trabajo |
+| w_ma711_rpt_mntto_preventivo | MA711 | Programa de mantenimiento preventivo |
+| w_ma712_horas_talleres | MA712 | Detalle de horas trabajadas de talleres |
+| w_ma713_rpt_efic_cc_det | MA713 | Detalle de reporte de eficiencia |
+| w_ma714_labores_x_dia | MA714 | Reporte diario de labores |
+| w_ma715_inoperat_maquinas | MA715 | Inoperatividad de máquinas |
+| w_ma716_estruct_maq | MA716 | Lista de estructuras |
+| w_ma717_rpt_agruphor | MA717 | Reporte de agruphor |
+| w_ma717_rpt_agruphor_resumen | MA717 | Disponibilidad por estructura (resumen) |
+| w_ma718_lista_equipos | MA717 | Lista de equipos y/o máquinas |
+| w_ma719_ciclo_mantto | MA719 | Programa cíclico de mantenimiento |
+| w_ma720_equipos_cencos | FL709 | Equipos por centro de costos |
+| w_ma721_doc_tenica_eq | FL709 | Documentación técnica de equipo |
+| w_ma722_costo_naturaleza | MA722 | Costo por naturaleza de OT |
+| w_ma723_costo_x_maquina | MA723 | Costo por máquina |
+| w_ma730_estructura_art | MA730 | Estructura de artículo |
+| w_ma731_consumos_cenbef | MA731 | Consumos/servicios por centro de beneficio |
+| w_ma735_estructura_maq | MA735 | Estructura de máquina |
+| w_ma736_historial_equipo | MA736 | Historial de equipos |
+| w_ma900_mant_prog_ot | MA900 | Generación de órdenes de trabajo |
+| w_ma901_mntto_proyectado | MA901 | Mantenimiento proyectado |
+| w_ma902_generar_ot | AP900 | Generar orden de trabajo |
+| w_maq_estructura | S/C | Vista de estructura de máquina (TreeView) |
+| w_maxxx_causa_fallas_tbl | MAXXX | Causas de fallas (tabla) |
+| w_print_properties | S/C | Propiedades de impresión |
+| w_reprogra_ope_campo_res | S/C | Campos sin cortes registrados |
+| w_reprogra_ope_ciclo_res | S/C | Ciclos sin cortes registrados |
+| w_reprogra_ope_detalle_pop | S/C | Detalle de reprogramación de operación |
+| w_rpt_jramos | MA708 | Labores pendientes por taller |
 
 ---
 
 ## 12. Aprovisionamiento
 
-*(Pendiente de análisis detallado)*
+| Ventana | Código | Descripción |
+|---------|--------|-------------|
+| w_ap001_zonas_descarga | AP001 | Zonas de descarga |
+| w_ap002_trato_provee | AP002 | Trato de proveedores |
+| w_ap004_precios_rep | AP004 | Precios de representación |
+| w_ap006_num_ap_pd_descarga | AP006 | Numerador partes diario de descarga |
+| w_ap007_num_guias_recep | AP007 | Numerador guías de recepción |
+| w_ap008_atrib_calidad | AP008 | Atributos de calidad |
+| w_ap009_especie | AP009 | Mantenimiento de especies |
+| w_ap010_unidad_grupo | AP010 | Unidades y grupos de atributos |
+| w_ap011_familia_especies | AP011 | Familia de especies |
+| w_ap013_dest_ref_matprim | AP013 | Destino referencia de materia prima |
+| w_ap015_factores_conversion | AP015 | Factores de conversión |
+| w_ap016_parametros_generales | AP016 | Parámetros generales de aprovisionamiento |
+| w_ap017_parametros_especificos | AP017 | Parámetros específicos de aprovisionamiento |
+| w_ap018_proveedor_transporte | AP018 | Transportes de materia prima |
+| w_ap019_precios_x_transp_mp | S/C | Tarifas por transportista de MP |
+| w_ap020_rutas_transporte | AP020 | Rutas de transporte de materia prima |
+| w_ap021_abc_prov_mp | AP021 | Proveedor MP - Especies y tarifas |
+| w_ap022_ap_transportista_mp_placa | AP022 | Transportista MP - Unidades |
+| w_ap023_ap_transportista_tarifa | AP021 | Proveedor MP - Especies y tarifas |
+| w_ap024_empacadoras | AP024 | Empacadoras |
+| w_ap025_sectores | AP025 | Sectores |
+| w_ap026_bases | AP026 | Bases |
+| w_ap027_cuadrillas | AP027 | Cuadrillas |
+| w_ap028_tipo_cajas | AP028 | Tipos de cajas |
+| w_ap029_tipo_fundas | AP029 | Tipos de fundas |
+| w_ap030_prov_certificacion | AP030 | Certificaciones de proveedores |
+| w_ap031_tipo_certificacion | AP031 | Tipo de certificación |
+| w_ap032_empacadoras_ot | AP032 | OT por empacadoras |
+| w_ap033_tipos_pesca | AP033 | Tipos de pesca |
+| w_ap300_proy_aprov | AP300 | Proyección de aprovisionamiento |
+| w_ap301_guia_recepcion | AP301 | Guía recepción de materia prima |
+| w_ap301_guia_recepcion_frm | S/C | Reporte de guía de recepción de MP |
+| w_ap302_aprob_grmp | AP302 | Aprobación de guía de recepción MP |
+| w_ap304_pd_matprim_filtro | S/C | Filtro de parte diario de materia prima |
+| w_ap307_pd_descarga | AP307 | Recepción, descarga y pesaje de MP |
+| w_ap307_pd_descarga_frm | S/C | Reporte de costo diario de MP |
+| w_ap308_calidad_matprim | AP308 | Calidad de materia prima |
+| w_ap309_variac_proy | AP309 | Variación de proyección de aprovisionamiento |
+| w_ap310_det_grf_calidad | S/C | Detalle de calidades por especie |
+| w_ap311_plantilla_presupuestal | AP006 | Asignación de plantillas presupuestales |
+| w_ap312_crea_plantilla | S/C | Creación de plantilla presupuestal |
+| w_ap313_pd_chata_qstn | AP313 | Parte de piso - Filtro de autollenado |
+| w_ap314_asig_plant_prsp | AP314 | Asignación de plantillas presupuestales |
+| w_ap315_liquidacion_compra | AP315 | Liquidación de compra |
+| w_ap315_liquidacion_compra_frm | AP315 | Reporte de liquidación de compra |
+| w_ap316_recibo_cajas | AP316 | Recibo de entrega de cajas |
+| w_ap317_parte_cosecha | AP317 | Parte de cosecha de campo |
+| w_ap318_imp_liq_comp | AP318 | Impresión de liquidación de compras |
+| w_ap319_precios_descarga | AP319 | Modificar precios del parte de recepción MP |
+| w_ap320_datos_calidad | AP320 | Asignar datos de calidad - Liberación |
+| w_ap321_datos_importacion | AP321 | Asignar datos de importación - Liberación |
+| w_ap500_comparativo_pesca_mat | AP500 | Comparativo entre ingreso por pesca y materiales |
+| w_ap501_ingreso_manual_almacen | AP501 | Ingresos manuales a almacén |
+| w_ap700_contol_desembarque | AP700 | Control de desembarque |
+| w_ap703_decl_jur_men_tolva | AP703 | Declaración jurada mensual de tolva |
+| w_ap704_decl_jur_dia_tolva | AP704 | Declaración jurada diaria de tolva |
+| w_ap706_ratios_control | AP706 | Ratios de control |
+| w_ap707_total_pesca_nave | AP707 | Reporte mensual de pesca por embarcación |
+| w_ap708_pd_descarga_planilla | AP708 | Planilla de descarga de materia prima |
+| w_ap709_recepcion_mp | AP709 | Recepción de materia prima por tinas |
+| w_ap711_compra_matprim | AP711 | Reporte de compra de materia prima |
+| w_ap712_plan_com_mp | AP712 | Planilla de compra de MP con diferentes precios |
+| w_ap713_diferencias_guias_mov_alm | AP713 | Diferencias guías/mov. almacén |
+| w_ap714_peso_precio_pond | AP714 | Peso/precio ponderado |
+| w_ap715_control_peso_rpm | AP715 | Control de pesos en recepción de MP |
+| w_ap717_ingreso_materia_prima | AP717 | Ingreso de materia prima |
+| w_ap718_record_pesca_embarcaciones | AP718 | Récord de pesca por embarcación |
+| w_ap719_reporte_semanal_x_embarcacion | AP719 | Reporte semanal de pesca por embarcación |
+| w_ap720_rpt_recep_mp_dt_x_fecha | S/C | Recepción de MP detallada por fecha |
+| w_ap720_rpt_recepcion_mp_x_especie | AP720 | Recepción de materia prima por especie |
+| w_ap721_recep_mp_x_proveedor | AP721 | Recepción de materia prima por proveedor |
+| w_ap722_recep_mp_x_prov_especie | AP722 | Recepción de MP por proveedor y especie |
+| w_ap723_recep_mp_x_transp_especie | AP723 | Recepción de MP por transportista y especie |
+| w_ap724_recep_mp_x_transportista | AP724 | Recepción de materia prima por transportista |
+| w_ap725_recep_mp_detalle | AP725 | Recepción de materia prima detallado |
+| w_ap726_acopio_procesamiento | AP726 | Reporte de acopio y procesamiento |
+| w_ap727_pago_recepcion | AP727 | Planilla de compras |
+| w_ap728_volumen_x_base | AP728 | Reporte de volumen por base |
+| w_ap729_datos_productores | AP729 | Reporte de validación de productores |
+| w_ap730_consolidado_compras | AP730 | Consolidado de compras |
+| w_ap731_volumen_x_productor | AP731 | Reporte de volumen por productor |
+| w_ap732_productores_sin_lc | AP732 | Productores sin liquidación de OC |
+| w_ap733_rpt_prod_mp | AP733 | Reporte de producción por proveedor de MP |
+| w_ap734_rpt_produccion_det | AP734 | Reporte de acopio de producción detallada |
+| w_ap901_generar_prsp | AP901 | Generar presupuesto |
+| w_ap902_presup_variac | AP902 | Variaciones presupuestales |
+| w_ap903_actualizar_costos_compra | AP903 | Actualizar costos de última compra |
+| w_ap904_genera_oc | AP904 | Generar orden de compra |
+| w_ap905_anula_oc | AP905 | Anular orden de compra |
+| w_ap906_genera_grmp | AP906 | Generar guías de recepción de MP |
+| w_ap907_anula_os | AP907 | Anulación de OS de transporte |
+| w_ap908_genera_lc | AP908 | Generar liquidación de compras para productores |
+| w_ap909_genera_os | AP909 | Generación de OS de transporte |
+| w_ap910_genera_os_proc | AP910 | Generación de OS de procesamiento |
 
 ---
 
 ## 13. Asistencia
 
-*(Pendiente de análisis detallado)*
+| Ventana | Código | Descripción |
+|---------|--------|-------------|
+| w_asi001_maestro_turnos | ASI001 | Maestro de Turnos |
+| w_asi002_maestro_tarjetas | ASI002 | Maestro de Tarjetas |
+| w_asi003_maestro_mov_asist | ASI001 | Maestro de Movimientos de Asistencia |
+| w_asi300_asignacion_turnos | ASI300 | Asignación de Turnos |
+| w_asi300_asignacion_turnos_bak | ASI300 | Asignación de Turnos (backup) |
+| w_asi301_incidencias | ASI301 | Incidencias |
+| w_asi302_delete_turnos_asig | ASI302 | Elimina Asignación de Turnos |
+| w_asi303_asigna_turno_semana | ASI303 | Asignación de Horarios por Plantilla Semanal |
+| w_asi304_asistencia_ht580 | ASI304 | Modificación de Asistencia de Personal HT580 |
+| w_asi304_asistencia_ht580_bk | ASI707 | Asistencia HT580 (backup) |
+| w_asi700_asistencia_trabajadores | ASI700 | Reporte de Asistencias |
+| w_asi701_registro_control_asist | ASI701 | Registro de Control de Ingresos y Salidas |
+| w_asi702_asignacion_turnos | ASI702 | Asignación de Turnos |
+| w_asi703_tardanzas | ASI703 | Reporte de Tardanzas |
+| w_asi704_tarjetas_trabajadores | AS704 | Trabajadores / Tarjetas |
+| w_asi705_carnet_identifica | ASI705 | Carnets de Trabajadores |
+| w_asi707_asistencia_ht580 | ASI707 | Asistencia HT580 |
+| w_asi900_transferencia_reloj | ASI900 | Transferencia de Archivo Texto |
+| w_asi901_actualiza_asistencias | ASI902 | Transferencia de Asistencia |
+| w_asi902_subir_asist_ht580 | ASI902 | Subir Asistencia del HT580 |
+| w_asi903_upgrade_zktime | ASI903 | Actualizar datos de ZKTIME |
+| w_gen_actualiza_marcaciones_as302 | AS302 | Actualiza Consolidado de Marcaciones Diarias |
+| w_gen_elimina_registros_as304 | AS304 | Elimina Información de Tablas |
+| w_gen_genera_turnos | S/C | Generación de Turnos para Personal Rotativo |
+| w_gen_informacion_reloj_as301 | AS301 | Proceso Diario de Información de Reloj |
+| w_gen_transferencia_as303 | AS303 | Transfiere Inasistencias y Pagos por Sobretiempos |
+| w_rh079_maestro_tarjetas | RH079 | Maestro de Tarjetas |
+| w_rh621_rpt_promedio_evaluacion | RH621 | Reporte de Promedio General de Evaluaciones |
+| w_rpt_carnet_as405 | AS405 | Marcaciones con Carnet Inactivos |
+| w_rpt_consolidado_as406 | AS406 | Resumen de Marcaciones |
+| w_rpt_inasistencia_codigo_as410 | AS410 | Comparativo de Inasistencias por Código |
+| w_rpt_inasistencia_general_as409 | AS409 | Comparativo de Inasistencias por Fechas |
+| w_rpt_incidencias_codigo_as408 | AS408 | Movimiento Digitado por Usuario (por Código) |
+| w_rpt_incidencias_general_as407 | AS407 | Movimiento Digitado por Usuario (General) |
+| w_rpt_marc_det_irregular_as403 | AS403 | Detalle de Irregularidades en Marcaciones |
+| w_rpt_marc_det_regular_as404 | AS404 | Detalle de Regularidades en Marcaciones |
+| w_rpt_marcacion_irregular_as402 | AS402 | Personal con Marcaciones Irregulares |
+| w_rpt_padron_as415 | AS415 | Padrón de Obreros y Empleados |
+| w_rpt_records_as414 | S/C | Registro de Marcaciones Diarias |
+| w_rpt_sobretiempo_codigo_as412 | AS412 | Comparativo de Sobretiempos por Código |
+| w_rpt_sobretiempo_general_as411 | AS411 | Comparativo de Sobretiempos por Fechas |
+| w_rpt_tardanzas_as401 | AS401 | Minutos Acumulados de Tardanzas |
+| w_rpt_tardanzas_codigo_as413 | AS413 | Tardanzas por Código de Trabajador |
+| w_rpt_tardanzas_general_as401 | AS401 | Tardanzas General |
+| w_rpt_turnos_as416 | AS416 | Programación de Turnos |
 
 ---
 
@@ -1584,7 +2140,104 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ## 16. Campo
 
-*(Pendiente de análisis detallado)*
+| Ventana | Código | Descripción |
+|---------|--------|-------------|
+| w_cam001_elem_quimicos | CAM001 | Elementos Químicos |
+| w_cam002_factor_ele_quim | CAM002 | Factor del Artículo con Elementos Químicos |
+| w_cam003_sectores_campo | CAM003 | Sectores de Campo |
+| w_cam004_tipos_riego | CAM004 | Tipos de Riego |
+| w_cam005_etapas_fenologicas | CAM005 | Etapas Fenológicas |
+| w_cam006_numeracion_origen | AL009 | Numeradores |
+| w_cam007_estados_fenologicos | CAM007 | Estados Fenológicos |
+| w_cam008_lotes_campo | CAM008 | Lotes Campos |
+| w_cam009_campanas | CAM008 | Lotes Campos |
+| w_cam010_campo_sembradores | CAM010 | Campos y Sembradores |
+| w_cam011_ingenios | CAM011 | Ingenios Azucareros |
+| w_cam012_formulas | CAM012 | Fórmulas |
+| w_cam013_ubicacion_campo | CAM013 | Ubicación Campo |
+| w_cam014_tipos_prestamos | CAM014 | Tipos de Préstamos |
+| w_cam015_tipo_contrato | CAM015 | Tipos de Contratos |
+| w_cam016_variedad_cana | CAM016 | Variedad de Caña |
+| w_cam017_documentos_empresa | CAM030 | Instructivos de Trabajo |
+| w_cam020_documentos | CAM020 | Documentos de Registros de Productor |
+| w_cam021_doc_x_productor | CAM021 | Documentos por Productor |
+| w_cam030_instructivos_trabajo | CAM030 | Instructivos de Trabajo |
+| w_cam031_procedimiento_operativo | CAM031 | Procedimientos Operativos |
+| w_cam032_listas_maestras | CAM032 | Listas Maestras |
+| w_cam033_tipos_gg | CAM033 | Tipos de Módulos de Global GAP |
+| w_cam034_preguntas_gg | CAM034 | Preguntas Global GAP |
+| w_cam040_preguntas_cj | CAM040 | Preguntas de Comercio Justo |
+| w_cam050_ley_fertilizacion | CAM050 | Ley de Fertilización |
+| w_cam051_ley_fitosanitario | CAM051 | Ley de Fitosanitarios |
+| w_cam060_areas_almacen | CAM060 | Áreas de Almacén |
+| w_cam200_global_gap | CM200 | Inspección Global GAP |
+| w_cam201_global_gap_general | CM201 | Inspección Global GAP General |
+| w_cam301_proy_horas_jornal | CAM301 | Proyección de Horas Jornaleros |
+| w_cam302_parte_riego | CAM301 | Parte de Riego |
+| w_cam303_parte_molienda | CAM303 | Parte de Molienda |
+| w_cam304_creditos | CM304 | Créditos |
+| w_cam304_creditos_frm | S/C | Formulario de Créditos |
+| w_cam305_contratos_sem | CM305 | Contratos Sembradores |
+| w_cam306_parte_consumo | CM306 | Parte Consumo Campo |
+| w_cam307_plantilla_consumo | CM306 | Parte Consumo Campo |
+| w_cam308_transporte_cana | CAM308 | Transporte de Caña |
+| w_cam309_liquidacion_cosecha | CAM309 | Liquidación de Cosecha |
+| w_cam310_liquidacion_pago | CM306 | Parte Consumo Campo |
+| w_cam311_ctacte_credito | CM311 | Cuenta Corriente Créditos |
+| w_cam312_liquidacion_credito_frm | CM311 | Formato de Orden de Compra |
+| w_cam312_liquidar_creditos | CM312 | Liquidación de Créditos |
+| w_cam313_cuaderno_productor | CM313 | Cuaderno del Productor |
+| w_cam320_comercio_justo | CM320 | Inspección Comercio Justo |
+| w_cam330_inspeccion_organica | CM330 | Inspección Orgánica |
+| w_cam340_inspeccion_no_anunciada | CM340 | Inspección No Anunciada |
+| w_cam349_reg_capacitacion | CAM349 | RG-42 Capacitaciones |
+| w_cam351_limpieza_almacen | CM351 | RG-35 Limpieza Almacén y Dosificación de Insumos |
+| w_cam352_entrega_limpieza | CM352 | RG-36 Entrega Limpieza y Estado de Materiales |
+| w_cam353_calibracion_mnt | CM353 | RG-37 Calibración y Mantenimiento de Equipos |
+| w_cam354_monitoreo_roedores | CM354 | RG-38 Monitoreo de Roedores |
+| w_cam361_pcm | CAM361 | RG-22 PCMs |
+| w_cam362_control_contenedor | CAM362 | RG-23 Control de Calidad en Contenedor |
+| w_cam363_limpieza_aplicacion | CAM363 | RG-20 Limpieza y Aplicación Insumos Empacadora |
+| w_cam371_sancion_x_inc | CM371 | RG-39 Sanciones por Incumplimientos |
+| w_cam372_entrega_documento | CAM372 | RG-40 Entrega de Documentos |
+| w_cam373_incumplimiento | CAM373 | RG-41 Incumplimientos - Reclamaciones |
+| w_cam374_rpt_reg43 | CAM374 | RG-43 Informe Compendio Productores |
+| w_cam375_conteo_doc | CAM375 | RG-44 Conteo de Documentos Obsoletos |
+| w_cam376_solicitud_ac | CAM376 | RG-45 Solicitud de Acciones Correctivas |
+| w_cam380_packing_list | CAM380 | Packing List |
+| w_cam380_packing_list_frm | S/C | Formulario Packing List |
+| w_cam390_control_contenedor | CAM390 | Control de Contenedor |
+| w_cam412_ch1 | CAM412 | CH1-010511 |
+| w_cam413_ab4_aaa | CM413 | AB4 - AAA |
+| w_cam422_ch4 | CAM422 | CH4-010511 |
+| w_cam423_ch3 | CAM423 | CH3-010511 |
+| w_cam424_ch2 | CAM424 | CH2 |
+| w_cam432_ab4_bpe | CAM432 | AB4-BPE |
+| w_cam433_ab4_bbb | CM433 | AB4 - BBB |
+| w_cam434_ac1 | CAM434 | AC1-010511 |
+| w_cam700_rendimiento_general | CAM700 | Rendimiento General |
+| w_cam701_rend_gen_x_semana | CAM701 | Rendimiento por Semana |
+| w_cam702_validar_lotes | CAM702 | Validar Labores por Lotes |
+| w_cam703_rendimiento_detallado | CAM703 | Cuadro de Rendimiento Detallado |
+| w_cam704_rend_labor_lote | CAM704 | Rendimiento Jornaleros por Labor y Lote |
+| w_cam705_rend_jornal_labor | CAM704 | Rendimiento Jornaleros por Labor y Lote |
+| w_cam706_rendimiento_jornal_lote | CAM706 | Rendimiento Jornaleros por Lote |
+| w_cam707_cronograma_ejecucion | CAM706 | Cronograma de Ejecución |
+| w_cam708_rend_molienda | CAM708 | Reporte de Molienda, Laboratorio y Producción |
+| w_cam709_molienda_proyectada | CAM709 | Rol de Molienda Proyectada |
+| w_cam710_rpt_gen_credito | CAM710 | Reporte General de Créditos |
+| w_cam711_rpt_productor_base | CAM711 | Reporte de Productores y Bases |
+| w_cam712_rpt_liquidacion_credito | CAM712 | Reporte de Liquidaciones de Préstamo |
+| w_cam713_rpt_liquidacion_x_productor | CAM713 | Consolidado de Compras por Productor |
+| w_cam714_rpt_recuperacion | CAM712 | Reporte de Recuperaciones de Crédito |
+| w_cam715_rpt_formato_credito | CAM715 | Reporte de Crédito |
+| w_cam752_declaracion | CAM752 | Declaración del Exportador |
+| w_cam754_resumen_cont | CAM754 | Resumen de Contenedores |
+| w_cam755_resumen_descarte | CAM755 | Resumen de Descarte |
+| w_cam756_resumen_exportado | CAM756 | Resumen Exportado |
+| w_cam757_fairtrade | CAM757 | Reporte de Cajas FairTrade |
+| w_cam758_rpt_control_cont | CAM758 | Reporte Control de Contenedores |
+| w_documento | S/C | Documento |
 
 ---
 
@@ -1685,7 +2338,146 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ## 21. Flota
 
-*(Pendiente de análisis detallado)*
+| Ventana | Código | Descripción |
+|---------|--------|-------------|
+| w_cm311_orden_compra_frm | CM311 | Formato de orden de compra |
+| w_cm314_orden_servicio_frm | CM314 | Formato de orden de servicio |
+| w_fl001_motiv_mov | FL001 | Motivos de traslado de embarcación |
+| w_fl002_cargo_tripulantes | FL002 | Cargo de tripulantes |
+| w_fl003_capit_puerto | FL003 | Capitanías de puerto |
+| w_fl004_tasas_peso | FL004 | Tasas aplicables al peso |
+| w_fl005_tasas_precio | FL005 | Tasas aplicables al precio |
+| w_fl006_bancos | FL006 | Bancos para detracción |
+| w_fl007_precios_snp | FL007 | Precios de pesca |
+| w_fl008_semanas_pesca | FL008 | Semanas de pesca |
+| w_fl009_especie | FL009 | Mantenimiento de especies |
+| w_fl010_especie_familia | FL010 | Familias de especies |
+| w_fl011_ubigeo | FL011 | Zonas geográficas en tierra |
+| w_fl012_zonas_pesca | FL012 | Zonas de pesca |
+| w_fl013_puertos | FL013 | Mantenimiento de puertos |
+| w_fl014_tripulantes | FL014 | Maestro de tripulantes |
+| w_fl015_clientes | FL015 | Mantenimiento de clientes |
+| w_fl016_politica_pago | FL016 | Políticas de pago tripulantes |
+| w_fl016_tipo_politica | FL016 | Tipos de políticas de pago |
+| w_fl017_clientes_referencia | FL017 | Datos de referencia laboral de clientes |
+| w_fl018_naves | FL018 | Maestro de naves |
+| w_fl019_representantes | FL019 | Representantes y administradores |
+| w_fl020_empresa_provee | FL020 | Empresas y códigos de relación |
+| w_fl021_plant_presup | FL021 | Plantilla de ratios presupuestales |
+| w_fl022_plant_nave_presup | FL022 | Plantillas presupuestales por nave |
+| w_fl023_polit_pago | FL023 | Políticas de pago |
+| w_fl024_empresa_general | FL024 | Empresas pesqueras del litoral peruano |
+| w_fl026_nave_repres | FL026 | Representantes por nave |
+| w_fl027_num_bitacora | FL027 | Numerador de bitácora |
+| w_fl028_num_parte_pesca | FL028 | Numerador de parte de pesca |
+| w_fl029_num_posib_arribo | FL029 | Numerador de posibles arribos |
+| w_fl030_clien_general | FL030 | Clientes general |
+| w_fl031_bonificaciones | FL031 | Bonificaciones fijas de tripulantes |
+| w_fl032_parametros | FL032 | Parámetros de flota |
+| w_fl033_plant_presup | FL033 | Plantillas presupuestales |
+| w_fl034_param_espec | FL034 | Parámetros específicos |
+| w_fl035_clien_general_v2 | FL035 | Clientes general v2 |
+| w_fl036_ratios_bonif_tripul | FL036 | Ratios bonificación por especialidad |
+| w_fl037_sueldos_fijos | FL037 | Sueldos fijos de tripulantes |
+| w_fl038_incentivos_pers_adm | FL038 | Incentivos personal administrativo |
+| w_fl039_conceptos_flota | FL039 | Aportaciones y descuentos para tripulantes |
+| w_fl040_estruct_nave | FL040 | Asignación de estructuras a nave |
+| w_fl041_derecho_pesca | FL041 | Tasas de derecho de pesca |
+| w_fl042_dias_motorista | FL042 | Días para bonificaciones (sueldo fijo) |
+| w_fl300_pesca_proy | FL300 | Pesca proyectada |
+| w_fl301_aprob_pesca_proy | FL301 | Aprobación de pesca proyectada |
+| w_fl302_cuota_imarpe | FL302 | Cuota de IMARPE |
+| w_fl303_captura_empresas | FL303 | Captura realizada por otras empresas |
+| w_fl304_parte_pesca | FL304 | Partes de pesca |
+| w_fl304_parte_pesca_bk | FL304 | Partes de pesca (backup) |
+| w_fl305_trip_zarpe | FL305 | Tripulantes en el zarpe |
+| w_fl306_venta_arribo | FL305 | Venta de materia prima |
+| w_fl307_posib_arribo | FL307 | Registro de posibles arribos |
+| w_fl308_anula_arribos | FL308 | Anulación de arribos en bloque |
+| w_fl310_bitacora | FL310 | Registro de bitácoras |
+| w_fl311_aprobar_parte | FL311 | Aprobación de partes de pesca |
+| w_fl312_asisten_trip | FL312 | Asistencia de tripulantes |
+| w_fl313_pes_proy_varia | FL313 | Variación de proyecciones de pesca |
+| w_fl314_asist_anterior | FL314 | Asistencias anteriores |
+| w_fl315_bus_trip_zarp | FL315 | Asistencia de zarpes anteriores |
+| w_fl316_vista_asist_trip | FL316 | Vista completa de asistencia de tripulantes |
+| w_fl317_asign_ot_nave | FL317 | Asignación de orden de trabajo y nave |
+| w_fl318_zarpes_anteriores | S/C | Zarpes anteriores |
+| w_fl319_gstos_drcts_bahia | FL319 | Gastos directos de bahía |
+| w_fl320_asistencia_bonificacion | FL320 | Asistencia mensual (bonificaciones fijo) |
+| w_fl500_buscar_zarpe | S/C | Búsqueda de zarpes |
+| w_fl501_buscar_arribo | S/C | Búsqueda de arribos |
+| w_fl502_buscar_parte | FL502 | Búsqueda por partes de pesca |
+| w_fl503_eficiencia_pesca_nave | FL503 | Eficiencia de pesca de flota propia |
+| w_fl504_emp_capt_ano | S/C | Captura de empresas por año |
+| w_fl505_emp_capt_rango | S/C | Captura de empresas por rango |
+| w_fl506_descarga_nave | FL506 | Descarga por mes |
+| w_fl507_eficiencia_salida | FL507 | Eficiencia de salida |
+| w_fl508_descarga_meses | FL508 | Descarga por meses |
+| w_fl509_ratio_captura_arribo | FL509 | Ratio captura vs arribo |
+| w_fl510_descarga_total | FL510 | Descarga por periodo |
+| w_fl511_captura_especie | FL511 | Captura por especie (gráfico pie) |
+| w_fl512_eficiencia_cala | FL512 | Eficiencia de calas |
+| w_fl514_captura_zonas | FL514 | Captura por zonas de pesca |
+| w_fl516_captura_naves | FL516 | Captura por especie y nave |
+| w_fl517_captura_pesca | FL517 | Consulta de captura de pesca |
+| w_fl518_tiempo_cala | S/C | Tiempo de cala |
+| w_fl519_compara_pesca | S/C | Comparación de pesca |
+| w_fl520_venta_mp | FL511 | Venta de materia prima por cliente |
+| w_fl521_variacion_grafica | FL521 | Variaciones del presupuesto (gráfica) |
+| w_fl700_bitacora | S/C | Reporte de bitácora |
+| w_fl701_pend_arribos | FL701 | Embarcaciones pendientes de arribo |
+| w_fl702_posibles_arribos | S/C | Posibles arribos |
+| w_fl703_inidcador_material | S/C | Indicadores de materiales |
+| w_fl704_costo_diario | FL704 | Costo diario de flota propia |
+| w_fl705_costo_ot | FL705 | Costo por orden de trabajo |
+| w_fl705_inid_trim_material | S/C | Indicadores trimestrales de materiales |
+| w_fl706_declar_jurada_sem | FL706 | Declaración jurada semanal |
+| w_fl707_resum_partic | FL707 | Resumen de participación de pesca |
+| w_fl708_arribo_emb | FL701 | Embarcaciones pendientes de arribo |
+| w_fl709_pesca_anual | FL709 | Pesca anual |
+| w_fl710_pesca_periodo | FL710 | Resumen de pesca por periodo |
+| w_fl711_bonif_especial | FL711 | Bonificación especial de tripulantes |
+| w_fl712_compr_egre_admin | FL711 | Comprobantes de egreso administrativos |
+| w_fl712_compr_egre_trip | FL712 | Comprobantes de egreso tripulantes |
+| w_fl713_pago_sem_cbssp | FL713 | Pago semanal a la CBSSP |
+| w_fl714_comp_egre_cbssp | FL714 | Comprobante de egreso CBSSP |
+| w_fl715_pago_derecho_pesca | FL715 | Declaración de derecho de pesca |
+| w_fl716_comp_derecho_pesca | FL716 | Comprobantes de derecho de pesca |
+| w_fl717_bonif_administrativos | FL717 | Incentivos personal administrativo |
+| w_fl718_compr_egre_admin | FL718 | Comprobantes egreso incentivos administrativos |
+| w_fl719_descarga_plantas | FL719 | Descarga por planta pesquera |
+| w_fl720_indica_general | FL720 | Indicadores de gestión US$/TM |
+| w_fl721_ratios_detalle | FL721 | Ratio de petróleo diesel 2 (detalle) |
+| w_fl722_consumo_d2 | FL722 | Consumo de petróleo D2 general |
+| w_fl723_rpt_diario_arribos | FL723 | Reporte diario de arribos |
+| w_fl724_pago_mensual_cbssp | FL724 | Beneficios mensuales a la CBSSP |
+| w_fl725_asistencia_periodo | FL725 | Asistencia de tripulantes por periodo |
+| w_fl726_consist_pago_trip | FL726 | Consistencia de pagos de tripulantes |
+| w_fl727_detalle_pesca | FL727 | Detalle de pesca por periodo |
+| w_fl728_parte_pesca | FL728 | Partes de pesca (reporte) |
+| w_fl729_resumen_planilla | FL729 | Resumen cálculo de participación |
+| w_fl900_semanas | FL900 | Generación de semanas de pesca |
+| w_fl901_presupuesto_new | FL901 | Generación de presupuesto |
+| w_fl902_consistencia_pesca | FL902 | Consistencia de pesca |
+| w_fl903_calculo_planillas | FL903 | Cálculo de planillas de tripulantes |
+| w_fl903_presupuesto_mod | S/C | Registro de variaciones en el presupuesto |
+| w_fl904_transf_pla_ext | FL904 | Transferencia a planillas externas |
+| w_fl905_asig_plan_oper | FL904 | Asignación de planilla operativa |
+| w_fl906_presupuesto_varia | FL906 | Variaciones presupuestales |
+| w_fl907_grafica_ppto_var | FL907 | Variaciones mensuales (gráfica) |
+| w_fl908_grafica_ppto_compos | FL908 | Variación por partida presupuestal (gráfica) |
+| w_fl909_generar_presupuesto | FL901 | Generación de presupuesto |
+| w_fl910_prspto_variacion | FL910 | Variaciones presupuestales |
+| w_fl911_generar_variaciones | FL911 | Generación de variaciones |
+| w_fl912_compr_egreso | FL912 | Generar comprobante de egreso |
+| w_fl913_gen_asiento_bonif | S/C | Generar asiento de bonificación |
+| w_fl914_gen_asiento_trip | FL914 | Asientos de bonificación de tripulantes |
+| w_fl915_anular_asiento_trip | FL915 | Anular asientos de bonificación de tripulantes |
+| w_fl916_gen_asiento_adm | FL916 | Asientos de incentivos de administrativos |
+| w_fl917_anular_asiento_adm | FL917 | Anular asientos de incentivo administrativo |
+| w_fl918_sueldos_fijos | FL918 | Cálculo de sueldos fijos |
+| w_fl919_generar_asientos_mp | FL919 | Generar ingresos/salidas en almacén |
 
 ---
 
@@ -1726,27 +2518,27 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 3 | Compras | 164 |
 | 4 | Comercialización / Ventas | 156 |
 | 5 | Contabilidad | 286 |
-| 6 | Finanzas | pendiente |
+| 6 | Finanzas | 161 |
 | 7 | RRHH | 283 |
 | 8 | Presupuesto | 156 |
 | 9 | Producción | 195 |
-| 10 | Operaciones OT | pendiente |
-| 11 | Mantenimiento | pendiente |
-| 12 | Aprovisionamiento | pendiente |
-| 13 | Asistencia | pendiente |
+| 10 | Operaciones OT | 160 |
+| 11 | Mantenimiento | 93 |
+| 12 | Aprovisionamiento | 94 |
+| 13 | Asistencia | 45 |
 | 14 | Auditoría | 19 |
 | 15 | BASC | 16 |
-| 16 | Campo | pendiente |
+| 16 | Campo | 96 |
 | 17 | CashLoan | 7 |
 | 18 | Comedor | 29 |
 | 19 | Consola Web | 16 |
 | 20 | Control de Documentos | 15 |
-| 21 | Flota | pendiente |
+| 21 | Flota | 138 |
 | 22 | Seguridad | 21 |
-| | **TOTAL (parcial)** | **~1,556** |
+| | **TOTAL** | **2,343** |
 
 ---
 
-*Documento generado el 08/02/2026*
+*Documento actualizado el 08/02/2026*
 *Se excluyen ventanas genéricas del framework: w_abc_*, w_logon, w_main, w_about, w_fondo, w_search*, w_help_*, w_pop_*, w_rpt_preview*, w_seleccion*, w_filtros, w_get_*, w_datos_*, w_password_chg, etc.*
-*Los módulos marcados como "pendiente" aún no han sido analizados en detalle.*
+*Todos los módulos han sido analizados.*
