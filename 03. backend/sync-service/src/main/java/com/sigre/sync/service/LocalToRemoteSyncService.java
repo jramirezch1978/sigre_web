@@ -299,16 +299,35 @@ public class LocalToRemoteSyncService {
             }
             
             registrosErrores++;
-            erroresSincronizacion.add(String.format("Error sincronizando asistencia RECKEY=%s, COD_ORIGEN=%s, CODIGO=%s: %s",
-                    asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(), asistenciaLocal.getCodigo(), errorMsg));
-            
-            log.error("❌ Error procesando asistencia {} (COD_ORIGEN={}): {}",
-                     asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(), errorMsg);
+
+            // Construir stack trace resumido para el email
+            StringBuilder stackTrace = new StringBuilder();
+            for (StackTraceElement ste : e.getStackTrace()) {
+                if (ste.getClassName().startsWith("com.sigre")) {
+                    stackTrace.append("  at ").append(ste.getClassName())
+                              .append(".").append(ste.getMethodName())
+                              .append("(").append(ste.getFileName())
+                              .append(":").append(ste.getLineNumber()).append(")\n");
+                }
+            }
+            Throwable causa = e.getCause();
+            String causaMsg = causa != null ? " | Causa: " + causa.getMessage() : "";
+
+            String errorCompleto = String.format(
+                "Error sincronizando asistencia RECKEY=%s, COD_ORIGEN=%s, CODIGO=%s: %s%s\nStack:\n%s",
+                asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(),
+                asistenciaLocal.getCodigo(), errorMsg, causaMsg, stackTrace);
+
+            erroresSincronizacion.add(errorCompleto);
+
+            log.error("❌ Error procesando asistencia {} (COD_ORIGEN={}): {}{}",
+                     asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(), errorMsg, causaMsg, e);
             
             asistenciaLocal.setEstadoSync("E");
             asistenciaLocal.setIntentosSync(asistenciaLocal.getIntentosSync() + 1);
             asistenciaLocal.setFechaSync(LocalDateTime.now());
-            asistenciaLocal.setObservaciones(errorMsg.length() > 200 ? errorMsg.substring(0, 200) : errorMsg);
+            String obsError = errorMsg + causaMsg;
+            asistenciaLocal.setObservaciones(obsError.length() > 200 ? obsError.substring(0, 200) : obsError);
             asistenciaLocalRepository.save(asistenciaLocal);
             
             log.info("🔄 Registro marcado como ERROR para reintento | RECKEY: {} | Intento: {}",
