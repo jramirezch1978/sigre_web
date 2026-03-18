@@ -81,6 +81,36 @@ public class ConfiguracionService {
         return insertarYRetornarDec(parametro, valorDefault);
     }
 
+    /**
+     * Obtener parámetro booleano.
+     * Convención PowerBuilder: "1"/"S"/"SI"/"TRUE" = true, cualquier otro valor = false.
+     * Se almacena en valor_char como "1" o "0".
+     */
+    @Transactional
+    public boolean getParametroBool(String parametro, boolean valorDefault) {
+        Optional<Configuracion> configOpt = configuracionRepository.findById(parametro);
+
+        if (configOpt.isPresent()) {
+            String valor = configOpt.get().getValorChar();
+            if (valor == null) {
+                return valorDefault;
+            }
+            boolean resultado = esTrueString(valor.trim());
+            log.debug("📋 getParametroBool('{}') = {} (desde BD, raw='{}')", parametro, resultado, valor.trim());
+            return resultado;
+        }
+
+        String valorStr = valorDefault ? "1" : "0";
+        log.info("📋 Parámetro '{}' no existe → creando con valor_char = '{}'", parametro, valorStr);
+        Configuracion nuevo = Configuracion.builder()
+                .parametro(parametro)
+                .valorChar(valorStr)
+                .fecRegistro(LocalDateTime.now())
+                .build();
+        configuracionRepository.save(nuevo);
+        return valorDefault;
+    }
+
     // ========================= SET PARAMETRO =========================
 
     /**
@@ -158,6 +188,17 @@ public class ConfiguracionService {
         }
     }
 
+    /**
+     * Establecer parámetro booleano (valor_char como "1" o "0").
+     * Si existe → actualiza; si no existe → inserta.
+     */
+    @Transactional
+    public void setParametroBool(String parametro, boolean valor) {
+        String valorStr = valor ? "1" : "0";
+        setParametroString(parametro, valorStr);
+        log.info("📋 setParametroBool('{}', {}) → valor_char = '{}'", parametro, valor, valorStr);
+    }
+
     // ========================= HELPERS PRIVADOS =========================
 
     private int insertarYRetornarInt(String parametro, int valorDefault) {
@@ -191,5 +232,16 @@ public class ConfiguracionService {
                 .build();
         configuracionRepository.save(nuevo);
         return valorDefault;
+    }
+
+    /**
+     * Evalúa si un string representa true.
+     * Compatible con la convención PowerBuilder: "1", "S", "SI", "TRUE", "Y", "YES".
+     */
+    private boolean esTrueString(String valor) {
+        if (valor == null) return false;
+        String v = valor.trim().toUpperCase();
+        return "1".equals(v) || "S".equals(v) || "SI".equals(v)
+                || "TRUE".equals(v) || "Y".equals(v) || "YES".equals(v);
     }
 }
