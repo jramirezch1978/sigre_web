@@ -2259,30 +2259,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ---
 
-## 19. Consola Web
-
-| Ventana | Código | Descripción |
-|---------|--------|-------------|
-| w_cw001_empresas | CW001 | Registrar Empresa |
-| w_cw002_usuario_housing | CW002 | Usuario Housing |
-| w_cw003_equipos_empresa | CW003 | Equipo |
-| w_cw004_cuotas | CW004 | Cuota |
-| w_cw005_pago_cuota | CW005 | Pagar Cuota |
-| w_cw006_contacto_empresa | CW006 | Contacto |
-| w_cw007_usuarios | CW007 | Usuario |
-| w_cw008_venc_renta | CW008 | Cronograma Renta |
-| w_cw009_versiones | CW009 | Versión |
-| w_cw010_modulos | CW010 | Módulo |
-| w_cw300_modulo_empresa | CW300 | Asignar módulos a empresa |
-| w_cw301_empresa_version | CW301 | Asignar versión a empresa |
-| w_cw302_versiones_modulo | CW302 | Asignar módulos a versión |
-| w_cw500_empresas_autorizadas | CW500 | Empresas autorizadas |
-| w_cw501_contactos | CW501 | Contactos |
-| w_cw502_modulos | CW502 | Módulos |
-
----
-
-## 20. Control de Documentos
+## 19. Control de Documentos
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
@@ -2304,7 +2281,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ---
 
-## 21. Flota
+## 20. Flota
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
@@ -2449,7 +2426,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 ---
 
-## 22. Seguridad
+## 21. Seguridad
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
@@ -2499,11 +2476,10 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 16 | Campo | 96 |
 | 17 | CashLoan | 7 |
 | 18 | Comedor | 29 |
-| 19 | Consola Web | 16 |
-| 20 | Control de Documentos | 15 |
-| 21 | Flota | 138 |
-| 22 | Seguridad | 21 |
-| | **TOTAL** | **2,307** |
+| 19 | Control de Documentos | 15 |
+| 20 | Flota | 138 |
+| 21 | Seguridad | 21 |
+| | **TOTAL** | **2,291** |
 
 ---
 
