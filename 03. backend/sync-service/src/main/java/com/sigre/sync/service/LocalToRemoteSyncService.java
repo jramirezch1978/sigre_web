@@ -144,7 +144,6 @@ public class LocalToRemoteSyncService {
         boolean existeEnRemote = false;
 
         try {
-            // Verificar si ya existe en Oracle
             if (externalId != null) {
                 existeEnRemote = asistenciaRemoteRepository.existsById(externalId);
             } else {
@@ -152,9 +151,6 @@ public class LocalToRemoteSyncService {
             }
             
             if (!existeEnRemote) {
-                // INSERTAR en Oracle
-                
-                // ✅ LOGGING JSON - Objeto local (PostgreSQL)
                 try {
                     log.info("🔄 Asistencia Local (PostgreSQL): {}", objectMapper.writeValueAsString(asistenciaLocal));
                 } catch (Exception e) {
@@ -661,9 +657,37 @@ public class LocalToRemoteSyncService {
                         contadorReseteados);
             }
             
+            // Resetear registros con estado "S" pero sin external_id (sincronización incompleta)
+            // Solo para fechas de movimiento anteriores a hoy
+            LocalDate hoy = LocalDate.now();
+            List<AsistenciaHt580Local> sincronizadosSinExternalId = asistenciaLocalRepository.findAll()
+                .stream()
+                .filter(a -> a.getCodOrigen() != null && a.getCodOrigen().equals(codOrigenConfiguracion))
+                .filter(a -> "S".equals(a.getEstadoSync()))
+                .filter(a -> a.getExternalId() == null)
+                .filter(a -> a.getFechaMovimiento() != null && a.getFechaMovimiento().isBefore(hoy))
+                .toList();
+            
+            if (!sincronizadosSinExternalId.isEmpty()) {
+                log.info("🔄 Encontrados {} registros con estado S sin external_id (fecha < hoy). Reseteando a P...", 
+                        sincronizadosSinExternalId.size());
+                
+                int resetSinExtId = 0;
+                for (AsistenciaHt580Local reg : sincronizadosSinExternalId) {
+                    try {
+                        reg.setEstadoSync("P");
+                        asistenciaLocalRepository.save(reg);
+                        resetSinExtId++;
+                    } catch (Exception e) {
+                        log.error("❌ Error reseteando registro S sin external_id {}: {}", reg.getReckey(), e.getMessage());
+                    }
+                }
+                
+                log.info("✅ {} registros S sin external_id reseteados a P para re-sincronización", resetSinExtId);
+            }
+            
         } catch (Exception e) {
             log.error("❌ Error en proceso de reseteo automático de registros bloqueados: {}", e.getMessage(), e);
-            // No detener el proceso de sincronización por este error
         }
     }
     
