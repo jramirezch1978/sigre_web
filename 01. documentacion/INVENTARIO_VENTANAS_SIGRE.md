@@ -1443,7 +1443,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_accion_enrolamiento | S/C | Opciones para enrolamiento |
 | w_ap500_base | S/C | Captura de pesca |
 | w_ap501_base_det | S/C | Base detalle |
 | w_asi705_carnet_identifica | RH621 | Reporte de Promedio General de las Evaluaciones |
@@ -2490,7 +2489,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 6 | Finanzas | 159 |
 | 7 | RRHH | 283 |
 | 8 | Presupuesto | 156 |
-| 9 | Producción | 195 |
+| 9 | Producción | 194 |
 | 10 | Operaciones OT | 159 |
 | 11 | Mantenimiento | 93 |
 | 12 | Aprovisionamiento | 94 |
@@ -2504,7 +2503,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 20 | Control de Documentos | 15 |
 | 21 | Flota | 138 |
 | 22 | Seguridad | 21 |
-| | **TOTAL** | **2,308** |
+| | **TOTAL** | **2,307** |
 
 ---
 
