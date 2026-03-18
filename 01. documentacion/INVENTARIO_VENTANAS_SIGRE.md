@@ -1769,12 +1769,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_ope906_balanza_prod_x_timer | OPE905 | Transferencia de balanza por timer |
 | w_ope907_aprob_material_prsp_det | S/C | Saldo comprometido detalle |
 | w_ope908_rpt_artic_no_autorizados | MA302RPT | Reporte de artículos no autorizados |
-| w_opexxx_aut_cencos | OPE002 | Autorizaciones de centro de costo |
-| w_opexxx_envio_email | S/C | Envío correo electrónico |
-| w_proceso_correcion | S/C | Corrección de facturación de operaciones |
-| w_proceso_facturacion | S/C | Proceso de facturación de operaciones |
-| w_promp_plantilla_ot | S/C | Opciones avanzadas de copiado de plantillas |
-| w_reprogra_ope_ciclo_res | S/C | Campos sin cortes registrados |
 
 
 ---
@@ -2422,7 +2416,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 7 | RRHH | 283 |
 | 8 | Presupuesto | 156 |
 | 9 | Producción | 194 |
-| 10 | Operaciones OT | 159 |
+| 10 | Operaciones OT | 153 |
 | 11 | Mantenimiento | 93 |
 | 12 | Aprovisionamiento | 94 |
 | 13 | Asistencia | 38 |
@@ -2433,7 +2427,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,253** |
+| | **TOTAL** | **2,247** |
 
 ---
 
