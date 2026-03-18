@@ -6,6 +6,7 @@ import com.sigre.asistencia.entity.AsistenciaHt580;
 import com.sigre.asistencia.repository.AsistenciaHt580Repository;
 import com.sigre.asistencia.service.TicketAsistenciaService;
 import com.sigre.asistencia.service.ValidacionTrabajadorService;
+import com.sigre.config.service.ConfiguracionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,12 +31,10 @@ public class MarcacionController {
     private final TicketAsistenciaService ticketService;
     private final ValidacionTrabajadorService validacionService;
     private final AsistenciaHt580Repository asistenciaRepository;
+    private final ConfiguracionService configuracionService;
     
     @Value("${asistencia.auto-cierre.horas-limite:13}")
     private int autoCierreHoras;
-    
-    @Value("${asistencia.marcacion.tiempo-minimo-minutos:15}")
-    private int tiempoMinimoMinutos;
     
     /**
      * API asíncrona para procesar marcaciones
@@ -133,6 +132,9 @@ public class MarcacionController {
     public ResponseEntity<?> validarCodigoPost(@RequestBody ValidarCodigoRequest request) {
         try {
             log.info("🔍 [POST] Validando código: {}", request.getCodigo());
+            
+            // Leer tiempo mínimo desde tabla CONFIGURACION (patrón PowerBuilder: auto-insert si no existe)
+            int tiempoMinimoMinutos = configuracionService.getParametroInt("ASISTENCIA_TIEMPO_MINIMO_MIN", 15);
             
             var resultado = validacionService.validarCodigo(request.getCodigo());
             

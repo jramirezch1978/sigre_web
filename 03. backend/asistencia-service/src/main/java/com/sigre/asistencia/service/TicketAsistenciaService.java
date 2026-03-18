@@ -72,9 +72,6 @@ public class TicketAsistenciaService {
     @Value("${asistencia.auto-cierre.horas-limite:13}")
     private int autoCierreHoras;
     
-    @Value("${asistencia.marcacion.tiempo-minimo-minutos:15}")
-    private int tiempoMinimoMinutos;
-    
     @Value("${asistencia.sistema.cod-usuario:work}")
     private String codUsuarioSistema;
     
