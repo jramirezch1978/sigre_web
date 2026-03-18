@@ -219,7 +219,7 @@ public class MarcacionController {
             
             // Obtener el último movimiento REAL (todos los tipos, no solo 1 y 2)
             AsistenciaHt580 ultimoMovimientoFinal = asistenciaRepository
-                    .findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(codTrabajador, codOrigen)
+                    .findUltimoMovimientoReal(codTrabajador, codOrigen)
                     .orElse(ultimaAsistencia);
             
             int numeroUltimoMovimiento = 0; // Por defecto = sin movimientos

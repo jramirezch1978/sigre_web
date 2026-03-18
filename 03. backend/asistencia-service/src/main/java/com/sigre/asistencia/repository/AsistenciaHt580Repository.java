@@ -35,8 +35,6 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     
     /**
      * Buscar última asistencia de un trabajador por código Y origen (solo tipo 1 y 2)
-     * SOLO movimientos tipo 1 (Ingreso) o 2 (Salida) - IGNORAR movimientos intermedios (3-10)
-     * ORDENADO POR FECHA DE REGISTRO
      */
     @Query(value = "SELECT * FROM asistencia_ht580 " +
            "WHERE codigo = :codigo " +
@@ -47,6 +45,19 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
            nativeQuery = true)
     Optional<AsistenciaHt580> findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(@Param("codigo") String codigo, 
                                                                                    @Param("codOrigen") String codOrigen);
+
+    /**
+     * Buscar última marcación de CUALQUIER tipo de un trabajador por código Y origen.
+     * Incluye todos los movimientos (1-10) para determinar el estado real del trabajador.
+     */
+    @Query(value = "SELECT * FROM asistencia_ht580 " +
+           "WHERE codigo = :codigo " +
+           "AND cod_origen = :codOrigen " +
+           "ORDER BY fec_registro DESC " +
+           "LIMIT 1",
+           nativeQuery = true)
+    Optional<AsistenciaHt580> findUltimoMovimientoReal(@Param("codigo") String codigo,
+                                                        @Param("codOrigen") String codOrigen);
     
     /**
      * ✅ NUEVA LÓGICA DE TURNOS - OPTIMIZADA CON ÍNDICES
