@@ -1,18 +1,17 @@
 package com.sigre.config;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * Auto-configuración de Spring Boot para sigre-config-common.
- * Al incluir esta librería como dependencia, el microservicio consumidor
- * detecta automáticamente la entidad, repositorio y servicio.
+ * Usa @AutoConfigurationPackage para SUMAR los paquetes de esta librería
+ * al escaneo existente del microservicio, sin sobreescribir sus propios
+ * repositorios ni entidades.
  */
 @AutoConfiguration
+@AutoConfigurationPackage(basePackages = "com.sigre.config")
 @ComponentScan(basePackages = "com.sigre.config")
-@EntityScan(basePackages = "com.sigre.config.entity")
-@EnableJpaRepositories(basePackages = "com.sigre.config.repository")
 public class SigreConfigAutoConfiguration {
 }
