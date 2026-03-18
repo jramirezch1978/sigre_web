@@ -1868,8 +1868,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_reprogra_ope_campo_res | S/C | Campos sin cortes registrados |
 | w_reprogra_ope_ciclo_res | S/C | Ciclos sin cortes registrados |
 | w_reprogra_ope_detalle_pop | S/C | Detalle de reprogramación de operación |
-| w_rpt_jramos | MA708 | Labores pendientes por taller |
-
 ---
 
 ## 12. Aprovisionamiento
@@ -2416,7 +2414,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 8 | Presupuesto | 156 |
 | 9 | Producción | 194 |
 | 10 | Operaciones OT | 153 |
-| 11 | Mantenimiento | 92 |
+| 11 | Mantenimiento | 91 |
 | 12 | Aprovisionamiento | 94 |
 | 13 | Asistencia | 38 |
 | 14 | Auditoría | 19 |
@@ -2426,7 +2424,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,246** |
+| | **TOTAL** | **2,245** |
 
 ---
 
