@@ -515,7 +515,7 @@ public class EmailNotificationServiceHTML {
                     SELECT TRUNC(FEC_MOVIMIENTO) as fecha, COUNT(*) as cantidad
                     FROM asistencia_ht580
                     WHERE COD_ORIGEN = :origen
-                    AND FEC_MOVIMIENTO >= SYSDATE - %d
+                    AND FEC_MOVIMIENTO >= TRUNC(SYSDATE) - %d
                     GROUP BY TRUNC(FEC_MOVIMIENTO)
                     ORDER BY fecha DESC
                     """.formatted(diasEstadisticas);
@@ -574,7 +574,7 @@ public class EmailNotificationServiceHTML {
                     SELECT TRUNC(FEC_MOVIMIENTO) as fecha, COUNT(*) as cantidad
                     FROM asistencia_ht580
                     WHERE COD_ORIGEN IN (%s)
-                    AND FEC_MOVIMIENTO >= SYSDATE - %d
+                    AND FEC_MOVIMIENTO >= TRUNC(SYSDATE) - %d
                     GROUP BY TRUNC(FEC_MOVIMIENTO)
                     ORDER BY fecha DESC
                     """.formatted(placeholders.toString(), diasEstadisticas);
