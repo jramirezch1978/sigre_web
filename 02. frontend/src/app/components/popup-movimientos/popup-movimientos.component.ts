@@ -35,6 +35,7 @@ export class PopupMovimientosComponent implements OnInit {
   @Output() cerrar = new EventEmitter<void>();
 
   movimientosDisponibles: TipoMovimiento[] = [];
+  mensajeAdvertencia: string = '';
 
   constructor(
     private configService: ConfigService,
@@ -96,6 +97,12 @@ export class PopupMovimientosComponent implements OnInit {
     }
 
     // MODO COMPLETO (puerta-principal): lógica con todas las reglas
+
+    // REGLA 0: Si último = 7 (ingresó a producción sin salir) → bloquear con advertencia
+    if (ultimo === 7) {
+      this.mensajeAdvertencia = 'No puede marcar salida de planta. Tiene pendiente una marcación de SALIDA del Área de Producción. Por favor, marque primero la salida de producción en la ventana "Marcaje Área de Producción".';
+      return [];
+    }
 
     // REGLA 1: Si último = 2 (salida) O no tiene movimientos (0) → solo movimiento 1
     if (ultimo === 2 || ultimo === 0) {
