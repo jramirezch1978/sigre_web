@@ -4,6 +4,7 @@ import com.sigre.sync.entity.local.*;
 import com.sigre.sync.entity.remote.*;
 import com.sigre.sync.repository.local.*;
 import com.sigre.sync.repository.remote.*;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,8 @@ public class RemoteToLocalSyncService {
     private final OrigenLocalRepository origenLocalRepository;
     private final CargoRemoteRepository cargoRemoteRepository;
     private final CargoLocalRepository cargoLocalRepository;
+    private final ConfiguracionRemoteRepository configuracionRemoteRepository;
+    private final ConfiguracionLocalRepository configuracionLocalRepository;
     
     // Contadores para cada tabla
     private final Map<String, Integer> insertados = new HashMap<>();
@@ -469,6 +472,94 @@ public class RemoteToLocalSyncService {
             erroresSincronizacion.add("Error crítico en tabla rrhh_asigna_trjt_reloj: " + e.getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Sincronizar tabla configuracion de Oracle → PostgreSQL
+     * Tabla de solo lectura: solo sincronización remota → local (una vía)
+     */
+    @Transactional(value = "localTransactionManager", propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    public boolean sincronizarConfiguracion() {
+        log.info("🔥 Iniciando sincronización de tabla CONFIGURACION (Remote → Local)");
+        String tabla = "configuracion";
+        resetearContadores(tabla);
+        
+        try {
+            // Obtener todos los parámetros de la base remota
+            List<ConfiguracionRemote> parametrosRemote = configuracionRemoteRepository.findAll();
+            log.info("📊 Encontrados {} parámetros en bd_remota", parametrosRemote.size());
+            
+            // Obtener parámetros locales existentes
+            List<ConfiguracionLocal> parametrosLocal = configuracionLocalRepository.findAll();
+            Map<String, ConfiguracionLocal> parametrosLocalMap = parametrosLocal.stream()
+                    .collect(Collectors.toMap(ConfiguracionLocal::getParametro, p -> p));
+            log.info("📊 Encontrados {} parámetros en bd_local", parametrosLocal.size());
+            
+            // Procesar cada parámetro remoto
+            for (ConfiguracionRemote remote : parametrosRemote) {
+                try {
+                    ConfiguracionLocal local = parametrosLocalMap.get(remote.getParametro());
+                    
+                    if (local == null) {
+                        // INSERTAR nuevo parámetro
+                        local = mapearConfiguracionRemoteALocal(remote);
+                        configuracionLocalRepository.save(local);
+                        insertados.merge(tabla, 1, Integer::sum);
+                        log.info("➕ INSERTADO parámetro: {}", remote.getParametro());
+                    } else {
+                        // ACTUALIZAR parámetro existente
+                        actualizarConfiguracionLocal(local, remote);
+                        configuracionLocalRepository.save(local);
+                        actualizados.merge(tabla, 1, Integer::sum);
+                        log.info("🔄 ACTUALIZADO parámetro: {}", remote.getParametro());
+                    }
+                    
+                } catch (Exception e) {
+                    errores.merge(tabla, 1, Integer::sum);
+                    erroresSincronizacion.add("Error procesando parámetro " + remote.getParametro() + ": " + e.getMessage());
+                    log.error("❌ Error procesando parámetro: {}", remote.getParametro(), e);
+                }
+            }
+            
+            log.info("✅ Sincronización de CONFIGURACION completada: {} insertados, {} actualizados, {} errores", 
+                    getInsertados(tabla), getActualizados(tabla), getErrores(tabla));
+            
+            return getErrores(tabla) == 0;
+            
+        } catch (Exception e) {
+            log.error("❌ Error crítico en sincronización de CONFIGURACION", e);
+            erroresSincronizacion.add("Error crítico en sincronización de CONFIGURACION: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Mapear ConfiguracionRemote a ConfiguracionLocal
+     */
+    private ConfiguracionLocal mapearConfiguracionRemoteALocal(ConfiguracionRemote remote) {
+        return ConfiguracionLocal.builder()
+                .parametro(remote.getParametro())
+                .valorInt(remote.getValorInt())
+                .valorDec(remote.getValorDec())
+                .valorChar(remote.getValorChar())
+                .valorDate(remote.getValorDate())
+                .fecRegistro(remote.getFecRegistro())
+                .fechaSync(LocalDate.now())
+                .estadoSync("S") // S=Sincronizado
+                .build();
+    }
+    
+    /**
+     * Actualizar ConfiguracionLocal con datos de ConfiguracionRemote
+     */
+    private void actualizarConfiguracionLocal(ConfiguracionLocal local, ConfiguracionRemote remote) {
+        local.setValorInt(remote.getValorInt());
+        local.setValorDec(remote.getValorDec());
+        local.setValorChar(remote.getValorChar());
+        local.setValorDate(remote.getValorDate());
+        local.setFecRegistro(remote.getFecRegistro());
+        local.setFechaSync(LocalDate.now());
+        local.setEstadoSync("S"); // S=Sincronizado
     }
     
     // Métodos privados de procesamiento

@@ -277,7 +277,18 @@ public class SyncSchedulerService {
         log.info("🔥 [HILO 1] Iniciando sincronización Remote → Local con ORDEN CORRECTO");
         
         try {
-            // PASO 0: Sincronizar ORIGEN primero (no tiene dependencias, tabla de configuración)
+            // PASO -1: Sincronizar CONFIGURACION primero (parámetros del sistema, usados por todos los microservicios via sigre-config-common)
+            log.info("📍 [HILO 1] PASO -1: Sincronizando CONFIGURACION...");
+            boolean configOk = remoteToLocalSync.sincronizarConfiguracion();
+            if (!configOk && maxRetries > 0) {
+                configOk = manejarErrorConReintento("configuracion", () -> remoteToLocalSync.sincronizarConfiguracion());
+            }
+            
+            if (!configOk) {
+                log.warn("⚠️ [HILO 1] Fallo en CONFIGURACION - No es crítico, continuando");
+            }
+            
+            // PASO 0: Sincronizar ORIGEN (no tiene dependencias, tabla de configuración)
             log.info("📍 [HILO 1] PASO 0/9: Sincronizando ORIGEN...");
             boolean origenOk = remoteToLocalSync.sincronizarOrigen();
             if (!origenOk && maxRetries > 0) {
