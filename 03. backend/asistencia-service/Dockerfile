@@ -15,6 +15,8 @@ COPY inventory-service/pom.xml ./inventory-service/pom.xml
 COPY orders-service/pom.xml ./orders-service/pom.xml
 COPY products-service/pom.xml ./products-service/pom.xml
 COPY sync-service/pom.xml ./sync-service/pom.xml
+COPY sigre-config-common/pom.xml ./sigre-config-common/pom.xml
+COPY sigre-config-common/src ./sigre-config-common/src
 
 # Copiar el código fuente del asistencia-service
 COPY asistencia-service/src ./asistencia-service/src

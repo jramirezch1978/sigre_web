@@ -13,6 +13,8 @@ COPY orders-service/pom.xml ./orders-service/
 COPY products-service/pom.xml ./products-service/
 COPY asistencia-service/pom.xml ./asistencia-service/
 COPY sync-service/pom.xml ./sync-service/
+COPY sigre-config-common/pom.xml ./sigre-config-common/
+COPY sigre-config-common/src ./sigre-config-common/src
 
 # Copiar código fuente del config-server
 COPY config-server/src ./config-server/src
