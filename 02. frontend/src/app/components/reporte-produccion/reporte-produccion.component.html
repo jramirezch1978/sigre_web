@@ -70,6 +70,15 @@
                   <mat-icon matPrefix>search</mat-icon>
                 </mat-form-field>
 
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Tipo de Trabajador</mat-label>
+                  <mat-select [(ngModel)]="tipoTrabajadorFiltro" (selectionChange)="onFiltroBusqueda()">
+                    <mat-option *ngFor="let tipo of tiposTrabajador" [value]="tipo">
+                      {{ tipo }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
                 <div class="results-info">
                   <mat-icon>info</mat-icon>
                   <span>Mostrando {{ registrosFiltrados.length }} de {{ registros.length }} registros</span>
@@ -122,6 +131,10 @@
                     <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'apellidos'">{{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                   </th>
                   <th class="column-title sortable" (click)="ordenarPor('nombres')">Nombres</th>
+                  <th class="column-title sortable" (click)="ordenarPor('tipoTrabajador')">
+                    Tipo<br>Trabajador
+                    <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'tipoTrabajador'">{{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                  </th>
                   <th class="column-title sortable" (click)="ordenarPor('fecha')">
                     Fecha
                     <mat-icon class="sort-icon" *ngIf="columnaOrdenada === 'fecha'">{{ ordenAscendente ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
@@ -152,6 +165,7 @@
                   <td>{{ row.dni }}</td>
                   <td>{{ row.apellidos }}</td>
                   <td>{{ row.nombres }}</td>
+                  <td>{{ row.tipoTrabajador }}</td>
                   <td>{{ row.fecha | date: 'dd/MM/yyyy' }}</td>
                   <td>{{ row.horaIngresoPlanta | date: 'HH:mm:ss' }}</td>
                   <td>{{ row.horaIngresoProduccion | date: 'HH:mm:ss' }}</td>

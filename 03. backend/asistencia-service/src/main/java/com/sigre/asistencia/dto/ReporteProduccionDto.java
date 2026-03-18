@@ -19,6 +19,7 @@ public class ReporteProduccionDto {
     private String dni;
     private String nombres;
     private String apellidos;
+    private String tipoTrabajador;
     private LocalDateTime horaIngresoPlanta;
     private LocalDateTime horaIngresoProduccion;
     private Double minutosCambioRopa;

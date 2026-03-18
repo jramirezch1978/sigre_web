@@ -591,6 +591,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
             COALESCE(TRIM(m.nro_doc_ident_rtps), TRIM(m.dni)) AS dni,
             TRIM(m.nombre1) || ' ' || COALESCE(TRIM(m.nombre2), '') AS nombres,
             TRIM(m.apel_paterno) || ' ' || TRIM(m.apel_materno) AS apellidos,
+            TRIM(tt.desc_tipo_tra) AS tipo_trabajador,
             a01.fec_marcacion AS hora_ingreso_planta,
             a07.fec_marcacion AS hora_ingreso_produccion,
             ROUND(EXTRACT(EPOCH FROM (a07.fec_marcacion - a01.fec_marcacion)) / 60.0, 1) AS minutos_cambio_ropa,
@@ -615,6 +616,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
             a01.fec_movimiento AS fecha
         FROM asistencia_ht580 a01
         JOIN maestro m ON m.cod_trabajador = a01.codigo
+        LEFT JOIN tipo_trabajador tt ON tt.tipo_trabajador = m.tipo_trabajador
         LEFT JOIN asistencia_ht580 a07 ON TRIM(a07.flag_in_out) = '7' AND a07.reckey_ref = a01.reckey AND a07.cod_origen = a01.cod_origen
         LEFT JOIN asistencia_ht580 a08 ON TRIM(a08.flag_in_out) = '8' AND a08.reckey_ref = a07.reckey AND a08.cod_origen = a01.cod_origen
         LEFT JOIN asistencia_ht580 a02 ON TRIM(a02.flag_in_out) = '2' AND a02.reckey_ref = a01.reckey AND a02.cod_origen = a01.cod_origen

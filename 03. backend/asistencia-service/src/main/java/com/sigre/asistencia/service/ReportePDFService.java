@@ -198,24 +198,25 @@ public class ReportePDFService {
                 1.5f,  // N°
                 3.0f,  // Código
                 3.0f,  // DNI
-                6.0f,  // Nombres
-                6.0f,  // Apellidos
-                3.0f,  // Fecha
-                3.0f,  // Ingreso Planta
-                3.0f,  // Ingreso Producción
-                2.5f,  // Cambio Ropa
-                3.0f,  // Salida Producción
-                3.0f,  // Salida Planta
-                3.0f,  // Hrs Efectivas
-                3.0f,  // Hrs Total
-                3.0f   // Hrs Muertas
+                5.0f,  // Nombres
+                5.0f,  // Apellidos
+                4.0f,  // Tipo Trabajador
+                2.5f,  // Fecha
+                2.5f,  // Ingreso Planta
+                2.5f,  // Ingreso Producción
+                2.0f,  // Cambio Ropa
+                2.5f,  // Salida Producción
+                2.5f,  // Salida Planta
+                2.5f,  // Hrs Efectivas
+                2.5f,  // Hrs Total
+                2.5f   // Hrs Muertas
             };
 
             Table table = new Table(columnWidths);
             table.setWidth(UnitValue.createPercentValue(100));
-            table.setFontSize(7);
+            table.setFontSize(6);
 
-            String[] headers = {"N°", "Código", "DNI", "Nombres", "Apellidos", "Fecha",
+            String[] headers = {"N°", "Código", "DNI", "Nombres", "Apellidos", "Tipo\nTrabajador", "Fecha",
                                "Ingreso\nPlanta", "Ingreso\nProducción", "Cambio\nRopa (min)",
                                "Salida\nProducción", "Salida\nPlanta", "Hrs Efect.\nProducción",
                                "Hrs Total\nPlanta", "Hrs\nMuertas"};
@@ -240,6 +241,7 @@ public class ReportePDFService {
                 table.addCell(createCell(row.getDni(), TextAlignment.CENTER, bgColor));
                 table.addCell(createCell(row.getNombres(), TextAlignment.LEFT, bgColor));
                 table.addCell(createCell(row.getApellidos(), TextAlignment.LEFT, bgColor));
+                table.addCell(createCell(row.getTipoTrabajador(), TextAlignment.LEFT, bgColor));
                 table.addCell(createCell(row.getFecha() != null ? row.getFecha().format(DATE_FORMATTER) : "", TextAlignment.CENTER, bgColor));
                 table.addCell(createCell(row.getHoraIngresoPlanta() != null ? row.getHoraIngresoPlanta().format(timeFormatter) : "", TextAlignment.CENTER, bgColor));
                 table.addCell(createCell(row.getHoraIngresoProduccion() != null ? row.getHoraIngresoProduccion().format(timeFormatter) : "", TextAlignment.CENTER, bgColor));

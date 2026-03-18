@@ -56,6 +56,7 @@ export interface ReporteProduccion {
   dni: string;
   nombres: string;
   apellidos: string;
+  tipoTrabajador: string;
   horaIngresoPlanta: string;
   horaIngresoProduccion: string;
   minutosCambioRopa: number;
@@ -95,8 +96,10 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
   fechaInicio: Date = new Date();
   fechaFin: Date = new Date();
   busquedaNombre: string = '';
+  tipoTrabajadorFiltro: string = 'TODOS';
 
   origenes: Origen[] = [];
+  tiposTrabajador: string[] = [];
 
   columnaOrdenada: string = '';
   ordenAscendente: boolean = true;
@@ -146,6 +149,7 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => {
           this.registros = data;
+          this.extraerTiposTrabajador();
           this.aplicarFiltros();
           this.cargando = false;
           this.mostrarMensaje(`Reporte generado: ${data.length} registros`, 'success');
@@ -166,6 +170,12 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
     this.aplicarFiltros();
   }
 
+  extraerTiposTrabajador(): void {
+    const tipos = new Set<string>();
+    this.registros.forEach(r => { if (r.tipoTrabajador) tipos.add(r.tipoTrabajador); });
+    this.tiposTrabajador = ['TODOS', ...Array.from(tipos).sort()];
+  }
+
   aplicarFiltros(): void {
     let filtrados = [...this.registros];
 
@@ -177,6 +187,10 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
         r.codigoTrabajador?.includes(busqueda) ||
         r.dni?.includes(busqueda)
       );
+    }
+
+    if (this.tipoTrabajadorFiltro && this.tipoTrabajadorFiltro !== 'TODOS') {
+      filtrados = filtrados.filter(r => r.tipoTrabajador === this.tipoTrabajadorFiltro);
     }
 
     this.registrosFiltrados = filtrados;
@@ -209,6 +223,7 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
       'DNI': reg.dni,
       'Nombres': reg.nombres,
       'Apellidos': reg.apellidos,
+      'Tipo Trabajador': reg.tipoTrabajador,
       'Fecha': reg.fecha,
       'Ingreso Planta': reg.horaIngresoPlanta,
       'Ingreso Producción': reg.horaIngresoProduccion,
