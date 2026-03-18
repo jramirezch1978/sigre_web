@@ -388,6 +388,9 @@ public class EmailNotificationServiceHTML {
         html.append("</tbody>");
         html.append("</table>");
         
+        // Consolidado de registros con error persistente en BD
+        agregarSeccionErroresPersistentes(html);
+
         // Pie de página
         html.append("<div class='footer'>");
         html.append("<p><strong>Sistema SIGRE - Módulo de Asistencia</strong></p>");
@@ -620,6 +623,76 @@ public class EmailNotificationServiceHTML {
         return estadisticas;
     }
     
+    /**
+     * Agregar sección con consolidado de registros que tienen estado_sync = 'E' en la BD local.
+     * Muestra: mensaje de error agrupado + cantidad de registros afectados.
+     */
+    private void agregarSeccionErroresPersistentes(StringBuilder html) {
+        try {
+            String sqlErrores = """
+                SELECT 
+                    COALESCE(observaciones, 'Error de conexión con Oracle') AS mensaje_error,
+                    COUNT(*) AS cantidad,
+                    MIN(fec_registro) AS primer_registro,
+                    MAX(fecha_sync) AS ultimo_intento,
+                    MAX(intentos_sync) AS max_intentos
+                FROM asistencia_ht580
+                WHERE estado_sync = 'E'
+                  AND external_id IS NULL
+                GROUP BY COALESCE(observaciones, 'Error de conexión con Oracle')
+                ORDER BY cantidad DESC
+                """;
+
+            List<Map<String, Object>> errores = jdbcTemplateLocal.queryForList(sqlErrores);
+
+            if (errores.isEmpty()) {
+                return;
+            }
+
+            long totalRegistrosError = errores.stream()
+                    .mapToLong(e -> ((Number) e.get("cantidad")).longValue())
+                    .sum();
+
+            html.append("<h2>🔴 Registros con Error Pendiente de Sincronización (").append(totalRegistrosError).append(" total)</h2>");
+            html.append("<p style='color: #7f8c8d;'>Estos registros se reintentan automáticamente cada 6 horas</p>");
+            html.append("<table>");
+            html.append("<thead>");
+            html.append("<tr>");
+            html.append("<th style='background-color: #e74c3c;'>Mensaje de Error</th>");
+            html.append("<th style='background-color: #e74c3c;'>Registros</th>");
+            html.append("<th style='background-color: #e74c3c;'>Primer Registro</th>");
+            html.append("<th style='background-color: #e74c3c;'>Último Intento</th>");
+            html.append("<th style='background-color: #e74c3c;'>Max Intentos</th>");
+            html.append("</tr>");
+            html.append("</thead>");
+            html.append("<tbody>");
+
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+            for (Map<String, Object> error : errores) {
+                String mensaje = (String) error.get("mensaje_error");
+                long cantidad = ((Number) error.get("cantidad")).longValue();
+                Object primerReg = error.get("primer_registro");
+                Object ultimoIntento = error.get("ultimo_intento");
+                Object maxIntentos = error.get("max_intentos");
+
+                html.append("<tr>");
+                html.append("<td class='error'>").append(mensaje != null && mensaje.length() > 120 ? mensaje.substring(0, 120) + "..." : mensaje).append("</td>");
+                html.append("<td style='text-align: center; font-weight: bold;'>").append(cantidad).append("</td>");
+                html.append("<td>").append(primerReg != null ? primerReg.toString().substring(0, Math.min(16, primerReg.toString().length())) : "-").append("</td>");
+                html.append("<td>").append(ultimoIntento != null ? ultimoIntento.toString().substring(0, Math.min(16, ultimoIntento.toString().length())) : "Nunca").append("</td>");
+                html.append("<td style='text-align: center;'>").append(maxIntentos != null ? maxIntentos : 0).append("</td>");
+                html.append("</tr>");
+            }
+
+            html.append("</tbody>");
+            html.append("</table>");
+
+        } catch (Exception e) {
+            log.error("Error generando sección de errores persistentes para email", e);
+        }
+    }
+
     // Métodos auxiliares para parsear errores
     private String extraerTabla(String error) {
         if (error.contains("maestro")) return "maestro";

@@ -99,9 +99,9 @@ public class LocalToRemoteSyncService {
                     erroresSincronizacion.add(error);
                     log.error("❌ {}", error, e);
                     
-                    // Marcar como error en local
                     asistenciaLocal.setEstadoSync("E");
                     asistenciaLocal.setIntentosSync(asistenciaLocal.getIntentosSync() + 1);
+                    asistenciaLocal.setFechaSync(LocalDateTime.now());
                     asistenciaLocalRepository.save(asistenciaLocal);
                 }
             }
@@ -225,8 +225,9 @@ public class LocalToRemoteSyncService {
                 } else {
                     // ❌ NO se encontró registro en Oracle - ERROR crítico
                     log.error("❌ CRÍTICO: No se encontró registro en Oracle después del save - posible fallo en trigger");
-                    asistenciaLocal.setEstadoSync("E"); // ✅ Marcar como ERROR (no como sincronizado)
+                    asistenciaLocal.setEstadoSync("E");
                     asistenciaLocal.setIntentosSync(asistenciaLocal.getIntentosSync() + 1);
+                    asistenciaLocal.setFechaSync(LocalDateTime.now());
                     asistenciaLocalRepository.save(asistenciaLocal);
                     registrosErrores++;
                 }
@@ -280,9 +281,11 @@ public class LocalToRemoteSyncService {
             log.error("❌ Error procesando asistencia {} (COD_ORIGEN={}): {}", 
                      asistenciaLocal.getReckey(), asistenciaLocal.getCodOrigen(), e.getMessage());
             
-            // Marcar registro como error en local para reintento
-            asistenciaLocal.setEstadoSync("E"); // E = Error
+            asistenciaLocal.setEstadoSync("E");
             asistenciaLocal.setIntentosSync(asistenciaLocal.getIntentosSync() + 1);
+            asistenciaLocal.setFechaSync(LocalDateTime.now());
+            String msgError = e.getMessage() != null ? e.getMessage() : "Error desconocido";
+            asistenciaLocal.setObservaciones(msgError.length() > 200 ? msgError.substring(0, 200) : msgError);
             asistenciaLocalRepository.save(asistenciaLocal);
             
             log.info("🔄 Registro marcado como ERROR para reintento | RECKEY: {} | Intento: {}", 
@@ -576,64 +579,48 @@ public class LocalToRemoteSyncService {
         asistenciaRemoteRepository.save(oracle);
     }
     
+    private static final int HORAS_REINTENTO_ERROR = 6;
+
     /**
-     * ✅ RESETEO AUTOMÁTICO DE REGISTROS BLOQUEADOS
-     * Busca registros que agotaron sus reintentos (intentos_sync >= maxRetries)
-     * y que llevan más de 3 horas bloqueados, para darles una nueva oportunidad
+     * Reseteo automático de registros con error.
+     * Cada 6 horas se reintentan los registros que fallaron,
+     * sin importar cuántos intentos previos tengan.
      */
     @Transactional("localTransactionManager")
     private void resetearRegistrosBloqueados() {
         try {
-            log.info("🔄 PASO 0: Verificando registros bloqueados para reseteo automático...");
+            log.info("🔄 PASO 0: Verificando registros con error para reintento (cada {} horas)...", HORAS_REINTENTO_ERROR);
             
-            // Calcular timestamp de hace 3 horas
-            LocalDateTime hace3Horas = LocalDateTime.now().minusHours(3);
+            LocalDateTime limiteReintento = LocalDateTime.now().minusHours(HORAS_REINTENTO_ERROR);
             
-            // Buscar registros que cumplan TODAS estas condiciones:
-            // 1. intentos_sync >= maxRetries (agotaron reintentos)
-            // 2. (fecha_sync IS NULL O external_id IS NULL) (nunca se sincronizó exitosamente)
-            // 3. fecha_registro < hace 3 horas (llevan más de 3 horas bloqueados)
-            List<AsistenciaHt580Local> registrosBloqueados = asistenciaLocalRepository.findAll()
+            List<AsistenciaHt580Local> registrosConError = asistenciaLocalRepository.findAll()
                 .stream()
                 .filter(a -> a.getCodOrigen() != null && a.getCodOrigen().equals(codOrigenConfiguracion))
-                .filter(a -> "E".equals(a.getEstadoSync())) // Solo errores
-                .filter(a -> a.getIntentosSync() != null && a.getIntentosSync() >= maxRetries) // Agotó reintentos
-                .filter(a -> a.getFechaSync() == null || a.getExternalId() == null) // Nunca sincronizó exitosamente
-                .filter(a -> a.getFechaRegistro() != null && a.getFechaRegistro().isBefore(hace3Horas)) // Más de 3 horas
+                .filter(a -> "E".equals(a.getEstadoSync()))
+                .filter(a -> a.getExternalId() == null)
+                .filter(a -> {
+                    LocalDateTime ultimoIntento = a.getFechaSync() != null ? a.getFechaSync() : a.getFechaRegistro();
+                    return ultimoIntento != null && ultimoIntento.isBefore(limiteReintento);
+                })
                 .toList();
             
-            if (registrosBloqueados.isEmpty()) {
-                log.info("✅ No hay registros bloqueados para resetear");
+            if (registrosConError.isEmpty()) {
+                log.info("✅ No hay registros con error que cumplan {} horas para reintento", HORAS_REINTENTO_ERROR);
                 return;
             }
             
-            log.info("🔄 Encontrados {} registros bloqueados que cumplen condiciones de reseteo:", 
-                    registrosBloqueados.size());
-            log.info("   - intentos_sync >= {} (maxRetries)", maxRetries);
-            log.info("   - fecha_sync IS NULL O external_id IS NULL");
-            log.info("   - fecha_registro > 3 horas de antigüedad");
+            log.info("🔄 Encontrados {} registros con error listos para reintento (último intento > {} horas)", 
+                    registrosConError.size(), HORAS_REINTENTO_ERROR);
             
-            // Resetear cada registro
             int contadorReseteados = 0;
-            for (AsistenciaHt580Local registro : registrosBloqueados) {
+            for (AsistenciaHt580Local registro : registrosConError) {
                 try {
-                    // Calcular horas transcurridas desde el registro
-                    long horasTranscurridas = java.time.Duration.between(
-                        registro.getFechaRegistro(), 
-                        LocalDateTime.now()
-                    ).toHours();
-                    
-                    log.debug("🔄 Reseteando registro {} - Intentos: {} | Horas bloqueado: {} | Trabajador: {}", 
+                    log.debug("🔄 Reseteando registro {} - Intentos previos: {} | Trabajador: {}", 
                             registro.getReckey(), 
                             registro.getIntentosSync(),
-                            horasTranscurridas,
                             registro.getCodigo());
                     
-                    // Resetear estado
-                    registro.setEstadoSync("P");  // Volver a Pendiente
-                    registro.setIntentosSync(0);  // Resetear contador
-                    registro.setFechaSync(null);  // Limpiar fecha de sincronización
-                    
+                    registro.setEstadoSync("P");
                     asistenciaLocalRepository.save(registro);
                     contadorReseteados++;
                     
@@ -643,7 +630,7 @@ public class LocalToRemoteSyncService {
             }
             
             if (contadorReseteados > 0) {
-                log.info("✅ RESETEO COMPLETADO: {} registros bloqueados fueron reseteados y estarán disponibles para sincronización", 
+                log.info("✅ RESETEO COMPLETADO: {} registros con error fueron reactivados para sincronización", 
                         contadorReseteados);
             }
             

@@ -66,8 +66,11 @@ public class AsistenciaHt580Local {
     private String lecturaPda;
     
     @Column(name = "RECKEY_REF", length = 12)
-    private String reckeyRef; // Referencia a marcación relacionada: última 01 para la mayoría, o 03/05/07/09 para regresos
-    
+    private String reckeyRef;
+
+    @Column(name = "OBSERVACIONES", length = 200)
+    private String observaciones;
+
     // Campos de auditoría para sincronización
     @Column(name = "FECHA_SYNC")
     private LocalDateTime fechaSync;
