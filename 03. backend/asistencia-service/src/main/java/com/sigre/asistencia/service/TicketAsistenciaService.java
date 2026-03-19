@@ -268,9 +268,13 @@ public class TicketAsistenciaService {
             String turnoAsignado;
             String reckeyRef = null;
             
-            // Buscar última marcación del trabajador (todos los tipos, no solo 1 y 2)
-            Optional<AsistenciaHt580> ultimaMarcacion = asistenciaRepository
-                .findUltimoMovimientoReal(ticket.getCodTrabajador(), ticket.getCodOrigen());
+            // Puerta principal (1,2,3,4,5,6,9,10): usar query filtrada solo tipos 1 y 2
+            // Producción (7,8): usar query real con todos los tipos
+            boolean esMovimientoProduccion = "7".equals(tipoMovimiento) || "8".equals(tipoMovimiento);
+            
+            Optional<AsistenciaHt580> ultimaMarcacion = esMovimientoProduccion
+                ? asistenciaRepository.findUltimoMovimientoReal(ticket.getCodTrabajador(), ticket.getCodOrigen())
+                : asistenciaRepository.findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(ticket.getCodTrabajador(), ticket.getCodOrigen());
             
             // LÓGICA SEGÚN TIPO DE MOVIMIENTO
             if ("1".equals(tipoMovimiento)) {
