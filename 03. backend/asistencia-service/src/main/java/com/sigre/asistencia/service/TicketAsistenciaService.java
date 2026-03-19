@@ -268,9 +268,9 @@ public class TicketAsistenciaService {
             String turnoAsignado;
             String reckeyRef = null;
             
-            // Buscar última marcación del trabajador (por código Y origen)
+            // Buscar última marcación del trabajador (todos los tipos, no solo 1 y 2)
             Optional<AsistenciaHt580> ultimaMarcacion = asistenciaRepository
-                .findTopByCodigoAndCodOrigenOrderByFechaRegistroDesc(ticket.getCodTrabajador(), ticket.getCodOrigen());
+                .findUltimoMovimientoReal(ticket.getCodTrabajador(), ticket.getCodOrigen());
             
             // LÓGICA SEGÚN TIPO DE MOVIMIENTO
             if ("1".equals(tipoMovimiento)) {
