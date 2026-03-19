@@ -582,7 +582,16 @@ public class TicketAsistenciaService {
                 return;
             }
             
-            // Calcular horas transcurridas desde la fecha/hora de marcación (no registro)
+            // Verificar si tiene ingreso a producción (7) sin salida (8)
+            AsistenciaHt580 ultimoReal = asistenciaRepository
+                    .findUltimoMovimientoReal(codTrabajador, codOrigen)
+                    .orElse(null);
+            
+            if (ultimoReal != null && "7".equals(ultimoReal.getFlagInOut().trim())) {
+                log.info("🔄 Trabajador {} tiene ingreso a producción (7) sin salida (8). Auto-cierre pospuesto.", codTrabajador);
+                return;
+            }
+
             long horasTranscurridas = java.time.Duration.between(
                     ultimaAsistencia.getFecMarcacion(), 
                     LocalDateTime.now()
