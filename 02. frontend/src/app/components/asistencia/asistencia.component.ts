@@ -127,12 +127,12 @@ export class AsistenciaComponent implements OnInit {
     this.procesandoValidacion = true;
     
     try {
-      const apiUrl = this.configService.getApiUrl() + '/api/asistencia/validar-codigo';
+      const endpoint = this.tipoMarcaje === 'area-produccion' ? '/api/asistencia/validar-codigo-produccion' : '/api/asistencia/validar-codigo';
+      const apiUrl = this.configService.getApiUrl() + endpoint;
   
       this.http.post<any>(apiUrl, { 
         codigo: this.codigoInput.trim(),
-        codOrigen: this.configService.getCodOrigen(),
-        tipoMarcaje: this.tipoMarcaje
+        codOrigen: this.configService.getCodOrigen()
       }).subscribe(
         {
           next: (response) => {

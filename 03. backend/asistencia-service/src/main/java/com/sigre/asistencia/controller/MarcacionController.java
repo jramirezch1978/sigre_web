@@ -217,35 +217,25 @@ public class MarcacionController {
                 log.info("✅ Sin marcaciones previas | Trabajador: {}", codTrabajador);
             }
             
-            // Obtener el último movimiento REAL (todos los tipos, no solo 1 y 2)
-            AsistenciaHt580 ultimoMovimientoFinal = asistenciaRepository
+            // PUERTA PRINCIPAL: último movimiento filtrado (solo tipos 1 y 2)
+            // Verificar si tiene tipo 7 pendiente para mostrar advertencia
+            AsistenciaHt580 ultimoReal = asistenciaRepository
                     .findUltimoMovimientoReal(codTrabajador, codOrigen)
-                    .orElse(ultimaAsistencia);
+                    .orElse(null);
             
-            int numeroUltimoMovimiento = 0; // Por defecto = sin movimientos
-            if (ultimoMovimientoFinal != null && ultimoMovimientoFinal.getFlagInOut() != null) {
+            int numeroUltimoMovimiento = 0;
+            if (ultimoReal != null && "7".equals(ultimoReal.getFlagInOut().trim())) {
+                numeroUltimoMovimiento = 7;
+            } else if (ultimaAsistencia != null && ultimaAsistencia.getFlagInOut() != null) {
                 try {
-                    numeroUltimoMovimiento = Integer.parseInt(ultimoMovimientoFinal.getFlagInOut().trim());
-                    log.info("📋 Último movimiento FINAL para frontend | Trabajador: {} | Tipo: {} | Fecha: {} | Auto-cierre aplicado: {}", 
-                            codTrabajador, numeroUltimoMovimiento, ultimoMovimientoFinal.getFechaRegistro(), seProcesaAutoCierre);
+                    numeroUltimoMovimiento = Integer.parseInt(ultimaAsistencia.getFlagInOut().trim());
                 } catch (NumberFormatException e) {
-                    log.warn("⚠️ FLAG_IN_OUT no válido: '{}'", ultimoMovimientoFinal.getFlagInOut());
                     numeroUltimoMovimiento = 0;
                 }
             }
             
-            // Validación de producción desde backend
-            if ("area-produccion".equals(request.getTipoMarcaje())) {
-                if (numeroUltimoMovimiento != 1 && numeroUltimoMovimiento != 7) {
-                    String msg = numeroUltimoMovimiento == 8
-                        ? "Ya marcó salida de producción. Para volver a ingresar al área de producción, primero debe marcar Ingreso a Planta desde \"Marcaje Puerta Principal\"."
-                        : "No puede marcar en el área de producción. Primero debe marcar Ingreso a Planta desde \"Marcaje Puerta Principal\".";
-                    return ResponseEntity.ok(ValidarCodigoResponse.builder()
-                            .valido(false)
-                            .mensajeError(msg)
-                            .build());
-                }
-            }
+            log.info("📋 Último movimiento para frontend | Trabajador: {} | Tipo: {}", 
+                    codTrabajador, numeroUltimoMovimiento);
 
             return ResponseEntity.ok(ValidarCodigoResponse.builder()
                     .valido(true)
@@ -302,6 +292,70 @@ public class MarcacionController {
         return ip != null ? ip : "0.0.0.0";
     }
     
+    /**
+     * Endpoint separado para validar código en área de producción.
+     * Usa findUltimoMovimientoReal (todos los tipos) para detectar 7 y 8.
+     */
+    @PostMapping("/validar-codigo-produccion")
+    public ResponseEntity<?> validarCodigoProduccion(@RequestBody ValidarCodigoRequest request) {
+        try {
+            log.info("🔍 [POST] Validando código para PRODUCCIÓN: {}", request.getCodigo());
+
+            var resultado = validacionService.validarCodigo(request.getCodigo());
+
+            if (!resultado.isValido()) {
+                return ResponseEntity.ok(ValidarCodigoResponse.builder()
+                        .valido(false)
+                        .mensajeError(resultado.getMensajeError())
+                        .build());
+            }
+
+            String codTrabajador = resultado.getTrabajador().getCodTrabajador();
+            String codOrigen = request.getCodOrigen();
+
+            AsistenciaHt580 ultimoReal = asistenciaRepository
+                    .findUltimoMovimientoReal(codTrabajador, codOrigen)
+                    .orElse(null);
+
+            int numeroUltimoMovimiento = 0;
+            if (ultimoReal != null && ultimoReal.getFlagInOut() != null) {
+                try {
+                    numeroUltimoMovimiento = Integer.parseInt(ultimoReal.getFlagInOut().trim());
+                } catch (NumberFormatException e) {
+                    numeroUltimoMovimiento = 0;
+                }
+            }
+
+            log.info("📋 Último movimiento PRODUCCIÓN | Trabajador: {} | Tipo: {}", codTrabajador, numeroUltimoMovimiento);
+
+            if (numeroUltimoMovimiento != 1 && numeroUltimoMovimiento != 7) {
+                String msg = numeroUltimoMovimiento == 8
+                    ? "Ya marcó salida de producción. Para volver a ingresar al área de producción, primero debe marcar Ingreso a Planta desde \"Marcaje Puerta Principal\"."
+                    : "No puede marcar en el área de producción. Primero debe marcar Ingreso a Planta desde \"Marcaje Puerta Principal\".";
+                return ResponseEntity.ok(ValidarCodigoResponse.builder()
+                        .valido(false)
+                        .mensajeError(msg)
+                        .build());
+            }
+
+            return ResponseEntity.ok(ValidarCodigoResponse.builder()
+                    .valido(true)
+                    .nombreTrabajador(resultado.getTrabajador().getNombreCompleto())
+                    .codigoTrabajador(resultado.getTrabajador().getCodTrabajador())
+                    .tipoInput(resultado.getTipoInput())
+                    .ultimoMovimiento(numeroUltimoMovimiento)
+                    .build());
+
+        } catch (Exception e) {
+            log.error("❌ Error validando código producción: {}", request.getCodigo(), e);
+            return ResponseEntity.internalServerError()
+                    .body(ValidarCodigoResponse.builder()
+                            .valido(false)
+                            .mensajeError("Error interno del servidor")
+                            .build());
+        }
+    }
+
     @PostMapping("/forzar-autocierre")
     public ResponseEntity<?> forzarAutoCierreMasivo() {
         log.info("🔄 Forzando auto-cierre masivo manualmente");
