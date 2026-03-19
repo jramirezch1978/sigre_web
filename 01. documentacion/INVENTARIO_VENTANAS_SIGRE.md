@@ -2142,8 +2142,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | w_cam756_resumen_exportado | CAM756 | Resumen Exportado |
 | w_cam757_fairtrade | CAM757 | Reporte de Cajas FairTrade |
 | w_cam758_rpt_control_cont | CAM758 | Reporte Control de Contenedores |
-| w_documento | S/C | Documento |
-
 ---
 
 ## 17. Comedor
@@ -2396,12 +2394,12 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 13 | Asistencia | 21 |
 | 14 | Auditoría | 19 |
 | 15 | BASC | 16 |
-| 16 | Campo | 96 |
+| 16 | Campo | 95 |
 | 17 | Comedor | 29 |
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,222** |
+| | **TOTAL** | **2,221** |
 
 ---
 
