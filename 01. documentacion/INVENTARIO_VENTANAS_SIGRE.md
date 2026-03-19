@@ -1618,7 +1618,6 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 
 | Ventana | Código | Descripción |
 |---------|--------|-------------|
-| w_aviso_err | S/C | Aviso de error |
 | w_cns_datos_ot | S/C | Consulta de movimientos de OT |
 | w_ma302_orden_trabajo_rpt | MA302RPT | Reporte de orden de trabajo |
 | w_ma302_orden_trabajo_rpt_prev | MA302RPT | Reporte de orden de trabajo (vista previa) |
@@ -2388,7 +2387,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 7 | RRHH | 283 |
 | 8 | Presupuesto | 156 |
 | 9 | Producción | 194 |
-| 10 | Operaciones OT | 153 |
+| 10 | Operaciones OT | 152 |
 | 11 | Mantenimiento | 85 |
 | 12 | Aprovisionamiento | 94 |
 | 13 | Asistencia | 21 |
@@ -2399,7 +2398,7 @@ Se excluyen ventanas genéricas del framework (w_abc_*, w_logon, w_main, popups,
 | 18 | Control de Documentos | 15 |
 | 19 | Flota | 138 |
 | 20 | Seguridad | 21 |
-| | **TOTAL** | **2,221** |
+| | **TOTAL** | **2,220** |
 
 ---
 
