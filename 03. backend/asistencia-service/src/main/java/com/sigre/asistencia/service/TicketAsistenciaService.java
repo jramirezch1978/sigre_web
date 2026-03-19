@@ -264,7 +264,7 @@ public class TicketAsistenciaService {
      */
     private String crearRegistroAsistencia(TicketAsistencia ticket) {
         try {
-            String tipoMovimiento = ticket.getTipoMovimiento();
+            String tipoMovimiento = ticket.getTipoMovimiento() != null ? ticket.getTipoMovimiento().trim() : "";
             String turnoAsignado;
             String reckeyRef = null;
             
