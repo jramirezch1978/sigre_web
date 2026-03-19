@@ -93,6 +93,11 @@ export class PopupMovimientosComponent implements OnInit {
       if (ultimo === 7) {
         return todosMovimientos.filter(m => m.numero === 8);
       }
+      if (ultimo === 8) {
+        this.mensajeAdvertencia = 'Ya marcó salida de producción. Para volver a ingresar al área de producción, primero debe marcar Ingreso a Planta desde la ventana "Marcaje Puerta Principal".';
+      } else {
+        this.mensajeAdvertencia = 'No puede marcar en el área de producción. Primero debe marcar Ingreso a Planta desde la ventana "Marcaje Puerta Principal".';
+      }
       return [];
     }
 
