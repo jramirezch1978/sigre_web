@@ -290,6 +290,18 @@ public class MarcacionController {
         return ip != null ? ip : "0.0.0.0";
     }
     
+    @PostMapping("/forzar-autocierre")
+    public ResponseEntity<?> forzarAutoCierreMasivo() {
+        log.info("🔄 Forzando auto-cierre masivo manualmente");
+        try {
+            ticketService.procesarAutoCierreMasivo();
+            return ResponseEntity.ok(Map.of("mensaje", "Auto-cierre masivo ejecutado exitosamente"));
+        } catch (Exception e) {
+            log.error("❌ Error en auto-cierre masivo forzado: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     // DTOs para validación de código
     @lombok.Data
     public static class ValidarCodigoRequest {

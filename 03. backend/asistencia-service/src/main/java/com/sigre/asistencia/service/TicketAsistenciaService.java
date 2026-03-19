@@ -588,8 +588,42 @@ public class TicketAsistenciaService {
                     .orElse(null);
             
             if (ultimoReal != null && "7".equals(ultimoReal.getFlagInOut().trim())) {
-                log.info("🔄 Trabajador {} tiene ingreso a producción (7) sin salida (8). Auto-cierre pospuesto.", codTrabajador);
-                return;
+                long horasDesdeProduccion = java.time.Duration.between(
+                        ultimoReal.getFecMarcacion(), LocalDateTime.now()
+                ).toHours();
+
+                if (horasDesdeProduccion < 12) {
+                    log.info("🔄 Trabajador {} tiene ingreso a producción (7) con {} h (< 12h). Auto-cierre pospuesto.",
+                            codTrabajador, horasDesdeProduccion);
+                    return;
+                }
+
+                log.info("🚨 Auto-cierre PRODUCCIÓN | Trabajador: {} | Horas en producción: {}/12",
+                        codTrabajador, horasDesdeProduccion);
+
+                LocalDateTime horaCierreProduccion = ultimoReal.getFecMarcacion().plusHours(12);
+
+                AsistenciaHt580 salidaProduccion = AsistenciaHt580.builder()
+                        .reckey(UUID.randomUUID().toString().replace("-", "").substring(0, 12))
+                        .codOrigen(ultimoReal.getCodOrigen())
+                        .codigo(codTrabajador)
+                        .fechaRegistro(LocalDateTime.now())
+                        .fecMarcacion(horaCierreProduccion)
+                        .fechaMovimiento(ultimoReal.getFechaMovimiento())
+                        .tipoMarcacion(ultimoReal.getTipoMarcacion())
+                        .flagInOut("8")
+                        .codUsuario(codUsuarioSistema)
+                        .direccionIp("AUTO-CLOSE")
+                        .flagVerifyType("1")
+                        .turno(ultimoReal.getTurno())
+                        .reckeyRef(ultimoReal.getReckey())
+                        .flagEstado("1")
+                        .observaciones(String.format("Auto-cierre producción - %d horas transcurridas", horasDesdeProduccion))
+                        .build();
+
+                asistenciaRepository.save(salidaProduccion);
+                log.info("✅ Auto-cierre producción ejecutado | Trabajador: {} | Salida producción: {}",
+                        codTrabajador, horaCierreProduccion);
             }
 
             long horasTranscurridas = java.time.Duration.between(
