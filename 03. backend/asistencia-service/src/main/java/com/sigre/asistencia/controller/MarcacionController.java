@@ -234,13 +234,25 @@ public class MarcacionController {
                 }
             }
             
-            // TODO OK - retornar trabajador válido + último movimiento actualizado
+            // Validación de producción desde backend
+            if ("area-produccion".equals(request.getTipoMarcaje())) {
+                if (numeroUltimoMovimiento != 1 && numeroUltimoMovimiento != 7) {
+                    String msg = numeroUltimoMovimiento == 8
+                        ? "Ya marcó salida de producción. Para volver a ingresar al área de producción, primero debe marcar Ingreso a Planta desde \"Marcaje Puerta Principal\"."
+                        : "No puede marcar en el área de producción. Primero debe marcar Ingreso a Planta desde \"Marcaje Puerta Principal\".";
+                    return ResponseEntity.ok(ValidarCodigoResponse.builder()
+                            .valido(false)
+                            .mensajeError(msg)
+                            .build());
+                }
+            }
+
             return ResponseEntity.ok(ValidarCodigoResponse.builder()
                     .valido(true)
                     .nombreTrabajador(resultado.getTrabajador().getNombreCompleto())
                     .codigoTrabajador(resultado.getTrabajador().getCodTrabajador())
                     .tipoInput(resultado.getTipoInput())
-                    .ultimoMovimiento(numeroUltimoMovimiento) // ✅ AGREGADO
+                    .ultimoMovimiento(numeroUltimoMovimiento)
                     .build());
             
         } catch (Exception e) {
@@ -306,7 +318,8 @@ public class MarcacionController {
     @lombok.Data
     public static class ValidarCodigoRequest {
         private String codigo;
-        private String codOrigen;  // Código de origen (SE, WE, etc.)
+        private String codOrigen;
+        private String tipoMarcaje;
     }
     
     @lombok.Data

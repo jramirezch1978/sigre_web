@@ -131,7 +131,8 @@ export class AsistenciaComponent implements OnInit {
   
       this.http.post<any>(apiUrl, { 
         codigo: this.codigoInput.trim(),
-        codOrigen: this.configService.getCodOrigen()  // ✅ Enviar código de origen
+        codOrigen: this.configService.getCodOrigen(),
+        tipoMarcaje: this.tipoMarcaje
       }).subscribe(
         {
           next: (response) => {

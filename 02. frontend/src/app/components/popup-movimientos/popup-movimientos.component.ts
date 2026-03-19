@@ -86,17 +86,13 @@ export class PopupMovimientosComponent implements OnInit {
     }
     
     // ÁREA DE PRODUCCIÓN: solo 7 después de 1, solo 8 después de 7
+    // El backend ya valida que el trabajador pueda marcar en producción
     if (this.tipoMarcaje === 'area-produccion') {
       if (ultimo === 1) {
         return todosMovimientos.filter(m => m.numero === 7);
       }
       if (ultimo === 7) {
         return todosMovimientos.filter(m => m.numero === 8);
-      }
-      if (ultimo === 8) {
-        this.mensajeAdvertencia = 'Ya marcó salida de producción. Para volver a ingresar al área de producción, primero debe marcar Ingreso a Planta desde la ventana "Marcaje Puerta Principal".';
-      } else {
-        this.mensajeAdvertencia = 'No puede marcar en el área de producción. Primero debe marcar Ingreso a Planta desde la ventana "Marcaje Puerta Principal".';
       }
       return [];
     }
