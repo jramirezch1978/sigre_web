@@ -249,7 +249,7 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
 
       const row = ws.addRow([
         reg.nro, reg.codigoTrabajador, reg.dni, reg.apellidos, reg.nombres, reg.tipoTrabajador,
-        reg.fecha ? new Date(reg.fecha).toLocaleDateString('es-PE') : '',
+        reg.fecha ? reg.fecha.toString().substring(0, 10).split('-').reverse().join('/') : '',
         formatTime(reg.horaIngresoPlanta), formatTime(reg.horaIngresoProduccion),
         reg.minutosCambioRopa != null ? Number(reg.minutosCambioRopa.toFixed(2)) : '', salidaProd, salidaPlanta,
         reg.horasEfectivasProduccion != null ? Number(reg.horasEfectivasProduccion.toFixed(2)) : '-',

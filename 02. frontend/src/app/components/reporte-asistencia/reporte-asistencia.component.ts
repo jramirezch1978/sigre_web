@@ -308,7 +308,7 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
       const row = ws.addRow([
         reg.nro, reg.tipoTrabajador, reg.codigoTrabajador, reg.dni, reg.apellidosNombres,
         reg.area, reg.cargoPuesto, reg.turno,
-        reg.fecha ? new Date(reg.fecha).toLocaleDateString('es-PE') : '',
+        reg.fecha ? reg.fecha.toString().substring(0, 10).split('-').reverse().join('/') : '',
         reg.horaIngreso ? new Date(reg.horaIngreso).toLocaleTimeString('es-PE') : '',
         horaSalida,
         reg.horasTrabajadas, reg.horasExtras, reg.tardanzaMin,
