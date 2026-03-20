@@ -607,6 +607,19 @@ public class TicketAsistenciaService {
 
                 LocalDateTime horaCierreProduccion = ultimoReal.getFecMarcacion().plusHours(12);
 
+                // Limitar al cierre de turno menos 10 minutos
+                LocalDateTime horaCierreTurno = this.calcularHoraCierreTurno(
+                        ultimaAsistencia.getFechaMovimiento(),
+                        ultimaAsistencia.getTurno()
+                );
+                LocalDateTime maxCierreProduccion = horaCierreTurno.minusMinutes(10);
+
+                if (horaCierreProduccion.isAfter(maxCierreProduccion)) {
+                    log.info("⏰ Cierre producción {} excede turno - 10min ({}). Ajustando a {}",
+                            horaCierreProduccion, horaCierreTurno, maxCierreProduccion);
+                    horaCierreProduccion = maxCierreProduccion;
+                }
+
                 AsistenciaHt580 salidaProduccion = AsistenciaHt580.builder()
                         .reckey(UUID.randomUUID().toString().replace("-", "").substring(0, 12))
                         .codOrigen(ultimoReal.getCodOrigen())
