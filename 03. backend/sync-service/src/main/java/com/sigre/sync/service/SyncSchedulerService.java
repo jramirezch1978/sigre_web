@@ -455,9 +455,15 @@ public class SyncSchedulerService {
     private void generarYEnviarReporteCondicional(LocalDateTime inicioSync, LocalDateTime finSync, 
                                                  boolean resultadoRemoteToLocal, boolean resultadoLocalToRemote) {
         try {
+            // Solo enviar reportes entre 6:00 AM y 8:00 PM
+            int horaActual = LocalDateTime.now().getHour();
+            if (horaActual < 6 || horaActual >= 20) {
+                log.info("😴 Fuera de horario de envío de reportes (6:00-20:00). Hora actual: {}:00", horaActual);
+                return;
+            }
+
             log.info("🔍 Verificando si se debe enviar reporte de sincronización...");
             
-            // Verificar si ha habido actividad en los últimos intervalMinutes
             boolean hayActividad = activityDetectionService.hayActividadReciente(intervalMinutes);
             String resumenActividad = activityDetectionService.getResumenActividad(intervalMinutes);
             
