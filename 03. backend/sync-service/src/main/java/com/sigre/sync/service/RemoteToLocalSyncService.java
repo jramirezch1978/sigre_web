@@ -1564,4 +1564,31 @@ public class RemoteToLocalSyncService {
     public List<String> getErroresSincronizacion() {
         return new ArrayList<>(erroresSincronizacion);
     }
+
+    public void limpiarErrores() {
+        erroresSincronizacion.clear();
+    }
+
+    private void registrarError(String tabla, String mensaje, Exception e) {
+        StringBuilder errorCompleto = new StringBuilder();
+        errorCompleto.append("[").append(tabla).append("] ").append(mensaje);
+
+        if (e != null) {
+            Throwable causa = e;
+            while (causa.getCause() != null) causa = causa.getCause();
+            if (!causa.getMessage().equals(mensaje)) {
+                errorCompleto.append(" | Causa: ").append(causa.getClass().getSimpleName()).append(": ").append(causa.getMessage());
+            }
+            errorCompleto.append("\nStack: ");
+            for (StackTraceElement ste : e.getStackTrace()) {
+                if (ste.getClassName().startsWith("com.sigre")) {
+                    errorCompleto.append(ste.getClassName()).append(".").append(ste.getMethodName())
+                                .append("(").append(ste.getFileName()).append(":").append(ste.getLineNumber()).append(") ");
+                }
+            }
+        }
+
+        erroresSincronizacion.add(errorCompleto.toString());
+        log.error("❌ {}", errorCompleto, e);
+    }
 }

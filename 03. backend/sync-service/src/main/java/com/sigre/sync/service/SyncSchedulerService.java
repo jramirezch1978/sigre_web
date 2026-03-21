@@ -663,6 +663,10 @@ public class SyncSchedulerService {
             
             emailService.enviarReporteSincronizacion(report);
             log.info("📧 Reporte de sincronización enviado por email");
+
+            // Limpiar errores después de enviarlos para no repetirlos en el siguiente reporte
+            remoteToLocalSync.limpiarErrores();
+            log.info("🧹 Errores de sincronización limpiados después de enviar reporte");
             
         } catch (Exception e) {
             log.error("❌ Error al generar/enviar reporte de sincronización", e);
