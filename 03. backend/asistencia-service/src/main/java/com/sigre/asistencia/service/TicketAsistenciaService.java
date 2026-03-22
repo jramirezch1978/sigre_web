@@ -71,6 +71,9 @@ public class TicketAsistenciaService {
     
     @Value("${asistencia.auto-cierre.horas-limite:13}")
     private int autoCierreHoras;
+
+    @Value("${asistencia.auto-cierre.produccion-horas-maximas:12}")
+    private int produccionHorasMaximas;
     
     @Value("${asistencia.sistema.cod-usuario:work}")
     private String codUsuarioSistema;
@@ -603,16 +606,16 @@ public class TicketAsistenciaService {
                         ultimoReal.getFecMarcacion(), LocalDateTime.now()
                 ).toHours();
 
-                if (horasDesdeProduccion < 12) {
-                    log.info("🔄 Trabajador {} tiene ingreso a producción (7) con {} h (< 12h). Auto-cierre pospuesto.",
-                            codTrabajador, horasDesdeProduccion);
+                if (horasDesdeProduccion < produccionHorasMaximas) {
+                    log.info("🔄 Trabajador {} tiene ingreso a producción (7) con {} h (< {}h). Auto-cierre pospuesto.",
+                            codTrabajador, horasDesdeProduccion, produccionHorasMaximas);
                     return;
                 }
 
-                log.info("🚨 Auto-cierre PRODUCCIÓN | Trabajador: {} | Horas en producción: {}/12",
-                        codTrabajador, horasDesdeProduccion);
+                log.info("🚨 Auto-cierre PRODUCCIÓN | Trabajador: {} | Horas en producción: {}/{}",
+                        codTrabajador, horasDesdeProduccion, produccionHorasMaximas);
 
-                LocalDateTime horaCierreProduccion = ultimoReal.getFecMarcacion().plusHours(12);
+                LocalDateTime horaCierreProduccion = ultimoReal.getFecMarcacion().plusHours(produccionHorasMaximas);
 
                 LocalDateTime horaCierreTurno = this.calcularHoraCierreTurno(
                         ultimaAsistencia.getFechaMovimiento(),
