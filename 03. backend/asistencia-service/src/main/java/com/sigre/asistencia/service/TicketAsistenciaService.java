@@ -125,12 +125,15 @@ public class TicketAsistenciaService {
                 return MarcacionResponse.error(validacionHorario.getMensajeError(), request.getCodigoInput());
             }
             
-            // PASO 1.6: Verificar y manejar auto-cierre de marcaciones antiguas
-            // Nota: Validación de tiempo mínimo ya se hizo en /validar-codigo
-            long inicioAutoCierre = System.currentTimeMillis();
-            this.procesarAutoCierreSiEsNecesario(validacion.getTrabajador().getCodTrabajador(), request.getCodOrigen());
-            long tiempoAutoCierre = System.currentTimeMillis() - inicioAutoCierre;
-            log.info("⏱️ Verificación auto-cierre completada en: {} ms", tiempoAutoCierre);
+            // PASO 1.6: Auto-cierre solo al marcar INGRESO_PLANTA (tipo 1).
+            // Limpia jornada anterior: si hay 7 abierto >=12h crea 8 auto, luego 2 auto.
+            // Para otros movimientos (8, 2, 3, etc.) NO se ejecuta.
+            if ("1".equals(request.getTipoMovimiento())) {
+                long inicioAutoCierre = System.currentTimeMillis();
+                this.procesarAutoCierreSiEsNecesario(validacion.getTrabajador().getCodTrabajador(), request.getCodOrigen());
+                long tiempoAutoCierre = System.currentTimeMillis() - inicioAutoCierre;
+                log.info("⏱️ Verificación auto-cierre completada en: {} ms", tiempoAutoCierre);
+            }
             
             // PASO 2: Generar número de ticket único
             long inicioGeneracion = System.currentTimeMillis();
@@ -591,6 +594,10 @@ public class TicketAsistenciaService {
                     .findUltimoMovimientoReal(codTrabajador, codOrigen)
                     .orElse(null);
             
+            long horasTranscurridas = java.time.Duration.between(
+                    ultimaAsistencia.getFecMarcacion(), LocalDateTime.now()
+            ).toHours();
+
             if (ultimoReal != null && "7".equals(ultimoReal.getFlagInOut().trim())) {
                 long horasDesdeProduccion = java.time.Duration.between(
                         ultimoReal.getFecMarcacion(), LocalDateTime.now()
@@ -607,7 +614,6 @@ public class TicketAsistenciaService {
 
                 LocalDateTime horaCierreProduccion = ultimoReal.getFecMarcacion().plusHours(12);
 
-                // Limitar al cierre de turno menos 10 minutos
                 LocalDateTime horaCierreTurno = this.calcularHoraCierreTurno(
                         ultimaAsistencia.getFechaMovimiento(),
                         ultimaAsistencia.getTurno()
@@ -639,23 +645,17 @@ public class TicketAsistenciaService {
                         .build();
 
                 asistenciaRepository.save(salidaProduccion);
-                log.info("✅ Auto-cierre producción ejecutado | Trabajador: {} | Salida producción: {}",
+                log.info("✅ Auto-cierre producción ejecutado | Trabajador: {} | Salida producción: {} | Ahora cerrando planta (2)...",
                         codTrabajador, horaCierreProduccion);
+            } else {
+                if (horasTranscurridas < autoCierreHoras) {
+                    log.debug("🔄 Marcación reciente ({} h < {} h límite) para trabajador {}, sin auto-cierre", 
+                             horasTranscurridas, autoCierreHoras, codTrabajador);
+                    return;
+                }
+                log.info("🚨 Auto-cierre necesario | Trabajador: {} | Horas: {}/{} | Registro: {}", 
+                        codTrabajador, horasTranscurridas, autoCierreHoras, ultimaAsistencia.getFechaRegistro());
             }
-
-            long horasTranscurridas = java.time.Duration.between(
-                    ultimaAsistencia.getFecMarcacion(), 
-                    LocalDateTime.now()
-            ).toHours();
-            
-            if (horasTranscurridas < autoCierreHoras) {
-                log.debug("🔄 Marcación reciente ({} h < {} h límite) para trabajador {}, sin auto-cierre", 
-                         horasTranscurridas, autoCierreHoras, codTrabajador);
-                return;
-            }
-            
-            log.info("🚨 Auto-cierre necesario | Trabajador: {} | Horas: {}/{} | Registro: {}", 
-                    codTrabajador, horasTranscurridas, autoCierreHoras, ultimaAsistencia.getFechaRegistro());
             
             // Determinar hora de cierre del turno usando fecha de movimiento y turno de la marcación 01
             LocalDateTime horaCierre = this.calcularHoraCierreTurno(
