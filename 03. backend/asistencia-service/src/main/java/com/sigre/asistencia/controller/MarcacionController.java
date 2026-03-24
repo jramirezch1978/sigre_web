@@ -176,6 +176,10 @@ public class MarcacionController {
                             ticketService.procesarAutoCierreSiEsNecesario(codTrabajador, codOrigen);
                             seProcesaAutoCierre = true;
                             log.info("✅ Auto-cierre completado | Trabajador: {}", codTrabajador);
+                            
+                            ultimaAsistencia = asistenciaRepository
+                                    .findUltimaMarcacionConFiltrosByTrabajador(codTrabajador, codOrigen)
+                                    .orElse(null);
                         } catch (Exception e) {
                             log.error("❌ Error en auto-cierre | Trabajador: {}: {}", codTrabajador, e.getMessage(), e);
                         }
