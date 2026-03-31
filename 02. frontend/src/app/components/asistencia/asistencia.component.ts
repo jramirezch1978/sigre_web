@@ -357,6 +357,7 @@ export class AsistenciaComponent implements OnInit {
       this.limpiarCamposParaSiguienteTrabajador();
     } else {
       this.mostrarPopupRaciones = false;
+      this.limpiarCamposParaSiguienteTrabajador();
     }
   }
 
