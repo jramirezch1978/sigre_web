@@ -351,7 +351,10 @@ export class AsistenciaComponent implements OnInit {
 
   onPopupCerrado(tipo: 'movimientos' | 'raciones') {
     if (tipo === 'movimientos') {
+      // Si cancela el popup principal de movimientos, volver al estado inicial.
+      // Requisito usuario: el input debe quedar limpio al cancelar.
       this.mostrarPopupMovimientos = false;
+      this.limpiarCamposParaSiguienteTrabajador();
     } else {
       this.mostrarPopupRaciones = false;
     }
