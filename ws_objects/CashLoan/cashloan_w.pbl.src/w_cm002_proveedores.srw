@@ -269,7 +269,7 @@ try
 		
 		invo_wait.of_mensaje("Espere un momento, procesando Servicio Web de SUNAT")
 		
-		lnvo_bean = gnvo_app.logistica.of_leer_ruc_externo(ls_ruc)
+		lnvo_bean = gnvo_app.logistica.of_leer_ruc_rest(ls_ruc)
 		
 		invo_wait.of_mensaje("Datos Obtenidos, validando informacion")
 		
