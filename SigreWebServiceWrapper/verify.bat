@@ -10,7 +10,17 @@ REM ============================================================
 
 REM --- Detectar carpeta de la DLL ---
 set "DLL_DIR=%~dp0"
-if exist "%~dp0dll\x86\SigreWebServiceWrapper.dll" set "DLL_DIR=%~dp0dll\x86\"
+set "DLL_ARCH=unknown"
+if exist "%~dp0dll\x86\SigreWebServiceWrapper.dll" (
+    set "DLL_DIR=%~dp0dll\x86\"
+    set "DLL_ARCH=x86"
+)
+if exist "%~dp0dll\x64\SigreWebServiceWrapper.dll" (
+    if "!DLL_ARCH!"=="unknown" (
+        set "DLL_DIR=%~dp0dll\x64\"
+        set "DLL_ARCH=x64"
+    )
+)
 if not "%~1"=="" if exist "%~1\SigreWebServiceWrapper.dll" set "DLL_DIR=%~1\"
 
 REM --- Parametros de prueba (modificar segun entorno) ---
@@ -32,14 +42,23 @@ if !SKIP! equ 0 (
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "(Get-Content -Path '%~f0' -Encoding Default) | Select-Object -Skip %SKIP% | Set-Content -Path '%TEMP_PS%' -Encoding UTF8"
 
-REM --- Ejecutar con PowerShell 64-bit ---
-powershell -NoProfile -ExecutionPolicy Bypass -File "%TEMP_PS%"
+REM --- Elegir PowerShell segun arquitectura de la DLL ---
+REM    DLL x86 (PowerBuilder 32-bit) -> PowerShell 32-bit
+REM    DLL x64 -> PowerShell 64-bit (default)
+set "PS_EXE=powershell"
+if "!DLL_ARCH!"=="x86" (
+    if exist "%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe" (
+        set "PS_EXE=%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe"
+    )
+)
+
+"!PS_EXE!" -NoProfile -ExecutionPolicy Bypass -File "%TEMP_PS%"
 set "PS_EXIT=!ERRORLEVEL!"
 
-REM --- Si falla por arquitectura (exit 2), reintentar con 32-bit ---
+REM --- Fallback: si fallo por arquitectura (exit 2), reintentar con 32-bit ---
 if !PS_EXIT! equ 2 (
     echo.
-    echo    Reintentando con PowerShell 32-bit ^(DLL x86^)...
+    echo    Reintentando con PowerShell 32-bit...
     echo.
     if exist "%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe" (
         "%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%TEMP_PS%"
@@ -143,13 +162,20 @@ public class SigreV {
 
 try {
     Add-Type -TypeDefinition $src -ErrorAction Stop
+} catch {
+    Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
+
+# Probar carga real de la DLL (Add-Type solo compila, no carga la DLL)
+try {
+    $null = [SigreV]::ObtenerVersion()
     Write-Host '   [OK] DLL cargada correctamente' -ForegroundColor Green
 } catch {
-    $msg = $_.Exception.InnerException.Message
-    if (-not $msg) { $msg = $_.Exception.Message }
-    if ($msg -match 'BadImageFormatException' -or $msg -match 'no es un') {
-        Write-Host "   [ERROR] Arquitectura incompatible: PowerShell $([IntPtr]::Size * 8)-bit no puede cargar esta DLL" -ForegroundColor Red
-        Write-Host '   Reintentando con PowerShell 32-bit...' -ForegroundColor Yellow
+    $msg = $_.Exception.Message
+    if ($msg -match '0x8007000B' -or $msg -match 'formato incorrecto' -or $msg -match 'BadImageFormat') {
+        $bits = [IntPtr]::Size * 8
+        Write-Host "   [ERROR] DLL x86 no compatible con PowerShell ${bits}-bit" -ForegroundColor Red
         exit 2
     }
     Write-Host "   [ERROR] $msg" -ForegroundColor Red
@@ -159,6 +185,7 @@ Write-Host ''
 
 # --- [3] ObtenerVersion() ---
 Write-Host '[3] ObtenerVersion()' -ForegroundColor Yellow
+# Ya se llamo en el probe, obtener resultado limpio
 try {
     $ver = [SigreV]::R([SigreV]::ObtenerVersion())
     if ($ver -and $ver.Length -gt 0 -and $ver -ne '(null)') {
