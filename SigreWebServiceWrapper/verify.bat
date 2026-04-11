@@ -4,24 +4,47 @@ cd /d "%~dp0"
 
 REM ============================================================
 REM  verify.bat - Verificador de SigreWebServiceWrapper.dll
-REM  Prueba todas las funciones exportadas via P/Invoke
-REM  Flujo: Version, IP, Config, Token, InfoToken, ConsultarRuc
+REM  Uso: verify.bat [x86|x64]
+REM    x86 = forzar DLL 32-bit con PowerShell 32-bit
+REM    x64 = forzar DLL 64-bit con PowerShell 64-bit
+REM    (sin argumento = auto-detectar)
 REM ============================================================
+
+REM --- Procesar argumento x86/x64 ---
+set "FORCE_ARCH="
+if /i "%~1"=="x86" set "FORCE_ARCH=x86"
+if /i "%~1"=="x64" set "FORCE_ARCH=x64"
 
 REM --- Detectar carpeta de la DLL ---
 set "DLL_DIR=%~dp0"
 set "DLL_ARCH=unknown"
-if exist "%~dp0dll\x86\SigreWebServiceWrapper.dll" (
-    set "DLL_DIR=%~dp0dll\x86\"
-    set "DLL_ARCH=x86"
-)
-if exist "%~dp0dll\x64\SigreWebServiceWrapper.dll" (
-    if "!DLL_ARCH!"=="unknown" (
+
+if "!FORCE_ARCH!"=="x86" (
+    if exist "%~dp0dll\x86\SigreWebServiceWrapper.dll" (
+        set "DLL_DIR=%~dp0dll\x86\"
+        set "DLL_ARCH=x86"
+    ) else (
+        set "DLL_ARCH=x86"
+    )
+) else if "!FORCE_ARCH!"=="x64" (
+    if exist "%~dp0dll\x64\SigreWebServiceWrapper.dll" (
         set "DLL_DIR=%~dp0dll\x64\"
         set "DLL_ARCH=x64"
+    ) else (
+        set "DLL_ARCH=x64"
+    )
+) else (
+    if exist "%~dp0dll\x86\SigreWebServiceWrapper.dll" (
+        set "DLL_DIR=%~dp0dll\x86\"
+        set "DLL_ARCH=x86"
+    )
+    if exist "%~dp0dll\x64\SigreWebServiceWrapper.dll" (
+        if "!DLL_ARCH!"=="unknown" (
+            set "DLL_DIR=%~dp0dll\x64\"
+            set "DLL_ARCH=x64"
+        )
     )
 )
-if not "%~1"=="" if exist "%~1\SigreWebServiceWrapper.dll" set "DLL_DIR=%~1\"
 
 REM --- Parametros de prueba (modificar segun entorno) ---
 set "TEST_USUARIO=sigre"
