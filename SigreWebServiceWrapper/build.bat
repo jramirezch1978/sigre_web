@@ -79,12 +79,17 @@ if exist "%VS_PATH%\VC\Auxiliary\Build\vcvars64.bat" (
     echo    [SKIP] vcvars64.bat no encontrado, saltando x64
 )
 
-REM --- Copiar INI ---
-echo [4/4] Copiando archivos de configuracion...
+REM --- Copiar INI y verify.bat ---
+echo [4/4] Copiando archivos de configuracion y verificacion...
 if exist "SigreWebServiceWrapper.ini" (
     copy /Y "SigreWebServiceWrapper.ini" "dll\x86\" >nul
     copy /Y "SigreWebServiceWrapper.ini" "dll\x64\" >nul
     echo    [OK] Archivo INI copiado
+)
+if exist "verify.bat" (
+    copy /Y "verify.bat" "dll\x86\" >nul
+    copy /Y "verify.bat" "dll\x64\" >nul
+    echo    [OK] verify.bat copiado
 )
 
 REM --- Verificar exportaciones ---
@@ -107,16 +112,15 @@ echo ============================================================
 echo   COMPILACION EXITOSA
 echo ============================================================
 echo.
-echo   Archivos generados:
-echo     - dll\x86\SigreWebServiceWrapper.dll (32 bits)
-echo     - dll\x64\SigreWebServiceWrapper.dll (64 bits)
-echo     - dll\x86\SigreWebServiceWrapper.ini
-echo     - dll\x64\SigreWebServiceWrapper.ini
+echo   Archivos generados en dll\x86\:
+echo     - SigreWebServiceWrapper.dll (32 bits)
+echo     - SigreWebServiceWrapper.ini
+echo     - verify.bat
 echo.
 echo   Para usar en PowerBuilder:
-echo     1. Copie dll\x86\SigreWebServiceWrapper.dll a su carpeta EXE
-echo     2. Copie dll\x86\SigreWebServiceWrapper.ini a la misma carpeta
-echo     3. Configure el archivo INI con sus credenciales SMTP
+echo     1. Copie los 3 archivos de dll\x86\ a la carpeta del EXE
+echo     2. Configure el archivo INI con sus credenciales
+echo     3. Ejecute verify.bat para verificar que todo funcione
 echo.
 goto :END
 
