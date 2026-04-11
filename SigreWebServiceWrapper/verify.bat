@@ -3,8 +3,9 @@ setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
 REM ============================================================
-REM   verify.bat - Verificador completo de SigreWebServiceWrapper.dll
-REM   Prueba: Version, IP, Configurar, Token, Consultar RUC
+REM  verify.bat - Verificador de SigreWebServiceWrapper.dll
+REM  Prueba todas las funciones exportadas via P/Invoke
+REM  Flujo: Version, IP, Config, Token, InfoToken, ConsultarRuc
 REM ============================================================
 
 REM --- Detectar carpeta de la DLL ---
@@ -12,216 +13,316 @@ set "DLL_DIR=%~dp0"
 if exist "%~dp0dll\x86\SigreWebServiceWrapper.dll" set "DLL_DIR=%~dp0dll\x86\"
 if not "%~1"=="" if exist "%~1\SigreWebServiceWrapper.dll" set "DLL_DIR=%~1\"
 
-REM --- Parametros de prueba ---
+REM --- Parametros de prueba (modificar segun entorno) ---
 set "TEST_USUARIO=sigre"
 set "TEST_CLAVE=sigre1234"
 set "TEST_EMPRESA=TRANSMARINA"
 set "TEST_RUC=10056450608"
 set "TEST_RUC_ORIGEN=20100070970"
 
-REM --- Generar script temporal ---
+REM --- Extraer script PS1 embebido en este BAT ---
 set "TEMP_PS=%TEMP%\verify_sigre_%RANDOM%.ps1"
+set /a "SKIP=0"
+for /f "delims=:" %%n in ('findstr /n /b /c:"#__PS1__" "%~f0"') do set /a "SKIP=%%n"
+if !SKIP! equ 0 (
+    echo ERROR: No se encontro el marcador del script PowerShell
+    pause
+    exit /b 1
+)
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "(Get-Content -Path '%~f0' -Encoding Default) | Select-Object -Skip %SKIP% | Set-Content -Path '%TEMP_PS%' -Encoding UTF8"
 
-> "%TEMP_PS%" (
-echo $ErrorActionPreference = 'Continue'
-echo.
-echo Write-Host ''
-echo Write-Host '============================================================' -ForegroundColor Cyan
-echo Write-Host '  VERIFICADOR DE DLL - SigreWebServiceWrapper' -ForegroundColor Cyan
-echo Write-Host '============================================================' -ForegroundColor Cyan
-echo Write-Host ''
-echo.
-echo $dllDir = '%DLL_DIR%'.TrimEnd('\')
-echo $dllPath = Join-Path $dllDir 'SigreWebServiceWrapper.dll'
-echo $iniPath = Join-Path $dllDir 'SigreWebServiceWrapper.ini'
-echo.
-echo Write-Host "  Carpeta: $dllDir" -ForegroundColor Gray
-echo Write-Host ''
-echo.
-echo # --- [1] Verificar archivos ---
-echo Write-Host '[1] Verificando archivos...' -ForegroundColor Yellow
-echo.
-echo if (-not ^(Test-Path $dllPath^)^) {
-echo     Write-Host '   [ERROR] SigreWebServiceWrapper.dll NO encontrado' -ForegroundColor Red
-echo     exit 1
-echo }
-echo $fi = Get-Item $dllPath
-echo $kb = [math]::Round^($fi.Length / 1KB, 1^)
-echo Write-Host "   [OK] SigreWebServiceWrapper.dll ($kb KB, $($fi.LastWriteTime.ToString('yyyy-MM-dd HH:mm')))" -ForegroundColor Green
-echo.
-echo if ^(Test-Path $iniPath^) {
-echo     Write-Host '   [OK] SigreWebServiceWrapper.ini encontrado' -ForegroundColor Green
-echo } else {
-echo     Write-Host '   [WARN] SigreWebServiceWrapper.ini no encontrado' -ForegroundColor Yellow
-echo }
-echo Write-Host ''
-echo.
-echo # --- [2] Cargar DLL via P/Invoke ---
-echo Write-Host '[2] Cargando DLL via P/Invoke...' -ForegroundColor Yellow
-echo.
-echo $fullPath = ^(Resolve-Path $dllPath^).Path
-echo $escaped = $fullPath.Replace('\', '\\')
-echo.
-echo $src = @"
-echo using System;
-echo using System.Runtime.InteropServices;
-echo public class SigreV {
-echo     [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-echo     public static extern IntPtr ObtenerVersion^(^);
-echo     [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-echo     public static extern IntPtr ObtenerIpLocal^(^);
-echo     [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-echo     public static extern IntPtr ObtenerConfiguracion^(^);
-echo     [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-echo     public static extern IntPtr ConfigurarCredencialesRuc^(
-echo         [MarshalAs(UnmanagedType.LPWStr)] string u,
-echo         [MarshalAs(UnmanagedType.LPWStr)] string c,
-echo         [MarshalAs(UnmanagedType.LPWStr)] string e2,
-echo         [MarshalAs(UnmanagedType.LPWStr)] string ip,
-echo         [MarshalAs(UnmanagedType.LPWStr)] string pc^);
-echo     [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-echo     public static extern IntPtr ObtenerTokenRest^(
-echo         [MarshalAs(UnmanagedType.LPWStr)] string u,
-echo         [MarshalAs(UnmanagedType.LPWStr)] string c,
-echo         [MarshalAs(UnmanagedType.LPWStr)] string e2,
-echo         [MarshalAs(UnmanagedType.LPWStr)] string ip,
-echo         [MarshalAs(UnmanagedType.LPWStr)] string pc^);
-echo     [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-echo     public static extern IntPtr ConsultarRuc^(
-echo         [MarshalAs(UnmanagedType.LPWStr)] string ruc,
-echo         [MarshalAs(UnmanagedType.LPWStr)] string rucOrigen^);
-echo     public static string R^(IntPtr p^) {
-echo         if ^(p == IntPtr.Zero^) return "(null)";
-echo         return Marshal.PtrToStringUni^(p^) ?? "(null)";
-echo     }
-echo }
-echo "@
-echo.
-echo try {
-echo     Add-Type -TypeDefinition $src -ErrorAction Stop
-echo     Write-Host '   [OK] DLL cargada correctamente' -ForegroundColor Green
-echo } catch {
-echo     Write-Host "   [ERROR] No se pudo cargar: $($_.Exception.Message)" -ForegroundColor Red
-echo     exit 1
-echo }
-echo Write-Host ''
-echo.
-echo # --- [3] Probar ObtenerVersion ---
-echo Write-Host '[3] Probando ObtenerVersion...' -ForegroundColor Yellow
-echo try {
-echo     $ver = [SigreV]::R^([SigreV]::ObtenerVersion^(^)^)
-echo     Write-Host "   Version: $ver" -ForegroundColor Green
-echo } catch {
-echo     Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
-echo }
-echo Write-Host ''
-echo.
-echo # --- [4] Probar ObtenerIpLocal ---
-echo Write-Host '[4] Probando ObtenerIpLocal...' -ForegroundColor Yellow
-echo try {
-echo     $ip = [SigreV]::R^([SigreV]::ObtenerIpLocal^(^)^)
-echo     Write-Host "   IP Local: $ip" -ForegroundColor Green
-echo } catch {
-echo     Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
-echo     $ip = '127.0.0.1'
-echo }
-echo Write-Host ''
-echo.
-echo # --- [5] Configurar credenciales ---
-echo Write-Host '[5] ConfigurarCredencialesRuc...' -ForegroundColor Yellow
-echo $pc = $env:COMPUTERNAME
-echo Write-Host "   Usuario:  %TEST_USUARIO%" -ForegroundColor Gray
-echo Write-Host "   Empresa:  %TEST_EMPRESA%" -ForegroundColor Gray
-echo Write-Host "   IP Local: $ip" -ForegroundColor Gray
-echo Write-Host "   Equipo:   $pc" -ForegroundColor Gray
-echo try {
-echo     $r = [SigreV]::R^([SigreV]::ConfigurarCredencialesRuc^('%TEST_USUARIO%', '%TEST_CLAVE%', '%TEST_EMPRESA%', $ip, $pc^)^)
-echo     Write-Host "   Resultado: $r" -ForegroundColor Green
-echo } catch {
-echo     Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
-echo }
-echo Write-Host ''
-echo.
-echo # --- [6] Obtener Token JWT ---
-echo Write-Host '[6] ObtenerTokenRest...' -ForegroundColor Yellow
-echo try {
-echo     $token = [SigreV]::R^([SigreV]::ObtenerTokenRest^('%TEST_USUARIO%', '%TEST_CLAVE%', '%TEST_EMPRESA%', $ip, $pc^)^)
-echo     if ^($token.Length -gt 50^) {
-echo         Write-Host "   Token obtenido: $($token.Substring(0, 50))..." -ForegroundColor Green
-echo         Write-Host "   Token length: $($token.Length) caracteres" -ForegroundColor Gray
-echo     } else {
-echo         Write-Host "   Respuesta: $token" -ForegroundColor Yellow
-echo     }
-echo } catch {
-echo     Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
-echo     $token = ''
-echo }
-echo Write-Host ''
-echo.
-echo # --- [7] Consultar RUC ---
-echo Write-Host '[7] ConsultarRuc(%TEST_RUC%)...' -ForegroundColor Yellow
-echo Write-Host "   RUC Consulta: %TEST_RUC%" -ForegroundColor Gray
-echo Write-Host "   RUC Origen:   %TEST_RUC_ORIGEN%" -ForegroundColor Gray
-echo try {
-echo     $ruc = [SigreV]::R^([SigreV]::ConsultarRuc^('%TEST_RUC%', '%TEST_RUC_ORIGEN%'^)^)
-echo     Write-Host ''
-echo     if ^($ruc -match '"success"\s*:\s*true'^) {
-echo         Write-Host '   [OK] RUC ENCONTRADO' -ForegroundColor Green
-echo         try {
-echo             $obj = $ruc ^| ConvertFrom-Json
-echo             if ^($obj.data^) {
-echo                 Write-Host "   RUC:          $($obj.data.ruc)" -ForegroundColor White
-echo                 Write-Host "   Razon Social: $($obj.data.razonSocial)" -ForegroundColor White
-echo                 Write-Host "   Estado:       $($obj.data.estado)" -ForegroundColor White
-echo                 Write-Host "   Condicion:    $($obj.data.condicion)" -ForegroundColor White
-echo                 Write-Host "   Departamento: $($obj.data.descDepartamento)" -ForegroundColor Gray
-echo                 Write-Host "   Provincia:    $($obj.data.descProvincia)" -ForegroundColor Gray
-echo                 Write-Host "   Distrito:     $($obj.data.descDistrito)" -ForegroundColor Gray
-echo                 $dir = @($obj.data.tipoVia, $obj.data.nombreVia, $obj.data.numero^) -join ' '
-echo                 Write-Host "   Direccion:    $($dir.Trim())" -ForegroundColor Gray
-echo             }
-echo         } catch {
-echo             Write-Host "   JSON: $ruc" -ForegroundColor Gray
-echo         }
-echo     } elseif ^($ruc -match 'exitoso.*false' -or $ruc -match '"success"\s*:\s*false'^) {
-echo         Write-Host '   [WARN] RUC no encontrado o error' -ForegroundColor Yellow
-echo         Write-Host "   Respuesta: $ruc" -ForegroundColor Gray
-echo     } else {
-echo         Write-Host "   Respuesta: $ruc" -ForegroundColor Gray
-echo     }
-echo } catch {
-echo     Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
-echo }
-echo Write-Host ''
-echo.
-echo # --- [8] Configuracion INI ---
-echo Write-Host '[8] Configuracion (SigreWebServiceWrapper.ini):' -ForegroundColor Yellow
-echo Write-Host '   ----------------------------------------'
-echo if ^(Test-Path $iniPath^) {
-echo     Get-Content $iniPath ^| ForEach-Object {
-echo         if ^($_ -match 'Password^|Secret^|Token^|AccessKey'^) {
-echo             $parts = $_ -split '=', 2
-echo             if ^($parts.Length -eq 2 -and $parts[1].Length -gt 4^) {
-echo                 $masked = $parts[1].Substring^(0, 3^) + ^('*' * [Math]::Min^($parts[1].Length - 3, 10^)^)
-echo                 Write-Host "   $($parts[0])=$masked" -ForegroundColor Gray
-echo             } else { Write-Host "   $_" -ForegroundColor Gray }
-echo         } else { Write-Host "   $_" -ForegroundColor Gray }
-echo     }
-echo } else { Write-Host '   Archivo INI no encontrado' -ForegroundColor Yellow }
-echo Write-Host '   ----------------------------------------'
-echo.
-echo Write-Host ''
-echo Write-Host '============================================================' -ForegroundColor Cyan
-echo Write-Host '  VERIFICACION COMPLETADA' -ForegroundColor Cyan
-echo Write-Host '============================================================' -ForegroundColor Cyan
-echo Write-Host ''
+REM --- Ejecutar con PowerShell 64-bit ---
+powershell -NoProfile -ExecutionPolicy Bypass -File "%TEMP_PS%"
+set "PS_EXIT=!ERRORLEVEL!"
+
+REM --- Si falla por arquitectura (exit 2), reintentar con 32-bit ---
+if !PS_EXIT! equ 2 (
+    echo.
+    echo    Reintentando con PowerShell 32-bit ^(DLL x86^)...
+    echo.
+    if exist "%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe" (
+        "%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%TEMP_PS%"
+    ) else (
+        echo    ERROR: PowerShell 32-bit no encontrado
+    )
 )
 
-REM --- Ejecutar script temporal ---
-powershell -NoProfile -ExecutionPolicy Bypass -File "%TEMP_PS%"
-
-REM --- Limpiar ---
 del "%TEMP_PS%" >nul 2>&1
-
+echo.
 pause
 endlocal
+exit /b
+#__PS1__
+# ============================================================
+#  Verify-Dll.ps1 (embebido en verify.bat)
+#  NO MODIFICAR - este contenido se extrae automaticamente
+# ============================================================
+
+$dllDir   = $env:DLL_DIR.TrimEnd('\')
+$usuario  = $env:TEST_USUARIO
+$clave    = $env:TEST_CLAVE
+$empresa  = $env:TEST_EMPRESA
+$testRuc  = $env:TEST_RUC
+$rucOrigen = $env:TEST_RUC_ORIGEN
+
+$dllPath = Join-Path $dllDir 'SigreWebServiceWrapper.dll'
+$iniPath = Join-Path $dllDir 'SigreWebServiceWrapper.ini'
+
+Write-Host ''
+Write-Host '============================================================' -ForegroundColor Cyan
+Write-Host '  VERIFICADOR DE DLL - SigreWebServiceWrapper' -ForegroundColor Cyan
+Write-Host '============================================================' -ForegroundColor Cyan
+Write-Host ''
+Write-Host "  Carpeta: $dllDir" -ForegroundColor Gray
+Write-Host "  PowerShell: $($PSVersionTable.PSVersion) ($([IntPtr]::Size * 8)-bit)" -ForegroundColor Gray
+Write-Host ''
+
+# --- [1] Verificar archivos ---
+Write-Host '[1] Verificando archivos...' -ForegroundColor Yellow
+
+if (-not (Test-Path $dllPath)) {
+    Write-Host '   [ERROR] SigreWebServiceWrapper.dll NO encontrado' -ForegroundColor Red
+    Write-Host "   Buscado en: $dllDir" -ForegroundColor Red
+    exit 1
+}
+$fi = Get-Item $dllPath
+$kb = [math]::Round($fi.Length / 1KB, 1)
+Write-Host "   [OK] SigreWebServiceWrapper.dll ($kb KB, $($fi.LastWriteTime.ToString('yyyy-MM-dd HH:mm')))" -ForegroundColor Green
+
+if (Test-Path $iniPath) {
+    Write-Host '   [OK] SigreWebServiceWrapper.ini encontrado' -ForegroundColor Green
+} else {
+    Write-Host '   [WARN] SigreWebServiceWrapper.ini no encontrado' -ForegroundColor Yellow
+}
+Write-Host ''
+
+# --- [2] Cargar DLL via P/Invoke ---
+Write-Host '[2] Cargando DLL via P/Invoke...' -ForegroundColor Yellow
+
+$fullPath = (Resolve-Path $dllPath).Path
+$escaped  = $fullPath.Replace('\', '\\')
+
+$src = @"
+using System;
+using System.Runtime.InteropServices;
+
+public class SigreV {
+
+    [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+    public static extern IntPtr ObtenerVersion();
+
+    [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+    public static extern IntPtr ObtenerIpLocal();
+
+    [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+    public static extern IntPtr ObtenerConfiguracion();
+
+    [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+    public static extern IntPtr ObtenerInfoToken();
+
+    [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+    public static extern IntPtr ObtenerTokenRest(
+        [MarshalAs(UnmanagedType.LPWStr)] string usuario,
+        [MarshalAs(UnmanagedType.LPWStr)] string clave,
+        [MarshalAs(UnmanagedType.LPWStr)] string empresa,
+        [MarshalAs(UnmanagedType.LPWStr)] string ipLocal,
+        [MarshalAs(UnmanagedType.LPWStr)] string computerName);
+
+    [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+    public static extern IntPtr ConsultarRuc(
+        [MarshalAs(UnmanagedType.LPWStr)] string ruc,
+        [MarshalAs(UnmanagedType.LPWStr)] string rucOrigen);
+
+    public static string R(IntPtr p) {
+        if (p == IntPtr.Zero) return "(null)";
+        return Marshal.PtrToStringUni(p) ?? "(null)";
+    }
+}
+"@
+
+try {
+    Add-Type -TypeDefinition $src -ErrorAction Stop
+    Write-Host '   [OK] DLL cargada correctamente' -ForegroundColor Green
+} catch {
+    $msg = $_.Exception.InnerException.Message
+    if (-not $msg) { $msg = $_.Exception.Message }
+    if ($msg -match 'BadImageFormatException' -or $msg -match 'no es un') {
+        Write-Host "   [ERROR] Arquitectura incompatible: PowerShell $([IntPtr]::Size * 8)-bit no puede cargar esta DLL" -ForegroundColor Red
+        Write-Host '   Reintentando con PowerShell 32-bit...' -ForegroundColor Yellow
+        exit 2
+    }
+    Write-Host "   [ERROR] $msg" -ForegroundColor Red
+    exit 1
+}
+Write-Host ''
+
+# --- [3] ObtenerVersion() ---
+Write-Host '[3] ObtenerVersion()' -ForegroundColor Yellow
+try {
+    $ver = [SigreV]::R([SigreV]::ObtenerVersion())
+    if ($ver -and $ver.Length -gt 0 -and $ver -ne '(null)') {
+        Write-Host "   => $ver" -ForegroundColor Green
+    } else {
+        Write-Host '   => (vacio)' -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+}
+Write-Host ''
+
+# --- [4] ObtenerIpLocal() ---
+Write-Host '[4] ObtenerIpLocal()' -ForegroundColor Yellow
+$ipLocal = '127.0.0.1'
+try {
+    $ipLocal = [SigreV]::R([SigreV]::ObtenerIpLocal())
+    Write-Host "   => $ipLocal" -ForegroundColor Green
+} catch {
+    Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+}
+Write-Host ''
+
+# --- [5] ObtenerConfiguracion() ---
+Write-Host '[5] ObtenerConfiguracion()' -ForegroundColor Yellow
+try {
+    $cfgJson = [SigreV]::R([SigreV]::ObtenerConfiguracion())
+    try {
+        $cfg = $cfgJson | ConvertFrom-Json
+        Write-Host "   apiHost:    $($cfg.apiHost)" -ForegroundColor Gray
+        Write-Host "   apiPort:    $($cfg.apiPort)" -ForegroundColor Gray
+        Write-Host "   smtpServer: $($cfg.smtpServer)" -ForegroundColor Gray
+        Write-Host "   logEnabled: $($cfg.logEnabled)" -ForegroundColor Gray
+        Write-Host "   version:    $($cfg.version)" -ForegroundColor Gray
+    } catch {
+        Write-Host "   => $cfgJson" -ForegroundColor Gray
+    }
+} catch {
+    Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+}
+Write-Host ''
+
+# --- [6] ObtenerTokenRest(usuario, clave, empresa, ipLocal, computerName) ---
+$pc = $env:COMPUTERNAME
+Write-Host "[6] ObtenerTokenRest('$usuario', '***', '$empresa', '$ipLocal', '$pc')" -ForegroundColor Yellow
+$tokenOk = $false
+try {
+    $tokenResult = [SigreV]::R([SigreV]::ObtenerTokenRest($usuario, $clave, $empresa, $ipLocal, $pc))
+    if ($tokenResult -match '^ERROR' -or $tokenResult -match '"exitoso"\s*:\s*false') {
+        Write-Host "   [WARN] $tokenResult" -ForegroundColor Yellow
+    } elseif ($tokenResult.Length -gt 50) {
+        Write-Host "   => Token obtenido ($($tokenResult.Length) chars)" -ForegroundColor Green
+        Write-Host "   => $($tokenResult.Substring(0, 60))..." -ForegroundColor Gray
+        $tokenOk = $true
+    } else {
+        Write-Host "   => $tokenResult" -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+}
+Write-Host ''
+
+# --- [7] ObtenerInfoToken() ---
+Write-Host '[7] ObtenerInfoToken()' -ForegroundColor Yellow
+try {
+    $infoJson = [SigreV]::R([SigreV]::ObtenerInfoToken())
+    try {
+        $info = $infoJson | ConvertFrom-Json
+        Write-Host "   tieneToken:   $($info.tieneToken)" -ForegroundColor $(if ($info.tieneToken) { 'Green' } else { 'Yellow' })
+        if ($info.tieneToken) {
+            Write-Host "   usuario:      $($info.usuario)" -ForegroundColor Gray
+            Write-Host "   empresa:      $($info.empresa)" -ForegroundColor Gray
+            Write-Host "   ipLocal:      $($info.ipLocal)" -ForegroundColor Gray
+            Write-Host "   computerName: $($info.computerName)" -ForegroundColor Gray
+            Write-Host "   tokenLength:  $($info.tokenLength)" -ForegroundColor Gray
+        }
+    } catch {
+        Write-Host "   => $infoJson" -ForegroundColor Gray
+    }
+} catch {
+    Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+}
+Write-Host ''
+
+# --- [8] ConsultarRuc(ruc, rucOrigen) ---
+Write-Host "[8] ConsultarRuc('$testRuc', '$rucOrigen')" -ForegroundColor Yellow
+
+if (-not $tokenOk) {
+    Write-Host '   [SKIP] No hay token valido - no se puede consultar' -ForegroundColor Yellow
+    Write-Host '   El paso [6] debe obtener un token exitosamente' -ForegroundColor Gray
+} else {
+    try {
+        $rucResult = [SigreV]::R([SigreV]::ConsultarRuc($testRuc, $rucOrigen))
+
+        if ($rucResult -match '"success"\s*:\s*true') {
+            Write-Host '   [OK] RUC ENCONTRADO' -ForegroundColor Green
+            Write-Host ''
+            try {
+                $rucObj = $rucResult | ConvertFrom-Json
+                $d = $rucObj.data
+                Write-Host "   RUC:          $($d.ruc)" -ForegroundColor White
+                Write-Host "   Razon Social: $($d.razonSocial)" -ForegroundColor White
+                Write-Host "   Estado:       $($d.estado)" -ForegroundColor White
+                Write-Host "   Condicion:    $($d.condicion)" -ForegroundColor White
+                Write-Host "   Ubigeo:       $($d.ubigeo)" -ForegroundColor Gray
+
+                $partes = @($d.tipoVia, $d.nombreVia, $d.numero) | Where-Object { $_ }
+                $direccion = ($partes -join ' ').Trim()
+                if ($direccion) {
+                    Write-Host "   Direccion:    $direccion" -ForegroundColor Gray
+                }
+
+                if ($d.tipoZona -or $d.codigoZona) {
+                    Write-Host "   Zona:         $($d.tipoZona) $($d.codigoZona)" -ForegroundColor Gray
+                }
+
+                Write-Host "   Departamento: $($d.descDepartamento)" -ForegroundColor Gray
+                Write-Host "   Provincia:    $($d.descProvincia)" -ForegroundColor Gray
+                Write-Host "   Distrito:     $($d.descDistrito)" -ForegroundColor Gray
+            } catch {
+                Write-Host "   JSON raw: $rucResult" -ForegroundColor Gray
+            }
+
+        } elseif ($rucResult -match '"exitoso"\s*:\s*false' -or $rucResult -match '"success"\s*:\s*false') {
+            Write-Host '   [WARN] Consulta sin resultado' -ForegroundColor Yellow
+            try {
+                $err = ($rucResult | ConvertFrom-Json).mensaje
+                Write-Host "   Mensaje: $err" -ForegroundColor Gray
+            } catch {
+                Write-Host "   => $rucResult" -ForegroundColor Gray
+            }
+        } else {
+            Write-Host "   Respuesta: $rucResult" -ForegroundColor Gray
+        }
+    } catch {
+        Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+Write-Host ''
+
+# --- [9] Contenido del INI ---
+Write-Host '[9] Configuracion INI:' -ForegroundColor Yellow
+Write-Host '   ----------------------------------------'
+if (Test-Path $iniPath) {
+    Get-Content $iniPath | ForEach-Object {
+        if ($_ -match '(?i)(Password|Secret|Token|AccessKey)') {
+            $parts = $_ -split '=', 2
+            if ($parts.Length -eq 2 -and $parts[1].Length -gt 4) {
+                $masked = $parts[1].Substring(0, 3) + ('*' * [Math]::Min($parts[1].Length - 3, 10))
+                Write-Host "   $($parts[0])=$masked" -ForegroundColor DarkGray
+            } else {
+                Write-Host "   $_" -ForegroundColor DarkGray
+            }
+        } else {
+            Write-Host "   $_" -ForegroundColor Gray
+        }
+    }
+} else {
+    Write-Host '   Archivo INI no encontrado' -ForegroundColor Yellow
+}
+Write-Host '   ----------------------------------------'
+
+Write-Host ''
+Write-Host '============================================================' -ForegroundColor Cyan
+Write-Host '  VERIFICACION COMPLETADA' -ForegroundColor Cyan
+Write-Host '============================================================' -ForegroundColor Cyan
+Write-Host ''
