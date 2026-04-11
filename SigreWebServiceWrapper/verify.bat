@@ -10,9 +10,8 @@ REM    x64 = forzar DLL 64-bit con PowerShell 64-bit
 REM    (sin argumento = auto-detectar)
 REM ============================================================
 
-REM --- Procesar argumento x86/x64 ---
-set "FORCE_ARCH="
-if /i "%~1"=="x86" set "FORCE_ARCH=x86"
+REM --- Procesar argumento x86/x64 (default: x86) ---
+set "FORCE_ARCH=x86"
 if /i "%~1"=="x64" set "FORCE_ARCH=x64"
 
 REM --- Detectar carpeta de la DLL ---
