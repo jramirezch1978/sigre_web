@@ -2,16 +2,26 @@
 forward
 global type w_cn009_tipo_cambio from w_abc_master
 end type
-type uo_1 from u_ingreso_fecha within w_cn009_tipo_cambio
+type uo_fecha from u_ingreso_fecha within w_cn009_tipo_cambio
+end type
+type shl_1 from statichyperlink within w_cn009_tipo_cambio
+end type
+type cb_1 from commandbutton within w_cn009_tipo_cambio
+end type
+type cb_sunat from commandbutton within w_cn009_tipo_cambio
 end type
 end forward
 
 global type w_cn009_tipo_cambio from w_abc_master
-integer width = 1632
-integer height = 1392
+integer width = 1879
+integer height = 1296
 string title = "Tipo de cambio (CN009)"
-string menuname = "m_master_simple"
-uo_1 uo_1
+string menuname = "m_abc_master_smpl"
+event ue_buscar ( )
+uo_fecha uo_fecha
+shl_1 shl_1
+cb_1 cb_1
+cb_sunat cb_sunat
 end type
 global w_cn009_tipo_cambio w_cn009_tipo_cambio
 
@@ -20,19 +30,43 @@ Decimal {3} id_vta_dol_prom, id_cmp_dol_prom
 
 end variables
 
+event ue_buscar();Date ld_fecha
+Long	ll_rc
+Integer li_msg_result
+
+ld_fecha = uo_fecha.of_get_fecha()
+ll_rc = dw_master.retrieve(ld_fecha)
+
+IF ll_rc = 0 THEN
+	li_msg_result = MessageBox('No existe Registro', 'Desea Crear una Nueva Fecha', Question!, YesNo!, 1)
+	IF li_msg_result = 1 THEN
+ 		this.EVENT ue_insert()
+	END IF
+END IF
+end event
+
 on w_cn009_tipo_cambio.create
 int iCurrent
 call super::create
-if this.MenuName = "m_master_simple" then this.MenuID = create m_master_simple
-this.uo_1=create uo_1
+if this.MenuName = "m_abc_master_smpl" then this.MenuID = create m_abc_master_smpl
+this.uo_fecha=create uo_fecha
+this.shl_1=create shl_1
+this.cb_1=create cb_1
+this.cb_sunat=create cb_sunat
 iCurrent=UpperBound(this.Control)
-this.Control[iCurrent+1]=this.uo_1
+this.Control[iCurrent+1]=this.uo_fecha
+this.Control[iCurrent+2]=this.shl_1
+this.Control[iCurrent+3]=this.cb_1
+this.Control[iCurrent+4]=this.cb_sunat
 end on
 
 on w_cn009_tipo_cambio.destroy
 call super::destroy
 if IsValid(MenuID) then destroy(MenuID)
-destroy(this.uo_1)
+destroy(this.uo_fecha)
+destroy(this.shl_1)
+destroy(this.cb_1)
+destroy(this.cb_sunat)
 end on
 
 event ue_modify;call super::ue_modify;String ls_protect
@@ -59,9 +93,8 @@ event ue_update_pre;call super::ue_update_pre;//ld_fecha = DATE(dw_master.GetIte
 dw_master.of_set_flag_replicacion()
 end event
 
-event ue_open_pre;call super::ue_open_pre;of_position_window(50,50) 
-Date ld_fecha
-ld_fecha = DATE( today() )
+event ue_open_pre;call super::ue_open_pre;Date ld_fecha
+ld_fecha = DATE( gnvo_app.of_fecha_actual() )
 dw_master.retrieve(ld_fecha)
 
 end event
@@ -71,7 +104,7 @@ Long	ll_rc
 Integer	li_mes, li_dia
 String	ls_flag, ls_flag_laborable
 
-ld_fecha = uo_1.of_get_fecha()
+ld_fecha = uo_fecha.of_get_fecha()
 
 ll_rc = dw_master.SetItem(al_row, 'fecha', ld_fecha)
 
@@ -84,6 +117,7 @@ SELECT "CALENDARIO_FERIADO"."FLAG_MEDIO_DIA_LAB"
   FROM "CALENDARIO_FERIADO"  
  WHERE ( "CALENDARIO_FERIADO"."MES" = :li_mes ) AND  
        ( "CALENDARIO_FERIADO"."DIA" = :li_dia )   ;
+		 
 IF SQLCA.SQLCODE = 0 THEN
 	IF ls_flag = '1' THEN
 		ls_flag_laborable = 'M'
@@ -109,7 +143,7 @@ Long	ll_rc
 Integer li_msg_result, li_ano, li_mes
 String	ls_fecha
 
-ld_fecha = uo_1.of_get_fecha()
+ld_fecha = uo_fecha.of_get_fecha()
 
 CHOOSE CASE as_value
 	CASE 'F'
@@ -132,7 +166,7 @@ CHOOSE CASE as_value
 		ld_fecha = RelativeDate(Date(ls_fecha),-1)
 END CHOOSE
 
-uo_1.of_set_fecha(ld_fecha)
+uo_fecha.of_set_fecha(ld_fecha)
 ll_rc = dw_master.retrieve(ld_fecha)
 
 IF ll_rc = 0 THEN
@@ -147,11 +181,12 @@ RETURN 0
 end event
 
 type dw_master from w_abc_master`dw_master within w_cn009_tipo_cambio
-integer x = 18
-integer y = 212
-integer width = 1550
-integer height = 944
+integer y = 208
+integer width = 1829
+integer height = 880
 string dataobject = "d_calendario_ff"
+boolean hscrollbar = false
+boolean vscrollbar = false
 end type
 
 event dw_master::doubleclicked;call super::doubleclicked;Datawindow ldw
@@ -171,6 +206,7 @@ from calendario where fecha in (select max(fecha) from calendario) ;
 
 this.object.cmp_dol_prom[al_row] = id_cmp_dol_prom
 this.object.vta_dol_prom[al_row] = id_vta_dol_prom
+this.object.cod_usr		[al_row] = gs_user
 
 end event
 
@@ -179,14 +215,14 @@ ii_ck[1] = 1				// columnas de lectrua de este dw
 
 end event
 
-type uo_1 from u_ingreso_fecha within w_cn009_tipo_cambio
-integer x = 41
-integer y = 64
+type uo_fecha from u_ingreso_fecha within w_cn009_tipo_cambio
+integer x = 32
+integer y = 16
 integer taborder = 30
 boolean bringtotop = true
 end type
 
-on uo_1.destroy
+on uo_fecha.destroy
 call u_ingreso_fecha::destroy
 end on
 
@@ -198,18 +234,109 @@ of_set_rango_fin(date('31/12/9999')) // rango final
 
 end event
 
-event ue_output;call super::ue_output;Date ld_fecha
-Long	ll_rc
-Integer li_msg_result
+type shl_1 from statichyperlink within w_cn009_tipo_cambio
+integer x = 27
+integer y = 124
+integer width = 727
+integer height = 64
+boolean bringtotop = true
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+boolean underline = true
+string pointer = "HyperLink!"
+long textcolor = 134217856
+long backcolor = 67108864
+string text = "Tipo de Cambio SUNAT"
+boolean focusrectangle = false
+string url = "http://www.sunat.gob.pe/cl-at-ittipcam/tcS01Alias"
+end type
 
-ld_fecha = THIS.of_get_fecha()
-ll_rc = dw_master.retrieve(ld_fecha)
+type cb_1 from commandbutton within w_cn009_tipo_cambio
+integer x = 718
+integer y = 12
+integer width = 352
+integer height = 92
+integer taborder = 40
+boolean bringtotop = true
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Buscar"
+end type
 
-IF ll_rc = 0 THEN
-	li_msg_result = MessageBox('No existe Registro', 'Desea Crear una Nueva Fecha', Question!, YesNo!, 1)
-	IF li_msg_result = 1 THEN
- 		PARENT.EVENT ue_insert()
-	END IF
-END IF
+event clicked;parent.event ue_buscar()
+end event
+
+type cb_sunat from commandbutton within w_cn009_tipo_cambio
+integer x = 1092
+integer y = 12
+integer width = 448
+integer height = 92
+integer taborder = 50
+boolean bringtotop = true
+integer textsize = -8
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "TC SUNAT"
+end type
+
+event cb_sunat::clicked;Date ld_fecha
+Long ll_row
+String ls_fecha_str, ls_json, ls_compra, ls_venta
+Decimal {3} ldc_compra, ldc_venta
+n_cst_api_sigre_dll lnvo_dll
+n_cst_utilitario lnvo_util
+
+ll_row = dw_master.GetRow()
+if ll_row <= 0 then
+	MessageBox('Aviso', 'No hay registro seleccionado', Information!)
+	return
+end if
+
+ld_fecha = dw_master.GetItemDate(ll_row, 'fecha')
+ls_fecha_str = String(ld_fecha, 'dd/mm/yyyy')
+
+try
+	lnvo_dll = create n_cst_api_sigre_dll
+
+	ls_json = lnvo_dll.ObtenerTipoCambio(ls_fecha_str)
+
+	if Pos(ls_json, '"success":true') > 0 then
+		ls_compra = lnvo_util.of_json_string(ls_json, 'compra')
+		ls_venta  = lnvo_util.of_json_string(ls_json, 'venta')
+
+		ldc_compra = Decimal(ls_compra)
+		ldc_venta  = Decimal(ls_venta)
+
+		dw_master.object.cmp_dol_prom[ll_row] = ldc_compra
+		dw_master.object.vta_dol_prom[ll_row] = ldc_venta
+		dw_master.object.cod_usr[ll_row] = gs_user
+
+		MessageBox('Tipo de Cambio SUNAT', 'Fecha: ' + ls_fecha_str &
+			+ '~r~nCompra: ' + ls_compra &
+			+ '~r~nVenta: ' + ls_venta, Information!)
+	else
+		ls_venta = lnvo_util.of_json_string(ls_json, 'mensaje')
+		if trim(ls_venta) = '' then ls_venta = ls_json
+		MessageBox('Error', 'No se pudo obtener el tipo de cambio.~r~n' + ls_venta, StopSign!)
+	end if
+
+catch (Exception ex)
+	MessageBox('Error', 'Exception: ' + ex.getMessage(), StopSign!)
+
+finally
+	destroy lnvo_dll
+
+end try
 end event
 
