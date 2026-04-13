@@ -357,64 +357,59 @@ Write-Host ''
 Write-Host '[9] ObtenerTipoCambio (dd/MM/yyyy, con fallback)' -ForegroundColor Yellow
 
 # Llama directo a free.e-api.net.pe via HTTPS (no requiere token JWT)
-{
-    $tcEncontrado = $false
-    $maxRetries = 5
+$tcEncontrado = $false
+$maxRetries = 5
 
-    for ($i = 0; $i -lt $maxRetries; $i++) {
-        $fechaProbar = (Get-Date).AddDays(-$i)
-        $fechaStr = $fechaProbar.ToString('dd/MM/yyyy')
+for ($i = 0; $i -lt $maxRetries; $i++) {
+    $fechaProbar = (Get-Date).AddDays(-$i)
+    $fechaStr = $fechaProbar.ToString('dd/MM/yyyy')
 
-        Write-Host "   Probando: $fechaStr ..." -ForegroundColor Gray -NoNewline
+    Write-Host "   Probando: $fechaStr ..." -ForegroundColor Gray -NoNewline
 
-        try {
-            $tcResult = [SigreV]::R([SigreV]::ObtenerTipoCambio($fechaStr))
+    try {
+        $tcResult = [SigreV]::R([SigreV]::ObtenerTipoCambio($fechaStr))
 
-            if ($tcResult -match '"success"\s*:\s*true') {
-                Write-Host ' OK' -ForegroundColor Green
-                Write-Host ''
-                Write-Host '   [OK] TIPO DE CAMBIO OBTENIDO' -ForegroundColor Green
-                try {
-                    $tcObj = $tcResult | ConvertFrom-Json
-                    $td = $tcObj.data
-                    Write-Host "   Fecha:   $($td.fecha)" -ForegroundColor White
-                    Write-Host "   SUNAT:   $($td.sunat)" -ForegroundColor White
-                    Write-Host "   Compra:  $($td.compra)" -ForegroundColor White
-                    Write-Host "   Venta:   $($td.venta)" -ForegroundColor White
-                } catch {
-                    Write-Host "   JSON raw: $tcResult" -ForegroundColor Gray
-                }
-                $tcEncontrado = $true
-                break
-            } else {
-                # Mostrar razon del fallo para diagnostico
-                try {
-                    $errObj = $tcResult | ConvertFrom-Json
-                    $errMsg = $errObj.mensaje
-                    if ($errMsg) {
-                        Write-Host " fallo: $errMsg" -ForegroundColor Yellow
-                        # Si es error de TLS/conexion, no reintentar (mismo error para todas las fechas)
-                        if ($errMsg -match 'protocol|TLS|SSL|conexion') {
-                            Write-Host ''
-                            Write-Host "   [ERROR] Problema de conexion del servidor Java a la API externa" -ForegroundColor Red
-                            Write-Host "   Mensaje: $errMsg" -ForegroundColor Red
-                            break
-                        }
-                    } else {
-                        Write-Host ' sin datos' -ForegroundColor Yellow
-                    }
-                } catch {
-                    Write-Host " sin datos" -ForegroundColor Yellow
-                }
+        if ($tcResult -match '"success"\s*:\s*true') {
+            Write-Host ' OK' -ForegroundColor Green
+            Write-Host ''
+            Write-Host '   [OK] TIPO DE CAMBIO OBTENIDO' -ForegroundColor Green
+            try {
+                $tcObj = $tcResult | ConvertFrom-Json
+                $td = $tcObj.data
+                Write-Host "   Fecha:   $($td.fecha)" -ForegroundColor White
+                Write-Host "   SUNAT:   $($td.sunat)" -ForegroundColor White
+                Write-Host "   Compra:  $($td.compra)" -ForegroundColor White
+                Write-Host "   Venta:   $($td.venta)" -ForegroundColor White
+            } catch {
+                Write-Host "   JSON raw: $tcResult" -ForegroundColor Gray
             }
-        } catch {
-            Write-Host " error: $($_.Exception.Message)" -ForegroundColor Red
+            $tcEncontrado = $true
+            break
+        } else {
+            try {
+                $errObj = $tcResult | ConvertFrom-Json
+                $errMsg = $errObj.mensaje
+                if ($errMsg) {
+                    Write-Host " fallo: $errMsg" -ForegroundColor Yellow
+                    if ($errMsg -match 'conexion') {
+                        Write-Host ''
+                        Write-Host "   [ERROR] $errMsg" -ForegroundColor Red
+                        break
+                    }
+                } else {
+                    Write-Host ' sin datos' -ForegroundColor Yellow
+                }
+            } catch {
+                Write-Host " sin datos" -ForegroundColor Yellow
+            }
         }
+    } catch {
+        Write-Host " error: $($_.Exception.Message)" -ForegroundColor Red
     }
+}
 
-    if (-not $tcEncontrado) {
-        Write-Host "   [WARN] No se encontro tipo de cambio en los ultimos $maxRetries dias" -ForegroundColor Yellow
-    }
+if (-not $tcEncontrado) {
+    Write-Host "   [WARN] No se encontro tipo de cambio en los ultimos $maxRetries dias" -ForegroundColor Yellow
 }
 Write-Host ''
 
