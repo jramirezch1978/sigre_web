@@ -195,20 +195,22 @@ static BOOL HttpRequest(
     DWORD bytesRead = 0;
     char buffer[4096];
     
+    const wchar_t* failStep = NULL;
+    
     hSession = WinHttpOpen(L"SigreWrapper/3.0", 
                            WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
                            WINHTTP_NO_PROXY_NAME, 
                            WINHTTP_NO_PROXY_BYPASS, 0);
-    if (!hSession) goto cleanup;
+    if (!hSession) { failStep = L"WinHttpOpen"; goto cleanup; }
     
     hConnect = WinHttpConnect(hSession, host, (INTERNET_PORT)port, 0);
-    if (!hConnect) goto cleanup;
+    if (!hConnect) { failStep = L"WinHttpConnect (DNS/red)"; goto cleanup; }
     
     hRequest = WinHttpOpenRequest(hConnect, method, path,
                                   NULL, WINHTTP_NO_REFERER,
                                   WINHTTP_DEFAULT_ACCEPT_TYPES,
                                   useSSL ? WINHTTP_FLAG_SECURE : 0);
-    if (!hRequest) goto cleanup;
+    if (!hRequest) { failStep = L"WinHttpOpenRequest"; goto cleanup; }
     
     if (headers && wcslen(headers) > 0) {
         WinHttpAddRequestHeaders(hRequest, headers, (DWORD)-1, WINHTTP_ADDREQ_FLAG_ADD);
@@ -217,10 +219,12 @@ static BOOL HttpRequest(
     DWORD bodyLen = body ? (DWORD)strlen(body) : 0;
     if (!WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0,
                             (LPVOID)body, bodyLen, bodyLen, 0)) {
+        failStep = L"WinHttpSendRequest (conexion/SSL)";
         goto cleanup;
     }
     
     if (!WinHttpReceiveResponse(hRequest, NULL)) {
+        failStep = L"WinHttpReceiveResponse";
         goto cleanup;
     }
     
@@ -237,9 +241,11 @@ static BOOL HttpRequest(
 cleanup:
     if (!result) {
         DWORD err = GetLastError();
-        wchar_t logMsg[512];
-        swprintf_s(logMsg, 512, L"HttpRequest FALLO: host=%s, port=%d, path=%s, useSSL=%d, WinError=%lu",
-                   host, port, path, useSSL, err);
+        wchar_t logMsg[1024];
+        swprintf_s(logMsg, 1024, 
+            L"HttpRequest FALLO en [%s]: host=%s, port=%d, path=%s, SSL=%d, WinError=%lu (0x%08X)",
+            failStep ? failStep : L"desconocido",
+            host, port, path, useSSL, err, err);
         LogError(logMsg);
     }
     if (hRequest) WinHttpCloseHandle(hRequest);
