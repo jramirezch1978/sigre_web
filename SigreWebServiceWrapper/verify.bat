@@ -356,8 +356,9 @@ Write-Host ''
 # Si hoy no tiene TC (fin de semana/feriado), busca hacia atras hasta 5 dias
 Write-Host '[9] ObtenerTipoCambio (dd/MM/yyyy, con fallback)' -ForegroundColor Yellow
 
-# No requiere token - llama directo a free.e-api.net.pe via HTTPS
-{
+if (-not $tokenOk) {
+    Write-Host '   [SKIP] No hay token valido' -ForegroundColor Yellow
+} else {
     $tcEncontrado = $false
     $maxRetries = 5
 
