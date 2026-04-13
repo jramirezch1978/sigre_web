@@ -1369,28 +1369,43 @@ __declspec(dllexport) const wchar_t* __stdcall ObtenerTipoCambio(
                fecha ? fecha : L"null");
     LogInfo(logMsg);
     
-    if (wcslen(g_token) == 0) {
-        wcscpy_s(g_result, 16384, L"{\"exitoso\":false,\"mensaje\":\"No hay token. Llame ObtenerTokenRest primero.\"}");
-        return g_result;
+    // Convertir dd/MM/yyyy a YYYY-MM-DD para la API externa
+    char fechaApi[32] = "today";
+    if (fecha && wcslen(fecha) > 0) {
+        char fechaUtf8[64];
+        WideCharToMultiByte(CP_UTF8, 0, fecha, -1, fechaUtf8, 64, NULL, NULL);
+        
+        if (strlen(fechaUtf8) == 10 && fechaUtf8[2] == '/' && fechaUtf8[5] == '/') {
+            sprintf_s(fechaApi, sizeof(fechaApi), "%.4s-%.2s-%.2s",
+                      fechaUtf8 + 6, fechaUtf8 + 3, fechaUtf8);
+        } else {
+            strcpy_s(fechaApi, sizeof(fechaApi), fechaUtf8);
+        }
     }
     
-    char body[1024];
-    char fecha_utf8[64];
-    WideCharToMultiByte(CP_UTF8, 0, fecha ? fecha : L"today", -1, fecha_utf8, 64, NULL, NULL);
+    wchar_t path[256];
+    wchar_t fechaApiW[32];
+    MultiByteToWideChar(CP_UTF8, 0, fechaApi, -1, fechaApiW, 32);
+    swprintf_s(path, 256, L"/tipo-cambio/%s.json", fechaApiW);
     
-    sprintf_s(body, sizeof(body), "{\"fecha\":\"%s\"}", fecha_utf8);
-    
-    wchar_t headers[4096];
-    swprintf_s(headers, 4096,
-        L"Authorization: Bearer %s\r\nContent-Type: application/json\r\n", g_token);
+    swprintf_s(logMsg, 512, L"ObtenerTipoCambio: GET https://free.e-api.net.pe%s", path);
+    LogInfo(logMsg);
     
     wchar_t response[8192] = {0};
     
-    if (HttpRequest(g_apiHost, g_apiPort, g_apiTipoCambioPath, L"POST", headers, body, response, sizeof(response), g_apiUseSSL)) {
-        wcscpy_s(g_result, 16384, response);
-        LogInfo(L"ObtenerTipoCambio: exitoso");
+    if (HttpRequest(L"free.e-api.net.pe", 443, path, L"GET",
+                    L"Accept: application/json\r\n", NULL, response, sizeof(response), TRUE))
+    {
+        if (wcsstr(response, L"\"fecha\"") != NULL && wcsstr(response, L"\"sunat\"") != NULL) {
+            swprintf_s(g_result, 16384, L"{\"success\":true,\"data\":%s}", response);
+            LogInfo(L"ObtenerTipoCambio: exitoso");
+        } else {
+            swprintf_s(g_result, 16384, 
+                L"{\"success\":false,\"mensaje\":\"Respuesta inesperada\",\"raw\":%s}", response);
+            LogError(L"ObtenerTipoCambio: respuesta inesperada");
+        }
     } else {
-        wcscpy_s(g_result, 16384, L"{\"exitoso\":false,\"mensaje\":\"Error de conexion\"}");
+        wcscpy_s(g_result, 16384, L"{\"success\":false,\"mensaje\":\"Error de conexion a free.e-api.net.pe\"}");
         LogError(L"ObtenerTipoCambio: error de conexion");
     }
     
