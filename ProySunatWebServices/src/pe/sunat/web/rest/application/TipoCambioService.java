@@ -4,23 +4,32 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import pe.sunat.web.rest.domain.model.TipoCambioData;
 import pe.sunat.web.rest.domain.port.TipoCambioPort;
 
 /**
  * Servicio de tipo de cambio - Capa de aplicacion
- * Consulta la API externa free.e-api.net.pe y parsea la respuesta
+ * Consulta la API externa free.e-api.net.pe
+ * Acepta fecha en formato dd/MM/yyyy y la convierte a YYYY-MM-DD para la API
  */
 public class TipoCambioService implements TipoCambioPort {
     
     private static final String API_BASE_URL = "https://free.e-api.net.pe/tipo-cambio/";
     private static final int TIMEOUT_MS = 10000;
     
+    private static final SimpleDateFormat FMT_INPUT  = new SimpleDateFormat("dd/MM/yyyy");
+    private static final SimpleDateFormat FMT_API    = new SimpleDateFormat("yyyy-MM-dd");
+    
     @Override
     public TipoCambioData consultarTipoCambio(String fecha) throws Exception {
-        String endpoint = (fecha == null || fecha.trim().isEmpty()) ? "today" : fecha.trim();
-        String url = API_BASE_URL + endpoint + ".json";
+        String fechaApi = convertirFecha(fecha);
+        String url = API_BASE_URL + fechaApi + ".json";
         
         String jsonResponse = httpGet(url);
         
@@ -28,12 +37,51 @@ public class TipoCambioService implements TipoCambioPort {
             throw new Exception("Respuesta vacia de la API de tipo de cambio");
         }
         
-        return parsearRespuesta(jsonResponse);
+        TipoCambioData data = parsearRespuesta(jsonResponse);
+        
+        // Devolver la fecha en formato dd/MM/yyyy al cliente
+        if (data.getFecha() != null && data.getFecha().contains("-")) {
+            try {
+                Date d = FMT_API.parse(data.getFecha());
+                data.setFecha(FMT_INPUT.format(d));
+            } catch (Exception ignored) {}
+        }
+        
+        return data;
+    }
+    
+    /**
+     * Convierte dd/MM/yyyy a YYYY-MM-DD para la API externa.
+     * Si es null/vacio o "today", retorna "today".
+     * Si ya viene en YYYY-MM-DD, lo deja tal cual.
+     */
+    private String convertirFecha(String fecha) throws Exception {
+        if (fecha == null || fecha.trim().isEmpty() || fecha.trim().equalsIgnoreCase("today")) {
+            return "today";
+        }
+        
+        String f = fecha.trim();
+        
+        if (f.contains("/")) {
+            try {
+                Date d = FMT_INPUT.parse(f);
+                return FMT_API.format(d);
+            } catch (Exception e) {
+                throw new Exception("Formato de fecha invalido: " + f + ". Use dd/MM/yyyy");
+            }
+        }
+        
+        return f;
     }
     
     private String httpGet(String urlStr) throws Exception {
         HttpURLConnection conn = null;
         try {
+            // Forzar TLS 1.2 (JBoss/Java 7 usa TLS 1.0 por defecto)
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+            sslContext.init(null, null, null);
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+            
             URL url = new URL(urlStr);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -43,7 +91,7 @@ public class TipoCambioService implements TipoCambioPort {
             
             int status = conn.getResponseCode();
             if (status != 200) {
-                throw new Exception("API retorno codigo " + status + " para URL: " + urlStr);
+                throw new Exception("API retorno codigo " + status + " para fecha solicitada");
             }
             
             BufferedReader reader = new BufferedReader(

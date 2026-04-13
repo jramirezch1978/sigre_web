@@ -352,33 +352,51 @@ if (-not $tokenOk) {
 }
 Write-Host ''
 
-# --- [9] ObtenerTipoCambio(fecha) ---
-Write-Host "[9] ObtenerTipoCambio('today')" -ForegroundColor Yellow
+# --- [9] ObtenerTipoCambio(fecha dd/MM/yyyy) ---
+# Si hoy no tiene TC (fin de semana/feriado), busca hacia atras hasta 5 dias
+Write-Host '[9] ObtenerTipoCambio (dd/MM/yyyy, con fallback)' -ForegroundColor Yellow
 
 if (-not $tokenOk) {
     Write-Host '   [SKIP] No hay token valido' -ForegroundColor Yellow
 } else {
-    try {
-        $tcResult = [SigreV]::R([SigreV]::ObtenerTipoCambio('today'))
+    $tcEncontrado = $false
+    $maxRetries = 5
 
-        if ($tcResult -match '"success"\s*:\s*true') {
-            Write-Host '   [OK] TIPO DE CAMBIO OBTENIDO' -ForegroundColor Green
-            try {
-                $tcObj = $tcResult | ConvertFrom-Json
-                $td = $tcObj.data
-                Write-Host "   Fecha:   $($td.fecha)" -ForegroundColor White
-                Write-Host "   SUNAT:   $($td.sunat)" -ForegroundColor White
-                Write-Host "   Compra:  $($td.compra)" -ForegroundColor White
-                Write-Host "   Venta:   $($td.venta)" -ForegroundColor White
-            } catch {
-                Write-Host "   JSON raw: $tcResult" -ForegroundColor Gray
+    for ($i = 0; $i -lt $maxRetries; $i++) {
+        $fechaProbar = (Get-Date).AddDays(-$i)
+        $fechaStr = $fechaProbar.ToString('dd/MM/yyyy')
+
+        Write-Host "   Probando: $fechaStr ..." -ForegroundColor Gray -NoNewline
+
+        try {
+            $tcResult = [SigreV]::R([SigreV]::ObtenerTipoCambio($fechaStr))
+
+            if ($tcResult -match '"success"\s*:\s*true') {
+                Write-Host ' OK' -ForegroundColor Green
+                Write-Host ''
+                Write-Host '   [OK] TIPO DE CAMBIO OBTENIDO' -ForegroundColor Green
+                try {
+                    $tcObj = $tcResult | ConvertFrom-Json
+                    $td = $tcObj.data
+                    Write-Host "   Fecha:   $($td.fecha)" -ForegroundColor White
+                    Write-Host "   SUNAT:   $($td.sunat)" -ForegroundColor White
+                    Write-Host "   Compra:  $($td.compra)" -ForegroundColor White
+                    Write-Host "   Venta:   $($td.venta)" -ForegroundColor White
+                } catch {
+                    Write-Host "   JSON raw: $tcResult" -ForegroundColor Gray
+                }
+                $tcEncontrado = $true
+                break
+            } else {
+                Write-Host ' sin datos' -ForegroundColor Yellow
             }
-        } else {
-            Write-Host '   [WARN] No se obtuvo tipo de cambio' -ForegroundColor Yellow
-            Write-Host "   => $tcResult" -ForegroundColor Gray
+        } catch {
+            Write-Host " error: $($_.Exception.Message)" -ForegroundColor Red
         }
-    } catch {
-        Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+    }
+
+    if (-not $tcEncontrado) {
+        Write-Host "   [WARN] No se encontro tipo de cambio en los ultimos $maxRetries dias" -ForegroundColor Yellow
     }
 }
 Write-Host ''
