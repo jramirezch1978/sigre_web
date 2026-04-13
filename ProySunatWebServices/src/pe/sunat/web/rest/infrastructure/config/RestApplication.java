@@ -8,6 +8,7 @@ import javax.ws.rs.core.Application;
 
 import pe.sunat.web.rest.infrastructure.controller.AuthController;
 import pe.sunat.web.rest.infrastructure.controller.RucController;
+import pe.sunat.web.rest.infrastructure.controller.TipoCambioController;
 
 /**
  * Configuracion de la aplicacion JAX-RS
@@ -24,6 +25,7 @@ public class RestApplication extends Application {
         // Registrar controladores REST
         classes.add(AuthController.class);
         classes.add(RucController.class);
+        classes.add(TipoCambioController.class);
     }
     
     @Override

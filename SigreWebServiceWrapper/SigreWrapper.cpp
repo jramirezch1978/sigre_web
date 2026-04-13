@@ -46,6 +46,7 @@ static int g_apiPort = 80;
 static BOOL g_apiUseSSL = FALSE;
 static wchar_t g_apiLoginPath[256] = L"";
 static wchar_t g_apiConsultaPath[256] = L"";
+static wchar_t g_apiTipoCambioPath[256] = L"";
 
 // Configuración SMTP (se carga desde SigreWebServiceWrapper.ini)
 static wchar_t g_smtpServer[256] = L"";
@@ -98,6 +99,8 @@ static void LoadConfiguration()
                              g_apiLoginPath, 256, g_iniPath);
     GetPrivateProfileStringW(L"API", L"ApiConsultaPath", L"/SunatWebServices/api/ruc/consultar",
                              g_apiConsultaPath, 256, g_iniPath);
+    GetPrivateProfileStringW(L"API", L"ApiTipoCambioPath", L"/SunatWebServices/api/tipo-cambio/consultar",
+                             g_apiTipoCambioPath, 256, g_iniPath);
     
     // [SMTP]
     GetPrivateProfileStringW(L"SMTP", L"SmtpServer", L"smtp.gmail.com", 
@@ -1353,6 +1356,42 @@ __declspec(dllexport) const wchar_t* __stdcall ConsultarRuc(
     } else {
         wcscpy_s(g_result, 16384, L"{\"exitoso\":false,\"mensaje\":\"Error de conexion\"}");
         LogError(L"ConsultarRuc: error de conexion");
+    }
+    
+    return g_result;
+}
+
+__declspec(dllexport) const wchar_t* __stdcall ObtenerTipoCambio(
+    const wchar_t* fecha)
+{
+    wchar_t logMsg[512];
+    swprintf_s(logMsg, 512, L"ObtenerTipoCambio: fecha=%s",
+               fecha ? fecha : L"null");
+    LogInfo(logMsg);
+    
+    if (wcslen(g_token) == 0) {
+        wcscpy_s(g_result, 16384, L"{\"exitoso\":false,\"mensaje\":\"No hay token. Llame ObtenerTokenRest primero.\"}");
+        return g_result;
+    }
+    
+    char body[1024];
+    char fecha_utf8[64];
+    WideCharToMultiByte(CP_UTF8, 0, fecha ? fecha : L"today", -1, fecha_utf8, 64, NULL, NULL);
+    
+    sprintf_s(body, sizeof(body), "{\"fecha\":\"%s\"}", fecha_utf8);
+    
+    wchar_t headers[4096];
+    swprintf_s(headers, 4096,
+        L"Authorization: Bearer %s\r\nContent-Type: application/json\r\n", g_token);
+    
+    wchar_t response[8192] = {0};
+    
+    if (HttpRequest(g_apiHost, g_apiPort, g_apiTipoCambioPath, L"POST", headers, body, response, sizeof(response), g_apiUseSSL)) {
+        wcscpy_s(g_result, 16384, response);
+        LogInfo(L"ObtenerTipoCambio: exitoso");
+    } else {
+        wcscpy_s(g_result, 16384, L"{\"exitoso\":false,\"mensaje\":\"Error de conexion\"}");
+        LogError(L"ObtenerTipoCambio: error de conexion");
     }
     
     return g_result;

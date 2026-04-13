@@ -175,6 +175,10 @@ public class SigreV {
         [MarshalAs(UnmanagedType.LPWStr)] string ruc,
         [MarshalAs(UnmanagedType.LPWStr)] string rucOrigen);
 
+    [DllImport("$escaped", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+    public static extern IntPtr ObtenerTipoCambio(
+        [MarshalAs(UnmanagedType.LPWStr)] string fecha);
+
     public static string R(IntPtr p) {
         if (p == IntPtr.Zero) return "(null)";
         return Marshal.PtrToStringUni(p) ?? "(null)";
@@ -348,8 +352,39 @@ if (-not $tokenOk) {
 }
 Write-Host ''
 
-# --- [9] Contenido del INI ---
-Write-Host '[9] Configuracion INI:' -ForegroundColor Yellow
+# --- [9] ObtenerTipoCambio(fecha) ---
+Write-Host "[9] ObtenerTipoCambio('today')" -ForegroundColor Yellow
+
+if (-not $tokenOk) {
+    Write-Host '   [SKIP] No hay token valido' -ForegroundColor Yellow
+} else {
+    try {
+        $tcResult = [SigreV]::R([SigreV]::ObtenerTipoCambio('today'))
+
+        if ($tcResult -match '"success"\s*:\s*true') {
+            Write-Host '   [OK] TIPO DE CAMBIO OBTENIDO' -ForegroundColor Green
+            try {
+                $tcObj = $tcResult | ConvertFrom-Json
+                $td = $tcObj.data
+                Write-Host "   Fecha:   $($td.fecha)" -ForegroundColor White
+                Write-Host "   SUNAT:   $($td.sunat)" -ForegroundColor White
+                Write-Host "   Compra:  $($td.compra)" -ForegroundColor White
+                Write-Host "   Venta:   $($td.venta)" -ForegroundColor White
+            } catch {
+                Write-Host "   JSON raw: $tcResult" -ForegroundColor Gray
+            }
+        } else {
+            Write-Host '   [WARN] No se obtuvo tipo de cambio' -ForegroundColor Yellow
+            Write-Host "   => $tcResult" -ForegroundColor Gray
+        }
+    } catch {
+        Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+Write-Host ''
+
+# --- [10] Contenido del INI ---
+Write-Host '[10] Configuracion INI:' -ForegroundColor Yellow
 Write-Host '   ----------------------------------------'
 if (Test-Path $iniPath) {
     Get-Content $iniPath | ForEach-Object {
