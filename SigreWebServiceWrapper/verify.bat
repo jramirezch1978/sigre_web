@@ -388,7 +388,25 @@ if (-not $tokenOk) {
                 $tcEncontrado = $true
                 break
             } else {
-                Write-Host ' sin datos' -ForegroundColor Yellow
+                # Mostrar razon del fallo para diagnostico
+                try {
+                    $errObj = $tcResult | ConvertFrom-Json
+                    $errMsg = $errObj.mensaje
+                    if ($errMsg) {
+                        Write-Host " fallo: $errMsg" -ForegroundColor Yellow
+                        # Si es error de TLS/conexion, no reintentar (mismo error para todas las fechas)
+                        if ($errMsg -match 'protocol|TLS|SSL|conexion') {
+                            Write-Host ''
+                            Write-Host "   [ERROR] Problema de conexion del servidor Java a la API externa" -ForegroundColor Red
+                            Write-Host "   Mensaje: $errMsg" -ForegroundColor Red
+                            break
+                        }
+                    } else {
+                        Write-Host ' sin datos' -ForegroundColor Yellow
+                    }
+                } catch {
+                    Write-Host " sin datos" -ForegroundColor Yellow
+                }
             }
         } catch {
             Write-Host " error: $($_.Exception.Message)" -ForegroundColor Red
