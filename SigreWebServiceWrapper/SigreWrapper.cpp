@@ -235,6 +235,13 @@ static BOOL HttpRequest(
     result = TRUE;
 
 cleanup:
+    if (!result) {
+        DWORD err = GetLastError();
+        wchar_t logMsg[512];
+        swprintf_s(logMsg, 512, L"HttpRequest FALLO: host=%s, port=%d, path=%s, useSSL=%d, WinError=%lu",
+                   host, port, path, useSSL, err);
+        LogError(logMsg);
+    }
     if (hRequest) WinHttpCloseHandle(hRequest);
     if (hConnect) WinHttpCloseHandle(hConnect);
     if (hSession) WinHttpCloseHandle(hSession);
