@@ -59,6 +59,10 @@ FUNCTION string EnviarEmail(string remitente, string destinatarios, &
 // Obtener configuracion actual del DLL
 FUNCTION string ObtenerConfiguracion() &
     LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ObtenerConfiguracion"
+
+// Obtener tipo de cambio SUNAT (fecha en dd/MM/yyyy)
+FUNCTION string ObtenerTipoCambio(string fecha) &
+    LIBRARY "SigreWebServiceWrapper.dll" ALIAS FOR "ObtenerTipoCambio"
 end prototypes
 
 forward prototypes

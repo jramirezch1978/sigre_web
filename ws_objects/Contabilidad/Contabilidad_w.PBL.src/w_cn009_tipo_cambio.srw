@@ -1,4 +1,4 @@
-﻿$PBExportHeader$w_cn009_tipo_cambio.srw
+$PBExportHeader$w_cn009_tipo_cambio.srw
 forward
 global type w_cn009_tipo_cambio from w_abc_master
 end type
@@ -7,6 +7,8 @@ end type
 type shl_1 from statichyperlink within w_cn009_tipo_cambio
 end type
 type cb_1 from commandbutton within w_cn009_tipo_cambio
+end type
+type cb_sunat from commandbutton within w_cn009_tipo_cambio
 end type
 end forward
 
@@ -19,6 +21,7 @@ event ue_buscar ( )
 uo_fecha uo_fecha
 shl_1 shl_1
 cb_1 cb_1
+cb_sunat cb_sunat
 end type
 global w_cn009_tipo_cambio w_cn009_tipo_cambio
 
@@ -49,10 +52,12 @@ if this.MenuName = "m_abc_master_smpl" then this.MenuID = create m_abc_master_sm
 this.uo_fecha=create uo_fecha
 this.shl_1=create shl_1
 this.cb_1=create cb_1
+this.cb_sunat=create cb_sunat
 iCurrent=UpperBound(this.Control)
 this.Control[iCurrent+1]=this.uo_fecha
 this.Control[iCurrent+2]=this.shl_1
 this.Control[iCurrent+3]=this.cb_1
+this.Control[iCurrent+4]=this.cb_sunat
 end on
 
 on w_cn009_tipo_cambio.destroy
@@ -61,6 +66,7 @@ if IsValid(MenuID) then destroy(MenuID)
 destroy(this.uo_fecha)
 destroy(this.shl_1)
 destroy(this.cb_1)
+destroy(this.cb_sunat)
 end on
 
 event ue_modify;call super::ue_modify;String ls_protect
@@ -266,5 +272,72 @@ string text = "Buscar"
 end type
 
 event clicked;parent.event ue_buscar()
+end event
+
+type cb_sunat from commandbutton within w_cn009_tipo_cambio
+integer x = 1092
+integer y = 12
+integer width = 448
+integer height = 92
+integer taborder = 50
+boolean bringtotop = true
+integer textsize = -8
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "TC SUNAT"
+end type
+
+event cb_sunat::clicked;Date ld_fecha
+Long ll_row
+String ls_fecha_str, ls_json, ls_compra, ls_venta
+Decimal {3} ldc_compra, ldc_venta
+n_cst_api_sigre_dll lnvo_dll
+n_cst_utilitario lnvo_util
+
+ll_row = dw_master.GetRow()
+if ll_row <= 0 then
+	MessageBox('Aviso', 'No hay registro seleccionado', Information!)
+	return
+end if
+
+ld_fecha = dw_master.GetItemDate(ll_row, 'fecha')
+ls_fecha_str = String(ld_fecha, 'dd/mm/yyyy')
+
+try
+	lnvo_dll = create n_cst_api_sigre_dll
+
+	ls_json = lnvo_dll.ObtenerTipoCambio(ls_fecha_str)
+
+	if Pos(ls_json, '"success":true') > 0 then
+		ls_compra = lnvo_util.of_json_string(ls_json, 'compra')
+		ls_venta  = lnvo_util.of_json_string(ls_json, 'venta')
+
+		ldc_compra = Decimal(ls_compra)
+		ldc_venta  = Decimal(ls_venta)
+
+		dw_master.object.cmp_dol_prom[ll_row] = ldc_compra
+		dw_master.object.vta_dol_prom[ll_row] = ldc_venta
+		dw_master.object.cod_usr[ll_row] = gs_user
+
+		MessageBox('Tipo de Cambio SUNAT', 'Fecha: ' + ls_fecha_str &
+			+ '~r~nCompra: ' + ls_compra &
+			+ '~r~nVenta: ' + ls_venta, Information!)
+	else
+		ls_venta = lnvo_util.of_json_string(ls_json, 'mensaje')
+		if trim(ls_venta) = '' then ls_venta = ls_json
+		MessageBox('Error', 'No se pudo obtener el tipo de cambio.~r~n' + ls_venta, StopSign!)
+	end if
+
+catch (Exception ex)
+	MessageBox('Error', 'Exception: ' + ex.getMessage(), StopSign!)
+
+finally
+	destroy lnvo_dll
+
+end try
+
 end event
 
