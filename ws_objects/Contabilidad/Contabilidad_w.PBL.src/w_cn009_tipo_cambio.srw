@@ -315,8 +315,8 @@ try
 		ls_compra = lnvo_util.of_json_string(ls_json, 'compra')
 		ls_venta  = lnvo_util.of_json_string(ls_json, 'venta')
 
-		ldc_compra = Decimal(ls_compra)
-		ldc_venta  = Decimal(ls_venta)
+		ldc_compra = Dec(ls_compra)
+		ldc_venta  = Dec(ls_venta)
 
 		dw_master.object.cmp_dol_prom[ll_row] = ldc_compra
 		dw_master.object.vta_dol_prom[ll_row] = ldc_venta
