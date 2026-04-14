@@ -203,6 +203,11 @@ static BOOL HttpRequest(
                            WINHTTP_NO_PROXY_BYPASS, 0);
     if (!hSession) { failStep = L"WinHttpOpen"; goto cleanup; }
     
+    if (useSSL) {
+        DWORD protocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_1 | WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
+        WinHttpSetOption(hSession, WINHTTP_OPTION_SECURE_PROTOCOLS, &protocols, sizeof(protocols));
+    }
+    
     hConnect = WinHttpConnect(hSession, host, (INTERNET_PORT)port, 0);
     if (!hConnect) { failStep = L"WinHttpConnect (DNS/red)"; goto cleanup; }
     
