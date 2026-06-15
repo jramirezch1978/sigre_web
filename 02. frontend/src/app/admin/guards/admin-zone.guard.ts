@@ -14,5 +14,5 @@ export const adminZoneGuard: CanActivateFn = () => {
   }
 
   intent.markAdmin();
-  return router.createUrlTree(['/auth/signin'], { queryParams: { returnUrl: '/admin' } });
+  return router.createUrlTree(['/admin/login']);
 };

@@ -275,7 +275,7 @@ export class AuthService {
     return this.storage.getToken();
   }
 
-  async signOut(options?: { returnUrl?: string }): Promise<void> {
+  async signOut(options?: { returnUrl?: string; redirectTo?: string }): Promise<void> {
     this.sessionIdle.stop();
     const token = this.storage.getToken();
     if (token) {
@@ -293,6 +293,11 @@ export class AuthService {
     }
     this.utilityService.signOut();
     this.storage.clearSession();
+    const redirectTo = options?.redirectTo?.trim();
+    if (redirectTo) {
+      await this.router.navigateByUrl(redirectTo);
+      return;
+    }
     const ret = options?.returnUrl?.trim();
     if (ret) {
       await this.router.navigate(['/auth/signin'], { queryParams: { returnUrl: ret } });

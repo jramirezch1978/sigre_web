@@ -4,6 +4,12 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { BaseChartDirective } from 'ng2-charts';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminUiModule } from '../ui/admin-ui.module';
@@ -20,9 +26,11 @@ import { AdminUsuariosComponent } from './pages/admin-usuarios/admin-usuarios.co
 import { AdminRolesUsuarioComponent } from './pages/admin-roles-usuario/admin-roles-usuario.component';
 import { AdminSucursalesComponent } from './pages/admin-sucursales/admin-sucursales.component';
 import { AdminUsuarioSucursalesComponent } from './pages/admin-usuario-sucursales/admin-usuario-sucursales.component';
+import { AdminLoginComponent } from './pages/admin-login/admin-login.component';
 
 @NgModule({
   declarations: [
+    AdminLoginComponent,
     AdminShellComponent,
     AdminDashboardComponent,
     AdminEmpresasComponent,
@@ -45,6 +53,12 @@ import { AdminUsuarioSucursalesComponent } from './pages/admin-usuario-sucursale
     AdminRoutingModule,
     AdminUiModule,
     BaseChartDirective,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

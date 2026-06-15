@@ -71,6 +71,6 @@ export class AdminShellComponent {
   }
 
   cerrarSesion(): void {
-    void this.authService.signOut();
+    void this.authService.signOut({ redirectTo: '/admin/login' });
   }
 }

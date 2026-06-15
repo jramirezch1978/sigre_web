@@ -16,7 +16,7 @@ export const adminProvisioningSessionGuard: CanActivateFn = () => {
   const token = storage.getToken();
   if (!token) {
     intent.markAdmin();
-    return router.createUrlTree(['/auth/signin'], { queryParams: { returnUrl: '/admin' } });
+    return router.createUrlTree(['/admin/login']);
   }
 
   if (!claims.isTemporal(token)) {

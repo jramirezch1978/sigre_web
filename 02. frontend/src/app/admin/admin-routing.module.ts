@@ -12,11 +12,18 @@ import { AdminUsuariosComponent } from './pages/admin-usuarios/admin-usuarios.co
 import { AdminRolesUsuarioComponent } from './pages/admin-roles-usuario/admin-roles-usuario.component';
 import { AdminSucursalesComponent } from './pages/admin-sucursales/admin-sucursales.component';
 import { AdminUsuarioSucursalesComponent } from './pages/admin-usuario-sucursales/admin-usuario-sucursales.component';
+import { AdminLoginComponent } from './pages/admin-login/admin-login.component';
 import { adminZoneGuard } from './guards/admin-zone.guard';
+import { adminLoginGuard } from './guards/admin-login.guard';
 import { adminOperativeSessionGuard } from './guards/admin-operative-session.guard';
 import { adminProvisioningSessionGuard } from './guards/admin-provisioning-session.guard';
 
 const routes: Routes = [
+  {
+    path: 'login',
+    component: AdminLoginComponent,
+    canActivate: [adminLoginGuard],
+  },
   {
     path: '',
     component: AdminShellComponent,

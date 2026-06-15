@@ -142,6 +142,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
     this.storage.clearSession();
     this.sessionModalShown = false;
-    await this.router.navigateByUrl('/auth/signin');
+    const loginUrl = this.router.url.startsWith('/admin') ? '/admin/login' : '/auth/signin';
+    await this.router.navigateByUrl(loginUrl);
   }
 }
