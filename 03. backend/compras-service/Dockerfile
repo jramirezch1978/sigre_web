@@ -9,7 +9,7 @@ COPY compras-service/pom.xml ./compras-service/pom.xml
 COPY sigre-common/src ./sigre-common/src
 COPY compras-service/src ./compras-service/src
 
-RUN mvn clean package -DskipTests -pl compras-service -am
+RUN mvn clean package -Dmaven.test.skip=true -pl compras-service -am
 
 # Etapa de produccion
 FROM eclipse-temurin:17-jre-jammy

@@ -9,7 +9,7 @@ COPY almacen-service/pom.xml ./almacen-service/pom.xml
 COPY sigre-common/src ./sigre-common/src
 COPY almacen-service/src ./almacen-service/src
 
-RUN mvn clean package -DskipTests -pl almacen-service -am
+RUN mvn clean package -Dmaven.test.skip=true -pl almacen-service -am
 
 # Etapa de produccion
 FROM eclipse-temurin:17-jre-jammy
