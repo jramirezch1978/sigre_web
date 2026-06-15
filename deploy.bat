@@ -294,7 +294,7 @@ exit /b 0
 set "SVC=%~1"
 set "IMAGE=!IMAGE_REGISTRY!/!SVC!:!IMAGE_TAG!"
 if "!NO_PUSH!"=="1" (
-    echo %YELLOW%[SKIP]%RESET% Push omitido (--no-push). Imagen solo local.
+    echo %YELLOW%[SKIP]%RESET% Push omitido: flag --no-push. Imagen solo local.
     exit /b 0
 )
 echo %CYAN%[PUSH]%RESET% !IMAGE! (contexto build: %DOCKER_CTX_BUILD%)
