@@ -1,14 +1,80 @@
+﻿server:
+  port: 9009
 spring:
   application:
     name: produccion-service
-  datasource:
-    url: jdbc:oracle:thin:@${ORACLE_HOST:localhost}:${ORACLE_PORT:1521}:${ORACLE_SERVICE:ORCL}
-    username: ${ORACLE_USERNAME:sigre_user}
-    password: ${ORACLE_PASSWORD:sigre_password}
-server:
-  port: 8086
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: produccion
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        boot:
+          allow_jdbc_metadata_access: false
+  flyway:
+    enabled: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  health:
+    db:
+      enabled: false
+app:
+  security-datasource:
+    jdbc-url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_SECURITY_NAME:sigre_security}?sslmode=${DB_SSL_MODE:disable}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:jarch32b}
+  tenant:
+    jdbc-ssl-mode: ${DB_SSL_MODE:disable}
+    pool:
+      maximum-pool-size: ${TENANT_POOL_MAX:3}
+      minimum-idle: ${TENANT_POOL_MIN_IDLE:0}
+      idle-timeout-ms: ${TENANT_POOL_IDLE_TIMEOUT:30000}
+      max-lifetime-ms: ${TENANT_POOL_MAX_LIFETIME:120000}
+  jwt:
+    secret: ${JWT_SECRET:dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
+    access-token-expiration: ${JWT_ACCESS_MS:900000}
+    definitive-token-expiration: ${JWT_DEFINITIVE_MS:900000}
+    refresh-token-expiration: ${JWT_REFRESH_MS:604800000}
+  encryption:
+    key: ${APP_ENCRYPTION_KEY:U2lncmVFcnBXZWJBZXMyNTZLZXlEZXYyMDI2ISEhISE=}
+api:
+  gateway:
+    url: ${API_GATEWAY_URL:http://api-gateway:9080}
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: basic
+  compression:
+    request:
+      enabled: true
+    response:
+      enabled: true
+springdoc:
+  api-docs:
+    path: /api/produccion/v3/api-docs
+  swagger-ui:
+    path: /api/produccion/swagger-ui.html
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
 eureka:
   client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
-
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+  instance:
+    prefer-ip-address: true

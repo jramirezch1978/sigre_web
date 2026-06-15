@@ -220,6 +220,217 @@ services:
         max-file: "3"
         compress: "true"
 
+  contabilidad-service:
+    container_name: contabilidad-service
+    image: ${IMAGE_REGISTRY}/contabilidad-service:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      TZ: America/Lima
+      SERVER_PORT: "9006"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_SECURITY_NAME: sigre_security
+      DB_USER: postgres
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_SSL_MODE: disable
+      JWT_SECRET: ${JWT_SECRET:-dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-U2lncmVFcnBXZWJBZXMyNTZLZXlEZXYyMDI2ISEhISE=}
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
+      JAVA_OPTS: "-Xms192m -Xmx512m -Duser.timezone=America/Lima"
+    mem_limit: 768m
+    networks:
+      - stack_default
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      seguridad-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9006/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
+  finanzas-service:
+    container_name: finanzas-service
+    image: ${IMAGE_REGISTRY}/finanzas-service:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      TZ: America/Lima
+      SERVER_PORT: "9005"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_SECURITY_NAME: sigre_security
+      DB_USER: postgres
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_SSL_MODE: disable
+      JWT_SECRET: ${JWT_SECRET:-dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-U2lncmVFcnBXZWJBZXMyNTZLZXlEZXYyMDI2ISEhISE=}
+      CONTABILIDAD_SERVICE_URL: http://contabilidad-service:9006
+      API_GATEWAY_URL: http://api-gateway:9080
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
+      JAVA_OPTS: "-Xms192m -Xmx512m -Duser.timezone=America/Lima"
+    mem_limit: 768m
+    networks:
+      - stack_default
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      seguridad-service:
+        condition: service_healthy
+      contabilidad-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9005/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
+  rrhh-service:
+    container_name: rrhh-service
+    image: ${IMAGE_REGISTRY}/rrhh-service:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      TZ: America/Lima
+      SERVER_PORT: "9007"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_SECURITY_NAME: sigre_security
+      DB_USER: postgres
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_SSL_MODE: disable
+      JWT_SECRET: ${JWT_SECRET:-dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-U2lncmVFcnBXZWJBZXMyNTZLZXlEZXYyMDI2ISEhISE=}
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
+      JAVA_OPTS: "-Xms192m -Xmx512m -Duser.timezone=America/Lima"
+    mem_limit: 768m
+    networks:
+      - stack_default
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      seguridad-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9007/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
+  produccion-service:
+    container_name: produccion-service
+    image: ${IMAGE_REGISTRY}/produccion-service:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      TZ: America/Lima
+      SERVER_PORT: "9009"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_SECURITY_NAME: sigre_security
+      DB_USER: postgres
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_SSL_MODE: disable
+      JWT_SECRET: ${JWT_SECRET:-dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-U2lncmVFcnBXZWJBZXMyNTZLZXlEZXYyMDI2ISEhISE=}
+      ALMACEN_SERVICE_URL: http://almacen-service:9003
+      API_GATEWAY_URL: http://api-gateway:9080
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
+      JAVA_OPTS: "-Xms192m -Xmx512m -Duser.timezone=America/Lima"
+    mem_limit: 768m
+    networks:
+      - stack_default
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      seguridad-service:
+        condition: service_healthy
+      almacen-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9009/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
+  comercializacion-service:
+    container_name: comercializacion-service
+    image: ${IMAGE_REGISTRY}/comercializacion-service:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      TZ: America/Lima
+      SERVER_PORT: "9010"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_SECURITY_NAME: sigre_security
+      DB_USER: postgres
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_SSL_MODE: disable
+      JWT_SECRET: ${JWT_SECRET:-dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-U2lncmVFcnBXZWJBZXMyNTZLZXlEZXYyMDI2ISEhISE=}
+      FINANZAS_SERVICE_URL: http://finanzas-service:9005
+      CONTABILIDAD_SERVICE_URL: http://contabilidad-service:9006
+      ALMACEN_SERVICE_URL: http://almacen-service:9003
+      API_GATEWAY_URL: http://api-gateway:9080
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
+      JAVA_OPTS: "-Xms192m -Xmx512m -Duser.timezone=America/Lima"
+    mem_limit: 768m
+    networks:
+      - stack_default
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      seguridad-service:
+        condition: service_healthy
+      finanzas-service:
+        condition: service_healthy
+      almacen-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9010/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
   sigre-frontend:
     container_name: sigre-frontend
     image: ${IMAGE_REGISTRY}/sigre-frontend:${IMAGE_TAG}

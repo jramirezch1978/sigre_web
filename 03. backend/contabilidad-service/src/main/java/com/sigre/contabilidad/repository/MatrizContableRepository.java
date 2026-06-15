@@ -1,43 +1,45 @@
 package com.sigre.contabilidad.repository;
 
-import com.sigre.contabilidad.model.entity.MatrizContable;
-import com.sigre.contabilidad.model.entity.MatrizContableId;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.sigre.contabilidad.entity.MatrizContable;
 
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Repositorio para MatrizContable
- * CRÍTICO: Gestiona las reglas de integración contable automática
- */
 @Repository
-public interface MatrizContableRepository extends JpaRepository<MatrizContable, MatrizContableId> {
+public interface MatrizContableRepository extends JpaRepository<MatrizContable, Long>, JpaSpecificationExecutor<MatrizContable> {
 
     /**
-     * Busca la matriz contable para un tipo de movimiento específico
+     * Resumen [id, codigo, descripcion] de matrices activas, opcionalmente
+     * filtradas por código o descripción. Para selectores/autocompletes.
      */
-    @Query("SELECT m FROM MatrizContable m WHERE m.id.empresa = :empresa " +
-           "AND m.id.modulo = :modulo AND m.id.tipoMovimiento = :tipoMovimiento " +
-           "AND m.id.tipoArticulo = :tipoArticulo AND m.flagActivo = 'S' " +
-           "ORDER BY m.id.secuencia")
-    List<MatrizContable> findMatricesByMovimiento(
-        @Param("empresa") String empresa,
-        @Param("modulo") String modulo,
-        @Param("tipoMovimiento") String tipoMovimiento,
-        @Param("tipoArticulo") String tipoArticulo
-    );
+    @Query("SELECT m.id, m.codigo, m.descripcion FROM MatrizContable m WHERE m.flagEstado = '1' "
+            + "AND (:q IS NULL OR :q = '' "
+            + "OR LOWER(m.codigo) LIKE LOWER(CONCAT('%', :q, '%')) "
+            + "OR LOWER(m.descripcion) LIKE LOWER(CONCAT('%', :q, '%'))) "
+            + "ORDER BY m.codigo")
+    List<Object[]> buscarResumen(@Param("q") String q, Pageable pageable);
 
-    /**
-     * Busca todas las matrices activas de un módulo
-     */
-    @Query("SELECT m FROM MatrizContable m WHERE m.id.empresa = :empresa " +
-           "AND m.id.modulo = :modulo AND m.flagActivo = 'S'")
-    List<MatrizContable> findByModulo(
-        @Param("empresa") String empresa,
-        @Param("modulo") String modulo
-    );
+    @Query("SELECT m FROM MatrizContable m LEFT JOIN FETCH m.detalles d " +
+           "WHERE m.codigo = :codigo AND m.flagEstado = '1' " +
+           "ORDER BY d.secuencia")
+    Optional<MatrizContable> findByCodigo(@Param("codigo") String codigo);
+
+    @Query("SELECT m FROM MatrizContable m LEFT JOIN FETCH m.detalles d " +
+           "WHERE m.id = :id AND m.flagEstado = '1' " +
+           "ORDER BY d.secuencia")
+    Optional<MatrizContable> findByIdWithDetalles(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT m FROM MatrizContable m LEFT JOIN FETCH m.detalles d " +
+           "WHERE m.id = :id ORDER BY d.secuencia")
+    Optional<MatrizContable> findByIdWithDetallesAll(@Param("id") Long id);
+
+    boolean existsByCodigo(String codigo);
+
+    boolean existsByCodigoAndIdNot(String codigo, Long id);
 }

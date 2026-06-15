@@ -1,97 +1,89 @@
 package com.sigre.contabilidad.controller;
 
-import com.sigre.contabilidad.model.entity.AsientoContable;
-import com.sigre.contabilidad.service.AsientoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import com.sigre.common.dto.ApiResponse;
+import com.sigre.contabilidad.dto.request.AsientoRequest;
+import com.sigre.contabilidad.dto.request.AsientoSearchRequest;
+import com.sigre.contabilidad.dto.response.AsientoResponse;
+import com.sigre.contabilidad.dto.response.PageData;
+import com.sigre.contabilidad.entity.CntblAsiento;
+import com.sigre.contabilidad.mapper.AsientoMapper;
+import com.sigre.contabilidad.service.AsientoService;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-
-/**
- * Controlador REST para Asientos Contables
- */
-@Slf4j
 @RestController
-@RequestMapping("/asientos")
+@RequestMapping("/api/contabilidad/asientos")
 @RequiredArgsConstructor
-@Tag(name = "Asientos Contables", description = "APIs para gestión de asientos contables")
+@Tag(name = "Asientos Contables", description = "Gestión de asientos contables")
 public class AsientoController {
 
-    private final AsientoService asientoService;
-
-    @GetMapping("/periodo")
-    @Operation(summary = "Obtener asientos por periodo", 
-               description = "Obtiene todos los asientos de un libro y periodo específico")
-    public ResponseEntity<List<AsientoContable>> obtenerPorPeriodo(
-            @RequestParam String empresa,
-            @RequestParam String libro,
-            @RequestParam String periodo) {
-        
-        log.info("GET /asientos/periodo - Empresa: {}, Libro: {}, Periodo: {}", 
-                 empresa, libro, periodo);
-        
-        List<AsientoContable> asientos = asientoService.obtenerAsientosPorPeriodo(empresa, libro, periodo);
-        return ResponseEntity.ok(asientos);
-    }
-
-    @GetMapping("/rango-fechas")
-    @Operation(summary = "Obtener asientos por rango de fechas",
-               description = "Obtiene todos los asientos dentro de un rango de fechas")
-    public ResponseEntity<List<AsientoContable>> obtenerPorRangoFechas(
-            @RequestParam String empresa,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
-        
-        log.info("GET /asientos/rango-fechas - Empresa: {}, Desde: {}, Hasta: {}", 
-                 empresa, fechaInicio, fechaFin);
-        
-        List<AsientoContable> asientos = asientoService.obtenerAsientosPorRangoFechas(
-            empresa, fechaInicio, fechaFin);
-        return ResponseEntity.ok(asientos);
-    }
+    private final AsientoService service;
+    private final AsientoMapper mapper;
 
     @PostMapping
-    @Operation(summary = "Crear asiento contable",
-               description = "Crea un nuevo asiento contable")
-    public ResponseEntity<AsientoContable> crearAsiento(@RequestBody AsientoContable asiento) {
-        log.info("POST /asientos - Libro: {}, Origen: {}", 
-                 asiento.getId().getLibro(), asiento.getId().getOrigen());
-        
-        AsientoContable nuevoAsiento = asientoService.crearAsiento(asiento);
-        return ResponseEntity.ok(nuevoAsiento);
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Crear asiento contable", 
+               description = "Crea un nuevo asiento contable validando balanceo y cuentas de detalle")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Asiento creado exitosamente"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Error de validación"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "422", description = "Asiento no balanceado")
+    })
+    public ApiResponse<AsientoResponse> crear(@Valid @RequestBody AsientoRequest request) {
+        CntblAsiento asiento = service.crear(request);
+        return ApiResponse.ok(mapper.toResponse(asiento), "Asiento creado exitosamente");
     }
 
-    @GetMapping("/pendientes")
-    @Operation(summary = "Obtener asientos pendientes de integración",
-               description = "Obtiene asientos que aún no han sido transferidos desde otro módulo")
-    public ResponseEntity<List<AsientoContable>> obtenerPendientes(
-            @RequestParam String empresa,
-            @RequestParam String origenIntegracion) {
-        
-        log.info("GET /asientos/pendientes - Empresa: {}, Origen: {}", 
-                 empresa, origenIntegracion);
-        
-        List<AsientoContable> pendientes = asientoService.obtenerAsientosPendientes(
-            empresa, origenIntegracion);
-        return ResponseEntity.ok(pendientes);
+    @GetMapping("/{id}")
+    @Operation(summary = "Obtener asiento por ID", 
+               description = "Obtiene un asiento contable con todos sus detalles")
+    public ApiResponse<AsientoResponse> obtenerPorId(@PathVariable Long id) {
+        CntblAsiento asiento = service.obtenerPorId(id);
+        return ApiResponse.ok(mapper.toResponse(asiento));
     }
 
-    @GetMapping("/health")
-    @Operation(summary = "Health check del módulo de contabilidad")
-    public ResponseEntity<Map<String, String>> health() {
-        return ResponseEntity.ok(Map.of(
-            "status", "UP",
-            "service", "contabilidad-service",
-            "module", "asientos",
-            "timestamp", LocalDate.now().toString()
-        ));
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar asiento", 
+               description = "Actualiza un asiento activo (flagEstado = '1')")
+    public ApiResponse<AsientoResponse> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody AsientoRequest request) {
+        CntblAsiento asiento = service.actualizar(id, request);
+        return ApiResponse.ok(mapper.toResponse(asiento), "Asiento actualizado exitosamente");
     }
+
+    @PostMapping("/{id}/anular")
+    @Operation(summary = "Anular asiento",
+               description = "Anula un asiento activo (flagEstado = '1'). Valida existencia, período contable abierto y estado activo.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Asiento anulado exitosamente"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Asiento no encontrado"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "422", description = "Asiento ya anulado, no activo o período contable cerrado")
+    })
+    public ApiResponse<AsientoResponse> anular(@PathVariable Long id) {
+        CntblAsiento asiento = service.anular(id);
+        return ApiResponse.ok(mapper.toResponse(asiento), "Asiento anulado exitosamente");
+    }
+
+    @GetMapping("/buscar")
+    @Operation(summary = "Buscar asientos contables",
+               description = "Busca asientos contables con filtros opcionales (fecha, cuenta contable, naturaleza, estado) y paginación")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Búsqueda exitosa"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Parámetros de búsqueda inválidos")
+    })
+    public ApiResponse<PageData<AsientoResponse>> buscar(
+            AsientoSearchRequest request,
+            @PageableDefault(size = 20) Pageable pageable) {
+        PageData<AsientoResponse> result = service.buscar(request, pageable);
+        return ApiResponse.ok(result);
+    }
+
 }
-

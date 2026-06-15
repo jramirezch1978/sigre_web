@@ -38,10 +38,12 @@ set "COMMERCE_SERVICES=inventory-service orders-service products-service sync-se
 set "DOMAIN_SERVICES=almacen-service compras-service contabilidad-service finanzas-service rrhh-service activo-fijo-service produccion-service auditoria-service comercializacion-service campo-service comedor-service flota-service mantenimiento-service operaciones-service presupuesto-service aprovision-service sig-service"
 set "ASISTENCIA_SERVICES=discovery-server api-gateway seguridad-service asistencia-service"
 set "LOGISTICA_SERVICES=discovery-server api-gateway seguridad-service almacen-service compras-service"
+set "FINANZAS_SERVICES=discovery-server api-gateway seguridad-service contabilidad-service finanzas-service"
+set "ERP_SERVICES=discovery-server api-gateway seguridad-service contabilidad-service finanzas-service rrhh-service produccion-service comercializacion-service almacen-service compras-service"
 set "SECURITY_SERVICES=discovery-server seguridad-service api-gateway"
 set "BACKEND_SERVICES=%ASISTENCIA_SERVICES%"
 set "FRONTEND_SERVICE=sigre-frontend"
-set "COMPOSE_APP_SERVICES=discovery-server api-gateway seguridad-service asistencia-service almacen-service compras-service sigre-frontend"
+set "COMPOSE_APP_SERVICES=discovery-server api-gateway seguridad-service asistencia-service almacen-service compras-service contabilidad-service finanzas-service rrhh-service produccion-service comercializacion-service sigre-frontend"
 set "ALL_APP_SERVICES=%INFRA_SERVICES% %CORE_SERVICES% %COMMERCE_SERVICES% %DOMAIN_SERVICES% %FRONTEND_SERVICE%"
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
@@ -83,6 +85,8 @@ if /i "%~1"=="domain" goto :deployDomain
 if /i "%~1"=="ms-all" goto :deployMsAll
 if /i "%~1"=="asistencia" goto :deployAsistencia
 if /i "%~1"=="logistica" goto :deployLogistica
+if /i "%~1"=="finanzas" goto :deployFinanzas
+if /i "%~1"=="erp" goto :deployErp
 if /i "%~1"=="security" goto :deploySecurity
 
 REM Servicio individual
@@ -229,6 +233,14 @@ goto :deployBackend
 
 :deployLogistica
 set "GROUP=%LOGISTICA_SERVICES%"
+goto :deployServiceGroup
+
+:deployFinanzas
+set "GROUP=%FINANZAS_SERVICES%"
+goto :deployServiceGroup
+
+:deployErp
+set "GROUP=%ERP_SERVICES%"
 goto :deployServiceGroup
 
 :deploySecurity

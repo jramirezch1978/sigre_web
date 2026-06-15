@@ -159,6 +159,11 @@ $serviceConfig = [ordered]@{
     'asistencia-service' = @{ folder = '02 - asistencia-service'; pattern = 'asistencia-service\src\main\java\*\controller\*.java' }
     'almacen-service'    = @{ folder = '10 - almacen-service';    pattern = 'almacen-service\src\main\java\*\controller\*.java' }
     'compras-service'    = @{ folder = '11 - compras-service';    pattern = 'compras-service\src\main\java\*\controller\*.java' }
+    'contabilidad-service' = @{ folder = '12 - contabilidad-service'; pattern = 'contabilidad-service\src\main\java\*\controller\*.java' }
+    'finanzas-service'   = @{ folder = '13 - finanzas-service';   pattern = 'finanzas-service\src\main\java\*\controller\*.java' }
+    'rrhh-service'       = @{ folder = '14 - rrhh-service';       pattern = 'rrhh-service\src\main\java\*\controller\*.java' }
+    'produccion-service' = @{ folder = '16 - produccion-service'; pattern = 'produccion-service\src\main\java\*\controller\*.java' }
+    'comercializacion-service' = @{ folder = '17 - comercializacion-service (api/ventas)'; pattern = 'comercializacion-service\src\main\java\*\controller\*.java' }
     'sync-service'       = @{ folder = '03 - sync-service';       pattern = 'sync-service\src\main\java\*\controller\*.java' }
     'inventory-service'  = @{ folder = '04 - inventory-service';  pattern = 'inventory-service\src\main\java\*\controllers\*.java' }
     'orders-service'     = @{ folder = '05 - orders-service';     pattern = 'orders-service\src\main\java\*\controllers\*.java' }
@@ -310,12 +315,7 @@ foreach ($svcKey in $serviceConfig.Keys) {
 }
 
 $migrationMap = @(
-    @('12 - finanzas-service', 'api/finanzas/actuator/health')
-    @('13 - contabilidad-service', 'api/contabilidad/actuator/health')
-    @('14 - rrhh-service', 'api/rrhh/actuator/health')
     @('15 - activo-fijo-service', 'api/activos/actuator/health')
-    @('16 - produccion-service', 'api/produccion/actuator/health')
-    @('17 - comercializacion-service', 'api/ventas/actuator/health')
     @('18 - auditoria-service', 'api/auditoria/actuator/health')
     @('19 - sig-service reportes', 'api/reportes/actuator/health')
     @('20 - aprovision-service notif', 'api/notificaciones/actuator/health')

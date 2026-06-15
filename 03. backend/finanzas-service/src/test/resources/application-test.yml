@@ -1,0 +1,48 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none  # No validar ni modificar esquema de BD remota
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  flyway:
+    enabled: false  # Desactivar Flyway para tests de integración
+
+app:
+  security-datasource:
+    jdbc-url: jdbc:postgresql://db-pv-pod1-dev.contabilidad.sigre.pe:5433/sigre_security
+    username: postgres
+    password: Erp_restpe#2026
+  tenant:
+    db-host-override: db-pv-pod1-dev.contabilidad.sigre.pe
+    db-port-override: 5433
+    jdbc-ssl-mode: disable
+    pool:
+      maximum-pool-size: 3
+      minimum-idle: 0
+      idle-timeout-ms: 30000
+      max-lifetime-ms: 120000
+  jwt:
+    secret: 5x0t3h4sh4v32048b1ts3cur3k3yf0rt3st1ngpurp0s3sonlynd0tpr0duct10n
+
+# URLs directas para Feign clients en tests (sin API Gateway)
+client:
+  contabilidad-service:
+    url: http://contabilidad-service:9006
+  ms-core-maestros:
+    url: http://localhost:9002
+
+logging:
+  level:
+    com.sigre.finanzas: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Configuración específica para tests
+testcontainers:
+  reuse:
+    enable: true

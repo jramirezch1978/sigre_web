@@ -2,34 +2,18 @@ package com.sigre.finanzas;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.sql.init.SqlInitializationAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-/**
- * Finanzas Service - Cuentas por Pagar y Cobrar
- * Puerto: 8083
- * 
- * Responsable de:
- * - Cuentas por pagar (proveedores)
- * - Cuentas por cobrar (clientes)
- * - Tesorería
- * - Bancos
- * - Flujo de caja
- * - Detracciones
- * - Generación de asientos contables a Contabilidad
- */
-@SpringBootApplication
-@EnableDiscoveryClient
+@SpringBootApplication(
+        scanBasePackages = {"com.sigre.finanzas", "com.sigre.common"},
+        exclude = {DataSourceAutoConfiguration.class, SqlInitializationAutoConfiguration.class})
 @EnableFeignClients
+@EnableJpaAuditing
 public class FinanzasApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(FinanzasApplication.class, args);
-        System.out.println("╔════════════════════════════════════════╗");
-        System.out.println("║  SIGRE 2.0 - Finanzas Service          ║");
-        System.out.println("║  Tesorería Iniciada                    ║");
-        System.out.println("║  Puerto: 8083                          ║");
-        System.out.println("╚════════════════════════════════════════╝");
     }
 }
-
