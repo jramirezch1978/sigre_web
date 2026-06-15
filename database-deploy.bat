@@ -107,7 +107,15 @@ goto :help
 
 :route_create
 call :check_host_docker_ddl || goto :fail
+echo.
+echo ^>^> Modo: create  ^(security + template^)
+echo ^>^> DDL: !DDL_ROOT!
+echo ^>^> DDL mount Docker: !DDL_MOUNT!
+echo.
+echo ========== PASO 1/2: SECURITY ^(!PGSECURITY!^) ==========
 call :do_create_security || goto :fail
+echo.
+echo ========== PASO 2/2: TEMPLATE ^(!PGTEMPLATE!^) ==========
 call :do_create_template || goto :fail
 goto :done
 
@@ -215,7 +223,9 @@ if not exist "!DDL_ROOT!\!REL!" (
 echo ^>^> --- !REL! ---
 >> "!DBDEPLOY_LOG!" echo ^>^> --- !REL! ---
 docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -f "/ddl/!REL_UNIX!"
-exit /b %ERRORLEVEL%
+if errorlevel 1 exit /b 1
+echo    OK
+exit /b 0
 
 :run_sql_tenant_grants
 set "TGRANT_ROLE=%~1"
@@ -223,7 +233,9 @@ set "REL_UNIX=tenant/99-grants-tenant-role.sql"
 echo ^>^> --- tenant/99-grants-tenant-role.sql ^(rol=!TGRANT_ROLE!^) ---
 >> "!DBDEPLOY_LOG!" echo ^>^> --- tenant/99-grants-tenant-role.sql ^(rol=!TGRANT_ROLE!^) ---
 docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -v tenant_role=!TGRANT_ROLE! -f "/ddl/!REL_UNIX!"
-exit /b %ERRORLEVEL%
+if errorlevel 1 exit /b 1
+echo    OK
+exit /b 0
 
 :ensure_database
 set "TARGETDB=%~1"
@@ -231,14 +243,18 @@ set "DBOWNER=%~2"
 if "!DBOWNER!"=="" set "DBOWNER=!PGUSER!"
 if "!FORCE!"=="1" (
     echo ^>^> --force: recreando !TARGETDB!...
+    echo ^>^>   Cerrando conexiones activas...
     call :psql_maint_cmd "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '!TARGETDB!' AND pid ^<^> pg_backend_pid();"
+    echo ^>^>   Eliminando BD existente...
     call :psql_maint_cmd "DROP DATABASE IF EXISTS !TARGETDB!;"
 )
+echo ^>^>   Creando BD !TARGETDB! ^(owner: !DBOWNER!^)...
 call :psql_maint_cmd "CREATE DATABASE !TARGETDB! OWNER !DBOWNER!;"
 if errorlevel 1 (
     echo ERROR: No se pudo crear la BD !TARGETDB! ^(owner: !DBOWNER!^)
     exit /b 1
 )
+echo ^>^>   BD !TARGETDB!: OK
 exit /b 0
 
 :do_create_security
@@ -251,6 +267,7 @@ echo.
 set "SAVED_PGDATABASE=!PGDATABASE!"
 call :ensure_database "!PGSECURITY!" "!PGUSER!" || exit /b 1
 set "PGDATABASE=!PGSECURITY!"
+echo ^>^> Ejecutando DDL + seed de seguridad...
 call :run_sql "security\00-convenciones-security.sql" || exit /b 1
 call :run_sql "security\01-master.sql" || exit /b 1
 call :run_sql "security\02-config.sql" || exit /b 1
@@ -262,7 +279,8 @@ call :run_sql "99-auditoria-triggers-fechas.sql" || exit /b 1
 call :run_sql "security\99-auditoria-security-post.sql" || exit /b 1
 call :run_sql "seed\01-carga-inicial-security.sql" || exit /b 1
 set "PGDATABASE=!SAVED_PGDATABASE!"
-echo ^>^> create-security: OK en !PGSECURITY!
+echo.
+echo ^>^> create-security: DDL de seguridad ejecutado en !PGSECURITY!
 exit /b 0
 
 :do_create_template
@@ -274,6 +292,7 @@ echo ^>^> DDL mount Docker: !DDL_MOUNT!
 echo.
 call :ensure_database "!PGTEMPLATE!" "!PGUSER!" || exit /b 1
 set "PGDATABASE=!PGTEMPLATE!"
+echo ^>^> Ejecutando DDL + seed de plantilla tenant...
 call :run_sql "00-convenciones-generales.sql" || exit /b 1
 call :run_sql "security\00-convenciones-security.sql" || exit /b 1
 call :run_sql "security\01-master.sql" || exit /b 1
@@ -297,14 +316,19 @@ call :run_sql "seed\01-carga-inicial-maestros.sql" || exit /b 1
 call :run_sql "seed\02-carga-sunat.sql" || exit /b 1
 call :run_sql "seed\02-carga-concepto-matriz-financiera.sql" || exit /b 1
 set "PGDATABASE=!PGTEMPLATE!"
-echo ^>^> create-template: OK en !PGTEMPLATE!
+echo.
+echo ^>^> create-template: DDL de plantilla ejecutado en !PGTEMPLATE!
 exit /b 0
 
 :do_insert
 echo.
 echo ^>^> Modo: insert ^(seed en !PGDATABASE!^)
+echo ^>^> Conexion: !PGUSER!@!PGHOST!:!PGPORT!/!PGDATABASE!
+echo ^>^> DDL: !DDL_ROOT!
+echo.
 call :precheck_ddl_applied || exit /b 1
 call :run_sql "seed\01-carga-inicial-maestros.sql" || exit /b 1
+echo.
 echo ^>^> insert: OK
 exit /b 0
 
