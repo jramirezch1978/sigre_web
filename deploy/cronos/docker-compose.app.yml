@@ -1,0 +1,125 @@
+# SIGRE ERP — Aplicación (frontend + backend Fase 1)
+# Red externa stack_default — PostgreSQL por hostname: postgres
+# NO compilar en cronos: docker compose pull && up -d
+
+name: sigre-app
+
+services:
+  discovery-server:
+    container_name: discovery-server
+    image: ${IMAGE_REGISTRY}/discovery-server:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      TZ: America/Lima
+      JAVA_OPTS: "-Xms128m -Xmx384m -Duser.timezone=America/Lima"
+    mem_limit: 512m
+    networks:
+      - stack_default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
+  api-gateway:
+    container_name: api-gateway
+    image: ${IMAGE_REGISTRY}/api-gateway:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "9080:9080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      TZ: America/Lima
+      SERVER_PORT: "9080"
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
+      JAVA_OPTS: "-Xms192m -Xmx384m -Duser.timezone=America/Lima"
+    mem_limit: 512m
+    networks:
+      - stack_default
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
+  asistencia-service:
+    container_name: asistencia-service
+    image: ${IMAGE_REGISTRY}/asistencia-service:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      TZ: America/Lima
+      SERVER_PORT: "8084"
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sigre_emp_cantabria
+      SPRING_DATASOURCE_USERNAME: erp_app
+      SPRING_DATASOURCE_PASSWORD: ${ERP_APP_PASSWORD}
+      JAVA_OPTS: "-Xms192m -Xmx384m -Duser.timezone=America/Lima"
+    mem_limit: 512m
+    networks:
+      - stack_default
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/api/time/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
+  sigre-frontend:
+    container_name: sigre-frontend
+    image: ${IMAGE_REGISTRY}/sigre-frontend:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      TZ: America/Lima
+      API_GATEWAY_URL: http://crisaor.serveftp.com:9080
+    mem_limit: 128m
+    networks:
+      - stack_default
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+        compress: "true"
+
+networks:
+  stack_default:
+    external: true
