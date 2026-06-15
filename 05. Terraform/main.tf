@@ -209,18 +209,16 @@ resource "local_file" "docker_compose_stack" {
   filename = "${var.docker_compose_output_dir}/docker-compose.stack.yml"
 
   content = templatefile("${path.module}/templates/docker-compose.stack.yml.tftpl", {
-    environment         = var.environment
-    server_spec         = var.server_spec
-    docker_stack        = var.docker_stack
-    service_ports       = var.service_ports
-    postgres_config     = var.postgres_config
-    postgres_resources  = var.postgres_resources
-    pg_tuning           = var.pg_tuning
-    testing_resources   = var.testing_resources
-    disk_allocation     = var.disk_allocation
-    postgres_password   = var.db_admin_password
-    erp_app_password    = var.erp_app_password
-    timezone            = var.docker_stack.timezone
+    environment        = var.environment
+    server_spec        = var.server_spec
+    docker_stack       = var.docker_stack
+    service_ports      = var.service_ports
+    postgres_config    = var.postgres_config
+    postgres_resources = var.postgres_resources
+    pg_tuning          = var.pg_tuning
+    testing_resources  = var.testing_resources
+    disk_allocation    = var.disk_allocation
+    timezone           = var.docker_stack.timezone
   })
 }
 
@@ -249,8 +247,9 @@ resource "local_file" "env_file" {
   filename = "${var.docker_compose_output_dir}/.env.example"
 
   content = templatefile("${path.module}/templates/env.example.tftpl", {
-    postgres_password   = var.db_admin_password
-    erp_app_password    = var.erp_app_password
+    postgres_password     = var.db_admin_password
+    erp_app_password      = var.erp_app_password
+    sonarqube_db_password = var.sonarqube_db_password
     postgres_superuser  = var.postgres_config.superuser
     postgres_service    = var.postgres_config.service_name
     public_host         = var.docker_stack.public_host
@@ -282,7 +281,8 @@ resource "local_file" "postgres_init" {
   filename = "${var.docker_compose_output_dir}/init/01-create-databases.sql"
 
   content = templatefile("${path.module}/templates/init-databases.sql.tftpl", {
-    databases        = var.postgres_config.databases
-    erp_app_password = var.erp_app_password
+    databases             = var.postgres_config.databases
+    erp_app_password      = var.erp_app_password
+    sonarqube_db_password = var.sonarqube_db_password
   })
 }

@@ -165,6 +165,7 @@ variable "postgres_config" {
     superuser      = string
     databases      = list(string)
     init_scripts   = list(string)
+    shm_size       = optional(string, "256mb")
   })
   default = {
     container_name = "postgres17"
@@ -273,6 +274,13 @@ variable "frontend_resources" {
 # SONARQUBE (perfil tools — bajo demanda)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+variable "sonarqube_db_password" {
+  description = "Contraseña del rol sonarqube en PostgreSQL"
+  type        = string
+  sensitive   = true
+  default     = "CHANGE_ME_SONARQUBE"
+}
+
 variable "testing_resources" {
   description = "Recursos para SonarQube (perfil tools)"
   type = object({
@@ -283,16 +291,22 @@ variable "testing_resources" {
       enabled        = bool
       image          = string
       container_name = string
+      restart        = optional(string, "no")
+      host_port      = optional(number, 9001)
+      jdbc_username  = optional(string, "sonarqube")
     })
   })
   default = {
     sonarqube = {
-      memory_limit   = "1536Mi"
-      memory_request = "1024Mi"
+      memory_limit   = "3g"
+      memory_request = "2g"
       cpu_limit      = "1000m"
       enabled        = true
       image          = "sonarqube:community"
       container_name = "sonarqube"
+      restart        = "no"
+      host_port      = 9001
+      jdbc_username  = "sonarqube"
     }
   }
 }

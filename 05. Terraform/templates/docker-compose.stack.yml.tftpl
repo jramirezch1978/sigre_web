@@ -7,11 +7,12 @@
 # ============================================================
 # Ubicación en cronos: ${docker_stack.stack_dir}/docker-compose.stack.yml
 #
-# Levantar infra:
-#   docker compose -f docker-compose.stack.yml up -d
-#
-# SonarQube bajo demanda:
+# Recrear stack idéntico a cronos (contexto.txt):
+#   terraform apply -var-file=environments/cronos.tfvars -var-file=secrets.tfvars
+#   docker compose -f docker-compose.stack.yml --env-file .env up -d
 #   docker compose --profile tools -f docker-compose.stack.yml up -d sonarqube
+#
+# ATENCIÓN: docker compose down -v elimina el volumen postgres_data
 # ============================================================
 
 name: sigre-stack
@@ -25,7 +26,7 @@ services:
       - "${service_ports.postgres}:5432"
     environment:
       POSTGRES_USER: ${postgres_config.superuser}
-      POSTGRES_PASSWORD: ${postgres_password}
+      POSTGRES_PASSWORD: $${POSTGRES_PASSWORD}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.utf8"
       TZ: ${timezone}
       PGTZ: ${timezone}
@@ -65,6 +66,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d:ro
     mem_limit: ${postgres_resources.memory_limit}
+    shm_size: ${postgres_config.shm_size}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${postgres_config.superuser}"]
       interval: 30s
@@ -83,16 +85,16 @@ services:
     profiles: ["tools"]
     container_name: ${testing_resources.sonarqube.container_name}
     image: ${testing_resources.sonarqube.image}
-    restart: unless-stopped
+    restart: ${testing_resources.sonarqube.restart}
     depends_on:
       ${postgres_config.service_name}:
         condition: service_healthy
     ports:
-      - "${service_ports.sonarqube}:9000"
+      - "${testing_resources.sonarqube.host_port}:9000"
     environment:
       SONAR_JDBC_URL: jdbc:postgresql://${postgres_config.service_name}:5432/sonarqube
-      SONAR_JDBC_USERNAME: ${postgres_config.superuser}
-      SONAR_JDBC_PASSWORD: ${postgres_password}
+      SONAR_JDBC_USERNAME: ${testing_resources.sonarqube.jdbc_username}
+      SONAR_JDBC_PASSWORD: $${SONAR_DB_PASSWORD}
       SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
       TZ: ${timezone}
     volumes:

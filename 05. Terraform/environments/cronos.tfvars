@@ -45,7 +45,7 @@ service_ports = {
   frontend    = 8080
   api_gateway = 9080
   postgres    = 5432
-  sonarqube   = 9000
+  sonarqube   = 9001
   eureka      = 8761
 }
 
@@ -60,7 +60,7 @@ disk_allocation = {
   os_swap   = 20
 }
 
-# ── PostgreSQL 17 (~2 GB RAM) ────────────────────────────────
+# ── PostgreSQL 17 (~3 GB RAM — igual que cronos en producción) ─
 
 postgres_config = {
   container_name = "postgres17"
@@ -69,15 +69,16 @@ postgres_config = {
   superuser      = "postgres"
   databases      = ["sigre_security", "template_sigre"]
   init_scripts   = []
+  shm_size       = "256mb"
 }
 
 pg_tuning = {
-  shared_buffers_mb            = 512
-  effective_cache_size_mb      = 1536
-  work_mem_mb                  = 8
+  shared_buffers_mb            = 768
+  effective_cache_size_mb      = 2048
+  work_mem_mb                  = 16
   maintenance_work_mem_mb      = 128
   wal_buffers_mb               = 16
-  max_connections              = 80
+  max_connections              = 100
   max_parallel_workers         = 2
   max_parallel_workers_gather  = 1
   max_parallel_maintenance     = 1
@@ -90,8 +91,8 @@ pg_tuning = {
 }
 
 postgres_resources = {
-  memory_limit   = "2048Mi"
-  memory_request = "1536Mi"
+  memory_limit   = "3g"
+  memory_request = "2g"
   cpu_limit      = "1500m"
   cpu_request    = "500m"
 }
@@ -100,16 +101,19 @@ postgres_resources = {
 # db_admin_password = "..."
 # erp_app_password  = "..."
 
-# ── SonarQube (perfil tools — bajo demanda, ~1.5 GB) ─────────
+# ── SonarQube (perfil tools — bajo demanda, ~3 GB) ───────────
 
 testing_resources = {
   sonarqube = {
-    memory_limit   = "1536Mi"
-    memory_request = "1024Mi"
+    memory_limit   = "3g"
+    memory_request = "2g"
     cpu_limit      = "1000m"
     enabled        = true
     image          = "sonarqube:community"
     container_name = "sonarqube"
+    restart        = "no"
+    host_port      = 9001
+    jdbc_username  = "sonarqube"
   }
 }
 

@@ -1,0 +1,118 @@
+PROMPT PARA CURSOR — Despliegue del ERP SIGRE en servidor de producción
+Necesito desplegar mi aplicación (frontend Angular + backend Java/Spring Boot con API Gateway) en un servidor remoto ya preparado. Quiero que generes los Dockerfile, el docker-compose de la aplicación y los scripts/pasos de despliegue ajustados EXACTAMENTE a este entorno. Aquí está toda la información del servidor destino:
+SERVIDOR DESTINO
+
+Host físico: Windows Server 2016 con Oracle VirtualBox
+VM: Oracle Linux 9.7, kernel UEK 6.12, hostname cronos
+Recursos de la VM: 4 vCPU, 10 GB RAM, 300 GB disco (223 GB libres montados en /home)
+IP local de la VM: 192.168.0.163
+Acceso remoto: SSH por crisaor.serveftp.com (DNS dinámico), usuario jramirez (tiene sudo y pertenece al grupo docker)
+IP pública: 190.117.92.142
+
+DOCKER (ya instalado y funcionando)
+
+Docker 29.5.3 + Docker Compose v5.1.4
+data-root configurado en /home/docker (usa los 223 GB libres, NO root)
+Red Docker existente: stack_default (creada por mi stack actual)
+Directorio del stack: /home/jramirez/stack con un docker-compose.yml que ya corre PostgreSQL y SonarQube
+Usuario de servicio para la app: erpsigre (sin sudo, en grupo docker)
+
+POSTGRESQL 17 (ya corriendo como contenedor)
+
+Contenedor: postgres17, imagen postgres:17
+Accesible DENTRO de la red Docker stack_default por hostname postgres puerto 5432 (NO usar IP, usar el nombre de servicio)
+Encoding: UTF-8 / Collation: en_US.utf8 / Timezone: America/Lima
+Superusuario: postgres
+IMPORTANTE: el backend debe conectarse a jdbc:postgresql://postgres:5432/... usando la red interna de Docker, NO por IP ni por localhost
+
+ARQUITECTURA MULTITENANT (base de datos por cliente)
+
+Modelo: una base de datos por cada cliente, clonada desde una plantilla
+Base security: autenticación central, usuarios, registro de tenants (compartida)
+Base template_sigre: plantilla que se clona para cada cliente nuevo (CREATE DATABASE cliente_x TEMPLATE template_sigre)
+Base por cliente: cliente_xxx creada desde el template
+NOTA: estas bases AÚN NO están creadas. Incluye en el despliegue los scripts SQL de inicialización (creación de security, template_sigre, rol de aplicación erp_app con permisos acotados, y el esquema inicial de cada una)
+Origen de datos: migración futura desde Oracle 11g R2 (encoding original ISO-8859-15 → convertir a UTF-8). Tener en cuenta compatibilidad de tipos Oracle→PostgreSQL
+
+PUERTOS
+
+Frontend Angular: 8080
+API Gateway (entrada del backend): 9080
+Estos puertos ya están con NAT en el router hacia 192.168.0.163
+El frontend consume el backend a través del gateway en el 9080
+
+RESTRICCIONES DE RECURSOS (CRÍTICO — solo 10 GB RAM total)
+
+En el servidor ya corren: PostgreSQL (~2 GB), Portainer, sistema (~1 GB). SonarQube existe pero está apagado (bajo demanda)
+NO compilar en el servidor (Maven/ng build consumen demasiada RAM). Las imágenes deben construirse con build multi-stage, idealmente construidas fuera y solo ejecutadas aquí
+Usar imágenes runtime ligeras: eclipse-temurin:21-jre-alpine para Java (JRE, no JDK), nginx:alpine para servir el Angular ya compilado (dist estático)
+Definir mem_limit por servicio en el compose para que ningún contenedor se desboque. Presupuesto aproximado disponible para la app: ~4-5 GB en total entre todos los microservicios + frontend
+Si la arquitectura tiene muchos microservicios, recomiéndame cuáles son imprescindibles para arrancar y cuáles pueden quedar para después (no levantar todo de golpe)
+
+INTEGRACIÓN CON EL STACK EXISTENTE
+
+La app debe unirse a la red stack_default para hablar con postgres por nombre
+Preferible: un docker-compose.app.yml separado en /home/jramirez/stack/ que se conecte a la red externa stack_default, para no tocar el compose de infraestructura
+Todos los servicios con restart: unless-stopped
+Zona horaria America/Lima y locale consistente en todos los contenedores
+
+MÉTODO DE DESPLIEGUE
+
+Indícame el método recomendado: build de imágenes local + push a registry + pull en servidor, O construcción directa. Considerando la RAM limitada, recomiéndame el flujo óptimo
+Incluye los comandos exactos de despliegue y un checklist de verificación post-despliegue (healthchecks de cada servicio)
+
+LO QUE NECESITO QUE GENERES
+
+Dockerfile del backend (multi-stage, runtime JRE alpine)
+Dockerfile del frontend (build Angular + nginx alpine sirviendo el dist)
+Configuración de nginx para el frontend (incluyendo proxy del /api hacia el gateway en 9080)
+docker-compose.app.yml integrado con la red stack_default, con mem_limits y healthchecks
+Scripts SQL de inicialización de las bases security, template_sigre y rol erp_app
+Variables de entorno (.env) necesarias, sin hardcodear contraseñas
+Pasos y comandos exactos de despliegue, en orden
+Checklist de verificación post-despliegue
+
+Aún NO incluyas reverse proxy con HTTPS/dominio para clientes (eso es una fase posterior); por ahora el objetivo es desplegar y probar la app funcionando por IP:puerto internamente.
+
+
+POSTGRESQL 17 (ya corriendo como contenedor — NO modificar, solo conectarse)
+
+Contenedor: postgres17, imagen postgres:17 (versión real 17.10)
+Definido en /home/jramirez/stack/docker-compose.yml
+Accesible DENTRO de la red Docker stack_default por hostname postgres puerto 5432 (usar el nombre de servicio, NO IP ni localhost)
+Puerto mapeado al host: 5432:5432
+Superusuario: postgres
+Encoding: UTF8 | Collation/Ctype: en_US.utf8 (equivalente al AMERICAN_AMERICA de Oracle) | Timezone: America/Lima
+Inicializado con: POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.utf8"
+Volumen de datos: pgdata (vive en /home/docker/volumes, sobre los 223 GB)
+mem_limit: 3g | shm_size: 256mb
+Parámetros de tuning aplicados (afinados para 10 GB RAM total compartida):
+
+shared_buffers=768MB
+effective_cache_size=2GB
+work_mem=16MB
+maintenance_work_mem=128MB
+max_connections=100
+timezone=America/Lima
+
+
+La contraseña del superusuario está en /home/jramirez/stack/.env como variable POSTGRES_PASSWORD (NO hardcodear; el backend debe leer credenciales de su propio .env)
+IMPORTANTE para el backend: con max_connections=100, si tienes varios microservicios cada uno con su pool de conexiones (HikariCP), dimensiona los pools con cuidado (ej. pool de 5-10 por servicio) para no agotar las 100 conexiones. Indícame el cálculo según el número de servicios.
+
+SONARQUBE (ya configurado como contenedor, apagado/bajo demanda — informativo, no desplegar)
+
+Contenedor: sonarqube, imagen sonarqube:community, en el mismo docker-compose.yml del stack
+Usa perfil de Compose tools y restart: "no" → NO arranca automáticamente, solo bajo demanda con docker compose --profile tools up -d sonarqube
+Puerto: 9001:9000 (el 9000 interno NO está libre para la app; Portainer usa 9000 interno también)
+Tiene su propia base en PostgreSQL: BD sonarqube, usuario sonarqube (ya creada)
+mem_limit: 3g
+RELEVANCIA para el despliegue: cuando SonarQube esté encendido consume ~2.5 GB. NO asumir que esos 2.5 GB están disponibles para la app de forma permanente; el presupuesto de RAM de la app (~4-5 GB) aplica con SonarQube APAGADO. Si se enciende para análisis, la app debe seguir funcionando con holgura.
+
+PUERTOS YA OCUPADOS EN EL SERVIDOR (no usar para la app)
+
+5432 → PostgreSQL
+9001 → SonarQube (cuando está encendido)
+9443, 8000, 9000 → Portainer
+9090 → Cockpit
+22 → SSH
+Puertos asignados a la app: 8080 (frontend), 9080 (gateway). Si necesitas más puertos para microservicios internos, NO los expongas al host salvo el gateway; comunícalos por la red interna stack_default.

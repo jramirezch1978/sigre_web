@@ -1,8 +1,13 @@
 -- SIGRE ERP — Inicialización multitenant (primera creación del volumen PG 17)
+-- Generado por Terraform — placeholders reemplazados al aplicar secrets.tfvars
 
 CREATE ROLE erp_app LOGIN PASSWORD 'CHANGE_ME_ERP_APP';
 ALTER ROLE erp_app SET client_encoding TO 'UTF8';
 ALTER ROLE erp_app SET timezone TO 'America/Lima';
+
+CREATE ROLE sonarqube LOGIN PASSWORD 'CHANGE_ME_SONARQUBE';
+ALTER ROLE sonarqube SET client_encoding TO 'UTF8';
+ALTER ROLE sonarqube SET timezone TO 'America/Lima';
 
 CREATE DATABASE sigre_security
   WITH ENCODING 'UTF8'
@@ -27,4 +32,6 @@ CREATE DATABASE sonarqube
   LC_COLLATE 'en_US.utf8'
   LC_CTYPE 'en_US.utf8'
   TEMPLATE template0
-  OWNER postgres;
+  OWNER sonarqube;
+
+GRANT ALL PRIVILEGES ON DATABASE sonarqube TO sonarqube;

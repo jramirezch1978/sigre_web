@@ -173,3 +173,76 @@ docker compose restart sync-service
 
 Dni de prueba
 22300596
+
+Encender bajo demanda
+
+
+Encender: docker compose --profile tools up -d sonarqube
+Apagar: docker compose --profile tools stop sonarqube
+Ver logs: docker logs sonarqube -f
+
+=========================================================
+CRONOS — SIGRE ERP (contexto.txt / Oracle Linux 9 + Docker)
+=========================================================
+Servidor: crisaor.serveftp.com (192.168.0.163) | Red: stack_default
+Stack infra (Terraform): postgres17 + SonarQube — recreable idéntico a cronos
+JDBC app: jdbc:postgresql://postgres:5432/... (hostname postgres, red interna)
+Secretos: deploy\cronos\.env (POSTGRES_PASSWORD, ERP_APP_PASSWORD, SONAR_DB_PASSWORD)
+
+Puertos app: 8080 frontend, 9080 gateway
+Stack: 5432 PG, 9001 SonarQube (perfil tools, restart no)
+
+--- Recrear stack completo con Terraform (PG + SonarQube + init SQL) ---
+cd "e:\Work\sigre_web\05. Terraform"
+terraform init
+terraform apply -var-file=environments/cronos.tfvars -var-file=secrets.tfvars
+cd e:\Work\sigre_web
+.\server-manage.bat sync-compose
+.\deploy.bat stack --force
+.\database-deploy.bat create-security --force
+.\database-deploy.bat create-template --force
+.\database-deploy.bat clone cantabria --force
+REM SonarQube bajo demanda:
+.\server-manage.bat sonarqube
+
+--- Base de datos (psql via NAT 5432; sin SSH — credenciales deploy\cronos\.env) ---
+cd e:\Work\sigre_web
+copy deploy\cronos\.env.example deploy\cronos\.env
+REM Editar deploy\cronos\.env con las mismas contraseñas que secrets.tfvars
+.\database-deploy.bat create-security --force
+.\database-deploy.bat create-template --force
+.\database-deploy.bat clone cantabria --force
+
+--- Contexto Docker cronos (solo deploy.bat / server-manage.bat; requiere clave SSH) ---
+docker context create cronos --docker "host=ssh://jramirez@crisaor.serveftp.com"
+REM Clave SSH (una vez): ssh-keygen -t ed25519  ^&  type %USERPROFILE%\.ssh\id_ed25519.pub ^| ssh jramirez@crisaor.serveftp.com "mkdir -p ~/.ssh ^&^& cat >> ~/.ssh/authorized_keys"
+
+--- Build local (NO compilar en cronos) ---
+.\build.bat backend
+.\build.bat frontend
+
+--- Despliegue en cronos (build local + push GHCR + pull/up) ---
+docker login ghcr.io
+.\deploy.bat backend
+.\deploy.bat frontend
+
+--- Gestion servidor ---
+.\server-manage.bat status
+.\server-manage.bat app-up
+.\server-manage.bat sonarqube
+REM SonarQube: http://crisaor.serveftp.com:9001
+
+--- Logs ---
+.\download-log.bat backend api-gateway
+.\download-log.bat backend asistencia-service
+.\download-log.bat frontend
+
+--- Pools HikariCP (PG max_connections=100) ---
+Backend desplegado: asistencia-service pool=5
+Regla: (N servicios x 5) + 15 reserva <= 85 conexiones app
+
+--- Checklist post-despliegue ---
+curl http://crisaor.serveftp.com:9080/actuator/health
+curl http://crisaor.serveftp.com:8080
+docker exec postgres17 pg_isready -U postgres
+=========================================================

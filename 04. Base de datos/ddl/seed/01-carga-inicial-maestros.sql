@@ -3668,87 +3668,6 @@ INSERT INTO auth.usuario (
     'JHONNY ALEXANDER', 'RAMIREZ CHIROQUE', 'JHONN RAMIREZ CHIROQUE',
     FALSE, FALSE, '2026-06-11T00:04:29.083Z'::timestamptz,
     '1', 1, '2026-04-11T21:15:52.928Z'::timestamptz, 1, '2026-06-11T00:04:29.086Z'::timestamptz
-),
-(
-    4,
-    'cjimenez',
-    'cjimenez@sigre.pe',
-    '$2b$10$litYD6w5YZHBEN.JszBog.O6VPF/qHMVDxDQLspY.SVd9jNv8MbWG',
-    'CARLOS', 'JIMENEZ', 'CARLOS JIMENEZ',
-    FALSE, FALSE, NULL,
-    '1', 1, '2026-04-11T21:15:52.928Z'::timestamptz, 1, '2026-04-11T21:15:52.928Z'::timestamptz
-),
-(
-    5,
-    'ecastro',
-    'ecastro@sigre.pe',
-    '$2a$10$2TLja3iEqAmBxY4GWOam/uCIw5AJrG52NMJDiKgY7xlaH1OkGFE2a',
-    'EDIIE', 'CASTRO', 'EDDIE CASTRO',
-    FALSE, FALSE, '2026-06-08T22:12:37.103Z'::timestamptz,
-    '1', 1, '2026-04-13T21:16:17.013Z'::timestamptz, 1, '2026-06-08T22:12:37.104Z'::timestamptz
-),
-(
-    6,
-    'wgomez',
-    'wgomez@sigre.pe',
-    '$2a$10$karJCVQAcp6sbMLl0jM3EusmCqW3FbODb9D73DBhaOETMgf3C6kTC',
-    'EILMAR', 'GOMEZ', 'WILMAR GOMEZ',
-    FALSE, FALSE, NULL,
-    '1', 1, '2026-04-13T21:16:52.301Z'::timestamptz, 1, '2026-04-13T21:16:52.301Z'::timestamptz
-),
-(
-    7,
-    'mines',
-    'minez@sigre.pe',
-    '$2a$10$FB9MSVcNWmGo.r3OyCf4HePIMg4n1HDGyb9TK/Pz1M5LaoVTCrhCK',
-    'MARIA', 'INEZ', 'MARIA INES',
-    FALSE, FALSE, NULL,
-    '1', 1, '2026-04-13T21:17:26.506Z'::timestamptz, 1, '2026-04-13T21:17:26.506Z'::timestamptz
-),
-(
-    8,
-    'lpalomeque',
-    'lpalomeque@sigre.pe',
-    '$2a$10$FB9MSVcNWmGo.r3OyCf4HePIMg4n1HDGyb9TK/Pz1M5LaoVTCrhCK',
-    'LESLYE', 'PALOMEQUE', 'LESLYE PALOMEQUE',
-    FALSE, FALSE, NULL,
-    '1', 1, '2026-04-13T21:18:07.386Z'::timestamptz, 1, '2026-04-13T21:18:07.386Z'::timestamptz
-),
-(
-    9,
-    'watoche',
-    'watoche@sigre.pe',
-    '$2a$10$lxT/8aSzCCA7Ux3r/VED8OTZjDUXOKP9ISF7PNDVm7SazuF3azB7y',
-    'WILFREDO', 'ATOCHE', 'WILFREDO ATOCHE',
-    FALSE, FALSE, NULL,
-    '1', 1, '2026-04-27T21:37:10.278Z'::timestamptz, 1, NULL
-),
-(
-    10,
-    'eqintegra',
-    'contabilidad.sigre@gmail.com',
-    '$2a$10$lxT/8aSzCCA7Ux3r/VED8OTZjDUXOKP9ISF7PNDVm7SazuF3azB7y',
-    'EQUIPO', 'DE INTEGRACION', 'EQUIPO DE INTEGRACION',
-    FALSE, FALSE, NULL,
-    '1', 1, '2026-04-27T21:38:01.733Z'::timestamptz, 1, NULL
-),
-(
-    11,
-    'hescobar',
-    'consultorexterno4@sigre.pe',
-    '$2a$10$2TLja3iEqAmBxY4GWOam/uCIw5AJrG52NMJDiKgY7xlaH1OkGFE2a',
-    'HEIDY', 'ESCOBAR', 'HEYDI ESCOBAR',
-    FALSE, FALSE, '2026-06-08T22:12:37.103Z'::timestamptz,
-    '1', 1, '2026-04-13T21:16:17.013Z'::timestamptz, 1, '2026-06-08T22:12:37.104Z'::timestamptz
-),
-(
-    12,
-    'pcastillo',
-    'pcastillo@sigre.pe',
-    '$2a$10$2TLja3iEqAmBxY4GWOam/uCIw5AJrG52NMJDiKgY7xlaH1OkGFE2a',
-    'CASTILLO', 'PAOLA', 'PAOLA CASTILLO',
-    FALSE, FALSE, '2026-06-08T22:12:37.103Z'::timestamptz,
-    '1', 1, '2026-04-13T21:16:17.013Z'::timestamptz, 1, '2026-06-08T22:12:37.104Z'::timestamptz
 )
 ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
@@ -3764,13 +3683,13 @@ ON CONFLICT (id) DO UPDATE SET
     updated_by = EXCLUDED.updated_by,
     fec_modificacion = EXCLUDED.fec_modificacion;
 
--- Matriz por defecto: usuarios seed 1..12 × sucursales PI, Lima, Chiclayo, Chimbote (código *-PI|LM|CX|CH).
+-- Matriz por defecto: usuarios seed 1..3 × sucursales PI, Lima, Chiclayo, Chimbote (código *-PI|LM|CX|CH).
 INSERT INTO auth.usuario_sucursal (usuario_id, sucursal_id, flag_estado)
 SELECT u.id, s.id, '1'
 FROM auth.usuario u
 CROSS JOIN auth.sucursal s
 WHERE u.flag_estado = '1'
-  AND u.id BETWEEN 1 AND 12
+  AND u.id BETWEEN 1 AND 3
   AND (
       s.codigo ~ '-(PI|LM|CX|CH)$'
       OR s.codigo IN ('PI', 'LM', 'CX', 'CH')
