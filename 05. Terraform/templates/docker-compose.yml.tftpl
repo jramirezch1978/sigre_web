@@ -1,0 +1,388 @@
+# ============================================================
+# Restaurant.pe ERP — Docker Compose (GENERADO POR TERRAFORM)
+# ============================================================
+# NO EDITAR MANUALMENTE — Este archivo es generado por:
+#   terraform apply -var-file="environments/${environment}.tfvars"
+#
+# Servidor: ${server_spec.ram_gb} GB RAM | ${server_spec.cpu_cores} cores | ${server_spec.disk_gb} GB disco
+# Ambiente: ${environment} (DESARROLLO + PRUEBAS)
+#
+# Perfiles disponibles:
+#   --profile testing        SonarQube + Selenium Grid
+#   --profile observability  ELK + Prometheus + Grafana + Zipkin
+#   --profile iac            Terraform runner
+# ============================================================
+
+services:
+
+  # ━━ TERRAFORM RUNNER (IaC) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  terraform:
+    build:
+      context: ../04. Terraform
+      dockerfile: Dockerfile
+    container_name: rpe-terraform
+    profiles: ["iac"]
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    volumes:
+      - ../04. Terraform:/workspace
+      - terraform_plugins:/workspace/.terraform
+      - terraform_plugin_cache:/workspace/.terraform-plugin-cache
+      - ../04. Terraform/credentials:/credentials:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TF_VAR_db_admin_password: $${DB_PASSWORD:-R3st4ur4nt_D3v!}
+      TF_VAR_rabbitmq_pass: $${RABBIT_PASS:-R4bb1t_D3v!}
+      TF_VAR_grafana_password: $${GRAFANA_PASS:-admin}
+      GOOGLE_APPLICATION_CREDENTIALS: /credentials/gcp-key.json
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
+    command: ["shell"]
+    networks:
+      - rpe-network
+
+  # ━━ TIER 1: BASE DE DATOS Y MENSAJERÍA ━━━━━━━━━━━━━━━━━━
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: rpe-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: restaurant_admin
+      POSTGRES_PASSWORD: $${DB_PASSWORD:-R3st4ur4nt_D3v!}
+      POSTGRES_DB: restaurant_pe_security
+      TZ: ${pg_tuning.timezone}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./config/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./scripts/01-init-security.sql:/docker-entrypoint-initdb.d/01-init-security.sql:ro
+      - ./scripts/02-init-empresa.sql:/docker-entrypoint-initdb.d/02-init-empresa.sql:ro
+    command: >
+      postgres
+        -c config_file=/etc/postgresql/postgresql.conf
+    deploy:
+      resources:
+        limits:
+          memory: ${postgres_resources.memory_limit}
+          cpus: '${replace(postgres_resources.cpu_limit, "m", "") / 1000}'
+        reservations:
+          memory: ${postgres_resources.memory_request}
+          cpus: '${replace(postgres_resources.cpu_request, "m", "") / 1000}'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U restaurant_admin -d restaurant_pe_security"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - rpe-network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rpe-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: $${RABBIT_USER:-restaurant}
+      RABBITMQ_DEFAULT_PASS: $${RABBIT_PASS:-R4bb1t_D3v!}
+      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: 0.4
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    deploy:
+      resources:
+        limits:
+          memory: ${rabbitmq_resources.memory_limit}
+          cpus: '${replace(rabbitmq_resources.cpu_limit, "m", "") / 1000}'
+        reservations:
+          memory: ${rabbitmq_resources.memory_request}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - rpe-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: rpe-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+        --requirepass $${REDIS_PASS:-R3d1s_D3v!}
+        --maxmemory ${redis_resources.maxmemory_mb}mb
+        --maxmemory-policy allkeys-lru
+        --save 900 1
+        --save 300 10
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: ${redis_resources.maxmemory_mb + 56}M
+          cpus: '0.25'
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$${REDIS_PASS:-R3d1s_D3v!}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rpe-network
+
+  # ━━ TIER 2: TESTING (perfil separado) ━━━━━━━━━━━━━━━━━━━
+%{ if testing_resources.sonarqube.enabled ~}
+
+  sonarqube:
+    image: sonarqube:10-community
+    container_name: rpe-sonarqube
+    restart: unless-stopped
+    profiles: ["testing"]
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonarqube
+      SONAR_JDBC_USERNAME: restaurant_admin
+      SONAR_JDBC_PASSWORD: $${DB_PASSWORD:-R3st4ur4nt_D3v!}
+      SONAR_SEARCH_JAVAADDITIONALOPTS: "-Dnode.store.allow_mmap=false"
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    deploy:
+      resources:
+        limits:
+          memory: ${testing_resources.sonarqube.memory_limit}
+          cpus: '${replace(testing_resources.sonarqube.cpu_limit, "m", "") / 1000}'
+        reservations:
+          memory: ${testing_resources.sonarqube.memory_request}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - rpe-network
+%{ endif ~}
+
+  selenium-hub:
+    image: selenium/hub:4-latest
+    container_name: rpe-selenium-hub
+    restart: unless-stopped
+    profiles: ["testing"]
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    deploy:
+      resources:
+        limits:
+          memory: ${testing_resources.selenium_hub.memory_limit}
+          cpus: '${replace(testing_resources.selenium_hub.cpu_limit, "m", "") / 1000}'
+    networks:
+      - rpe-network
+
+  selenium-chrome:
+    image: selenium/node-chrome:4-latest
+    container_name: rpe-selenium-chrome
+    restart: unless-stopped
+    profiles: ["testing"]
+    environment:
+      SE_EVENT_BUS_HOST: selenium-hub
+      SE_EVENT_BUS_PUBLISH_PORT: 4442
+      SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
+      SE_NODE_MAX_SESSIONS: ${testing_resources.selenium_chrome.max_sessions}
+    depends_on:
+      - selenium-hub
+    shm_size: '${testing_resources.selenium_chrome.shm_size}'
+    deploy:
+      resources:
+        limits:
+          memory: ${testing_resources.selenium_chrome.memory_limit}
+          cpus: '${replace(testing_resources.selenium_chrome.cpu_limit, "m", "") / 1000}'
+    networks:
+      - rpe-network
+
+  # ━━ TIER 3: OBSERVABILIDAD (perfil separado) ━━━━━━━━━━━━
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.1
+    container_name: rpe-elasticsearch
+    restart: unless-stopped
+    profiles: ["observability"]
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms${observability_resources.elasticsearch.heap_mb}m -Xmx${observability_resources.elasticsearch.heap_mb}m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    deploy:
+      resources:
+        limits:
+          memory: ${observability_resources.elasticsearch.memory_limit}
+          cpus: '${replace(observability_resources.elasticsearch.cpu_limit, "m", "") / 1000}'
+    networks:
+      - rpe-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.16.1
+    container_name: rpe-kibana
+    restart: unless-stopped
+    profiles: ["observability"]
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    deploy:
+      resources:
+        limits:
+          memory: ${observability_resources.kibana.memory_limit}
+    depends_on:
+      - elasticsearch
+    networks:
+      - rpe-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: rpe-prometheus
+    restart: unless-stopped
+    profiles: ["observability"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=${observability_resources.prometheus.retention_days}d'
+    deploy:
+      resources:
+        limits:
+          memory: ${observability_resources.prometheus.memory_limit}
+    networks:
+      - rpe-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: rpe-grafana
+    restart: unless-stopped
+    profiles: ["observability"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: $${GRAFANA_PASS:-admin}
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    deploy:
+      resources:
+        limits:
+          memory: ${observability_resources.grafana.memory_limit}
+    depends_on:
+      - prometheus
+    networks:
+      - rpe-network
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: rpe-zipkin
+    restart: unless-stopped
+    profiles: ["observability"]
+    environment:
+      JAVA_OPTS: "-Xms${observability_resources.zipkin.jvm_xms} -Xmx${observability_resources.zipkin.jvm_xmx}"
+    ports:
+      - "9411:9411"
+    deploy:
+      resources:
+        limits:
+          memory: ${observability_resources.zipkin.memory_limit}
+    networks:
+      - rpe-network
+
+  # ━━ TIER 3-5: MICROSERVICIOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+%{ for name, svc in microservices ~}
+
+  ${name}:
+    build: ./${name}
+    container_name: rpe-${name}
+    restart: unless-stopped
+    ports:
+      - "${svc.port}:${svc.port}"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    environment:
+      EUREKA_URI: http://eureka-server:8761/eureka
+%{ if !contains(["ms-reportes", "ms-notificaciones"], name) ~}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: restaurant_admin
+      DB_PASS: $${DB_PASSWORD:-R3st4ur4nt_D3v!}
+%{ endif ~}
+%{ if contains(["api-gateway", "ms-auth-security"], name) ~}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: $${REDIS_PASS:-R3d1s_D3v!}
+%{ endif ~}
+%{ if !contains(["eureka-server", "config-server", "api-gateway", "ms-auth-security"], name) ~}
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_USER: $${RABBIT_USER:-restaurant}
+      RABBIT_PASS: $${RABBIT_PASS:-R4bb1t_D3v!}
+%{ endif ~}
+      JAVA_TOOL_OPTIONS: "-Xms${svc.jvm_xms} -Xmx${svc.jvm_xmx} -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+    deploy:
+      resources:
+        limits:
+          memory: ${svc.memory_limit}
+          cpus: '${replace(svc.cpu_limit, "m", "") / 1000}'
+        reservations:
+          memory: ${svc.memory_request}
+          cpus: '${replace(svc.cpu_request, "m", "") / 1000}'
+%{ if name == "eureka-server" ~}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${svc.port}/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+%{ endif ~}
+    networks:
+      - rpe-network
+%{ endfor ~}
+
+# ━━ VOLÚMENES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+volumes:
+  postgres_data:         # ~${disk_allocation.postgres} GB
+    driver: local
+  rabbitmq_data:         # ~${disk_allocation.rabbitmq} GB
+    driver: local
+  redis_data:            # ~${disk_allocation.redis} GB
+    driver: local
+  elasticsearch_data:    # ~${disk_allocation.elasticsearch} GB
+    driver: local
+  prometheus_data:       # ~${disk_allocation.prometheus} GB
+    driver: local
+  grafana_data:          # ~${disk_allocation.grafana} GB
+    driver: local
+  sonarqube_data:        # ~${disk_allocation.sonarqube} GB
+    driver: local
+  sonarqube_logs:
+    driver: local
+  sonarqube_extensions:
+    driver: local
+  terraform_plugins:
+    driver: local
+  terraform_plugin_cache:
+    driver: local
+
+networks:
+  rpe-network:
+    driver: bridge

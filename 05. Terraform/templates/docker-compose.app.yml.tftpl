@@ -1,0 +1,104 @@
+# ============================================================
+# SIGRE ERP — Aplicación (frontend + backend)
+# Generado por Terraform — NO editar manualmente
+# Ambiente: ${environment}
+# Red externa: ${docker_stack.network_name} (PostgreSQL hostname: ${postgres_service_name})
+# ============================================================
+
+name: sigre-app
+
+services:
+%{ for name, svc in microservices ~}
+  ${svc.container_name}:
+    container_name: ${svc.container_name}
+%{ if use_prebuilt_images ~}
+    image: ${image_registry}/${svc.image_name}:${image_tag}
+%{ else ~}
+    build:
+      context: ${repo_dir}/03. backend
+      dockerfile: ${name}/Dockerfile
+%{ endif ~}
+    restart: unless-stopped
+%{ if svc.expose_port ~}
+    ports:
+      - "${svc.port}:${svc.port}"
+%{ endif ~}
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      TZ: ${timezone}
+      JAVA_OPTS: "-Xms${svc.jvm_xms} -Xmx${svc.jvm_xmx} -Duser.timezone=${timezone}"
+%{ if name != "discovery-server" ~}
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
+%{ endif ~}
+%{ if name == "asistencia-service" ~}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${postgres_service_name}:5432/${svc.db_name}
+      SPRING_DATASOURCE_USERNAME: erp_app
+      SPRING_DATASOURCE_PASSWORD: $${ERP_APP_PASSWORD}
+      SERVER_PORT: "${svc.port}"
+%{ endif ~}
+%{ if name == "api-gateway" ~}
+      SERVER_PORT: "${svc.port}"
+%{ endif ~}
+    mem_limit: ${svc.memory_limit}
+    networks:
+      - ${docker_stack.network_name}
+%{ if name != "discovery-server" ~}
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+%{ endif ~}
+    healthcheck:
+%{ if name == "asistencia-service" ~}
+      test: ["CMD", "curl", "-f", "http://localhost:${svc.port}/api/time/health"]
+%{ else ~}
+      test: ["CMD", "curl", "-f", "http://localhost:${svc.port}/actuator/health"]
+%{ endif ~}
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
+%{ endfor ~}
+  ${frontend.container_name}:
+    container_name: ${frontend.container_name}
+%{ if use_prebuilt_images ~}
+    image: ${image_registry}/${frontend.image_name}:${image_tag}
+%{ else ~}
+    build:
+      context: ${repo_dir}/02. frontend
+      dockerfile: Dockerfile
+%{ endif ~}
+    restart: unless-stopped
+    ports:
+      - "${service_ports.frontend}:80"
+    environment:
+      TZ: ${timezone}
+      API_GATEWAY_URL: ${api_public_url}
+    mem_limit: ${frontend.memory_limit}
+    networks:
+      - ${docker_stack.network_name}
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+        compress: "true"
+
+networks:
+  ${docker_stack.network_name}:
+    external: true

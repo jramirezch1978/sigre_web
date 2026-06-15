@@ -1,0 +1,132 @@
+# ============================================================
+# SIGRE ERP — Stack de infraestructura (cronos)
+# Generado por Terraform — NO editar manualmente
+# Ambiente: ${environment}
+# Servidor: ${server_spec.hostname} (${server_spec.ip_local})
+# RAM: ${server_spec.ram_gb} GB | CPU: ${server_spec.cpu_cores} | Disco: ${server_spec.disk_gb} GB
+# ============================================================
+# Ubicación en cronos: ${docker_stack.stack_dir}/docker-compose.stack.yml
+#
+# Levantar infra:
+#   docker compose -f docker-compose.stack.yml up -d
+#
+# SonarQube bajo demanda:
+#   docker compose --profile tools -f docker-compose.stack.yml up -d sonarqube
+# ============================================================
+
+name: sigre-stack
+
+services:
+  ${postgres_config.service_name}:
+    container_name: ${postgres_config.container_name}
+    image: ${postgres_config.image}
+    restart: unless-stopped
+    ports:
+      - "${service_ports.postgres}:5432"
+    environment:
+      POSTGRES_USER: ${postgres_config.superuser}
+      POSTGRES_PASSWORD: ${postgres_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.utf8"
+      TZ: ${timezone}
+      PGTZ: ${timezone}
+    command:
+      - postgres
+      - -c
+      - timezone=${pg_tuning.timezone}
+      - -c
+      - shared_buffers=${pg_tuning.shared_buffers_mb}MB
+      - -c
+      - effective_cache_size=${pg_tuning.effective_cache_size_mb}MB
+      - -c
+      - work_mem=${pg_tuning.work_mem_mb}MB
+      - -c
+      - maintenance_work_mem=${pg_tuning.maintenance_work_mem_mb}MB
+      - -c
+      - wal_buffers=${pg_tuning.wal_buffers_mb}MB
+      - -c
+      - max_connections=${pg_tuning.max_connections}
+      - -c
+      - max_parallel_workers=${pg_tuning.max_parallel_workers}
+      - -c
+      - max_parallel_workers_per_gather=${pg_tuning.max_parallel_workers_gather}
+      - -c
+      - max_parallel_maintenance_workers=${pg_tuning.max_parallel_maintenance}
+      - -c
+      - random_page_cost=${pg_tuning.random_page_cost}
+      - -c
+      - effective_io_concurrency=${pg_tuning.effective_io_concurrency}
+      - -c
+      - checkpoint_completion_target=${pg_tuning.checkpoint_completion_target}
+      - -c
+      - autovacuum_vacuum_scale_factor=${pg_tuning.autovacuum_scale_factor}
+      - -c
+      - log_min_duration_statement=${pg_tuning.log_min_duration_ms}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    mem_limit: ${postgres_resources.memory_limit}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${postgres_config.superuser}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
+%{ if testing_resources.sonarqube.enabled ~}
+  sonarqube:
+    profiles: ["tools"]
+    container_name: ${testing_resources.sonarqube.container_name}
+    image: ${testing_resources.sonarqube.image}
+    restart: unless-stopped
+    depends_on:
+      ${postgres_config.service_name}:
+        condition: service_healthy
+    ports:
+      - "${service_ports.sonarqube}:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://${postgres_config.service_name}:5432/sonarqube
+      SONAR_JDBC_USERNAME: ${postgres_config.superuser}
+      SONAR_JDBC_PASSWORD: ${postgres_password}
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+      TZ: ${timezone}
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    mem_limit: ${testing_resources.sonarqube.memory_limit}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/api/system/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+%{ endif ~}
+
+volumes:
+  postgres_data:
+    driver: local
+%{ if testing_resources.sonarqube.enabled ~}
+  sonarqube_data:
+    driver: local
+  sonarqube_extensions:
+    driver: local
+  sonarqube_logs:
+    driver: local
+%{ endif ~}
+
+networks:
+  default:
+    name: ${docker_stack.network_name}
+    driver: bridge

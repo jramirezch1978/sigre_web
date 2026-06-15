@@ -1,0 +1,68 @@
+@echo off
+REM SIGRE ERP — Despliegue en cronos (generado por Terraform)
+REM Uso: deploy.bat [stack|app|all|sonarqube-up|sonarqube-down|status]
+
+setlocal EnableExtensions
+set CONTEXT=${docker_context}
+set STACK_DIR=${stack_dir}
+set REPO_DIR=${repo_dir}
+set DEPLOY_DIR=%~dp0
+
+if "%1"=="" set ACTION=all
+if not "%1"=="" set ACTION=%1
+
+echo === SIGRE deploy cronos — accion: %ACTION% ===
+echo Contexto Docker: %CONTEXT%
+echo Stack dir: %STACK_DIR%
+
+docker context use %CONTEXT%
+if errorlevel 1 exit /b 1
+
+if /I "%ACTION%"=="stack" goto :stack
+if /I "%ACTION%"=="app" goto :app
+if /I "%ACTION%"=="all" goto :all
+if /I "%ACTION%"=="sonarqube-up" goto :sonarqube_up
+if /I "%ACTION%"=="sonarqube-down" goto :sonarqube_down
+if /I "%ACTION%"=="status" goto :status
+echo Accion no reconocida: %ACTION%
+exit /b 1
+
+:stack
+copy /Y "%DEPLOY_DIR%docker-compose.stack.yml" "%STACK_DIR%\docker-compose.stack.yml"
+copy /Y "%DEPLOY_DIR%init\01-create-databases.sql" "%STACK_DIR%\init\01-create-databases.sql"
+docker compose -f "%STACK_DIR%\docker-compose.stack.yml" pull
+docker compose -f "%STACK_DIR%\docker-compose.stack.yml" up -d
+goto :eof
+
+:app
+if not exist "%STACK_DIR%\.env" (
+  echo Copie .env.example a %STACK_DIR%\.env y configure contraseñas.
+  exit /b 1
+)
+copy /Y "%DEPLOY_DIR%docker-compose.app.yml" "%STACK_DIR%\docker-compose.app.yml"
+docker compose --env-file "%STACK_DIR%\.env" -f "%STACK_DIR%\docker-compose.app.yml" pull
+docker compose --env-file "%STACK_DIR%\.env" -f "%STACK_DIR%\docker-compose.app.yml" up -d
+goto :eof
+
+:all
+call "%~f0" stack
+call "%~f0" app
+goto :status
+
+:sonarqube_up
+docker compose --profile tools -f "%STACK_DIR%\docker-compose.stack.yml" up -d sonarqube
+goto :eof
+
+:sonarqube_down
+docker compose --profile tools -f "%STACK_DIR%\docker-compose.stack.yml" stop sonarqube
+goto :eof
+
+:status
+echo.
+echo --- URLs publicas ---
+echo Frontend:  http://${public_host}:${frontend_port}
+echo API GW:    http://${public_host}:${gateway_port}/actuator/health
+echo SonarQube: http://${public_host}:${sonarqube_port}  (perfil tools)
+echo.
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+goto :eof
