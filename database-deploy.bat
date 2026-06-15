@@ -37,7 +37,7 @@ set "PGPORT=5432"
 set "PGUSER=postgres"
 set "PGMAINTDB=postgres"
 set "PGSECURITY=sigre_security"
-set "PGTEMPLATE=template_sigre"
+set "PGTEMPLATE=sigre_template"
 set "PGDATABASE=%PGTEMPLATE%"
 set "PGSQLIMG=postgres:17-alpine"
 set "PGSSLMODE=disable"
@@ -333,7 +333,7 @@ exit /b 0
 
 :is_protected_db
 set "PDB=%~1"
-powershell -NoProfile -Command "$d=$env:PDB.Trim().ToLower(); $x=@('postgres','template0','template1','sigre_security','template_sigre','sonarqube'); if($x -contains $d){exit 1}; exit 0"
+powershell -NoProfile -Command "$d=$env:PDB.Trim().ToLower(); $x=@('postgres','template0','template1','sigre_security','sigre_template','sonarqube'); if($x -contains $d){exit 1}; exit 0"
 exit /b %ERRORLEVEL%
 
 :do_delete
@@ -353,12 +353,12 @@ exit /b %ERRORLEVEL%
 
 :do_delete_dev
 echo ^>^> Modo: delete-dev ^(BDs que terminan en _dev^)
-call :psql_maint_cmd "SELECT datname FROM pg_database WHERE datistemplate = false AND LENGTH(datname) >= 4 AND RIGHT(datname, 4) = '_dev' AND datname NOT IN ('postgres','template0','template1','sigre_security','template_sigre','sonarqube') ORDER BY 1;"
+call :psql_maint_cmd "SELECT datname FROM pg_database WHERE datistemplate = false AND LENGTH(datname) >= 4 AND RIGHT(datname, 4) = '_dev' AND datname NOT IN ('postgres','template0','template1','sigre_security','sigre_template','sonarqube') ORDER BY 1;"
 if "!FORCE!"=="0" (
     set /p DELCONF= Escribe SI para eliminar TODAS las bases _dev listadas: 
     if /i not "!DELCONF!"=="SI" exit /b 1
 )
-for /f "usebackq delims=" %%D in (`docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGMAINTDB!" -t -A -c "SELECT datname FROM pg_database WHERE datistemplate = false AND LENGTH(datname) >= 4 AND RIGHT(datname, 4) = '_dev' AND datname NOT IN ('postgres','template0','template1','sigre_security','template_sigre','sonarqube') ORDER BY 1;"`) do (
+for /f "usebackq delims=" %%D in (`docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGMAINTDB!" -t -A -c "SELECT datname FROM pg_database WHERE datistemplate = false AND LENGTH(datname) >= 4 AND RIGHT(datname, 4) = '_dev' AND datname NOT IN ('postgres','template0','template1','sigre_security','sigre_template','sonarqube') ORDER BY 1;"`) do (
     if not "%%D"=="" (
         call :psql_maint_cmd "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '%%D' AND pid ^<^> pg_backend_pid();"
         call :psql_maint_cmd "DROP DATABASE IF EXISTS %%D;"

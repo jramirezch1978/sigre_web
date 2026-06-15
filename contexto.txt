@@ -29,9 +29,9 @@ ARQUITECTURA MULTITENANT (base de datos por cliente)
 
 Modelo: una base de datos por cada cliente, clonada desde una plantilla
 Base security: autenticación central, usuarios, registro de tenants (compartida)
-Base template_sigre: plantilla que se clona para cada cliente nuevo (CREATE DATABASE cliente_x TEMPLATE template_sigre)
+Base sigre_template: plantilla que se clona para cada cliente nuevo (CREATE DATABASE cliente_x TEMPLATE sigre_template)
 Base por cliente: cliente_xxx creada desde el template
-NOTA: estas bases AÚN NO están creadas. Incluye en el despliegue los scripts SQL de inicialización (creación de security, template_sigre, rol de aplicación erp_app con permisos acotados, y el esquema inicial de cada una)
+NOTA: estas bases AÚN NO están creadas. Incluye en el despliegue los scripts SQL de inicialización (creación de security, sigre_template, rol de aplicación erp_app con permisos acotados, y el esquema inicial de cada una)
 Origen de datos: migración futura desde Oracle 11g R2 (encoding original ISO-8859-15 → convertir a UTF-8). Tener en cuenta compatibilidad de tipos Oracle→PostgreSQL
 
 PUERTOS
@@ -67,7 +67,7 @@ Dockerfile del backend (multi-stage, runtime JRE alpine)
 Dockerfile del frontend (build Angular + nginx alpine sirviendo el dist)
 Configuración de nginx para el frontend (incluyendo proxy del /api hacia el gateway en 9080)
 docker-compose.app.yml integrado con la red stack_default, con mem_limits y healthchecks
-Scripts SQL de inicialización de las bases security, template_sigre y rol erp_app
+Scripts SQL de inicialización de las bases security, sigre_template y rol erp_app
 Variables de entorno (.env) necesarias, sin hardcodear contraseñas
 Pasos y comandos exactos de despliegue, en orden
 Checklist de verificación post-despliegue

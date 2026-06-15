@@ -1,7 +1,7 @@
 ﻿-- ============================================================
 -- SIGRE ERP — auth.usuario en BD tenant (y template)
 -- ============================================================
--- Ejecutar en: template_sigre y en cada sigre_emp_*.
+-- Ejecutar en: sigre_template y en cada sigre_emp_*.
 -- Idempotente: CREATE IF NOT EXISTS + ALTER ADD COLUMN IF NOT EXISTS.
 -- Requerido por ms-auth-security (sync usuario security → tenant).
 -- Orden: 00-auth-usuario → 01-auth.sql (auth.sucursal) → 01-core.sql (ver database-deploy.bat).

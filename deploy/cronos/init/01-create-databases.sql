@@ -18,14 +18,14 @@ CREATE DATABASE sigre_security
 
 GRANT CONNECT ON DATABASE sigre_security TO erp_app;
 
-CREATE DATABASE template_sigre
+CREATE DATABASE sigre_template
   WITH ENCODING 'UTF8'
   LC_COLLATE 'en_US.utf8'
   LC_CTYPE 'en_US.utf8'
   TEMPLATE template0
   OWNER erp_app;
 
-GRANT CONNECT ON DATABASE template_sigre TO erp_app;
+GRANT CONNECT ON DATABASE sigre_template TO erp_app;
 
 CREATE DATABASE sonarqube
   WITH ENCODING 'UTF8'

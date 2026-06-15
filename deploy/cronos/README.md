@@ -83,5 +83,5 @@ docker compose --profile tools stop sonarqube
 - [ ] `curl http://crisaor.serveftp.com:9080/actuator/health`
 - [ ] `curl http://crisaor.serveftp.com:8080`
 - [ ] `docker exec postgres17 pg_isready -U postgres`
-- [ ] Bases: `sigre_security`, `template_sigre`, `sigre_emp_cantabria`
+- [ ] Bases: `sigre_security`, `sigre_template`, `sigre_emp_cantabria`
 - [ ] Eureka: `discovery-server` healthy

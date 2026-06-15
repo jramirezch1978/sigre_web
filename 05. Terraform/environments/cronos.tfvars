@@ -67,7 +67,7 @@ postgres_config = {
   service_name   = "postgres"
   image          = "postgres:17"
   superuser      = "postgres"
-  databases      = ["sigre_security", "template_sigre"]
+  databases      = ["sigre_security", "sigre_template"]
   init_scripts   = []
   shm_size       = "256mb"
 }
