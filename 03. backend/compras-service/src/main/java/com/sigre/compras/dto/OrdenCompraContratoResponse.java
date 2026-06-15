@@ -1,0 +1,21 @@
+package com.sigre.compras.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrdenCompraContratoResponse {
+    private Long id;
+    private String nroOrdenCompra;
+    private LocalDate fechaEmision;
+    private BigDecimal total;
+    private String flagEstado;
+}

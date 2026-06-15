@@ -2,14 +2,16 @@ package com.sigre.compras;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.sql.init.SqlInitializationAutoConfiguration;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication
-@EnableDiscoveryClient
+@SpringBootApplication(
+        scanBasePackages = {"com.sigre.compras", "com.sigre.common"},
+        exclude = {DataSourceAutoConfiguration.class, SqlInitializationAutoConfiguration.class})
+@EnableFeignClients
 public class ComprasApplication {
     public static void main(String[] args) {
         SpringApplication.run(ComprasApplication.class, args);
-        System.out.println("SIGRE 2.0 - Compras Service - Puerto: 8089");
     }
 }
-

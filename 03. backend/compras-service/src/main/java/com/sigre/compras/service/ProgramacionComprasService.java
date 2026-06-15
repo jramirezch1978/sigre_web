@@ -1,0 +1,22 @@
+package com.sigre.compras.service;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.sigre.compras.dto.ProgramacionComprasDetalleResponse;
+import com.sigre.compras.dto.ProgramacionComprasRequest;
+import com.sigre.compras.dto.ProgramacionComprasResponse;
+
+public interface ProgramacionComprasService {
+
+    Page<ProgramacionComprasResponse> listar(Integer anio, Integer mes, String flagEstado, Pageable pageable);
+
+    ProgramacionComprasDetalleResponse obtener(Long id);
+
+    ProgramacionComprasDetalleResponse crear(ProgramacionComprasRequest request);
+
+    ProgramacionComprasDetalleResponse actualizar(Long id, ProgramacionComprasRequest request);
+
+    ProgramacionComprasDetalleResponse confirmar(Long id);
+
+    ProgramacionComprasDetalleResponse anular(Long id);
+}

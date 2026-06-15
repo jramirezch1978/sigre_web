@@ -1,0 +1,45 @@
+# Perfil test para almacen-service — BD tenant de desarrollo + rollback @Transactional
+# Igual que ms-ventas / ms-finanzas: Flyway deshabilitado; no altera esquema.
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: almacen
+
+  flyway:
+    enabled: false
+
+app:
+  testdata:
+    enabled: true
+  almacen:
+    integracion:
+      validar-tres-vias: false
+      tolerancia-tres-vias: 0.0001
+  security-datasource:
+    jdbc-url: jdbc:postgresql://db-pv-pod1-dev.contabilidad.sigre.web:5433/sigre_security
+    username: postgres
+    password: Erp_restpe#2026
+  tenant:
+    db-host-override: db-pv-pod1-dev.contabilidad.sigre.web
+    db-port-override: 5433
+    jdbc-ssl-mode: disable
+    pool:
+      maximum-pool-size: 3
+      minimum-idle: 0
+      idle-timeout-ms: 30000
+      max-lifetime-ms: 120000
+  jwt:
+    secret: 5x0t3h4v32048b1ts3cur3k3yf0rt3st1ngpurp0s3sonlynd0tpr0duct10n
+    access-token-expiration: 3600000
+    definitive-token-expiration: 3600000
+    refresh-token-expiration: 86400000
+
+logging:
+  level:
+    com.sigre.almacen: INFO

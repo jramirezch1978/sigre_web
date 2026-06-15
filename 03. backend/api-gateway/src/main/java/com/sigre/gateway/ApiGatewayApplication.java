@@ -23,9 +23,9 @@ public class ApiGatewayApplication {
     public static void main(String[] args) {
         SpringApplication.run(ApiGatewayApplication.class, args);
         System.out.println("╔════════════════════════════════════════╗");
-        System.out.println("║  SIGRE 2.0 - API Gateway               ║");
-        System.out.println("║  Puerta de Entrada Iniciada           ║");
-        System.out.println("║  URL: http://localhost:8080            ║");
+        System.out.println("║  SIGRE Backend - API Gateway           ║");
+        System.out.println("║  Puerta de Entrada Iniciada            ║");
+        System.out.println("║  URL: http://localhost:9080            ║");
         System.out.println("╚════════════════════════════════════════╝");
     }
 }

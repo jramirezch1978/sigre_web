@@ -41,7 +41,7 @@ set "LOGISTICA_SERVICES=discovery-server api-gateway seguridad-service almacen-s
 set "SECURITY_SERVICES=discovery-server seguridad-service api-gateway"
 set "BACKEND_SERVICES=%ASISTENCIA_SERVICES%"
 set "FRONTEND_SERVICE=sigre-frontend"
-set "COMPOSE_APP_SERVICES=discovery-server api-gateway seguridad-service asistencia-service sigre-frontend"
+set "COMPOSE_APP_SERVICES=discovery-server api-gateway seguridad-service asistencia-service almacen-service compras-service sigre-frontend"
 set "ALL_APP_SERVICES=%INFRA_SERVICES% %CORE_SERVICES% %COMMERCE_SERVICES% %DOMAIN_SERVICES% %FRONTEND_SERVICE%"
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
