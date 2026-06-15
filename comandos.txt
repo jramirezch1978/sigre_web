@@ -221,8 +221,7 @@ REM Clave SSH (una vez): ssh-keygen -t ed25519  ^&  type %USERPROFILE%\.ssh\id_e
 .\build.bat backend
 .\build.bat frontend
 
---- Despliegue en cronos (build local + push GHCR + pull/up) ---
-docker login ghcr.io
+--- Despliegue en cronos (build local + transfer directo + limpieza local) ---
 .\deploy.bat list
 .\deploy.bat backend
 .\deploy.bat seguridad-service --force
@@ -230,6 +229,7 @@ docker login ghcr.io
 .\deploy.bat api-gateway --force
 .\deploy.bat frontend
 .\deploy.bat all
+REM Opcional GHCR: deploy.bat ^<servicio^> --force --registry  ^(requiere docker login ghcr.io^)
 
 --- Despliegue por modulo ---
 .\deploy.bat asistencia --force

@@ -7,8 +7,8 @@ echo [deploy] Inicio: !SCRIPT_START_HUMAN!
 REM ============================================================
 REM SIGRE ERP — Despliegue Docker en cronos (Oracle Linux 9)
 REM ============================================================
-REM Contexto Docker activo: cronos. Build/push local con --context default.
-REM NO compilar en el servidor (10 GB RAM).
+REM Modo directo (default): build local, transfer save/load a cronos, borrar imagen local.
+REM Modo --registry: build + push ghcr.io + pull en cronos.
 REM Compose: deploy/cronos/docker-compose.app.yml
 REM ============================================================
 
@@ -54,10 +54,13 @@ set "RESET=%ESC%[0m"
 set "FORCE=0"
 set "NO_PUSH=0"
 set "NO_BUILD=0"
+set "DEPLOY_DIRECT=1"
 for %%a in (%*) do (
     if /i "%%a"=="--force" set "FORCE=1"
     if /i "%%a"=="--no-push" set "NO_PUSH=1"
     if /i "%%a"=="--no-build" set "NO_BUILD=1"
+    if /i "%%a"=="--direct" set "DEPLOY_DIRECT=1"
+    if /i "%%a"=="--registry" set "DEPLOY_DIRECT=0"
 )
 
 call :useRemoteContext >nul 2>&1
@@ -91,6 +94,11 @@ echo.
 echo %CYAN%============================================================%RESET%
 echo %CYAN%  SIGRE ERP - Deploy cronos (Docker context: %DOCKER_CTX%)%RESET%
 echo %CYAN%  Registry: %IMAGE_REGISTRY%:%IMAGE_TAG%%RESET%
+if "!DEPLOY_DIRECT!"=="1" (
+    echo %CYAN%  Modo: directo a cronos ^(save/load, sin GHCR^)%RESET%
+) else (
+    echo %CYAN%  Modo: registry GHCR ^(push + pull^)%RESET%
+)
 echo %CYAN%============================================================%RESET%
 echo.
 echo   1. Desplegar backend (%BACKEND_SERVICES%)
@@ -232,14 +240,8 @@ for %%s in (%SECURITY_SERVICES%) do (
     )
 )
 call :ensureEnv || goto :endScript
-call :useRemoteContext || goto :endScript
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-security-!DEPLOY_LOG_TS!.log"
-docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" pull %SECURITY_SERVICES% >> "!DEPLOY_LOG!" 2>&1
-docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d %SECURITY_SERVICES% >> "!DEPLOY_LOG!" 2>&1
-if errorlevel 1 (
-    echo %RED%[ERROR]%RESET% Ver: !DEPLOY_LOG!
-    goto :endScript
-)
+call :composeUpServices "%SECURITY_SERVICES%" || goto :endScript
 echo %GREEN%[OK]%RESET% Modulo seguridad desplegado.
 echo   Discovery: http://%SSH_HOST%:8761
 echo   Auth:      http://%SSH_HOST%:9080/api/auth/
@@ -287,20 +289,73 @@ if !BUILD_ERR! neq 0 (
     echo %RED%[ERROR]%RESET% Build fallo. Ver: !DEPLOY_LOG!
     exit /b 1
 )
-echo %GREEN%[OK]%RESET% Imagen local: !IMAGE!
+echo %GREEN%[OK]%RESET% Build completado: !IMAGE!
 exit /b 0
 
 :pushImage
 set "SVC=%~1"
 set "IMAGE=!IMAGE_REGISTRY!/!SVC!:!IMAGE_TAG!"
 if "!NO_PUSH!"=="1" (
-    echo %YELLOW%[SKIP]%RESET% Push omitido: flag --no-push. Imagen solo local.
+    echo %YELLOW%[SKIP]%RESET% Transfer/push omitido: flag --no-push.
+    exit /b 0
+)
+if "!DEPLOY_DIRECT!"=="1" (
+    call :transferImage || exit /b 1
+    call :cleanupLocalImage
     exit /b 0
 )
 echo %CYAN%[PUSH]%RESET% !IMAGE! (contexto build: %DOCKER_CTX_BUILD%)
 docker --context %DOCKER_CTX_BUILD% push !IMAGE!
 if errorlevel 1 (
-    echo %RED%[ERROR]%RESET% Push fallo. Ejecute: docker login ghcr.io
+    echo %RED%[ERROR]%RESET% Push GHCR fallo. Login: docker --context default login ghcr.io
+    echo %YELLOW%[TIP]%RESET% Use modo directo: deploy.bat %~1 --force --direct
+    exit /b 1
+)
+call :cleanupLocalImage
+exit /b 0
+
+:transferImage
+set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-transfer-!SVC!-!DEPLOY_LOG_TS!.log"
+set "TAR=%TEMP%\sigre-!SVC!-!DEPLOY_LOG_TS!.tar"
+echo %CYAN%[TRANSFER]%RESET% !IMAGE! -^> cronos
+docker --context %DOCKER_CTX_BUILD% save !IMAGE! -o "!TAR!" >> "!DEPLOY_LOG!" 2>&1
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% docker save fallo. Ver: !DEPLOY_LOG!
+    exit /b 1
+)
+call :useRemoteContext || exit /b 1
+docker --context %DOCKER_CTX% load -i "!TAR!" >> "!DEPLOY_LOG!" 2>&1
+set "LOAD_ERR=!errorlevel!"
+if exist "!TAR!" del /f /q "!TAR!" >nul 2>&1
+if !LOAD_ERR! neq 0 (
+    echo %RED%[ERROR]%RESET% docker load en cronos fallo. Ver: !DEPLOY_LOG!
+    exit /b 1
+)
+echo %GREEN%[OK]%RESET% Imagen en cronos: !IMAGE!
+exit /b 0
+
+:cleanupLocalImage
+if not defined DEPLOY_LOG set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-cleanup-!SVC!-!DEPLOY_LOG_TS!.log"
+echo %CYAN%[CLEANUP]%RESET% Eliminando imagen local: !IMAGE!
+docker --context %DOCKER_CTX_BUILD% rmi -f !IMAGE! >> "!DEPLOY_LOG!" 2>&1
+docker --context %DOCKER_CTX_BUILD% image prune -f >> "!DEPLOY_LOG!" 2>&1
+echo %GREEN%[OK]%RESET% Docker local limpio para !SVC!
+exit /b 0
+
+:composeUpServices
+set "COMPOSE_SVCS=%~1"
+call :ensureEnv || exit /b 1
+call :useRemoteContext || exit /b 1
+if "!DEPLOY_DIRECT!"=="1" (
+    echo %CYAN%[CRONOS]%RESET% up --pull never !COMPOSE_SVCS!...
+    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d --pull never !COMPOSE_SVCS! >> "!DEPLOY_LOG!" 2>&1
+) else (
+    echo %CYAN%[CRONOS]%RESET% pull + up !COMPOSE_SVCS!...
+    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" pull !COMPOSE_SVCS! >> "!DEPLOY_LOG!" 2>&1
+    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d !COMPOSE_SVCS! >> "!DEPLOY_LOG!" 2>&1
+)
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Deploy remoto fallo. Ver: !DEPLOY_LOG!
     exit /b 1
 )
 exit /b 0
@@ -315,15 +370,8 @@ if "!IN_COMPOSE!"=="0" (
     exit /b 0
 )
 call :ensureEnv || exit /b 1
-call :useRemoteContext || exit /b 1
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-up-!SVC!-!DEPLOY_LOG_TS!.log"
-echo %CYAN%[CRONOS]%RESET% pull + up !SVC!...
-docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" pull !SVC! >> "!DEPLOY_LOG!" 2>&1
-docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d !SVC! >> "!DEPLOY_LOG!" 2>&1
-if errorlevel 1 (
-    echo %RED%[ERROR]%RESET% Deploy remoto fallo. Ver: !DEPLOY_LOG!
-    exit /b 1
-)
+call :composeUpServices "!SVC!" || exit /b 1
 echo %GREEN%[OK]%RESET% !SVC! activo en cronos.
 exit /b 0
 
@@ -345,14 +393,8 @@ for %%s in (%BACKEND_SERVICES%) do (
     )
 )
 call :ensureEnv || goto :endScript
-call :useRemoteContext || goto :endScript
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-backend-!DEPLOY_LOG_TS!.log"
-docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" pull %BACKEND_SERVICES% >> "!DEPLOY_LOG!" 2>&1
-docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d %BACKEND_SERVICES% >> "!DEPLOY_LOG!" 2>&1
-if errorlevel 1 (
-    echo %RED%[ERROR]%RESET% Ver: !DEPLOY_LOG!
-    goto :endScript
-)
+call :composeUpServices "%BACKEND_SERVICES%" || goto :endScript
 echo %GREEN%[OK]%RESET% Backend desplegado.
 echo   API Gateway: http://%SSH_HOST%:9080
 goto :endScript
@@ -366,14 +408,8 @@ for %%s in (%BACKEND_SERVICES% %FRONTEND_SERVICE%) do (
     )
 )
 call :ensureEnv || goto :endScript
-call :useRemoteContext || goto :endScript
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-all-!DEPLOY_LOG_TS!.log"
-docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" pull %BACKEND_SERVICES% %FRONTEND_SERVICE% >> "!DEPLOY_LOG!" 2>&1
-docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d %BACKEND_SERVICES% %FRONTEND_SERVICE% >> "!DEPLOY_LOG!" 2>&1
-if errorlevel 1 (
-    echo %RED%[ERROR]%RESET% Ver: !DEPLOY_LOG!
-    goto :endScript
-)
+call :composeUpServices "%BACKEND_SERVICES% %FRONTEND_SERVICE%" || goto :endScript
 echo %GREEN%[OK]%RESET% Backend + frontend desplegados.
 echo   Frontend: http://%SSH_HOST%:8080
 echo   API Gateway: http://%SSH_HOST%:9080
@@ -459,8 +495,10 @@ echo %YELLOW%En cronos (compose):%RESET% %COMPOSE_APP_SERVICES%
 echo.
 echo %YELLOW%Flags:%RESET%
 echo   --force     Sin confirmacion en stack
-echo   --no-push   Build local sin push
-echo   --no-build  Solo pull + up remoto (requiere imagen en registry)
+echo   --direct    Build + transfer a cronos y limpiar imagen local ^(default^)
+echo   --registry  Push/pull via ghcr.io ^(requiere docker login ghcr.io^)
+echo   --no-push   Build local sin transferir ni push
+echo   --no-build  Solo up remoto ^(requiere imagen ya en cronos^)
 echo.
 echo %YELLOW%Postman:%RESET% 01. documentacion\SIGRE Web ERP.postman_collection.json
 echo.
