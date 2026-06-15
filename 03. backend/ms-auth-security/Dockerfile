@@ -3,7 +3,7 @@ FROM maven:3.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-COPY pom.xml ./pom.xml
+COPY docker/pom.ms-auth-security.xml ./pom.xml
 COPY sigre-common/pom.xml ./sigre-common/pom.xml
 COPY ms-auth-security/pom.xml ./ms-auth-security/pom.xml
 COPY sigre-common/src ./sigre-common/src
