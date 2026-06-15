@@ -356,6 +356,8 @@ if "!DEPLOY_DIRECT!"=="1" (
 )
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Deploy remoto fallo. Ver: !DEPLOY_LOG!
+    powershell -NoProfile -Command "Get-Content -LiteralPath '!DEPLOY_LOG!' -Tail 6 -ErrorAction SilentlyContinue"
+    echo %YELLOW%[TIP]%RESET% Revisar logs: docker --context cronos logs ^<servicio^> --tail 80
     exit /b 1
 )
 exit /b 0
