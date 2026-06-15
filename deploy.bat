@@ -36,7 +36,9 @@ set "INFRA_SERVICES=discovery-server config-server api-gateway"
 set "CORE_SERVICES=ms-auth-security asistencia-service"
 set "COMMERCE_SERVICES=inventory-service orders-service products-service sync-service"
 set "DOMAIN_SERVICES=almacen-service compras-service contabilidad-service finanzas-service rrhh-service activo-fijo-service produccion-service auditoria-service comercializacion-service campo-service comedor-service flota-service mantenimiento-service operaciones-service presupuesto-service aprovision-service sig-service"
-set "BACKEND_SERVICES=discovery-server ms-auth-security api-gateway asistencia-service"
+set "ASISTENCIA_SERVICES=discovery-server api-gateway ms-auth-security asistencia-service"
+set "LOGISTICA_SERVICES=discovery-server api-gateway ms-auth-security almacen-service compras-service"
+set "BACKEND_SERVICES=%ASISTENCIA_SERVICES%"
 set "FRONTEND_SERVICE=sigre-frontend"
 set "COMPOSE_APP_SERVICES=discovery-server api-gateway ms-auth-security asistencia-service sigre-frontend"
 set "ALL_APP_SERVICES=%INFRA_SERVICES% %CORE_SERVICES% %COMMERCE_SERVICES% %DOMAIN_SERVICES% %FRONTEND_SERVICE%"
@@ -73,6 +75,8 @@ if /i "%~1"=="core" goto :deployCore
 if /i "%~1"=="commerce" goto :deployCommerce
 if /i "%~1"=="domain" goto :deployDomain
 if /i "%~1"=="ms-all" goto :deployMsAll
+if /i "%~1"=="asistencia" goto :deployAsistencia
+if /i "%~1"=="logistica" goto :deployLogistica
 
 REM Servicio individual
 set "SERVICE=%~1"
@@ -153,10 +157,16 @@ echo %YELLOW%Commerce / sync:%RESET% %COMMERCE_SERVICES%
 echo %YELLOW%Dominio SIGRE (migracion):%RESET% %DOMAIN_SERVICES%
 echo %YELLOW%Frontend:%RESET% %FRONTEND_SERVICE%
 echo.
+echo %YELLOW%Modulos funcionales:%RESET%
+echo   asistencia          %ASISTENCIA_SERVICES%
+echo   logistica           %LOGISTICA_SERVICES%
+echo.
 echo %YELLOW%En docker-compose.app.yml (pull/up remoto):%RESET% %COMPOSE_APP_SERVICES%
-echo %YELLOW%Backend activo (deploy.bat backend):%RESET% %BACKEND_SERVICES%
+echo %YELLOW%Backend activo (deploy.bat backend ^| asistencia):%RESET% %BACKEND_SERVICES%
 echo.
 echo %CYAN%Ejemplos:%RESET%
+echo   deploy.bat asistencia --force
+echo   deploy.bat logistica --force
 echo   deploy.bat ms-auth-security --force
 echo   deploy.bat asistencia-service --force
 echo   deploy.bat infra
@@ -198,6 +208,13 @@ goto :deployServiceGroup
 
 :deployMsAll
 set "GROUP=%INFRA_SERVICES% %CORE_SERVICES% %COMMERCE_SERVICES% %DOMAIN_SERVICES%"
+goto :deployServiceGroup
+
+:deployAsistencia
+goto :deployBackend
+
+:deployLogistica
+set "GROUP=%LOGISTICA_SERVICES%"
 goto :deployServiceGroup
 
 :ensureEnv
@@ -397,6 +414,8 @@ echo   core                %CORE_SERVICES%
 echo   commerce            %COMMERCE_SERVICES%
 echo   domain              %DOMAIN_SERVICES% (migracion)
 echo   ms-all              infra + core + commerce + domain
+echo   asistencia          %ASISTENCIA_SERVICES%
+echo   logistica           %LOGISTICA_SERVICES%
 echo   list                Listar todos los microservicios
 echo   stack               Infra PG + SonarQube
 echo   pull [servicio]     Pull remoto sin build
