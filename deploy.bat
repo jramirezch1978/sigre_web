@@ -8,7 +8,7 @@ REM ============================================================
 REM SIGRE ERP — Despliegue Docker en cronos (Oracle Linux 9)
 REM ============================================================
 REM Modo directo (default): build local, transfer save/load a cronos, borrar imagen local.
-REM Modo --registry: build + push ghcr.io + pull en cronos.
+REM Modo --registry: build + push registry remoto + pull en cronos.
 REM Compose: deploy/cronos/docker-compose.app.yml
 REM ============================================================
 
@@ -26,7 +26,7 @@ for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format ddMMy
 
 set "DOCKER_CTX=cronos"
 set "DOCKER_CTX_BUILD=default"
-set "IMAGE_REGISTRY=ghcr.io/jramirezch1978/sigre"
+set "IMAGE_REGISTRY=sigre"
 set "IMAGE_TAG=latest"
 set "SSH_USER=jramirez"
 set "SSH_HOST=crisaor.serveftp.com"
@@ -95,9 +95,9 @@ echo %CYAN%============================================================%RESET%
 echo %CYAN%  SIGRE ERP - Deploy cronos (Docker context: %DOCKER_CTX%)%RESET%
 echo %CYAN%  Registry: %IMAGE_REGISTRY%:%IMAGE_TAG%%RESET%
 if "!DEPLOY_DIRECT!"=="1" (
-    echo %CYAN%  Modo: directo a cronos ^(save/load, sin GHCR^)%RESET%
+    echo %CYAN%  Modo: directo a cronos ^(save/load, sin registry remoto^)%RESET%
 ) else (
-    echo %CYAN%  Modo: registry GHCR ^(push + pull^)%RESET%
+    echo %CYAN%  Modo: registry remoto ^(push + pull^)%RESET%
 )
 echo %CYAN%============================================================%RESET%
 echo.
@@ -307,7 +307,7 @@ if "!DEPLOY_DIRECT!"=="1" (
 echo %CYAN%[PUSH]%RESET% !IMAGE! (contexto build: %DOCKER_CTX_BUILD%)
 docker --context %DOCKER_CTX_BUILD% push !IMAGE!
 if errorlevel 1 (
-    echo %RED%[ERROR]%RESET% Push GHCR fallo. Login: docker --context default login ghcr.io
+    echo %RED%[ERROR]%RESET% Push al registry fallo. Verifique login del registry configurado.
     echo %YELLOW%[TIP]%RESET% Use modo directo: deploy.bat %~1 --force --direct
     exit /b 1
 )
@@ -498,7 +498,7 @@ echo.
 echo %YELLOW%Flags:%RESET%
 echo   --force     Sin confirmacion en stack
 echo   --direct    Build + transfer a cronos y limpiar imagen local ^(default^)
-echo   --registry  Push/pull via ghcr.io ^(requiere docker login ghcr.io^)
+echo   --registry  Push/pull via registry remoto ^(requiere docker login^)
 echo   --no-push   Build local sin transferir ni push
 echo   --no-build  Solo up remoto ^(requiere imagen ya en cronos^)
 echo.

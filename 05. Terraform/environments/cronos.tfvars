@@ -16,7 +16,7 @@ region              = "us-east1"
 generate_docker_compose    = true
 docker_compose_output_dir  = "../deploy/cronos"
 use_prebuilt_images        = true
-image_registry             = "ghcr.io/jramirezch1978/sigre"
+image_registry             = "sigre"
 image_tag                  = "latest"
 
 # ── Servidor cronos ──────────────────────────────────────────

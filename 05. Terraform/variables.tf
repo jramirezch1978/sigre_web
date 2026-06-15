@@ -91,7 +91,7 @@ variable "docker_stack" {
 variable "image_registry" {
   description = "Registry de imágenes pre-construidas (build fuera del servidor)"
   type        = string
-  default     = "ghcr.io/jramirezch1978/sigre"
+  default     = "sigre"
 }
 
 variable "image_tag" {
