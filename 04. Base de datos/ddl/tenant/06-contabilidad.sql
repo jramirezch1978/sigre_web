@@ -39,7 +39,7 @@ CREATE SCHEMA IF NOT EXISTS contabilidad;
 -- SECCIÓN 1: TABLAS Y CONSTRAINTS
 -- ============================================================
 
-CREATE TABLE contabilidad.grupo_contable (
+CREATE TABLE IF NOT EXISTS contabilidad.grupo_contable (
     id              BIGSERIAL       NOT NULL,
     codigo          VARCHAR(10)     NOT NULL UNIQUE,
     nombre          VARCHAR(200)    NOT NULL,

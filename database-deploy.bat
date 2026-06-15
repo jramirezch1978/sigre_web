@@ -215,13 +215,15 @@ exit /b %ERRORLEVEL%
 
 :run_sql
 set "REL=%~1"
-set "REL_UNIX=!REL:\=/!"
-if not exist "!DDL_ROOT!\!REL!" (
-    echo ERROR: No existe !DDL_ROOT!\!REL!
+set "REL=!REL:\=/!"
+set "REL_UNIX=!REL!"
+set "REL_WIN=!REL:/=\!"
+if not exist "!DDL_ROOT!\!REL_WIN!" (
+    echo ERROR: No existe !DDL_ROOT!\!REL_WIN!
     exit /b 1
 )
-echo ^>^> --- !REL! ---
->> "!DBDEPLOY_LOG!" echo ^>^> --- !REL! ---
+echo ^>^> --- !REL_UNIX! ---
+(echo ^>^> --- !REL_UNIX! ---)>> "!DBDEPLOY_LOG!"
 docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -f "/ddl/!REL_UNIX!"
 if errorlevel 1 exit /b 1
 echo    OK
@@ -231,7 +233,7 @@ exit /b 0
 set "TGRANT_ROLE=%~1"
 set "REL_UNIX=tenant/99-grants-tenant-role.sql"
 echo ^>^> --- tenant/99-grants-tenant-role.sql ^(rol=!TGRANT_ROLE!^) ---
->> "!DBDEPLOY_LOG!" echo ^>^> --- tenant/99-grants-tenant-role.sql ^(rol=!TGRANT_ROLE!^) ---
+(echo ^>^> --- tenant/99-grants-tenant-role.sql ^(rol=!TGRANT_ROLE!^) ---)>> "!DBDEPLOY_LOG!"
 docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -v tenant_role=!TGRANT_ROLE! -f "/ddl/!REL_UNIX!"
 if errorlevel 1 exit /b 1
 echo    OK
@@ -268,16 +270,16 @@ set "SAVED_PGDATABASE=!PGDATABASE!"
 call :ensure_database "!PGSECURITY!" "!PGUSER!" || exit /b 1
 set "PGDATABASE=!PGSECURITY!"
 echo ^>^> Ejecutando DDL + seed de seguridad...
-call :run_sql "security\00-convenciones-security.sql" || exit /b 1
-call :run_sql "security\01-master.sql" || exit /b 1
-call :run_sql "security\02-config.sql" || exit /b 1
-call :run_sql "security\03-auth.sql" || exit /b 1
-call :run_sql "security\04-auditoria-schema-sync.sql" || exit /b 1
-call :run_sql "security\99-auditoria-security.sql" || exit /b 1
+call :run_sql "security/00-convenciones-security.sql" || exit /b 1
+call :run_sql "security/01-master.sql" || exit /b 1
+call :run_sql "security/02-config.sql" || exit /b 1
+call :run_sql "security/03-auth.sql" || exit /b 1
+call :run_sql "security/04-auditoria-schema-sync.sql" || exit /b 1
+call :run_sql "security/99-auditoria-security.sql" || exit /b 1
 call :run_sql "99-auditoria-global.sql" || exit /b 1
 call :run_sql "99-auditoria-triggers-fechas.sql" || exit /b 1
-call :run_sql "security\99-auditoria-security-post.sql" || exit /b 1
-call :run_sql "seed\01-carga-inicial-security.sql" || exit /b 1
+call :run_sql "security/99-auditoria-security-post.sql" || exit /b 1
+call :run_sql "seed/01-carga-inicial-security.sql" || exit /b 1
 set "PGDATABASE=!SAVED_PGDATABASE!"
 echo.
 echo ^>^> create-security: DDL de seguridad ejecutado en !PGSECURITY!
@@ -294,27 +296,27 @@ call :ensure_database "!PGTEMPLATE!" "!PGUSER!" || exit /b 1
 set "PGDATABASE=!PGTEMPLATE!"
 echo ^>^> Ejecutando DDL + seed de plantilla tenant...
 call :run_sql "00-convenciones-generales.sql" || exit /b 1
-call :run_sql "security\00-convenciones-security.sql" || exit /b 1
-call :run_sql "security\01-master.sql" || exit /b 1
-call :run_sql "security\02-config.sql" || exit /b 1
-call :run_sql "tenant\00-auth-usuario.sql" || exit /b 1
-call :run_sql "tenant\01-auth.sql" || exit /b 1
-call :run_sql "tenant\01-core.sql" || exit /b 1
-call :run_sql "tenant\02-almacen.sql" || exit /b 1
-call :run_sql "tenant\03-compras.sql" || exit /b 1
-call :run_sql "tenant\04-ventas.sql" || exit /b 1
-call :run_sql "tenant\05-finanzas.sql" || exit /b 1
-call :run_sql "tenant\06-contabilidad.sql" || exit /b 1
-call :run_sql "tenant\07-rrhh.sql" || exit /b 1
-call :run_sql "tenant\08-activos.sql" || exit /b 1
-call :run_sql "tenant\09-produccion.sql" || exit /b 1
-call :run_sql "tenant\10-auditoria.sql" || exit /b 1
-call :run_sql "tenant\11-auditoria-campos-obligatorios.sql" || exit /b 1
+call :run_sql "security/00-convenciones-security.sql" || exit /b 1
+call :run_sql "security/01-master.sql" || exit /b 1
+call :run_sql "security/02-config.sql" || exit /b 1
+call :run_sql "tenant/00-auth-usuario.sql" || exit /b 1
+call :run_sql "tenant/01-auth.sql" || exit /b 1
+call :run_sql "tenant/01-core.sql" || exit /b 1
+call :run_sql "tenant/02-almacen.sql" || exit /b 1
+call :run_sql "tenant/03-compras.sql" || exit /b 1
+call :run_sql "tenant/04-ventas.sql" || exit /b 1
+call :run_sql "tenant/05-finanzas.sql" || exit /b 1
+call :run_sql "tenant/06-contabilidad.sql" || exit /b 1
+call :run_sql "tenant/07-rrhh.sql" || exit /b 1
+call :run_sql "tenant/08-activos.sql" || exit /b 1
+call :run_sql "tenant/09-produccion.sql" || exit /b 1
+call :run_sql "tenant/10-auditoria.sql" || exit /b 1
+call :run_sql "tenant/11-auditoria-campos-obligatorios.sql" || exit /b 1
 call :run_sql "99-auditoria-global.sql" || exit /b 1
 call :run_sql "99-auditoria-triggers-fechas.sql" || exit /b 1
-call :run_sql "seed\01-carga-inicial-maestros.sql" || exit /b 1
-call :run_sql "seed\02-carga-sunat.sql" || exit /b 1
-call :run_sql "seed\02-carga-concepto-matriz-financiera.sql" || exit /b 1
+call :run_sql "seed/01-carga-inicial-maestros.sql" || exit /b 1
+call :run_sql "seed/02-carga-sunat.sql" || exit /b 1
+call :run_sql "seed/02-carga-concepto-matriz-financiera.sql" || exit /b 1
 set "PGDATABASE=!PGTEMPLATE!"
 echo.
 echo ^>^> create-template: DDL de plantilla ejecutado en !PGTEMPLATE!
@@ -327,7 +329,7 @@ echo ^>^> Conexion: !PGUSER!@!PGHOST!:!PGPORT!/!PGDATABASE!
 echo ^>^> DDL: !DDL_ROOT!
 echo.
 call :precheck_ddl_applied || exit /b 1
-call :run_sql "seed\01-carga-inicial-maestros.sql" || exit /b 1
+call :run_sql "seed/01-carga-inicial-maestros.sql" || exit /b 1
 echo.
 echo ^>^> insert: OK
 exit /b 0
