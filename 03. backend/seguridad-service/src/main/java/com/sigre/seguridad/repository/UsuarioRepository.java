@@ -1,29 +1,19 @@
 package com.sigre.seguridad.repository;
 
-import com.sigre.seguridad.model.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+import com.sigre.seguridad.entity.Usuario;
 
 import java.util.Optional;
 
-/**
- * Repositorio para Usuario
- */
-@Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, String> {
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    Optional<Usuario> findByCodUser(String codUser);
+    @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.flagEstado = '1'")
+    Optional<Usuario> findByEmailAndActivoTrue(@Param("email") String email);
 
-    Optional<Usuario> findByEmail(String email);
-
-    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.roles r LEFT JOIN FETCH r.permisos " +
-           "WHERE u.codUser = :codUser")
-    Optional<Usuario> findByIdWithRolesAndPermissions(@Param("codUser") String codUser);
-
-    boolean existsByCodUser(String codUser);
+    @Query("SELECT u FROM Usuario u WHERE u.username = :username AND u.flagEstado = '1'")
+    Optional<Usuario> findByUsernameAndActivoTrue(@Param("username") String username);
 
     boolean existsByEmail(String email);
 }
-

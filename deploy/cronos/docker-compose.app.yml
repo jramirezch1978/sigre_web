@@ -40,7 +40,7 @@ services:
       TZ: America/Lima
       SERVER_PORT: "9080"
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
-      MS_AUTH_URI: http://ms-auth-security:9001
+      MS_AUTH_URI: http://seguridad-service:9001
       JWT_SECRET: ${JWT_SECRET:-dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
       JAVA_OPTS: "-Xms192m -Xmx384m -Duser.timezone=America/Lima"
     mem_limit: 512m
@@ -49,7 +49,7 @@ services:
     depends_on:
       discovery-server:
         condition: service_healthy
-      ms-auth-security:
+      seguridad-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9080/actuator/health"]
@@ -98,9 +98,9 @@ services:
         max-file: "3"
         compress: "true"
 
-  ms-auth-security:
-    container_name: ms-auth-security
-    image: ${IMAGE_REGISTRY}/ms-auth-security:${IMAGE_TAG}
+  seguridad-service:
+    container_name: seguridad-service
+    image: ${IMAGE_REGISTRY}/seguridad-service:${IMAGE_TAG}
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -116,6 +116,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
       APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-U2lncmVBZXMyNTZLZXlEZXYyMDI2ISEhIQ==}
       APP_PROVISION_SECRET: ${APP_PROVISION_SECRET:-dev-provision-cambiar-produccion}
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
       JAVA_OPTS: "-Xms192m -Xmx512m -Duser.timezone=America/Lima"
     mem_limit: 768m
     networks:
@@ -151,7 +152,7 @@ services:
     depends_on:
       api-gateway:
         condition: service_healthy
-      ms-auth-security:
+      seguridad-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]

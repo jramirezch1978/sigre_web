@@ -1,82 +1,81 @@
+server:
+  port: 9001
+
 spring:
   application:
     name: seguridad-service
-
   datasource:
-    url: jdbc:oracle:thin:@${ORACLE_HOST:localhost}:${ORACLE_PORT:1521}:${ORACLE_SERVICE:ORCL}
-    username: ${ORACLE_USERNAME:sigre_user}
-    password: ${ORACLE_PASSWORD:sigre_password}
-    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:sigre_security}?sslmode=${DB_SSL_MODE:disable}
+    username: ${DB_USER:postgres}
+    password: "${DB_PASS:jarch32b}"
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-
+      maximum-pool-size: 5
+      minimum-idle: 0
+      idle-timeout: 30000
+      max-lifetime: 120000
+      pool-name: pool-seguridad-service
   jpa:
-    database-platform: org.hibernate.dialect.Oracle10gDialect
     hibernate:
       ddl-auto: validate
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-    show-sql: false
     properties:
       hibernate:
-        format_sql: true
-        use_sql_comments: false
-
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      timeout: 60000
-
-server:
-  port: 8081
-
-# JWT Configuration
-jwt:
-  secret: ${JWT_SECRET:sigre2025_secret_key_change_in_production_please}
-  expiration: 86400000 # 24 horas
-  refresh-expiration: 604800000 # 7 días
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 10
+        default_schema: auth
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  flyway:
+    enabled: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SMTP_USER:no-reply@npssac.com.pe}
+    password: ${SMTP_PASSWORD:fpbcdsvqqlmjtiyg}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: always
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+        include: health,info,prometheus
 
-# OpenAPI/Swagger
+app:
+  jwt:
+    secret: ${JWT_SECRET:dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
+    access-token-expiration: 900000
+    definitive-token-expiration: 900000
+    refresh-token-expiration: 604800000
+  admin-datasource:
+    jdbc-url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/postgres?sslmode=${DB_SSL_MODE:disable}
+    username: ${DB_USER:postgres}
+    password: "${DB_PASS:jarch32b}"
+    driver-class-name: org.postgresql.Driver
+  tenant:
+    template-database: ${TENANT_TEMPLATE_DB:sigre_template}
+    db-name-prefix: sigre_emp_
+    default-db-host: ${DB_HOST:postgres}
+    default-db-port: ${DB_PORT:5432}
+    jdbc-ssl-mode: ${DB_SSL_MODE:disable}
+  encryption:
+    key: ${APP_ENCRYPTION_KEY:U2lncmVBZXMyNTZLZXlEZXYyMDI2ISEhIQ==}
+  provisioning:
+    secret: ${APP_PROVISION_SECRET:dev-provision-cambiar-produccion}
+
 springdoc:
   api-docs:
-    path: /v3/api-docs
+    path: /api/auth/v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html
+    path: /api/auth/swagger-ui.html
 
-logging:
-  level:
-    com.sigre: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate: WARN
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+  instance:
+    prefer-ip-address: true

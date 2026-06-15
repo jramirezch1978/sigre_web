@@ -33,15 +33,15 @@ set "SSH_HOST=crisaor.serveftp.com"
 set "REMOTE_STACK=/home/jramirez/stack"
 
 set "INFRA_SERVICES=discovery-server config-server api-gateway"
-set "CORE_SERVICES=ms-auth-security asistencia-service"
+set "CORE_SERVICES=seguridad-service asistencia-service"
 set "COMMERCE_SERVICES=inventory-service orders-service products-service sync-service"
 set "DOMAIN_SERVICES=almacen-service compras-service contabilidad-service finanzas-service rrhh-service activo-fijo-service produccion-service auditoria-service comercializacion-service campo-service comedor-service flota-service mantenimiento-service operaciones-service presupuesto-service aprovision-service sig-service"
-set "ASISTENCIA_SERVICES=discovery-server api-gateway ms-auth-security asistencia-service"
-set "LOGISTICA_SERVICES=discovery-server api-gateway ms-auth-security almacen-service compras-service"
-set "SECURITY_SERVICES=discovery-server ms-auth-security api-gateway"
+set "ASISTENCIA_SERVICES=discovery-server api-gateway seguridad-service asistencia-service"
+set "LOGISTICA_SERVICES=discovery-server api-gateway seguridad-service almacen-service compras-service"
+set "SECURITY_SERVICES=discovery-server seguridad-service api-gateway"
 set "BACKEND_SERVICES=%ASISTENCIA_SERVICES%"
 set "FRONTEND_SERVICE=sigre-frontend"
-set "COMPOSE_APP_SERVICES=discovery-server api-gateway ms-auth-security asistencia-service sigre-frontend"
+set "COMPOSE_APP_SERVICES=discovery-server api-gateway seguridad-service asistencia-service sigre-frontend"
 set "ALL_APP_SERVICES=%INFRA_SERVICES% %CORE_SERVICES% %COMMERCE_SERVICES% %DOMAIN_SERVICES% %FRONTEND_SERVICE%"
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
@@ -171,7 +171,7 @@ echo %CYAN%Ejemplos:%RESET%
 echo   deploy.bat asistencia --force
 echo   deploy.bat logistica --force
 echo   deploy.bat security --force
-echo   deploy.bat ms-auth-security --force
+echo   deploy.bat seguridad-service --force
 echo   deploy.bat asistencia-service --force
 echo   deploy.bat infra
 echo   deploy.bat core
@@ -451,7 +451,7 @@ echo   status              docker ps en cronos
 echo   context             Verificar contexto cronos
 echo.
 echo %YELLOW%Servicios individuales (ejemplos):%RESET%
-echo   ms-auth-security    api-gateway       discovery-server    config-server
+echo   seguridad-service    api-gateway       discovery-server    config-server
 echo   asistencia-service  sync-service      inventory-service   orders-service
 echo   products-service    almacen-service   compras-service     contabilidad-service
 echo   finanzas-service    rrhh-service      activo-fijo-service produccion-service

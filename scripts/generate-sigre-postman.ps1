@@ -15,7 +15,7 @@ foreach ($pair in $replacements) {
 }
 
 $collection = $raw | ConvertFrom-Json
-$collection.info | Add-Member -NotePropertyName description -NotePropertyValue 'Coleccion SIGRE Web. Gateway puerto 9080 en cronos. Incluye ms-auth-security y servicios en migracion.' -Force
+$collection.info | Add-Member -NotePropertyName description -NotePropertyValue 'Coleccion SIGRE Web. Gateway puerto 9080 en cronos. Incluye seguridad-service y servicios en migracion.' -Force
 
 $collection.variable = @(
     @{ key = 'base_url'; value = 'http://crisaor.serveftp.com:9080'; type = 'string' },
@@ -91,9 +91,9 @@ $selectEmpresaScript = @(
 )
 
 foreach ($item in $collection.item) {
-    if ($item.name -eq 'ms-auth-security') { $item.name = '01 - ms-auth-security' }
+    if ($item.name -eq 'seguridad-service') { $item.name = '01 - seguridad-service' }
     if ($item.name -eq 'ms-core-maestros') { $item.name = '99 - ms-core-maestros (migracion pendiente)' }
-    if ($item.name -like '*ms-auth-security*') {
+    if ($item.name -like '*seguridad-service*') {
         foreach ($req in $item.item) {
             if ($req.name -eq 'Login') {
                 $req | Add-Member -NotePropertyName event -NotePropertyValue @(

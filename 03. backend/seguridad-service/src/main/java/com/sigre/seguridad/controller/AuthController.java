@@ -1,73 +1,109 @@
 package com.sigre.seguridad.controller;
 
-import com.sigre.seguridad.model.dto.LoginRequest;
-import com.sigre.seguridad.model.dto.LoginResponse;
-import com.sigre.seguridad.service.AuthService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import com.sigre.seguridad.dto.*;
+import com.sigre.seguridad.service.AuthService;
+import com.sigre.common.dto.ApiResponse;
+import com.sigre.common.exception.BusinessException;
+import com.sigre.common.security.JwtTokenProvider;
 
-import java.util.Map;
+import java.util.List;
 
-/**
- * Controlador REST para Autenticación
- */
-@Slf4j
 @RestController
-@RequestMapping
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "Autenticación", description = "APIs para login, logout y refresh de tokens")
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
-    @Operation(summary = "Login de usuario", description = "Autentica usuario y retorna tokens JWT")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        log.info("POST /login - Usuario: {}", request.getUsuario());
-        try {
-            LoginResponse response = authService.login(request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            log.error("Error en login: {}", e.getMessage());
-            throw new RuntimeException(e.getMessage());
-        }
+    public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ApiResponse.ok(authService.login(request), "Login exitoso");
+    }
+
+    @GetMapping("/empresas")
+    public ApiResponse<List<EmpresaUsuarioDto>> listarEmpresas(
+            @RequestHeader("Authorization") String authHeader) {
+        Long userId = extractAndValidateToken(authHeader, true);
+        List<EmpresaUsuarioDto> empresas = authService.listarEmpresas(userId);
+        return ApiResponse.ok(empresas, "Empresas del usuario");
+    }
+
+    @PostMapping("/seleccionar-empresa")
+    public ApiResponse<LoginResponse> seleccionarEmpresa(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @Valid @RequestBody SeleccionEmpresaRequest request) {
+        Long userId = resolveUserIdForSeleccionarEmpresa(authHeader, request);
+        LoginResponse response = authService.seleccionarEmpresa(userId, request);
+        return ApiResponse.ok(response, "Empresa seleccionada correctamente");
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "Logout de usuario", description = "Invalida el token actual del usuario")
-    public ResponseEntity<Map<String, String>> logout(
-            @RequestHeader("X-User-Id") String usuario) {
-        log.info("POST /logout - Usuario: {}", usuario);
-        authService.logout(usuario);
-        return ResponseEntity.ok(Map.of("message", "Logout exitoso"));
+    public ApiResponse<Void> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ApiResponse.ok(null, "Sesión cerrada");
+        }
+        String token = authHeader.substring(7);
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ApiResponse.ok(null, "Sesión cerrada");
+        }
+        Long userId = jwtTokenProvider.getUserId(token);
+        authService.logout(userId, authHeader);
+        return ApiResponse.ok(null, "Sesión cerrada");
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "Refrescar token", description = "Genera un nuevo access token usando el refresh token")
-    public ResponseEntity<LoginResponse> refreshToken(@RequestBody Map<String, String> request) {
-        log.info("POST /refresh");
-        String refreshToken = request.get("refreshToken");
-        if (refreshToken == null || refreshToken.isBlank()) {
-            throw new RuntimeException("Refresh token es requerido");
-        }
-        
-        LoginResponse response = authService.refreshToken(refreshToken);
-        return ResponseEntity.ok(response);
+    public ApiResponse<RefreshTokenResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return ApiResponse.ok(authService.refreshToken(request), "Token renovado");
     }
 
-    @GetMapping("/health")
-    @Operation(summary = "Health check", description = "Verifica que el servicio esté funcionando")
-    public ResponseEntity<Map<String, String>> health() {
-        return ResponseEntity.ok(Map.of(
-            "status", "UP",
-            "service", "seguridad-service",
-            "timestamp", java.time.LocalDateTime.now().toString()
-        ));
+    @GetMapping("/me")
+    public ApiResponse<AuthMeResponse> me(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new BusinessException("Token requerido",
+                    HttpStatus.UNAUTHORIZED, "TOKEN_REQUERIDO");
+        }
+        String token = authHeader.substring(7);
+        return ApiResponse.ok(authService.getProfile(token), "Perfil del usuario autenticado");
+    }
+
+    private Long extractAndValidateToken(String authHeader, boolean requireTemporal) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new BusinessException("Token requerido",
+                    HttpStatus.UNAUTHORIZED, "TOKEN_REQUERIDO");
+        }
+        String token = authHeader.substring(7);
+
+        if (!jwtTokenProvider.validateToken(token)) {
+            throw new BusinessException(
+                    "Su sesión ha expirado. Por favor, inicie sesión nuevamente.",
+                    HttpStatus.UNAUTHORIZED, "TOKEN_EXPIRADO");
+        }
+
+        if (requireTemporal) {
+            Boolean isTemporal = jwtTokenProvider.getClaim(token, "temporal", Boolean.class);
+            if (isTemporal == null || !isTemporal) {
+                // También acepta token definitivo para consultar empresas
+            }
+        }
+
+        return jwtTokenProvider.getUserId(token);
+    }
+
+    /**
+     * Bearer temporal/definitivo válido, o autenticación por credenciales en el cuerpo (sin paso intermedio de token temporal).
+     */
+    private Long resolveUserIdForSeleccionarEmpresa(String authHeader, SeleccionEmpresaRequest request) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String raw = authHeader.substring(7).trim();
+            if (!raw.isEmpty()) {
+                return extractAndValidateToken(authHeader, true);
+            }
+        }
+        return authService.authenticateCredentialsForSeleccionEmpresa(request);
     }
 }
-

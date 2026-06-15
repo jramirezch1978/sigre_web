@@ -28,10 +28,10 @@ set "YELLOW=%ESC%[93m"
 set "CYAN=%ESC%[96m"
 set "RESET=%ESC%[0m"
 
-set "DEPLOY_BACKEND_MODULES=sigre-config-common sigre-common discovery-server api-gateway ms-auth-security asistencia-service"
+set "DEPLOY_BACKEND_MODULES=sigre-config-common sigre-common discovery-server api-gateway seguridad-service asistencia-service"
 set "INFRA_MODULES=discovery-server config-server api-gateway"
 set "OPTIONAL_MODULES=sync-service inventory-service orders-service products-service"
-set "ALL_BACKEND_MODULES=sigre-config-common sigre-common %INFRA_MODULES% ms-auth-security asistencia-service %OPTIONAL_MODULES%"
+set "ALL_BACKEND_MODULES=sigre-config-common sigre-common %INFRA_MODULES% seguridad-service asistencia-service %OPTIONAL_MODULES%"
 
 if "%~1"=="" goto :buildBackendAll
 if /i "%~1"=="menu" goto :showMenu

@@ -4,7 +4,7 @@
 -- ============================================================
 -- db_password_encrypted: copiar tal cual el valor exportado desde master.empresa
 -- (p. ej. JSON de la API o SELECT). No recalcular ni sustituir por otro cifrado;
--- debe coincidir con lo que usa ms-auth-security (misma clave y misma contraseña RDS).
+-- debe coincidir con lo que usa seguridad-service (misma clave y misma contrasena RDS).
 -- ============================================================
 
 SET client_min_messages TO WARNING;
