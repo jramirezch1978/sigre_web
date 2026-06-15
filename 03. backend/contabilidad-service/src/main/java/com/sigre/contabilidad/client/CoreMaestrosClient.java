@@ -7,8 +7,8 @@ import com.sigre.common.dto.ApiResponse;
 import com.sigre.contabilidad.dto.response.PlanContableDetResponse;
 
 @FeignClient(
-    name = "ms-core-maestros",
-    url = "${feign.client.config.ms-core-maestros.url:http://localhost:9002}",
+    name = "core-service",
+    url = "${feign.client.config.core-service.url:http://localhost:9002}",
     path = "/api/core",
     configuration = com.sigre.contabilidad.config.FeignConfig.class
 )

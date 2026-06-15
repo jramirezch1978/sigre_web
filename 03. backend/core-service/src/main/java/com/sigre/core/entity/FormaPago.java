@@ -1,0 +1,26 @@
+package com.sigre.core.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import com.sigre.common.entity.BaseEntity;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "forma_pago", schema = "core")
+public class FormaPago extends BaseEntity {
+
+    @Column(nullable = false, unique = true, length = 20)
+    private String codigo;
+
+    @Column(nullable = false, length = 120)
+    private String nombre;
+
+    @Column(nullable = false, length = 30)
+    private String tipo;
+}

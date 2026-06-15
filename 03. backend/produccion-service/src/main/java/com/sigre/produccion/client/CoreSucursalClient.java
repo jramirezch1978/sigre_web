@@ -8,9 +8,9 @@ import com.sigre.produccion.client.dto.SucursalResponse;
 import com.sigre.produccion.config.FeignConfig;
 
 @FeignClient(
-    name = "ms-core-maestros",
+    name = "core-service",
     contextId = "coreSucursalClient",
-    url = "${client.ms-core-maestros.url:${api.gateway.url}}",
+    url = "${client.core-service.url:${api.gateway.url}}",
     path = "/api/core",
     configuration = FeignConfig.class
 )

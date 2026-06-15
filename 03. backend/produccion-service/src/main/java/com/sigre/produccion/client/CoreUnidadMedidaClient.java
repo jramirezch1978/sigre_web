@@ -8,9 +8,9 @@ import com.sigre.produccion.client.dto.UnidadMedidaResponse;
 import com.sigre.produccion.config.FeignConfig;
 
 @FeignClient(
-    name = "ms-core-maestros",
+    name = "core-service",
     contextId = "coreUnidadMedidaClient",
-    url = "${client.ms-core-maestros.url:${api.gateway.url}}",
+    url = "${client.core-service.url:${api.gateway.url}}",
     path = "/api/core",
     configuration = FeignConfig.class
 )

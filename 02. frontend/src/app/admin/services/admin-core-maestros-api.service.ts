@@ -68,7 +68,7 @@ export class AdminCoreMaestrosApiService extends AbstractAuthenticatedApiService
 
   listarSucursalesAsignadasUsuario(empresaId: number, usuarioId: number): Observable<ApiResponse<SucursalCatalogoDto[]>> {
     return this.http.get<ApiResponse<SucursalCatalogoDto[]>>(
-      this.buildUrl(`/auth/seguridad/empresas/${empresaId}/usuarios/${usuarioId}/sucursales`),
+      this.buildUrl(`/core/empresas/${empresaId}/usuarios/${usuarioId}/sucursales`),
       { headers: this.bearerHeaders() }
     );
   }
@@ -79,7 +79,7 @@ export class AdminCoreMaestrosApiService extends AbstractAuthenticatedApiService
     sucursalId: number
   ): Observable<ApiResponse<UsuarioSucursalSyncResponse>> {
     return this.http.post<ApiResponse<UsuarioSucursalSyncResponse>>(
-      this.buildUrl(`/auth/seguridad/empresas/${empresaId}/usuarios/${usuarioId}/sucursales/${sucursalId}`),
+      this.buildUrl(`/core/empresas/${empresaId}/usuarios/${usuarioId}/sucursales/${sucursalId}`),
       null,
       { headers: this.bearerHeaders() }
     );
@@ -91,7 +91,7 @@ export class AdminCoreMaestrosApiService extends AbstractAuthenticatedApiService
     sucursalId: number
   ): Observable<ApiResponse<UsuarioSucursalSyncResponse>> {
     return this.http.delete<ApiResponse<UsuarioSucursalSyncResponse>>(
-      this.buildUrl(`/auth/seguridad/empresas/${empresaId}/usuarios/${usuarioId}/sucursales/${sucursalId}`),
+      this.buildUrl(`/core/empresas/${empresaId}/usuarios/${usuarioId}/sucursales/${sucursalId}`),
       { headers: this.bearerHeaders() }
     );
   }

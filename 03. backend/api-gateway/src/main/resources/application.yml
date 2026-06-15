@@ -42,6 +42,11 @@ spring:
           filters:
             - RewritePath=/api/asistencia/(?<segment>.*), /${segment}
 
+        - id: core-service
+          uri: ${CORE_SERVICE_URI:http://core-service:9002}
+          predicates:
+            - Path=/api/core/**
+
         - id: almacen-service
           uri: ${ALMACEN_SERVICE_URI:http://almacen-service:9003}
           predicates:
@@ -76,6 +81,11 @@ spring:
           uri: ${COMERCIALIZACION_SERVICE_URI:http://comercializacion-service:9010}
           predicates:
             - Path=/api/ventas/**
+
+        - id: sync-service
+          uri: ${SYNC_SERVICE_URI:http://sync-service:8088}
+          predicates:
+            - Path=/api/sync/**,/api/worker/**
 
         - id: discovery-service
           uri: http://10.100.14.102:8761

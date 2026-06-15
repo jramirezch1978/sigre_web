@@ -21,8 +21,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 @FeignClient(
-    name = "ms-core-maestros",
-    url = "${client.ms-core-maestros.url:${api.gateway.url}}",
+    name = "core-service",
+    url = "${client.core-service.url:${api.gateway.url}}",
     path = "/api/core",
     configuration = com.sigre.finanzas.config.FeignConfig.class
 )

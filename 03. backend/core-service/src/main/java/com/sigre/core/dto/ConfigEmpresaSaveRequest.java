@@ -1,0 +1,20 @@
+package com.sigre.core.dto;
+
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.Map;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ConfigEmpresaSaveRequest {
+    @NotNull
+    private Long empresaId;
+    @NotNull
+    private Map<String, Object> valores;
+}
