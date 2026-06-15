@@ -1,0 +1,85 @@
+<div class="admin-page ion-padding admin-page--fluid">
+  <h1 class="admin-page__title">Asignación de roles por usuario</h1>
+  <p class="admin-page__subtitle">Seleccione un usuario para gestionar sus roles en la empresa actual.</p>
+
+  @if (!usuarioSeleccionado) {
+    <ion-searchbar [(ngModel)]="filtro" placeholder="Buscar usuario..." animated="true" class="admin-search"></ion-searchbar>
+    @if (loading) {
+      <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+    }
+    @if (!loading) {
+      <div class="admin-table-wrapper">
+        <table class="admin-table admin-table--plain">
+          <thead>
+            <tr>
+              <th>Nombre completo</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th class="admin-acciones-col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of usuariosFiltrados; track u.id) {
+              <tr (click)="seleccionarUsuario(u)" (dblclick)="seleccionarUsuario(u)">
+                <td>{{ u.nombreCompleto }}</td>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email }}</td>
+                <td class="admin-acciones-col">
+                  <div class="admin-acciones-wrap" (click)="$event.stopPropagation()">
+                    <ion-button fill="clear" size="small" class="admin-acciones-btn" title="Gestionar roles"
+                      (click)="seleccionarUsuario(u)">
+                      <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                    </ion-button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" style="text-align:center;color:#6b7280">No hay usuarios.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (usuarioSeleccionado) {
+    <ion-button fill="clear" size="small" (click)="volver()">
+      <ion-icon name="arrow-back-outline" slot="start"></ion-icon> Volver a usuarios
+    </ion-button>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ usuarioSeleccionado.nombreCompleto }}</ion-card-title>
+        <ion-card-subtitle>{{ usuarioSeleccionado.username }} · {{ usuarioSeleccionado.email }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <h3>Roles asignados</h3>
+        @if (loadingRoles) { <ion-spinner name="crescent"></ion-spinner> }
+        <ion-list>
+          @for (ru of rolesUsuario; track ru.id) {
+            <ion-item>
+              <ion-label><strong>{{ ru.rol?.codigo }}</strong> — {{ ru.rol?.nombre }}</ion-label>
+              <ion-button slot="end" fill="clear" color="danger" size="small" (click)="quitar(ru.rolId)">
+                <ion-icon name="trash-outline"></ion-icon>
+              </ion-button>
+            </ion-item>
+          } @empty {
+            <ion-item><ion-label color="medium">Sin roles asignados.</ion-label></ion-item>
+          }
+        </ion-list>
+
+        <h3 style="margin-top:1rem">Asignar rol</h3>
+        <div class="form-row">
+          <ion-item>
+            <ion-select [(ngModel)]="rolIdAsignar" placeholder="Seleccione rol">
+              @for (r of rolesDisponibles; track r.id) {
+                <ion-select-option [value]="r.id">{{ r.codigo }} — {{ r.nombre }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          <ion-button [disabled]="!rolIdAsignar" (click)="asignar()" color="primary">Asignar</ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  }
+</div>

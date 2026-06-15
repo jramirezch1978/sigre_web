@@ -5,6 +5,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ClockComponent } from './components/clock/clock.component';
+import { AdminUiModule } from './ui/admin-ui.module';
 import { ConfigService } from './services/config.service';
 
 @Component({
@@ -16,7 +17,8 @@ import { ConfigService } from './services/config.service';
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
-    ClockComponent
+    ClockComponent,
+    AdminUiModule
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
