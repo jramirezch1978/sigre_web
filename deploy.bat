@@ -32,9 +32,14 @@ set "SSH_USER=jramirez"
 set "SSH_HOST=crisaor.serveftp.com"
 set "REMOTE_STACK=/home/jramirez/stack"
 
+set "INFRA_SERVICES=discovery-server config-server api-gateway"
+set "CORE_SERVICES=ms-auth-security asistencia-service"
+set "COMMERCE_SERVICES=inventory-service orders-service products-service sync-service"
+set "DOMAIN_SERVICES=almacen-service compras-service contabilidad-service finanzas-service rrhh-service activo-fijo-service produccion-service auditoria-service comercializacion-service campo-service comedor-service flota-service mantenimiento-service operaciones-service presupuesto-service aprovision-service sig-service"
 set "BACKEND_SERVICES=discovery-server ms-auth-security api-gateway asistencia-service"
 set "FRONTEND_SERVICE=sigre-frontend"
-set "ALL_APP_SERVICES=discovery-server config-server ms-auth-security api-gateway asistencia-service sync-service sigre-frontend"
+set "COMPOSE_APP_SERVICES=discovery-server api-gateway ms-auth-security asistencia-service sigre-frontend"
+set "ALL_APP_SERVICES=%INFRA_SERVICES% %CORE_SERVICES% %COMMERCE_SERVICES% %DOMAIN_SERVICES% %FRONTEND_SERVICE%"
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
 set "GREEN=%ESC%[92m"
@@ -62,10 +67,16 @@ if /i "%~1"=="pull" goto :pullRemote
 if /i "%~1"=="status" goto :remoteStatus
 if /i "%~1"=="context" goto :checkContext
 if /i "%~1"=="help" goto :showHelp
+if /i "%~1"=="list" goto :listServices
+if /i "%~1"=="infra" goto :deployInfra
+if /i "%~1"=="core" goto :deployCore
+if /i "%~1"=="commerce" goto :deployCommerce
+if /i "%~1"=="domain" goto :deployDomain
+if /i "%~1"=="ms-all" goto :deployMsAll
 
 REM Servicio individual
 set "SERVICE=%~1"
-goto :deployOneService
+goto :validateService
 
 :showMenu
 echo.
@@ -82,6 +93,7 @@ echo   5. Stack infra (PG + SonarQube)
 echo   6. Pull remoto (sin build)
 echo   7. Estado contenedores en cronos
 echo   8. Verificar contexto Docker
+echo   9. Listar microservicios (deploy.bat list)
 echo   0. Salir
 echo.
 set /p "OPTION=  Seleccione: "
@@ -93,14 +105,100 @@ if "%OPTION%"=="5" goto :deployStack
 if "%OPTION%"=="6" goto :pullRemote
 if "%OPTION%"=="7" goto :remoteStatus
 if "%OPTION%"=="8" goto :checkContext
+if "%OPTION%"=="9" goto :listServices
 if "%OPTION%"=="0" goto :endScript
 goto :showMenu
 
 :selectService
-echo Servicios: %ALL_APP_SERVICES%
+echo Infra: %INFRA_SERVICES%
+echo Core: %CORE_SERVICES%
+echo Commerce: %COMMERCE_SERVICES%
+echo Dominio SIGRE: %DOMAIN_SERVICES%
+echo Frontend: %FRONTEND_SERVICE%
+echo.
+echo Ver todos: deploy.bat list
 set /p "SERVICE=  Nombre: "
 if "!SERVICE!"=="" goto :endScript
+goto :validateService
+
+:isKnownService
+set "CHK=%~1"
+set "FOUND=0"
+for %%s in (%ALL_APP_SERVICES%) do if /i "%%s"=="!CHK!" set "FOUND=1"
+if "!FOUND!"=="0" exit /b 1
+exit /b 0
+
+:validateService
+call :isKnownService "!SERVICE!"
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Servicio desconocido: !SERVICE!
+    echo   Ejecute: deploy.bat list
+    goto :endScript
+)
+if not exist "!BACKEND_DIR!\!SERVICE!\Dockerfile" (
+    if /i not "!SERVICE!"=="sigre-frontend" (
+        echo %RED%[ERROR]%RESET% No existe Dockerfile: !BACKEND_DIR!\!SERVICE!\Dockerfile
+        goto :endScript
+    )
+)
 goto :deployOneService
+
+:listServices
+echo.
+echo %CYAN%Microservicios desplegables (deploy.bat ^<nombre^> [--force]):%RESET%
+echo.
+echo %YELLOW%Infraestructura:%RESET% %INFRA_SERVICES%
+echo %YELLOW%Core (auth + asistencia):%RESET% %CORE_SERVICES%
+echo %YELLOW%Commerce / sync:%RESET% %COMMERCE_SERVICES%
+echo %YELLOW%Dominio SIGRE (migracion):%RESET% %DOMAIN_SERVICES%
+echo %YELLOW%Frontend:%RESET% %FRONTEND_SERVICE%
+echo.
+echo %YELLOW%En docker-compose.app.yml (pull/up remoto):%RESET% %COMPOSE_APP_SERVICES%
+echo %YELLOW%Backend activo (deploy.bat backend):%RESET% %BACKEND_SERVICES%
+echo.
+echo %CYAN%Ejemplos:%RESET%
+echo   deploy.bat ms-auth-security --force
+echo   deploy.bat asistencia-service --force
+echo   deploy.bat infra
+echo   deploy.bat core
+echo   deploy.bat commerce
+echo   deploy.bat domain
+echo   deploy.bat ms-all
+echo   deploy.bat backend
+echo   deploy.bat all
+goto :endScript
+
+:deployServiceGroup
+echo %CYAN%[INFO]%RESET% Desplegando grupo: !GROUP!
+for %%s in (!GROUP!) do (
+    if "!NO_BUILD!"=="0" (
+        call :buildBackendImage "%%s" || goto :endScript
+        call :pushImage "%%s" || goto :endScript
+    )
+    call :remoteUp "%%s" || goto :endScript
+)
+echo %GREEN%[OK]%RESET% Grupo !GROUP! procesado.
+goto :endScript
+
+:deployInfra
+set "GROUP=%INFRA_SERVICES%"
+goto :deployServiceGroup
+
+:deployCore
+set "GROUP=%CORE_SERVICES%"
+goto :deployServiceGroup
+
+:deployCommerce
+set "GROUP=%COMMERCE_SERVICES%"
+goto :deployServiceGroup
+
+:deployDomain
+set "GROUP=%DOMAIN_SERVICES%"
+goto :deployServiceGroup
+
+:deployMsAll
+set "GROUP=%INFRA_SERVICES% %CORE_SERVICES% %COMMERCE_SERVICES% %DOMAIN_SERVICES%"
+goto :deployServiceGroup
 
 :ensureEnv
 if not exist "!ENV_FILE!" (
@@ -169,6 +267,13 @@ exit /b 0
 
 :remoteUp
 set "SVC=%~1"
+set "IN_COMPOSE=0"
+for %%c in (%COMPOSE_APP_SERVICES%) do if /i "%%c"=="!SVC!" set "IN_COMPOSE=1"
+if "!IN_COMPOSE!"=="0" (
+    echo %YELLOW%[WARN]%RESET% !SVC! no esta en docker-compose.app.yml. Solo build/push local.
+    echo   Agregue el servicio al compose para pull/up en cronos.
+    exit /b 0
+)
 call :ensureEnv || exit /b 1
 call :useRemoteContext || exit /b 1
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-up-!SVC!-!DEPLOY_LOG_TS!.log"
@@ -283,19 +388,38 @@ goto :endScript
 echo.
 echo %CYAN%Uso:%RESET% deploy.bat ^<servicio^|comando^> [--force] [--no-push] [--no-build]
 echo.
-echo   backend             discovery-server, api-gateway, asistencia-service
-echo   frontend            sigre-frontend
+echo %YELLOW%Comandos por grupo:%RESET%
+echo   backend             %BACKEND_SERVICES%
+echo   frontend            %FRONTEND_SERVICE%
 echo   all                 backend + frontend
-echo   discovery-server    api-gateway  asistencia-service  sync-service  config-server
-echo   stack               Infra PG + SonarQube (Terraform / deploy/cronos)
+echo   infra               %INFRA_SERVICES%
+echo   core                %CORE_SERVICES%
+echo   commerce            %COMMERCE_SERVICES%
+echo   domain              %DOMAIN_SERVICES% (migracion)
+echo   ms-all              infra + core + commerce + domain
+echo   list                Listar todos los microservicios
+echo   stack               Infra PG + SonarQube
 echo   pull [servicio]     Pull remoto sin build
 echo   status              docker ps en cronos
 echo   context             Verificar contexto cronos
 echo.
+echo %YELLOW%Servicios individuales (ejemplos):%RESET%
+echo   ms-auth-security    api-gateway       discovery-server    config-server
+echo   asistencia-service  sync-service      inventory-service   orders-service
+echo   products-service    almacen-service   compras-service     contabilidad-service
+echo   finanzas-service    rrhh-service      activo-fijo-service produccion-service
+echo   auditoria-service   comercializacion-service  campo-service  comedor-service
+echo   flota-service       mantenimiento-service     operaciones-service  presupuesto-service
+echo   aprovision-service  sig-service       sigre-frontend
+echo.
+echo %YELLOW%En cronos (compose):%RESET% %COMPOSE_APP_SERVICES%
+echo.
 echo %YELLOW%Flags:%RESET%
 echo   --force     Sin confirmacion en stack
-echo   --no-push   Build local sin push (solo pruebas)
-echo   --no-build  Solo pull + up remoto
+echo   --no-push   Build local sin push
+echo   --no-build  Solo pull + up remoto (requiere imagen en registry)
+echo.
+echo %YELLOW%Postman:%RESET% 01. documentacion\SIGRE Web ERP.postman_collection.json
 echo.
 echo %YELLOW%Contexto cronos:%RESET%
 echo   docker context create cronos --docker "host=ssh://%SSH_USER%@%SSH_HOST%"

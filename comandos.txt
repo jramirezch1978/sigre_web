@@ -223,8 +223,25 @@ REM Clave SSH (una vez): ssh-keygen -t ed25519  ^&  type %USERPROFILE%\.ssh\id_e
 
 --- Despliegue en cronos (build local + push GHCR + pull/up) ---
 docker login ghcr.io
+.\deploy.bat list
 .\deploy.bat backend
+.\deploy.bat ms-auth-security --force
+.\deploy.bat asistencia-service --force
+.\deploy.bat api-gateway --force
 .\deploy.bat frontend
+.\deploy.bat all
+
+--- Despliegue por grupo ---
+.\deploy.bat infra
+.\deploy.bat core
+.\deploy.bat commerce
+.\deploy.bat domain
+.\deploy.bat ms-all
+
+--- Postman ---
+Importar: 01. documentacion\SIGRE Web ERP.postman_collection.json
+Variable base_url: http://crisaor.serveftp.com:9080
+Flujo: Login -> seleccionar-empresa (guarda jwt_definitive_token) -> resto de APIs
 
 --- Gestion servidor ---
 .\server-manage.bat status
