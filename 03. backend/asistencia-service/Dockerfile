@@ -3,25 +3,12 @@ FROM maven:3.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-# Copiar el pom.xml padre primero
-COPY pom.xml ./pom.xml
-
-# Copiar todos los pom.xml de los módulos para resolver dependencias
-COPY discovery-server/pom.xml ./discovery-server/pom.xml
-COPY config-server/pom.xml ./config-server/pom.xml
-COPY api-gateway/pom.xml ./api-gateway/pom.xml
-COPY asistencia-service/pom.xml ./asistencia-service/pom.xml
-COPY inventory-service/pom.xml ./inventory-service/pom.xml
-COPY orders-service/pom.xml ./orders-service/pom.xml
-COPY products-service/pom.xml ./products-service/pom.xml
-COPY sync-service/pom.xml ./sync-service/pom.xml
+COPY docker/pom.asistencia-service.xml ./pom.xml
 COPY sigre-config-common/pom.xml ./sigre-config-common/pom.xml
+COPY asistencia-service/pom.xml ./asistencia-service/pom.xml
 COPY sigre-config-common/src ./sigre-config-common/src
-
-# Copiar el código fuente del asistencia-service
 COPY asistencia-service/src ./asistencia-service/src
 
-# Construir directamente sin dependency:go-offline (MÁS RÁPIDO)
 RUN mvn clean package -DskipTests -pl asistencia-service -am
 
 # Etapa de producción
