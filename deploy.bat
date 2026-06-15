@@ -7,7 +7,7 @@ echo [deploy] Inicio: !SCRIPT_START_HUMAN!
 REM ============================================================
 REM SIGRE ERP — Despliegue Docker en cronos (Oracle Linux 9)
 REM ============================================================
-REM Build LOCAL en Windows. Pull + up en cronos (contexto cronos).
+REM Contexto Docker activo: cronos. Build/push local con --context default.
 REM NO compilar en el servidor (10 GB RAM).
 REM Compose: deploy/cronos/docker-compose.app.yml
 REM ============================================================
@@ -25,7 +25,7 @@ if not exist "!DEPLOY_LOG_DIR!" mkdir "!DEPLOY_LOG_DIR!"
 for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format ddMMyyyy-HHmmss"') do set "DEPLOY_LOG_TS=%%t"
 
 set "DOCKER_CTX=cronos"
-set "DOCKER_CTX_LOCAL=default"
+set "DOCKER_CTX_BUILD=default"
 set "IMAGE_REGISTRY=ghcr.io/jramirezch1978/sigre"
 set "IMAGE_TAG=latest"
 set "SSH_USER=jramirez"
@@ -59,6 +59,8 @@ for %%a in (%*) do (
     if /i "%%a"=="--no-push" set "NO_PUSH=1"
     if /i "%%a"=="--no-build" set "NO_BUILD=1"
 )
+
+call :useRemoteContext >nul 2>&1
 
 if "%~1"=="" goto :showMenu
 if /i "%~1"=="menu" goto :showMenu
@@ -256,10 +258,6 @@ if not exist "!ENV_FILE!" (
 )
 exit /b 0
 
-:useLocalContext
-docker context use %DOCKER_CTX_LOCAL% >nul 2>&1
-exit /b 0
-
 :useRemoteContext
 docker context use %DOCKER_CTX% >nul 2>&1
 if errorlevel 1 (
@@ -273,16 +271,15 @@ exit /b 0
 set "SVC=%~1"
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-build-!SVC!-!DEPLOY_LOG_TS!.log"
 set "IMAGE=!IMAGE_REGISTRY!/!SVC!:!IMAGE_TAG!"
-echo %CYAN%[BUILD LOCAL]%RESET% !SVC! -^> !IMAGE!
-call :useLocalContext
+echo %CYAN%[BUILD LOCAL]%RESET% !SVC! -^> !IMAGE! (contexto build: %DOCKER_CTX_BUILD%)
 if /i "!SVC!"=="sigre-frontend" (
     pushd "!FRONTEND_DIR!"
-    docker build -t !IMAGE! . >> "!DEPLOY_LOG!" 2>&1
+    docker --context %DOCKER_CTX_BUILD% build -t !IMAGE! . >> "!DEPLOY_LOG!" 2>&1
     set "BUILD_ERR=!errorlevel!"
     popd
 ) else (
     pushd "!BACKEND_DIR!"
-    docker build -f "!SVC!\Dockerfile" -t !IMAGE! . >> "!DEPLOY_LOG!" 2>&1
+    docker --context %DOCKER_CTX_BUILD% build -f "!SVC!\Dockerfile" -t !IMAGE! . >> "!DEPLOY_LOG!" 2>&1
     set "BUILD_ERR=!errorlevel!"
     popd
 )
@@ -300,9 +297,8 @@ if "!NO_PUSH!"=="1" (
     echo %YELLOW%[SKIP]%RESET% Push omitido (--no-push). Imagen solo local.
     exit /b 0
 )
-echo %CYAN%[PUSH]%RESET% !IMAGE!
-call :useLocalContext
-docker push !IMAGE!
+echo %CYAN%[PUSH]%RESET% !IMAGE! (contexto build: %DOCKER_CTX_BUILD%)
+docker --context %DOCKER_CTX_BUILD% push !IMAGE!
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Push fallo. Ejecute: docker login ghcr.io
     exit /b 1
@@ -468,13 +464,13 @@ echo   --no-build  Solo pull + up remoto (requiere imagen en registry)
 echo.
 echo %YELLOW%Postman:%RESET% 01. documentacion\SIGRE Web ERP.postman_collection.json
 echo.
-echo %YELLOW%Contexto cronos:%RESET%
+echo %YELLOW%Contexto Docker:%RESET% activo %DOCKER_CTX% (build/push en %DOCKER_CTX_BUILD%)
 echo   docker context create cronos --docker "host=ssh://%SSH_USER%@%SSH_HOST%"
 echo.
 goto :endScript
 
 :endScript
-call :useLocalContext >nul 2>&1
+call :useRemoteContext >nul 2>&1
 for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format \"yyyy-MM-dd HH:mm:ss\""') do set "SCRIPT_END_HUMAN=%%t"
 echo [deploy] Fin: !SCRIPT_END_HUMAN!
 endlocal
