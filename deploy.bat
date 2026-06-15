@@ -77,6 +77,7 @@ if /i "%~1"=="pull" goto :pullRemote
 if /i "%~1"=="status" goto :remoteStatus
 if /i "%~1"=="context" goto :checkContext
 if /i "%~1"=="help" goto :showHelp
+if /i "%~1"=="retag-images" goto :retagImagesOnly
 if /i "%~1"=="list" goto :listServices
 if /i "%~1"=="infra" goto :deployInfra
 if /i "%~1"=="core" goto :deployCore
@@ -260,6 +261,12 @@ echo   Auth:      http://%SSH_HOST%:9080/api/auth/
 echo   Gateway:   http://%SSH_HOST%:9080
 goto :endScript
 
+:retagImagesOnly
+echo %CYAN%[INFO]%RESET% Retag imagenes ghcr.io -^> sigre en cronos...
+call :retagLegacyImagesOnCronos
+echo %GREEN%[OK]%RESET% Retag completado. Ejecute deploy.bat security --force para actualizar infra base.
+goto :endScript
+
 :ensureEnv
 if not exist "!ENV_FILE!" (
     if exist "!CRONOS_DIR!\.env.example" (
@@ -354,10 +361,28 @@ docker --context %DOCKER_CTX_BUILD% image prune -f >> "!DEPLOY_LOG!" 2>&1
 echo %GREEN%[OK]%RESET% Docker local limpio para !SVC!
 exit /b 0
 
+:retagLegacyImagesOnCronos
+REM Migra tags ghcr.io -> sigre en cronos sin rebuild (contenedores ya desplegados)
+set "LEGACY_REG=ghcr.io/jramirezch1978/sigre"
+call :useRemoteContext >nul 2>&1
+if errorlevel 1 exit /b 0
+for %%s in (%COMPOSE_APP_SERVICES%) do (
+    docker --context %DOCKER_CTX% image inspect "!LEGACY_REG!/%%s:!IMAGE_TAG!" >nul 2>&1
+    if not errorlevel 1 (
+        docker --context %DOCKER_CTX% image inspect "!IMAGE_REGISTRY!/%%s:!IMAGE_TAG!" >nul 2>&1
+        if errorlevel 1 (
+            docker --context %DOCKER_CTX% tag "!LEGACY_REG!/%%s:!IMAGE_TAG!" "!IMAGE_REGISTRY!/%%s:!IMAGE_TAG!" >nul 2>&1
+            if not errorlevel 1 echo %CYAN%[RETAG]%RESET% %%s: !LEGACY_REG! -^> !IMAGE_REGISTRY!
+        )
+    )
+)
+exit /b 0
+
 :composeUpServices
 set "COMPOSE_SVCS=%~1"
 call :ensureEnv || exit /b 1
 call :useRemoteContext || exit /b 1
+call :retagLegacyImagesOnCronos
 if "!DEPLOY_DIRECT!"=="1" (
     echo %CYAN%[CRONOS]%RESET% up --pull never !COMPOSE_SVCS!...
     docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d --pull never !COMPOSE_SVCS! >> "!DEPLOY_LOG!" 2>&1
@@ -385,7 +410,23 @@ if "!IN_COMPOSE!"=="0" (
 )
 call :ensureEnv || exit /b 1
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-up-!SVC!-!DEPLOY_LOG_TS!.log"
-call :composeUpServices "!SVC!" || exit /b 1
+call :useRemoteContext || exit /b 1
+call :retagLegacyImagesOnCronos
+if "!DEPLOY_DIRECT!"=="1" (
+    echo %CYAN%[CRONOS]%RESET% up --no-deps --pull never !SVC!...
+    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d --no-deps --pull never !SVC! >> "!DEPLOY_LOG!" 2>&1
+) else (
+    echo %CYAN%[CRONOS]%RESET% pull + up --no-deps !SVC!...
+    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" pull !SVC! >> "!DEPLOY_LOG!" 2>&1
+    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d --no-deps !SVC! >> "!DEPLOY_LOG!" 2>&1
+)
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Deploy remoto fallo. Ver: !DEPLOY_LOG!
+    powershell -NoProfile -Command "Get-Content -LiteralPath '!DEPLOY_LOG!' -Tail 6 -ErrorAction SilentlyContinue"
+    echo %YELLOW%[TIP]%RESET% Revisar logs: docker --context cronos logs ^<servicio^> --tail 80
+    echo %YELLOW%[TIP]%RESET% Si falta infra base: deploy.bat security --force
+    exit /b 1
+)
 echo %GREEN%[OK]%RESET% !SVC! activo en cronos.
 exit /b 0
 
