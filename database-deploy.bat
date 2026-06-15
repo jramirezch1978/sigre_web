@@ -212,15 +212,17 @@ if not exist "!DDL_ROOT!\!REL!" (
     echo ERROR: No existe !DDL_ROOT!\!REL!
     exit /b 1
 )
-echo ^>^> --- !REL! --- >> "!DBDEPLOY_LOG!"
-docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -f "/ddl/!REL_UNIX!" >> "!DBDEPLOY_LOG!" 2>&1
+echo ^>^> --- !REL! ---
+>> "!DBDEPLOY_LOG!" echo ^>^> --- !REL! ---
+docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -f "/ddl/!REL_UNIX!"
 exit /b %ERRORLEVEL%
 
 :run_sql_tenant_grants
 set "TGRANT_ROLE=%~1"
 set "REL_UNIX=tenant/99-grants-tenant-role.sql"
-echo ^>^> --- tenant/99-grants-tenant-role.sql ^(rol=!TGRANT_ROLE!^) --- >> "!DBDEPLOY_LOG!"
-docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -v tenant_role=!TGRANT_ROLE! -f "/ddl/!REL_UNIX!" >> "!DBDEPLOY_LOG!" 2>&1
+echo ^>^> --- tenant/99-grants-tenant-role.sql ^(rol=!TGRANT_ROLE!^) ---
+>> "!DBDEPLOY_LOG!" echo ^>^> --- tenant/99-grants-tenant-role.sql ^(rol=!TGRANT_ROLE!^) ---
+docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -v tenant_role=!TGRANT_ROLE! -f "/ddl/!REL_UNIX!"
 exit /b %ERRORLEVEL%
 
 :ensure_database
@@ -242,6 +244,10 @@ exit /b 0
 :do_create_security
 echo.
 echo ^>^> Modo: create-security ^(!PGSECURITY!^)  Force: !FORCE!
+echo ^>^> Conexion: !PGUSER!@!PGHOST!:!PGPORT!/!PGSECURITY!
+echo ^>^> DDL: !DDL_ROOT!
+echo ^>^> DDL mount Docker: !DDL_MOUNT!
+echo.
 set "SAVED_PGDATABASE=!PGDATABASE!"
 call :ensure_database "!PGSECURITY!" "!PGUSER!" || exit /b 1
 set "PGDATABASE=!PGSECURITY!"
@@ -262,6 +268,10 @@ exit /b 0
 :do_create_template
 echo.
 echo ^>^> Modo: create-template ^(!PGTEMPLATE!^)  Force: !FORCE!
+echo ^>^> Conexion: !PGUSER!@!PGHOST!:!PGPORT!/!PGTEMPLATE!
+echo ^>^> DDL: !DDL_ROOT!
+echo ^>^> DDL mount Docker: !DDL_MOUNT!
+echo.
 call :ensure_database "!PGTEMPLATE!" "!PGUSER!" || exit /b 1
 set "PGDATABASE=!PGTEMPLATE!"
 call :run_sql "00-convenciones-generales.sql" || exit /b 1
