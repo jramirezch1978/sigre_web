@@ -38,6 +38,7 @@ set "COMMERCE_SERVICES=inventory-service orders-service products-service sync-se
 set "DOMAIN_SERVICES=almacen-service compras-service contabilidad-service finanzas-service rrhh-service activo-fijo-service produccion-service auditoria-service comercializacion-service campo-service comedor-service flota-service mantenimiento-service operaciones-service presupuesto-service aprovision-service sig-service"
 set "ASISTENCIA_SERVICES=discovery-server api-gateway ms-auth-security asistencia-service"
 set "LOGISTICA_SERVICES=discovery-server api-gateway ms-auth-security almacen-service compras-service"
+set "SECURITY_SERVICES=discovery-server ms-auth-security api-gateway"
 set "BACKEND_SERVICES=%ASISTENCIA_SERVICES%"
 set "FRONTEND_SERVICE=sigre-frontend"
 set "COMPOSE_APP_SERVICES=discovery-server api-gateway ms-auth-security asistencia-service sigre-frontend"
@@ -77,6 +78,7 @@ if /i "%~1"=="domain" goto :deployDomain
 if /i "%~1"=="ms-all" goto :deployMsAll
 if /i "%~1"=="asistencia" goto :deployAsistencia
 if /i "%~1"=="logistica" goto :deployLogistica
+if /i "%~1"=="security" goto :deploySecurity
 
 REM Servicio individual
 set "SERVICE=%~1"
@@ -160,6 +162,7 @@ echo.
 echo %YELLOW%Modulos funcionales:%RESET%
 echo   asistencia          %ASISTENCIA_SERVICES%
 echo   logistica           %LOGISTICA_SERVICES%
+echo   security            %SECURITY_SERVICES%
 echo.
 echo %YELLOW%En docker-compose.app.yml (pull/up remoto):%RESET% %COMPOSE_APP_SERVICES%
 echo %YELLOW%Backend activo (deploy.bat backend ^| asistencia):%RESET% %BACKEND_SERVICES%
@@ -167,6 +170,7 @@ echo.
 echo %CYAN%Ejemplos:%RESET%
 echo   deploy.bat asistencia --force
 echo   deploy.bat logistica --force
+echo   deploy.bat security --force
 echo   deploy.bat ms-auth-security --force
 echo   deploy.bat asistencia-service --force
 echo   deploy.bat infra
@@ -216,6 +220,29 @@ goto :deployBackend
 :deployLogistica
 set "GROUP=%LOGISTICA_SERVICES%"
 goto :deployServiceGroup
+
+:deploySecurity
+echo %CYAN%[INFO]%RESET% Desplegando modulo seguridad (%SECURITY_SERVICES%)...
+for %%s in (%SECURITY_SERVICES%) do (
+    if "!NO_BUILD!"=="0" (
+        call :buildBackendImage "%%s" || goto :endScript
+        call :pushImage "%%s" || goto :endScript
+    )
+)
+call :ensureEnv || goto :endScript
+call :useRemoteContext || goto :endScript
+set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-security-!DEPLOY_LOG_TS!.log"
+docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" pull %SECURITY_SERVICES% >> "!DEPLOY_LOG!" 2>&1
+docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d %SECURITY_SERVICES% >> "!DEPLOY_LOG!" 2>&1
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Ver: !DEPLOY_LOG!
+    goto :endScript
+)
+echo %GREEN%[OK]%RESET% Modulo seguridad desplegado.
+echo   Discovery: http://%SSH_HOST%:8761
+echo   Auth:      http://%SSH_HOST%:9080/api/auth/
+echo   Gateway:   http://%SSH_HOST%:9080
+goto :endScript
 
 :ensureEnv
 if not exist "!ENV_FILE!" (
@@ -416,6 +443,7 @@ echo   domain              %DOMAIN_SERVICES% (migracion)
 echo   ms-all              infra + core + commerce + domain
 echo   asistencia          %ASISTENCIA_SERVICES%
 echo   logistica           %LOGISTICA_SERVICES%
+echo   security            %SECURITY_SERVICES%
 echo   list                Listar todos los microservicios
 echo   stack               Infra PG + SonarQube
 echo   pull [servicio]     Pull remoto sin build
