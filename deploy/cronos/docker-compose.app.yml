@@ -40,12 +40,16 @@ services:
       TZ: America/Lima
       SERVER_PORT: "9080"
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka
+      MS_AUTH_URI: http://ms-auth-security:9001
+      JWT_SECRET: ${JWT_SECRET:-dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
       JAVA_OPTS: "-Xms192m -Xmx384m -Duser.timezone=America/Lima"
     mem_limit: 512m
     networks:
       - stack_default
     depends_on:
       discovery-server:
+        condition: service_healthy
+      ms-auth-security:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9080/actuator/health"]
@@ -94,6 +98,44 @@ services:
         max-file: "3"
         compress: "true"
 
+  ms-auth-security:
+    container_name: ms-auth-security
+    image: ${IMAGE_REGISTRY}/ms-auth-security:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      TZ: America/Lima
+      SERVER_PORT: "9001"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: sigre_security
+      DB_USER: postgres
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_SSL_MODE: disable
+      TENANT_TEMPLATE_DB: sigre_template
+      JWT_SECRET: ${JWT_SECRET:-dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-U2lncmVBZXMyNTZLZXlEZXYyMDI2ISEhIQ==}
+      APP_PROVISION_SECRET: ${APP_PROVISION_SECRET:-dev-provision-cambiar-produccion}
+      JAVA_OPTS: "-Xms192m -Xmx512m -Duser.timezone=America/Lima"
+    mem_limit: 768m
+    networks:
+      - stack_default
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9001/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
   sigre-frontend:
     container_name: sigre-frontend
     image: ${IMAGE_REGISTRY}/sigre-frontend:${IMAGE_TAG}
@@ -108,6 +150,8 @@ services:
       - stack_default
     depends_on:
       api-gateway:
+        condition: service_healthy
+      ms-auth-security:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]

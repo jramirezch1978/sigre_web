@@ -1,0 +1,68 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: ms-auth-security
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:sigre_security}?sslmode=${DB_SSL_MODE:disable}
+    username: ${DB_USER:postgres}
+    password: "${DB_PASS:jarch32b}"
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 0
+      idle-timeout: 30000
+      max-lifetime: 120000
+      pool-name: pool-auth-security
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: auth
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  flyway:
+    enabled: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SMTP_USER:no-reply@npssac.com.pe}
+    password: ${SMTP_PASSWORD:fpbcdsvqqlmjtiyg}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
+    access-token-expiration: 900000
+    definitive-token-expiration: 900000
+    refresh-token-expiration: 604800000
+  admin-datasource:
+    jdbc-url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/postgres?sslmode=${DB_SSL_MODE:disable}
+    username: ${DB_USER:postgres}
+    password: "${DB_PASS:jarch32b}"
+    driver-class-name: org.postgresql.Driver
+  tenant:
+    template-database: ${TENANT_TEMPLATE_DB:sigre_template}
+    db-name-prefix: sigre_emp_
+    default-db-host: ${DB_HOST:postgres}
+    default-db-port: ${DB_PORT:5432}
+    jdbc-ssl-mode: ${DB_SSL_MODE:disable}
+  encryption:
+    key: ${APP_ENCRYPTION_KEY:U2lncmVBZXMyNTZLZXlEZXYyMDI2ISEhIQ==}
+  provisioning:
+    secret: ${APP_PROVISION_SECRET:dev-provision-cambiar-produccion}
+
+springdoc:
+  api-docs:
+    path: /api/auth/v3/api-docs
+  swagger-ui:
+    path: /api/auth/swagger-ui.html

@@ -32,9 +32,9 @@ set "SSH_USER=jramirez"
 set "SSH_HOST=crisaor.serveftp.com"
 set "REMOTE_STACK=/home/jramirez/stack"
 
-set "BACKEND_SERVICES=discovery-server api-gateway asistencia-service"
+set "BACKEND_SERVICES=discovery-server ms-auth-security api-gateway asistencia-service"
 set "FRONTEND_SERVICE=sigre-frontend"
-set "ALL_APP_SERVICES=discovery-server config-server api-gateway asistencia-service sync-service sigre-frontend"
+set "ALL_APP_SERVICES=discovery-server config-server ms-auth-security api-gateway asistencia-service sync-service sigre-frontend"
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
 set "GREEN=%ESC%[92m"
