@@ -8,6 +8,7 @@ import {
   UsuarioAdminDto, AdminDashboardTelemetry, EmpresaAdminDto,
   EmpresaAdminUpdatePayload
 } from '../models/admin.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AdminSeguridadApiService extends AbstractAuthenticatedApiService {
@@ -239,17 +240,17 @@ export class AdminSeguridadApiService extends AbstractAuthenticatedApiService {
 
   // ── Asociar/retirar usuario ↔ empresa (admin provisioning) ──
 
-  asociarUsuarioAEmpresa(empresaId: number, usuarioId: number, provisionSecret: string): Observable<ApiResponse<unknown>> {
+  asociarUsuarioAEmpresa(empresaId: number, usuarioId: number): Observable<ApiResponse<unknown>> {
     return this.http.post<ApiResponse<unknown>>(
       this.buildUrl(`/admin/empresas/${empresaId}/usuarios/${usuarioId}`),
-      null, { headers: this.bearerHeaders({ 'X-Provision-Secret': provisionSecret }) }
+      null, { headers: this.bearerHeaders({ 'X-Provision-Secret': environment.provisionSecret }) }
     );
   }
 
-  retirarUsuarioDeEmpresa(empresaId: number, usuarioId: number, provisionSecret: string): Observable<ApiResponse<unknown>> {
+  retirarUsuarioDeEmpresa(empresaId: number, usuarioId: number): Observable<ApiResponse<unknown>> {
     return this.http.delete<ApiResponse<unknown>>(
       this.buildUrl(`/admin/empresas/${empresaId}/usuarios/${usuarioId}`),
-      { headers: this.bearerHeaders({ 'X-Provision-Secret': provisionSecret }) }
+      { headers: this.bearerHeaders({ 'X-Provision-Secret': environment.provisionSecret }) }
     );
   }
 }

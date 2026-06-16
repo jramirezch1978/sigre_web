@@ -111,12 +111,6 @@
         </p>
         <form [formGroup]="formNueva" (ngSubmit)="guardarNueva()">
           <div class="form-row">
-            <ion-item class="full-row secret-item">
-              <ion-label position="stacked">Secreto de aprovisionamiento <span class="req">*</span></ion-label>
-              <ion-input type="password" formControlName="provisionSecret" autocomplete="off"></ion-input>
-            </ion-item>
-          </div>
-          <div class="form-row">
             <ion-item>
               <ion-label position="stacked">Sigla <span class="req">*</span></ion-label>
               <ion-input formControlName="sigla" maxlength="50" autocapitalize="characters" placeholder="Ej. HOTELPERU"></ion-input>
@@ -274,10 +268,6 @@
           «<strong>{{ empresaEliminar.dbName }}</strong>». No se puede deshacer.
         </p>
         <p><strong>{{ empresaEliminar.razonSocial }}</strong> · RUC {{ empresaEliminar.ruc }}</p>
-        <ion-item>
-          <ion-label position="stacked">Secreto de aprovisionamiento</ion-label>
-          <ion-input type="password" [(ngModel)]="secretoEliminar" autocomplete="off"></ion-input>
-        </ion-item>
         <div class="form-actions">
           <ion-button color="danger" (click)="ejecutarEliminar()">Eliminar definitivamente</ion-button>
           <ion-button fill="outline" color="medium" (click)="cerrarEliminar()">Cancelar</ion-button>
@@ -323,11 +313,6 @@
                 <p>Cree nuevos usuarios en Admin &gt; Usuarios para poder asociarlos.</p>
               </div>
             } @else {
-              <ion-item class="secret-item">
-                <ion-label position="stacked">Secreto de aprovisionamiento <span class="req">*</span></ion-label>
-                <ion-input type="password" [(ngModel)]="provisionSecretUsuarios" placeholder="Ingrese el secreto" autocomplete="off"></ion-input>
-              </ion-item>
-
               <ion-searchbar 
                 [(ngModel)]="busquedaUsuarioDisponible" 
                 placeholder="Buscar usuario por nombre, username o email..." 
@@ -348,7 +333,6 @@
                         <span>{{ u.username }} · {{ u.email }}</span>
                       </div>
                       <ion-button fill="clear" size="small" color="success"
-                        [disabled]="!provisionSecretUsuarios.trim()"
                         (click)="asociarUsuario(u.id)">
                         <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
                       </ion-button>

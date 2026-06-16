@@ -13,7 +13,8 @@ export const environment = {
    */
   adminExternalBaseUrl: '',
   simulationMode: false,
-  encryptionKey: 'U2lncmVFcnBXZWJBZXMyNTZLZXlEZXYyMDI2ISEhISE='
+  encryptionKey: 'U2lncmVFcnBXZWJBZXMyNTZLZXlEZXYyMDI2ISEhISE=',
+  provisionSecret: 'dev-provision-cambiar-produccion'
 };
 
 /*

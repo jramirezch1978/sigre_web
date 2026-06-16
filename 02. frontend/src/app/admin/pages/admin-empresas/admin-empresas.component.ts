@@ -35,19 +35,16 @@ export class AdminEmpresasComponent implements OnInit {
 
   mostrandoEliminar = false;
   empresaEliminar: EmpresaAdminDto | null = null;
-  secretoEliminar = '';
 
   mostrandoUsuarios = false;
   empresaGestionUsuarios: EmpresaAdminDto | null = null;
   todosLosUsuarios: UsuarioAdminDto[] = [];
   usuariosAsociados: UsuarioAdminDto[] = [];
   loadingUsuarios = false;
-  provisionSecretUsuarios = '';
   busquedaUsuarioDisponible = '';
 
   ngOnInit(): void {
     this.formNueva = this.fb.group({
-      provisionSecret: ['', [Validators.required]],
       sigla: ['', [Validators.required, Validators.maxLength(50)]],
       razonSocial: ['', [Validators.required, Validators.maxLength(200)]],
       ruc: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
@@ -99,7 +96,6 @@ export class AdminEmpresasComponent implements OnInit {
 
   abrirNueva(): void {
     this.formNueva.reset({
-      provisionSecret: '',
       sigla: '',
       razonSocial: '',
       ruc: '',
@@ -130,36 +126,27 @@ export class AdminEmpresasComponent implements OnInit {
     }
 
     const v = this.formNueva.getRawValue();
-    const secret = (v.provisionSecret ?? '').trim();
-    if (!secret) {
-      void this.presentToast('Indique el secreto de aprovisionamiento', 'warning');
-      return;
-    }
-
     this.guardandoNueva = true;
-    this.provisioning.provisionar(
-      {
-        sigla: (v.sigla ?? '').trim().toUpperCase(),
-        razonSocial: (v.razonSocial ?? '').trim(),
-        ruc: (v.ruc ?? '').trim(),
-        nombreComercial: this.trimOrUndef(v.nombreComercial),
-        personeria: 'J',
-        direccion: this.trimOrUndef(v.direccion),
-        dirCalle: this.trimOrUndef(v.direccion),
-        dirDistrito: this.trimOrUndef(v.dirDistrito),
-        dirProvincia: this.trimOrUndef(v.dirProvincia),
-        dirDepartamento: this.trimOrUndef(v.dirDepartamento),
-        dirPais: this.trimOrUndef(v.dirPais) ?? 'PERU',
-        dirUbigeo: this.trimOrUndef(v.dirUbigeo),
-        ciuCodPais: 'PE',
-        correoContacto: this.trimOrUndef(v.correoContacto),
-        celular: this.trimOrUndef(v.celular),
-        represLegal: this.trimOrUndef(v.represLegal),
-        flagReplicacion: '1',
-        flagCntrlCd: '0',
-      },
-      secret,
-    ).subscribe({
+    this.provisioning.provisionar({
+      sigla: (v.sigla ?? '').trim().toUpperCase(),
+      razonSocial: (v.razonSocial ?? '').trim(),
+      ruc: (v.ruc ?? '').trim(),
+      nombreComercial: this.trimOrUndef(v.nombreComercial),
+      personeria: 'J',
+      direccion: this.trimOrUndef(v.direccion),
+      dirCalle: this.trimOrUndef(v.direccion),
+      dirDistrito: this.trimOrUndef(v.dirDistrito),
+      dirProvincia: this.trimOrUndef(v.dirProvincia),
+      dirDepartamento: this.trimOrUndef(v.dirDepartamento),
+      dirPais: this.trimOrUndef(v.dirPais) ?? 'PERU',
+      dirUbigeo: this.trimOrUndef(v.dirUbigeo),
+      ciuCodPais: 'PE',
+      correoContacto: this.trimOrUndef(v.correoContacto),
+      celular: this.trimOrUndef(v.celular),
+      represLegal: this.trimOrUndef(v.represLegal),
+      flagReplicacion: '1',
+      flagCntrlCd: '0',
+    }).subscribe({
       next: async res => {
         this.guardandoNueva = false;
         const data = res.data;
@@ -260,22 +247,16 @@ export class AdminEmpresasComponent implements OnInit {
         titlemodal: '',
         tipemodal: 'warning',
         title: 'Recrear base de datos',
-        message: `Se eliminará y recreará la BD <strong>${this.escapeHtmlLite(e.dbName ?? '')}</strong> desde el template.\n\nEsta acción borra todos los datos del tenant «${this.escapeHtmlLite(e.razonSocial)}». ¿Continuar?`,
-        btnCancelTxt: 'Cancelar',
-        btnOkTxt: 'Recrear',
+        message: `Se eliminará y recreará la BD <strong>${this.escapeHtmlLite(e.dbName ?? '')}</strong> desde el template. Esta acción borra todos los datos del tenant «${this.escapeHtmlLite(e.razonSocial)}». ¿Continuar?`,
+        btnCancelTxt: 'CANCELAR',
+        btnOkTxt: 'RECREAR',
       },
     });
     await modal.present();
     const { data: confirmed } = await modal.onDidDismiss<boolean>();
     if (!confirmed) return;
 
-    const secret = prompt('Ingrese el secreto de aprovisionamiento:');
-    if (!secret || !secret.trim()) {
-      await this.presentToast('Debe ingresar el secreto de aprovisionamiento', 'warning');
-      return;
-    }
-
-    this.provisioning.recrearEmpresa({ dbName: e.dbName }, secret.trim()).subscribe({
+    this.provisioning.recrearEmpresa({ dbName: e.dbName }).subscribe({
       next: async res => {
         const msg = res.data?.mensaje ?? res.message ?? 'Base de datos recreada exitosamente.';
         await this.presentSuccess('BD recreada', msg);
@@ -289,29 +270,20 @@ export class AdminEmpresasComponent implements OnInit {
 
   abrirEliminar(e: EmpresaAdminDto): void {
     this.empresaEliminar = e;
-    this.secretoEliminar = '';
     this.mostrandoEliminar = true;
   }
 
   cerrarEliminar(): void {
     this.mostrandoEliminar = false;
     this.empresaEliminar = null;
-    this.secretoEliminar = '';
   }
 
   async ejecutarEliminar(): Promise<void> {
     const e = this.empresaEliminar;
-    const secret = this.secretoEliminar?.trim();
-    if (!e || !secret) {
-      await this.presentToast('Indique el secreto de aprovisionamiento', 'warning');
-      return;
-    }
+    if (!e) return;
     try {
       const res = await firstValueFrom(
-        this.provisioning.desaprovisionar(
-          { codigo: e.codigo, ruc: e.ruc, dbName: e.dbName },
-          secret
-        )
+        this.provisioning.desaprovisionar({ codigo: e.codigo, ruc: e.ruc, dbName: e.dbName })
       );
       const msg = res.data?.mensaje ?? res.message ?? 'Operación completada';
       this.cerrarEliminar();
@@ -355,7 +327,6 @@ export class AdminEmpresasComponent implements OnInit {
 
   abrirGestionUsuarios(e: EmpresaAdminDto): void {
     this.empresaGestionUsuarios = e;
-    this.provisionSecretUsuarios = '';
     this.mostrandoUsuarios = true;
     this.cargarUsuariosEmpresa();
   }
@@ -365,7 +336,6 @@ export class AdminEmpresasComponent implements OnInit {
     this.empresaGestionUsuarios = null;
     this.todosLosUsuarios = [];
     this.usuariosAsociados = [];
-    this.provisionSecretUsuarios = '';
     this.busquedaUsuarioDisponible = '';
   }
 
@@ -406,17 +376,11 @@ export class AdminEmpresasComponent implements OnInit {
   }
 
   async asociarUsuario(usuarioId: number): Promise<void> {
-    if (!this.empresaGestionUsuarios || !this.provisionSecretUsuarios.trim()) {
-      await this.presentToast('Ingrese el secreto de aprovisionamiento', 'warning');
-      return;
-    }
+    if (!this.empresaGestionUsuarios) return;
 
     const eid = this.empresaGestionUsuarios.id;
-    const secret = this.provisionSecretUsuarios;
-
     try {
-      await firstValueFrom(this.api.asociarUsuarioAEmpresa(eid, usuarioId, secret));
-      this.provisionSecretUsuarios = '';
+      await firstValueFrom(this.api.asociarUsuarioAEmpresa(eid, usuarioId));
       await this.presentToast('Usuario asociado exitosamente', 'success');
       await this.cargarUsuariosEmpresa();
     } catch (err: any) {
@@ -437,27 +401,18 @@ export class AdminEmpresasComponent implements OnInit {
         titlemodal: '',
         tipemodal: 'warning',
         title: 'Confirmar retiro',
-        message: `¿Está seguro de retirar a "${usuario.nombreCompleto}" de esta empresa?\n\nEsto eliminará sus roles y sucursales asignadas.`,
+        message: `¿Está seguro de retirar a «${this.escapeHtmlLite(usuario.nombreCompleto ?? '')}» de esta empresa? Esto eliminará sus roles y sucursales asignadas.`,
         btnOkTxt: 'Continuar',
         btnCancelTxt: 'Cancelar',
       },
     });
     await modal.present();
     const { data } = await modal.onWillDismiss();
-    
     if (!data) return;
 
-    // Pedir el secreto de aprovisionamiento
-    const secret = prompt('Ingrese el secreto de aprovisionamiento:');
-    if (!secret || !secret.trim()) {
-      await this.presentToast('Debe ingresar el secreto de aprovisionamiento', 'warning');
-      return;
-    }
-
     const eid = this.empresaGestionUsuarios.id;
-
     try {
-      await firstValueFrom(this.api.retirarUsuarioDeEmpresa(eid, usuarioId, secret.trim()));
+      await firstValueFrom(this.api.retirarUsuarioDeEmpresa(eid, usuarioId));
       await this.presentToast('Usuario retirado exitosamente', 'success');
       await this.cargarUsuariosEmpresa();
     } catch (err: any) {

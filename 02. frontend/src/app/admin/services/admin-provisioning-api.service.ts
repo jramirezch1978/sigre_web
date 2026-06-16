@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../shared/models/api-response.model';
 import { AbstractAuthenticatedApiService } from './abstract-authenticated-api.service';
+import { environment } from '../../../environments/environment';
 
 /** Cuerpo compatible con ProvisionEmpresaRequest (ms-auth-security). */
 export interface ProvisionEmpresaBody {
@@ -95,42 +96,31 @@ export interface DeleteEmpresaProvisionResult {
 @Injectable({ providedIn: 'root' })
 export class AdminProvisioningApiService extends AbstractAuthenticatedApiService {
 
-  provisionar(body: ProvisionEmpresaBody, provisionSecret: string): Observable<ApiResponse<ProvisionEmpresaResult>> {
+  private get provisionHeaders() {
+    return this.bearerHeaders({ 'X-Provision-Secret': environment.provisionSecret });
+  }
+
+  provisionar(body: ProvisionEmpresaBody): Observable<ApiResponse<ProvisionEmpresaResult>> {
     return this.http.post<ApiResponse<ProvisionEmpresaResult>>(
       this.buildUrl('/admin/empresas/provision'),
       body,
-      {
-        headers: this.bearerHeaders({
-          'X-Provision-Secret': provisionSecret,
-        }),
-      }
+      { headers: this.provisionHeaders }
     );
   }
 
-  recrearEmpresa(body: RecreateEmpresaBody, provisionSecret: string): Observable<ApiResponse<RecreateEmpresaResult>> {
+  recrearEmpresa(body: RecreateEmpresaBody): Observable<ApiResponse<RecreateEmpresaResult>> {
     return this.http.post<ApiResponse<RecreateEmpresaResult>>(
       this.buildUrl('/admin/empresas/recreate'),
       body,
-      {
-        headers: this.bearerHeaders({
-          'X-Provision-Secret': provisionSecret,
-        }),
-      }
+      { headers: this.provisionHeaders }
     );
   }
 
-  /**
-   * Elimina registro en master y la BD tenant. Requiere cabecera X-Provision-Secret.
-   * Enviar al menos uno entre codigo, ruc y dbName (coincidentes con el mismo registro).
-   */
-  desaprovisionar(
-    body: DeleteEmpresaProvisionBody,
-    provisionSecret: string
-  ): Observable<ApiResponse<DeleteEmpresaProvisionResult>> {
+  desaprovisionar(body: DeleteEmpresaProvisionBody): Observable<ApiResponse<DeleteEmpresaProvisionResult>> {
     return this.http.delete<ApiResponse<DeleteEmpresaProvisionResult>>(
       this.buildUrl('/admin/empresas/deprovision'),
       {
-        headers: this.bearerHeaders({ 'X-Provision-Secret': provisionSecret }),
+        headers: this.provisionHeaders,
         body,
       }
     );

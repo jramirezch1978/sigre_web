@@ -58,7 +58,6 @@ export class AdminEmpresaProvisionComponent {
         dbUser: v.dbUser || undefined,
         dbPassword: v.dbPassword || undefined,
       },
-      v.provisionSecret,
     ).subscribe({
       next: async res => {
         this.submitting = false;
