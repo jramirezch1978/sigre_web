@@ -47,11 +47,8 @@ public class PasswordRecoveryService {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    public String obtenerEmailOfuscado(String username) {
-        Usuario usuario = usuarioRepository.findByUsernameAndActivoTrue(username)
-                .orElseThrow(() -> new BusinessException(
-                        "No se encontró una cuenta con ese usuario",
-                        HttpStatus.NOT_FOUND, "USUARIO_NO_ENCONTRADO"));
+    public String obtenerEmailOfuscado(String usernameOrEmail) {
+        Usuario usuario = findUsuarioByUsernameOrEmail(usernameOrEmail);
         return ocultarEmail(usuario.getEmail());
     }
 
@@ -160,6 +157,14 @@ public class PasswordRecoveryService {
                 .orElseThrow(() -> new BusinessException(
                         "No se encontró una cuenta con ese correo electrónico",
                         HttpStatus.NOT_FOUND, "EMAIL_NO_ENCONTRADO"));
+    }
+
+    private Usuario findUsuarioByUsernameOrEmail(String usernameOrEmail) {
+        return usuarioRepository.findByEmailAndActivoTrue(usernameOrEmail)
+                .or(() -> usuarioRepository.findByUsernameAndActivoTrue(usernameOrEmail))
+                .orElseThrow(() -> new BusinessException(
+                        "No se encontró una cuenta con ese usuario o correo",
+                        HttpStatus.NOT_FOUND, "USUARIO_NO_ENCONTRADO"));
     }
 
     private String generarCodigo() {
