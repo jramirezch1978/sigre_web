@@ -15,5 +15,10 @@ Despliegue servicio:
 
 Variables en deploy/cronos/.env:
   ASISTENCIA_DB_PASSWORD
-  ASISTENCIA_DB_HOST  (default crisaor.serveftp.com)
-  ASISTENCIA_DB_PORT  (default 5433 — NAT al contenedor db-sigre-web)
+
+Verificar conexion (docker exec en cronos, no requiere NAT 5433):
+  database-deploy.bat create-asistencia
+
+Opcional acceso externo psql (requiere NAT router -> 5433):
+  ASISTENCIA_DB_HOST=crisaor.serveftp.com
+  ASISTENCIA_DB_PORT=5433

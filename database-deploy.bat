@@ -46,6 +46,8 @@ set "PGASISTENCIA_HOST=crisaor.serveftp.com"
 set "PGASISTENCIA_PORT=5433"
 set "PGASISTENCIA_USER=sigre-web"
 set "PGASISTENCIA_DB=db-sigre-web"
+set "PGASISTENCIA_CONTAINER=db-sigre-web"
+set "DOCKER_CTX=cronos"
 
 if exist "!ENV_FILE!" (
     for /f "usebackq eol=# tokens=1,* delims==" %%a in ("!ENV_FILE!") do (
@@ -210,6 +212,15 @@ where docker >nul 2>&1 || (
 set "DOCKER_CONTEXT=default"
 exit /b 0
 
+:useRemoteContext
+docker context use !DOCKER_CTX! >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Contexto Docker '!DOCKER_CTX!' no existe.
+    echo        docker context create cronos --docker "host=ssh://usuario@crisaor.serveftp.com"
+    exit /b 1
+)
+exit /b 0
+
 :check_host_docker_ddl
 call :check_host_docker || exit /b 1
 call :init_ddl_paths || exit /b 1
@@ -232,7 +243,7 @@ exit /b %ERRORLEVEL%
 
 :psql_asistencia_cmd
 set "SQLLINE=%~1"
-docker run --rm -e "PGPASSWORD=!PGASISTENCIA_PASSWORD!" -e PGSSLMODE=!PGSSLMODE! !PGSQLIMG! psql -h "!PGASISTENCIA_HOST!" -p "!PGASISTENCIA_PORT!" -U "!PGASISTENCIA_USER!" -d "!PGASISTENCIA_DB!" -v ON_ERROR_STOP=1 -c "!SQLLINE!"
+docker --context !DOCKER_CTX! exec -e "PGPASSWORD=!PGASISTENCIA_PASSWORD!" !PGASISTENCIA_CONTAINER! psql -U "!PGASISTENCIA_USER!" -d "!PGASISTENCIA_DB!" -v ON_ERROR_STOP=1 -c "!SQLLINE!"
 exit /b %ERRORLEVEL%
 
 :run_sql
@@ -347,21 +358,28 @@ exit /b 0
 :do_create_asistencia
 echo.
 echo ^>^> Modo: create-asistencia ^(!PGASISTENCIA_DB!^)  Force: !FORCE!
-echo ^>^> Conexion: !PGASISTENCIA_USER!@!PGASISTENCIA_HOST!:!PGASISTENCIA_PORT!/!PGASISTENCIA_DB!
+echo ^>^> Conexion: docker exec !PGASISTENCIA_CONTAINER! ^(contexto !DOCKER_CTX!^)
 echo ^>^> Nota: BD dedicada asistencia-service. Sin DDL multitenant.
-echo ^>^> El esquema lo gestiona asistencia-service ^(hibernate ddl-auto=update^).
+echo ^>^> La BD se crea al levantar db-sigre-web ^(POSTGRES_DB^). Esquema: Hibernate ddl-auto=update.
 echo.
 if "!FORCE!"=="1" (
     echo ^>^> --force: recrear volumen requiere en cronos:
     echo       deploy.bat stack --force
     echo       ^(elimina db_sigre_web_data si necesita BD limpia^)
 )
+call :useRemoteContext || exit /b 1
+docker --context !DOCKER_CTX! inspect !PGASISTENCIA_CONTAINER! >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Contenedor !PGASISTENCIA_CONTAINER! no existe en cronos.
+    echo        Ejecute: deploy.bat stack --force
+    exit /b 1
+)
 echo ^>^> Verificando PostgreSQL asistencia...
 call :psql_asistencia_cmd "SELECT current_database() AS db, current_user AS usr, version();"
 if errorlevel 1 (
-    echo ERROR: No se pudo conectar a !PGASISTENCIA_DB!.
+    echo ERROR: No se pudo conectar a !PGASISTENCIA_DB! en !PGASISTENCIA_CONTAINER!.
     echo        1^) Levante stack: deploy.bat stack --force
-    echo        2^) Verifique ASISTENCIA_DB_* en deploy\cronos\.env
+    echo        2^) Verifique ASISTENCIA_DB_PASSWORD en deploy\cronos\.env
     exit /b 1
 )
 echo.
