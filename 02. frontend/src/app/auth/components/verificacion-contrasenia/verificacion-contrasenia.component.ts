@@ -19,6 +19,7 @@ export class VerificacionContraseniaComponent implements OnInit, OnDestroy {
   emailOculto = '';
   emailCompleto = '';
   usernameIngresado = '';
+  confirmacionEmailRequerida = true;
   contador = 300;
   timerActivo = false;
   codigoInvalido = false;
@@ -79,6 +80,11 @@ export class VerificacionContraseniaComponent implements OnInit, OnDestroy {
   }
 
   regresar(): void {
+    if (this.paso === 3 && !this.confirmacionEmailRequerida) {
+      this.paso = 1;
+      this.detenerContador();
+      return;
+    }
     if (this.paso > 1) {
       this.paso--;
       if (this.paso !== 3) this.detenerContador();
@@ -111,14 +117,23 @@ export class VerificacionContraseniaComponent implements OnInit, OnDestroy {
     if (!this.usernameForm.valid) return;
 
     this.isLoading = true;
-    this.usernameIngresado = this.usernameForm.value.username;
+    this.usernameIngresado = (this.usernameForm.value.username as string).trim();
 
     this.authService.obtenerEmailOfuscado(this.usernameIngresado).subscribe({
       next: (res: any) => {
-        this.isLoading = false;
         if (res.success && res.data?.emailOculto) {
           this.emailOculto = res.data.emailOculto;
-          this.paso = 2;
+          if (this.esCorreoElectronico(this.usernameIngresado)) {
+            this.confirmacionEmailRequerida = false;
+            this.emailCompleto = this.usernameIngresado;
+            this.enviarCodigoYAvanzar();
+          } else {
+            this.confirmacionEmailRequerida = true;
+            this.isLoading = false;
+            this.paso = 2;
+          }
+        } else {
+          this.isLoading = false;
         }
       },
       error: (err: any) => {
@@ -365,6 +380,10 @@ export class VerificacionContraseniaComponent implements OnInit, OnDestroy {
       if (!clave || !confirmar) return null;
       return clave === confirmar ? null : { clavesNoCoinciden: true };
     };
+  }
+
+  private esCorreoElectronico(valor: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor.trim());
   }
 
   private async showError(titulo: string, mensaje: string): Promise<void> {

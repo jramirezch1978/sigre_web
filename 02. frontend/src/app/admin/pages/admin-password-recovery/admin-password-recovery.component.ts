@@ -28,6 +28,9 @@ export class AdminPasswordRecoveryComponent implements OnInit, OnDestroy {
   mostrarConfirmar = false;
   emailOculto = '';
   emailCompleto = '';
+  usernameIngresado = '';
+  /** false cuando el paso 1 fue un correo: no se muestra confirmación de email. */
+  confirmacionEmailRequerida = true;
   contador = 300;
   timerActivo = false;
   codigoInvalido = false;
@@ -80,6 +83,11 @@ export class AdminPasswordRecoveryComponent implements OnInit, OnDestroy {
 
   regresar(): void {
     this.limpiarMensajes();
+    if (this.paso === 3 && !this.confirmacionEmailRequerida) {
+      this.paso = 1;
+      this.detenerContador();
+      return;
+    }
     if (this.paso > 1) {
       this.paso--;
       if (this.paso !== 3) {
@@ -104,14 +112,24 @@ export class AdminPasswordRecoveryComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    const username = this.usernameForm.value.username as string;
+    const username = (this.usernameForm.value.username as string).trim();
+    this.usernameIngresado = username;
 
     this.authService.obtenerEmailOfuscado(username).subscribe({
       next: (res) => {
-        this.isLoading = false;
         if (res.success && res.data?.emailOculto) {
           this.emailOculto = res.data.emailOculto;
-          this.paso = 2;
+          if (this.esCorreoElectronico(username)) {
+            this.confirmacionEmailRequerida = false;
+            this.emailCompleto = username;
+            this.enviarCodigoYAvanzar();
+          } else {
+            this.confirmacionEmailRequerida = true;
+            this.isLoading = false;
+            this.paso = 2;
+          }
+        } else {
+          this.isLoading = false;
         }
       },
       error: (err) => {
@@ -364,6 +382,11 @@ export class AdminPasswordRecoveryComponent implements OnInit, OnDestroy {
   private limpiarMensajes(): void {
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  /** Igual que restpe: paso 2 solo si el paso 1 fue nombre de usuario, no correo. */
+  private esCorreoElectronico(valor: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor.trim());
   }
 
   private leerErrorApi(
