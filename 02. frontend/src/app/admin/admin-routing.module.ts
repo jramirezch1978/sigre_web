@@ -13,6 +13,7 @@ import { AdminRolesUsuarioComponent } from './pages/admin-roles-usuario/admin-ro
 import { AdminSucursalesComponent } from './pages/admin-sucursales/admin-sucursales.component';
 import { AdminUsuarioSucursalesComponent } from './pages/admin-usuario-sucursales/admin-usuario-sucursales.component';
 import { AdminLoginComponent } from './pages/admin-login/admin-login.component';
+import { AdminCuentaComponent } from './pages/admin-cuenta/admin-cuenta.component';
 import { adminZoneGuard } from './guards/admin-zone.guard';
 import { adminLoginGuard } from './guards/admin-login.guard';
 import { adminOperativeSessionGuard } from './guards/admin-operative-session.guard';
@@ -42,6 +43,24 @@ const routes: Routes = [
       { path: 'roles-usuario', component: AdminRolesUsuarioComponent, canActivate: [adminOperativeSessionGuard] },
       { path: 'sucursales', component: AdminSucursalesComponent, canActivate: [adminZoneGuard] },
       { path: 'usuarios-sucursales', component: AdminUsuarioSucursalesComponent, canActivate: [adminZoneGuard] },
+      {
+        path: 'perfil',
+        component: AdminCuentaComponent,
+        canActivate: [adminOperativeSessionGuard],
+        data: {
+          titulo: 'Mi perfil',
+          descripcion: 'Consulta y edición de datos personales. Disponible en una próxima versión.',
+        },
+      },
+      {
+        path: 'preferencias',
+        component: AdminCuentaComponent,
+        canActivate: [adminOperativeSessionGuard],
+        data: {
+          titulo: 'Preferencias',
+          descripcion: 'Configuración de idioma, notificaciones y apariencia. Disponible en una próxima versión.',
+        },
+      },
     ],
   },
 ];

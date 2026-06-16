@@ -28,6 +28,7 @@ import { AdminSucursalesComponent } from './pages/admin-sucursales/admin-sucursa
 import { AdminUsuarioSucursalesComponent } from './pages/admin-usuario-sucursales/admin-usuario-sucursales.component';
 import { AdminLoginComponent } from './pages/admin-login/admin-login.component';
 import { AdminPasswordRecoveryComponent } from './pages/admin-password-recovery/admin-password-recovery.component';
+import { AdminCuentaComponent } from './pages/admin-cuenta/admin-cuenta.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { AdminPasswordRecoveryComponent } from './pages/admin-password-recovery/
     AdminRolesUsuarioComponent,
     AdminSucursalesComponent,
     AdminUsuarioSucursalesComponent,
+    AdminCuentaComponent,
   ],
   imports: [
     CommonModule,
