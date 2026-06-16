@@ -23,6 +23,7 @@ export class AdminLoginComponent implements OnInit {
 
   loginForm!: FormGroup;
   mostrarClave = false;
+  vistaRecuperacion = false;
   isLoading = false;
   errorMessage = '';
 
@@ -48,6 +49,15 @@ export class AdminLoginComponent implements OnInit {
 
   toggleClave(): void {
     this.mostrarClave = !this.mostrarClave;
+  }
+
+  mostrarRecuperacion(): void {
+    this.errorMessage = '';
+    this.vistaRecuperacion = true;
+  }
+
+  ocultarRecuperacion(): void {
+    this.vistaRecuperacion = false;
   }
 
   onSubmit(): void {

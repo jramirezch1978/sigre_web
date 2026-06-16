@@ -5,44 +5,52 @@
       <h1>SIGRE Admin</h1>
     </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="admin-login-form">
-      <h2>Consola de administración</h2>
-      <p class="admin-login-subtitle">Ingrese sus credenciales de administrador del sistema.</p>
+    @if (!vistaRecuperacion) {
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="admin-login-form">
+        <h2>Consola de administración</h2>
+        <p class="admin-login-subtitle">Ingrese sus credenciales de administrador del sistema.</p>
 
-      @if (errorMessage) {
-        <div class="admin-login-error" role="alert">{{ errorMessage }}</div>
-      }
-
-      <mat-form-field appearance="outline" class="admin-login-field">
-        <mat-label>Usuario o correo</mat-label>
-        <input matInput formControlName="usuario" autocomplete="username" />
-        @if (campoInvalido('usuario')) {
-          <mat-error>El usuario es requerido</mat-error>
+        @if (errorMessage) {
+          <div class="admin-login-error" role="alert">{{ errorMessage }}</div>
         }
-      </mat-form-field>
 
-      <mat-form-field appearance="outline" class="admin-login-field">
-        <mat-label>Contraseña</mat-label>
-        <input matInput [type]="mostrarClave ? 'text' : 'password'" formControlName="clave" autocomplete="current-password" />
-        <button mat-icon-button matSuffix type="button" (click)="toggleClave()" [attr.aria-label]="mostrarClave ? 'Ocultar' : 'Mostrar'">
-          <mat-icon>{{ mostrarClave ? 'visibility_off' : 'visibility' }}</mat-icon>
+        <mat-form-field appearance="outline" class="admin-login-field">
+          <mat-label>Usuario o correo</mat-label>
+          <input matInput formControlName="usuario" autocomplete="username" />
+          @if (campoInvalido('usuario')) {
+            <mat-error>El usuario es requerido</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="admin-login-field">
+          <mat-label>Contraseña</mat-label>
+          <input matInput [type]="mostrarClave ? 'text' : 'password'" formControlName="clave" autocomplete="current-password" />
+          <button mat-icon-button matSuffix type="button" (click)="toggleClave()" [attr.aria-label]="mostrarClave ? 'Ocultar' : 'Mostrar'">
+            <mat-icon>{{ mostrarClave ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (campoInvalido('clave')) {
+            <mat-error>La contraseña es requerida</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-checkbox formControlName="recordar" class="admin-login-remember">Recordar usuario</mat-checkbox>
+
+        <button mat-flat-button color="primary" type="submit" class="admin-login-submit" [disabled]="isLoading">
+          @if (isLoading) {
+            <mat-spinner diameter="22"></mat-spinner>
+            <span>Ingresando…</span>
+          } @else {
+            Ingresar al panel
+          }
         </button>
-        @if (campoInvalido('clave')) {
-          <mat-error>La contraseña es requerida</mat-error>
-        }
-      </mat-form-field>
 
-      <mat-checkbox formControlName="recordar" class="admin-login-remember">Recordar usuario</mat-checkbox>
-
-      <button mat-flat-button color="primary" type="submit" class="admin-login-submit" [disabled]="isLoading">
-        @if (isLoading) {
-          <mat-spinner diameter="22"></mat-spinner>
-          <span>Ingresando…</span>
-        } @else {
-          Ingresar al panel
-        }
-      </button>
-    </form>
+        <p class="admin-login-forgot">
+          <button type="button" mat-button (click)="mostrarRecuperacion()">¿Olvidó su contraseña?</button>
+        </p>
+      </form>
+    } @else {
+      <app-admin-password-recovery (volverLogin)="ocultarRecuperacion()"></app-admin-password-recovery>
+    }
 
     <footer class="admin-login-footer">
       <a routerLink="/">← Volver al módulo SIGRE</a>

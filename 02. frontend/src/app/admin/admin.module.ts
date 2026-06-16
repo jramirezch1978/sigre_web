@@ -27,10 +27,12 @@ import { AdminRolesUsuarioComponent } from './pages/admin-roles-usuario/admin-ro
 import { AdminSucursalesComponent } from './pages/admin-sucursales/admin-sucursales.component';
 import { AdminUsuarioSucursalesComponent } from './pages/admin-usuario-sucursales/admin-usuario-sucursales.component';
 import { AdminLoginComponent } from './pages/admin-login/admin-login.component';
+import { AdminPasswordRecoveryComponent } from './pages/admin-password-recovery/admin-password-recovery.component';
 
 @NgModule({
   declarations: [
     AdminLoginComponent,
+    AdminPasswordRecoveryComponent,
     AdminShellComponent,
     AdminDashboardComponent,
     AdminEmpresasComponent,
