@@ -1,8 +1,10 @@
 import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { ModalController } from '@ionic/angular';
 import { AuthService, LoginData } from '../../../auth/services/auth.service';
 import { StorageService } from '../../../core/services/storage.service';
+import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
 
 export interface AdminMenuItem {
   label: string;
@@ -21,6 +23,7 @@ export class AdminShellComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly storage = inject(StorageService);
+  private readonly modalCtrl = inject(ModalController);
 
   rutaActiva = '';
   menuAbierto = true;
@@ -89,9 +92,26 @@ export class AdminShellComponent implements OnInit {
     void this.router.navigateByUrl('/admin/preferencias');
   }
 
-  cerrarSesion(): void {
+  async cerrarSesion(): Promise<void> {
     this.menuUsuarioAbierto = false;
-    void this.authService.signOut({ redirectTo: '/admin/login' });
+    const modal = await this.modalCtrl.create({
+      component: ModalConfirmationComponent,
+      cssClass: 'promo',
+      componentProps: {
+        titlemodal: 'Cerrar sesión',
+        title: '¿Desea cerrar sesión?',
+        message:
+          'Se cerrará su sesión y se eliminarán los tokens y datos temporales guardados en este navegador.',
+        btnCancelTxt: 'Cancelar',
+        btnOkTxt: 'Sí, cerrar sesión',
+      },
+    });
+    await modal.present();
+    const { data } = await modal.onDidDismiss<boolean>();
+    if (!data) {
+      return;
+    }
+    await this.authService.signOut({ redirectTo: '/admin/login' });
   }
 
   private cargarDatosUsuario(): void {

@@ -119,6 +119,16 @@ export class StorageService {
     localStorage.removeItem(SESSION_KEY);
   }
 
+  /** Tokens, usuario, sesión legacy y claves temporales de auth en el navegador. */
+  purgeAuthState(): void {
+    this.clearSession();
+    try {
+      sessionStorage.removeItem('rpe_post_auth_target');
+    } catch {
+      /* entorno sin sessionStorage */
+    }
+  }
+
   isAuthenticated(): boolean {
     // Se considera autenticado si hay access token válido o un refresh token
     // vigente con el que renovarlo (el interceptor hará la renovación).

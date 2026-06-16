@@ -8,6 +8,7 @@ import { SessionIdleService } from '../../core/services/session-idle.service';
 import { CryptoService } from '../../core/services/crypto.service';
 import { SanitizerService } from '../../core/services/sanitizer.service';
 import { UtilityService } from '../../services/utility.service';
+import { PostAuthIntentService } from '../../admin/services/post-auth-intent.service';
 
 export interface LoginApiResponse {
   success: boolean;
@@ -65,6 +66,7 @@ export class AuthService {
   private readonly sanitizer = inject(SanitizerService);
   private readonly utilityService = inject(UtilityService);
   private readonly sessionIdle = inject(SessionIdleService);
+  private readonly postAuthIntent = inject(PostAuthIntentService);
 
   private readonly apiBase = inject(ApiBaseService);
 
@@ -277,6 +279,8 @@ export class AuthService {
 
   async signOut(options?: { returnUrl?: string; redirectTo?: string }): Promise<void> {
     this.sessionIdle.stop();
+    this.loginLoadingSubject.next(false);
+    this.loginErrorSubject.next(false);
     const token = this.storage.getToken();
     if (token) {
       try {
@@ -291,8 +295,9 @@ export class AuthService {
         /* ignorar */
       }
     }
+    this.postAuthIntent.markDefault();
     this.utilityService.signOut();
-    this.storage.clearSession();
+    this.storage.purgeAuthState();
     const redirectTo = options?.redirectTo?.trim();
     if (redirectTo) {
       await this.router.navigateByUrl(redirectTo);
