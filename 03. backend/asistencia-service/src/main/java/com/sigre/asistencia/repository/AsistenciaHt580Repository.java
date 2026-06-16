@@ -19,7 +19,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
      */
     @Query("SELECT a FROM AsistenciaHt580 a " +
            "WHERE a.codigo = :codigo " +
-           "AND DATE(a.fechaMovimiento) = :fecha " +
+           "AND a.fechaMovimiento = :fecha " +
            "ORDER BY a.fechaMovimiento DESC")
     List<AsistenciaHt580> findAsistenciasByCodigoAndFecha(@Param("codigo") String codigo, 
                                                           @Param("fecha") LocalDate fecha);
@@ -92,7 +92,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
      */
     @Query("SELECT COUNT(a) FROM AsistenciaHt580 a " +
            "WHERE a.codigo = :codigo " +
-           "AND DATE(a.fechaMovimiento) = :fecha")
+           "AND a.fechaMovimiento = :fecha")
     Long countAsistenciasByCodigoAndFecha(@Param("codigo") String codigo, @Param("fecha") LocalDate fecha);
     
     /**
@@ -101,7 +101,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     @Query("SELECT a FROM AsistenciaHt580 a " +
            "WHERE a.codigo = :codigo " +
            "AND a.flagInOut = :tipoMovimiento " +
-           "AND DATE(a.fechaMovimiento) = :fecha " +
+           "AND a.fechaMovimiento = :fecha " +
            "ORDER BY a.fechaMovimiento DESC")
     List<AsistenciaHt580> findAsistenciasByCodigoAndTipoMovimiento(@Param("codigo") String codigo,
                                                                   @Param("tipoMovimiento") String tipoMovimiento,
@@ -134,7 +134,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     /**
      * Contar registros del día actual
      */
-    @Query("SELECT COUNT(a) FROM AsistenciaHt580 a WHERE DATE(a.fechaMovimiento) = CURRENT_DATE")
+    @Query("SELECT COUNT(a) FROM AsistenciaHt580 a WHERE a.fechaMovimiento = CURRENT_DATE")
     Long countRegistrosHoy();
     
     /**
@@ -217,7 +217,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
      * Obtener todos los marcajes del día actual
      */
     @Query("SELECT a FROM AsistenciaHt580 a " +
-           "WHERE DATE(a.fechaMovimiento) = CURRENT_DATE " +
+           "WHERE a.fechaMovimiento = CURRENT_DATE " +
            "ORDER BY a.fechaMovimiento DESC")
     List<AsistenciaHt580> findMarcajesDelDia();
     
@@ -226,7 +226,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
      */
     @Query("SELECT SUBSTRING(a.codigo, 1, 2) as centroCosto, COUNT(a) as cantidad " +
            "FROM AsistenciaHt580 a " +
-           "WHERE DATE(a.fechaMovimiento) = CURRENT_DATE " +
+           "WHERE a.fechaMovimiento = CURRENT_DATE " +
            "GROUP BY SUBSTRING(a.codigo, 1, 2) " +
            "ORDER BY cantidad DESC")
     List<Object[]> countMarcajesPorCentroCostoHoy();
@@ -234,7 +234,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     /**
      * Contar trabajadores únicos que han marcado hoy
      */
-    @Query("SELECT COUNT(DISTINCT a.codigo) FROM AsistenciaHt580 a WHERE DATE(a.fechaMovimiento) = CURRENT_DATE")
+    @Query("SELECT COUNT(DISTINCT a.codigo) FROM AsistenciaHt580 a WHERE a.fechaMovimiento = CURRENT_DATE")
     Long countTrabajadoresUnicosHoy();
     
     /**
@@ -292,7 +292,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
            "LEFT JOIN Area ar ON m.codArea = ar.codArea " +
            "LEFT JOIN Seccion s ON m.codArea = s.id.codArea AND m.codSeccion = s.id.codSeccion " +
            "LEFT JOIN CentrosCosto cc ON m.centroCosto = cc.cencos " +
-           "WHERE DATE(a.fechaMovimiento) = :fecha " +
+           "WHERE a.fechaMovimiento = :fecha " +
            "AND a.codOrigen = 'SE' " +
            "GROUP BY m.tipoTrabajador, tt.descripcionTipoTrabajador, m.codArea, ar.descripcionArea, " +
            "         m.codSeccion, s.descripcionSeccion, cc.descripcionCencos, a.flagInOut " +
@@ -315,7 +315,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
            "LEFT JOIN TipoTrabajador tt ON m.tipoTrabajador = tt.tipoTrabajador " +
            "LEFT JOIN Area ar ON m.codArea = ar.codArea " +
            "LEFT JOIN CentrosCosto cc ON m.centroCosto = cc.cencos " +
-           "WHERE DATE(a.fechaMovimiento) = :fecha " +
+           "WHERE a.fechaMovimiento = :fecha " +
            "AND a.codOrigen = 'SE' " +
            "GROUP BY m.tipoTrabajador, tt.descripcionTipoTrabajador, m.codArea, ar.descripcionArea, " +
            "         cc.descripcionCencos, a.flagInOut " +
@@ -341,7 +341,7 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
            "LEFT JOIN Area ar ON m.codArea = ar.codArea " +
            "LEFT JOIN Seccion s ON m.codArea = s.id.codArea AND m.codSeccion = s.id.codSeccion " +
            "LEFT JOIN CentrosCosto cc ON m.centroCosto = cc.cencos " +
-           "WHERE DATE(a.fechaMovimiento) = :fecha " +
+           "WHERE a.fechaMovimiento = :fecha " +
            "AND a.codOrigen = 'SE' " +
            "GROUP BY m.tipoTrabajador, tt.descripcionTipoTrabajador, m.codArea, ar.descripcionArea, " +
            "         m.codSeccion, s.descripcionSeccion, cc.descripcionCencos, a.flagInOut " +
