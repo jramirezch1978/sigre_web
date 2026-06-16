@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
@@ -30,9 +31,13 @@ public interface MaestroRepository extends JpaRepository<Maestro, String> {
            "AND (m.codTrabajador = :codigo " +
            "     OR m.dni = :codigo " +
            "     OR (r.codTarjeta = :codigo AND r.flagEstado = '1' " +
-           "         AND (r.fechaInicio IS NULL OR r.fechaInicio <= CURRENT_DATE) " +
-           "         AND (r.fechaFin IS NULL OR r.fechaFin >= CURRENT_DATE)))")
-    Optional<Maestro> findTrabajadorByCodigoOrDniOrTarjeta(@Param("codigo") String codigo);
+           "         AND (r.fechaInicio IS NULL OR r.fechaInicio <= :hoy) " +
+           "         AND (r.fechaFin IS NULL OR r.fechaFin >= :hoy)))")
+    Optional<Maestro> findTrabajadorByCodigoOrDniOrTarjeta(@Param("codigo") String codigo, @Param("hoy") LocalDate hoy);
+
+    default Optional<Maestro> findTrabajadorByCodigoOrDniOrTarjeta(String codigo) {
+        return findTrabajadorByCodigoOrDniOrTarjeta(codigo, LocalDate.now());
+    }
     
     /**
      * Verificar si existe un trabajador activo por código

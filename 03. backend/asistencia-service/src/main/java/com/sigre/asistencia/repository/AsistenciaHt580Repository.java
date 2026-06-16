@@ -130,42 +130,39 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
     List<AsistenciaHt580> findUltimosMovimientosPorTrabajador();
     
     // ===== MÉTODOS PARA DASHBOARD =====
-    
-    /**
-     * Contar registros del día actual
-     */
-    @Query("SELECT COUNT(a) FROM AsistenciaHt580 a WHERE a.fechaMovimiento = CURRENT_DATE")
-    Long countRegistrosHoy();
-    
+    // Hibernate 6: CURRENT_DATE no es compatible con LocalDate — usar :hoy (LocalDate.now() en default)
+
+    @Query("SELECT COUNT(a) FROM AsistenciaHt580 a WHERE a.fechaMovimiento = :hoy")
+    Long countRegistrosEnFecha(@Param("hoy") LocalDate hoy);
+
+    default Long countRegistrosHoy() {
+        return countRegistrosEnFecha(LocalDate.now());
+    }
+
     /**
      * Contar registros sincronizados (que tienen fechaSync)
      */
     @Query("SELECT COUNT(a) FROM AsistenciaHt580 a WHERE a.fechaSync IS NOT NULL")
     Long countRegistrosSincronizados();
-    
+
     /**
      * Contar registros pendientes de sincronización
      */
     @Query("SELECT COUNT(a) FROM AsistenciaHt580 a WHERE a.fechaSync IS NULL")
     Long countRegistrosPendientesSincronizacion();
-    
-    /**
-     * Obtener marcajes agrupados por hora del día actual CORREGIDO
-     * Solo del día actual, sin mezclar con otros días
-     * ACTUALIZADO: Agrupa por fechaMovimiento, extrae HOUR de fecMarcacion, excluye AUTO-CLOSE
-     */
+
     @Query("SELECT EXTRACT(HOUR FROM a.fecMarcacion) as hora, COUNT(a) as cantidad " +
            "FROM AsistenciaHt580 a " +
-           "WHERE a.fechaMovimiento = CURRENT_DATE " +
+           "WHERE a.fechaMovimiento = :hoy " +
            "AND a.direccionIp <> 'AUTO-CLOSE' " +
            "GROUP BY EXTRACT(HOUR FROM a.fecMarcacion) " +
            "ORDER BY hora")
-    List<Object[]> countMarcajesPorHoraHoy();
-    
-    /**
-     * Obtener marcajes del día actual con información detallada para verificación
-     * ACTUALIZADO: Agrupa por fechaMovimiento, extrae HOUR de fecMarcacion, excluye AUTO-CLOSE
-     */
+    List<Object[]> countMarcajesPorHoraEnFecha(@Param("hoy") LocalDate hoy);
+
+    default List<Object[]> countMarcajesPorHoraHoy() {
+        return countMarcajesPorHoraEnFecha(LocalDate.now());
+    }
+
     @Query("SELECT " +
            "a.fechaMovimiento as fecha, " +
            "EXTRACT(HOUR FROM a.fecMarcacion) as hora, " +
@@ -173,20 +170,19 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
            "MIN(a.fecMarcacion) as primerMarcaje, " +
            "MAX(a.fecMarcacion) as ultimoMarcaje " +
            "FROM AsistenciaHt580 a " +
-           "WHERE a.fechaMovimiento = CURRENT_DATE " +
+           "WHERE a.fechaMovimiento = :hoy " +
            "AND a.direccionIp <> 'AUTO-CLOSE' " +
            "GROUP BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion) " +
            "ORDER BY hora")
-    List<Object[]> countMarcajesDetalladosHoy();
-    
-    /**
-     * Obtener marcajes agrupados por hora de las últimas 24 horas
-     * CORREGIDO: Distingue entre horas del día actual vs día anterior
-     * ACTUALIZADO: Agrupa por fechaMovimiento, extrae HOUR de fecMarcacion, excluye AUTO-CLOSE
-     */
+    List<Object[]> countMarcajesDetalladosEnFecha(@Param("hoy") LocalDate hoy);
+
+    default List<Object[]> countMarcajesDetalladosHoy() {
+        return countMarcajesDetalladosEnFecha(LocalDate.now());
+    }
+
     @Query("SELECT " +
            "CASE " +
-           "    WHEN a.fechaMovimiento = CURRENT_DATE THEN EXTRACT(HOUR FROM a.fecMarcacion) " +
+           "    WHEN a.fechaMovimiento = :hoy THEN EXTRACT(HOUR FROM a.fecMarcacion) " +
            "    ELSE -(EXTRACT(HOUR FROM a.fecMarcacion)) " +
            "END as horaConFecha, " +
            "COUNT(a) as cantidad, " +
@@ -196,8 +192,12 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
            "AND a.direccionIp <> 'AUTO-CLOSE' " +
            "GROUP BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion) " +
            "ORDER BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion)")
-    List<Object[]> countMarcajesPorHoraUltimas24h(@Param("fechaInicio") LocalDateTime fechaInicio);
-    
+    List<Object[]> countMarcajesPorHoraUltimas24h(@Param("fechaInicio") LocalDateTime fechaInicio, @Param("hoy") LocalDate hoy);
+
+    default List<Object[]> countMarcajesPorHoraUltimas24h(LocalDateTime fechaInicio) {
+        return countMarcajesPorHoraUltimas24h(fechaInicio, LocalDate.now());
+    }
+
     /**
      * Obtener marcajes de las últimas 24 horas con información detallada por fecha y hora
      * ACTUALIZADO: Agrupa por fechaMovimiento, extrae HOUR de fecMarcacion, excluye AUTO-CLOSE
@@ -212,31 +212,34 @@ public interface AsistenciaHt580Repository extends JpaRepository<AsistenciaHt580
            "GROUP BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion) " +
            "ORDER BY a.fechaMovimiento, EXTRACT(HOUR FROM a.fecMarcacion)")
     List<Object[]> countMarcajesDetalladoUltimas24h(@Param("fechaInicio") LocalDateTime fechaInicio);
-    
-    /**
-     * Obtener todos los marcajes del día actual
-     */
+
     @Query("SELECT a FROM AsistenciaHt580 a " +
-           "WHERE a.fechaMovimiento = CURRENT_DATE " +
+           "WHERE a.fechaMovimiento = :hoy " +
            "ORDER BY a.fechaMovimiento DESC")
-    List<AsistenciaHt580> findMarcajesDelDia();
-    
-    /**
-     * Obtener marcajes agrupados por centro de costo (primeros 2 caracteres del código)
-     */
+    List<AsistenciaHt580> findMarcajesEnFecha(@Param("hoy") LocalDate hoy);
+
+    default List<AsistenciaHt580> findMarcajesDelDia() {
+        return findMarcajesEnFecha(LocalDate.now());
+    }
+
     @Query("SELECT SUBSTRING(a.codigo, 1, 2) as centroCosto, COUNT(a) as cantidad " +
            "FROM AsistenciaHt580 a " +
-           "WHERE a.fechaMovimiento = CURRENT_DATE " +
+           "WHERE a.fechaMovimiento = :hoy " +
            "GROUP BY SUBSTRING(a.codigo, 1, 2) " +
            "ORDER BY cantidad DESC")
-    List<Object[]> countMarcajesPorCentroCostoHoy();
-    
-    /**
-     * Contar trabajadores únicos que han marcado hoy
-     */
-    @Query("SELECT COUNT(DISTINCT a.codigo) FROM AsistenciaHt580 a WHERE a.fechaMovimiento = CURRENT_DATE")
-    Long countTrabajadoresUnicosHoy();
-    
+    List<Object[]> countMarcajesPorCentroCostoEnFecha(@Param("hoy") LocalDate hoy);
+
+    default List<Object[]> countMarcajesPorCentroCostoHoy() {
+        return countMarcajesPorCentroCostoEnFecha(LocalDate.now());
+    }
+
+    @Query("SELECT COUNT(DISTINCT a.codigo) FROM AsistenciaHt580 a WHERE a.fechaMovimiento = :hoy")
+    Long countTrabajadoresUnicosEnFecha(@Param("hoy") LocalDate hoy);
+
+    default Long countTrabajadoresUnicosHoy() {
+        return countTrabajadoresUnicosEnFecha(LocalDate.now());
+    }
+
     /**
      * ✅ VALIDACIÓN ANTI-DUPLICADOS
      * Verificar si ya existe una marcación con la MISMA combinación del índice único:

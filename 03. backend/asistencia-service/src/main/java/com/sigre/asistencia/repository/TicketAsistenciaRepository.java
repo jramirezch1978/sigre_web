@@ -3,8 +3,10 @@ package com.sigre.asistencia.repository;
 import com.sigre.asistencia.entity.TicketAsistencia;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -42,6 +44,11 @@ public interface TicketAsistenciaRepository extends JpaRepository<TicketAsistenc
     /**
      * Buscar tickets de hoy
      */
-    @Query("SELECT t FROM TicketAsistencia t WHERE DATE(t.fechaCreacion) = CURRENT_DATE ORDER BY t.fechaCreacion DESC")
-    List<TicketAsistencia> findTicketsDeHoy();
+    @Query("SELECT t FROM TicketAsistencia t WHERE t.fechaCreacion >= :inicio AND t.fechaCreacion < :fin ORDER BY t.fechaCreacion DESC")
+    List<TicketAsistencia> findTicketsEntre(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
+
+    default List<TicketAsistencia> findTicketsDeHoy() {
+        LocalDate hoy = LocalDate.now();
+        return findTicketsEntre(hoy.atStartOfDay(), hoy.plusDays(1).atStartOfDay());
+    }
 }
