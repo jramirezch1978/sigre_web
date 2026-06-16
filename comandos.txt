@@ -250,9 +250,18 @@ REM sync-service incluye ms-worker (schema sync, jobs activos)
 .\deploy.bat ms-all
 
 --- Postman ---
-Importar: 01. documentacion\SIGRE Web ERP.postman_collection.json
-Variable base_url: http://crisaor.serveftp.com:9080
-Flujo: Login -> seleccionar-empresa (guarda jwt_definitive_token) -> resto de APIs
+Importar coleccion: 01. documentacion\SIGRE Web ERP.postman_collection.json
+Importar entorno:  01. documentacion\SIGRE Web ERP - cronos.postman_environment.json
+Activar entorno "SIGRE Web ERP - cronos" en Postman.
+Variables cronos:
+  base_url      = http://crisaor.serveftp.com:9080   (API Gateway)
+  frontend_url  = http://crisaor.serveftp.com:8080   (nginx / Angular)
+  postgres        crisaor.serveftp.com:5432
+  asistencia BD   crisaor.serveftp.com:5433
+Regenerar coleccion desde controllers Java:
+  powershell -NoProfile -File scripts\generate-sigre-postman-endpoints.ps1
+Flujo auth: POST /api/auth/login -> POST /api/auth/seleccionar-empresa (guarda jwt_definitive_token) -> resto de APIs
+Health rapido: GET {{base_url}}/actuator/health
 
 --- Gestion servidor ---
 .\server-manage.bat status
@@ -282,3 +291,22 @@ cd e:\Work\sigre_web
 .\deploy.bat seguridad-service --force
 .\deploy.bat api-gateway --force
 .\deploy.bat backend --force
+
+
+
+.\download-log.bat all          REM todos los del repo
+.\download-log.bat compose      REM solo los desplegados en cronos (docker-compose.app.yml)
+.\download-log.bat core all     REM seguridad + core + asistencia
+.\download-log.bat infra all
+.\download-log.bat commerce all
+.\download-log.bat domain all
+.\download-log.bat backend core-service seguridad-service
+.\download-log.bat stack all    REM postgres17, sonarqube
+
+.\download-log.bat backend asistencia-service contabilidad-service
+
+
+cd e:\Work\sigre_web
+.\download-log.bat asistencia-service
+.\download-log.bat core asistencia-service seguridad-service
+.\download-log.bat backend seguridad-service sigre-frontend api-gateway

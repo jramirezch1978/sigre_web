@@ -157,6 +157,11 @@ function Parse-ControllerFile {
 $serviceConfig = [ordered]@{
     'seguridad-service'  = @{ folder = '01 - seguridad-service';  pattern = 'seguridad-service\src\main\java\*\controller\*.java' }
     'asistencia-service' = @{ folder = '02 - asistencia-service'; pattern = 'asistencia-service\src\main\java\*\controller\*.java' }
+    'sync-service'       = @{ folder = '03 - sync-service';       pattern = 'sync-service\src\main\java\*\controller\*.java' }
+    'inventory-service'  = @{ folder = '04 - inventory-service';  pattern = 'inventory-service\src\main\java\*\controllers\*.java' }
+    'orders-service'     = @{ folder = '05 - orders-service';     pattern = 'orders-service\src\main\java\*\controllers\*.java' }
+    'products-service'   = @{ folder = '06 - products-service';   pattern = 'products-service\src\main\java\*\controllers\*.java' }
+    'core-service'       = @{ folder = '07 - core-service';       pattern = 'core-service\src\main\java\*\controller\*.java' }
     'almacen-service'    = @{ folder = '10 - almacen-service';    pattern = 'almacen-service\src\main\java\*\controller\*.java' }
     'compras-service'    = @{ folder = '11 - compras-service';    pattern = 'compras-service\src\main\java\*\controller\*.java' }
     'contabilidad-service' = @{ folder = '12 - contabilidad-service'; pattern = 'contabilidad-service\src\main\java\*\controller\*.java' }
@@ -164,10 +169,6 @@ $serviceConfig = [ordered]@{
     'rrhh-service'       = @{ folder = '14 - rrhh-service';       pattern = 'rrhh-service\src\main\java\*\controller\*.java' }
     'produccion-service' = @{ folder = '16 - produccion-service'; pattern = 'produccion-service\src\main\java\*\controller\*.java' }
     'comercializacion-service' = @{ folder = '17 - comercializacion-service (api/ventas)'; pattern = 'comercializacion-service\src\main\java\*\controller\*.java' }
-    'sync-service'       = @{ folder = '03 - sync-service';       pattern = 'sync-service\src\main\java\*\controller\*.java' }
-    'inventory-service'  = @{ folder = '04 - inventory-service';  pattern = 'inventory-service\src\main\java\*\controllers\*.java' }
-    'orders-service'     = @{ folder = '05 - orders-service';     pattern = 'orders-service\src\main\java\*\controllers\*.java' }
-    'products-service'   = @{ folder = '06 - products-service';   pattern = 'products-service\src\main\java\*\controllers\*.java' }
 }
 
 $sampleBodies = @{
@@ -215,6 +216,13 @@ $sampleBodies = @{
   "REPRES_LEGAL": "REPRESENTANTE LEGAL"
 }
 '@
+    '/api/admin/empresas/credenciales-bd' = @'
+{
+  "dbName": "sigre_emp_cantabria",
+  "dbUser": "cantabria",
+  "dbPassword": "Cantabria@Dev2026!"
+}
+'@
     '/api/admin/empresas/deprovision' = @'
 {
   "dbName": "sigre_emp_demo"
@@ -240,6 +248,7 @@ $loginTestScript = @(
     '  if (data.accessToken) pm.collectionVariables.set("jwt_token", data.accessToken);'
     '  if (data.token) pm.collectionVariables.set("jwt_token", data.token);'
     '  if (data.definitiveToken) pm.collectionVariables.set("jwt_definitive_token", data.definitiveToken);'
+    '  if (data.accessToken && data.temporal === false) pm.collectionVariables.set("jwt_definitive_token", data.accessToken);'
     '}'
 )
 $selectEmpresaScript = @(
@@ -247,22 +256,64 @@ $selectEmpresaScript = @(
     '  var json = pm.response.json();'
     '  var data = json.data || json;'
     '  if (data.definitiveToken) pm.collectionVariables.set("jwt_definitive_token", data.definitiveToken);'
-    '  if (data.accessToken) pm.collectionVariables.set("jwt_token", data.accessToken);'
+    '  if (data.accessToken) {'
+    '    pm.collectionVariables.set("jwt_token", data.accessToken);'
+    '    if (data.temporal === false) pm.collectionVariables.set("jwt_definitive_token", data.accessToken);'
+    '  }'
     '}'
 )
+
+function New-PostmanUrlRequest {
+    param(
+        [string]$Name,
+        [string]$Method,
+        [string]$RawUrl,
+        [string]$HostVar = '{{base_url}}',
+        [string[]]$PathSegments = @(),
+        [switch]$UseBearer
+    )
+    $req = [ordered]@{
+        name    = $Name
+        request = [ordered]@{
+            method = $Method
+            header = @()
+            url    = [ordered]@{
+                raw  = $RawUrl
+                host = @($HostVar)
+                path = $PathSegments
+            }
+        }
+        response = @()
+    }
+    if ($UseBearer) {
+        $req.request.auth = [ordered]@{
+            type   = 'bearer'
+            bearer = @([ordered]@{ key = 'token'; value = '{{jwt_definitive_token}}'; type = 'string' })
+        }
+    }
+    return [pscustomobject]$req
+}
 
 $folders = @()
 
 $infraItems = @(
-    (New-PostmanRequest 'GET actuator/health' 'GET' '/actuator/health')
-    (New-PostmanRequest 'GET discovery eureka' 'GET' '/eureka/apps')
+    (New-PostmanRequest 'GET gateway actuator/health' 'GET' '/actuator/health')
+    (New-PostmanUrlRequest 'GET frontend (nginx)' 'GET' '{{frontend_url}}/' '{{frontend_url}}' @(''))
+    (New-PostmanRequest 'GET core actuator/health' 'GET' '/api/core/actuator/health' -UseBearer)
+    (New-PostmanRequest 'GET asistencia actuator/health' 'GET' '/api/asistencia/actuator/health')
+    (New-PostmanRequest 'GET discovery eureka apps' 'GET' '/eureka/apps')
 )
-$folders += [pscustomobject]@{ name = '00 - Infraestructura'; item = $infraItems }
+$folders += [pscustomobject]@{ name = '00 - Infraestructura (cronos)'; item = $infraItems }
 
 foreach ($svcKey in $serviceConfig.Keys) {
     $cfg = $serviceConfig[$svcKey]
     $files = Get-ChildItem -Path (Join-Path $backend $cfg.pattern.Split('\')[0]) -Recurse -Filter '*Controller.java' |
         Where-Object { $_.FullName -match '\\controller\\' -or $_.FullName -match '\\controllers\\' }
+    if ($svcKey -eq 'sync-service') {
+        $workerControllers = Get-ChildItem -Path (Join-Path $backend 'sync-service\src\main\java') -Recurse -Filter '*Controller.java' |
+            Where-Object { $_.FullName -match '\\worker\\controller\\' }
+        $files = @($files) + @($workerControllers)
+    }
 
     $byController = @{}
     foreach ($file in $files) {
@@ -301,8 +352,12 @@ foreach ($svcKey in $serviceConfig.Keys) {
         $controllerFolders += [pscustomobject]@{ name = $ctrl; item = $requests }
     }
 
-    if ($svcKey -in @('almacen-service', 'compras-service')) {
-        $healthPath = if ($svcKey -eq 'almacen-service') { '/api/almacen/actuator/health' } else { '/api/compras/actuator/health' }
+    if ($svcKey -in @('almacen-service', 'compras-service', 'core-service')) {
+        $healthPath = switch ($svcKey) {
+            'almacen-service' { '/api/almacen/actuator/health' }
+            'compras-service' { '/api/compras/actuator/health' }
+            'core-service'    { '/api/core/actuator/health' }
+        }
         $controllerFolders = @(
             [pscustomobject]@{
                 name = 'Actuator'
@@ -339,7 +394,7 @@ $collection = [ordered]@{
         name        = 'SIGRE Web ERP'
         schema      = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
         _exporter_id = '4961867'
-        description = 'Coleccion SIGRE Web generada desde controllers Java. Gateway puerto 9080 en cronos. Incluye seguridad-service, almacen-service, compras-service y demas servicios backend.'
+        description = 'Coleccion SIGRE Web generada desde controllers Java. Servidor cronos: API Gateway {{base_url}} (9080), frontend {{frontend_url}} (8080). Importar tambien el entorno SIGRE Web ERP - cronos.postman_environment.json.'
     }
     item = $folders
     event = @(
@@ -354,7 +409,15 @@ $collection = [ordered]@{
     )
     variable = @(
         @{ key = 'base_url'; value = 'http://crisaor.serveftp.com:9080'; type = 'string' }
+        @{ key = 'frontend_url'; value = 'http://crisaor.serveftp.com:8080'; type = 'string' }
         @{ key = 'base_url_local'; value = 'http://localhost:9080'; type = 'string' }
+        @{ key = 'frontend_url_local'; value = 'http://localhost:8080'; type = 'string' }
+        @{ key = 'host_cronos'; value = 'crisaor.serveftp.com'; type = 'string' }
+        @{ key = 'postgres_host'; value = 'crisaor.serveftp.com'; type = 'string' }
+        @{ key = 'postgres_port'; value = '5432'; type = 'string' }
+        @{ key = 'asistencia_db_host'; value = 'crisaor.serveftp.com'; type = 'string' }
+        @{ key = 'asistencia_db_port'; value = '5433'; type = 'string' }
+        @{ key = 'sonarqube_url'; value = 'http://crisaor.serveftp.com:9001'; type = 'string' }
         @{ key = 'provision_secret'; value = 'dev-provision-cambiar-produccion'; type = 'string' }
         @{ key = 'jwt_token'; value = ''; type = 'string' }
         @{ key = 'jwt_definitive_token'; value = ''; type = 'string' }
