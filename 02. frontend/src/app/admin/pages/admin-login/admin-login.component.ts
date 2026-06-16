@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 import { CryptoService } from '../../../core/services/crypto.service';
 import { PostAuthIntentService } from '../../services/post-auth-intent.service';
-import { ConfigService } from '../../../services/config.service';
 
 @Component({
   selector: 'app-admin-login',
@@ -21,14 +20,11 @@ export class AdminLoginComponent implements OnInit {
   private readonly crypto = inject(CryptoService);
   private readonly router = inject(Router);
   private readonly postAuthIntent = inject(PostAuthIntentService);
-  private readonly configService = inject(ConfigService);
 
   loginForm!: FormGroup;
   mostrarClave = false;
   isLoading = false;
   errorMessage = '';
-  companyName = 'SIGRE';
-  companyLogo = 'assets/logo-transmarina.png';
 
   private ipAddress = 'unknown';
   private ipPrivada = '';
@@ -40,24 +36,7 @@ export class AdminLoginComponent implements OnInit {
       recordar: [false],
     });
     this.cargarCredencialesRecordadas();
-    this.cargarBranding();
     this.obtenerIpPublica();
-  }
-
-  private cargarBranding(): void {
-    try {
-      if (this.configService.isConfigLoaded()) {
-        this.companyName = this.configService.getCompanyName();
-        this.companyLogo = this.configService.getCompanyLogo();
-      } else {
-        void this.configService.waitForConfig().then(() => {
-          this.companyName = this.configService.getCompanyName();
-          this.companyLogo = this.configService.getCompanyLogo();
-        });
-      }
-    } catch {
-      /* branding por defecto */
-    }
   }
 
   private obtenerIpPublica(): void {
@@ -124,10 +103,22 @@ export class AdminLoginComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        const body = err?.error;
-        this.errorMessage = body?.message ?? 'Error de autenticación. Verifique usuario y contraseña.';
+        this.errorMessage = this.mensajeErrorLogin(err);
       },
     });
+  }
+
+  private mensajeErrorLogin(err: { status?: number; error?: { message?: string; errorCode?: string } }): string {
+    const code = err?.error?.errorCode ?? '';
+    const msg = err?.error?.message ?? '';
+
+    if (code === 'USUARIO_BLOQUEADO' || err?.status === 403) {
+      return msg || 'Usuario bloqueado por intentos fallidos. Espere 24 horas o contacte al administrador.';
+    }
+    if (code === 'CREDENCIALES_INVALIDAS' || err?.status === 401) {
+      return msg || 'Usuario o contraseña incorrectos.';
+    }
+    return msg || 'Error de autenticación. Verifique usuario y contraseña.';
   }
 
   campoInvalido(nombre: string): boolean {
