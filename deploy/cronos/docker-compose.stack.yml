@@ -78,7 +78,8 @@ services:
       TZ: America/Lima
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    mem_limit: 512m
+    mem_limit: 384m
+    shm_size: 128mb
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 30s
@@ -110,7 +111,7 @@ services:
       - timezone=America/Lima
     volumes:
       - db_sigre_web_data:/var/lib/postgresql/data
-    mem_limit: 512m
+    mem_limit: 384m
     shm_size: 128mb
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sigre-web -d db-sigre-web"]
@@ -176,4 +177,4 @@ volumes:
 networks:
   default:
     name: stack_default
-    driver: bridge
+    external: true

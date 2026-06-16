@@ -279,6 +279,15 @@ if not exist "!ENV_FILE!" (
 )
 exit /b 0
 
+:ensureStackNetwork
+docker network inspect stack_default >nul 2>&1
+if errorlevel 1 (
+    echo %CYAN%[STACK]%RESET% Creando red stack_default...
+    docker network create stack_default >> "!DEPLOY_LOG!" 2>&1
+    if errorlevel 1 exit /b 1
+)
+exit /b 0
+
 :useRemoteContext
 docker context use %DOCKER_CTX% >nul 2>&1
 if errorlevel 1 (
@@ -484,13 +493,28 @@ if "!FORCE!"=="0" (
 call :ensureEnv || goto :endScript
 call :useRemoteContext || goto :endScript
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-stack-!DEPLOY_LOG_TS!.log"
-docker compose -f "!COMPOSE_STACK!" --env-file "!ENV_FILE!" up -d >> "!DEPLOY_LOG!" 2>&1
+call :ensureStackNetwork || goto :endScript
+call :deployStackServices
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Ver: !DEPLOY_LOG!
     goto :endScript
 )
 echo %GREEN%[OK]%RESET% Stack levantado.
 goto :endScript
+
+:deployStackServices
+docker compose -f "!COMPOSE_STACK!" --env-file "!ENV_FILE!" up -d rabbitmq db-sigre-web >> "!DEPLOY_LOG!" 2>&1
+if errorlevel 1 exit /b 1
+docker inspect postgres17 >nul 2>&1
+if errorlevel 1 (
+    docker compose -f "!COMPOSE_STACK!" --env-file "!ENV_FILE!" up -d postgres >> "!DEPLOY_LOG!" 2>&1
+    if errorlevel 1 exit /b 1
+) else (
+    echo %CYAN%[STACK]%RESET% Reutilizando postgres17 existente >> "!DEPLOY_LOG!" 2>&1
+    docker network connect stack_default postgres17 >> "!DEPLOY_LOG!" 2>&1
+    docker start postgres17 >> "!DEPLOY_LOG!" 2>&1
+)
+exit /b 0
 
 :pullRemote
 call :ensureEnv || goto :endScript
