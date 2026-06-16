@@ -212,15 +212,6 @@ where docker >nul 2>&1 || (
 set "DOCKER_CONTEXT=default"
 exit /b 0
 
-:useRemoteContext
-docker context use !DOCKER_CTX! >nul 2>&1
-if errorlevel 1 (
-    echo ERROR: Contexto Docker '!DOCKER_CTX!' no existe.
-    echo        docker context create cronos --docker "host=ssh://usuario@crisaor.serveftp.com"
-    exit /b 1
-)
-exit /b 0
-
 :check_host_docker_ddl
 call :check_host_docker || exit /b 1
 call :init_ddl_paths || exit /b 1
@@ -239,11 +230,6 @@ exit /b %ERRORLEVEL%
 set "SQLLINE=%~1"
 set "TARGETDB=%~2"
 docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!TARGETDB!" -v ON_ERROR_STOP=1 -c "!SQLLINE!"
-exit /b %ERRORLEVEL%
-
-:psql_asistencia_cmd
-set "SQLLINE=%~1"
-docker --context !DOCKER_CTX! exec -e "PGPASSWORD=!PGASISTENCIA_PASSWORD!" !PGASISTENCIA_CONTAINER! psql -U "!PGASISTENCIA_USER!" -d "!PGASISTENCIA_DB!" -v ON_ERROR_STOP=1 -c "!SQLLINE!"
 exit /b %ERRORLEVEL%
 
 :run_sql
@@ -358,32 +344,27 @@ exit /b 0
 :do_create_asistencia
 echo.
 echo ^>^> Modo: create-asistencia ^(!PGASISTENCIA_DB!^)  Force: !FORCE!
-echo ^>^> Conexion: docker exec !PGASISTENCIA_CONTAINER! ^(contexto !DOCKER_CTX!^)
-echo ^>^> Nota: BD dedicada asistencia-service. Sin DDL multitenant.
-echo ^>^> La BD se crea al levantar db-sigre-web ^(POSTGRES_DB^). Esquema: Hibernate ddl-auto=update.
+echo ^>^> Contenedor: !PGASISTENCIA_CONTAINER! ^(contexto Docker !DOCKER_CTX!^)
+echo ^>^> DBeaver NAT: !PGASISTENCIA_HOST!:!PGASISTENCIA_PORT! — usuarios: postgres ^| sigre-web
+echo ^>^> App JDBC interno: !PGASISTENCIA_USER!@!PGASISTENCIA_CONTAINER!:5432/!PGASISTENCIA_DB!
+echo ^>^> Esquema tablas: asistencia-service ^(hibernate ddl-auto=update^)
 echo.
-if "!FORCE!"=="1" (
-    echo ^>^> --force: recrear volumen requiere en cronos:
-    echo       deploy.bat stack --force
-    echo       ^(elimina db_sigre_web_data si necesita BD limpia^)
-)
-call :useRemoteContext || exit /b 1
-docker --context !DOCKER_CTX! inspect !PGASISTENCIA_CONTAINER! >nul 2>&1
-if errorlevel 1 (
-    echo ERROR: Contenedor !PGASISTENCIA_CONTAINER! no existe en cronos.
-    echo        Ejecute: deploy.bat stack --force
+call :init_ddl_paths || exit /b 1
+set "ASIST_DDL=!DDL_ROOT!\asistencia\01-create-database.sql"
+if not exist "!ASIST_DDL!" (
+    echo ERROR: No existe !ASIST_DDL!
     exit /b 1
 )
-echo ^>^> Verificando PostgreSQL asistencia...
-call :psql_asistencia_cmd "SELECT current_database() AS db, current_user AS usr, version();"
-if errorlevel 1 (
-    echo ERROR: No se pudo conectar a !PGASISTENCIA_DB! en !PGASISTENCIA_CONTAINER!.
-    echo        1^) Levante stack: deploy.bat stack --force
-    echo        2^) Verifique ASISTENCIA_DB_PASSWORD en deploy\cronos\.env
-    exit /b 1
-)
+set "ASIST_FORCE_ARG="
+if "!FORCE!"=="1" set "ASIST_FORCE_ARG=-Force"
+powershell -NoProfile -ExecutionPolicy Bypass -File "!REPO_ROOT!\scripts\ensure-asistencia-db.ps1" -EnvFile "!ENV_FILE!" -DockerContext "!DOCKER_CTX!" -Container "!PGASISTENCIA_CONTAINER!" -Database "!PGASISTENCIA_DB!" -AppUser "!PGASISTENCIA_USER!" -DdlFile "!ASIST_DDL!" !ASIST_FORCE_ARG!
+if errorlevel 1 exit /b 1
 echo.
-echo ^>^> create-asistencia: conexion OK. Despliegue: deploy.bat asistencia-service --force
+echo ^>^> create-asistencia: BD y permisos OK en contenedor !PGASISTENCIA_CONTAINER!.
+echo ^>^> Conexion DBeaver ^(requiere NAT 5433 o red LAN 192.168.0.163^):
+echo        Host: !PGASISTENCIA_HOST!  Puerto: !PGASISTENCIA_PORT!
+echo        BD: !PGASISTENCIA_DB!  Usuario app: !PGASISTENCIA_USER!
+echo        Usuario admin DBeaver: postgres ^(misma clave POSTGRES_PASSWORD del .env^)
 exit /b 0
 
 :do_insert
@@ -497,7 +478,7 @@ echo Uso:
 echo   %~nx0 create                  DDL completo: security + template
 echo   %~nx0 create-security         Solo !PGSECURITY!
 echo   %~nx0 create-template         Solo !PGTEMPLATE!
-echo   %~nx0 create-asistencia       Verifica BD dedicada asistencia ^(!PGASISTENCIA_DB!^)
+echo   %~nx0 create-asistencia [--force]  Crea BD !PGASISTENCIA_DB! en postgres17 + rol sigre-web
 echo   %~nx0 insert                  Solo seed ^(requiere create previo^)
 echo   %~nx0 clone ^<empresa^>
 echo   %~nx0 delete ^<nombre_bd^>

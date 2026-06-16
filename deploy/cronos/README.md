@@ -36,13 +36,13 @@ Salida regenerada:
 
 | Archivo | Contenido |
 |---------|-----------|
-| `docker-compose.stack.yml` | PG17 + RabbitMQ + BD asistencia + SonarQube (perfil `tools`, restart no) |
+| `docker-compose.stack.yml` | PG17 + RabbitMQ + db-sigre-web (asistencia) + SonarQube (perfil `tools`) |
 | `docker-compose.app.yml` | Eureka + Gateway + microservicios + Frontend |
 
 Red Docker compartida: **`stack_default`** (externa). La app y el stack se conectan a la misma red; Compose **no** intenta recrearla (`external: true`).
 
 JDBC interno ERP: `jdbc:postgresql://postgres:5432/...`  
-JDBC asistencia: `jdbc:postgresql://db-sigre-web:5432/db-sigre-web`
+JDBC asistencia: `jdbc:postgresql://db-sigre-web:5432/db-sigre-web` (contenedor aparte, DBeaver **:5433**)
 
 ## Presupuesto RAM (VM 10 GB — contexto.txt)
 
@@ -87,7 +87,7 @@ Los `mem_limit` son techo cgroup; el heap JVM va en `JAVA_OPTS` (`-Xmx`). Dejar 
 | Frontend | 8080 |
 | API Gateway | 9080 |
 | PostgreSQL ERP | 5432 |
-| PostgreSQL asistencia | 5433 |
+| PostgreSQL asistencia (db-sigre-web) | **5433** |
 | SonarQube | **9001** (9001:9000) |
 
 ## PostgreSQL (contexto.txt)
@@ -115,6 +115,7 @@ Stack infra (red externa — no bajar contenedores app):
 
 ```bat
 .\deploy.bat stack --force
+.\database-deploy.bat create-asistencia --force
 ```
 
 ## SonarQube bajo demanda
@@ -130,5 +131,6 @@ docker compose --profile tools stop sonarqube
 - [ ] `curl http://crisaor.serveftp.com:8080`
 - [ ] `docker exec postgres17 pg_isready -U postgres`
 - [ ] `docker exec rabbitmq rabbitmq-diagnostics -q ping`
-- [ ] Bases: `sigre_security`, `sigre_template`, `sigre_emp_cantabria`
+- [ ] Bases ERP en :5432: `sigre_security`, `sigre_template`, `sigre_emp_cantabria`
+- [ ] BD asistencia en :5433: `db-sigre-web` (`database-deploy.bat create-asistencia`)
 - [ ] Eureka: `discovery-server` healthy

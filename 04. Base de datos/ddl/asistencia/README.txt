@@ -1,24 +1,28 @@
-BD dedicada asistencia-service (db-sigre-web)
+BD dedicada asistencia-service (contenedor db-sigre-web)
 ==============================================
 
-Esta base NO forma parte del esquema multitenant SIGRE ERP.
-El esquema lo gestiona asistencia-service con hibernate.ddl-auto=update.
+Instancia PostgreSQL SEPARADA de postgres17 (ERP). No aparece en :5432.
 
 Despliegue infra:
-  deploy.bat stack --force          (contenedor db-sigre-web + rabbitmq)
+  deploy.bat stack --force
 
-Verificar conexion:
-  database-deploy.bat create-asistencia
+Crear / recrear BD y rol postgres para DBeaver:
+  database-deploy.bat create-asistencia [--force]
 
-Despliegue servicio:
+Despliegue servicio (sin cambiar JDBC):
   deploy.bat asistencia-service --force
 
 Variables en deploy/cronos/.env:
-  ASISTENCIA_DB_PASSWORD
+  ASISTENCIA_DB_PASSWORD   (usuario sigre-web — app)
+  POSTGRES_PASSWORD        (usuario postgres creado en db-sigre-web para DBeaver)
+  ASISTENCIA_DB_HOST       (default crisaor.serveftp.com)
+  ASISTENCIA_DB_PORT       (default 5433 — NAT al contenedor)
 
-Verificar conexion (docker exec en cronos, no requiere NAT 5433):
-  database-deploy.bat create-asistencia
+Conexion DBeaver (segunda conexion, distinta de postgres17 :5432):
+  Host: crisaor.serveftp.com  (o 192.168.0.163 en LAN)
+  Puerto: 5433
+  Base: db-sigre-web
+  Usuario: postgres  /  POSTGRES_PASSWORD
+  Usuario app: sigre-web  /  ASISTENCIA_DB_PASSWORD
 
-Opcional acceso externo psql (requiere NAT router -> 5433):
-  ASISTENCIA_DB_HOST=crisaor.serveftp.com
-  ASISTENCIA_DB_PORT=5433
+Esquema tablas: Hibernate ddl-auto=update en asistencia-service.
