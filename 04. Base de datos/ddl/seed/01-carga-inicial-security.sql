@@ -23,7 +23,7 @@ INSERT INTO master.empresa (
     db_name, db_user, db_password_encrypted, flag_estado
 )
 VALUES
-    (2, 'T0000009', '20504595863', 'PESQUERA CANTABRIA S.A.', 'CANTABRIA', 'CALLE AMADOR MERINO REYNA 339 INT 501 - SAN ISIDRO - LIMA', '010101', 'JUAN CARLOS PEREZ RAMIREZ', 'contacto@cantabria.com.pe', '999888777', 'postgres', 5432, 'sigre_emp_cantabria', 'cantabria', 'sxBqt1DJb6Wk6C9o0nvwn8fZyN8wKndTAuiqVH8MLUJxnWtf1Q==', '1')
+    (2, 'T0000009', '20504595863', 'PESQUERA CANTABRIA S.A.', 'CANTABRIA', 'CALLE AMADOR MERINO REYNA 339 INT 501 - SAN ISIDRO - LIMA', '010101', 'JUAN CARLOS PEREZ RAMIREZ', 'contacto@cantabria.com.pe', '999888777', 'postgres', 5432, 'sigre_emp_cantabria', 'cantabria', '5gC+og7bqKDE8zKIZpm2wJeSNkWxsaGfpaWws5CUJY0Lr4aT4yjWjV6rD7sLGQ==', '1')
 ON CONFLICT (id) DO UPDATE SET
     codigo = EXCLUDED.codigo,
     ruc = EXCLUDED.ruc,
