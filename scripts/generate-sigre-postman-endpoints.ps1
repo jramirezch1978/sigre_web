@@ -4,13 +4,34 @@ $backend = Join-Path $root "03. backend"
 $dst = Join-Path $root "01. documentacion\SIGRE Web ERP.postman_collection.json"
 
 function Get-MappingPath {
-    param([string]$AnnotationLine)
-    if ($AnnotationLine -match '@(?:Get|Post|Put|Patch|Delete)Mapping\s*\(\s*\)') { return '' }
-    if ($AnnotationLine -match '@(?:Get|Post|Put|Patch|Delete)Mapping\s*\(\s*value\s*=\s*"([^"]+)"') { return $matches[1] }
-    if ($AnnotationLine -match '@(?:Get|Post|Put|Patch|Delete)Mapping\s*\(\s*"([^"]+)"') { return $matches[1] }
-    if ($AnnotationLine -match '@RequestMapping\s*\(\s*value\s*=\s*"([^"]+)"') { return $matches[1] }
-    if ($AnnotationLine -match '@RequestMapping\s*\(\s*"([^"]+)"') { return $matches[1] }
+    param([string]$AnnotationBlock)
+    $block = ($AnnotationBlock -replace '\s+', ' ').Trim()
+    if ($block -match '@(?:Get|Post|Put|Patch|Delete)Mapping\s*\(\s*\)') { return '' }
+    if ($block -match '@(?:Get|Post|Put|Patch|Delete)Mapping\s*$') { return '' }
+    if ($block -match '@(?:Get|Post|Put|Patch|Delete)Mapping\s*\(\s*(?:value|path)\s*=\s*\{([^}]+)\}') {
+        $paths = [regex]::Matches($block, '"([^"]+)"') | ForEach-Object { $_.Groups[1].Value }
+        return ($paths -join '|')
+    }
+    if ($block -match '@(?:Get|Post|Put|Patch|Delete)Mapping\s*\(\s*(?:value|path)\s*=\s*"([^"]+)"') { return $matches[1] }
+    if ($block -match '@(?:Get|Post|Put|Patch|Delete)Mapping\s*\(\s*"([^"]+)"') { return $matches[1] }
+    if ($block -match '@RequestMapping\s*\(\s*(?:value|path)\s*=\s*"([^"]+)"') { return $matches[1] }
+    if ($block -match '@RequestMapping\s*\(\s*"([^"]+)"') { return $matches[1] }
     return $null
+}
+
+function Get-AnnotationBlock {
+    param([string[]]$Lines, [int]$StartIndex)
+    $block = $Lines[$StartIndex].Trim()
+    $depth = ($block.ToCharArray() | Where-Object { $_ -eq '(' }).Count - ($block.ToCharArray() | Where-Object { $_ -eq ')' }).Count
+    $j = $StartIndex
+    while ($depth -gt 0 -and ($j + 1) -lt $Lines.Count) {
+        $j++
+        $next = $Lines[$j].Trim()
+        $block += ' ' + $next
+        $depth += ($next.ToCharArray() | Where-Object { $_ -eq '(' }).Count
+        $depth -= ($next.ToCharArray() | Where-Object { $_ -eq ')' }).Count
+    }
+    return @{ Block = $block; EndIndex = $j }
 }
 
 function Get-HttpMethod {
@@ -56,6 +77,76 @@ function Test-PublicEndpoint {
 function Test-ProvisionEndpoint {
     param([string]$Path)
     return $Path -like '/api/admin/empresas/*'
+}
+
+function Get-TableGroupFromPath {
+    param([string]$Path)
+    if ($Path -match 'actuator') { return 'actuator' }
+
+    $segments = @()
+    foreach ($m in [regex]::Matches($Path, '/([^/]+)')) {
+        $s = $m.Groups[1].Value
+        if ($s -notmatch '^\{') { $segments += $s.ToLower() }
+    }
+
+    if ($segments.Count -lt 2 -or $segments[0] -ne 'api') { return 'general' }
+
+    $idx = 2
+    if ($idx -lt $segments.Count -and $segments[$idx] -eq 'recuperar') {
+        return 'recuperar'
+    }
+    if ($idx -lt $segments.Count -and $segments[$idx] -in @('seguridad', 'admin')) {
+        $idx++
+    }
+
+    $resource = @($segments[$idx..($segments.Count - 1)])
+    if ($resource.Count -eq 0) { return 'general' }
+
+    $actionsOnEntity = @('estado', 'activar', 'desactivar', 'aprobar', 'rechazar', 'anular', 'confirmar')
+    if ($resource.Count -eq 2 -and $actionsOnEntity -contains $resource[-1]) {
+        return $resource[0]
+    }
+
+    return $resource[-1]
+}
+
+function Format-TableFolderName {
+    param([string]$TableKey, [string]$ServiceKey)
+    $labels = @{
+        'login'              = 'login (genera jwt_temporal_token)'
+        'seleccionar-empresa'= 'seleccionar-empresa (genera jwt_definitive_token)'
+        'refresh'            = 'refresh (renueva jwt_definitive_token)'
+        'empresas'           = 'empresas'
+        'acciones'           = 'acciones'
+        'roles'              = 'roles'
+        'opciones-menu'      = 'opciones-menu'
+        'opciones-libres'    = 'opciones-libres'
+        'sucursales'         = 'sucursales'
+        'modulos'            = 'modulos'
+        'mi-menu'            = 'mi-menu'
+        'usuarios'           = 'usuarios'
+        'recuperar'          = 'recuperar-password'
+    }
+    if ($labels.ContainsKey($TableKey)) { return $labels[$TableKey] }
+    return ($TableKey -replace '-', ' ')
+}
+
+function Get-TableSortKey {
+    param([string]$TableKey, [string]$ServiceKey)
+    if ($ServiceKey -eq 'seguridad-service') {
+        $order = @{
+            'login' = '01'
+            'empresas' = '02'
+            'seleccionar-empresa' = '03'
+            'me' = '04'
+            'refresh' = '05'
+            'logout' = '06'
+            'recuperar' = '07'
+            'actuator' = '00'
+        }
+        if ($order.ContainsKey($TableKey)) { return $order[$TableKey] + $TableKey }
+    }
+    return '99' + $TableKey
 }
 
 function New-PostmanRequest {
@@ -122,33 +213,43 @@ function Parse-ControllerFile {
     $content = Get-Content $FilePath -Raw
     $className = [IO.Path]::GetFileNameWithoutExtension($FilePath) -replace 'Controller$', ''
     $classMapping = ''
-    if ($content -match '@RequestMapping\s*\(\s*value\s*=\s*"([^"]+)"') { $classMapping = $matches[1] }
+    if ($content -match '@RequestMapping\s*\([^)]*?(?:value|path)\s*=\s*"([^"]+)"') { $classMapping = $matches[1] }
     elseif ($content -match '@RequestMapping\s*\(\s*"([^"]+)"') { $classMapping = $matches[1] }
 
     $endpoints = @()
     $lines = Get-Content $FilePath
     for ($i = 0; $i -lt $lines.Count; $i++) {
         $line = $lines[$i].Trim()
-        if ($line -notmatch '@(?:Get|Post|Put|Patch|Delete|Request)Mapping') { continue }
+        if ($line -notmatch '@(?:Get|Post|Put|Patch|Delete)Mapping') { continue }
         $method = Get-HttpMethod $line
-        if (-not $method -or $method -eq 'REQUEST') { continue }
-        $subPath = Get-MappingPath $line
-        if ($null -eq $subPath) { continue }
-        $servicePath = Join-UrlPath $classMapping $subPath
-        $gatewayPath = Normalize-GatewayPath $ServiceKey $servicePath
-        $isMultipart = $line -match 'MULTIPART_FORM_DATA'
-        $displayName = if ([string]::IsNullOrWhiteSpace($subPath)) {
-            "$method $classMapping".Trim()
-        } else {
-            "$method $subPath"
-        }
-        $endpoints += [pscustomobject]@{
-            Controller  = $className
-            Name        = $displayName
-            Method      = $method
-            ServicePath = $servicePath
-            GatewayPath = $gatewayPath
-            IsMultipart = [bool]$isMultipart
+        if (-not $method) { continue }
+
+        $anno = Get-AnnotationBlock -Lines $lines -StartIndex $i
+        $annoBlock = $anno.Block
+        $i = $anno.EndIndex
+
+        $subPathRaw = Get-MappingPath $annoBlock
+        if ($null -eq $subPathRaw) { continue }
+
+        $contextBlock = ($lines[[Math]::Max(0, $anno.EndIndex - 2)..([Math]::Min($lines.Count - 1, $anno.EndIndex + 8))] -join ' ')
+        $isMultipart = $contextBlock -match 'MULTIPART_FORM_DATA|MediaType\.MULTIPART'
+
+        foreach ($subPath in ($subPathRaw -split '\|')) {
+            $servicePath = Join-UrlPath $classMapping $subPath
+            $gatewayPath = Normalize-GatewayPath $ServiceKey $servicePath
+            $displayName = if ([string]::IsNullOrWhiteSpace($subPath)) {
+                "$method $classMapping".Trim()
+            } else {
+                "$method $subPath"
+            }
+            $endpoints += [pscustomobject]@{
+                Controller  = $className
+                Name        = $displayName
+                Method      = $method
+                ServicePath = $servicePath
+                GatewayPath = $gatewayPath
+                IsMultipart = [bool]$isMultipart
+            }
         }
     }
     return $endpoints
@@ -174,18 +275,31 @@ $serviceConfig = [ordered]@{
 $sampleBodies = @{
     '/api/auth/login' = @'
 {
-  "username": "jramirez",
-  "password": "tu-password"
+  "email": "jramirez@npssac.com.pe",
+  "password": "vMZRnU+HMLYd09Uj4jIv4HpkLzoIEA==",
+  "passwordHash": "009389e3858fa09ccdabb98c29170408f65bbe7dc76268e7e4d37c79b97efafc",
+  "ipAddress": "127.0.0.1",
+  "ipPrivada": "192.168.1.10",
+  "browser": "PostmanRuntime/7.44.0",
+  "sistemaOperativo": "Windows 11"
 }
 '@
     '/api/auth/seleccionar-empresa' = @'
 {
-  "empresaId": {{empresa_id}}
+  "email": "jramirez@npssac.com.pe",
+  "password": "vMZRnU+HMLYd09Uj4jIv4HpkLzoIEA==",
+  "passwordHash": "009389e3858fa09ccdabb98c29170408f65bbe7dc76268e7e4d37c79b97efafc",
+  "empresaId": {{empresa_id}},
+  "sucursalId": 1,
+  "ipAddress": "127.0.0.1",
+  "ipPrivada": "192.168.1.10",
+  "browser": "PostmanRuntime/7.44.0",
+  "sistemaOperativo": "Windows 11"
 }
 '@
     '/api/auth/refresh' = @'
 {
-  "refreshToken": "{{jwt_token}}"
+  "refreshToken": "{{refresh_token}}"
 }
 '@
     '/api/auth/recuperar/enviar-codigo' = @'
@@ -241,26 +355,60 @@ $sampleBodies = @{
 '@
 }
 
+$saveAuthTokensScript = @(
+    'function saveSigreAuthTokens(data) {'
+    '  if (!data) return;'
+    '  var token = data.accessToken || data.token;'
+    '  if (!token) return;'
+    '  if (data.temporal === true) {'
+    '    pm.collectionVariables.set("jwt_temporal_token", token);'
+    '  } else {'
+    '    pm.collectionVariables.set("jwt_definitive_token", token);'
+    '  }'
+    '  if (data.refreshToken) {'
+    '    pm.collectionVariables.set("refresh_token", data.refreshToken);'
+    '  }'
+    '}'
+)
+
 $loginTestScript = @(
     'if (pm.response.code === 200) {'
     '  var json = pm.response.json();'
     '  var data = json.data || json;'
-    '  if (data.accessToken) pm.collectionVariables.set("jwt_token", data.accessToken);'
-    '  if (data.token) pm.collectionVariables.set("jwt_token", data.token);'
-    '  if (data.definitiveToken) pm.collectionVariables.set("jwt_definitive_token", data.definitiveToken);'
-    '  if (data.accessToken && data.temporal === false) pm.collectionVariables.set("jwt_definitive_token", data.accessToken);'
+    '  saveSigreAuthTokens(data);'
     '}'
 )
+
 $selectEmpresaScript = @(
     'if (pm.response.code === 200) {'
     '  var json = pm.response.json();'
     '  var data = json.data || json;'
-    '  if (data.definitiveToken) pm.collectionVariables.set("jwt_definitive_token", data.definitiveToken);'
-    '  if (data.accessToken) {'
-    '    pm.collectionVariables.set("jwt_token", data.accessToken);'
-    '    if (data.temporal === false) pm.collectionVariables.set("jwt_definitive_token", data.accessToken);'
-    '  }'
+    '  saveSigreAuthTokens(data);'
     '}'
+)
+
+$refreshTestScript = @(
+    'if (pm.response.code === 200) {'
+    '  var json = pm.response.json();'
+    '  var data = json.data || json;'
+    '  if (data.accessToken) pm.collectionVariables.set("jwt_definitive_token", data.accessToken);'
+    '  if (data.refreshToken) pm.collectionVariables.set("refresh_token", data.refreshToken);'
+    '}'
+)
+
+$collectionPreRequestScript = @(
+    '(function () {'
+    '  var auth = pm.request.auth;'
+    '  if (!auth || auth.type !== "bearer") return;'
+    '  var url = pm.request.url.toString();'
+    '  var temporal = pm.collectionVariables.get("jwt_temporal_token") || "";'
+    '  var definitive = pm.collectionVariables.get("jwt_definitive_token") || "";'
+    '  var needsTemporal = /\/api\/auth\/(empresas|seleccionar-empresa)(?:\?|$|\/)/.test(url);'
+    '  var token = needsTemporal ? temporal : (definitive || temporal);'
+    '  if (token) {'
+    '    pm.request.auth.bearer = [{ key: "token", value: token, type: "string" }];'
+    '  }'
+    '})();'
 )
 
 function New-PostmanUrlRequest {
@@ -315,20 +463,21 @@ foreach ($svcKey in $serviceConfig.Keys) {
         $files = @($files) + @($workerControllers)
     }
 
-    $byController = @{}
+    $byTable = @{}
     foreach ($file in $files) {
         foreach ($ep in (Parse-ControllerFile $file.FullName $svcKey)) {
-            if (-not $byController.ContainsKey($ep.Controller)) {
-                $byController[$ep.Controller] = @()
+            $tableKey = Get-TableGroupFromPath $ep.GatewayPath
+            if (-not $byTable.ContainsKey($tableKey)) {
+                $byTable[$tableKey] = @()
             }
-            $byController[$ep.Controller] += $ep
+            $byTable[$tableKey] += $ep
         }
     }
 
-    $controllerFolders = @()
-    foreach ($ctrl in ($byController.Keys | Sort-Object)) {
+    $tableFolders = @()
+    foreach ($tableKey in ($byTable.Keys | Sort-Object { Get-TableSortKey $_ $svcKey })) {
         $requests = @()
-        foreach ($ep in ($byController[$ctrl] | Sort-Object GatewayPath, Method)) {
+        foreach ($ep in ($byTable[$tableKey] | Sort-Object GatewayPath, Method)) {
             $path = $ep.GatewayPath
             $body = $sampleBodies[$path]
             $useBearer = -not (Test-PublicEndpoint $path $ep.Method)
@@ -338,18 +487,24 @@ foreach ($svcKey in $serviceConfig.Keys) {
             if ($svcKey -eq 'seguridad-service') {
                 if ($path -eq '/api/auth/login') {
                     $req | Add-Member -NotePropertyName event -NotePropertyValue @(
-                        [pscustomobject]@{ listen = 'test'; script = [pscustomobject]@{ type = 'text/javascript'; exec = $loginTestScript } }
+                        [pscustomobject]@{ listen = 'test'; script = [pscustomobject]@{ type = 'text/javascript'; exec = ($saveAuthTokensScript + $loginTestScript) } }
                     ) -Force
                 }
                 if ($path -eq '/api/auth/seleccionar-empresa') {
                     $req | Add-Member -NotePropertyName event -NotePropertyValue @(
-                        [pscustomobject]@{ listen = 'test'; script = [pscustomobject]@{ type = 'text/javascript'; exec = $selectEmpresaScript } }
+                        [pscustomobject]@{ listen = 'test'; script = [pscustomobject]@{ type = 'text/javascript'; exec = ($saveAuthTokensScript + $selectEmpresaScript) } }
+                    ) -Force
+                }
+                if ($path -eq '/api/auth/refresh') {
+                    $req | Add-Member -NotePropertyName event -NotePropertyValue @(
+                        [pscustomobject]@{ listen = 'test'; script = [pscustomobject]@{ type = 'text/javascript'; exec = $refreshTestScript } }
                     ) -Force
                 }
             }
             $requests += $req
         }
-        $controllerFolders += [pscustomobject]@{ name = $ctrl; item = $requests }
+        $folderName = Format-TableFolderName $tableKey $svcKey
+        $tableFolders += [pscustomobject]@{ name = $folderName; item = $requests }
     }
 
     if ($svcKey -in @('almacen-service', 'compras-service', 'core-service')) {
@@ -358,27 +513,29 @@ foreach ($svcKey in $serviceConfig.Keys) {
             'compras-service' { '/api/compras/actuator/health' }
             'core-service'    { '/api/core/actuator/health' }
         }
-        $controllerFolders = @(
-            [pscustomobject]@{
-                name = 'Actuator'
-                item = @((New-PostmanRequest 'GET actuator/health' 'GET' $healthPath -UseBearer))
-            }
-        ) + $controllerFolders
+        if (-not ($tableFolders | Where-Object { $_.name -like 'actuator*' })) {
+            $tableFolders = @(
+                [pscustomobject]@{
+                    name = 'actuator'
+                    item = @((New-PostmanRequest 'GET actuator/health' 'GET' $healthPath -UseBearer))
+                }
+            ) + $tableFolders
+        }
     }
 
-    $folders += [pscustomobject]@{ name = $cfg.folder; item = $controllerFolders }
+    $folders += [pscustomobject]@{ name = $cfg.folder; item = $tableFolders }
 }
 
 $migrationMap = @(
-    @('15 - activo-fijo-service', 'api/activos/actuator/health')
-    @('18 - auditoria-service', 'api/auditoria/actuator/health')
-    @('19 - sig-service reportes', 'api/reportes/actuator/health')
-    @('20 - aprovision-service notif', 'api/notificaciones/actuator/health')
-    @('21 - campo-service', 'api/campo/actuator/health')
-    @('22 - comedor-service', 'api/comedor/actuator/health')
-    @('23 - flota-service', 'api/flota/actuator/health')
-    @('24 - mantenimiento-service', 'api/mantenimiento/actuator/health')
-    @('25 - operaciones-service', 'api/operaciones/actuator/health')
+    @('15 - activo-fijo-service', 'api/activos/actuator/health'),
+    @('18 - auditoria-service', 'api/auditoria/actuator/health'),
+    @('19 - sig-service reportes', 'api/reportes/actuator/health'),
+    @('20 - aprovision-service notif', 'api/notificaciones/actuator/health'),
+    @('21 - campo-service', 'api/campo/actuator/health'),
+    @('22 - comedor-service', 'api/comedor/actuator/health'),
+    @('23 - flota-service', 'api/flota/actuator/health'),
+    @('24 - mantenimiento-service', 'api/mantenimiento/actuator/health'),
+    @('25 - operaciones-service', 'api/operaciones/actuator/health'),
     @('26 - presupuesto-service', 'api/presupuesto/actuator/health')
 )
 foreach ($m in $migrationMap) {
@@ -400,7 +557,7 @@ $collection = [ordered]@{
     event = @(
         [pscustomobject]@{
             listen = 'prerequest'
-            script = [pscustomobject]@{ type = 'text/javascript'; exec = @('') }
+            script = [pscustomobject]@{ type = 'text/javascript'; exec = $collectionPreRequestScript }
         },
         [pscustomobject]@{
             listen = 'test'
@@ -419,8 +576,9 @@ $collection = [ordered]@{
         @{ key = 'asistencia_db_port'; value = '5433'; type = 'string' }
         @{ key = 'sonarqube_url'; value = 'http://crisaor.serveftp.com:9001'; type = 'string' }
         @{ key = 'provision_secret'; value = 'dev-provision-cambiar-produccion'; type = 'string' }
-        @{ key = 'jwt_token'; value = ''; type = 'string' }
+        @{ key = 'jwt_temporal_token'; value = ''; type = 'string' }
         @{ key = 'jwt_definitive_token'; value = ''; type = 'string' }
+        @{ key = 'refresh_token'; value = ''; type = 'string' }
         @{ key = 'empresa_id'; value = '2'; type = 'string' }
         @{ key = 'usuario_id'; value = '3'; type = 'string' }
     )
