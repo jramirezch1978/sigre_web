@@ -366,7 +366,16 @@ export class AdminPasswordRecoveryComponent implements OnInit, OnDestroy {
     this.successMessage = '';
   }
 
-  private leerErrorApi(err: { error?: { message?: string } }, fallback: string): string {
+  private leerErrorApi(
+    err: { status?: number; error?: { message?: string; errorCode?: string } },
+    fallback: string
+  ): string {
+    if (err?.status === 403) {
+      return 'Acceso denegado al servicio de autenticación. Verifique la URL o contacte soporte.';
+    }
+    if (err?.status === 0 || err?.status === 502 || err?.status === 504) {
+      return 'No se pudo contactar al servidor. Intente nuevamente en unos segundos.';
+    }
     return err?.error?.message?.trim() || fallback;
   }
 
