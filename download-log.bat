@@ -59,40 +59,35 @@ if /i "%~1"=="compose" (
 if /i "%~1"=="infra" (
     if "%~2"=="" set "TARGET_SERVICES=%INFRA_SERVICES%" & goto :download
     if /i "%~2"=="all" set "TARGET_SERVICES=%INFRA_SERVICES%" & goto :download
-    shift
-    call :collect_args %*
+    call :collect_args %2 %3 %4 %5 %6 %7 %8 %9 || goto :help
     goto :download
 )
 
 if /i "%~1"=="core" (
     if "%~2"=="" set "TARGET_SERVICES=%CORE_SERVICES%" & goto :download
     if /i "%~2"=="all" set "TARGET_SERVICES=%CORE_SERVICES%" & goto :download
-    shift
-    call :collect_args %*
+    call :collect_args %2 %3 %4 %5 %6 %7 %8 %9 || goto :help
     goto :download
 )
 
 if /i "%~1"=="commerce" (
     if "%~2"=="" set "TARGET_SERVICES=%COMMERCE_SERVICES%" & goto :download
     if /i "%~2"=="all" set "TARGET_SERVICES=%COMMERCE_SERVICES%" & goto :download
-    shift
-    call :collect_args %*
+    call :collect_args %2 %3 %4 %5 %6 %7 %8 %9 || goto :help
     goto :download
 )
 
 if /i "%~1"=="domain" (
     if "%~2"=="" set "TARGET_SERVICES=%DOMAIN_SERVICES%" & goto :download
     if /i "%~2"=="all" set "TARGET_SERVICES=%DOMAIN_SERVICES%" & goto :download
-    shift
-    call :collect_args %*
+    call :collect_args %2 %3 %4 %5 %6 %7 %8 %9 || goto :help
     goto :download
 )
 
 if /i "%~1"=="stack" (
     if "%~2"=="" set "TARGET_SERVICES=%STACK_SERVICES%" & goto :download
     if /i "%~2"=="all" set "TARGET_SERVICES=%STACK_SERVICES%" & goto :download
-    shift
-    call :collect_args %*
+    call :collect_args %2 %3 %4 %5 %6 %7 %8 %9 || goto :help
     goto :download
 )
 
@@ -102,8 +97,7 @@ if /i "%~1"=="backend" (
         set "TARGET_SERVICES=%ALL_BACKEND_SERVICES%"
         goto :download
     )
-    shift
-    call :collect_args %*
+    call :collect_args %2 %3 %4 %5 %6 %7 %8 %9 || goto :help
     goto :download
 )
 
@@ -116,8 +110,7 @@ if /i "%~1"=="frontend" (
         set "TARGET_SERVICES=%FRONTEND_SERVICES%"
         goto :download
     )
-    shift
-    call :collect_args %*
+    call :collect_args %2 %3 %4 %5 %6 %7 %8 %9 || goto :help
     goto :download
 )
 
