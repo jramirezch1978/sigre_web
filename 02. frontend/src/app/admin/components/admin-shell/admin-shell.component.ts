@@ -2,8 +2,6 @@ import { Component, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../auth/services/auth.service';
-import { StorageService } from '../../../core/services/storage.service';
-import { JwtClaimsReaderService } from '../../services/jwt-claims-reader.service';
 
 export interface AdminMenuItem {
   label: string;
@@ -21,12 +19,9 @@ export class AdminShellComponent {
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
-  private readonly storage = inject(StorageService);
-  private readonly claims = inject(JwtClaimsReaderService);
 
   rutaActiva = '';
   menuAbierto = true;
-  empresaLabel = '';
 
   readonly menuItems: AdminMenuItem[] = [
     { label: 'Inicio', icon: 'home-outline', route: '/admin/inicio' },
@@ -46,12 +41,6 @@ export class AdminShellComponent {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(e => this.rutaActiva = e.urlAfterRedirects);
-
-    const token = this.storage.getToken();
-    if (token) {
-      const empId = this.claims.getEmpresaId(token);
-      this.empresaLabel = empId ? `Empresa #${empId}` : 'Sin empresa';
-    }
   }
 
   isActive(route: string): boolean {

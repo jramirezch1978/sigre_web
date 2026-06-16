@@ -7,7 +7,7 @@ import { StorageService } from '../../../core/services/storage.service';
 import { JwtClaimsReaderService } from '../../services/jwt-claims-reader.service';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { AdminCoreMaestrosApiService } from '../../services/admin-core-maestros-api.service';
-import { AuthService, LoginData } from '../../../auth/services/auth.service';
+import { AuthService } from '../../../auth/services/auth.service';
 import { ApiResponse } from '../../../shared/models/api-response.model';
 import {
   AdminDashboardTelemetry,
@@ -57,9 +57,7 @@ export class AdminDashboardComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   avisoClave: string | null = null;
-  empresaEtiqueta = '—';
   tokenTemporal = false;
-  empresaNombreSesion: string | null = null;
 
   telemetry: AdminDashboardTelemetry | null = null;
   kpis: AdminDashboardKpis | null = null;
@@ -135,16 +133,6 @@ export class AdminDashboardComponent implements OnInit {
     const token = this.storage.getToken();
     if (token) {
       this.tokenTemporal = this.claimsReader.isTemporal(token);
-      const empresaId = this.claimsReader.getEmpresaId(token);
-      this.empresaEtiqueta = empresaId != null && empresaId > 0 ? `Empresa ID ${empresaId}` : 'Sin empresa en sesión';
-
-      const user = this.storage.getUser<LoginData>();
-      if (user?.empresaNombre) {
-        this.empresaNombreSesion = user.empresaNombre;
-        if (empresaId != null && empresaId > 0) {
-          this.empresaEtiqueta = `${user.empresaNombre} (ID ${empresaId})`;
-        }
-      }
     }
 
     this.cargarDashboard();
