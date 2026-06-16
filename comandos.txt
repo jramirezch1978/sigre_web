@@ -239,7 +239,8 @@ REM Opcional registry remoto: deploy.bat ^<servicio^> --force --registry  ^(requ
 .\deploy.bat security --force
 REM logistica: discovery api-gateway seguridad almacen compras
 REM finanzas: discovery api-gateway seguridad contabilidad finanzas
-REM Si falla por imagen sigre/discovery-server: deploy.bat retag-images  luego deploy.bat security --force
+REM sync-service incluye ms-worker (schema sync, jobs activos)
+.\deploy.bat sync-service --force
 
 --- Despliegue por grupo ---
 .\deploy.bat infra
@@ -260,8 +261,10 @@ Flujo: Login -> seleccionar-empresa (guarda jwt_definitive_token) -> resto de AP
 REM SonarQube: http://crisaor.serveftp.com:9001
 
 --- Logs ---
-.\download-log.bat backend api-gateway
-.\download-log.bat backend asistencia-service
+.\download-log.bat all
+.\download-log.bat compose
+.\download-log.bat core all
+.\download-log.bat backend core-service seguridad-service
 .\download-log.bat frontend
 
 --- Pools HikariCP (PG max_connections=100) ---
