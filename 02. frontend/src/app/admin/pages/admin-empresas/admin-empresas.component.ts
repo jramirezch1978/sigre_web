@@ -252,6 +252,41 @@ export class AdminEmpresasComponent implements OnInit {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  async confirmarRecrear(e: EmpresaAdminDto): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: ModalConfirmationComponent,
+      cssClass: 'promo',
+      componentProps: {
+        titlemodal: '',
+        tipemodal: 'warning',
+        title: 'Recrear base de datos',
+        message: `Se eliminará y recreará la BD <strong>${this.escapeHtmlLite(e.dbName ?? '')}</strong> desde el template.\n\nEsta acción borra todos los datos del tenant «${this.escapeHtmlLite(e.razonSocial)}». ¿Continuar?`,
+        btnCancelTxt: 'Cancelar',
+        btnOkTxt: 'Recrear',
+      },
+    });
+    await modal.present();
+    const { data: confirmed } = await modal.onDidDismiss<boolean>();
+    if (!confirmed) return;
+
+    const secret = prompt('Ingrese el secreto de aprovisionamiento:');
+    if (!secret || !secret.trim()) {
+      await this.presentToast('Debe ingresar el secreto de aprovisionamiento', 'warning');
+      return;
+    }
+
+    this.provisioning.recrearEmpresa({ dbName: e.dbName }, secret.trim()).subscribe({
+      next: async res => {
+        const msg = res.data?.mensaje ?? res.message ?? 'Base de datos recreada exitosamente.';
+        await this.presentSuccess('BD recreada', msg);
+        this.cargar();
+      },
+      error: async (err: any) => {
+        await this.presentError(err?.error?.message ?? 'No se pudo recrear la base de datos.');
+      },
+    });
+  }
+
   abrirEliminar(e: EmpresaAdminDto): void {
     this.empresaEliminar = e;
     this.secretoEliminar = '';

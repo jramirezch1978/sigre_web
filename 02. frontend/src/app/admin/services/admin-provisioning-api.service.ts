@@ -59,6 +59,21 @@ export interface ProvisionEmpresaResult {
   mensaje?: string;
 }
 
+export interface RecreateEmpresaBody {
+  empresaId?: number;
+  codigo?: string;
+  ruc?: string;
+  dbName?: string;
+}
+
+export interface RecreateEmpresaResult {
+  empresaId?: number;
+  codigo?: string;
+  ruc?: string;
+  dbName?: string;
+  mensaje?: string;
+}
+
 export interface DeleteEmpresaProvisionBody {
   codigo?: string;
   ruc?: string;
@@ -83,6 +98,18 @@ export class AdminProvisioningApiService extends AbstractAuthenticatedApiService
   provisionar(body: ProvisionEmpresaBody, provisionSecret: string): Observable<ApiResponse<ProvisionEmpresaResult>> {
     return this.http.post<ApiResponse<ProvisionEmpresaResult>>(
       this.buildUrl('/admin/empresas/provision'),
+      body,
+      {
+        headers: this.bearerHeaders({
+          'X-Provision-Secret': provisionSecret,
+        }),
+      }
+    );
+  }
+
+  recrearEmpresa(body: RecreateEmpresaBody, provisionSecret: string): Observable<ApiResponse<RecreateEmpresaResult>> {
+    return this.http.post<ApiResponse<RecreateEmpresaResult>>(
+      this.buildUrl('/admin/empresas/recreate'),
       body,
       {
         headers: this.bearerHeaders({
