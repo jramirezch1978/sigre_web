@@ -11,6 +11,7 @@ REM ============================================================
 REM   database-deploy.bat create
 REM   database-deploy.bat create-security [--force]
 REM   database-deploy.bat create-template [--force]
+REM   database-deploy.bat create-asistencia [--force]
 REM   database-deploy.bat insert
 REM   database-deploy.bat clone <empresa> [--force]
 REM   database-deploy.bat delete <nombre_bd> [--force]
@@ -41,13 +42,22 @@ set "PGTEMPLATE=sigre_template"
 set "PGDATABASE=%PGTEMPLATE%"
 set "PGSQLIMG=postgres:17-alpine"
 set "PGSSLMODE=disable"
+set "PGASISTENCIA_HOST=crisaor.serveftp.com"
+set "PGASISTENCIA_PORT=5433"
+set "PGASISTENCIA_USER=sigre-web"
+set "PGASISTENCIA_DB=db-sigre-web"
 
 if exist "!ENV_FILE!" (
     for /f "usebackq eol=# tokens=1,* delims==" %%a in ("!ENV_FILE!") do (
         if /i "%%a"=="POSTGRES_PASSWORD" set "PGPASSWORD=%%b"
         if /i "%%a"=="POSTGRES_USER" set "PGUSER=%%b"
+        if /i "%%a"=="ASISTENCIA_DB_PASSWORD" set "PGASISTENCIA_PASSWORD=%%b"
+        if /i "%%a"=="ASISTENCIA_DB_HOST" set "PGASISTENCIA_HOST=%%b"
+        if /i "%%a"=="ASISTENCIA_DB_PORT" set "PGASISTENCIA_PORT=%%b"
     )
 )
+if defined PGASISTENCIA_PASSWORD set "PGASISTENCIA_PASSWORD=!PGASISTENCIA_PASSWORD:"=!"
+if not defined PGASISTENCIA_PASSWORD set "PGASISTENCIA_PASSWORD=S1greW3b@2025!"
 if defined PGPASSWORD set "PGPASSWORD=!PGPASSWORD:"=!"
 if not defined PGPASSWORD (
     echo ERROR: POSTGRES_PASSWORD no definida en deploy\cronos\.env
@@ -75,6 +85,7 @@ for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format ddMMy
 set "DBDEPLOY_SCOPE=general"
 if /I "!MODE!"=="create-security" set "DBDEPLOY_SCOPE=security"
 if /I "!MODE!"=="create-template" set "DBDEPLOY_SCOPE=template"
+if /I "!MODE!"=="create-asistencia" set "DBDEPLOY_SCOPE=asistencia"
 if /I "!MODE!"=="create" set "DBDEPLOY_SCOPE=security-template"
 if /I "!MODE!"=="insert" set "DBDEPLOY_SCOPE=insert-template"
 if /I "!MODE!"=="clone" set "DBDEPLOY_SCOPE=clone"
@@ -96,6 +107,7 @@ if "!MODE!"=="" goto :help
 if /I "!MODE!"=="create" goto :route_create
 if /I "!MODE!"=="create-security" goto :route_create_security
 if /I "!MODE!"=="create-template" goto :route_create_template
+if /I "!MODE!"=="create-asistencia" goto :route_create_asistencia
 if /I "!MODE!"=="insert" goto :route_insert
 if /I "!MODE!"=="clone" goto :route_clone
 if /I "!MODE!"=="delete" goto :route_delete
@@ -127,6 +139,11 @@ goto :done
 :route_create_template
 call :check_host_docker_ddl || goto :fail
 call :do_create_template || goto :fail
+goto :done
+
+:route_create_asistencia
+call :check_host_docker || goto :fail
+call :do_create_asistencia || goto :fail
 goto :done
 
 :route_insert
@@ -211,6 +228,11 @@ exit /b %ERRORLEVEL%
 set "SQLLINE=%~1"
 set "TARGETDB=%~2"
 docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!TARGETDB!" -v ON_ERROR_STOP=1 -c "!SQLLINE!"
+exit /b %ERRORLEVEL%
+
+:psql_asistencia_cmd
+set "SQLLINE=%~1"
+docker run --rm -e "PGPASSWORD=!PGASISTENCIA_PASSWORD!" -e PGSSLMODE=!PGSSLMODE! !PGSQLIMG! psql -h "!PGASISTENCIA_HOST!" -p "!PGASISTENCIA_PORT!" -U "!PGASISTENCIA_USER!" -d "!PGASISTENCIA_DB!" -v ON_ERROR_STOP=1 -c "!SQLLINE!"
 exit /b %ERRORLEVEL%
 
 :run_sql
@@ -322,6 +344,30 @@ echo.
 echo ^>^> create-template: DDL de plantilla ejecutado en !PGTEMPLATE!
 exit /b 0
 
+:do_create_asistencia
+echo.
+echo ^>^> Modo: create-asistencia ^(!PGASISTENCIA_DB!^)  Force: !FORCE!
+echo ^>^> Conexion: !PGASISTENCIA_USER!@!PGASISTENCIA_HOST!:!PGASISTENCIA_PORT!/!PGASISTENCIA_DB!
+echo ^>^> Nota: BD dedicada asistencia-service. Sin DDL multitenant.
+echo ^>^> El esquema lo gestiona asistencia-service ^(hibernate ddl-auto=update^).
+echo.
+if "!FORCE!"=="1" (
+    echo ^>^> --force: recrear volumen requiere en cronos:
+    echo       deploy.bat stack --force
+    echo       ^(elimina db_sigre_web_data si necesita BD limpia^)
+)
+echo ^>^> Verificando PostgreSQL asistencia...
+call :psql_asistencia_cmd "SELECT current_database() AS db, current_user AS usr, version();"
+if errorlevel 1 (
+    echo ERROR: No se pudo conectar a !PGASISTENCIA_DB!.
+    echo        1^) Levante stack: deploy.bat stack --force
+    echo        2^) Verifique ASISTENCIA_DB_* en deploy\cronos\.env
+    exit /b 1
+)
+echo.
+echo ^>^> create-asistencia: conexion OK. Despliegue: deploy.bat asistencia-service --force
+exit /b 0
+
 :do_insert
 echo.
 echo ^>^> Modo: insert ^(seed en !PGDATABASE!^)
@@ -369,7 +415,7 @@ exit /b 0
 
 :is_protected_db
 set "PDB=%~1"
-powershell -NoProfile -Command "$d=$env:PDB.Trim().ToLower(); $x=@('postgres','template0','template1','sigre_security','sigre_template','sonarqube'); if($x -contains $d){exit 1}; exit 0"
+powershell -NoProfile -Command "$d=$env:PDB.Trim().ToLower(); $x=@('postgres','template0','template1','sigre_security','sigre_template','sonarqube','db-sigre-web'); if($x -contains $d){exit 1}; exit 0"
 exit /b %ERRORLEVEL%
 
 :do_delete
@@ -433,6 +479,7 @@ echo Uso:
 echo   %~nx0 create                  DDL completo: security + template
 echo   %~nx0 create-security         Solo !PGSECURITY!
 echo   %~nx0 create-template         Solo !PGTEMPLATE!
+echo   %~nx0 create-asistencia       Verifica BD dedicada asistencia ^(!PGASISTENCIA_DB!^)
 echo   %~nx0 insert                  Solo seed ^(requiere create previo^)
 echo   %~nx0 clone ^<empresa^>
 echo   %~nx0 delete ^<nombre_bd^>

@@ -68,6 +68,63 @@ services:
         max-file: "3"
         compress: "true"
 
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: sigre
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-sigre}
+      TZ: America/Lima
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "3"
+        compress: "true"
+
+  db-sigre-web:
+    container_name: db-sigre-web
+    image: postgres:17
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: db-sigre-web
+      POSTGRES_USER: sigre-web
+      POSTGRES_PASSWORD: ${ASISTENCIA_DB_PASSWORD:-S1greW3b@2025!}
+      TZ: America/Lima
+      PGTZ: America/Lima
+    command:
+      - postgres
+      - -c
+      - timezone=America/Lima
+    volumes:
+      - db_sigre_web_data:/var/lib/postgresql/data
+    mem_limit: 512m
+    shm_size: 128mb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sigre-web -d db-sigre-web"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
   sonarqube:
     profiles: ["tools"]
     container_name: sonarqube
@@ -104,6 +161,10 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  db_sigre_web_data:
     driver: local
   sonarqube_data:
     driver: local
