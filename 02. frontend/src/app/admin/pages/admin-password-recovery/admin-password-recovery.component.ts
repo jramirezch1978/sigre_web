@@ -118,7 +118,7 @@ export class AdminPasswordRecoveryComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         this.errorMessage = this.leerErrorApi(
           err,
-          'El nombre de usuario ingresado no existe. Verifique e intente nuevamente.'
+          'No se encontró una cuenta con ese usuario o correo. Verifique e intente nuevamente.'
         );
       },
     });
