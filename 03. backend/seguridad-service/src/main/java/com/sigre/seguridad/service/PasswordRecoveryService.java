@@ -48,7 +48,7 @@ public class PasswordRecoveryService {
     }
 
     public String obtenerEmailOfuscado(String usernameOrEmail) {
-        Usuario usuario = findUsuarioByUsernameOrEmail(usernameOrEmail);
+        Usuario usuario = findUsuarioByUsernameOrEmail(normalizeLogin(usernameOrEmail));
         return ocultarEmail(usuario.getEmail());
     }
 
@@ -152,16 +152,21 @@ public class PasswordRecoveryService {
         }
     }
 
+    private String normalizeLogin(String value) {
+        return value == null ? "" : value.trim();
+    }
+
     private Usuario findUsuarioByEmail(String email) {
-        return usuarioRepository.findByEmailAndActivoTrue(email)
+        return usuarioRepository.findByEmailAndActivoTrue(normalizeLogin(email))
                 .orElseThrow(() -> new BusinessException(
                         "No se encontró una cuenta con ese correo electrónico",
                         HttpStatus.NOT_FOUND, "EMAIL_NO_ENCONTRADO"));
     }
 
     private Usuario findUsuarioByUsernameOrEmail(String usernameOrEmail) {
-        return usuarioRepository.findByEmailAndActivoTrue(usernameOrEmail)
-                .or(() -> usuarioRepository.findByUsernameAndActivoTrue(usernameOrEmail))
+        String login = normalizeLogin(usernameOrEmail);
+        return usuarioRepository.findByEmailAndActivoTrue(login)
+                .or(() -> usuarioRepository.findByUsernameAndActivoTrue(login))
                 .orElseThrow(() -> new BusinessException(
                         "No se encontró una cuenta con ese usuario o correo",
                         HttpStatus.NOT_FOUND, "USUARIO_NO_ENCONTRADO"));

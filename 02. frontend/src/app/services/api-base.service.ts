@@ -8,13 +8,17 @@ export class ApiBaseService {
   private readonly config = inject(ConfigService);
 
   getApiBaseUrl(): string {
+    const envBase = (environment.apiBaseUrl ?? '/api').replace(/\/$/, '');
+    // Misma origen que la SPA: nginx en :8080 proxya /api → api-gateway (evita CORS y puerto 9080).
+    if (typeof window !== 'undefined' && envBase.startsWith('/')) {
+      return envBase || '/api';
+    }
+    if (envBase.startsWith('http')) {
+      return envBase;
+    }
     if (this.config.isConfigLoaded()) {
       const base = this.config.getCurrentConfig().api.baseUrl.replace(/\/$/, '');
       return `${base}/api`;
-    }
-    const envBase = environment.apiBaseUrl.replace(/\/$/, '');
-    if (envBase.startsWith('http')) {
-      return envBase;
     }
     const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
     return `http://${host}:9080/api`;

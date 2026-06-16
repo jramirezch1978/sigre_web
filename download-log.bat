@@ -59,35 +59,40 @@ if /i "%~1"=="compose" (
 if /i "%~1"=="infra" (
     if "%~2"=="" set "TARGET_SERVICES=%INFRA_SERVICES%" & goto :download
     if /i "%~2"=="all" set "TARGET_SERVICES=%INFRA_SERVICES%" & goto :download
-    call :collect_args infra %*
+    shift
+    call :collect_args %*
     goto :download
 )
 
 if /i "%~1"=="core" (
     if "%~2"=="" set "TARGET_SERVICES=%CORE_SERVICES%" & goto :download
     if /i "%~2"=="all" set "TARGET_SERVICES=%CORE_SERVICES%" & goto :download
-    call :collect_args core %*
+    shift
+    call :collect_args %*
     goto :download
 )
 
 if /i "%~1"=="commerce" (
     if "%~2"=="" set "TARGET_SERVICES=%COMMERCE_SERVICES%" & goto :download
     if /i "%~2"=="all" set "TARGET_SERVICES=%COMMERCE_SERVICES%" & goto :download
-    call :collect_args commerce %*
+    shift
+    call :collect_args %*
     goto :download
 )
 
 if /i "%~1"=="domain" (
     if "%~2"=="" set "TARGET_SERVICES=%DOMAIN_SERVICES%" & goto :download
     if /i "%~2"=="all" set "TARGET_SERVICES=%DOMAIN_SERVICES%" & goto :download
-    call :collect_args domain %*
+    shift
+    call :collect_args %*
     goto :download
 )
 
 if /i "%~1"=="stack" (
     if "%~2"=="" set "TARGET_SERVICES=%STACK_SERVICES%" & goto :download
     if /i "%~2"=="all" set "TARGET_SERVICES=%STACK_SERVICES%" & goto :download
-    call :collect_args stack %*
+    shift
+    call :collect_args %*
     goto :download
 )
 
@@ -97,7 +102,8 @@ if /i "%~1"=="backend" (
         set "TARGET_SERVICES=%ALL_BACKEND_SERVICES%"
         goto :download
     )
-    call :collect_args backend %*
+    shift
+    call :collect_args %*
     goto :download
 )
 
@@ -110,7 +116,14 @@ if /i "%~1"=="frontend" (
         set "TARGET_SERVICES=%FRONTEND_SERVICES%"
         goto :download
     )
-    call :collect_args frontend %*
+    shift
+    call :collect_args %*
+    goto :download
+)
+
+call :is_known_service "%~1"
+if not errorlevel 1 (
+    set "TARGET_SERVICES=%~1"
     goto :download
 )
 
@@ -118,7 +131,6 @@ echo ERROR: Comando no reconocido. Use all, compose, backend, frontend, infra, c
 goto :help
 
 :collect_args
-shift
 :collect_loop
 if "%~1"=="" exit /b 0
 call :validate_known "%~1" || exit /b 1
@@ -129,6 +141,11 @@ if defined TARGET_SERVICES (
 )
 shift
 goto :collect_loop
+
+:is_known_service
+set "SVC=%~1"
+for %%V in (%KNOWN_SERVICES%) do if /i "!SVC!"=="%%V" exit /b 0
+exit /b 1
 
 :validate_known
 set "SVC=%~1"
@@ -226,6 +243,7 @@ echo   %~nx0 all                  — Todos los microservicios + frontend del re
 echo   %~nx0 compose              — Solo servicios en docker-compose.app.yml ^(cronos^)
 echo   %~nx0 backend all
 echo   %~nx0 backend core-service seguridad-service
+echo   %~nx0 asistencia-service       — Un servicio directo (sin grupo)
 echo   %~nx0 infra ^| core ^| commerce ^| domain [all ^| servicio...]
 echo   %~nx0 frontend
 echo   %~nx0 stack all            — Infra stack ^(postgres17, sonarqube^)

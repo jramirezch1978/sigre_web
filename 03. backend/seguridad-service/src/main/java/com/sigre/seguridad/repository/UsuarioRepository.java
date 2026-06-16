@@ -9,10 +9,10 @@ import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.flagEstado = '1'")
+    @Query("SELECT u FROM Usuario u WHERE LOWER(u.email) = LOWER(:email) AND u.flagEstado = '1'")
     Optional<Usuario> findByEmailAndActivoTrue(@Param("email") String email);
 
-    @Query("SELECT u FROM Usuario u WHERE u.username = :username AND u.flagEstado = '1'")
+    @Query("SELECT u FROM Usuario u WHERE LOWER(u.username) = LOWER(:username) AND u.flagEstado = '1'")
     Optional<Usuario> findByUsernameAndActivoTrue(@Param("username") String username);
 
     boolean existsByEmail(String email);
