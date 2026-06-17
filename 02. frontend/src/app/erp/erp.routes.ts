@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '../core/guards/auth.guard';
+import { erpSessionGuard } from './guards/erp-session.guard';
 
 export const erpRoutes: Routes = [
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [erpSessionGuard],
     children: [
       { path: '', redirectTo: 'inicio', pathMatch: 'full' },
       {

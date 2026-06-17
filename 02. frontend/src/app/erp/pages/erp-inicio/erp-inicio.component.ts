@@ -39,11 +39,33 @@ export class ErpInicioComponent implements OnInit {
       empresaNombre?: string;
       sucursalNombre?: string;
     }>();
-    this.nombreUsuario = user?.nombreCompleto ?? user?.nombres ?? 'Usuario';
-    this.empresaActual = user?.empresaNombre ?? '';
-    this.sucursalActual = user?.sucursalNombre ?? '';
+
+    if (user?.nombreCompleto) {
+      this.nombreUsuario = user.nombreCompleto;
+      this.empresaActual = user.empresaNombre ?? '';
+      this.sucursalActual = user.sucursalNombre ?? '';
+    } else {
+      const claims = this.leerClaimsToken();
+      this.nombreUsuario = claims?.nombreCompleto ?? claims?.nombres ?? 'Usuario';
+      this.empresaActual = claims?.empresaNombre ?? '';
+      this.sucursalActual = claims?.sucursalNombre ?? '';
+    }
 
     this.cargarMenu();
+  }
+
+  private leerClaimsToken(): Record<string, string> | null {
+    const token = this.storage.getToken();
+    if (!token) return null;
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4 !== 0) base64 += '=';
+      return JSON.parse(atob(base64));
+    } catch {
+      return null;
+    }
   }
 
   cargarMenu(): void {
