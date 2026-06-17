@@ -134,16 +134,6 @@
           </div>
           <div class="form-row">
             <ion-item>
-              <ion-label position="stacked">Representante legal</ion-label>
-              <ion-input formControlName="represLegal" maxlength="200"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">DNI representante legal</ion-label>
-              <ion-input formControlName="dniRepresLegal" maxlength="20" inputmode="numeric"></ion-input>
-            </ion-item>
-          </div>
-          <div class="form-row">
-            <ion-item>
               <ion-label position="stacked">Correo de contacto</ion-label>
               <ion-input type="email" formControlName="correoContacto" maxlength="150"></ion-input>
             </ion-item>
@@ -152,43 +142,72 @@
               <ion-input formControlName="celular" maxlength="30"></ion-input>
             </ion-item>
           </div>
-          <div class="form-row">
-            <ion-item class="full-row">
-              <ion-label position="stacked">Dirección fiscal</ion-label>
-              <ion-input formControlName="direccion" maxlength="300"></ion-input>
-            </ion-item>
+
+          <div class="form-panel">
+            <h4 class="form-panel__title">
+              <ion-icon name="person-outline"></ion-icon>
+              Datos del representante legal
+            </h4>
+            <div class="form-panel__body">
+              <div class="form-row">
+                <ion-item>
+                  <ion-label position="stacked">Representante legal</ion-label>
+                  <ion-input formControlName="represLegal" maxlength="200"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">DNI representante legal</ion-label>
+                  <ion-input formControlName="dniRepresLegal" maxlength="20" inputmode="numeric"></ion-input>
+                </ion-item>
+              </div>
+            </div>
           </div>
-          <div class="form-row">
-            <ion-item>
-              <ion-label position="stacked">Departamento</ion-label>
-              <ion-select [value]="selectedDepartamentoNueva" (ionChange)="onDepartamentoChangeNueva($event.detail.value)"
-                placeholder="Seleccione" interface="popover">
-                @for (d of departamentos; track d.id) {
-                  <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
-                }
-              </ion-select>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">Provincia</ion-label>
-              <ion-select [value]="selectedProvinciaNueva" (ionChange)="onProvinciaChangeNueva($event.detail.value)"
-                placeholder="Seleccione" interface="popover" [disabled]="!selectedDepartamentoNueva">
-                @for (p of provinciasNueva; track p.id) {
-                  <ion-select-option [value]="p.id">{{ p.nombre }}</ion-select-option>
-                }
-              </ion-select>
-            </ion-item>
+
+          <div class="form-panel">
+            <h4 class="form-panel__title">
+              <ion-icon name="location-outline"></ion-icon>
+              Dirección fiscal de la empresa
+            </h4>
+            <div class="form-panel__body">
+              <div class="form-row">
+                <ion-item class="full-row">
+                  <ion-label position="stacked">Dirección fiscal</ion-label>
+                  <ion-input formControlName="direccion" maxlength="300"></ion-input>
+                </ion-item>
+              </div>
+              <div class="form-row">
+                <ion-item>
+                  <ion-label position="stacked">Departamento</ion-label>
+                  <ion-select [value]="selectedDepartamentoNueva" (ionChange)="onDepartamentoChangeNueva($event.detail.value)"
+                    placeholder="Seleccione" interface="popover">
+                    @for (d of departamentos; track d.id) {
+                      <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Provincia</ion-label>
+                  <ion-select [value]="selectedProvinciaNueva" (ionChange)="onProvinciaChangeNueva($event.detail.value)"
+                    placeholder="Seleccione" interface="popover" [disabled]="!selectedDepartamentoNueva">
+                    @for (p of provinciasNueva; track p.id) {
+                      <ion-select-option [value]="p.id">{{ p.nombre }}</ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+              </div>
+              <div class="form-row">
+                <ion-item>
+                  <ion-label position="stacked">Distrito</ion-label>
+                  <ion-select formControlName="distritoId" placeholder="Seleccione" interface="popover"
+                    [disabled]="!selectedProvinciaNueva">
+                    @for (d of distritosNueva; track d.id) {
+                      <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+              </div>
+            </div>
           </div>
-          <div class="form-row">
-            <ion-item>
-              <ion-label position="stacked">Distrito</ion-label>
-              <ion-select formControlName="distritoId" placeholder="Seleccione" interface="popover"
-                [disabled]="!selectedProvinciaNueva">
-                @for (d of distritosNueva; track d.id) {
-                  <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
-                }
-              </ion-select>
-            </ion-item>
-          </div>
+
           <div class="form-actions">
             <ion-button type="submit" color="primary" [disabled]="guardandoNueva">
               @if (guardandoNueva) {
@@ -241,57 +260,76 @@
           </div>
           <div class="form-row">
             <ion-item class="full-row">
-              <ion-label position="stacked">Dirección fiscal</ion-label>
-              <ion-input formControlName="direccionFiscal" maxlength="300"></ion-input>
-            </ion-item>
-          </div>
-          <div class="form-row">
-            <ion-item>
-              <ion-label position="stacked">Departamento</ion-label>
-              <ion-select [value]="selectedDepartamentoEditar" (ionChange)="onDepartamentoChangeEditar($event.detail.value)"
-                placeholder="Seleccione" interface="popover">
-                @for (d of departamentos; track d.id) {
-                  <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
-                }
-              </ion-select>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">Provincia</ion-label>
-              <ion-select [value]="selectedProvinciaEditar" (ionChange)="onProvinciaChangeEditar($event.detail.value)"
-                placeholder="Seleccione" interface="popover" [disabled]="!selectedDepartamentoEditar">
-                @for (p of provinciasEditar; track p.id) {
-                  <ion-select-option [value]="p.id">{{ p.nombre }}</ion-select-option>
-                }
-              </ion-select>
-            </ion-item>
-          </div>
-          <div class="form-row">
-            <ion-item>
-              <ion-label position="stacked">Distrito</ion-label>
-              <ion-select formControlName="distritoId" placeholder="Seleccione" interface="popover"
-                [disabled]="!selectedProvinciaEditar">
-                @for (d of distritosEditar; track d.id) {
-                  <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
-                }
-              </ion-select>
-            </ion-item>
-          </div>
-          <div class="form-row">
-            <ion-item>
-              <ion-label position="stacked">Representante legal</ion-label>
-              <ion-input formControlName="representanteLegal" maxlength="200"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">DNI representante legal</ion-label>
-              <ion-input formControlName="dniRepresentanteLegal" maxlength="20" inputmode="numeric"></ion-input>
-            </ion-item>
-          </div>
-          <div class="form-row">
-            <ion-item class="full-row">
               <ion-label position="stacked">Correo de contacto</ion-label>
               <ion-input type="email" formControlName="correoContacto" maxlength="150"></ion-input>
             </ion-item>
           </div>
+
+          <div class="form-panel">
+            <h4 class="form-panel__title">
+              <ion-icon name="person-outline"></ion-icon>
+              Datos del representante legal
+            </h4>
+            <div class="form-panel__body">
+              <div class="form-row">
+                <ion-item>
+                  <ion-label position="stacked">Representante legal</ion-label>
+                  <ion-input formControlName="representanteLegal" maxlength="200"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">DNI representante legal</ion-label>
+                  <ion-input formControlName="dniRepresentanteLegal" maxlength="20" inputmode="numeric"></ion-input>
+                </ion-item>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-panel">
+            <h4 class="form-panel__title">
+              <ion-icon name="location-outline"></ion-icon>
+              Dirección fiscal de la empresa
+            </h4>
+            <div class="form-panel__body">
+              <div class="form-row">
+                <ion-item class="full-row">
+                  <ion-label position="stacked">Dirección fiscal</ion-label>
+                  <ion-input formControlName="direccionFiscal" maxlength="300"></ion-input>
+                </ion-item>
+              </div>
+              <div class="form-row">
+                <ion-item>
+                  <ion-label position="stacked">Departamento</ion-label>
+                  <ion-select [value]="selectedDepartamentoEditar" (ionChange)="onDepartamentoChangeEditar($event.detail.value)"
+                    placeholder="Seleccione" interface="popover">
+                    @for (d of departamentos; track d.id) {
+                      <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Provincia</ion-label>
+                  <ion-select [value]="selectedProvinciaEditar" (ionChange)="onProvinciaChangeEditar($event.detail.value)"
+                    placeholder="Seleccione" interface="popover" [disabled]="!selectedDepartamentoEditar">
+                    @for (p of provinciasEditar; track p.id) {
+                      <ion-select-option [value]="p.id">{{ p.nombre }}</ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+              </div>
+              <div class="form-row">
+                <ion-item>
+                  <ion-label position="stacked">Distrito</ion-label>
+                  <ion-select formControlName="distritoId" placeholder="Seleccione" interface="popover"
+                    [disabled]="!selectedProvinciaEditar">
+                    @for (d of distritosEditar; track d.id) {
+                      <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+              </div>
+            </div>
+          </div>
+
           <div class="form-actions">
             <ion-button type="submit" color="primary">Guardar</ion-button>
             <ion-button type="button" fill="outline" color="medium" (click)="cerrarEditar()">Cancelar</ion-button>
