@@ -14,16 +14,32 @@ SET statement_timeout = '0';
 -- TX 0: EMPRESA (master)
 BEGIN;
 
--- Tenants demo externos eliminados; SIGRE arranca con tenant piloto Cantabria.
-DELETE FROM master.empresa WHERE id BETWEEN 3 AND 9;
+-- Tenants demo externos eliminados; SIGRE arranca con Cantabria y Blue Coast.
+DELETE FROM master.empresa WHERE id BETWEEN 4 AND 9;
 
 INSERT INTO master.empresa (
     id, codigo, ruc, razon_social, nombre_comercial, direccion_fiscal, ubigeo,
-    representante_legal, correo_contacto, telefono_contacto, db_host, db_port,
+    distrito_id, representante_legal, dni_representante_legal,
+    correo_contacto, telefono_contacto, db_host, db_port,
     db_name, db_user, db_password_encrypted, flag_estado
 )
 VALUES
-    (2, 'T0000009', '20504595863', 'PESQUERA CANTABRIA S.A.', 'CANTABRIA', 'CALLE AMADOR MERINO REYNA 339 INT 501 - SAN ISIDRO - LIMA', '010101', 'JUAN CARLOS PEREZ RAMIREZ', 'contacto@cantabria.com.pe', '999888777', 'postgres', 5432, 'sigre_emp_cantabria', 'cantabria', '5gC+og7bqKDE8zKIZpm2wJeSNkWxsaGfpaWws5CUJY0Lr4aT4yjWjV6rD7sLGQ==', '1')
+    (
+        2, 'T0000009', '20504595863', 'PESQUERA CANTABRIA S.A.', 'CANTABRIA',
+        'CALLE AMADOR MERINO REYNA 339 INT 501 - SAN ISIDRO - LIMA', '010101',
+        NULL, 'JUAN CARLOS PEREZ RAMIREZ', NULL,
+        'contacto@cantabria.com.pe', '999888777',
+        'postgres', 5432, 'sigre_emp_cantabria', 'cantabria',
+        '5gC+og7bqKDE8zKIZpm2wJeSNkWxsaGfpaWws5CUJY0Lr4aT4yjWjV6rD7sLGQ==', '1'
+    ),
+    (
+        3, 'T0000010', '20609837340', 'BLUE COAST S.A.C.', 'BLUE COAST S.A.C.',
+        'AV. RIVERA NAVARRETE NRO. 2801 DPTO. 1606', '150131',
+        NULL, 'Francisco Camino Rivera', '12345678',
+        'javier.camino@bluecoastsac.com', '+51 994 076 286',
+        'postgres', 5432, 'sigre_emp_bluecoast', 'bluecoast',
+        'Jkke6fZxOXE+EiGVEMuHwwl9BmrvptRoExA7QX5swBCmcYyErg==', '1'
+    )
 ON CONFLICT (id) DO UPDATE SET
     codigo = EXCLUDED.codigo,
     ruc = EXCLUDED.ruc,
@@ -31,7 +47,9 @@ ON CONFLICT (id) DO UPDATE SET
     nombre_comercial = EXCLUDED.nombre_comercial,
     direccion_fiscal = EXCLUDED.direccion_fiscal,
     ubigeo = EXCLUDED.ubigeo,
+    distrito_id = EXCLUDED.distrito_id,
     representante_legal = EXCLUDED.representante_legal,
+    dni_representante_legal = EXCLUDED.dni_representante_legal,
     correo_contacto = EXCLUDED.correo_contacto,
     telefono_contacto = EXCLUDED.telefono_contacto,
     db_host = EXCLUDED.db_host,
@@ -450,7 +468,7 @@ VALUES
 COMMIT;
 
 -- TX 2: Asignaciones usuario–empresa (en security)
--- Usuario jramirez (id=3) asignado al tenant piloto Cantabria (empresa_id = 2).
+-- Usuario jramirez (id=3) asignado a todas las empresas activas del seed.
 BEGIN;
 
 INSERT INTO auth.usuario_empresa (usuario_id, empresa_id, flag_estado, fec_creacion)
@@ -4118,5 +4136,12 @@ JOIN master.provincia p ON p.codigo = (
     ) AS pp(id_ubigeo, dept_id, codigo_ubigeo) ON pp.dept_id = dep.id_ubigeo
     WHERE pp.id_ubigeo = v.prov_ubigeo_id
 );
+
+-- Enlace distrito_id por ubigeo (FK disponible tras cargar master.distrito).
+UPDATE master.empresa
+SET distrito_id = d.id
+FROM master.distrito d
+WHERE master.empresa.id = 3
+  AND d.codigo = '150131';
 
 COMMIT;
