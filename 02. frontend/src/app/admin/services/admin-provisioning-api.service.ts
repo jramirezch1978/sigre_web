@@ -31,6 +31,7 @@ export interface ProvisionEmpresaBody {
   flagReplicacion?: string;
   flagCntrlCd?: string;
   represLegal?: string;
+  dniRepresLegal?: string;
   codActividad?: string;
   flagEnviaPersonal?: string;
   direccion?: string;

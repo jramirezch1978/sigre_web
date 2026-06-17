@@ -119,6 +119,10 @@ public class ProvisionEmpresaRequest {
     private String represLegal;
 
     @Size(max = 20)
+    @JsonAlias({"DNI_REPRES_LEGAL"})
+    private String dniRepresLegal;
+
+    @Size(max = 20)
     @JsonAlias({"COD_ACTIVIDAD"})
     private String codActividad;
 

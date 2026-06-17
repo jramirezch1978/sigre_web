@@ -53,6 +53,9 @@ public class EmpresaMaster {
     @Column(name = "representante_legal", length = 200)
     private String representanteLegal;
 
+    @Column(name = "dni_representante_legal", length = 20)
+    private String dniRepresentanteLegal;
+
     @Column(name = "correo_contacto", length = 150)
     private String correoContacto;
 

@@ -503,6 +503,7 @@ public class TenantProvisioningService {
                 .direccionFiscal(trimOrNull(direccionFiscal))
                 .ubigeo(trimOrNull(req.getDirUbigeo()))
                 .representanteLegal(trimOrNull(repLegal))
+                .dniRepresentanteLegal(trimOrNull(req.getDniRepresLegal()))
                 .correoContacto(trimOrNull(firstNonBlank(req.getEmail(), req.getCorreoContacto())))
                 .telefonoContacto(trimOrNull(telefono))
                 .dbHost(host)

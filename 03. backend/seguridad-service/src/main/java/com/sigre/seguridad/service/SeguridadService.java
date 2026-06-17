@@ -95,8 +95,8 @@ public class SeguridadService {
         return jdbcTemplate.query(
                 """
                 SELECT id, codigo, ruc, razon_social, nombre_comercial,
-                       direccion_fiscal, correo_contacto, telefono_contacto,
-                       db_name, flag_estado
+                       direccion_fiscal, representante_legal, dni_representante_legal,
+                       correo_contacto, telefono_contacto, db_name, flag_estado
                 FROM master.empresa
                 ORDER BY razon_social
                 """,
@@ -107,6 +107,8 @@ public class SeguridadService {
                         .razonSocial(rs.getString("razon_social"))
                         .nombreComercial(rs.getString("nombre_comercial"))
                         .direccionFiscal(rs.getString("direccion_fiscal"))
+                        .representanteLegal(rs.getString("representante_legal"))
+                        .dniRepresentanteLegal(rs.getString("dni_representante_legal"))
                         .correoContacto(rs.getString("correo_contacto"))
                         .telefonoContacto(rs.getString("telefono_contacto"))
                         .dbName(rs.getString("db_name"))
@@ -119,8 +121,8 @@ public class SeguridadService {
         List<EmpresaAdminDto> rows = jdbcTemplate.query(
                 """
                 SELECT id, codigo, ruc, razon_social, nombre_comercial,
-                       direccion_fiscal, correo_contacto, telefono_contacto,
-                       db_name, flag_estado
+                       direccion_fiscal, representante_legal, dni_representante_legal,
+                       correo_contacto, telefono_contacto, db_name, flag_estado
                 FROM master.empresa
                 WHERE id = ?
                 """,
@@ -131,6 +133,8 @@ public class SeguridadService {
                         .razonSocial(rs.getString("razon_social"))
                         .nombreComercial(rs.getString("nombre_comercial"))
                         .direccionFiscal(rs.getString("direccion_fiscal"))
+                        .representanteLegal(rs.getString("representante_legal"))
+                        .dniRepresentanteLegal(rs.getString("dni_representante_legal"))
                         .correoContacto(rs.getString("correo_contacto"))
                         .telefonoContacto(rs.getString("telefono_contacto"))
                         .dbName(rs.getString("db_name"))
@@ -152,6 +156,8 @@ public class SeguridadService {
                     razon_social = ?,
                     nombre_comercial = ?,
                     direccion_fiscal = ?,
+                    representante_legal = ?,
+                    dni_representante_legal = ?,
                     correo_contacto = ?,
                     telefono_contacto = ?,
                     modificado_en = NOW()
@@ -160,6 +166,8 @@ public class SeguridadService {
                 req.getRazonSocial(),
                 emptyToNull(req.getNombreComercial()),
                 emptyToNull(req.getDireccionFiscal()),
+                emptyToNull(req.getRepresentanteLegal()),
+                emptyToNull(req.getDniRepresentanteLegal()),
                 emptyToNull(req.getCorreoContacto()),
                 emptyToNull(req.getTelefonoContacto()),
                 empresaId);

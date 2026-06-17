@@ -85,6 +85,8 @@ export interface EmpresaAdminDto {
   razonSocial: string;
   nombreComercial?: string;
   direccionFiscal?: string;
+  representanteLegal?: string;
+  dniRepresentanteLegal?: string;
   correoContacto?: string;
   telefonoContacto?: string;
   dbName: string;
@@ -96,6 +98,8 @@ export interface EmpresaAdminUpdatePayload {
   razonSocial: string;
   nombreComercial?: string;
   direccionFiscal?: string;
+  representanteLegal?: string;
+  dniRepresentanteLegal?: string;
   correoContacto?: string;
   telefonoContacto?: string;
 }

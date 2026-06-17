@@ -18,6 +18,8 @@ public class EmpresaAdminDto {
     private String razonSocial;
     private String nombreComercial;
     private String direccionFiscal;
+    private String representanteLegal;
+    private String dniRepresentanteLegal;
     private String correoContacto;
     private String telefonoContacto;
     private String dbName;

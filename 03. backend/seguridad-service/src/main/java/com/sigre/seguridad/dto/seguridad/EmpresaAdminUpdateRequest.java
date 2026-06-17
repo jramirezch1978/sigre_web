@@ -19,6 +19,12 @@ public class EmpresaAdminUpdateRequest {
     @Size(max = 300)
     private String direccionFiscal;
 
+    @Size(max = 200)
+    private String representanteLegal;
+
+    @Size(max = 20)
+    private String dniRepresentanteLegal;
+
     @Size(max = 150)
     private String correoContacto;
 

@@ -58,11 +58,14 @@ export class AdminEmpresasComponent implements OnInit {
       dirPais: ['PERU', [Validators.maxLength(120)]],
       dirUbigeo: ['', [Validators.maxLength(12)]],
       represLegal: ['', [Validators.maxLength(200)]],
+      dniRepresLegal: ['', [Validators.maxLength(20)]],
     });
     this.formEditar = this.fb.group({
       razonSocial: ['', [Validators.required, Validators.maxLength(200)]],
       nombreComercial: ['', [Validators.maxLength(200)]],
       direccionFiscal: ['', [Validators.maxLength(300)]],
+      representanteLegal: ['', [Validators.maxLength(200)]],
+      dniRepresentanteLegal: ['', [Validators.maxLength(20)]],
       correoContacto: ['', [Validators.maxLength(150)]],
       telefonoContacto: ['', [Validators.maxLength(30)]],
     });
@@ -109,6 +112,7 @@ export class AdminEmpresasComponent implements OnInit {
       dirPais: 'PERU',
       dirUbigeo: '',
       represLegal: '',
+      dniRepresLegal: '',
     });
     this.guardandoNueva = false;
     this.mostrandoNueva = true;
@@ -144,6 +148,7 @@ export class AdminEmpresasComponent implements OnInit {
       correoContacto: this.trimOrUndef(v.correoContacto),
       celular: this.trimOrUndef(v.celular),
       represLegal: this.trimOrUndef(v.represLegal),
+      dniRepresLegal: this.trimOrUndef(v.dniRepresLegal),
       flagReplicacion: '1',
       flagCntrlCd: '0',
     }).subscribe({
@@ -168,6 +173,8 @@ export class AdminEmpresasComponent implements OnInit {
       razonSocial: e.razonSocial ?? '',
       nombreComercial: e.nombreComercial ?? '',
       direccionFiscal: e.direccionFiscal ?? '',
+      representanteLegal: e.representanteLegal ?? '',
+      dniRepresentanteLegal: e.dniRepresentanteLegal ?? '',
       correoContacto: e.correoContacto ?? '',
       telefonoContacto: e.telefonoContacto ?? '',
     });
@@ -190,6 +197,8 @@ export class AdminEmpresasComponent implements OnInit {
       razonSocial: (v.razonSocial ?? '').trim(),
       nombreComercial: this.trimOrUndef(v.nombreComercial),
       direccionFiscal: this.trimOrUndef(v.direccionFiscal),
+      representanteLegal: this.trimOrUndef(v.representanteLegal),
+      dniRepresentanteLegal: this.trimOrUndef(v.dniRepresentanteLegal),
       correoContacto: this.trimOrUndef(v.correoContacto),
       telefonoContacto: this.trimOrUndef(v.telefonoContacto),
     }).subscribe({
