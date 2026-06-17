@@ -92,6 +92,7 @@ if /I "!MODE!"=="create" set "DBDEPLOY_SCOPE=security-template"
 if /I "!MODE!"=="insert" set "DBDEPLOY_SCOPE=insert-template"
 if /I "!MODE!"=="clone" set "DBDEPLOY_SCOPE=clone"
 if /I "!MODE!"=="patch-bluecoast" set "DBDEPLOY_SCOPE=patch-bluecoast"
+if /I "!MODE!"=="patch-cantabria" set "DBDEPLOY_SCOPE=patch-cantabria"
 if /I "!MODE!"=="delete" set "DBDEPLOY_SCOPE=delete"
 if /I "!MODE!"=="delete-dev" set "DBDEPLOY_SCOPE=delete-dev"
 if /I "!MODE!"=="tenant-grants" set "DBDEPLOY_SCOPE=tenant-grants"
@@ -114,6 +115,7 @@ if /I "!MODE!"=="create-asistencia" goto :route_create_asistencia
 if /I "!MODE!"=="insert" goto :route_insert
 if /I "!MODE!"=="clone" goto :route_clone
 if /I "!MODE!"=="patch-bluecoast" goto :route_patch_bluecoast
+if /I "!MODE!"=="patch-cantabria" goto :route_patch_cantabria
 if /I "!MODE!"=="delete" goto :route_delete
 if /I "!MODE!"=="delete-dev" goto :route_delete_dev
 if /I "!MODE!"=="tenant-grants" goto :route_tenant_grants
@@ -167,6 +169,11 @@ goto :done
 :route_patch_bluecoast
 call :check_host_docker_ddl || goto :fail
 call :do_patch_bluecoast || goto :fail
+goto :done
+
+:route_patch_cantabria
+call :check_host_docker_ddl || goto :fail
+call :do_patch_cantabria || goto :fail
 goto :done
 
 :route_delete
@@ -441,6 +448,16 @@ if /I "!CLONE_NEWDB!"=="sigre_emp_bluecoast" (
     )
     set "PGDATABASE=!SAVED_PGDATABASE!"
 )
+if /I "!CLONE_NEWDB!"=="sigre_emp_cantabria" (
+    set "SAVED_PGDATABASE=!PGDATABASE!"
+    set "PGDATABASE=!CLONE_NEWDB!"
+    echo ^>^> Aplicando seed Cantabria ^(4 sucursales operativas^)...
+    call :run_sql "seed/02-carga-inicial-cantabria-tenant.sql" || (
+        set "PGDATABASE=!SAVED_PGDATABASE!"
+        exit /b 1
+    )
+    set "PGDATABASE=!SAVED_PGDATABASE!"
+)
 set "CLONE_ROLE="
 for /f "delims=" %%a in ('powershell -NoProfile -Command "$s='%~1'; if([string]::IsNullOrWhiteSpace($s)){exit 2}; $s=$s.Trim().ToLower() -replace '[^a-z0-9_]','_'; $s=$s -replace '_+','_'; $s=$s.Trim('_'); Write-Output $s"') do set "CLONE_ROLE=%%a"
 if not defined CLONE_ROLE (
@@ -462,6 +479,19 @@ call :run_sql "seed/02-carga-inicial-bluecoast-tenant.sql" || (
 )
 set "PGDATABASE=!SAVED_PGDATABASE!"
 echo ^>^> patch-bluecoast: OK
+exit /b 0
+
+:do_patch_cantabria
+echo.
+echo ^>^> Modo: patch-cantabria ^(sigre_emp_cantabria^)
+set "SAVED_PGDATABASE=!PGDATABASE!"
+set "PGDATABASE=sigre_emp_cantabria"
+call :run_sql "seed/02-carga-inicial-cantabria-tenant.sql" || (
+    set "PGDATABASE=!SAVED_PGDATABASE!"
+    exit /b 1
+)
+set "PGDATABASE=!SAVED_PGDATABASE!"
+echo ^>^> patch-cantabria: OK
 exit /b 0
 
 :is_protected_db
@@ -534,6 +564,7 @@ echo   %~nx0 create-asistencia [--force]  Crea BD !PGASISTENCIA_DB! en postgres1
 echo   %~nx0 insert                  Solo seed ^(requiere create previo^)
 echo   %~nx0 clone ^<empresa^>
 echo   %~nx0 patch-bluecoast           Sucursales + usuarios Blue Coast en sigre_emp_bluecoast
+echo   %~nx0 patch-cantabria           Restaura 4 sucursales en sigre_emp_cantabria
 echo   %~nx0 delete ^<nombre_bd^>
 echo   %~nx0 delete-dev              BDs que terminan en _dev
 echo   %~nx0 tenant-grants ^<bd^> ^<rol^>
