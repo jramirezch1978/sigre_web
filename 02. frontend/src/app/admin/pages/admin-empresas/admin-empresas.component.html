@@ -160,28 +160,33 @@
           </div>
           <div class="form-row">
             <ion-item>
-              <ion-label position="stacked">Distrito</ion-label>
-              <ion-input formControlName="dirDistrito" maxlength="120"></ion-input>
+              <ion-label position="stacked">Departamento</ion-label>
+              <ion-select [value]="selectedDepartamentoNueva" (ionChange)="onDepartamentoChangeNueva($event.detail.value)"
+                placeholder="Seleccione" interface="popover">
+                @for (d of departamentos; track d.id) {
+                  <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
+                }
+              </ion-select>
             </ion-item>
             <ion-item>
               <ion-label position="stacked">Provincia</ion-label>
-              <ion-input formControlName="dirProvincia" maxlength="120"></ion-input>
+              <ion-select [value]="selectedProvinciaNueva" (ionChange)="onProvinciaChangeNueva($event.detail.value)"
+                placeholder="Seleccione" interface="popover" [disabled]="!selectedDepartamentoNueva">
+                @for (p of provinciasNueva; track p.id) {
+                  <ion-select-option [value]="p.id">{{ p.nombre }}</ion-select-option>
+                }
+              </ion-select>
             </ion-item>
           </div>
           <div class="form-row">
             <ion-item>
-              <ion-label position="stacked">Departamento</ion-label>
-              <ion-input formControlName="dirDepartamento" maxlength="120"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">País</ion-label>
-              <ion-input formControlName="dirPais" maxlength="120"></ion-input>
-            </ion-item>
-          </div>
-          <div class="form-row">
-            <ion-item class="full-row">
-              <ion-label position="stacked">Ubigeo</ion-label>
-              <ion-input formControlName="dirUbigeo" maxlength="12" inputmode="numeric"></ion-input>
+              <ion-label position="stacked">Distrito</ion-label>
+              <ion-select formControlName="distritoId" placeholder="Seleccione" interface="popover"
+                [disabled]="!selectedProvinciaNueva">
+                @for (d of distritosNueva; track d.id) {
+                  <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
+                }
+              </ion-select>
             </ion-item>
           </div>
           <div class="form-actions">
@@ -238,6 +243,37 @@
             <ion-item class="full-row">
               <ion-label position="stacked">Dirección fiscal</ion-label>
               <ion-input formControlName="direccionFiscal" maxlength="300"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Departamento</ion-label>
+              <ion-select [value]="selectedDepartamentoEditar" (ionChange)="onDepartamentoChangeEditar($event.detail.value)"
+                placeholder="Seleccione" interface="popover">
+                @for (d of departamentos; track d.id) {
+                  <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Provincia</ion-label>
+              <ion-select [value]="selectedProvinciaEditar" (ionChange)="onProvinciaChangeEditar($event.detail.value)"
+                placeholder="Seleccione" interface="popover" [disabled]="!selectedDepartamentoEditar">
+                @for (p of provinciasEditar; track p.id) {
+                  <ion-select-option [value]="p.id">{{ p.nombre }}</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Distrito</ion-label>
+              <ion-select formControlName="distritoId" placeholder="Seleccione" interface="popover"
+                [disabled]="!selectedProvinciaEditar">
+                @for (d of distritosEditar; track d.id) {
+                  <ion-select-option [value]="d.id">{{ d.nombre }}</ion-select-option>
+                }
+              </ion-select>
             </ion-item>
           </div>
           <div class="form-row">

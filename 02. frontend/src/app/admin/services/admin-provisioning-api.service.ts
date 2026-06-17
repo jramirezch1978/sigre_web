@@ -39,6 +39,7 @@ export interface ProvisionEmpresaBody {
   dirDepartamento?: string;
   dirPais?: string;
   dirUbigeo?: string;
+  distritoId?: number | null;
   fonoFijo?: string;
   celular?: string;
   email?: string;

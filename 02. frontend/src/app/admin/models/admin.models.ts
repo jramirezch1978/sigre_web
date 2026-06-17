@@ -78,6 +78,12 @@ export interface EmpresaListDto {
   dbName: string;
 }
 
+export interface UbigeoItem {
+  id: number;
+  codigo: string;
+  nombre: string;
+}
+
 export interface EmpresaAdminDto {
   id: number;
   codigo: string;
@@ -85,6 +91,11 @@ export interface EmpresaAdminDto {
   razonSocial: string;
   nombreComercial?: string;
   direccionFiscal?: string;
+  distritoId?: number;
+  distritoNombre?: string;
+  provinciaNombre?: string;
+  departamentoNombre?: string;
+  ubigeo?: string;
   representanteLegal?: string;
   dniRepresentanteLegal?: string;
   correoContacto?: string;
@@ -98,6 +109,7 @@ export interface EmpresaAdminUpdatePayload {
   razonSocial: string;
   nombreComercial?: string;
   direccionFiscal?: string;
+  distritoId?: number | null;
   representanteLegal?: string;
   dniRepresentanteLegal?: string;
   correoContacto?: string;

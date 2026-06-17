@@ -49,6 +49,7 @@ CREATE TABLE master.empresa (
     nombre_comercial VARCHAR(200),
     direccion_fiscal VARCHAR(300),
     ubigeo VARCHAR(12),
+    distrito_id BIGINT REFERENCES master.distrito(id),
     representante_legal VARCHAR(200),
     correo_contacto VARCHAR(150),
     telefono_contacto VARCHAR(30),

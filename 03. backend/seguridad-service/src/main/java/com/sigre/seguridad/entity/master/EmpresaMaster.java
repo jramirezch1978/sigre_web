@@ -50,6 +50,9 @@ public class EmpresaMaster {
     @Column(length = 12)
     private String ubigeo;
 
+    @Column(name = "distrito_id")
+    private Long distritoId;
+
     @Column(name = "representante_legal", length = 200)
     private String representanteLegal;
 

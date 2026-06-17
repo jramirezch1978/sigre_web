@@ -4,7 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import { ModalController, ToastController } from '@ionic/angular';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { AdminProvisioningApiService } from '../../services/admin-provisioning-api.service';
-import { EmpresaAdminDto, UsuarioAdminDto } from '../../models/admin.models';
+import { AdminUbigeoApiService } from '../../services/admin-ubigeo-api.service';
+import { EmpresaAdminDto, UbigeoItem, UsuarioAdminDto } from '../../models/admin.models';
 import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
 
 @Component({
@@ -17,6 +18,7 @@ export class AdminEmpresasComponent implements OnInit {
 
   private readonly api = inject(AdminSeguridadApiService);
   private readonly provisioning = inject(AdminProvisioningApiService);
+  private readonly ubigeoApi = inject(AdminUbigeoApiService);
   private readonly fb = inject(FormBuilder);
   private readonly modalCtrl = inject(ModalController);
   private readonly toastCtrl = inject(ToastController);
@@ -43,6 +45,16 @@ export class AdminEmpresasComponent implements OnInit {
   loadingUsuarios = false;
   busquedaUsuarioDisponible = '';
 
+  departamentos: UbigeoItem[] = [];
+  provinciasNueva: UbigeoItem[] = [];
+  distritosNueva: UbigeoItem[] = [];
+  provinciasEditar: UbigeoItem[] = [];
+  distritosEditar: UbigeoItem[] = [];
+  selectedDepartamentoNueva: number | null = null;
+  selectedProvinciaNueva: number | null = null;
+  selectedDepartamentoEditar: number | null = null;
+  selectedProvinciaEditar: number | null = null;
+
   ngOnInit(): void {
     this.formNueva = this.fb.group({
       sigla: ['', [Validators.required, Validators.maxLength(50)]],
@@ -52,11 +64,7 @@ export class AdminEmpresasComponent implements OnInit {
       correoContacto: ['', [Validators.maxLength(150)]],
       celular: ['', [Validators.maxLength(30)]],
       direccion: ['', [Validators.maxLength(300)]],
-      dirDistrito: ['', [Validators.maxLength(120)]],
-      dirProvincia: ['', [Validators.maxLength(120)]],
-      dirDepartamento: ['', [Validators.maxLength(120)]],
-      dirPais: ['PERU', [Validators.maxLength(120)]],
-      dirUbigeo: ['', [Validators.maxLength(12)]],
+      distritoId: [null],
       represLegal: ['', [Validators.maxLength(200)]],
       dniRepresLegal: ['', [Validators.maxLength(20)]],
     });
@@ -64,11 +72,13 @@ export class AdminEmpresasComponent implements OnInit {
       razonSocial: ['', [Validators.required, Validators.maxLength(200)]],
       nombreComercial: ['', [Validators.maxLength(200)]],
       direccionFiscal: ['', [Validators.maxLength(300)]],
+      distritoId: [null],
       representanteLegal: ['', [Validators.maxLength(200)]],
       dniRepresentanteLegal: ['', [Validators.maxLength(20)]],
       correoContacto: ['', [Validators.maxLength(150)]],
       telefonoContacto: ['', [Validators.maxLength(30)]],
     });
+    this.cargarDepartamentos();
     this.cargar();
   }
 
@@ -106,14 +116,14 @@ export class AdminEmpresasComponent implements OnInit {
       correoContacto: '',
       celular: '',
       direccion: '',
-      dirDistrito: '',
-      dirProvincia: '',
-      dirDepartamento: '',
-      dirPais: 'PERU',
-      dirUbigeo: '',
+      distritoId: null,
       represLegal: '',
       dniRepresLegal: '',
     });
+    this.selectedDepartamentoNueva = null;
+    this.selectedProvinciaNueva = null;
+    this.provinciasNueva = [];
+    this.distritosNueva = [];
     this.guardandoNueva = false;
     this.mostrandoNueva = true;
   }
@@ -130,6 +140,10 @@ export class AdminEmpresasComponent implements OnInit {
     }
 
     const v = this.formNueva.getRawValue();
+    const distritoSel = this.distritosNueva.find(d => d.id === v.distritoId);
+    const provinciaSel = this.provinciasNueva.find(p => p.id === this.selectedProvinciaNueva);
+    const departamentoSel = this.departamentos.find(d => d.id === this.selectedDepartamentoNueva);
+
     this.guardandoNueva = true;
     this.provisioning.provisionar({
       sigla: (v.sigla ?? '').trim().toUpperCase(),
@@ -139,11 +153,12 @@ export class AdminEmpresasComponent implements OnInit {
       personeria: 'J',
       direccion: this.trimOrUndef(v.direccion),
       dirCalle: this.trimOrUndef(v.direccion),
-      dirDistrito: this.trimOrUndef(v.dirDistrito),
-      dirProvincia: this.trimOrUndef(v.dirProvincia),
-      dirDepartamento: this.trimOrUndef(v.dirDepartamento),
-      dirPais: this.trimOrUndef(v.dirPais) ?? 'PERU',
-      dirUbigeo: this.trimOrUndef(v.dirUbigeo),
+      dirDistrito: distritoSel?.nombre,
+      dirProvincia: provinciaSel?.nombre,
+      dirDepartamento: departamentoSel?.nombre,
+      dirPais: 'PERU',
+      dirUbigeo: distritoSel?.codigo,
+      distritoId: v.distritoId || null,
       ciuCodPais: 'PE',
       correoContacto: this.trimOrUndef(v.correoContacto),
       celular: this.trimOrUndef(v.celular),
@@ -167,18 +182,27 @@ export class AdminEmpresasComponent implements OnInit {
     });
   }
 
-  abrirEditar(e: EmpresaAdminDto): void {
+  async abrirEditar(e: EmpresaAdminDto): Promise<void> {
     this.empresaEditando = e;
     this.formEditar.patchValue({
       razonSocial: e.razonSocial ?? '',
       nombreComercial: e.nombreComercial ?? '',
       direccionFiscal: e.direccionFiscal ?? '',
+      distritoId: e.distritoId ?? null,
       representanteLegal: e.representanteLegal ?? '',
       dniRepresentanteLegal: e.dniRepresentanteLegal ?? '',
       correoContacto: e.correoContacto ?? '',
       telefonoContacto: e.telefonoContacto ?? '',
     });
+    this.selectedDepartamentoEditar = null;
+    this.selectedProvinciaEditar = null;
+    this.provinciasEditar = [];
+    this.distritosEditar = [];
     this.mostrandoEditar = true;
+
+    if (e.distritoId) {
+      await this.cargarCascadaEditarDesdeDistrito(e.distritoId);
+    }
   }
 
   cerrarEditar(): void {
@@ -197,6 +221,7 @@ export class AdminEmpresasComponent implements OnInit {
       razonSocial: (v.razonSocial ?? '').trim(),
       nombreComercial: this.trimOrUndef(v.nombreComercial),
       direccionFiscal: this.trimOrUndef(v.direccionFiscal),
+      distritoId: v.distritoId || null,
       representanteLegal: this.trimOrUndef(v.representanteLegal),
       dniRepresentanteLegal: this.trimOrUndef(v.dniRepresentanteLegal),
       correoContacto: this.trimOrUndef(v.correoContacto),
@@ -330,6 +355,90 @@ export class AdminEmpresasComponent implements OnInit {
       },
     });
     await modal.present();
+  }
+
+  // ── Ubigeo cascada ──
+
+  cargarDepartamentos(): void {
+    this.ubigeoApi.listarDepartamentos().subscribe({
+      next: res => this.departamentos = res.data ?? [],
+      error: () => this.departamentos = [],
+    });
+  }
+
+  onDepartamentoChangeNueva(departamentoId: number | null): void {
+    this.selectedDepartamentoNueva = departamentoId;
+    this.selectedProvinciaNueva = null;
+    this.provinciasNueva = [];
+    this.distritosNueva = [];
+    this.formNueva.patchValue({ distritoId: null });
+    if (departamentoId) {
+      this.ubigeoApi.listarProvincias(departamentoId).subscribe({
+        next: res => this.provinciasNueva = res.data ?? [],
+        error: () => this.provinciasNueva = [],
+      });
+    }
+  }
+
+  onProvinciaChangeNueva(provinciaId: number | null): void {
+    this.selectedProvinciaNueva = provinciaId;
+    this.distritosNueva = [];
+    this.formNueva.patchValue({ distritoId: null });
+    if (provinciaId) {
+      this.ubigeoApi.listarDistritos(provinciaId).subscribe({
+        next: res => this.distritosNueva = res.data ?? [],
+        error: () => this.distritosNueva = [],
+      });
+    }
+  }
+
+  onDepartamentoChangeEditar(departamentoId: number | null): void {
+    this.selectedDepartamentoEditar = departamentoId;
+    this.selectedProvinciaEditar = null;
+    this.provinciasEditar = [];
+    this.distritosEditar = [];
+    this.formEditar.patchValue({ distritoId: null });
+    if (departamentoId) {
+      this.ubigeoApi.listarProvincias(departamentoId).subscribe({
+        next: res => this.provinciasEditar = res.data ?? [],
+        error: () => this.provinciasEditar = [],
+      });
+    }
+  }
+
+  onProvinciaChangeEditar(provinciaId: number | null): void {
+    this.selectedProvinciaEditar = provinciaId;
+    this.distritosEditar = [];
+    this.formEditar.patchValue({ distritoId: null });
+    if (provinciaId) {
+      this.ubigeoApi.listarDistritos(provinciaId).subscribe({
+        next: res => this.distritosEditar = res.data ?? [],
+        error: () => this.distritosEditar = [],
+      });
+    }
+  }
+
+  private async cargarCascadaEditarDesdeDistrito(distritoId: number): Promise<void> {
+    try {
+      const e = this.empresaEditando;
+      if (!e) return;
+
+      const dept = this.departamentos.find(d => d.nombre === e.departamentoNombre);
+      if (!dept) return;
+
+      this.selectedDepartamentoEditar = dept.id;
+      const provRes = await firstValueFrom(this.ubigeoApi.listarProvincias(dept.id));
+      this.provinciasEditar = provRes.data ?? [];
+
+      const prov = this.provinciasEditar.find(p => p.nombre === e.provinciaNombre);
+      if (!prov) return;
+
+      this.selectedProvinciaEditar = prov.id;
+      const distRes = await firstValueFrom(this.ubigeoApi.listarDistritos(prov.id));
+      this.distritosEditar = distRes.data ?? [];
+    } catch {
+      // silently fail
+    }
   }
 
   // ── Gestión de usuarios de empresa ──

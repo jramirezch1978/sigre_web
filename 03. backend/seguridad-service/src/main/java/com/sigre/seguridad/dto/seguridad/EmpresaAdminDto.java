@@ -18,6 +18,11 @@ public class EmpresaAdminDto {
     private String razonSocial;
     private String nombreComercial;
     private String direccionFiscal;
+    private Long distritoId;
+    private String distritoNombre;
+    private String provinciaNombre;
+    private String departamentoNombre;
+    private String ubigeo;
     private String representanteLegal;
     private String dniRepresentanteLegal;
     private String correoContacto;

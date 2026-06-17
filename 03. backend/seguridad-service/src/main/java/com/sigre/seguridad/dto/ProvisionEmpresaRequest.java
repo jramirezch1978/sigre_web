@@ -150,6 +150,9 @@ public class ProvisionEmpresaRequest {
     @JsonAlias({"DIR_UBIGEO"})
     private String dirUbigeo;
 
+    @JsonAlias({"DISTRITO_ID"})
+    private Long distritoId;
+
     @Size(max = 30)
     @JsonAlias({"FONO_FIJO"})
     private String fonoFijo;

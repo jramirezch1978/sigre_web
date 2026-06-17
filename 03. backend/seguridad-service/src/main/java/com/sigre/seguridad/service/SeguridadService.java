@@ -94,11 +94,16 @@ public class SeguridadService {
     public List<EmpresaAdminDto> listarEmpresasAdmin() {
         return jdbcTemplate.query(
                 """
-                SELECT id, codigo, ruc, razon_social, nombre_comercial,
-                       direccion_fiscal, representante_legal, dni_representante_legal,
-                       correo_contacto, telefono_contacto, db_name, flag_estado
-                FROM master.empresa
-                ORDER BY razon_social
+                SELECT e.id, e.codigo, e.ruc, e.razon_social, e.nombre_comercial,
+                       e.direccion_fiscal, e.distrito_id, e.ubigeo,
+                       d.nombre AS distrito_nombre, p.nombre AS provincia_nombre, dep.nombre AS departamento_nombre,
+                       e.representante_legal, e.dni_representante_legal,
+                       e.correo_contacto, e.telefono_contacto, e.db_name, e.flag_estado
+                FROM master.empresa e
+                LEFT JOIN master.distrito d ON d.id = e.distrito_id
+                LEFT JOIN master.provincia p ON p.id = d.provincia_id
+                LEFT JOIN master.departamento dep ON dep.id = p.departamento_id
+                ORDER BY e.razon_social
                 """,
                 (rs, i) -> EmpresaAdminDto.builder()
                         .id(rs.getLong("id"))
@@ -107,6 +112,11 @@ public class SeguridadService {
                         .razonSocial(rs.getString("razon_social"))
                         .nombreComercial(rs.getString("nombre_comercial"))
                         .direccionFiscal(rs.getString("direccion_fiscal"))
+                        .distritoId(rs.getObject("distrito_id", Long.class))
+                        .ubigeo(rs.getString("ubigeo"))
+                        .distritoNombre(rs.getString("distrito_nombre"))
+                        .provinciaNombre(rs.getString("provincia_nombre"))
+                        .departamentoNombre(rs.getString("departamento_nombre"))
                         .representanteLegal(rs.getString("representante_legal"))
                         .dniRepresentanteLegal(rs.getString("dni_representante_legal"))
                         .correoContacto(rs.getString("correo_contacto"))
@@ -120,11 +130,16 @@ public class SeguridadService {
     public EmpresaAdminDto obtenerEmpresaAdmin(long empresaId) {
         List<EmpresaAdminDto> rows = jdbcTemplate.query(
                 """
-                SELECT id, codigo, ruc, razon_social, nombre_comercial,
-                       direccion_fiscal, representante_legal, dni_representante_legal,
-                       correo_contacto, telefono_contacto, db_name, flag_estado
-                FROM master.empresa
-                WHERE id = ?
+                SELECT e.id, e.codigo, e.ruc, e.razon_social, e.nombre_comercial,
+                       e.direccion_fiscal, e.distrito_id, e.ubigeo,
+                       d.nombre AS distrito_nombre, p.nombre AS provincia_nombre, dep.nombre AS departamento_nombre,
+                       e.representante_legal, e.dni_representante_legal,
+                       e.correo_contacto, e.telefono_contacto, e.db_name, e.flag_estado
+                FROM master.empresa e
+                LEFT JOIN master.distrito d ON d.id = e.distrito_id
+                LEFT JOIN master.provincia p ON p.id = d.provincia_id
+                LEFT JOIN master.departamento dep ON dep.id = p.departamento_id
+                WHERE e.id = ?
                 """,
                 (rs, i) -> EmpresaAdminDto.builder()
                         .id(rs.getLong("id"))
@@ -133,6 +148,11 @@ public class SeguridadService {
                         .razonSocial(rs.getString("razon_social"))
                         .nombreComercial(rs.getString("nombre_comercial"))
                         .direccionFiscal(rs.getString("direccion_fiscal"))
+                        .distritoId(rs.getObject("distrito_id", Long.class))
+                        .ubigeo(rs.getString("ubigeo"))
+                        .distritoNombre(rs.getString("distrito_nombre"))
+                        .provinciaNombre(rs.getString("provincia_nombre"))
+                        .departamentoNombre(rs.getString("departamento_nombre"))
                         .representanteLegal(rs.getString("representante_legal"))
                         .dniRepresentanteLegal(rs.getString("dni_representante_legal"))
                         .correoContacto(rs.getString("correo_contacto"))
@@ -156,6 +176,7 @@ public class SeguridadService {
                     razon_social = ?,
                     nombre_comercial = ?,
                     direccion_fiscal = ?,
+                    distrito_id = ?,
                     representante_legal = ?,
                     dni_representante_legal = ?,
                     correo_contacto = ?,
@@ -166,6 +187,7 @@ public class SeguridadService {
                 req.getRazonSocial(),
                 emptyToNull(req.getNombreComercial()),
                 emptyToNull(req.getDireccionFiscal()),
+                req.getDistritoId(),
                 emptyToNull(req.getRepresentanteLegal()),
                 emptyToNull(req.getDniRepresentanteLegal()),
                 emptyToNull(req.getCorreoContacto()),
@@ -1001,4 +1023,41 @@ public class SeguridadService {
     }
 
     private record RolOpcionRow(long romId, OpcionMenuDto opcion) {}
+
+    // ─── Ubigeo (master) ─────────────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public List<com.sigre.seguridad.dto.seguridad.UbigeoItemDto> listarDepartamentos() {
+        return jdbcTemplate.query(
+                "SELECT id, codigo, nombre FROM master.departamento WHERE activo = TRUE ORDER BY nombre",
+                (rs, i) -> com.sigre.seguridad.dto.seguridad.UbigeoItemDto.builder()
+                        .id(rs.getLong("id"))
+                        .codigo(rs.getString("codigo"))
+                        .nombre(rs.getString("nombre"))
+                        .build());
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.sigre.seguridad.dto.seguridad.UbigeoItemDto> listarProvinciasPorDepartamento(long departamentoId) {
+        return jdbcTemplate.query(
+                "SELECT id, codigo, nombre FROM master.provincia WHERE departamento_id = ? AND activo = TRUE ORDER BY nombre",
+                (rs, i) -> com.sigre.seguridad.dto.seguridad.UbigeoItemDto.builder()
+                        .id(rs.getLong("id"))
+                        .codigo(rs.getString("codigo"))
+                        .nombre(rs.getString("nombre"))
+                        .build(),
+                departamentoId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.sigre.seguridad.dto.seguridad.UbigeoItemDto> listarDistritosPorProvincia(long provinciaId) {
+        return jdbcTemplate.query(
+                "SELECT id, codigo, nombre FROM master.distrito WHERE provincia_id = ? AND activo = TRUE ORDER BY nombre",
+                (rs, i) -> com.sigre.seguridad.dto.seguridad.UbigeoItemDto.builder()
+                        .id(rs.getLong("id"))
+                        .codigo(rs.getString("codigo"))
+                        .nombre(rs.getString("nombre"))
+                        .build(),
+                provinciaId);
+    }
 }

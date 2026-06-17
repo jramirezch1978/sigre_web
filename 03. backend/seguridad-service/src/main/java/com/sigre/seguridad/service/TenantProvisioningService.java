@@ -502,6 +502,7 @@ public class TenantProvisioningService {
                 .nombreComercial(trimOrNull(req.getNombreComercial()))
                 .direccionFiscal(trimOrNull(direccionFiscal))
                 .ubigeo(trimOrNull(req.getDirUbigeo()))
+                .distritoId(req.getDistritoId())
                 .representanteLegal(trimOrNull(repLegal))
                 .dniRepresentanteLegal(trimOrNull(req.getDniRepresLegal()))
                 .correoContacto(trimOrNull(firstNonBlank(req.getEmail(), req.getCorreoContacto())))
