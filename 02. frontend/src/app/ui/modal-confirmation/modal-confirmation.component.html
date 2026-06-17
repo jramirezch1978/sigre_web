@@ -6,20 +6,29 @@
     </button>
   </div>
   <div class="modal-confirmation__body">
-    @if (tipemodal == 'confirm') {
+    @if (tipemodal === 'confirm' || tipemodal === 'success') {
       <ion-icon name="checkmark-circle-outline" class="modal-confirmation__icon modal-confirmation__icon--success"></ion-icon>
     }
-    @if (tipemodal == 'error') {
+    @if (tipemodal === 'error') {
       <ion-icon name="close-circle-outline" class="modal-confirmation__icon modal-confirmation__icon--error"></ion-icon>
+    }
+    @if (tipemodal === 'warning') {
+      <ion-icon name="warning-outline" class="modal-confirmation__icon modal-confirmation__icon--warning"></ion-icon>
     }
     <span class="modal-confirmation__heading">{{ title }}</span>
     <span class="modal-confirmation__message" [innerHTML]="message"></span>
-    <span class="modal-confirmation__message" [innerHTML]="submessage"></span>
+    @if (submessage) {
+      <span class="modal-confirmation__message" [innerHTML]="submessage"></span>
+    }
     <div class="modal-confirmation__actions">
       @if (btnCancelTxt) {
-        <ion-button fill="outline" color="medium" (click)="cerrarModal(false)">{{ btnCancelTxt }}</ion-button>
+        <button type="button" class="btn btn-default" (click)="cerrarModal(false)">{{ btnCancelTxt }}</button>
       }
-      <ion-button color="primary" (click)="cerrarModal(true)">{{ btnOkTxt }}</ion-button>
+      @if (tipemodal === 'error' || tipemodal === 'warning') {
+        <button type="button" class="btn btn-danger" (click)="cerrarModal(true)">{{ btnOkTxt }}</button>
+      } @else {
+        <button type="button" class="btn btn-success" (click)="cerrarModal(true)">{{ btnOkTxt }}</button>
+      }
     </div>
   </div>
 </div>
