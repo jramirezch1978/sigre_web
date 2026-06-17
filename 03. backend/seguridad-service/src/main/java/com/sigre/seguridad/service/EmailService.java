@@ -80,16 +80,6 @@ public class EmailService {
                         %s
                         %s
                         <tr>
-                          <td style="padding:8px 32px 28px;">
-                            <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="background:#f8fafc;border:1px solid #e4e9f0;border-radius:6px;">
-                              <tr><td style="padding:14px 18px;border-bottom:1px solid #e4e9f0;font-size:13px;font-weight:700;color:#2a3f54;text-transform:uppercase;letter-spacing:0.04em;">Infraestructura del tenant</td></tr>
-                              <tr><td style="padding:0 18px 14px;">
-                                %s
-                              </td></tr>
-                            </table>
-                          </td>
-                        </tr>
-                        <tr>
                           <td style="padding:0 32px 28px;">
                             <p style="margin:0;font-size:13px;line-height:1.6;color:#73879c;">
                               Guarde este correo como comprobante del registro. Si detecta algún dato incorrecto, contacte al administrador del sistema para su actualización.
@@ -131,12 +121,6 @@ public class EmailService {
                         {"Ubigeo", d.getUbigeo()},
                         {"Correo de contacto", d.getCorreoContacto()},
                         {"Teléfono / celular", d.getTelefonoContacto()}
-                }),
-                buildRows(new String[][]{
-                        {"Servidor de base de datos", d.getDbHost()},
-                        {"Puerto", d.getDbPort() != null ? String.valueOf(d.getDbPort()) : null},
-                        {"Base de datos tenant", d.getDbName()},
-                        {"Usuario de conexión", d.getDbUser()}
                 })
         );
     }
