@@ -16,6 +16,10 @@ export const routes: Routes = [
   { path: 'reporte-asistencia', component: ReporteAsistenciaComponent },
   { path: 'reporte-produccion', component: ReporteProduccionComponent },
   {
+    path: 'erp',
+    loadChildren: () => import('./erp/erp.routes').then(m => m.erpRoutes)
+  },
+  {
     path: 'auth',
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },

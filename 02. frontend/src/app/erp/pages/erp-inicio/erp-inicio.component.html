@@ -1,0 +1,56 @@
+<div class="erp-inicio-page">
+
+  <!-- Header -->
+  <header class="erp-header">
+    <div class="erp-header__brand">
+      <img src="assets/imagenes/auth/logo-sigre.png" alt="SIGRE ERP" class="erp-header__logo" />
+      <span class="erp-header__title">ERP</span>
+    </div>
+    <div class="erp-header__info">
+      @if (empresaActual) {
+        <span class="erp-header__empresa">{{ empresaActual }}</span>
+      }
+      @if (sucursalActual) {
+        <span class="erp-header__sucursal">{{ sucursalActual }}</span>
+      }
+    </div>
+    <div class="erp-header__actions">
+      <button mat-icon-button (click)="cerrarSesion()" title="Cerrar sesión">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="erp-main">
+    <div class="erp-welcome">
+      <h1>Bienvenido, {{ nombreUsuario }}</h1>
+      <p>Seleccione un módulo para comenzar</p>
+    </div>
+
+    <div class="erp-modulos">
+      @for (modulo of modulos; track modulo.titulo) {
+        <div class="erp-modulo"
+             [class.erp-modulo--disabled]="!modulo.habilitado"
+             (click)="navegarModulo(modulo)">
+          <div class="erp-modulo__icon" [style.background-color]="modulo.color">
+            <mat-icon>{{ modulo.icono }}</mat-icon>
+          </div>
+          <div class="erp-modulo__content">
+            <h3>{{ modulo.titulo }}</h3>
+            <p>{{ modulo.descripcion }}</p>
+          </div>
+          @if (!modulo.habilitado) {
+            <span class="erp-modulo__badge">Próximamente</span>
+          }
+        </div>
+      }
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="erp-footer">
+    <span>&copy; {{ currentYear }} SIGRE ERP — Todos los derechos reservados</span>
+  </footer>
+
+</div>
