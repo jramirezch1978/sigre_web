@@ -15,23 +15,30 @@ CREATE SCHEMA IF NOT EXISTS master;
 --
 -- DIAGRAMA DE RELACIONES (→ = tiene FK hacia):
 --
---   empresa (sin dependencias en master)
+--   empresa → master.distrito
+--   distrito → master.provincia
+--   provincia → master.departamento
+--   departamento → master.pais
 --
 --   NOTA: auth.usuario_empresa → master.empresa (en 03-auth.sql)
 --         Se elimina con CASCADE al hacer DROP de master.empresa.
 --
 -- ORDEN DE DROP:
 --   1. empresa (CASCADE elimina FK de auth.usuario_empresa)
+--   2. distrito
+--   3. provincia
+--   4. departamento
+--   5. pais
 -- ============================================================
 
+DROP TABLE IF EXISTS master.empresa CASCADE;
 DROP TABLE IF EXISTS master.distrito CASCADE;
 DROP TABLE IF EXISTS master.provincia CASCADE;
 DROP TABLE IF EXISTS master.departamento CASCADE;
 DROP TABLE IF EXISTS master.pais CASCADE;
-DROP TABLE IF EXISTS master.empresa CASCADE;
 
 -- ============================================================
--- SECCIÓN 2: CREATE (crear tablas, constraints e índices)
+-- SECCIÓN 2: CREATE (crear tablas en orden de dependencias)
 -- ============================================================
 
 CREATE SEQUENCE IF NOT EXISTS master.seq_empresa_codigo
@@ -40,29 +47,6 @@ CREATE SEQUENCE IF NOT EXISTS master.seq_empresa_codigo
     MINVALUE 1
     NO MAXVALUE
     CACHE 1;
-
-CREATE TABLE master.empresa (
-    id BIGSERIAL PRIMARY KEY,
-    codigo VARCHAR(20) NOT NULL UNIQUE,
-    ruc VARCHAR(20) NOT NULL UNIQUE,
-    razon_social VARCHAR(200) NOT NULL,
-    nombre_comercial VARCHAR(200),
-    direccion_fiscal VARCHAR(300),
-    ubigeo VARCHAR(12),
-    distrito_id BIGINT,
-    representante_legal VARCHAR(200),
-    dni_representante_legal VARCHAR(20),
-    correo_contacto VARCHAR(150),
-    telefono_contacto VARCHAR(30),
-    db_host VARCHAR(120) NOT NULL CHECK (TRIM(db_host) <> ''),
-    db_port INTEGER NOT NULL DEFAULT 5432,
-    db_name VARCHAR(120) NOT NULL CHECK (TRIM(db_name) <> ''),
-    db_user VARCHAR(120) NOT NULL CHECK (TRIM(db_user) <> ''),
-    db_password_encrypted TEXT NOT NULL CHECK (TRIM(db_password_encrypted) <> ''),
-    logo BYTEA,
-    flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
-    modificado_en TIMESTAMPTZ
-);
 
 CREATE TABLE master.pais (
     id BIGSERIAL PRIMARY KEY,
@@ -95,6 +79,29 @@ CREATE TABLE master.distrito (
     activo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+CREATE TABLE master.empresa (
+    id BIGSERIAL PRIMARY KEY,
+    codigo VARCHAR(20) NOT NULL UNIQUE,
+    ruc VARCHAR(20) NOT NULL UNIQUE,
+    razon_social VARCHAR(200) NOT NULL,
+    nombre_comercial VARCHAR(200),
+    direccion_fiscal VARCHAR(300),
+    ubigeo VARCHAR(12),
+    distrito_id BIGINT REFERENCES master.distrito(id),
+    representante_legal VARCHAR(200),
+    dni_representante_legal VARCHAR(20),
+    correo_contacto VARCHAR(150),
+    telefono_contacto VARCHAR(30),
+    db_host VARCHAR(120) NOT NULL CHECK (TRIM(db_host) <> ''),
+    db_port INTEGER NOT NULL DEFAULT 5432,
+    db_name VARCHAR(120) NOT NULL CHECK (TRIM(db_name) <> ''),
+    db_user VARCHAR(120) NOT NULL CHECK (TRIM(db_user) <> ''),
+    db_password_encrypted TEXT NOT NULL CHECK (TRIM(db_password_encrypted) <> ''),
+    logo BYTEA,
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
+    modificado_en TIMESTAMPTZ
+);
+
 -- ============================================================
 -- SECCIÓN 3: ÍNDICES
 -- ============================================================
@@ -106,11 +113,3 @@ CREATE INDEX IX_MASTER_PAIS_01 ON master.pais (activo);
 CREATE INDEX IX_MASTER_DEP_01 ON master.departamento (pais_id);
 CREATE INDEX IX_MASTER_PROV_01 ON master.provincia (departamento_id);
 CREATE INDEX IX_MASTER_DIST_01 ON master.distrito (provincia_id);
-
--- ============================================================
--- SECCIÓN 4: FOREIGN KEYS (diferidas por orden de creación)
--- ============================================================
-
-ALTER TABLE master.empresa
-    ADD CONSTRAINT fk_empresa_distrito
-    FOREIGN KEY (distrito_id) REFERENCES master.distrito(id);

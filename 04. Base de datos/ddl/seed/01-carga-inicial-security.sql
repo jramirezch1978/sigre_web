@@ -74,19 +74,19 @@ VALUES
      '$2a$10$karJCVQAcp6sbMLl0jM3EusmCqW3FbODb9D73DBhaOETMgf3C6kTC',
      'ADMINISTRADOR', 'SISTEMA', 'ADMINISTRADOR SISTEMA',
      FALSE, FALSE, 0, NULL, NULL, '1', '1',
-     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-04-11T21:15:52.928Z'::timestamptz, 1, 1),
+     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-15T01:50:58.156Z'::timestamptz, 1, 1),
 
     (2, 'work', 'work@sigre.pe',
      '$2a$10$V3dIARuAlB5lOG8Ry72ohO63y7NYaEcYV3gKueXQMo80CUDy3e1Ni',
      'WORK', 'SYSTEM', 'WORK SYSTEM',
      FALSE, FALSE, 0, NULL, NULL, '1', '1',
-     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-04-11T21:15:52.928Z'::timestamptz, 1, 1),
+     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-15T01:50:58.156Z'::timestamptz, 1, 1),
 
     (3, 'jramirez', 'jramirez@npssac.com.pe',
-     '$2a$10$lxT/8aSzCCA7Ux3r/VED8OTZjDUXOKP9ISF7PNDVm7SazuF3azB7y',
+     '$2a$10$gDrLsvJmekAkuiqZX7XIy.K4zI1FtRjsO2sf6A..rZgUK/i7izjty',
      'JHONNY ALEXANDER', 'RAMIREZ CHIROQUE', 'JHONN RAMIREZ CHIROQUE',
-     FALSE, FALSE, 0, NULL, '2026-06-11T00:04:29.083Z'::timestamptz, '1', '1',
-     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-11T00:04:29.086Z'::timestamptz, 1, 1)
+     FALSE, FALSE, 0, NULL, '2026-06-16T23:26:04.063Z'::timestamptz, '1', '1',
+     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-16T23:26:03.806Z'::timestamptz, 1, 1)
 ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     email = EXCLUDED.email,
