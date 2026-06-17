@@ -3592,7 +3592,7 @@ JOIN core.provincia p ON p.codigo = (
     WHERE pp.id_ubigeo = v.prov_ubigeo_id
 );
 
--- Sucursales por defecto: Piura, Lima, Chiclayo y Chimbote (prefijo código alineado a master.empresa).
+-- Sucursales Blue Coast S.A.C.: Sullana (Piura) y Lima (San Isidro).
 -- Requisito: sucursal.moneda_defult_id debe apuntar a SOL (fallback PEN para compatibilidad histórica).
 INSERT INTO core.moneda (codigo, sigla_moneda, nombre, simbolo, decimales, flag_estado)
 VALUES ('SOL', 'S/.', 'Soles', 'S/', 2, '1')
@@ -3607,10 +3607,8 @@ INSERT INTO auth.sucursal (codigo, nombre, direccion, ciudad, moneda_defult_id, 
 SELECT v.sufijo, v.nombre, v.direccion, v.ciudad, m_pen.id, pa.id, dep.id, pro.id, dis.id, v.ubigeo, '1'
 FROM (
     VALUES
-        ('PI', 'PIURA', 'Av. Principal Piura', 'Piura', '20', '2001', '200101', '200101'),
-        ('LM', 'LIMA', 'Av. Principal Lima', 'Lima', '15', '1501', '150101', '150101'),
-        ('CX', 'CHICLAYO', 'Av. Principal Chiclayo', 'Chiclayo', '14', '1401', '140101', '140101'),
-        ('CH', 'CHIMBOTE', 'Av. Principal Chimbote', 'Chimbote', '02', '0218', '021801', '021801')
+        ('PI', 'SULLANA', 'Manzana B, Lotes 8-9, Zona Industrial N 2', 'Sullana', '20', '2006', '200601', '200601'),
+        ('LM', 'LIMA', 'AV. RIVERA NAVARRETE 2801- DPTO. 1606', 'San Isidro', '15', '1501', '150131', '150131')
 ) AS v(sufijo, nombre, direccion, ciudad, dep_cod, prov_cod, dist_cod, ubigeo)
 JOIN LATERAL (
     SELECT m.id
@@ -3623,15 +3621,25 @@ JOIN core.pais pa ON pa.codigo = 'PE'
 JOIN core.departamento dep ON dep.codigo = v.dep_cod
 JOIN core.provincia pro ON pro.codigo = v.prov_cod
 JOIN core.distrito dis ON dis.codigo = v.dist_cod
-WHERE NOT EXISTS (SELECT 1 FROM auth.sucursal s WHERE s.codigo = v.sufijo)
-ON CONFLICT (codigo) DO NOTHING;
+ON CONFLICT (codigo) DO UPDATE SET
+    nombre = EXCLUDED.nombre,
+    direccion = EXCLUDED.direccion,
+    ciudad = EXCLUDED.ciudad,
+    moneda_defult_id = EXCLUDED.moneda_defult_id,
+    pais_id = EXCLUDED.pais_id,
+    departamento_id = EXCLUDED.departamento_id,
+    provincia_id = EXCLUDED.provincia_id,
+    distrito_id = EXCLUDED.distrito_id,
+    ubigeo = EXCLUDED.ubigeo,
+    flag_estado = '1',
+    fec_modificacion = NOW();
 
 COMMIT;
 
 -- ============================================================
 -- TX 5b: auth — usuarios tenant + usuario_sucursal (sucursal = auth.sucursal únicamente)
 -- Fuente usuarios: ddl/security/99-auditoria-security.sql (mismos id y password hash).
--- Asignación: cada usuario activo queda habilitado en todas las auth.sucursal del tenant (Piura, Lima, Chiclayo, Chimbote).
+-- Asignación: cada usuario activo queda habilitado en Sullana (PI) y Lima (LM).
 -- auth.usuario_sucursal en tenant: solo usuario_id + sucursal_id (sin empresa_id).
 -- Idempotente: ON CONFLICT.
 -- ============================================================
@@ -3668,6 +3676,36 @@ INSERT INTO auth.usuario (
     'JHONNY ALEXANDER', 'RAMIREZ CHIROQUE', 'JHONN RAMIREZ CHIROQUE',
     FALSE, FALSE, '2026-06-11T00:04:29.083Z'::timestamptz,
     '1', 1, '2026-04-11T21:15:52.928Z'::timestamptz, 1, '2026-06-11T00:04:29.086Z'::timestamptz
+),
+(
+    4, 'anamaria.calderon', 'anamaria.calderon@bluecoastsac.com',
+    '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
+    'ANA MARIA', 'CALDERON CURAY', 'ANA MARIA CALDERON CURAY',
+    FALSE, FALSE, NULL, '1', 1, NOW(), 1, NOW()
+),
+(
+    5, 'angela.pena', 'angela.pena@bluecoastsac.com',
+    '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
+    'SANTOS ANGELA', 'PENA ESTRADA', 'SANTOS ANGELA PENA ESTRADA',
+    FALSE, FALSE, NULL, '1', 1, NOW(), 1, NOW()
+),
+(
+    6, 'produccion', 'produccion@bluecoastsac.com',
+    '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
+    'CEDRIS BERNABE', 'VASQUEZ ARICA', 'CEDRIS BERNABE VASQUEZ ARICA',
+    FALSE, FALSE, NULL, '1', 1, NOW(), 1, NOW()
+),
+(
+    7, 'rodolfo.camino', 'rodolfo.camino@bluecoastsac.com',
+    '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
+    'RODOLFO HORACIO', 'CAMINO CALLE', 'RODOLFO HORACIO CAMINO CALLE',
+    FALSE, FALSE, NULL, '1', 1, NOW(), 1, NOW()
+),
+(
+    8, 'javier.camino', 'javier.camino@bluecoastsac.com',
+    '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
+    'FRANCISCO JAVIER', 'CAMINO CALLE', 'FRANCISCO JAVIER CAMINO CALLE',
+    FALSE, FALSE, NULL, '1', 1, NOW(), 1, NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
@@ -3683,17 +3721,16 @@ ON CONFLICT (id) DO UPDATE SET
     updated_by = EXCLUDED.updated_by,
     fec_modificacion = EXCLUDED.fec_modificacion;
 
--- Matriz por defecto: usuarios seed 1..3 × sucursales PI, Lima, Chiclayo, Chimbote (código *-PI|LM|CX|CH).
+SELECT setval(pg_get_serial_sequence('auth.usuario', 'id'), (SELECT COALESCE(MAX(id), 1) FROM auth.usuario), TRUE);
+
+-- Matriz por defecto: usuarios activos × sucursales Sullana (PI) y Lima (LM).
 INSERT INTO auth.usuario_sucursal (usuario_id, sucursal_id, flag_estado)
 SELECT u.id, s.id, '1'
 FROM auth.usuario u
 CROSS JOIN auth.sucursal s
 WHERE u.flag_estado = '1'
-  AND u.id BETWEEN 1 AND 3
-  AND (
-      s.codigo ~ '-(PI|LM|CX|CH)$'
-      OR s.codigo IN ('PI', 'LM', 'CX', 'CH')
-  )
+  AND s.flag_estado = '1'
+  AND s.codigo IN ('PI', 'LM')
 ON CONFLICT (usuario_id, sucursal_id) DO UPDATE SET
     flag_estado = EXCLUDED.flag_estado;
 
@@ -16712,19 +16749,19 @@ FROM (VALUES
     ('1000005312', '10201101', '012', 'A', 'CUENTA DE AHORROS SOLES LIMA', NULL::int, 'PEN', 7888.67::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '1', '1', '038-101000005312-42', '1', NULL::varchar, '1'),
     ('000-0276197', '10401101', '021', 'C', 'BANCO SCOTIABANK LIMA M.N. N° 000-027619', NULL::int, 'PEN', -395741.52::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
     ('000-01184866', '10401102', '021', 'C', 'BANCO SCOTIABANK LIMA M.E. N° 000-011848', NULL::int, 'USD', 4457542.98::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
-    ('000-0314498', '10401103', '021', 'C', 'BANCO SCOTIABANK CHIMBOTE M.N. N° 000-03', NULL::int, 'PEN', 19928.76::numeric, NULL::numeric, NULL::numeric, 'CH', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
-    ('000-1469873', '10401104', '021', 'C', 'BANCO SCOTIABANK CHIMBOTE M.E. N° 000-14', NULL::int, 'USD', 4720.97::numeric, NULL::numeric, NULL::numeric, 'CH', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
+    ('000-0314498', '10401103', '021', 'C', 'BANCO SCOTIABANK CHIMBOTE M.N. N° 000-03', NULL::int, 'PEN', 19928.76::numeric, NULL::numeric, NULL::numeric, 'PI', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
+    ('000-1469873', '10401104', '021', 'C', 'BANCO SCOTIABANK CHIMBOTE M.E. N° 000-14', NULL::int, 'USD', 4720.97::numeric, NULL::numeric, NULL::numeric, 'PI', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
     ('193-2132641-0-27', '10401201', '010', 'C', 'BCP LIMA M.N. N° 193-2132641-0-27', NULL::int, 'PEN', -485425.79::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
     ('193-1205787-1-75', '10401202', '010', 'C', 'BCP LIMA M.E. N° 193-1205787-1-75', NULL::int, 'USD', 2695977.29::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
-    ('310-2140948-0-48', '10401203', '010', 'C', 'BCP CHIMBOTE M.N. N° 310-2140948-0-48', NULL::int, 'PEN', 0::numeric, NULL::numeric, NULL::numeric, 'CH', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
-    ('310-2127032-1-94', '10401204', '010', 'C', 'BCP CHIMBOTE M.E. N° 310-2127032-1-94', NULL::int, 'USD', 2657.71::numeric, NULL::numeric, NULL::numeric, 'CH', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
+    ('310-2140948-0-48', '10401203', '010', 'C', 'BCP CHIMBOTE M.N. N° 310-2140948-0-48', NULL::int, 'PEN', 0::numeric, NULL::numeric, NULL::numeric, 'PI', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
+    ('310-2127032-1-94', '10401204', '010', 'C', 'BCP CHIMBOTE M.E. N° 310-2127032-1-94', NULL::int, 'USD', 2657.71::numeric, NULL::numeric, NULL::numeric, 'PI', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
     ('1000092529', '10401301', '012', 'C', 'BANBIF LIMA M.N. N° 1000092529', NULL::int, 'PEN', 98134.11::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
     ('1000092081', '10401302', '012', 'C', 'BANBIF LIMA M.E. N° 1000092081', NULL::int, 'USD', 3509329.56::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
     ('00-000-307041', '10402101', '029', 'C', 'BANCO DE LA NACION M.N. N° 00-000-307041', NULL::int, 'PEN', 1152116.02::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
     ('26599-A26599', '10601101', '056', 'A', '26599-A26599', NULL::int, 'USD', NULL::numeric, NULL::numeric, NULL::numeric, 'LM', '1', '1', '1', NULL::varchar, '1', NULL::varchar, '1'),
-    ('CAJA CHICA CHIMBOTE', '10201104', '001', 'A', 'CAJA CHICA CHIMBOTE', NULL::int, 'PEN', 40.5::numeric, NULL::numeric, NULL::numeric, 'CH', '0', '1', '1', NULL::varchar, '0', NULL::varchar, '1'),
-    ('7000546417', '10401304', '012', 'C', 'BANBIF CHIMBOTE M.E. N° 7000546417', NULL::int, 'USD', 16825.14::numeric, NULL::numeric, NULL::numeric, 'CH', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
-    ('7000546425', '10401303', '012', 'C', 'BANBIF CHIMBOTE M.N. N° 7000546425', NULL::int, 'PEN', 23144.39::numeric, NULL::numeric, NULL::numeric, 'CH', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
+    ('CAJA CHICA CHIMBOTE', '10201104', '001', 'A', 'CAJA CHICA CHIMBOTE', NULL::int, 'PEN', 40.5::numeric, NULL::numeric, NULL::numeric, 'PI', '0', '1', '1', NULL::varchar, '0', NULL::varchar, '1'),
+    ('7000546417', '10401304', '012', 'C', 'BANBIF CHIMBOTE M.E. N° 7000546417', NULL::int, 'USD', 16825.14::numeric, NULL::numeric, NULL::numeric, 'PI', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
+    ('7000546425', '10401303', '012', 'C', 'BANBIF CHIMBOTE M.N. N° 7000546425', NULL::int, 'PEN', 23144.39::numeric, NULL::numeric, NULL::numeric, 'PI', '0', '0', '1', NULL::varchar, '1', NULL::varchar, '1'),
     ('CERTIFICADO 30 DIAS', '10101101', '012', 'D', 'CERTIFICADO DE DEPOSITO A PLAZO FIJO 30', NULL::int, 'USD', -1500000::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '1', '1', NULL::varchar, '0', NULL::varchar, '1'),
     ('CERTIFICADO A 45 DIA', '10101102', '012', 'D', 'CERTIFICADO DEPOSITO A PLAZO FIJO 45', NULL::int, 'USD', 1500000::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '1', '1', NULL::varchar, '0', NULL::varchar, '1'),
     ('CERTIFICADO 60 DIAS', '10701101', '012', 'D', 'CERTIFICADO DEPOSITO PLAZO FIJO 60', NULL::int, 'USD', -15735000::numeric, NULL::numeric, NULL::numeric, 'LM', '0', '1', '1', NULL::varchar, '0', NULL::varchar, '1'),
@@ -16755,6 +16792,25 @@ ON CONFLICT (cod_ctabco) DO UPDATE SET
     nro_cci            = EXCLUDED.nro_cci,
     flag_flujo_caja    = EXCLUDED.flag_flujo_caja,
     flag_facturacion_simpl = EXCLUDED.flag_facturacion_simpl;
+
+COMMIT;
+
+-- ============================================================
+-- Limpieza sucursales legacy Chiclayo/Chimbote (plantilla Blue Coast).
+-- Idempotente: solo aplica si aún existen CX/CH de despliegues anteriores.
+-- ============================================================
+BEGIN;
+
+UPDATE finanzas.banco_cnta bc
+SET sucursal_id = s_pi.id
+FROM auth.sucursal s_pi
+WHERE s_pi.codigo = 'PI'
+  AND bc.sucursal_id IN (SELECT id FROM auth.sucursal WHERE codigo IN ('CX', 'CH'));
+
+DELETE FROM auth.usuario_sucursal
+WHERE sucursal_id IN (SELECT id FROM auth.sucursal WHERE codigo IN ('CX', 'CH'));
+
+DELETE FROM auth.sucursal WHERE codigo IN ('CX', 'CH');
 
 COMMIT;
 

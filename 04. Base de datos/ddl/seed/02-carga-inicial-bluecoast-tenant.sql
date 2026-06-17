@@ -1,10 +1,8 @@
 -- ============================================================
--- SIGRE ERP - Seed tenant BLUE COAST S.A.C. (sigre_emp_bluecoast)
--- Ejecutar tras clonar desde sigre_template o sobre BD existente.
--- ============================================================
--- Sucursales activas: Sullana (Piura) y Lima (San Isidro).
--- Usuarios capacitación (ids 4-8) sincronizados con auth security.
--- Contraseña temporal capacitación: Capacitacion2026!
+-- SIGRE ERP - Patch tenant BLUE COAST (sigre_emp_bluecoast)
+-- NOTA: sigre_template ya incluye sucursales PI/LM y usuarios 4-8 en
+--       seed/01-carga-inicial-maestros.sql. Este script es idempotente
+--       para BD existentes creadas antes del cambio de plantilla.
 -- ============================================================
 
 SET client_min_messages TO WARNING;
