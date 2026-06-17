@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, NgZone, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Observable, filter } from 'rxjs';
@@ -7,6 +7,17 @@ import { PostAuthIntentService } from '../../../admin/services/post-auth-intent.
 import { ModalController, ViewWillEnter } from '@ionic/angular';
 import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
 import { CryptoService } from '@core/services/crypto.service';
+import { environment } from '../../../../environments/environment';
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: string | HTMLElement, options: Record<string, unknown>) => string;
+      reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
 
 @Component({
   selector: 'app-signin',
@@ -14,11 +25,15 @@ import { CryptoService } from '@core/services/crypto.service';
   styleUrls: ['./signin.component.scss'],
   standalone: false
 })
-export class SignInComponent implements OnInit, ViewWillEnter {
+export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWillEnter {
 
   vistaVerif = false;
   mostrar = false;
   isLoading = false;
+  turnstileToken: string | null = null;
+  turnstileError = false;
+  private turnstileWidgetId: string | null = null;
+  private readonly zone = inject(NgZone);
 
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
@@ -43,6 +58,14 @@ export class SignInComponent implements OnInit, ViewWillEnter {
     this.cargarCredencialesRecordadas();
     this.suscribirRecargaCredencialesAlVolverALogin();
     this.obtenerIpPublica();
+  }
+
+  ngAfterViewInit(): void {
+    this.renderTurnstile();
+  }
+
+  ngOnDestroy(): void {
+    this.removeTurnstile();
   }
 
   /**
@@ -89,7 +112,53 @@ export class SignInComponent implements OnInit, ViewWillEnter {
     this.vistaVerif = !this.vistaVerif;
   }
 
+  private renderTurnstile(): void {
+    const tryRender = () => {
+      const container = document.getElementById('cf-turnstile-container');
+      if (!container || !window.turnstile) {
+        setTimeout(tryRender, 200);
+        return;
+      }
+      this.turnstileWidgetId = window.turnstile.render(container, {
+        sitekey: environment.turnstileSiteKey,
+        theme: 'light',
+        callback: (token: string) => {
+          this.zone.run(() => {
+            this.turnstileToken = token;
+            this.turnstileError = false;
+          });
+        },
+        'expired-callback': () => {
+          this.zone.run(() => { this.turnstileToken = null; });
+        },
+        'error-callback': () => {
+          this.zone.run(() => { this.turnstileToken = null; });
+        },
+      });
+    };
+    tryRender();
+  }
+
+  private removeTurnstile(): void {
+    if (this.turnstileWidgetId && window.turnstile) {
+      window.turnstile.remove(this.turnstileWidgetId);
+      this.turnstileWidgetId = null;
+    }
+  }
+
+  private resetTurnstile(): void {
+    if (this.turnstileWidgetId && window.turnstile) {
+      window.turnstile.reset(this.turnstileWidgetId);
+    }
+    this.turnstileToken = null;
+  }
+
   public onSubmit(): void {
+    if (!this.turnstileToken) {
+      this.turnstileError = true;
+      return;
+    }
+
     if (!this.loginForm.valid) {
       this.markFormGroupTouched();
       return;
@@ -160,6 +229,7 @@ export class SignInComponent implements OnInit, ViewWillEnter {
         },
         error: (err) => {
           this.isLoading = false;
+          this.resetTurnstile();
           const errorBody = err.error;
           const message = errorBody?.message ?? 'Error al iniciar sesión';
           const errorCode = errorBody?.errorCode ?? '';
