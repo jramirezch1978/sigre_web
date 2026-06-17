@@ -298,17 +298,25 @@ export class AuthService {
     this.postAuthIntent.markDefault();
     this.utilityService.signOut();
     this.storage.purgeAuthState();
+
     const redirectTo = options?.redirectTo?.trim();
     if (redirectTo) {
       await this.router.navigateByUrl(redirectTo);
       return;
     }
-    const ret = options?.returnUrl?.trim();
-    if (ret) {
-      await this.router.navigate(['/auth/signin'], { queryParams: { returnUrl: ret } });
-    } else {
-      await this.router.navigateByUrl('/auth/signin');
+
+    const returnUrl = options?.returnUrl?.trim();
+    if (returnUrl?.startsWith('/admin')) {
+      await this.router.navigateByUrl('/admin/login');
+      return;
     }
+    if (returnUrl) {
+      await this.router.navigate(['/auth/signin'], { queryParams: { returnUrl } });
+      return;
+    }
+
+    const loginUrl = this.router.url.startsWith('/admin') ? '/admin/login' : '/auth/signin';
+    await this.router.navigateByUrl(loginUrl);
   }
 
   private authHeaders(): HttpHeaders {

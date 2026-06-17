@@ -115,7 +115,7 @@ export class SeleccionRazonSocialComponent implements OnInit, CanComponentDeacti
     await modal.onDidDismiss();
     this.postAuthIntent.markDefault();
     this.cerrandoSesion = true;
-    await this.authService.signOut({ returnUrl: '/admin' });
+    await this.authService.signOut({ redirectTo: '/admin/login' });
   }
 
   private async mostrarErrorYVolverAlLoginAdmin(mensaje: string): Promise<void> {
@@ -136,7 +136,7 @@ export class SeleccionRazonSocialComponent implements OnInit, CanComponentDeacti
     await modal.present();
     await modal.onDidDismiss();
     this.cerrandoSesion = true;
-    await this.authService.signOut({ returnUrl: '/admin' });
+    await this.authService.signOut({ redirectTo: '/admin/login' });
   }
 
   private cargarEmpresas(): void {

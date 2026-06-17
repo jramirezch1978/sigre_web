@@ -68,6 +68,7 @@ export class SessionIdleService {
       }
     }
     this.storage.clearSession();
-    await this.router.navigateByUrl('/auth/signin');
+    const loginUrl = this.router.url.startsWith('/admin') ? '/admin/login' : '/auth/signin';
+    await this.router.navigateByUrl(loginUrl);
   }
 }

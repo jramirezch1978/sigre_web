@@ -11,7 +11,7 @@ export class SesionNoValidaGuard implements CanActivate {
 
   async canActivate(): Promise<boolean> {
     if (this.storage.isAuthenticated()) {
-      await this.router.navigateByUrl('/inicio');
+      await this.router.navigateByUrl('/');
       return false;
     }
     

@@ -85,7 +85,7 @@ export class AdminLoginComponent implements OnInit {
         if (response.data?.adminSistema !== true) {
           this.isLoading = false;
           this.errorMessage = 'No tiene permisos de administrador de sistema.';
-          void this.authService.signOut();
+          void this.authService.signOut({ redirectTo: '/admin/login' });
           return;
         }
 
@@ -101,13 +101,13 @@ export class AdminLoginComponent implements OnInit {
                 this.loginForm.reset();
               } else {
                 this.errorMessage = sel.message ?? 'No se pudo completar el acceso al panel.';
-                void this.authService.signOut();
+                void this.authService.signOut({ redirectTo: '/admin/login' });
               }
             },
             error: (err: unknown) => {
               this.isLoading = false;
               this.errorMessage = err instanceof Error ? err.message : 'Error al preparar la sesión admin.';
-              void this.authService.signOut();
+              void this.authService.signOut({ redirectTo: '/admin/login' });
             },
           });
       },

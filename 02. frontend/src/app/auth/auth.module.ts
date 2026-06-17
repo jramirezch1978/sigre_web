@@ -7,6 +7,12 @@ import { IonicModule } from '@ionic/angular';
 import { AuthRoutingModule } from './auth-routing.module';
 import { SignInComponent } from './pages/signin/signin.component';
 import { SeleccionRazonSocialComponent } from './pages/seleccion-razon-social/seleccion-razon-social.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Servicios
 import { AuthService } from './services/auth.service';
@@ -27,9 +33,16 @@ import { VerificacionContraseniaComponent } from './components/verificacion-cont
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    HttpClientModule,
     IonicModule,
     AuthRoutingModule,
-    AdminUiModule
+    AdminUiModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule,
   ],
   providers: [
     AuthService,

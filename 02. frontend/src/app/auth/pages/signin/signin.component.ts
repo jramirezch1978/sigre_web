@@ -1,11 +1,10 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, NgZone, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { Observable, filter } from 'rxjs';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
+import { ViewWillEnter } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
 import { PostAuthIntentService } from '../../../admin/services/post-auth-intent.service';
-import { ModalController, ViewWillEnter } from '@ionic/angular';
-import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
 import { CryptoService } from '@core/services/crypto.service';
 import { environment } from '../../../../environments/environment';
 
@@ -28,27 +27,24 @@ declare global {
 export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWillEnter {
 
   vistaVerif = false;
-  mostrar = false;
+  mostrarClave = false;
   isLoading = false;
+  errorMessage = '';
   turnstileToken: string | null = null;
   turnstileError = false;
   private turnstileWidgetId: string | null = null;
-  private readonly zone = inject(NgZone);
 
+  private readonly zone = inject(NgZone);
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly cryptoService = inject(CryptoService);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly postAuthIntent = inject(PostAuthIntentService);
-  private readonly modalController = inject(ModalController);
-  private static readonly REMEMBER_LOGIN_COOKIE = 'rpe_remember_login';
+
+  private static readonly REMEMBER_LOGIN_COOKIE = 'sigre_erp_remember_login';
   private static readonly REMEMBER_LOGIN_DAYS = 30;
 
-  public loginForm!: FormGroup;
-  public readonly loginLoading$: Observable<boolean> = this.authService.loginLoading$;
-  public readonly loginError$: Observable<boolean> = this.authService.loginError$;
-  public APP_VERSION = '1.0.0';
+  loginForm!: FormGroup;
 
   private ipAddress = '';
   private ipPrivada = '';
@@ -68,11 +64,6 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
     this.removeTurnstile();
   }
 
-  /**
-   * Con IonicRouteStrategy la vista de login puede reutilizarse desde caché;
-   * al volver tras cerrar sesión, ngOnInit no se ejecuta de nuevo.
-   * Aquí sí se vuelve a entrar y se reaplican credenciales guardadas.
-   */
   ionViewWillEnter(): void {
     this.cargarCredencialesRecordadas();
   }
@@ -89,27 +80,31 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
 
   private initializeForm(): void {
     this.loginForm = this.fb.group({
-      usuario_nombre: ['', [Validators.required, Validators.minLength(2)]],
-      usuario_clave: ['', [Validators.required, Validators.minLength(1)]],
-      guardar_datos: [false]
+      usuario: ['', [Validators.required, Validators.minLength(2)]],
+      clave: ['', [Validators.required, Validators.minLength(1)]],
+      recordar: [false],
     });
   }
 
   private obtenerIpPublica(): void {
     fetch('https://api.ipify.org?format=json')
       .then(r => r.json())
-      .then((data: { ip: string }) => this.ipAddress = data.ip)
-      .catch(() => this.ipAddress = 'unknown');
+      .then((data: { ip: string }) => { this.ipAddress = data.ip; })
+      .catch(() => { this.ipAddress = 'unknown'; });
   }
 
-  mostrarOcultar(event?: Event) {
-    event?.preventDefault();
-    event?.stopPropagation();
-    this.mostrar = !this.mostrar;
+  toggleClave(): void {
+    this.mostrarClave = !this.mostrarClave;
   }
 
-  cambioVistaVerif() {
+  cambioVistaVerif(): void {
+    this.errorMessage = '';
     this.vistaVerif = !this.vistaVerif;
+  }
+
+  campoInvalido(nombre: string): boolean {
+    const control = this.loginForm.get(nombre);
+    return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
   private renderTurnstile(): void {
@@ -153,90 +148,59 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
     this.turnstileToken = null;
   }
 
-  public onSubmit(): void {
+  onSubmit(): void {
+    this.errorMessage = '';
+
     if (!this.turnstileToken) {
       this.turnstileError = true;
       return;
     }
 
-    if (!this.loginForm.valid) {
-      this.markFormGroupTouched();
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
       return;
     }
 
     this.isLoading = true;
-    const raw = this.loginForm.getRawValue();
-    const email = raw.usuario_nombre ?? '';
-    const password = raw.usuario_clave ?? '';
-    const guardarDatos = !!raw.guardar_datos;
+    const { usuario, clave, recordar } = this.loginForm.getRawValue();
     const browser = navigator.userAgent;
     const sistemaOperativo = this.detectarSO();
 
-    this.authService.signIn(email, password, this.ipAddress, browser, sistemaOperativo, this.ipPrivada)
+    this.postAuthIntent.markDefault();
+
+    this.authService.signIn(usuario, clave, this.ipAddress, browser, sistemaOperativo, this.ipPrivada)
       .subscribe({
         next: (response) => {
           if (!response.success) {
             this.isLoading = false;
+            this.errorMessage = response.message ?? 'No se pudo iniciar sesión.';
             return;
           }
 
-          this.gestionarGuardadoCredenciales(guardarDatos, email, password);
-          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '';
-          const esLoginAdministracion = returnUrl.startsWith('/admin');
-
-          if (esLoginAdministracion) {
-            this.postAuthIntent.markAdmin();
-            if (response.data?.adminSistema !== true) {
-              void this.accesoAdminDenegadoTrasLogin();
-              return;
-            }
-
-            this.authService
-              .completarContextoConPrimeraEmpresaYSucursal(
-                this.ipAddress,
-                browser,
-                sistemaOperativo,
-                this.ipPrivada
-              )
-              .subscribe({
-                next: (sel) => {
-                  this.isLoading = false;
-                  if (sel.success && sel.data) {
-                    const dest = this.postAuthIntent.consumeHomeRoute();
-                    void this.router.navigateByUrl(dest);
-                  } else {
-                    void this.autoContextoAdminFallido(sel.message ?? 'No se pudo completar el acceso.');
-                  }
-                  this.loginForm.reset();
-                },
-                error: (err: unknown) => {
-                  this.isLoading = false;
-                  const msg =
-                    err instanceof Error
-                      ? err.message
-                      : 'No se pudo preparar el acceso al panel de administración.';
-                  void this.autoContextoAdminFallido(msg);
-                  this.loginForm.reset();
-                }
-              });
-            return;
-          }
-
-          this.postAuthIntent.markDefault();
+          this.gestionarGuardadoCredenciales(!!recordar, usuario, clave);
           this.isLoading = false;
-          this.router.navigate(['/auth/seleccion-razon-social']);
           this.loginForm.reset();
+          void this.router.navigateByUrl('/auth/seleccion-razon-social');
         },
         error: (err) => {
           this.isLoading = false;
           this.resetTurnstile();
-          const errorBody = err.error;
-          const message = errorBody?.message ?? 'Error al iniciar sesión';
-          const errorCode = errorBody?.errorCode ?? '';
-          this.showErrorModal(message, errorCode);
+          this.errorMessage = this.mensajeErrorLogin(err);
         }
       });
+  }
 
+  private mensajeErrorLogin(err: { status?: number; error?: { message?: string; errorCode?: string } }): string {
+    const code = err?.error?.errorCode ?? '';
+    const msg = err?.error?.message ?? '';
+
+    if (code === 'USUARIO_BLOQUEADO' || err?.status === 403) {
+      return msg || 'Usuario bloqueado por intentos fallidos. Espere 24 horas o contacte al administrador.';
+    }
+    if (code === 'CREDENCIALES_INVALIDAS' || err?.status === 401) {
+      return msg || 'Usuario o contraseña incorrectos.';
+    }
+    return msg || 'Error de autenticación. Verifique usuario y contraseña.';
   }
 
   private cargarCredencialesRecordadas(): void {
@@ -244,39 +208,43 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
       this.initializeForm();
     }
 
-    const rememberedRaw = this.getCookie(SignInComponent.REMEMBER_LOGIN_COOKIE);
+    const rememberedRaw = this.getCookie(SignInComponent.REMEMBER_LOGIN_COOKIE)
+      ?? this.getCookie('rpe_remember_login');
     if (!rememberedRaw) {
       this.loginForm.patchValue({
-        usuario_nombre: '',
-        usuario_clave: '',
-        guardar_datos: false
+        usuario: '',
+        clave: '',
+        recordar: false,
       });
       return;
     }
 
     try {
-      const remembered = JSON.parse(rememberedRaw) as { usuario: string; password: string };
-      const decryptedPassword = this.cryptoService.decrypt(remembered.password);
+      const remembered = JSON.parse(rememberedRaw) as { usuario: string; password?: string; clave?: string };
+      const encrypted = remembered.password ?? remembered.clave ?? '';
+      const decryptedPassword = this.cryptoService.decrypt(encrypted);
 
       this.loginForm.patchValue({
-        usuario_nombre: remembered.usuario ?? '',
-        usuario_clave: decryptedPassword ?? '',
-        guardar_datos: true
+        usuario: remembered.usuario ?? '',
+        clave: decryptedPassword ?? '',
+        recordar: true,
       });
     } catch {
       this.deleteCookie(SignInComponent.REMEMBER_LOGIN_COOKIE);
+      this.deleteCookie('rpe_remember_login');
     }
   }
 
   private gestionarGuardadoCredenciales(guardar: boolean, usuario: string, passwordPlano: string): void {
     if (!guardar) {
       this.deleteCookie(SignInComponent.REMEMBER_LOGIN_COOKIE);
+      this.deleteCookie('rpe_remember_login');
       return;
     }
 
     const payload = {
       usuario,
-      password: this.cryptoService.encrypt(passwordPlano)
+      clave: this.cryptoService.encrypt(passwordPlano),
     };
 
     this.setCookie(
@@ -284,6 +252,18 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
       JSON.stringify(payload),
       SignInComponent.REMEMBER_LOGIN_DAYS
     );
+  }
+
+  private detectarSO(): string {
+    const ua = navigator.userAgent;
+    if (ua.includes('Windows NT 10')) return 'Windows 10/11';
+    if (ua.includes('Windows NT 6.3')) return 'Windows 8.1';
+    if (ua.includes('Windows NT 6.2')) return 'Windows 8';
+    if (ua.includes('Mac OS X')) return 'macOS';
+    if (ua.includes('Linux')) return 'Linux';
+    if (ua.includes('Android')) return 'Android';
+    if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+    return 'Desconocido';
   }
 
   private getCookie(name: string): string | null {
@@ -305,92 +285,5 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
 
   private deleteCookie(name: string): void {
     document.cookie = `${encodeURIComponent(name)}=; Path=/; Max-Age=0; SameSite=Lax`;
-  }
-
-  public onGuardarDatosIonChange(event: Event): void {
-    const checked = (event as CustomEvent<{ checked: boolean }>).detail?.checked ?? false;
-    this.loginForm.patchValue({ guardar_datos: checked }, { emitEvent: true });
-  }
-
-  private async accesoAdminDenegadoTrasLogin(): Promise<void> {
-    this.isLoading = false;
-    this.postAuthIntent.markDefault();
-    const modal = await this.modalController.create({
-      component: ModalConfirmationComponent,
-      cssClass: 'promo',
-      componentProps: {
-        titlemodal: '',
-        tipemodal: 'error',
-        title: 'Acceso denegado',
-        message:
-          'No tiene permisos de administrador de sistema. Solo los usuarios autorizados pueden acceder al panel de administración.',
-        btnOkTxt: 'Aceptar',
-        mostrarCancelar: false
-      }
-    });
-    await modal.present();
-    await modal.onDidDismiss();
-    this.loginForm.reset();
-    await this.authService.signOut({ returnUrl: '/admin' });
-  }
-
-  private async autoContextoAdminFallido(mensaje: string): Promise<void> {
-    this.postAuthIntent.markDefault();
-    await this.showErrorModal(mensaje, '');
-    await this.authService.signOut({ returnUrl: '/admin' });
-  }
-
-  private detectarSO(): string {
-    const ua = navigator.userAgent;
-    if (ua.includes('Windows NT 10')) return 'Windows 10/11';
-    if (ua.includes('Windows NT 6.3')) return 'Windows 8.1';
-    if (ua.includes('Windows NT 6.2')) return 'Windows 8';
-    if (ua.includes('Mac OS X')) return 'macOS';
-    if (ua.includes('Linux')) return 'Linux';
-    if (ua.includes('Android')) return 'Android';
-    if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
-    return 'Desconocido';
-  }
-
-  private async showErrorModal(message: string, errorCode: string): Promise<void> {
-    const titulo = errorCode === 'USUARIO_BLOQUEADO'
-      ? 'Cuenta bloqueada'
-      : 'Error de autenticación';
-
-    const modal = await this.modalController.create({
-      component: ModalConfirmationComponent,
-      cssClass: 'promo',
-      componentProps: {
-        titlemodal: '',
-        tipemodal: 'error',
-        title: titulo,
-        message: message,
-        btnOkTxt: 'Aceptar',
-        mostrarCancelar: false
-      }
-    });
-    await modal.present();
-    await modal.onDidDismiss();
-  }
-
-  private markFormGroupTouched(): void {
-    Object.keys(this.loginForm.controls).forEach(key => {
-      const control = this.loginForm.get(key);
-      control?.markAsTouched();
-    });
-  }
-
-  public isFieldInvalid(fieldName: string): boolean {
-    const field = this.loginForm.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
-  }
-
-  public getFieldError(fieldName: string): string {
-    const field = this.loginForm.get(fieldName);
-    if (field?.errors) {
-      if (field.errors['required']) return `El campo es requerido`;
-      if (field.errors['minlength']) return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
-    }
-    return '';
   }
 }
