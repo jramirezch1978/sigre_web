@@ -3,22 +3,15 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StorageService } from '../../../core/services/storage.service';
 import { AuthService } from '../../../auth/services/auth.service';
-
-interface ModuloERP {
-  titulo: string;
-  descripcion: string;
-  icono: string;
-  color: string;
-  ruta: string;
-  habilitado: boolean;
-}
+import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
 
 @Component({
   selector: 'app-erp-inicio',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, RouterModule, MatIconModule, MatButtonModule, MatProgressSpinnerModule],
   templateUrl: './erp-inicio.component.html',
   styleUrls: ['./erp-inicio.component.scss'],
 })
@@ -27,62 +20,17 @@ export class ErpInicioComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly storage = inject(StorageService);
   private readonly authService = inject(AuthService);
+  private readonly menuService = inject(ErpMenuService);
 
   nombreUsuario = '';
   empresaActual = '';
   sucursalActual = '';
   currentYear = new Date().getFullYear();
 
-  modulos: ModuloERP[] = [
-    {
-      titulo: 'Contabilidad',
-      descripcion: 'Plan de cuentas, asientos, libros electrónicos',
-      icono: 'account_balance',
-      color: '#3498db',
-      ruta: '/erp/contabilidad',
-      habilitado: false,
-    },
-    {
-      titulo: 'Compras',
-      descripcion: 'Órdenes de compra, proveedores, cuentas por pagar',
-      icono: 'shopping_cart',
-      color: '#27ae60',
-      ruta: '/erp/compras',
-      habilitado: false,
-    },
-    {
-      titulo: 'Ventas',
-      descripcion: 'Facturación, clientes, cuentas por cobrar',
-      icono: 'point_of_sale',
-      color: '#e67e22',
-      ruta: '/erp/ventas',
-      habilitado: false,
-    },
-    {
-      titulo: 'Activos Fijos',
-      descripcion: 'Control de activos, depreciación, revaluación',
-      icono: 'domain',
-      color: '#8e44ad',
-      ruta: '/erp/activos-fijos',
-      habilitado: false,
-    },
-    {
-      titulo: 'Tesorería',
-      descripcion: 'Flujo de caja, bancos, conciliaciones',
-      icono: 'savings',
-      color: '#16a085',
-      ruta: '/erp/tesoreria',
-      habilitado: false,
-    },
-    {
-      titulo: 'Planillas',
-      descripcion: 'Nómina, boletas, AFP, PLAME',
-      icono: 'groups',
-      color: '#c0392b',
-      ruta: '/erp/planillas',
-      habilitado: false,
-    },
-  ];
+  modulos: MenuModulo[] = [];
+  moduloActivo: MenuModulo | null = null;
+  cargandoMenu = true;
+  errorMenu = '';
 
   ngOnInit(): void {
     const user = this.storage.getUser<{
@@ -94,11 +42,31 @@ export class ErpInicioComponent implements OnInit {
     this.nombreUsuario = user?.nombreCompleto ?? user?.nombres ?? 'Usuario';
     this.empresaActual = user?.empresaNombre ?? '';
     this.sucursalActual = user?.sucursalNombre ?? '';
+
+    this.cargarMenu();
   }
 
-  navegarModulo(modulo: ModuloERP): void {
-    if (!modulo.habilitado) return;
-    void this.router.navigateByUrl(modulo.ruta);
+  cargarMenu(): void {
+    this.cargandoMenu = true;
+    this.menuService.obtenerMiMenu().subscribe({
+      next: (modulos) => {
+        this.modulos = modulos;
+        this.cargandoMenu = false;
+      },
+      error: (err) => {
+        this.cargandoMenu = false;
+        this.errorMenu = err?.error?.message ?? 'No se pudo cargar el menú';
+      },
+    });
+  }
+
+  seleccionarModulo(modulo: MenuModulo): void {
+    this.moduloActivo = this.moduloActivo?.moduloId === modulo.moduloId ? null : modulo;
+  }
+
+  navegarOpcion(ruta: string | null): void {
+    if (!ruta) return;
+    void this.router.navigateByUrl(ruta);
   }
 
   cerrarSesion(): void {
