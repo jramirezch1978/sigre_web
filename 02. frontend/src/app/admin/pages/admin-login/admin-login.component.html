@@ -41,7 +41,16 @@
 
         <mat-checkbox formControlName="recordar" class="admin-login-remember">Recordar usuario</mat-checkbox>
 
-        <button mat-flat-button color="primary" type="submit" class="admin-login-submit" [disabled]="isLoading">
+        @if (turnstileEnabled) {
+        <div class="admin-login-turnstile">
+          <div id="cf-turnstile-container-admin"></div>
+          @if (turnstileError) {
+            <span class="turnstile-error">Debe completar la verificación de seguridad</span>
+          }
+        </div>
+        }
+
+        <button mat-flat-button color="primary" type="submit" class="admin-login-submit" [disabled]="isLoading || (turnstileEnabled && !turnstileToken)">
           @if (isLoading) {
             <span class="admin-login-submit__loading">
               <mat-spinner diameter="22"></mat-spinner>

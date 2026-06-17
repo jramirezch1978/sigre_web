@@ -1,9 +1,20 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, NgZone, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 import { CryptoService } from '../../../core/services/crypto.service';
 import { PostAuthIntentService } from '../../services/post-auth-intent.service';
+import { ConfigService } from '../../../services/config.service';
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: string | HTMLElement, options: Record<string, unknown>) => string;
+      reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
 
 @Component({
   selector: 'app-admin-login',
@@ -11,7 +22,7 @@ import { PostAuthIntentService } from '../../services/post-auth-intent.service';
   styleUrls: ['./admin-login.component.scss'],
   standalone: false,
 })
-export class AdminLoginComponent implements OnInit {
+export class AdminLoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private static readonly REMEMBER_COOKIE = 'sigre_admin_remember_login';
 
@@ -20,12 +31,20 @@ export class AdminLoginComponent implements OnInit {
   private readonly crypto = inject(CryptoService);
   private readonly router = inject(Router);
   private readonly postAuthIntent = inject(PostAuthIntentService);
+  private readonly configService = inject(ConfigService);
+  private readonly zone = inject(NgZone);
 
   loginForm!: FormGroup;
   mostrarClave = false;
   vistaRecuperacion = false;
   isLoading = false;
   errorMessage = '';
+
+  turnstileToken: string | null = null;
+  turnstileError = false;
+  turnstileEnabled = false;
+  private turnstileSiteKey = '';
+  private turnstileWidgetId: string | null = null;
 
   private ipAddress = 'unknown';
   private ipPrivada = '';
@@ -38,6 +57,62 @@ export class AdminLoginComponent implements OnInit {
     });
     this.cargarCredencialesRecordadas();
     this.obtenerIpPublica();
+
+    void this.configService.waitForConfig().then(() => {
+      this.turnstileEnabled = this.configService.isTurnstileEnabled();
+      this.turnstileSiteKey = this.configService.getTurnstileSiteKey();
+      if (this.turnstileEnabled) {
+        this.renderTurnstile();
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    if (this.configService.isConfigLoaded() && this.configService.isTurnstileEnabled()) {
+      this.turnstileEnabled = true;
+      this.turnstileSiteKey = this.configService.getTurnstileSiteKey();
+      this.renderTurnstile();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.removeTurnstile();
+  }
+
+  private renderTurnstile(): void {
+    if (!this.turnstileEnabled || !this.turnstileSiteKey) return;
+    const tryRender = () => {
+      const container = document.getElementById('cf-turnstile-container-admin');
+      if (!container || !window.turnstile) {
+        setTimeout(tryRender, 200);
+        return;
+      }
+      if (this.turnstileWidgetId) return;
+      this.turnstileWidgetId = window.turnstile.render(container, {
+        sitekey: this.turnstileSiteKey,
+        theme: 'light',
+        callback: (token: string) => {
+          this.zone.run(() => { this.turnstileToken = token; this.turnstileError = false; });
+        },
+        'expired-callback': () => { this.zone.run(() => { this.turnstileToken = null; }); },
+        'error-callback': () => { this.zone.run(() => { this.turnstileToken = null; }); },
+      });
+    };
+    tryRender();
+  }
+
+  private removeTurnstile(): void {
+    if (this.turnstileWidgetId && window.turnstile) {
+      window.turnstile.remove(this.turnstileWidgetId);
+      this.turnstileWidgetId = null;
+    }
+  }
+
+  private resetTurnstile(): void {
+    if (this.turnstileWidgetId && window.turnstile) {
+      window.turnstile.reset(this.turnstileWidgetId);
+    }
+    this.turnstileToken = null;
   }
 
   private obtenerIpPublica(): void {
@@ -62,6 +137,12 @@ export class AdminLoginComponent implements OnInit {
 
   onSubmit(): void {
     this.errorMessage = '';
+
+    if (this.turnstileEnabled && !this.turnstileToken) {
+      this.turnstileError = true;
+      return;
+    }
+
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -74,7 +155,7 @@ export class AdminLoginComponent implements OnInit {
 
     this.postAuthIntent.markAdmin();
 
-    this.authService.signIn(usuario, clave, this.ipAddress, browser, so, this.ipPrivada).subscribe({
+    this.authService.signIn(usuario, clave, this.ipAddress, browser, so, this.ipPrivada, this.turnstileToken ?? undefined).subscribe({
       next: (response) => {
         if (!response.success) {
           this.isLoading = false;
@@ -113,6 +194,7 @@ export class AdminLoginComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
+        this.resetTurnstile();
         this.errorMessage = this.mensajeErrorLogin(err);
       },
     });
@@ -121,7 +203,9 @@ export class AdminLoginComponent implements OnInit {
   private mensajeErrorLogin(err: { status?: number; error?: { message?: string; errorCode?: string } }): string {
     const code = err?.error?.errorCode ?? '';
     const msg = err?.error?.message ?? '';
-
+    if (code === 'TURNSTILE_REQUERIDO' || code === 'TURNSTILE_INVALIDO' || code === 'TURNSTILE_ERROR') {
+      return msg || 'Complete la verificación de seguridad e intente de nuevo.';
+    }
     if (code === 'USUARIO_BLOQUEADO' || err?.status === 403) {
       return msg || 'Usuario bloqueado por intentos fallidos. Espere 24 horas o contacte al administrador.';
     }
@@ -138,9 +222,7 @@ export class AdminLoginComponent implements OnInit {
 
   private cargarCredencialesRecordadas(): void {
     const raw = this.getCookie(AdminLoginComponent.REMEMBER_COOKIE);
-    if (!raw) {
-      return;
-    }
+    if (!raw) return;
     try {
       const data = JSON.parse(raw) as { usuario: string; clave: string };
       this.loginForm.patchValue({

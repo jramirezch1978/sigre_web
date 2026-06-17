@@ -41,6 +41,7 @@ export class SeleccionRazonSocialComponent implements OnInit, CanComponentDeacti
   loading = true;
   loadingSucursales = false;
   isSelecting = false;
+  currentYear = new Date().getFullYear();
   private seleccionCompletada = false;
   private cerrandoSesion = false;
   private ipAddress = '';

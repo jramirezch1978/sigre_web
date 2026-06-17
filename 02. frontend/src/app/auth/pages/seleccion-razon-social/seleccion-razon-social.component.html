@@ -1,164 +1,137 @@
-<div class="flex flex-col overflow-auto h-full">
-  <div class="flex items-center justify-between bg-primary pl-[15px]">
-    <div class="flex items-center gap-5 py-[13px]">
-      <div class="flex flex-col items-center">
-        <img src="assets/imagenes/auth/logo-sigre.png" alt="SIGRE" class="sigre-header-logo">
-      </div>
-    </div>
-    <div class="flex items-center text-sm gap-4 pr-3">
-      <div class="bg-white w-[24px] h-[24px] rounded-md flex items-center shadow-[0px 1px 2px 0px rgba(0, 0, 0, 0.12)] justify-center cursor-pointer" 
-           (click)="logout()" 
-           title="Cerrar sesión">
-        <ion-icon name="log-in-outline" class="text-primary text-sm flex justify-center items-center"></ion-icon>
-      </div>
-    </div>
-  </div>
+<div class="seleccion-page">
+  <div class="seleccion-card">
 
-  <div class="bg-white p-8 overflow-auto h-full">
-    <div class="max-w-[1400px] mx-auto flex h-full flex-col gap-4 overflow-auto">
+    <!-- Header con logo -->
+    <div class="seleccion-header">
+      <img src="assets/imagenes/auth/logo-sigre.png" alt="SIGRE ERP" class="seleccion-header__logo" />
+      <p class="seleccion-header__tagline">Solución Integral de Gestión de Recursos Empresariales</p>
+    </div>
+
+    <!-- Contenido -->
+    <div class="seleccion-body">
 
       <!-- Paso 1: Selección de Empresa -->
-      @if(paso === 'empresa'){
-        <div class="flex flex-col">
-          <span class="text-2xl font-semibold text-text-85">Seleccionar Empresa</span>
-          <span>Haz click en una empresa para ingresar al sistema</span>
+      @if (paso === 'empresa') {
+        <div class="seleccion-body__title-row">
+          <h2 class="seleccion-body__title">Seleccionar Empresa</h2>
+          <button type="button" class="seleccion-logout" (click)="logout()" title="Cerrar sesión">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <span>Salir</span>
+          </button>
         </div>
+        <p class="seleccion-body__subtitle">Haz click en una empresa para ingresar al sistema</p>
 
-        @if(empresas.length > 1){
-          <ion-input fill="outline" class="w-full"
-            placeholder="Buscar por razón social o RUC" [(ngModel)]="searchQuery">
-            <ion-icon name="search-outline" slot="start" class="text-text-25 !mr-2"></ion-icon>
-          </ion-input>
+        @if (empresas.length > 1) {
+          <div class="seleccion-search">
+            <ion-icon name="search-outline" class="seleccion-search__icon"></ion-icon>
+            <input type="text"
+              class="seleccion-search__input"
+              placeholder="Buscar por razón social o RUC"
+              [(ngModel)]="searchQuery" />
+          </div>
         }
 
-        <div class="bg-white h-full overflow-auto">
-          @if(loading){
-            <div class="flex items-center justify-center h-full">
-              <ion-spinner name="crescent" class="text-primary"></ion-spinner>
-            </div>
-          }
+        @if (loading) {
+          <div class="seleccion-loading">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+        }
 
-          @if(!loading && getEmpresasFiltradas().length > 0){
-            <table class="tabla-razon">
-              <thead>
-                <tr>
-                  <th>Empresa</th>
-                  <th>RUC</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                @for(empresa of getEmpresasFiltradas(); track empresa.empresaId){
-                <tr class="cursor-pointer hover:bg-light" 
-                    [class.opacity-50]="isSelecting"
-                    (click)="onEmpresaClick(empresa)">
-                  <td class="p-2">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 bg-[#E8EEFF] rounded-lg flex items-center justify-center flex-shrink-0">
-                        <ion-icon name="business-outline" class="text-primary text-base"></ion-icon>
-                      </div>
-                      <div>
-                        <p class="text-xxs font-semibold text-text-85 truncate">{{ empresa.razonSocial }}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="p-2 text-xxs text-text-65 truncate">{{ empresa.ruc }}</td>
-                  <td class="p-2 text-right">
-                    <ion-icon name="chevron-forward-outline" class="text-primary text-sm"></ion-icon>
-                  </td>
-                </tr>}
-              </tbody>
-            </table>
-          }
-          
-          @if(!loading && getEmpresasFiltradas().length === 0 && !searchQuery){
-            <div class="empty-container">
-              <img src="assets/imagenes/img-emptys/empty_sin_mensaje.svg" alt="" class="object-contain">
-              <div class="cont-text">
-                <span class="title">No tiene empresas asignadas</span>
-                <span class="descripcion">Coordine con el administrador del sistema</span>
+        @if (!loading && getEmpresasFiltradas().length > 0) {
+          <div class="seleccion-list">
+            @for (empresa of getEmpresasFiltradas(); track empresa.empresaId) {
+              <div class="seleccion-list__item"
+                   [class.seleccion-list__item--disabled]="isSelecting"
+                   (click)="onEmpresaClick(empresa)">
+                <div class="seleccion-list__icon seleccion-list__icon--empresa">
+                  <ion-icon name="business-outline"></ion-icon>
+                </div>
+                <div class="seleccion-list__info">
+                  <span class="seleccion-list__name">{{ empresa.razonSocial }}</span>
+                  <span class="seleccion-list__detail">RUC: {{ empresa.ruc }}</span>
+                </div>
+                <ion-icon name="chevron-forward-outline" class="seleccion-list__arrow"></ion-icon>
               </div>
-            </div>
-          }
+            }
+          </div>
+        }
 
-          @if(!loading && getEmpresasFiltradas().length === 0 && searchQuery){
-            <div class="empty-container">
-              <img src="assets/imagenes/img-emptys/empty-search.svg" alt="" class="object-contain">
-              <div class="cont-text">
-                <span class="title">No se encontraron empresas</span>
-                <span class="descripcion">Verifica el criterio de búsqueda e intenta nuevamente</span>
-              </div>
-            </div>
-          }
-        </div>
+        @if (!loading && getEmpresasFiltradas().length === 0 && !searchQuery) {
+          <div class="seleccion-empty">
+            <ion-icon name="alert-circle-outline" class="seleccion-empty__icon"></ion-icon>
+            <p class="seleccion-empty__title">No tiene empresas asignadas</p>
+            <p class="seleccion-empty__desc">Coordine con el administrador del sistema</p>
+          </div>
+        }
+
+        @if (!loading && getEmpresasFiltradas().length === 0 && searchQuery) {
+          <div class="seleccion-empty">
+            <ion-icon name="search-outline" class="seleccion-empty__icon"></ion-icon>
+            <p class="seleccion-empty__title">No se encontraron empresas</p>
+            <p class="seleccion-empty__desc">Verifica el criterio de búsqueda e intenta nuevamente</p>
+          </div>
+        }
       }
 
       <!-- Paso 2: Selección de Sucursal -->
-      @if(paso === 'sucursal'){
-        <div class="flex flex-col">
-          <div class="flex items-center gap-2 mb-1">
-            <ion-icon name="chevron-back-outline" class="text-primary text-sm cursor-pointer" (click)="volverAEmpresas()"></ion-icon>
-            <span class="text-2xl font-semibold text-text-85">Seleccionar Sucursal</span>
+      @if (paso === 'sucursal') {
+        <div class="seleccion-body__title-row">
+          <div class="seleccion-body__back-group">
+            <button type="button" class="seleccion-back" (click)="volverAEmpresas()">
+              <ion-icon name="arrow-back-outline"></ion-icon>
+            </button>
+            <h2 class="seleccion-body__title">Seleccionar Sucursal</h2>
           </div>
-          <div class="flex items-center gap-2">
-            <ion-icon name="business-outline" class="text-primary text-xs"></ion-icon>
-            <span class="text-sm text-text-65">{{ empresaSeleccionada?.razonSocial }} — RUC: {{ empresaSeleccionada?.ruc }}</span>
-          </div>
+          <button type="button" class="seleccion-logout" (click)="logout()" title="Cerrar sesión">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <span>Salir</span>
+          </button>
         </div>
+        <p class="seleccion-body__subtitle">
+          <ion-icon name="business-outline"></ion-icon>
+          {{ empresaSeleccionada?.razonSocial }} — RUC: {{ empresaSeleccionada?.ruc }}
+        </p>
 
-        <div class="bg-white h-full overflow-auto">
-          @if(loadingSucursales){
-            <div class="flex items-center justify-center h-full">
-              <ion-spinner name="crescent" class="text-primary"></ion-spinner>
-            </div>
-          }
+        @if (loadingSucursales) {
+          <div class="seleccion-loading">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+        }
 
-          @if(!loadingSucursales && sucursales.length > 0){
-            <table class="tabla-razon">
-              <thead>
-                <tr>
-                  <th>Sucursal</th>
-                  <th>Dirección</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                @for(sucursal of sucursales; track sucursal.id){
-                <tr class="cursor-pointer hover:bg-light" 
-                    [class.opacity-50]="isSelecting"
-                    (click)="seleccionarSucursal(sucursal)">
-                  <td class="p-2">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 bg-[#FFF3E0] rounded-lg flex items-center justify-center flex-shrink-0">
-                        <ion-icon name="storefront-outline" class="text-orange-500 text-base"></ion-icon>
-                      </div>
-                      <div>
-                        <p class="text-xxs font-semibold text-text-85 truncate">{{ sucursal.nombre }}</p>
-                        <p class="text-xxss text-text-45">{{ sucursal.codigo }}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="p-2 text-xxs text-text-65 truncate">{{ sucursal.direccion || '—' }}</td>
-                  <td class="p-2 text-right">
-                    <ion-icon name="chevron-forward-outline" class="text-primary text-sm"></ion-icon>
-                  </td>
-                </tr>}
-              </tbody>
-            </table>
-          }
-
-          @if(!loadingSucursales && sucursales.length === 0){
-            <div class="empty-container">
-              <img src="assets/imagenes/img-emptys/empty_sin_mensaje.svg" alt="" class="object-contain">
-              <div class="cont-text">
-                <span class="title">No hay sucursales registradas</span>
-                <span class="descripcion">Esta empresa no tiene sucursales configuradas</span>
+        @if (!loadingSucursales && sucursales.length > 0) {
+          <div class="seleccion-list">
+            @for (sucursal of sucursales; track sucursal.id) {
+              <div class="seleccion-list__item"
+                   [class.seleccion-list__item--disabled]="isSelecting"
+                   (click)="seleccionarSucursal(sucursal)">
+                <div class="seleccion-list__icon seleccion-list__icon--sucursal">
+                  <ion-icon name="storefront-outline"></ion-icon>
+                </div>
+                <div class="seleccion-list__info">
+                  <span class="seleccion-list__name">{{ sucursal.nombre }}</span>
+                  <span class="seleccion-list__detail">{{ sucursal.codigo }} — {{ sucursal.direccion || '—' }}</span>
+                </div>
+                <ion-icon name="chevron-forward-outline" class="seleccion-list__arrow"></ion-icon>
               </div>
-            </div>
-          }
-        </div>
+            }
+          </div>
+        }
+
+        @if (!loadingSucursales && sucursales.length === 0) {
+          <div class="seleccion-empty">
+            <ion-icon name="alert-circle-outline" class="seleccion-empty__icon"></ion-icon>
+            <p class="seleccion-empty__title">No hay sucursales registradas</p>
+            <p class="seleccion-empty__desc">Esta empresa no tiene sucursales configuradas</p>
+          </div>
+        }
       }
 
     </div>
+
+    <!-- Footer -->
+    <div class="seleccion-footer">
+      <span>&copy; {{ currentYear }} SIGRE ERP — Todos los derechos reservados</span>
+    </div>
+
   </div>
 </div>
