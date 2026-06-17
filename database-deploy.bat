@@ -156,7 +156,7 @@ call :do_insert || goto :fail
 goto :done
 
 :route_clone
-call :check_host_docker || goto :fail
+call :check_host_docker_ddl || goto :fail
 if "!ARG1!"=="" (
     echo ERROR: Indique empresa. Ejemplo: %~nx0 clone cantabria
     goto :fail
@@ -441,6 +441,14 @@ if /I "!CLONE_NEWDB!"=="sigre_emp_bluecoast" (
     )
     set "PGDATABASE=!SAVED_PGDATABASE!"
 )
+set "CLONE_ROLE="
+for /f "delims=" %%a in ('powershell -NoProfile -Command "$s='%~1'; if([string]::IsNullOrWhiteSpace($s)){exit 2}; $s=$s.Trim().ToLower() -replace '[^a-z0-9_]','_'; $s=$s -replace '_+','_'; $s=$s.Trim('_'); Write-Output $s"') do set "CLONE_ROLE=%%a"
+if not defined CLONE_ROLE (
+    echo ERROR: No se pudo derivar rol tenant desde: %~1
+    exit /b 1
+)
+echo ^>^> Aplicando privilegios tenant ^(!CLONE_NEWDB! / !CLONE_ROLE!^)...
+call :do_tenant_grants "!CLONE_NEWDB!" "!CLONE_ROLE!" || exit /b 1
 exit /b 0
 
 :do_patch_bluecoast
