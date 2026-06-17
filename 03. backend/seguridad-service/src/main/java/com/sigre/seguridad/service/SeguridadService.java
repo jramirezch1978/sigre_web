@@ -96,7 +96,9 @@ public class SeguridadService {
                 """
                 SELECT e.id, e.codigo, e.ruc, e.razon_social, e.nombre_comercial,
                        e.direccion_fiscal, e.distrito_id, e.ubigeo,
-                       d.nombre AS distrito_nombre, p.nombre AS provincia_nombre, dep.nombre AS departamento_nombre,
+                       d.nombre AS distrito_nombre, d.provincia_id,
+                       p.nombre AS provincia_nombre, p.departamento_id,
+                       dep.nombre AS departamento_nombre,
                        e.representante_legal, e.dni_representante_legal,
                        e.correo_contacto, e.telefono_contacto, e.db_name, e.flag_estado
                 FROM master.empresa e
@@ -112,11 +114,13 @@ public class SeguridadService {
                         .razonSocial(rs.getString("razon_social"))
                         .nombreComercial(rs.getString("nombre_comercial"))
                         .direccionFiscal(rs.getString("direccion_fiscal"))
-                        .distritoId(rs.getObject("distrito_id", Long.class))
-                        .ubigeo(rs.getString("ubigeo"))
-                        .distritoNombre(rs.getString("distrito_nombre"))
-                        .provinciaNombre(rs.getString("provincia_nombre"))
+                        .departamentoId(rs.getObject("departamento_id", Long.class))
                         .departamentoNombre(rs.getString("departamento_nombre"))
+                        .provinciaId(rs.getObject("provincia_id", Long.class))
+                        .provinciaNombre(rs.getString("provincia_nombre"))
+                        .distritoId(rs.getObject("distrito_id", Long.class))
+                        .distritoNombre(rs.getString("distrito_nombre"))
+                        .ubigeo(rs.getString("ubigeo"))
                         .representanteLegal(rs.getString("representante_legal"))
                         .dniRepresentanteLegal(rs.getString("dni_representante_legal"))
                         .correoContacto(rs.getString("correo_contacto"))
@@ -132,7 +136,9 @@ public class SeguridadService {
                 """
                 SELECT e.id, e.codigo, e.ruc, e.razon_social, e.nombre_comercial,
                        e.direccion_fiscal, e.distrito_id, e.ubigeo,
-                       d.nombre AS distrito_nombre, p.nombre AS provincia_nombre, dep.nombre AS departamento_nombre,
+                       d.nombre AS distrito_nombre, d.provincia_id,
+                       p.nombre AS provincia_nombre, p.departamento_id,
+                       dep.nombre AS departamento_nombre,
                        e.representante_legal, e.dni_representante_legal,
                        e.correo_contacto, e.telefono_contacto, e.db_name, e.flag_estado
                 FROM master.empresa e
@@ -148,11 +154,13 @@ public class SeguridadService {
                         .razonSocial(rs.getString("razon_social"))
                         .nombreComercial(rs.getString("nombre_comercial"))
                         .direccionFiscal(rs.getString("direccion_fiscal"))
-                        .distritoId(rs.getObject("distrito_id", Long.class))
-                        .ubigeo(rs.getString("ubigeo"))
-                        .distritoNombre(rs.getString("distrito_nombre"))
-                        .provinciaNombre(rs.getString("provincia_nombre"))
+                        .departamentoId(rs.getObject("departamento_id", Long.class))
                         .departamentoNombre(rs.getString("departamento_nombre"))
+                        .provinciaId(rs.getObject("provincia_id", Long.class))
+                        .provinciaNombre(rs.getString("provincia_nombre"))
+                        .distritoId(rs.getObject("distrito_id", Long.class))
+                        .distritoNombre(rs.getString("distrito_nombre"))
+                        .ubigeo(rs.getString("ubigeo"))
                         .representanteLegal(rs.getString("representante_legal"))
                         .dniRepresentanteLegal(rs.getString("dni_representante_legal"))
                         .correoContacto(rs.getString("correo_contacto"))

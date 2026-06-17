@@ -91,10 +91,12 @@ export interface EmpresaAdminDto {
   razonSocial: string;
   nombreComercial?: string;
   direccionFiscal?: string;
+  departamentoId?: number;
+  departamentoNombre?: string;
+  provinciaId?: number;
+  provinciaNombre?: string;
   distritoId?: number;
   distritoNombre?: string;
-  provinciaNombre?: string;
-  departamentoNombre?: string;
   ubigeo?: string;
   representanteLegal?: string;
   dniRepresentanteLegal?: string;

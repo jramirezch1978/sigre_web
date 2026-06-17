@@ -18,10 +18,12 @@ public class EmpresaAdminDto {
     private String razonSocial;
     private String nombreComercial;
     private String direccionFiscal;
+    private Long departamentoId;
+    private String departamentoNombre;
+    private Long provinciaId;
+    private String provinciaNombre;
     private Long distritoId;
     private String distritoNombre;
-    private String provinciaNombre;
-    private String departamentoNombre;
     private String ubigeo;
     private String representanteLegal;
     private String dniRepresentanteLegal;

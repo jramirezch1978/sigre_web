@@ -194,14 +194,14 @@ export class AdminEmpresasComponent implements OnInit {
       correoContacto: e.correoContacto ?? '',
       telefonoContacto: e.telefonoContacto ?? '',
     });
-    this.selectedDepartamentoEditar = null;
-    this.selectedProvinciaEditar = null;
+    this.selectedDepartamentoEditar = e.departamentoId ?? null;
+    this.selectedProvinciaEditar = e.provinciaId ?? null;
     this.provinciasEditar = [];
     this.distritosEditar = [];
     this.mostrandoEditar = true;
 
-    if (e.distritoId) {
-      await this.cargarCascadaEditarDesdeDistrito(e.distritoId);
+    if (e.departamentoId) {
+      await this.cargarCascadaEditarDesdeEmpresa(e);
     }
   }
 
@@ -418,24 +418,16 @@ export class AdminEmpresasComponent implements OnInit {
     }
   }
 
-  private async cargarCascadaEditarDesdeDistrito(distritoId: number): Promise<void> {
+  private async cargarCascadaEditarDesdeEmpresa(e: EmpresaAdminDto): Promise<void> {
     try {
-      const e = this.empresaEditando;
-      if (!e) return;
-
-      const dept = this.departamentos.find(d => d.nombre === e.departamentoNombre);
-      if (!dept) return;
-
-      this.selectedDepartamentoEditar = dept.id;
-      const provRes = await firstValueFrom(this.ubigeoApi.listarProvincias(dept.id));
-      this.provinciasEditar = provRes.data ?? [];
-
-      const prov = this.provinciasEditar.find(p => p.nombre === e.provinciaNombre);
-      if (!prov) return;
-
-      this.selectedProvinciaEditar = prov.id;
-      const distRes = await firstValueFrom(this.ubigeoApi.listarDistritos(prov.id));
-      this.distritosEditar = distRes.data ?? [];
+      if (e.departamentoId) {
+        const provRes = await firstValueFrom(this.ubigeoApi.listarProvincias(e.departamentoId));
+        this.provinciasEditar = provRes.data ?? [];
+      }
+      if (e.provinciaId) {
+        const distRes = await firstValueFrom(this.ubigeoApi.listarDistritos(e.provinciaId));
+        this.distritosEditar = distRes.data ?? [];
+      }
     } catch {
       // silently fail
     }
