@@ -6,7 +6,7 @@ import { ViewWillEnter } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
 import { PostAuthIntentService } from '../../../admin/services/post-auth-intent.service';
 import { CryptoService } from '@core/services/crypto.service';
-import { environment } from '../../../../environments/environment';
+import { ConfigService } from '../../../services/config.service';
 
 declare global {
   interface Window {
@@ -32,12 +32,15 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   errorMessage = '';
   turnstileToken: string | null = null;
   turnstileError = false;
+  turnstileEnabled = false;
+  turnstileSiteKey = '';
   private turnstileWidgetId: string | null = null;
 
   private readonly zone = inject(NgZone);
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly cryptoService = inject(CryptoService);
+  private readonly configService = inject(ConfigService);
   private readonly router = inject(Router);
   private readonly postAuthIntent = inject(PostAuthIntentService);
 
@@ -54,10 +57,21 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
     this.cargarCredencialesRecordadas();
     this.suscribirRecargaCredencialesAlVolverALogin();
     this.obtenerIpPublica();
+    void this.configService.waitForConfig().then(() => {
+      this.turnstileEnabled = this.configService.isTurnstileEnabled();
+      this.turnstileSiteKey = this.configService.getTurnstileSiteKey();
+      if (this.turnstileEnabled) {
+        this.renderTurnstile();
+      }
+    });
   }
 
   ngAfterViewInit(): void {
-    this.renderTurnstile();
+    if (this.configService.isConfigLoaded() && this.configService.isTurnstileEnabled()) {
+      this.turnstileEnabled = true;
+      this.turnstileSiteKey = this.configService.getTurnstileSiteKey();
+      this.renderTurnstile();
+    }
   }
 
   ngOnDestroy(): void {
@@ -108,14 +122,20 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   }
 
   private renderTurnstile(): void {
+    if (!this.turnstileEnabled || !this.turnstileSiteKey) {
+      return;
+    }
     const tryRender = () => {
       const container = document.getElementById('cf-turnstile-container');
       if (!container || !window.turnstile) {
         setTimeout(tryRender, 200);
         return;
       }
+      if (this.turnstileWidgetId) {
+        return;
+      }
       this.turnstileWidgetId = window.turnstile.render(container, {
-        sitekey: environment.turnstileSiteKey,
+        sitekey: this.turnstileSiteKey,
         theme: 'light',
         callback: (token: string) => {
           this.zone.run(() => {
@@ -151,7 +171,7 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   onSubmit(): void {
     this.errorMessage = '';
 
-    if (!this.turnstileToken) {
+    if (this.turnstileEnabled && !this.turnstileToken) {
       this.turnstileError = true;
       return;
     }
@@ -168,7 +188,9 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
 
     this.postAuthIntent.markDefault();
 
-    this.authService.signIn(usuario, clave, this.ipAddress, browser, sistemaOperativo, this.ipPrivada)
+    this.authService.signIn(
+      usuario, clave, this.ipAddress, browser, sistemaOperativo, this.ipPrivada, this.turnstileToken ?? undefined
+    )
       .subscribe({
         next: (response) => {
           if (!response.success) {
@@ -194,6 +216,9 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
     const code = err?.error?.errorCode ?? '';
     const msg = err?.error?.message ?? '';
 
+    if (code === 'TURNSTILE_REQUERIDO' || code === 'TURNSTILE_INVALIDO' || code === 'TURNSTILE_ERROR') {
+      return msg || 'Complete la verificación de seguridad e intente de nuevo.';
+    }
     if (code === 'USUARIO_BLOQUEADO' || err?.status === 403) {
       return msg || 'Usuario bloqueado por intentos fallidos. Espere 24 horas o contacte al administrador.';
     }

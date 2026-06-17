@@ -17,7 +17,7 @@ import com.sigre.seguridad.service.EmailService;
 import com.sigre.seguridad.service.TenantConnectionService;
 import com.sigre.seguridad.service.LogAccesoService;
 import com.sigre.seguridad.service.TokensSessionService;
-import com.sigre.seguridad.service.UsuarioEmpresaAdminService;
+import com.sigre.seguridad.service.TurnstileVerificationService;
 import com.sigre.seguridad.dto.TenantConnectionInfoResponse;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.security.JwtTokenProvider;
@@ -55,6 +55,7 @@ public class AuthServiceImpl implements AuthService {
     private final UsuarioEmpresaAdminService usuarioEmpresaAdminService;
     private final TokensSessionService tokensSessionService;
     private final LogAccesoService logAccesoService;
+    private final TurnstileVerificationService turnstileVerificationService;
 
     @Value("${app.jwt.access-token-expiration:900000}")
     private long tempTokenExpiration;
@@ -76,6 +77,7 @@ public class AuthServiceImpl implements AuthService {
             UsuarioEmpresaAdminService usuarioEmpresaAdminService,
             TokensSessionService tokensSessionService,
             LogAccesoService logAccesoService,
+            TurnstileVerificationService turnstileVerificationService,
             DataSource dataSource) {
         this.usuarioRepository = usuarioRepository;
         this.empresaMasterRepository = empresaMasterRepository;
@@ -87,12 +89,15 @@ public class AuthServiceImpl implements AuthService {
         this.usuarioEmpresaAdminService = usuarioEmpresaAdminService;
         this.tokensSessionService = tokensSessionService;
         this.logAccesoService = logAccesoService;
+        this.turnstileVerificationService = turnstileVerificationService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
     @Transactional
     public LoginResponse login(LoginRequest request) {
+        turnstileVerificationService.requireValid(request.getTurnstileToken(), request.getIpAddress());
+
         Usuario usuario = findUsuario(request.getEmail());
 
         checkBloqueo(usuario);

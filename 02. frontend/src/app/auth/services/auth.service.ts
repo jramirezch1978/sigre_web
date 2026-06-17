@@ -81,7 +81,8 @@ export class AuthService {
   public readonly loginError$ = this.loginErrorSubject.asObservable();
 
   signIn(email: string, password: string, ipAddress: string,
-         browser: string, sistemaOperativo: string, ipPrivada?: string): Observable<LoginApiResponse> {
+         browser: string, sistemaOperativo: string, ipPrivada?: string,
+         turnstileToken?: string): Observable<LoginApiResponse> {
 
     this.loginLoadingSubject.next(true);
     this.loginErrorSubject.next(false);
@@ -90,7 +91,7 @@ export class AuthService {
     const encryptedPassword = this.crypto.encrypt(password);
     const passwordHash = this.crypto.hash(password);
 
-    const body = {
+    const body: Record<string, string> = {
       email: cleanEmail,
       password: encryptedPassword,
       passwordHash,
@@ -99,6 +100,9 @@ export class AuthService {
       browser,
       sistemaOperativo: this.sanitizer.sanitize(sistemaOperativo)
     };
+    if (turnstileToken) {
+      body['turnstileToken'] = turnstileToken;
+    }
 
     return this.http.post<LoginApiResponse>(`${this.baseUrl}/auth/login`, body).pipe(
       tap(response => {

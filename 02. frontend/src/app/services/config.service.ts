@@ -48,10 +48,20 @@ export interface RacionesConfig {
   };
 }
 
+export interface TurnstileConfig {
+  enabled: boolean;
+  siteKey: string;
+}
+
+export interface SecurityConfig {
+  turnstile: TurnstileConfig;
+}
+
 export interface AppSettings {
   company: CompanyConfig;
   api: ApiConfig;
   raciones: RacionesConfig;
+  security?: SecurityConfig;
 }
 
 @Injectable({
@@ -245,5 +255,22 @@ export class ConfigService {
   deberMostrarVentanaRaciones(horaActual?: Date): boolean {
     const racionesDisponibles = this.getRacionesDisponibles(horaActual);
     return racionesDisponibles.some(r => r.disponible);
+  }
+
+  /** Site key pública de Cloudflare Turnstile (sin secret). */
+  getTurnstileSiteKey(): string {
+    const config = this.configSubject.value;
+    return config?.security?.turnstile?.siteKey?.trim() ?? '';
+  }
+
+  /** Activa captcha solo con site key real (no claves 1x/2x/3x de prueba de Cloudflare). */
+  isTurnstileEnabled(): boolean {
+    const config = this.configSubject.value;
+    const ts = config?.security?.turnstile;
+    if (ts?.enabled === false) {
+      return false;
+    }
+    const siteKey = ts?.siteKey?.trim() ?? '';
+    return siteKey.length > 0 && !/^[123]x/.test(siteKey);
   }
 }

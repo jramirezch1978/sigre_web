@@ -3,8 +3,10 @@ package com.sigre.seguridad.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import com.sigre.seguridad.dto.EnviarCorreoBienvenidaResponse;
 import com.sigre.seguridad.dto.seguridad.*;
 import com.sigre.seguridad.service.SeguridadService;
+import com.sigre.seguridad.service.TenantProvisioningService;
 import com.sigre.seguridad.support.SeguridadContextHelper;
 import com.sigre.common.dto.ApiResponse;
 
@@ -21,6 +23,7 @@ public class SeguridadController {
 
     private final SeguridadContextHelper contextHelper;
     private final SeguridadService seguridadService;
+    private final TenantProvisioningService tenantProvisioningService;
 
     // --- Empresas (acepta token temporal o definitivo) ---
 
@@ -53,6 +56,16 @@ public class SeguridadController {
         return ApiResponse.ok(
                 seguridadService.actualizarEstadoEmpresaAdmin(empresaId, activo),
                 activo ? "Empresa reactivada" : "Empresa anulada");
+    }
+
+    @PostMapping("/empresas/{empresaId}/correo-bienvenida")
+    public ApiResponse<EnviarCorreoBienvenidaResponse> enviarCorreoBienvenida(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable long empresaId) {
+        long uid = contextHelper.requireUserIdAny(auth);
+        seguridadService.requireAdminSistema(uid);
+        EnviarCorreoBienvenidaResponse data = tenantProvisioningService.enviarCorreoBienvenida(empresaId);
+        return ApiResponse.ok(data, data.getMensaje());
     }
 
     // --- Catálogo global ---

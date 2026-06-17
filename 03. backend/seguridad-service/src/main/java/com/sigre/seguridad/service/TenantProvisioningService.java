@@ -15,6 +15,7 @@ import com.sigre.seguridad.dto.ActualizarCredencialesBdRequest;
 import com.sigre.seguridad.dto.ActualizarCredencialesBdResponse;
 import com.sigre.seguridad.dto.DeleteEmpresaResponse;
 import com.sigre.seguridad.dto.EmpresaLogoUploadResponse;
+import com.sigre.seguridad.dto.EnviarCorreoBienvenidaResponse;
 import com.sigre.seguridad.dto.EmpresaRegistroEmailDto;
 import com.sigre.seguridad.dto.ProvisionEmpresaRequest;
 import com.sigre.seguridad.dto.ProvisionEmpresaResponse;
@@ -476,28 +477,80 @@ public class TenantProvisioningService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public EnviarCorreoBienvenidaResponse enviarCorreoBienvenida(long empresaId) {
+        EmpresaMaster empresa = empresaMasterRepository.findById(empresaId)
+                .orElseThrow(() -> new BusinessException(
+                        "Empresa no encontrada",
+                        HttpStatus.NOT_FOUND,
+                        "EMPRESA_NO_ENCONTRADA"));
+
+        String correo = trimOrNull(empresa.getCorreoContacto());
+        if (isBlank(correo)) {
+            throw new BusinessException(
+                    "La empresa no tiene correo de contacto registrado",
+                    HttpStatus.BAD_REQUEST,
+                    "CORREO_CONTACTO_REQUERIDO");
+        }
+        if (!EMAIL_PATTERN.matcher(correo).matches()) {
+            throw new BusinessException(
+                    "El correo de contacto registrado no es válido",
+                    HttpStatus.BAD_REQUEST,
+                    "CORREO_CONTACTO_INVALIDO");
+        }
+
+        EmpresaRegistroEmailDto datos = buildEmpresaRegistroEmailDto(empresa);
+        emailService.enviarConfirmacionRegistroEmpresa(datos);
+
+        return EnviarCorreoBienvenidaResponse.builder()
+                .empresaId(empresa.getId())
+                .codigo(empresa.getCodigo())
+                .razonSocial(empresa.getRazonSocial())
+                .correoContacto(correo)
+                .mensaje("Correo de bienvenida enviado a " + correo)
+                .build();
+    }
+
     private void notificarRegistroEmpresa(
             ProvisionEmpresaRequest req,
             EmpresaMaster saved,
             String slug,
             String host,
             int port) {
+        emailService.enviarConfirmacionRegistroEmpresa(buildEmpresaRegistroEmailDto(saved, req, slug, host, port));
+    }
+
+    private EmpresaRegistroEmailDto buildEmpresaRegistroEmailDto(EmpresaMaster empresa) {
+        return buildEmpresaRegistroEmailDto(
+                empresa,
+                null,
+                resolveSiglaFromEmpresa(empresa),
+                empresa.getDbHost(),
+                empresa.getDbPort());
+    }
+
+    private EmpresaRegistroEmailDto buildEmpresaRegistroEmailDto(
+            EmpresaMaster saved,
+            ProvisionEmpresaRequest req,
+            String slug,
+            String host,
+            int port) {
         UbigeoResumenDto ubigeo = seguridadService.obtenerUbigeoResumenPorDistrito(saved.getDistritoId()).orElse(null);
 
-        EmpresaRegistroEmailDto datos = EmpresaRegistroEmailDto.builder()
+        return EmpresaRegistroEmailDto.builder()
                 .codigo(saved.getCodigo())
                 .ruc(saved.getRuc())
                 .razonSocial(saved.getRazonSocial())
                 .nombreComercial(saved.getNombreComercial())
-                .sigla(req.getSigla() != null ? req.getSigla().trim().toUpperCase(Locale.ROOT) : slug.toUpperCase(Locale.ROOT))
+                .sigla(resolveSiglaForEmail(saved, req, slug))
                 .direccionFiscal(saved.getDireccionFiscal())
-                .departamento(ubigeo != null ? ubigeo.getDepartamentoNombre() : trimOrNull(req.getDirDepartamento()))
-                .provincia(ubigeo != null ? ubigeo.getProvinciaNombre() : trimOrNull(req.getDirProvincia()))
-                .distrito(ubigeo != null ? ubigeo.getDistritoNombre() : trimOrNull(req.getDirDistrito()))
+                .departamento(ubigeo != null ? ubigeo.getDepartamentoNombre() : req != null ? trimOrNull(req.getDirDepartamento()) : null)
+                .provincia(ubigeo != null ? ubigeo.getProvinciaNombre() : req != null ? trimOrNull(req.getDirProvincia()) : null)
+                .distrito(ubigeo != null ? ubigeo.getDistritoNombre() : req != null ? trimOrNull(req.getDirDistrito()) : null)
                 .ubigeo(firstNonBlank(
                         ubigeo != null ? ubigeo.getDistritoCodigo() : null,
                         saved.getUbigeo(),
-                        req.getDirUbigeo()))
+                        req != null ? req.getDirUbigeo() : null))
                 .representanteLegal(saved.getRepresentanteLegal())
                 .dniRepresentanteLegal(saved.getDniRepresentanteLegal())
                 .correoContacto(saved.getCorreoContacto())
@@ -508,8 +561,27 @@ public class TenantProvisioningService {
                 .dbUser(saved.getDbUser())
                 .fechaRegistro(FECHA_REGISTRO_FMT.format(Instant.now()))
                 .build();
+    }
 
-        emailService.enviarConfirmacionRegistroEmpresa(datos);
+    private String resolveSiglaForEmail(EmpresaMaster saved, ProvisionEmpresaRequest req, String slug) {
+        if (req != null && req.getSigla() != null && !req.getSigla().isBlank()) {
+            return req.getSigla().trim().toUpperCase(Locale.ROOT);
+        }
+        if (slug != null && !slug.isBlank()) {
+            return slug.toUpperCase(Locale.ROOT);
+        }
+        return resolveSiglaFromEmpresa(saved);
+    }
+
+    private String resolveSiglaFromEmpresa(EmpresaMaster empresa) {
+        String dbName = empresa.getDbName();
+        if (dbName != null && dbName.startsWith(dbNamePrefix)) {
+            return dbName.substring(dbNamePrefix.length()).toUpperCase(Locale.ROOT);
+        }
+        if (empresa.getDbUser() != null && !empresa.getDbUser().isBlank()) {
+            return empresa.getDbUser().trim().toUpperCase(Locale.ROOT);
+        }
+        return empresa.getCodigo();
     }
 
     /**

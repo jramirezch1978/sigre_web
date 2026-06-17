@@ -43,4 +43,8 @@ public class LoginRequest {
     @Size(max = 100, message = "Nombre de dispositivo muy largo")
     @Pattern(regexp = "^[a-zA-Z0-9 ._\\-]*$", message = "Formato de dispositivo no válido")
     private String deviceName;
+
+    /** Token emitido por Cloudflare Turnstile en el login ERP (opcional si backend no exige captcha). */
+    @Size(max = 4096, message = "Token Turnstile demasiado largo")
+    private String turnstileToken;
 }
