@@ -24,11 +24,11 @@ import { ConfigService } from './services/config.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'SIGRE - Módulo de Asistencia';
-  companyName = 'Transmarina del PERU SAC';
-  companyLogo = 'assets/logo-transmarina.png';
-  companySector = 'Empresa Hidrobiológica';
-  companySucursal = 'PIURA - SECHURA';
+  title = 'SIGRE ERP';
+  companyName = 'SIGRE';
+  companyLogo = 'assets/imagenes/auth/logo-sigre.png';
+  companySector = 'Gestión Empresarial';
+  companySucursal = '';
 
   constructor(private configService: ConfigService) {}
 

@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.restaurant.pe/api',
+  apiUrl: '/api',
   apiBaseUrl: '/api',
   /** Ver comentario en environment.ts */
   adminExternalBaseUrl: '',

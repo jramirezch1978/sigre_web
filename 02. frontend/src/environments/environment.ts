@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost/webapp/restaurant/m/rest',
+  apiUrl: '/api',
   /** Gateway API (ms detrás del mismo host); ver docker-compose api-gateway :9080 */
   apiBaseUrl: '/api',
   /**

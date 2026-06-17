@@ -118,22 +118,22 @@ export class ConfigService {
 
   getCompanyName(): string {
     const config = this.configSubject.value;
-    return config?.company?.name || 'Transmarina del PERU SAC';
+    return config?.company?.name || 'SIGRE';
   }
 
   getCompanyLogo(): string {
     const config = this.configSubject.value;
-    return config?.company?.logoPath || 'assets/logo-transmarina.png';
+    return config?.company?.logoPath || 'assets/imagenes/auth/logo-sigre.png';
   }
 
   getCompanySector(): string {
     const config = this.configSubject.value;
-    return config?.company?.sector || 'Empresa Hidrobiológica';
+    return config?.company?.sector || 'Gestión Empresarial';
   }
 
   getCompanySucursal(): string {
     const config = this.configSubject.value;
-    return config?.company?.sucursal || 'PIURA - SECHURA';
+    return config?.company?.sucursal || '';
   }
 
   getCodOrigen(): string {

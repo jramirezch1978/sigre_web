@@ -23,9 +23,9 @@ import { Observable } from 'rxjs';
   styleUrls: ['./menu-inicial.component.scss']
 })
 export class MenuInicialComponent implements OnInit {
-  companyName = 'Transmarina del PERU SAC';
-  companyLogo = 'assets/logo-transmarina.png';
-  companySucursal = 'PIURA - SECHURA';
+  companyName = 'SIGRE';
+  companyLogo = 'assets/imagenes/auth/logo-sigre.png';
+  companySucursal = '';
   mostrarPopupModo = false;
 
   appVersion$!: Observable<string>;

@@ -47,7 +47,7 @@ export const ENVIRONMENT_CONFIG = {
     mockAuth: false
   },
   PRODUCTION: {
-    apiUrl: 'https://api.restaurant.pe/api',
+    apiUrl: '/api',
     enableDebugLogs: false,
     mockAuth: false
   }
