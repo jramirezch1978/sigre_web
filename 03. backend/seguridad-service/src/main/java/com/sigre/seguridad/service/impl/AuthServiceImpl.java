@@ -18,6 +18,7 @@ import com.sigre.seguridad.service.TenantConnectionService;
 import com.sigre.seguridad.service.LogAccesoService;
 import com.sigre.seguridad.service.TokensSessionService;
 import com.sigre.seguridad.service.TurnstileVerificationService;
+import com.sigre.seguridad.service.UsuarioEmpresaAdminService;
 import com.sigre.seguridad.dto.TenantConnectionInfoResponse;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.security.JwtTokenProvider;
