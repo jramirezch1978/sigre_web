@@ -49,8 +49,9 @@ CREATE TABLE master.empresa (
     nombre_comercial VARCHAR(200),
     direccion_fiscal VARCHAR(300),
     ubigeo VARCHAR(12),
-    distrito_id BIGINT REFERENCES master.distrito(id),
+    distrito_id BIGINT,
     representante_legal VARCHAR(200),
+    dni_representante_legal VARCHAR(20),
     correo_contacto VARCHAR(150),
     telefono_contacto VARCHAR(30),
     db_host VARCHAR(120) NOT NULL CHECK (TRIM(db_host) <> ''),
@@ -100,7 +101,16 @@ CREATE TABLE master.distrito (
 
 CREATE INDEX IX_EMPRESA_01 ON master.empresa (flag_estado);
 CREATE INDEX IX_EMPRESA_02 ON master.empresa (razon_social);
+CREATE INDEX IX_EMPRESA_03 ON master.empresa (distrito_id);
 CREATE INDEX IX_MASTER_PAIS_01 ON master.pais (activo);
 CREATE INDEX IX_MASTER_DEP_01 ON master.departamento (pais_id);
 CREATE INDEX IX_MASTER_PROV_01 ON master.provincia (departamento_id);
 CREATE INDEX IX_MASTER_DIST_01 ON master.distrito (provincia_id);
+
+-- ============================================================
+-- SECCIÓN 4: FOREIGN KEYS (diferidas por orden de creación)
+-- ============================================================
+
+ALTER TABLE master.empresa
+    ADD CONSTRAINT fk_empresa_distrito
+    FOREIGN KEY (distrito_id) REFERENCES master.distrito(id);
