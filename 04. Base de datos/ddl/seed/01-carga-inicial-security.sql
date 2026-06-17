@@ -104,7 +104,38 @@ VALUES
      '$2a$10$gDrLsvJmekAkuiqZX7XIy.K4zI1FtRjsO2sf6A..rZgUK/i7izjty',
      'JHONNY ALEXANDER', 'RAMIREZ CHIROQUE', 'JHONN RAMIREZ CHIROQUE',
      FALSE, FALSE, 0, NULL, '2026-06-16T23:26:04.063Z'::timestamptz, '1', '1',
-     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-16T23:26:03.806Z'::timestamptz, 1, 1)
+     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-16T23:26:03.806Z'::timestamptz, 1, 1),
+
+    -- Capacitación Blue Coast S.A.C. — contraseña temporal: Capacitacion2026!
+    (4, 'anamaria.calderon', 'anamaria.calderon@bluecoastsac.com',
+     '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
+     'ANA MARIA', 'CALDERON CURAY', 'ANA MARIA CALDERON CURAY',
+     FALSE, FALSE, 0, NULL, NULL, '1', '0',
+     NOW(), NOW(), 1, 1),
+
+    (5, 'angela.pena', 'angela.pena@bluecoastsac.com',
+     '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
+     'SANTOS ANGELA', 'PENA ESTRADA', 'SANTOS ANGELA PENA ESTRADA',
+     FALSE, FALSE, 0, NULL, NULL, '1', '0',
+     NOW(), NOW(), 1, 1),
+
+    (6, 'produccion', 'produccion@bluecoastsac.com',
+     '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
+     'CEDRIS BERNABE', 'VASQUEZ ARICA', 'CEDRIS BERNABE VASQUEZ ARICA',
+     FALSE, FALSE, 0, NULL, NULL, '1', '0',
+     NOW(), NOW(), 1, 1),
+
+    (7, 'rodolfo.camino', 'rodolfo.camino@bluecoastsac.com',
+     '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
+     'RODOLFO HORACIO', 'CAMINO CALLE', 'RODOLFO HORACIO CAMINO CALLE',
+     FALSE, FALSE, 0, NULL, NULL, '1', '0',
+     NOW(), NOW(), 1, 1),
+
+    (8, 'javier.camino', 'javier.camino@bluecoastsac.com',
+     '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
+     'FRANCISCO JAVIER', 'CAMINO CALLE', 'FRANCISCO JAVIER CAMINO CALLE',
+     FALSE, FALSE, 0, NULL, NULL, '1', '0',
+     NOW(), NOW(), 1, 1)
 ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     email = EXCLUDED.email,
@@ -468,7 +499,8 @@ VALUES
 COMMIT;
 
 -- TX 2: Asignaciones usuario–empresa (en security)
--- Usuario jramirez (id=3) asignado a todas las empresas activas del seed.
+-- jramirez (id=3) → todas las empresas activas.
+-- Capacitación Blue Coast (ids 4–8) → empresa BLUE COAST S.A.C. (id=3).
 BEGIN;
 
 INSERT INTO auth.usuario_empresa (usuario_id, empresa_id, flag_estado, fec_creacion)
@@ -478,6 +510,14 @@ CROSS JOIN master.empresa e
 WHERE u.flag_estado = '1'
   AND u.id = 3
   AND e.flag_estado = '1'
+ON CONFLICT (usuario_id, empresa_id) DO UPDATE SET
+    flag_estado = '1';
+
+INSERT INTO auth.usuario_empresa (usuario_id, empresa_id, flag_estado, fec_creacion)
+SELECT u.id, 3, '1', NOW()
+FROM auth.usuario u
+WHERE u.flag_estado = '1'
+  AND u.id IN (4, 5, 6, 7, 8)
 ON CONFLICT (usuario_id, empresa_id) DO UPDATE SET
     flag_estado = '1';
 
