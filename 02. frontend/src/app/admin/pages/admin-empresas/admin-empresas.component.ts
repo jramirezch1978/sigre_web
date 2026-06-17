@@ -39,11 +39,14 @@ export class AdminEmpresasComponent implements OnInit {
   empresaEliminar: EmpresaAdminDto | null = null;
 
   mostrandoUsuarios = false;
+  mostrandoSeleccionUsuarios = false;
   empresaGestionUsuarios: EmpresaAdminDto | null = null;
   todosLosUsuarios: UsuarioAdminDto[] = [];
   usuariosAsociados: UsuarioAdminDto[] = [];
+  usuariosSeleccionados = new Set<number>();
+  busquedaSeleccionUsuarios = '';
   loadingUsuarios = false;
-  busquedaUsuarioDisponible = '';
+  asociandoUsuarios = false;
 
   departamentos: UbigeoItem[] = [];
   provinciasNueva: UbigeoItem[] = [];
@@ -54,6 +57,8 @@ export class AdminEmpresasComponent implements OnInit {
   selectedProvinciaNueva: number | null = null;
   selectedDepartamentoEditar: number | null = null;
   selectedProvinciaEditar: number | null = null;
+
+  enviandoCorreoBienvenidaId: number | null = null;
 
   ngOnInit(): void {
     this.formNueva = this.fb.group({
@@ -273,6 +278,42 @@ export class AdminEmpresasComponent implements OnInit {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  async confirmarEnviarCorreoBienvenida(e: EmpresaAdminDto): Promise<void> {
+    if (!e.correoContacto?.trim()) {
+      await this.presentError('La empresa no tiene correo de contacto registrado.');
+      return;
+    }
+
+    const modal = await this.modalCtrl.create({
+      component: ModalConfirmationComponent,
+      cssClass: 'promo',
+      componentProps: {
+        titlemodal: '',
+        tipemodal: 'info',
+        title: 'Enviar correo de bienvenida',
+        message: `Se enviará el correo de registro a <strong>${this.escapeHtmlLite(e.correoContacto)}</strong> con los datos de «${this.escapeHtmlLite(e.razonSocial)}». ¿Continuar?`,
+        btnCancelTxt: 'CANCELAR',
+        btnOkTxt: 'ENVIAR',
+      },
+    });
+    await modal.present();
+    const { data: confirmed } = await modal.onDidDismiss<boolean>();
+    if (!confirmed) return;
+
+    this.enviandoCorreoBienvenidaId = e.id;
+    this.api.enviarCorreoBienvenida(e.id).subscribe({
+      next: async res => {
+        this.enviandoCorreoBienvenidaId = null;
+        const msg = res.data?.mensaje ?? res.message ?? 'Correo enviado correctamente.';
+        await this.presentSuccess('Correo enviado', msg);
+      },
+      error: async (err: any) => {
+        this.enviandoCorreoBienvenidaId = null;
+        await this.presentError(err?.error?.message ?? 'No se pudo enviar el correo de bienvenida.');
+      },
+    });
+  }
+
   async confirmarRecrear(e: EmpresaAdminDto): Promise<void> {
     const modal = await this.modalCtrl.create({
       component: ModalConfirmationComponent,
@@ -443,10 +484,12 @@ export class AdminEmpresasComponent implements OnInit {
 
   cerrarGestionUsuarios(): void {
     this.mostrandoUsuarios = false;
+    this.mostrandoSeleccionUsuarios = false;
     this.empresaGestionUsuarios = null;
     this.todosLosUsuarios = [];
     this.usuariosAsociados = [];
-    this.busquedaUsuarioDisponible = '';
+    this.usuariosSeleccionados.clear();
+    this.busquedaSeleccionUsuarios = '';
   }
 
   async cargarUsuariosEmpresa(): Promise<void> {
@@ -469,15 +512,21 @@ export class AdminEmpresasComponent implements OnInit {
 
   get usuariosDisponibles(): UsuarioAdminDto[] {
     const idsAsociados = new Set(this.usuariosAsociados.map(u => u.id));
-    return this.todosLosUsuarios.filter(u => !idsAsociados.has(u.id));
+    return this.ordenarPorFechaCreacion(
+      this.todosLosUsuarios.filter(u => !idsAsociados.has(u.id))
+    );
   }
 
-  get usuariosDisponiblesFiltrados(): UsuarioAdminDto[] {
+  get usuariosAsociadosOrdenados(): UsuarioAdminDto[] {
+    return this.ordenarPorFechaCreacion(this.usuariosAsociados);
+  }
+
+  get usuariosDisponiblesFiltradosSeleccion(): UsuarioAdminDto[] {
     const disponibles = this.usuariosDisponibles;
-    if (!this.busquedaUsuarioDisponible.trim()) {
-      return [];
+    const q = this.busquedaSeleccionUsuarios.trim().toLowerCase();
+    if (!q) {
+      return disponibles;
     }
-    const q = this.busquedaUsuarioDisponible.toLowerCase();
     return disponibles.filter(u =>
       u.nombreCompleto?.toLowerCase().includes(q) ||
       u.username?.toLowerCase().includes(q) ||
@@ -485,17 +534,81 @@ export class AdminEmpresasComponent implements OnInit {
     );
   }
 
-  async asociarUsuario(usuarioId: number): Promise<void> {
-    if (!this.empresaGestionUsuarios) return;
+  get cantidadSeleccionados(): number {
+    return this.usuariosSeleccionados.size;
+  }
+
+  abrirSeleccionUsuarios(): void {
+    this.usuariosSeleccionados.clear();
+    this.busquedaSeleccionUsuarios = '';
+    this.mostrandoSeleccionUsuarios = true;
+  }
+
+  cerrarSeleccionUsuarios(): void {
+    this.mostrandoSeleccionUsuarios = false;
+    this.usuariosSeleccionados.clear();
+    this.busquedaSeleccionUsuarios = '';
+  }
+
+  isUsuarioSeleccionado(usuarioId: number): boolean {
+    return this.usuariosSeleccionados.has(usuarioId);
+  }
+
+  onUsuarioSeleccionChange(usuarioId: number, event: Event): void {
+    const checked = (event as CustomEvent<{ checked: boolean }>).detail?.checked ?? false;
+    if (checked) {
+      this.usuariosSeleccionados.add(usuarioId);
+    } else {
+      this.usuariosSeleccionados.delete(usuarioId);
+    }
+  }
+
+  seleccionarTodosVisibles(): void {
+    for (const u of this.usuariosDisponiblesFiltradosSeleccion) {
+      this.usuariosSeleccionados.add(u.id);
+    }
+  }
+
+  limpiarSeleccionUsuarios(): void {
+    this.usuariosSeleccionados.clear();
+  }
+
+  async asociarUsuariosSeleccionados(): Promise<void> {
+    if (!this.empresaGestionUsuarios || this.usuariosSeleccionados.size === 0) {
+      return;
+    }
 
     const eid = this.empresaGestionUsuarios.id;
+    const ids = [...this.usuariosSeleccionados];
+    this.asociandoUsuarios = true;
+
     try {
-      await firstValueFrom(this.api.asociarUsuarioAEmpresa(eid, usuarioId));
-      await this.presentToast('Usuario asociado exitosamente', 'success');
+      await Promise.all(
+        ids.map(id => firstValueFrom(this.api.asociarUsuarioAEmpresa(eid, id)))
+      );
+      const msg = ids.length === 1
+        ? 'Usuario asociado exitosamente'
+        : `${ids.length} usuarios asociados exitosamente`;
+      await this.presentToast(msg, 'success');
+      this.cerrarSeleccionUsuarios();
       await this.cargarUsuariosEmpresa();
     } catch (err: any) {
-      await this.presentError(err?.error?.message ?? 'Error al asociar usuario a la empresa.');
+      await this.presentError(err?.error?.message ?? 'Error al asociar usuarios a la empresa.');
+      await this.cargarUsuariosEmpresa();
+    } finally {
+      this.asociandoUsuarios = false;
     }
+  }
+
+  private ordenarPorFechaCreacion(usuarios: UsuarioAdminDto[]): UsuarioAdminDto[] {
+    return [...usuarios].sort((a, b) =>
+      this.compareFechaCreacion(b.fecCreacion, a.fecCreacion));
+  }
+
+  private compareFechaCreacion(a?: string, b?: string): number {
+    const ta = a ? Date.parse(a) : 0;
+    const tb = b ? Date.parse(b) : 0;
+    return ta - tb;
   }
 
   async retirarUsuario(usuarioId: number): Promise<void> {

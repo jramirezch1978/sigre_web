@@ -72,6 +72,12 @@
                       <ion-icon slot="icon-only" name="checkmark-circle-outline"></ion-icon>
                     </ion-button>
                   }
+                  <ion-button fill="clear" size="small" class="admin-acciones-btn" color="primary"
+                    title="Enviar correo de bienvenida"
+                    [disabled]="enviandoCorreoBienvenidaId === e.id || !e.correoContacto"
+                    (click)="confirmarEnviarCorreoBienvenida(e)">
+                    <ion-icon slot="icon-only" name="mail-outline"></ion-icon>
+                  </ion-button>
                   <ion-button fill="clear" size="small" class="admin-acciones-btn" color="tertiary" title="Recrear BD desde template"
                     (click)="confirmarRecrear(e)">
                     <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
@@ -404,56 +410,34 @@
           }
 
           @if (!loadingUsuarios) {
-          <!-- Asociar nuevo usuario -->
           <div class="section-block">
-            <h3 class="section-subtitle">Asociar nuevo usuario</h3>
-            <p class="section-info">Total: {{ todosLosUsuarios.length }} · Asociados: {{ usuariosAsociados.length }} · Disponibles: {{ usuariosDisponibles.length }}</p>
+            <div class="section-header-row">
+              <div>
+                <h3 class="section-subtitle">Usuarios de la empresa</h3>
+                <p class="section-info">Total: {{ todosLosUsuarios.length }} · Asociados: {{ usuariosAsociados.length }} · Disponibles: {{ usuariosDisponibles.length }}</p>
+              </div>
+              <ion-button size="small" color="primary" (click)="abrirSeleccionUsuarios()"
+                [disabled]="usuariosDisponibles.length === 0">
+                <ion-icon slot="start" name="person-add-outline"></ion-icon>
+                Añadir
+              </ion-button>
+            </div>
 
-            @if (usuariosDisponibles.length === 0) {
+            @if (usuariosDisponibles.length === 0 && usuariosAsociados.length > 0) {
               <div class="info-box">
                 <ion-icon name="information-circle" class="info-icon"></ion-icon>
-                <p>Todos los usuarios ya están asociados a esta empresa.</p>
-                <p>Cree nuevos usuarios en Admin &gt; Usuarios para poder asociarlos.</p>
+                <p>Todos los usuarios del sistema ya están asociados a esta empresa.</p>
               </div>
-            } @else {
-              <ion-searchbar 
-                [(ngModel)]="busquedaUsuarioDisponible" 
-                placeholder="Buscar usuario por nombre, username o email..." 
-                animated="true"
-                style="--background: #f8fafc; --border-radius: 8px; padding: 0;">
-              </ion-searchbar>
-
-              @if (busquedaUsuarioDisponible.trim() && usuariosDisponiblesFiltrados.length === 0) {
-                <p class="empty-msg" style="margin-top: 1rem;">No se encontraron usuarios con ese criterio de búsqueda.</p>
-              }
-
-              @if (usuariosDisponiblesFiltrados.length > 0) {
-                <div class="disponibles-list">
-                  @for (u of usuariosDisponiblesFiltrados; track u.id) {
-                    <div class="usuario-item">
-                      <div class="usuario-info">
-                        <strong>{{ u.nombreCompleto }}</strong>
-                        <span>{{ u.username }} · {{ u.email }}</span>
-                      </div>
-                      <ion-button fill="clear" size="small" color="success"
-                        (click)="asociarUsuario(u.id)">
-                        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
-                      </ion-button>
-                    </div>
-                  }
-                </div>
-              }
             }
           </div>
 
-          <!-- Usuarios asociados -->
           <div class="section-block">
             <h3 class="section-subtitle">Usuarios asociados ({{ usuariosAsociados.length }})</h3>
             @if (usuariosAsociados.length === 0) {
-              <p class="empty-msg">No hay usuarios asociados a esta empresa.</p>
+              <p class="empty-msg">No hay usuarios asociados a esta empresa. Use «Añadir» para seleccionarlos.</p>
             } @else {
               <div class="usuarios-list">
-                @for (u of usuariosAsociados; track u.id) {
+                @for (u of usuariosAsociadosOrdenados; track u.id) {
                   <div class="usuario-item">
                     <div class="usuario-info">
                       <strong>{{ u.nombreCompleto }}</strong>
@@ -471,5 +455,78 @@
         }
       </div>
     </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="mostrandoSeleccionUsuarios" (didDismiss)="cerrarSeleccionUsuarios()"
+  [style]="{ '--width': '640px', '--max-width': '95vw', '--height': '620px', '--max-height': '90vh', '--border-radius': '16px' }">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Seleccionar usuarios</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarSeleccionUsuarios()"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar
+          [(ngModel)]="busquedaSeleccionUsuarios"
+          placeholder="Filtrar por nombre, usuario o correo..."
+          animated="true"
+          debounce="150">
+        </ion-searchbar>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div class="seleccion-usuarios-panel">
+        <div class="seleccion-usuarios-toolbar">
+          <span>{{ cantidadSeleccionados }} seleccionado(s)</span>
+          <div class="seleccion-usuarios-toolbar__actions">
+            <ion-button fill="clear" size="small" (click)="seleccionarTodosVisibles()">Seleccionar visibles</ion-button>
+            <ion-button fill="clear" size="small" color="medium" (click)="limpiarSeleccionUsuarios()">Limpiar</ion-button>
+          </div>
+        </div>
+
+        @if (usuariosDisponiblesFiltradosSeleccion.length === 0) {
+          <p class="empty-msg">No hay usuarios disponibles con ese criterio.</p>
+        } @else {
+          <div class="disponibles-list seleccion-usuarios-list">
+            @for (u of usuariosDisponiblesFiltradosSeleccion; track u.id) {
+              <label class="usuario-item usuario-item--selectable" [class.is-selected]="isUsuarioSeleccionado(u.id)">
+                <ion-checkbox
+                  [checked]="isUsuarioSeleccionado(u.id)"
+                  (ionChange)="onUsuarioSeleccionChange(u.id, $event)">
+                </ion-checkbox>
+                <div class="usuario-info">
+                  <strong>{{ u.nombreCompleto }}</strong>
+                  <span>{{ u.username }} · {{ u.email }}</span>
+                  @if (u.fecCreacion) {
+                    <small>Creado: {{ u.fecCreacion | date:'dd/MM/yyyy HH:mm' }}</small>
+                  }
+                </div>
+              </label>
+            }
+          </div>
+        }
+      </div>
+    </ion-content>
+    <ion-footer>
+      <ion-toolbar>
+        <div class="seleccion-usuarios-footer">
+          <ion-button fill="outline" color="medium" (click)="cerrarSeleccionUsuarios()" [disabled]="asociandoUsuarios">
+            Cancelar
+          </ion-button>
+          <ion-button color="primary" (click)="asociarUsuariosSeleccionados()"
+            [disabled]="cantidadSeleccionados === 0 || asociandoUsuarios">
+            @if (asociandoUsuarios) {
+              <ion-spinner name="crescent" slot="start"></ion-spinner>
+              Asociando...
+            } @else {
+              Asociar seleccionados ({{ cantidadSeleccionados }})
+            }
+          </ion-button>
+        </div>
+      </ion-toolbar>
+    </ion-footer>
   </ng-template>
 </ion-modal>

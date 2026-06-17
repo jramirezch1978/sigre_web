@@ -35,7 +35,7 @@ public class UsuarioAdminCrudService {
                        flag_estado, bloqueado, flag_admin_sistema, fec_creacion
                 FROM auth.usuario
                 WHERE flag_estado = '1'
-                ORDER BY nombre_completo
+                ORDER BY fec_creacion DESC NULLS LAST, nombre_completo
                 """,
                 (rs, i) -> UsuarioAdminDto.builder()
                         .id(rs.getLong("id"))
@@ -145,7 +145,7 @@ public class UsuarioAdminCrudService {
                 FROM auth.usuario u
                 JOIN auth.usuario_empresa ue ON ue.usuario_id = u.id
                 WHERE ue.empresa_id = ? AND ue.flag_estado = '1' AND u.flag_estado = '1'
-                ORDER BY u.nombre_completo
+                ORDER BY u.fec_creacion DESC NULLS LAST, u.nombre_completo
                 """,
                 (rs, i) -> UsuarioAdminDto.builder()
                         .id(rs.getLong("id"))
