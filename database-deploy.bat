@@ -268,14 +268,28 @@ if "!FORCE!"=="1" (
     call :psql_maint_cmd "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '!TARGETDB!' AND pid ^<^> pg_backend_pid();"
     echo ^>^>   Eliminando BD existente...
     call :psql_maint_cmd "DROP DATABASE IF EXISTS !TARGETDB!;"
+    echo ^>^>   Creando BD !TARGETDB! ^(owner: !DBOWNER!^)...
+    call :psql_maint_cmd "CREATE DATABASE !TARGETDB! OWNER !DBOWNER!;"
+    if errorlevel 1 (
+        echo ERROR: No se pudo crear la BD !TARGETDB! ^(owner: !DBOWNER!^)
+        exit /b 1
+    )
+    echo ^>^>   BD !TARGETDB! recreada: OK
+) else (
+    REM Verificar si la BD existe; si no existe, crearla
+    docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGMAINTDB!" -t -A -c "SELECT 1 FROM pg_database WHERE datname = '!TARGETDB!';" | findstr "1" >nul 2>&1
+    if errorlevel 1 (
+        echo ^>^>   Creando BD !TARGETDB! ^(owner: !DBOWNER!^)...
+        call :psql_maint_cmd "CREATE DATABASE !TARGETDB! OWNER !DBOWNER!;"
+        if errorlevel 1 (
+            echo ERROR: No se pudo crear la BD !TARGETDB! ^(owner: !DBOWNER!^)
+            exit /b 1
+        )
+        echo ^>^>   BD !TARGETDB! creada: OK
+    ) else (
+        echo ^>^>   BD !TARGETDB! ya existe, ejecutando DDL sobre ella ^(schemas se recrean internamente^)...
+    )
 )
-echo ^>^>   Creando BD !TARGETDB! ^(owner: !DBOWNER!^)...
-call :psql_maint_cmd "CREATE DATABASE !TARGETDB! OWNER !DBOWNER!;"
-if errorlevel 1 (
-    echo ERROR: No se pudo crear la BD !TARGETDB! ^(owner: !DBOWNER!^)
-    exit /b 1
-)
-echo ^>^>   BD !TARGETDB!: OK
 exit /b 0
 
 :do_create_security
