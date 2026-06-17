@@ -15,16 +15,20 @@ import com.sigre.seguridad.dto.ActualizarCredencialesBdRequest;
 import com.sigre.seguridad.dto.ActualizarCredencialesBdResponse;
 import com.sigre.seguridad.dto.DeleteEmpresaResponse;
 import com.sigre.seguridad.dto.EmpresaLogoUploadResponse;
+import com.sigre.seguridad.dto.EmpresaRegistroEmailDto;
 import com.sigre.seguridad.dto.ProvisionEmpresaRequest;
 import com.sigre.seguridad.dto.ProvisionEmpresaResponse;
 import com.sigre.seguridad.dto.RecreateEmpresaRequest;
 import com.sigre.seguridad.dto.RecreateEmpresaResponse;
 import com.sigre.seguridad.entity.master.EmpresaMaster;
+import com.sigre.seguridad.dto.seguridad.UbigeoResumenDto;
 import com.sigre.seguridad.repository.EmpresaMasterRepository;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.util.AesEncryptor;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
@@ -55,10 +59,16 @@ public class TenantProvisioningService {
     );
     private static final int MAX_LOGO_BYTES = 5 * 1024 * 1024;
 
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}$");
+    private static final DateTimeFormatter FECHA_REGISTRO_FMT =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(ZoneId.of("America/Lima"));
+
     private final EmpresaMasterRepository empresaMasterRepository;
     private final JdbcTemplate adminJdbcTemplate;
     private final JdbcTemplate securityJdbcTemplate;
     private final AesEncryptor aesEncryptor;
+    private final EmailService emailService;
+    private final SeguridadService seguridadService;
 
     @Value("${app.tenant.template-database:sigre_template}")
     private String templateDatabase;
@@ -85,11 +95,15 @@ public class TenantProvisioningService {
             EmpresaMasterRepository empresaMasterRepository,
             @Qualifier("adminJdbcTemplate") JdbcTemplate adminJdbcTemplate,
             DataSource dataSource,
-            AesEncryptor aesEncryptor) {
+            AesEncryptor aesEncryptor,
+            EmailService emailService,
+            SeguridadService seguridadService) {
         this.empresaMasterRepository = empresaMasterRepository;
         this.adminJdbcTemplate = adminJdbcTemplate;
         this.securityJdbcTemplate = new JdbcTemplate(dataSource);
         this.aesEncryptor = aesEncryptor;
+        this.emailService = emailService;
+        this.seguridadService = seguridadService;
     }
 
     @Transactional
@@ -133,6 +147,8 @@ public class TenantProvisioningService {
             masterEmpresaId = saved.getId();
 
             ensureTenantRoleAndPrivileges(saved, tenantDb);
+
+            notificarRegistroEmpresa(req, saved, slug, host, port);
 
             return ProvisionEmpresaResponse.builder()
                     .exitoso(true)
@@ -439,9 +455,61 @@ public class TenantProvisioningService {
     }
 
     private void validatePreconditions(ProvisionEmpresaRequest req) {
+        String correo = firstNonBlank(req.getCorreoContacto(), req.getEmail());
+        if (isBlank(correo)) {
+            throw new BusinessException(
+                    "El correo de contacto es obligatorio",
+                    HttpStatus.BAD_REQUEST,
+                    "CORREO_CONTACTO_REQUERIDO");
+        }
+        correo = correo.trim();
+        if (!EMAIL_PATTERN.matcher(correo).matches()) {
+            throw new BusinessException(
+                    "El correo de contacto no es válido",
+                    HttpStatus.BAD_REQUEST,
+                    "CORREO_CONTACTO_INVALIDO");
+        }
+        req.setCorreoContacto(correo);
+
         if (empresaMasterRepository.existsByRuc(req.getRuc())) {
             throw new BusinessException("Ya existe una empresa con RUC " + req.getRuc(), HttpStatus.CONFLICT, "EMPRESA_RUC_DUPLICADO");
         }
+    }
+
+    private void notificarRegistroEmpresa(
+            ProvisionEmpresaRequest req,
+            EmpresaMaster saved,
+            String slug,
+            String host,
+            int port) {
+        UbigeoResumenDto ubigeo = seguridadService.obtenerUbigeoResumenPorDistrito(saved.getDistritoId()).orElse(null);
+
+        EmpresaRegistroEmailDto datos = EmpresaRegistroEmailDto.builder()
+                .codigo(saved.getCodigo())
+                .ruc(saved.getRuc())
+                .razonSocial(saved.getRazonSocial())
+                .nombreComercial(saved.getNombreComercial())
+                .sigla(req.getSigla() != null ? req.getSigla().trim().toUpperCase(Locale.ROOT) : slug.toUpperCase(Locale.ROOT))
+                .direccionFiscal(saved.getDireccionFiscal())
+                .departamento(ubigeo != null ? ubigeo.getDepartamentoNombre() : trimOrNull(req.getDirDepartamento()))
+                .provincia(ubigeo != null ? ubigeo.getProvinciaNombre() : trimOrNull(req.getDirProvincia()))
+                .distrito(ubigeo != null ? ubigeo.getDistritoNombre() : trimOrNull(req.getDirDistrito()))
+                .ubigeo(firstNonBlank(
+                        ubigeo != null ? ubigeo.getDistritoCodigo() : null,
+                        saved.getUbigeo(),
+                        req.getDirUbigeo()))
+                .representanteLegal(saved.getRepresentanteLegal())
+                .dniRepresentanteLegal(saved.getDniRepresentanteLegal())
+                .correoContacto(saved.getCorreoContacto())
+                .telefonoContacto(saved.getTelefonoContacto())
+                .dbHost(host)
+                .dbPort(port)
+                .dbName(saved.getDbName())
+                .dbUser(saved.getDbUser())
+                .fechaRegistro(FECHA_REGISTRO_FMT.format(Instant.now()))
+                .build();
+
+        emailService.enviarConfirmacionRegistroEmpresa(datos);
     }
 
     /**
@@ -505,7 +573,7 @@ public class TenantProvisioningService {
                 .distritoId(req.getDistritoId())
                 .representanteLegal(trimOrNull(repLegal))
                 .dniRepresentanteLegal(trimOrNull(req.getDniRepresLegal()))
-                .correoContacto(trimOrNull(firstNonBlank(req.getEmail(), req.getCorreoContacto())))
+                .correoContacto(trimOrNull(firstNonBlank(req.getCorreoContacto(), req.getEmail())))
                 .telefonoContacto(trimOrNull(telefono))
                 .dbHost(host)
                 .dbPort(port)

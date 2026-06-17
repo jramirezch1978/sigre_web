@@ -1068,4 +1068,29 @@ public class SeguridadService {
                         .build(),
                 provinciaId);
     }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<com.sigre.seguridad.dto.seguridad.UbigeoResumenDto> obtenerUbigeoResumenPorDistrito(Long distritoId) {
+        if (distritoId == null) {
+            return java.util.Optional.empty();
+        }
+        var rows = jdbcTemplate.query("""
+                SELECT dep.nombre AS departamento_nombre,
+                       p.nombre AS provincia_nombre,
+                       d.nombre AS distrito_nombre,
+                       d.codigo AS distrito_codigo
+                FROM master.distrito d
+                JOIN master.provincia p ON p.id = d.provincia_id
+                JOIN master.departamento dep ON dep.id = p.departamento_id
+                WHERE d.id = ?
+                """,
+                (rs, i) -> com.sigre.seguridad.dto.seguridad.UbigeoResumenDto.builder()
+                        .departamentoNombre(rs.getString("departamento_nombre"))
+                        .provinciaNombre(rs.getString("provincia_nombre"))
+                        .distritoNombre(rs.getString("distrito_nombre"))
+                        .distritoCodigo(rs.getString("distrito_codigo"))
+                        .build(),
+                distritoId);
+        return rows.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(rows.get(0));
+    }
 }

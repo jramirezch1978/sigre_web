@@ -61,7 +61,7 @@ export class AdminEmpresasComponent implements OnInit {
       razonSocial: ['', [Validators.required, Validators.maxLength(200)]],
       ruc: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
       nombreComercial: ['', [Validators.maxLength(200)]],
-      correoContacto: ['', [Validators.maxLength(150)]],
+      correoContacto: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
       celular: ['', [Validators.maxLength(30)]],
       direccion: ['', [Validators.maxLength(300)]],
       distritoId: [null],

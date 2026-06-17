@@ -1,5 +1,6 @@
 package com.sigre.seguridad.service;
 
+import com.sigre.seguridad.dto.EmpresaRegistroEmailDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -43,6 +44,152 @@ public class EmailService {
                 """.formatted(codigo);
 
         enviarHtml(destinatario, subject, body);
+    }
+
+    @Async
+    public void enviarConfirmacionRegistroEmpresa(EmpresaRegistroEmailDto datos) {
+        String subject = "SIGRE ERP - Registro de empresa " + safe(datos.getCodigo());
+        enviarHtml(datos.getCorreoContacto(), subject, buildRegistroEmpresaHtml(datos));
+    }
+
+    private String buildRegistroEmpresaHtml(EmpresaRegistroEmailDto d) {
+        return """
+                <!DOCTYPE html>
+                <html lang="es">
+                <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+                <body style="margin:0;padding:0;background:#eef2f6;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#2a3f54;">
+                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="background:#eef2f6;padding:24px 12px;">
+                    <tr><td align="center">
+                      <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(42,63,84,0.12);">
+                        <tr>
+                          <td style="background:#2a3f54;padding:28px 32px;">
+                            <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a7b1c2;margin-bottom:8px;">SIGRE ERP</div>
+                            <h1 style="margin:0;font-size:24px;font-weight:600;color:#ffffff;">Registro de empresa completado</h1>
+                            <p style="margin:10px 0 0;color:#c5d0dc;font-size:14px;line-height:1.5;">Su organización ha sido registrada correctamente en la plataforma empresarial SIGRE.</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:28px 32px 8px;">
+                            <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#526273;">
+                              Estimado equipo de <strong>%s</strong>,<br>
+                              confirmamos el alta de su empresa en SIGRE ERP. A continuación encontrará el resumen de la información registrada.
+                            </p>
+                          </td>
+                        </tr>
+                        %s
+                        %s
+                        %s
+                        <tr>
+                          <td style="padding:8px 32px 28px;">
+                            <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="background:#f8fafc;border:1px solid #e4e9f0;border-radius:6px;">
+                              <tr><td style="padding:14px 18px;border-bottom:1px solid #e4e9f0;font-size:13px;font-weight:700;color:#2a3f54;text-transform:uppercase;letter-spacing:0.04em;">Infraestructura del tenant</td></tr>
+                              <tr><td style="padding:0 18px 14px;">
+                                %s
+                              </td></tr>
+                            </table>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:0 32px 28px;">
+                            <p style="margin:0;font-size:13px;line-height:1.6;color:#73879c;">
+                              Guarde este correo como comprobante del registro. Si detecta algún dato incorrecto, contacte al administrador del sistema para su actualización.
+                            </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="background:#f8fafc;padding:18px 32px;border-top:1px solid #e4e9f0;">
+                            <p style="margin:0;font-size:11px;color:#95a5a6;line-height:1.5;">
+                              Este mensaje fue generado automáticamente por SIGRE ERP. Por favor no responda a este correo.<br>
+                              &copy; SIGRE ERP &mdash; Sistema Integrado de Gestión Empresarial
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td></tr>
+                  </table>
+                </body>
+                </html>
+                """.formatted(
+                escapeHtml(d.getRazonSocial()),
+                buildSection("Datos generales", new String[][]{
+                        {"Código interno", d.getCodigo()},
+                        {"RUC", d.getRuc()},
+                        {"Razón social", d.getRazonSocial()},
+                        {"Nombre comercial", d.getNombreComercial()},
+                        {"Sigla / tenant", d.getSigla()},
+                        {"Fecha de registro", d.getFechaRegistro()}
+                }),
+                buildSection("Representante legal", new String[][]{
+                        {"Representante legal", d.getRepresentanteLegal()},
+                        {"DNI representante legal", d.getDniRepresentanteLegal()}
+                }),
+                buildSection("Dirección fiscal", new String[][]{
+                        {"Dirección", d.getDireccionFiscal()},
+                        {"Departamento", d.getDepartamento()},
+                        {"Provincia", d.getProvincia()},
+                        {"Distrito", d.getDistrito()},
+                        {"Ubigeo", d.getUbigeo()},
+                        {"Correo de contacto", d.getCorreoContacto()},
+                        {"Teléfono / celular", d.getTelefonoContacto()}
+                }),
+                buildRows(new String[][]{
+                        {"Servidor de base de datos", d.getDbHost()},
+                        {"Puerto", d.getDbPort() != null ? String.valueOf(d.getDbPort()) : null},
+                        {"Base de datos tenant", d.getDbName()},
+                        {"Usuario de conexión", d.getDbUser()}
+                })
+        );
+    }
+
+    private String buildSection(String title, String[][] rows) {
+        return """
+                <tr>
+                  <td style="padding:8px 32px 12px;">
+                    <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="background:#f8fafc;border:1px solid #e4e9f0;border-radius:6px;">
+                      <tr><td style="padding:14px 18px;border-bottom:1px solid #e4e9f0;font-size:13px;font-weight:700;color:#2a3f54;text-transform:uppercase;letter-spacing:0.04em;">%s</td></tr>
+                      <tr><td style="padding:0 18px 14px;">%s</td></tr>
+                    </table>
+                  </td>
+                </tr>
+                """.formatted(escapeHtml(title), buildRows(rows));
+    }
+
+    private String buildRows(String[][] rows) {
+        StringBuilder html = new StringBuilder("<table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"margin-top:12px;\">");
+        for (String[] row : rows) {
+            String label = row[0];
+            String value = row.length > 1 ? row[1] : null;
+            html.append("""
+                    <tr>
+                      <td style="padding:10px 0;border-bottom:1px solid #edf1f5;width:38%%;font-size:12px;font-weight:600;color:#73879c;vertical-align:top;">%s</td>
+                      <td style="padding:10px 0;border-bottom:1px solid #edf1f5;font-size:14px;color:#2a3f54;vertical-align:top;">%s</td>
+                    </tr>
+                    """.formatted(escapeHtml(label), formatValue(value)));
+        }
+        html.append("</table>");
+        return html.toString();
+    }
+
+    private String formatValue(String value) {
+        if (value == null || value.isBlank()) {
+            return "<span style=\"color:#aab2bd;\">—</span>";
+        }
+        return escapeHtml(value.trim());
+    }
+
+    private String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;");
+    }
+
+    private String safe(String value) {
+        return value != null ? value : "";
     }
 
     @Async
