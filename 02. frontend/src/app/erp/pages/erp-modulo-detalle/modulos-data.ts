@@ -19,7 +19,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'ALMACEN',
     nombre: 'Almacén',
-    icono: 'assets/imagenes/modulos/almacen.svg',
+    icono: 'assets/imagenes/modulos/almacen.png',
     color: '#2E7D32',
     slogan: 'Control total de inventarios en tiempo real',
     descripcion: 'Gestión integral de almacenes, inventarios y logística interna. Permite el control de múltiples almacenes, movimientos de entrada/salida, kardex valorizado, tomas de inventario y trazabilidad completa de productos.',
@@ -43,7 +43,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'COMPRAS',
     nombre: 'Compras',
-    icono: 'assets/imagenes/modulos/compras.svg',
+    icono: 'assets/imagenes/modulos/compras.png',
     color: '#1565C0',
     slogan: 'Adquisiciones inteligentes y controladas',
     descripcion: 'Ciclo completo de compras: desde el requerimiento hasta la recepción y registro contable. Control de proveedores, aprobaciones multinivel, órdenes de compra y servicio con trazabilidad total.',
@@ -65,7 +65,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'COMERCIALIZACION',
     nombre: 'Comercialización',
-    icono: 'assets/imagenes/modulos/ventas.svg',
+    icono: 'assets/imagenes/modulos/ventas.png',
     color: '#E65100',
     slogan: 'Impulsa tus ventas con gestión comercial integral',
     descripcion: 'Gestión comercial completa: órdenes de venta, facturación electrónica, exportaciones, control de embarques, comisiones de vendedores y análisis de rentabilidad por canal.',
@@ -86,7 +86,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'FINANZAS',
     nombre: 'Finanzas',
-    icono: 'assets/imagenes/modulos/finanzas.svg',
+    icono: 'assets/imagenes/modulos/finanzas.png',
     color: '#6A1B9A',
     slogan: 'Visibilidad financiera y control de tesorería',
     descripcion: 'Tesorería integral: flujo de caja, cuentas por pagar y cobrar, conciliaciones bancarias, pagos masivos, adelantos, fondos fijos y proyección financiera.',
@@ -112,7 +112,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'CONTABILIDAD',
     nombre: 'Contabilidad',
-    icono: 'assets/imagenes/modulos/contabilidad.svg',
+    icono: 'assets/imagenes/modulos/contabilidad.png',
     color: '#00695C',
     slogan: 'Contabilidad precisa y reportes al instante',
     descripcion: 'Plan contable dinámico, asientos manuales y automáticos, libros electrónicos SUNAT, reportes financieros, centros de costo y procesos de cierre contable mensual y anual.',
@@ -137,7 +137,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'ACTIVOS_FIJOS',
     nombre: 'Activos Fijos',
-    icono: 'assets/imagenes/modulos/activos-fijos.svg',
+    icono: 'assets/imagenes/modulos/activos-fijos.png',
     color: '#BF360C',
     slogan: 'Patrimonio bajo control total',
     descripcion: 'Control patrimonial completo: registro, clasificación, depreciación tributaria y financiera, traslados, bajas, pólizas de seguro y generación automática de asientos contables.',
@@ -160,7 +160,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'RRHH',
     nombre: 'RR.HH.',
-    icono: 'assets/imagenes/modulos/rrhh.svg',
+    icono: 'assets/imagenes/modulos/rrhh.png',
     color: '#283593',
     slogan: 'Gestión de talento humano y nómina integrada',
     descripcion: 'Gestión completa del ciclo de vida del trabajador: desde el ingreso hasta la liquidación. Incluye planillas, asistencia, vacaciones, AFP, impuesto a la renta, boletas electrónicas y reportes regulatorios.',
@@ -186,7 +186,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'PRODUCCION',
     nombre: 'Producción',
-    icono: 'assets/imagenes/modulos/produccion.svg',
+    icono: 'assets/imagenes/modulos/produccion.png',
     color: '#F57F17',
     slogan: 'Producción eficiente con costeo preciso',
     descripcion: 'Control de procesos productivos, centros de beneficio, partes de producción, costeo por proceso y asignación de gastos indirectos de fabricación. Incluye control de calidad y energía.',
@@ -208,7 +208,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'PRESUPUESTO',
     nombre: 'Presupuesto',
-    icono: 'assets/imagenes/modulos/presupuesto.svg',
+    icono: 'assets/imagenes/modulos/presupuesto.png',
     color: '#2E7D32',
     slogan: 'Planificación y control presupuestario',
     descripcion: 'Formulación presupuestal por centros de costo y partidas. Control de ejecución, variaciones, solicitudes de modificación con aprobaciones y reportes de avance.',
@@ -230,7 +230,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'FLOTA',
     nombre: 'Flota',
-    icono: 'assets/imagenes/modulos/flota.svg',
+    icono: 'assets/imagenes/modulos/flota.png',
     color: '#1565C0',
     slogan: 'Gestión eficiente de vehículos y embarcaciones',
     descripcion: 'Administración de flota vehicular y/o pesquera: control de combustible, mantenimiento preventivo, documentos, tripulación y costeo operativo por unidad.',
@@ -252,7 +252,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'MANTENIMIENTO',
     nombre: 'Mantenimiento',
-    icono: 'assets/imagenes/modulos/mantenimiento.svg',
+    icono: 'assets/imagenes/modulos/mantenimiento.png',
     color: '#E65100',
     slogan: 'Disponibilidad máxima de equipos e infraestructura',
     descripcion: 'Planificación y ejecución de mantenimiento preventivo y correctivo. Gestión de órdenes de trabajo, repuestos, historial de equipos y análisis de costos.',
@@ -273,7 +273,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'AUDITORIA',
     nombre: 'Auditoría',
-    icono: 'assets/imagenes/modulos/auditoria.svg',
+    icono: 'assets/imagenes/modulos/auditoria.png',
     color: '#880E4F',
     slogan: 'Transparencia y cumplimiento garantizados',
     descripcion: 'Trazabilidad de todas las operaciones del sistema. Registro de hallazgos, acciones correctivas, control interno y reportes de cumplimiento.',
@@ -294,7 +294,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'CAMPO',
     nombre: 'Campo',
-    icono: 'assets/imagenes/modulos/campo.svg',
+    icono: 'assets/imagenes/modulos/campo.png',
     color: '#2E7D32',
     slogan: 'Agricultura inteligente y trazable',
     descripcion: 'Gestión de operaciones agrícolas: planificación de siembras, control de labores de campo, cosecha, insumos y costeo por hectárea cultivada.',
@@ -314,7 +314,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'COMEDOR',
     nombre: 'Comedor',
-    icono: 'assets/imagenes/modulos/comedor.svg',
+    icono: 'assets/imagenes/modulos/comedor.png',
     color: '#F57F17',
     slogan: 'Alimentación eficiente para tu equipo',
     descripcion: 'Administración de servicios de alimentación: gestión de menús, control de raciones, costos de alimentación por trabajador y centro de costo.',
@@ -333,7 +333,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'SIG',
     nombre: 'SIG',
-    icono: 'assets/imagenes/modulos/sig.svg',
+    icono: 'assets/imagenes/modulos/sig.png',
     color: '#00695C',
     slogan: 'Información gerencial para decisiones acertadas',
     descripcion: 'Sistema de Información Gerencial: dashboards ejecutivos, indicadores clave de rendimiento (KPI), reportes consolidados multi-empresa y análisis de tendencias.',
@@ -352,7 +352,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'OPERACIONES',
     nombre: 'Operaciones',
-    icono: 'assets/imagenes/modulos/operaciones.svg',
+    icono: 'assets/imagenes/modulos/operaciones.png',
     color: '#283593',
     slogan: 'Coordinación operativa transversal',
     descripcion: 'Gestión de órdenes de trabajo transversales, coordinación entre módulos y seguimiento de procesos operativos que involucran múltiples áreas.',
@@ -371,7 +371,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'HORECA',
     nombre: 'HORECA',
-    icono: 'assets/imagenes/modulos/horeca.svg',
+    icono: 'assets/imagenes/modulos/horeca.png',
     color: '#AD1457',
     slogan: 'Hospitalidad, gastronomía y eventos integrados',
     descripcion: 'Gestión hotelera, de restaurantes y catering: reservas, alojamiento de huéspedes, maestro de habitaciones, servicios de restaurante, eventos y facturación de servicios.',
@@ -392,7 +392,7 @@ export const MODULOS_INFO: ModuloCompleto[] = [
   {
     codigo: 'SEGURIDAD',
     nombre: 'Configuración',
-    icono: 'assets/imagenes/modulos/configuracion.svg',
+    icono: 'assets/imagenes/modulos/configuracion.png',
     color: '#37474F',
     slogan: 'Administración centralizada y segura',
     descripcion: 'Módulo de administración del sistema: gestión de usuarios, roles, permisos granulares, empresas, sucursales, monedas, ejercicios contables y parámetros generales.',
