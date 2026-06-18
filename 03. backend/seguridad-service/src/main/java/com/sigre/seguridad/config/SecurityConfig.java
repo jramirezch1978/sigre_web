@@ -40,6 +40,7 @@ public class SecurityConfig {
                                 "/api/auth/recuperar/**",
                                 "/api/auth/seguridad/registro-demo",
                                 "/api/auth/seguridad/ruc/**",
+                                "/api/auth/seguridad/ubigeo/**",
                                 "/api/auth/seguridad/landing/**",
                                 "/api/admin/empresas/**",
                                 "/api/internal/tenants/**",

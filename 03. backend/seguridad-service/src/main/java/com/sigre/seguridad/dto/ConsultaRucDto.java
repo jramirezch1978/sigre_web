@@ -18,4 +18,7 @@ public class ConsultaRucDto {
     private String estado;
     private String condicion;
     private String ubigeo;
+    private String departamento;
+    private String provincia;
+    private String distrito;
 }

@@ -12,6 +12,9 @@ export interface ConsultaRucResult {
   estado: string;
   condicion: string;
   ubigeo: string;
+  departamento: string;
+  provincia: string;
+  distrito: string;
 }
 
 @Injectable({ providedIn: 'root' })

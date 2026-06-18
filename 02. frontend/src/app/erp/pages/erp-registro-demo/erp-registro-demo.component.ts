@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ErpConsultaRucService } from '../../services/erp-consulta-ruc.service';
+import { ErpUbigeoService, UbigeoItem } from '../../services/erp-ubigeo.service';
 
 interface UsuarioDemo {
   username: string;
@@ -21,6 +22,10 @@ interface RegistroDemoRequest {
     razonSocial: string;
     nombreComercial: string;
     direccionFiscal: string;
+    ubigeo: string;
+    distritoId: number | null;
+    representanteLegal: string;
+    dniRepresentanteLegal: string;
     correoContacto: string;
     telefonoContacto: string;
   };
@@ -41,11 +46,12 @@ interface RegistroDemoRequest {
   templateUrl: './erp-registro-demo.component.html',
   styleUrls: ['./erp-registro-demo.component.scss'],
 })
-export class ErpRegistroDemoComponent implements OnDestroy {
+export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
 
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly consultaRucService = inject(ErpConsultaRucService);
+  private readonly ubigeoService = inject(ErpUbigeoService);
 
   paso = 1;
   cargando = false;
@@ -53,6 +59,10 @@ export class ErpRegistroDemoComponent implements OnDestroy {
   rucMensaje = '';
   error = '';
   registroExitoso = false;
+
+  departamentos: UbigeoItem[] = [];
+  provincias: UbigeoItem[] = [];
+  distritos: UbigeoItem[] = [];
 
   private rucConsultaTimer?: ReturnType<typeof setTimeout>;
   private rucConsultaSub?: Subscription;
@@ -63,8 +73,16 @@ export class ErpRegistroDemoComponent implements OnDestroy {
     razonSocial: '',
     nombreComercial: '',
     direccionFiscal: '',
+    ubigeo: '',
+    departamentoId: null as number | null,
+    provinciaId: null as number | null,
+    distritoId: null as number | null,
+    representanteLegal: '',
+    dniRepresentanteLegal: '',
     correoContacto: '',
     telefonoContacto: '',
+    estadoSunat: '',
+    condicionSunat: '',
   };
 
   adminUser: UsuarioDemo = {
@@ -78,6 +96,12 @@ export class ErpRegistroDemoComponent implements OnDestroy {
   confirmPassword = '';
 
   usuariosAdicionales: UsuarioDemo[] = [];
+
+  ngOnInit(): void {
+    this.ubigeoService.listarDepartamentos().subscribe({
+      next: (items) => { this.departamentos = items; },
+    });
+  }
 
   get totalUsuarios(): number {
     return 1 + this.usuariosAdicionales.length;
@@ -132,6 +156,37 @@ export class ErpRegistroDemoComponent implements OnDestroy {
     this.rucConsultaTimer = setTimeout(() => this.consultarRucSunat(ruc), 450);
   }
 
+  onDepartamentoChange(): void {
+    this.empresa.provinciaId = null;
+    this.empresa.distritoId = null;
+    this.provincias = [];
+    this.distritos = [];
+    if (!this.empresa.departamentoId) return;
+
+    this.ubigeoService.listarProvincias(this.empresa.departamentoId).subscribe({
+      next: (items) => { this.provincias = items; },
+    });
+  }
+
+  onProvinciaChange(): void {
+    this.empresa.distritoId = null;
+    this.distritos = [];
+    if (!this.empresa.provinciaId) return;
+
+    this.ubigeoService.listarDistritos(this.empresa.provinciaId).subscribe({
+      next: (items) => { this.distritos = items; },
+    });
+  }
+
+  onDistritoChange(): void {
+    const distrito = this.distritos.find(d => d.id === this.empresa.distritoId);
+    this.empresa.ubigeo = distrito?.codigo ?? this.empresa.ubigeo;
+  }
+
+  onDniRepresentanteChange(value: string): void {
+    this.empresa.dniRepresentanteLegal = (value ?? '').replace(/\D/g, '').slice(0, 8);
+  }
+
   private consultarRucSunat(ruc: string): void {
     this.rucConsultaSub?.unsubscribe();
     this.consultandoRuc = true;
@@ -146,11 +201,44 @@ export class ErpRegistroDemoComponent implements OnDestroy {
           this.empresa.nombreComercial = data.nombreComercial ?? data.razonSocial ?? '';
         }
         this.empresa.direccionFiscal = data.direccionFiscal ?? '';
+        this.empresa.ubigeo = data.ubigeo ?? '';
+        this.empresa.estadoSunat = data.estado ?? '';
+        this.empresa.condicionSunat = data.condicion ?? '';
+
+        if (ruc.startsWith('10') && !this.empresa.representanteLegal.trim()) {
+          this.empresa.representanteLegal = data.razonSocial ?? '';
+          this.empresa.dniRepresentanteLegal = ruc.substring(2, 10);
+        }
+
+        if (data.ubigeo) {
+          this.aplicarUbigeoPorCodigo(data.ubigeo);
+        }
       },
       error: (err) => {
         this.consultandoRuc = false;
         this.ultimoRucConsultado = '';
         this.rucMensaje = err.error?.message || err.message || 'No se encontró información para este RUC.';
+      },
+    });
+  }
+
+  private aplicarUbigeoPorCodigo(codigo: string): void {
+    this.ubigeoService.obtenerPorCodigo(codigo).subscribe({
+      next: (lookup) => {
+        this.empresa.ubigeo = lookup.ubigeo;
+        this.empresa.departamentoId = lookup.departamentoId;
+        this.ubigeoService.listarProvincias(lookup.departamentoId).subscribe({
+          next: (provincias) => {
+            this.provincias = provincias;
+            this.empresa.provinciaId = lookup.provinciaId;
+            this.ubigeoService.listarDistritos(lookup.provinciaId).subscribe({
+              next: (distritos) => {
+                this.distritos = distritos;
+                this.empresa.distritoId = lookup.distritoId;
+              },
+            });
+          },
+        });
       },
     });
   }
@@ -169,6 +257,22 @@ export class ErpRegistroDemoComponent implements OnDestroy {
     }
     if (!this.empresa.razonSocial.trim()) {
       this.error = 'La razón social es obligatoria.';
+      return false;
+    }
+    if (!this.empresa.direccionFiscal.trim()) {
+      this.error = 'La dirección fiscal es obligatoria.';
+      return false;
+    }
+    if (!this.empresa.distritoId) {
+      this.error = 'Seleccione departamento, provincia y distrito.';
+      return false;
+    }
+    if (!this.empresa.representanteLegal.trim()) {
+      this.error = 'El representante legal es obligatorio.';
+      return false;
+    }
+    if (!this.empresa.dniRepresentanteLegal.trim() || this.empresa.dniRepresentanteLegal.length !== 8) {
+      this.error = 'El DNI del representante legal debe tener 8 dígitos.';
       return false;
     }
     if (!this.empresa.correoContacto.trim() || !this.empresa.correoContacto.includes('@')) {
@@ -207,7 +311,18 @@ export class ErpRegistroDemoComponent implements OnDestroy {
     this.cargando = true;
 
     const body: RegistroDemoRequest = {
-      empresa: { ...this.empresa },
+      empresa: {
+        ruc: this.empresa.ruc,
+        razonSocial: this.empresa.razonSocial,
+        nombreComercial: this.empresa.nombreComercial,
+        direccionFiscal: this.empresa.direccionFiscal,
+        ubigeo: this.empresa.ubigeo,
+        distritoId: this.empresa.distritoId,
+        representanteLegal: this.empresa.representanteLegal,
+        dniRepresentanteLegal: this.empresa.dniRepresentanteLegal,
+        correoContacto: this.empresa.correoContacto,
+        telefonoContacto: this.empresa.telefonoContacto,
+      },
       adminUser: { ...this.adminUser },
       usuariosAdicionales: this.usuariosAdicionales.filter(u => u.username.trim()),
     };

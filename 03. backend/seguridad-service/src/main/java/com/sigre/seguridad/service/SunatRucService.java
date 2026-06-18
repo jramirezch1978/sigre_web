@@ -80,6 +80,9 @@ public class SunatRucService {
                     .estado(text(data, "estado"))
                     .condicion(text(data, "condicion"))
                     .ubigeo(text(data, "ubigeo"))
+                    .departamento(text(data, "descDepartamento"))
+                    .provincia(text(data, "descProvincia"))
+                    .distrito(text(data, "descDistrito"))
                     .build();
         } catch (BusinessException e) {
             throw e;

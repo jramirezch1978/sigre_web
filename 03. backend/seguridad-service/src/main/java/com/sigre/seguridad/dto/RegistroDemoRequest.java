@@ -40,9 +40,23 @@ public class RegistroDemoRequest {
         @Size(max = 300)
         private String direccionFiscal;
 
+        @Size(max = 12)
+        private String ubigeo;
+
+        private Long distritoId;
+
+        @NotBlank
+        @Size(max = 200)
+        private String representanteLegal;
+
+        @NotBlank
+        @Size(max = 20)
+        private String dniRepresentanteLegal;
+
         @NotBlank
         private String correoContacto;
 
+        @Size(max = 30)
         private String telefonoContacto;
     }
 

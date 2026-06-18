@@ -1093,4 +1093,48 @@ public class SeguridadService {
                 distritoId);
         return rows.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(rows.get(0));
     }
+
+    @Transactional(readOnly = true)
+    public UbigeoLookupDto obtenerUbigeoPorCodigoDistrito(String codigoUbigeo) {
+        String codigo = codigoUbigeo == null ? "" : codigoUbigeo.trim();
+        if (codigo.isBlank()) {
+            throw new com.sigre.common.exception.BusinessException(
+                    "El código de ubigeo es requerido.",
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "UBIGEO_REQUERIDO");
+        }
+
+        var rows = jdbcTemplate.query("""
+                SELECT d.id AS distrito_id,
+                       d.codigo AS distrito_codigo,
+                       d.nombre AS distrito_nombre,
+                       p.id AS provincia_id,
+                       p.nombre AS provincia_nombre,
+                       dep.id AS departamento_id,
+                       dep.nombre AS departamento_nombre
+                FROM master.distrito d
+                JOIN master.provincia p ON p.id = d.provincia_id
+                JOIN master.departamento dep ON dep.id = p.departamento_id
+                WHERE d.codigo = ? AND d.activo = TRUE
+                """,
+                (rs, i) -> UbigeoLookupDto.builder()
+                        .ubigeo(rs.getString("distrito_codigo"))
+                        .distritoId(rs.getLong("distrito_id"))
+                        .distritoNombre(rs.getString("distrito_nombre"))
+                        .provinciaId(rs.getLong("provincia_id"))
+                        .provinciaNombre(rs.getString("provincia_nombre"))
+                        .departamentoId(rs.getLong("departamento_id"))
+                        .departamentoNombre(rs.getString("departamento_nombre"))
+                        .build(),
+                codigo);
+
+        if (rows.isEmpty()) {
+            throw new com.sigre.common.exception.BusinessException(
+                    "No se encontró ubicación para el ubigeo " + codigo + ".",
+                    org.springframework.http.HttpStatus.NOT_FOUND,
+                    "UBIGEO_NO_ENCONTRADO");
+        }
+
+        return rows.get(0);
+    }
 }

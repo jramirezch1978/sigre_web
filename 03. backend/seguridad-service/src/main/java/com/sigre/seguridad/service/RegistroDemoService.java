@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sigre.seguridad.dto.RegistroDemoRequest;
 import com.sigre.seguridad.dto.RegistroDemoRequest.EmpresaDemo;
 import com.sigre.seguridad.dto.RegistroDemoRequest.UsuarioDemo;
+import com.sigre.seguridad.dto.seguridad.UbigeoLookupDto;
 import com.sigre.seguridad.repository.EmpresaMasterRepository;
 import com.sigre.seguridad.repository.UsuarioRepository;
 import com.sigre.common.exception.BusinessException;
@@ -33,6 +34,7 @@ public class RegistroDemoService {
     private final PasswordEncoder passwordEncoder;
     private final EmpresaMasterRepository empresaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final SeguridadService seguridadService;
 
     @Transactional
     public void registrarDemo(RegistroDemoRequest request) {
@@ -64,17 +66,21 @@ public class RegistroDemoService {
         Long empresaCodigo = empresaRepository.nextEmpresaCodigo();
         String codigoEmpresa = String.format("DEMO%04d", empresaCodigo);
         String dbName = DEMO_DB_PREFIX + empresaCodigo;
+        Long distritoId = resolverDistritoId(emp);
 
         Long empresaId = jdbcTemplate.queryForObject("""
                 INSERT INTO master.empresa (codigo, ruc, razon_social, nombre_comercial,
-                    direccion_fiscal, correo_contacto, telefono_contacto,
+                    direccion_fiscal, ubigeo, distrito_id, representante_legal, dni_representante_legal,
+                    correo_contacto, telefono_contacto,
                     db_host, db_port, db_name, db_user, db_password_encrypted,
                     flag_demo, flag_estado)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '1', '1')
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '1', '1')
                 RETURNING id
                 """, Long.class,
                 codigoEmpresa, emp.getRuc(), emp.getRazonSocial(), emp.getNombreComercial(),
-                emp.getDireccionFiscal(), emp.getCorreoContacto(), emp.getTelefonoContacto(),
+                emp.getDireccionFiscal(), emp.getUbigeo(), distritoId,
+                emp.getRepresentanteLegal(), emp.getDniRepresentanteLegal(),
+                emp.getCorreoContacto(), emp.getTelefonoContacto(),
                 DEMO_DB_HOST, DEMO_DB_PORT, dbName, DEMO_DB_USER, DEMO_DB_PASS_ENCRYPTED);
 
         List<Long> userIds = new ArrayList<>();
@@ -112,6 +118,22 @@ public class RegistroDemoService {
 
         log.info("Empresa demo registrada: {} (RUC: {}) con {} usuarios",
                 codigoEmpresa, emp.getRuc(), userIds.size());
+    }
+
+    private Long resolverDistritoId(EmpresaDemo emp) {
+        if (emp.getDistritoId() != null) {
+            return emp.getDistritoId();
+        }
+        if (emp.getUbigeo() == null || emp.getUbigeo().isBlank()) {
+            return null;
+        }
+        try {
+            UbigeoLookupDto ubigeo = seguridadService.obtenerUbigeoPorCodigoDistrito(emp.getUbigeo());
+            return ubigeo.getDistritoId();
+        } catch (Exception ex) {
+            log.warn("No se pudo resolver distrito para ubigeo {}: {}", emp.getUbigeo(), ex.getMessage());
+            return null;
+        }
     }
 
     private Long crearUsuarioDemo(UsuarioDemo u) {
