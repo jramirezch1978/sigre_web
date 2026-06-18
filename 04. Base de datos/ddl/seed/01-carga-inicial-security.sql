@@ -172,6 +172,15 @@ VALUES
     ('ACTIVOS_FIJOS', 'Activos fijos', '1'),
     ('RRHH', 'RR.HH', '1'),
     ('PRODUCCION', 'Producción', '1'),
+    ('PRESUPUESTO', 'Presupuesto', '1'),
+    ('FLOTA', 'Flota', '1'),
+    ('MANTENIMIENTO', 'Mantenimiento', '1'),
+    ('AUDITORIA', 'Auditoría', '1'),
+    ('CAMPO', 'Campo', '1'),
+    ('COMEDOR', 'Comedor', '1'),
+    ('SIG', 'SIG', '1'),
+    ('COMERCIALIZACION', 'Comercialización', '1'),
+    ('OPERACIONES', 'Operaciones', '1'),
     ('SEGURIDAD', 'Seguridad', '1')
 ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,

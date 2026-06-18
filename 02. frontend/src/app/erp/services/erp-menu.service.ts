@@ -67,6 +67,15 @@ const ICONOS_MODULO: Record<string, string> = {
   ACTIVOS_FIJOS: 'domain',
   RRHH: 'groups',
   PRODUCCION: 'precision_manufacturing',
+  PRESUPUESTO: 'request_quote',
+  FLOTA: 'local_shipping',
+  MANTENIMIENTO: 'build',
+  AUDITORIA: 'fact_check',
+  CAMPO: 'grass',
+  COMEDOR: 'restaurant',
+  SIG: 'monitoring',
+  COMERCIALIZACION: 'storefront',
+  OPERACIONES: 'hub',
   SEGURIDAD: 'admin_panel_settings',
 };
 
@@ -80,6 +89,15 @@ const ICONOS_SVG_MODULO: Record<string, string> = {
   ACTIVOS: 'assets/imagenes/modulos/activos-fijos.svg',
   RRHH: 'assets/imagenes/modulos/rrhh.svg',
   PRODUCCION: 'assets/imagenes/modulos/produccion.svg',
+  PRESUPUESTO: 'assets/imagenes/modulos/presupuesto.svg',
+  FLOTA: 'assets/imagenes/modulos/flota.svg',
+  MANTENIMIENTO: 'assets/imagenes/modulos/mantenimiento.svg',
+  AUDITORIA: 'assets/imagenes/modulos/auditoria.svg',
+  CAMPO: 'assets/imagenes/modulos/campo.svg',
+  COMEDOR: 'assets/imagenes/modulos/comedor.svg',
+  SIG: 'assets/imagenes/modulos/sig.svg',
+  COMERCIALIZACION: 'assets/imagenes/modulos/comercializacion.svg',
+  OPERACIONES: 'assets/imagenes/modulos/operaciones.svg',
   SEGURIDAD: 'assets/imagenes/modulos/configuracion.svg',
 };
 
@@ -177,6 +195,15 @@ export class ErpMenuService {
       ACTIVOS_FIJOS: 'Activos Fijos',
       RRHH: 'RR.HH.',
       PRODUCCION: 'Producción',
+      PRESUPUESTO: 'Presupuesto',
+      FLOTA: 'Flota',
+      MANTENIMIENTO: 'Mantenimiento',
+      AUDITORIA: 'Auditoría',
+      CAMPO: 'Campo',
+      COMEDOR: 'Comedor',
+      SIG: 'SIG',
+      COMERCIALIZACION: 'Comercialización',
+      OPERACIONES: 'Operaciones',
       SEGURIDAD: 'Configuración',
     };
     return nombres[codigo] ?? codigo;
