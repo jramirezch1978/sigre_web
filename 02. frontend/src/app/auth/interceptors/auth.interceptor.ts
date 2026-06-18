@@ -26,9 +26,19 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Peticiones a assets locales nunca llevan token ni disparan refresh.
+    if (this.isLocalAsset(req.url)) {
+      return next.handle(req);
+    }
+
     // Los endpoints de autenticación no llevan bearer ni disparan refresh (evita bucles
     // y que el filtro de seguridad rechace /auth/refresh por un access token vencido).
     if (this.isAuthEndpoint(req.url)) {
+      return next.handle(this.addToken(req, null));
+    }
+
+    // Si estamos en una ruta pública no requiere autenticación: pasar sin token.
+    if (this.isPublicRoute()) {
       return next.handle(this.addToken(req, null));
     }
 
@@ -109,16 +119,33 @@ export class AuthInterceptor implements HttpInterceptor {
     return req.clone({ setHeaders: headers });
   }
 
+  private isLocalAsset(url: string): boolean {
+    return url.includes('/assets/') || url.endsWith('.json') && !url.includes('/api/');
+  }
+
   private isAuthEndpoint(url: string): boolean {
     return (
       url.includes('/auth/login') ||
       url.includes('/auth/refresh') ||
-      url.includes('/auth/recuperar')
+      url.includes('/auth/recuperar') ||
+      url.includes('/registro-demo')
+    );
+  }
+
+  private isPublicRoute(): boolean {
+    const url = this.router.url;
+    return (
+      url.startsWith('/sigre/inicio') ||
+      url.startsWith('/sigre/modulo') ||
+      url.startsWith('/sigre/registro') ||
+      url === '/' ||
+      url.startsWith('/asistencia') ||
+      url.startsWith('/dashboard')
     );
   }
 
   private async handleSessionExpired(error: HttpErrorResponse): Promise<void> {
-    if (this.sessionModalShown) {
+    if (this.sessionModalShown || this.isPublicRoute()) {
       return;
     }
     this.sessionModalShown = true;
