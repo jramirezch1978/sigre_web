@@ -247,30 +247,30 @@ INSERT INTO auth.plan_suscripcion (
 VALUES
     (
         'DEMO', 'Demo gratuito', 0,
-        'Prueba SIGRE por 15 días sin compromiso',
+        'Acceso completo al SIGRE por 15 días',
         NULL, '#00bcd4', FALSE, 15, 5, 1,
-        '["Acceso limitado por 15 días","Hasta 5 usuarios","Todos los módulos","Sin tarjeta de crédito"]'::jsonb,
+        '["Todo el SIGRE","Máximo 5 usuarios","15 días de acceso","Sin tarjeta de crédito"]'::jsonb,
         '1'
     ),
     (
         'STANDARD', 'Estándar', 8,
-        'Todas las aplicaciones — SIGRE Online',
-        'SMALL_BUSINESS', '#f5a623', FALSE, NULL, NULL, 2,
-        '["Todas las aplicaciones","SIGRE Online","Soporte por email","Actualizaciones incluidas"]'::jsonb,
+        'Edición SIGRE Mype — SIGRE Online',
+        'MYPE', '#f5a623', FALSE, NULL, NULL, 2,
+        '["Edición SIGRE Mype","SIGRE Online","Módulos incluidos en Mype","Soporte por email","Actualizaciones incluidas"]'::jsonb,
         '1'
     ),
     (
         'PERSONALIZADO', 'Personalizado', 12,
-        'Todas las aplicaciones — SIGRE Online / On-premise',
+        'Edición SIGRE Professional — SIGRE Online / On-premise',
         'PROFESSIONAL', '#714b67', TRUE, NULL, NULL, 3,
-        '["Todas las aplicaciones","SIGRE Online / On-premise","Multi-sucursal","Múltiples empresas","Soporte prioritario"]'::jsonb,
+        '["Edición SIGRE Professional","SIGRE Online / On-premise","Multi-sucursal","Módulos operativos completos","Soporte prioritario"]'::jsonb,
         '1'
     ),
     (
         'ENTERPRISE', 'Enterprise', 20,
-        'Acceso exclusivo a la edición Enterprise',
+        'Edición SIGRE Enterprise — acceso completo',
         'ENTERPRISE', '#e11d48', FALSE, NULL, NULL, 4,
-        '["Todas las aplicaciones","Edición Enterprise completa","Multi-empresa ilimitado","API de integración","Personalización avanzada","Soporte 24/7 dedicado"]'::jsonb,
+        '["Edición SIGRE Enterprise","Todos los módulos","Multi-empresa ilimitado","API de integración","Personalización avanzada","Soporte 24/7 dedicado"]'::jsonb,
         '1'
     )
 ON CONFLICT (codigo) DO UPDATE SET
