@@ -1,6 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import {
+  EdicionErpDto,
+  ErpLandingCatalogService,
+  PlanSuscripcionDto,
+} from '../../services/erp-landing-catalog.service';
 
 interface ModuloInfo {
   codigo: string;
@@ -30,7 +35,6 @@ interface EdicionERP {
   codigo: string;
   nombre: string;
   descripcion: string;
-  caracteristicas: string[];
 }
 
 @Component({
@@ -40,76 +44,17 @@ interface EdicionERP {
   templateUrl: './erp-landing.component.html',
   styleUrls: ['./erp-landing.component.scss'],
 })
-export class ErpLandingComponent {
+export class ErpLandingComponent implements OnInit {
+
+  private readonly router = inject(Router);
+  private readonly landingCatalog = inject(ErpLandingCatalogService);
 
   currentYear = new Date().getFullYear();
   showDropdown = '';
+  catalogoCargando = true;
 
-  planes: PlanSuscripcion[] = [
-    {
-      codigo: 'DEMO',
-      nombre: 'Demo gratuito',
-      precio: 0,
-      descripcion: 'Prueba SIGRE por 15 días sin compromiso',
-      caracteristicas: ['Acceso limitado por 15 días', 'Hasta 5 usuarios', 'Todos los módulos', 'Sin tarjeta de crédito'],
-      color: '#00bcd4',
-      destacado: false,
-    },
-    {
-      codigo: 'STANDARD',
-      nombre: 'Estándar',
-      precio: 8,
-      descripcion: 'Todas las aplicaciones — SIGRE Online',
-      caracteristicas: ['Todas las aplicaciones', 'SIGRE Online', 'Soporte por email', 'Actualizaciones incluidas'],
-      color: '#f5a623',
-      destacado: false,
-    },
-    {
-      codigo: 'PERSONALIZADO',
-      nombre: 'Personalizado',
-      precio: 12,
-      descripcion: 'Todas las aplicaciones — SIGRE Online / On-premise',
-      caracteristicas: ['Todas las aplicaciones', 'SIGRE Online / On-premise', 'Multi-sucursal', 'Múltiples empresas', 'Soporte prioritario'],
-      color: '#714b67',
-      destacado: true,
-    },
-    {
-      codigo: 'ENTERPRISE',
-      nombre: 'Enterprise',
-      precio: 20,
-      descripcion: 'Acceso exclusivo a la edición Enterprise',
-      caracteristicas: ['Todas las aplicaciones', 'Edición Enterprise completa', 'Multi-empresa ilimitado', 'API de integración', 'Personalización avanzada', 'Soporte 24/7 dedicado'],
-      color: '#e11d48',
-      destacado: false,
-    },
-  ];
-
-  ediciones: EdicionERP[] = [
-    {
-      codigo: 'MYPE',
-      nombre: 'SIGRE Mype',
-      descripcion: 'Para microempresas y emprendedores',
-      caracteristicas: ['Hasta 3 usuarios', 'Contabilidad básica', 'Facturación electrónica', 'Almacén', 'Soporte por email'],
-    },
-    {
-      codigo: 'SMALL_BUSINESS',
-      nombre: 'SIGRE Small Business',
-      descripcion: 'Para pequeñas empresas en crecimiento',
-      caracteristicas: ['Hasta 15 usuarios', 'Contabilidad completa', 'Compras y Almacén', 'RR.HH. básico', 'Finanzas', 'Soporte prioritario'],
-    },
-    {
-      codigo: 'PROFESSIONAL',
-      nombre: 'SIGRE Professional',
-      descripcion: 'Para medianas empresas',
-      caracteristicas: ['Hasta 50 usuarios', 'Todos los módulos operativos', 'Multi-sucursal', 'Presupuesto', 'Producción', 'Activos Fijos', 'Soporte dedicado'],
-    },
-    {
-      codigo: 'ENTERPRISE',
-      nombre: 'SIGRE Enterprise',
-      descripcion: 'Para grandes corporaciones',
-      caracteristicas: ['Usuarios ilimitados', 'Todos los módulos', 'Multi-empresa', 'SIG y Auditoría', 'API de integración', 'Personalización avanzada', 'Soporte 24/7'],
-    },
-  ];
+  planes: PlanSuscripcion[] = [];
+  ediciones: EdicionERP[] = [];
 
   modulos: ModuloInfo[] = [
     {
@@ -260,8 +205,20 @@ export class ErpLandingComponent {
 
   categoriasModulos: CategoriaModulos[] = [];
 
-  constructor(private router: Router) {
+  ngOnInit(): void {
     this.buildCategorias();
+    this.landingCatalog.obtenerCatalogo().subscribe({
+      next: (catalogo) => {
+        this.ediciones = catalogo.ediciones.map(e => this.mapEdicion(e));
+        this.planes = catalogo.planes.map(p => this.mapPlan(p));
+        this.catalogoCargando = false;
+      },
+      error: () => {
+        this.ediciones = this.getEdicionesFallback();
+        this.planes = this.getPlanesFallback();
+        this.catalogoCargando = false;
+      },
+    });
   }
 
   irALogin(): void {
@@ -302,6 +259,76 @@ export class ErpLandingComponent {
         .map(c => this.modulos.find(m => m.codigo === c))
         .filter((m): m is ModuloInfo => !!m),
     }));
+  }
+
+  private mapEdicion(edicion: EdicionErpDto): EdicionERP {
+    return {
+      codigo: edicion.codigo,
+      nombre: edicion.nombre,
+      descripcion: edicion.descripcion,
+    };
+  }
+
+  private mapPlan(plan: PlanSuscripcionDto): PlanSuscripcion {
+    return {
+      codigo: plan.codigo,
+      nombre: plan.nombre,
+      precio: Number(plan.precio),
+      descripcion: plan.descripcion,
+      caracteristicas: plan.caracteristicas ?? [],
+      color: plan.color ?? '#714b67',
+      destacado: !!plan.destacado,
+    };
+  }
+
+  private getEdicionesFallback(): EdicionERP[] {
+    return [
+      { codigo: 'MYPE', nombre: 'SIGRE Mype', descripcion: 'Para microempresas y emprendedores' },
+      { codigo: 'SMALL_BUSINESS', nombre: 'SIGRE Small Business', descripcion: 'Para pequeñas empresas en crecimiento' },
+      { codigo: 'PROFESSIONAL', nombre: 'SIGRE Professional', descripcion: 'Para medianas empresas con operaciones completas' },
+      { codigo: 'ENTERPRISE', nombre: 'SIGRE Enterprise', descripcion: 'Para grandes corporaciones con todos los módulos' },
+    ];
+  }
+
+  private getPlanesFallback(): PlanSuscripcion[] {
+    return [
+      {
+        codigo: 'DEMO',
+        nombre: 'Demo gratuito',
+        precio: 0,
+        descripcion: 'Prueba SIGRE por 15 días sin compromiso',
+        caracteristicas: ['Acceso limitado por 15 días', 'Hasta 5 usuarios', 'Todos los módulos', 'Sin tarjeta de crédito'],
+        color: '#00bcd4',
+        destacado: false,
+      },
+      {
+        codigo: 'STANDARD',
+        nombre: 'Estándar',
+        precio: 8,
+        descripcion: 'Todas las aplicaciones — SIGRE Online',
+        caracteristicas: ['Todas las aplicaciones', 'SIGRE Online', 'Soporte por email', 'Actualizaciones incluidas'],
+        color: '#f5a623',
+        destacado: false,
+      },
+      {
+        codigo: 'PERSONALIZADO',
+        nombre: 'Personalizado',
+        precio: 12,
+        descripcion: 'Todas las aplicaciones — SIGRE Online / On-premise',
+        caracteristicas: ['Todas las aplicaciones', 'SIGRE Online / On-premise', 'Multi-sucursal', 'Múltiples empresas', 'Soporte prioritario'],
+        color: '#714b67',
+        destacado: true,
+      },
+      {
+        codigo: 'ENTERPRISE',
+        nombre: 'Enterprise',
+        precio: 20,
+        descripcion: 'Acceso exclusivo a la edición Enterprise',
+        caracteristicas: ['Todas las aplicaciones', 'Edición Enterprise completa', 'Multi-empresa ilimitado', 'API de integración', 'Personalización avanzada', 'Soporte 24/7 dedicado'],
+        color: '#e11d48',
+        destacado: false,
+      },
+    ];
   }
 
 }

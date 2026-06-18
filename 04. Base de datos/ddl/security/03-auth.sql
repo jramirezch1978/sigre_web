@@ -52,6 +52,7 @@ DROP TABLE IF EXISTS auth.token_uso_log CASCADE;
 DROP TABLE IF EXISTS auth.codigo_recuperacion CASCADE;
 DROP TABLE IF EXISTS auth.notificacion CASCADE;
 DROP TABLE IF EXISTS auth.log_acceso CASCADE;
+DROP TABLE IF EXISTS auth.plan_suscripcion CASCADE;
 DROP TABLE IF EXISTS auth.edicion_modulo CASCADE;
 DROP TABLE IF EXISTS auth.edicion_erp CASCADE;
 DROP TABLE IF EXISTS auth.tokens_session CASCADE;
@@ -131,6 +132,24 @@ CREATE TABLE auth.edicion_modulo (
 
 CREATE INDEX IX_EDICION_MODULO_EDICION ON auth.edicion_modulo (edicion_id);
 CREATE INDEX IX_EDICION_MODULO_MODULO ON auth.edicion_modulo (modulo_id);
+
+CREATE TABLE auth.plan_suscripcion (
+    id BIGSERIAL PRIMARY KEY,
+    codigo VARCHAR(40) NOT NULL UNIQUE,
+    nombre VARCHAR(120) NOT NULL,
+    precio NUMERIC(10, 2) NOT NULL DEFAULT 0,
+    descripcion VARCHAR(500),
+    edicion_codigo VARCHAR(40) REFERENCES auth.edicion_erp(codigo),
+    color VARCHAR(20),
+    destacado BOOLEAN NOT NULL DEFAULT FALSE,
+    dias_demo INTEGER,
+    max_usuarios INTEGER,
+    orden INTEGER NOT NULL DEFAULT 0,
+    caracteristicas JSONB NOT NULL DEFAULT '[]'::jsonb,
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1'))
+);
+
+CREATE INDEX IX_PLAN_SUSCRIPCION_ORDEN ON auth.plan_suscripcion (orden);
 
 CREATE TABLE auth.opcion_menu (
     id BIGSERIAL PRIMARY KEY,

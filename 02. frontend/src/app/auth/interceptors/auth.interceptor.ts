@@ -128,7 +128,8 @@ export class AuthInterceptor implements HttpInterceptor {
       url.includes('/auth/login') ||
       url.includes('/auth/refresh') ||
       url.includes('/auth/recuperar') ||
-      url.includes('/registro-demo')
+      url.includes('/registro-demo') ||
+      url.includes('/landing/')
     );
   }
 
