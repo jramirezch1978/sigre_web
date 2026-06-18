@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.seguridad.dto.ConsultaRucDto;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -20,43 +20,28 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SunatRucService {
 
+    private static final String MODULO_SUNAT = "SUNAT";
     private static final Pattern RUC_PATTERN = Pattern.compile("^\\d{11}$");
 
+    private static final String DEFAULT_API_BASE_URL = "http://pegazus.serveftp.com:9080/SunatWebServices";
+    private static final String DEFAULT_USUARIO = "sigre";
+    private static final String DEFAULT_CLAVE = "sigre1234";
+    private static final String DEFAULT_EMPRESA = "TRANSMARINA";
+    private static final String DEFAULT_RUC_ORIGEN = "20100070970";
+    private static final String DEFAULT_IP_LOCAL = "192.168.1.100";
+    private static final String DEFAULT_COMPUTER_NAME = "SIGRE-WEB";
+
     private final ObjectMapper objectMapper;
-    private final HttpClient httpClient;
-
-    @Value("${app.sunat.api-base-url:http://pegazus.serveftp.com:9080/SunatWebServices}")
-    private String apiBaseUrl;
-
-    @Value("${app.sunat.usuario:sigre}")
-    private String usuario;
-
-    @Value("${app.sunat.clave:sigre1234}")
-    private String clave;
-
-    @Value("${app.sunat.empresa:TRANSMARINA}")
-    private String empresa;
-
-    @Value("${app.sunat.ruc-origen:20100070970}")
-    private String rucOrigen;
-
-    @Value("${app.sunat.ip-local:192.168.1.100}")
-    private String ipLocal;
-
-    @Value("${app.sunat.computer-name:SIGRE-WEB}")
-    private String computerName;
+    private final SecurityConfiguracionService securityConfiguracionService;
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
 
     private volatile String cachedToken;
     private volatile long tokenExpiresAtMs;
-
-    public SunatRucService(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
-                .build();
-    }
 
     public ConsultaRucDto consultar(String ruc) {
         String rucNormalizado = ruc == null ? "" : ruc.trim();
@@ -68,8 +53,9 @@ public class SunatRucService {
         }
 
         try {
-            String token = obtenerToken();
-            JsonNode data = consultarRucRemoto(token, rucNormalizado);
+            SunatApiConfig config = obtenerConfigSunat();
+            String token = obtenerToken(config);
+            JsonNode data = consultarRucRemoto(config, token, rucNormalizado);
             String razonSocial = text(data, "razonSocial");
 
             return ConsultaRucDto.builder()
@@ -95,7 +81,19 @@ public class SunatRucService {
         }
     }
 
-    private String obtenerToken() throws Exception {
+    private SunatApiConfig obtenerConfigSunat() {
+        return new SunatApiConfig(
+                securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_BASE_URL", DEFAULT_API_BASE_URL),
+                securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_USUARIO", DEFAULT_USUARIO),
+                securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_CLAVE", DEFAULT_CLAVE),
+                securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_EMPRESA", DEFAULT_EMPRESA),
+                securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_RUC_ORIGEN", DEFAULT_RUC_ORIGEN),
+                securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_IP_LOCAL", DEFAULT_IP_LOCAL),
+                securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_COMPUTER_NAME", DEFAULT_COMPUTER_NAME)
+        );
+    }
+
+    private String obtenerToken(SunatApiConfig config) throws Exception {
         long ahora = System.currentTimeMillis();
         if (cachedToken != null && ahora < tokenExpiresAtMs - 30_000L) {
             return cachedToken;
@@ -108,13 +106,13 @@ public class SunatRucService {
             }
 
             Map<String, String> body = new LinkedHashMap<>();
-            body.put("usuario", usuario);
-            body.put("clave", clave);
-            body.put("empresa", empresa);
-            body.put("ipLocal", ipLocal);
-            body.put("computerName", computerName);
+            body.put("usuario", config.usuario());
+            body.put("clave", config.clave());
+            body.put("empresa", config.empresa());
+            body.put("ipLocal", config.ipLocal());
+            body.put("computerName", config.computerName());
 
-            HttpRequest request = HttpRequest.newBuilder(tokenUri())
+            HttpRequest request = HttpRequest.newBuilder(tokenUri(config.apiBaseUrl()))
                     .timeout(Duration.ofSeconds(15))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body)))
@@ -147,13 +145,13 @@ public class SunatRucService {
         }
     }
 
-    private JsonNode consultarRucRemoto(String token, String ruc) throws Exception {
+    private JsonNode consultarRucRemoto(SunatApiConfig config, String token, String ruc) throws Exception {
         Map<String, String> body = new LinkedHashMap<>();
         body.put("rucConsulta", ruc);
-        body.put("rucOrigen", rucOrigen);
-        body.put("computerName", computerName);
+        body.put("rucOrigen", config.rucOrigen());
+        body.put("computerName", config.computerName());
 
-        HttpRequest request = HttpRequest.newBuilder(consultaUri())
+        HttpRequest request = HttpRequest.newBuilder(consultaUri(config.apiBaseUrl()))
                 .timeout(Duration.ofSeconds(20))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + token)
@@ -184,15 +182,15 @@ public class SunatRucService {
         return data;
     }
 
-    private URI tokenUri() {
-        return URI.create(normalizeBaseUrl() + "/api/auth/token");
+    private URI tokenUri(String apiBaseUrl) {
+        return URI.create(normalizeBaseUrl(apiBaseUrl) + "/api/auth/token");
     }
 
-    private URI consultaUri() {
-        return URI.create(normalizeBaseUrl() + "/api/ruc/consultar");
+    private URI consultaUri(String apiBaseUrl) {
+        return URI.create(normalizeBaseUrl(apiBaseUrl) + "/api/ruc/consultar");
     }
 
-    private String normalizeBaseUrl() {
+    private static String normalizeBaseUrl(String apiBaseUrl) {
         String base = apiBaseUrl == null ? "" : apiBaseUrl.trim();
         while (base.endsWith("/")) {
             base = base.substring(0, base.length() - 1);
@@ -272,4 +270,14 @@ public class SunatRucService {
         String text = value.asText();
         return text == null || text.isBlank() ? defaultValue : text.trim();
     }
+
+    private record SunatApiConfig(
+            String apiBaseUrl,
+            String usuario,
+            String clave,
+            String empresa,
+            String rucOrigen,
+            String ipLocal,
+            String computerName
+    ) {}
 }
