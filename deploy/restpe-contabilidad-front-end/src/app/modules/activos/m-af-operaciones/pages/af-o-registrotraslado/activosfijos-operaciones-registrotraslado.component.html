@@ -1,0 +1,196 @@
+<div class="contenedor-principal">
+  @if (!panelLateralVisible) {
+  <div class="flex-none flex items-center bg-[#E6E8F4] text-primary text-xs cursor-pointer"
+    (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight"></fa-icon>
+  </div>
+  }
+  <div class="h-full flex flex-col flex-grow overflow-hidden border-r border-text-5" [style.display]="panelLateralVisible ? 'flex' : 'none'">
+    <div class="cont-title">
+      <span>Gestión de traslados de activos</span>
+      <div class="px-2 text-primary text-xs cursor-pointer" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>
+    </div>
+    <div class=" p-1.5 flex flex-row gap-3 items-center w-full">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch" class=""></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por N° de traslado" class="min-w-[234px] w-full"
+          style="--padding-start:30px"></ion-input>
+      </div>
+      <div class="flex items-center gap-3 flex-none">
+        <ion-button class="w-[115px] flex-none" fill="outline" id="reportestraslado">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportestraslado" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" [disabled]="camponuevo" (click)="botonNuevoTraslado()"><fa-icon [icon]="fasCirclePlus"
+            class="mr-1"></fa-icon> <span class="font-normal">Nuevo traslado</span></ion-button>
+      </div>
+    </div>
+    <div class="h-full relative" [appLoader]="isLoadingTraslados()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData()" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [localeText]="localeText" [rowHeight]="20" [headerHeight]="24"
+        [paginationPageSize]="20" [rowSelection]="'single'" (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)" [purgeClosedRowNodes]="true" />
+    </div>
+  </div>
+  <div class="panel-derecho" [ngClass]="{'!flex-grow': !panelLateralVisible}" [appLoader]="isLoadingTraslados()">
+    <div class="cont-title">
+      <span>{{ camponuevo ? 'Registro de traslado' : 'Información de traslado: ' + (filaSeleccionada?.traslado || '') }}</span>
+    </div>
+
+     @if (filaSeleccionada) { 
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" ></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+  }
+
+    <!-- Tabs -->
+    <div class="cont-tabs">
+      <div class="flex overflow-hidden">
+        <ion-segment [(ngModel)]="tabSeleccionado" [ngModelOptions]="{standalone: true}" mode="md" scrollable
+          class="company-tabs">
+          <ion-segment-button value="datosGenerales" class="boton-subsubtitulo">
+            <ion-label>Datos Generales</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="ubicaciontraslado" class="boton-subsubtitulo" [disabled]="!datosGeneralesValid">
+            <ion-label>Ubicación del traslado</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+    </div>
+
+    <form action="" [formGroup]="registroTrasladoForm">
+      <div class="flex flex-col gap-1 h-full w-full">
+        @if(tabSeleccionado === 'datosGenerales'){
+        <!-- Contenido del formulario -->
+        <div class="flex" [ngClass]="{'flex-col': panelLateralVisible === true}">
+          <div class="p-2.5 flex flex-col gap-1">
+            <div class="contenido-formulario !items-start">
+              <span class="label">Motivo de traslado <span class="text-danger">*</span></span>
+              <ion-textarea fill="outline" [placeholder]="camponuevo ? 'Ingrese un motivo de traslado' : ''" formControlName="motivoTraslado" class="w-[200px]"></ion-textarea>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Fecha de solicitud <span class="text-danger">*</span></span>
+              <ion-input fill="outline" class="w-[120px]" formControlName="fechaSolicitud"> </ion-input>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2.5 px-2.5 pb-2.5 w-fulls">
+            <div class="contenido-formulario">
+              <ion-checkbox formControlName="unicoResponsable"></ion-checkbox>
+              <span class="text-xxs">Único responsable</span>
+            </div>
+            @if(registroTrasladoForm.value.unicoResponsable == true){<div class="contenido-formulario">
+              <span class="label">Nvo. Respon. del Activo <span class="text-danger">*</span></span>
+              <app-autocomplete formControlName="responsable" [items]="responsables" displayKey="nombre" valueKey="nombre"
+                [placeholder]="camponuevo ? 'Selecciona un responsable' : ''" (itemSelected)="onResponsableSeleccionado($event)">
+              </app-autocomplete>
+            </div>}
+          </div>
+        </div>
+        }
+        @if(tabSeleccionado === 'ubicaciontraslado'){
+        <div class="contenedor-formulario" [ngClass]="{'flex-col': panelLateralVisible === true}">
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Destino <span class="text-danger">*</span></span>
+              <app-autocomplete formControlName="destino" [items]="destinos" displayKey="nombre" valueKey="nombre"
+                [placeholder]="camponuevo ? 'Selecciona un destino' : ''" (itemSelected)="onDestinoSeleccionado($event)">
+              </app-autocomplete>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Solicitante<span class="text-danger">*</span></span>
+              <app-autocomplete formControlName="solicitante" [items]="solicitantes" displayKey="nombre" valueKey="nombre"
+                [placeholder]="camponuevo ? 'Selecciona un solicitante' : ''" (itemSelected)="onSolicitanteSeleccionado($event)">
+              </app-autocomplete>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Fecha programada <span class="text-danger">*</span></span>
+              <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaProgramada" position="center"
+                (dateSelected)="onFechaProgramadaSelected($event)">
+              </app-base-calendar-new>
+
+            </div>
+            <div class="contenido-formulario !items-start">
+              <span class="label">Observaciones</span>
+              <ion-textarea fill="outline" [placeholder]="camponuevo ? 'Ingrese sus observaciones' : ''" formControlName="observaciones" [ngClass]="'w-[163px] 2xl:w-[200px]'"></ion-textarea>
+            </div>
+          </div>
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Responsable de aprob. <span class="text-danger">*</span></span>
+              <app-autocomplete formControlName="aprobacion" [items]="responsables" displayKey="nombre" valueKey="nombre"
+                [placeholder]="camponuevo ? 'Selecciona un responsable' : ''" [ngClass]="'w-[163px] 2xl:w-[200px]'"
+                (itemSelected)="onResponsableAprobacionSeleccionado($event)">
+              </app-autocomplete>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Fecha de aprobación <span class="text-danger">*</span></span>
+              <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaAprobacion" position="center"
+                (dateSelected)="onFechaAprobacionSelected($event)">
+              </app-base-calendar-new>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Responsable de ejec. <span class="text-danger">*</span></span>
+              <app-autocomplete formControlName="ejecucion" [items]="responsables" displayKey="nombre" valueKey="nombre"
+                [placeholder]="camponuevo ? 'Selecciona un responsable' : ''" [ngClass]="'w-[163px] 2xl:w-[200px]'"
+                (itemSelected)="onResponsableEjecucionSeleccionado($event)">
+              </app-autocomplete>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Fecha de ejecución <span class="text-danger">*</span></span>
+              <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaEjecuciom" position="center"
+                (dateSelected)="onFechaEjecucionSelected($event)">
+              </app-base-calendar-new>
+            </div>
+          </div>
+        </div>
+        }
+        @if(tabSeleccionado === 'datosGenerales'){<div class="flex flex-col gap-2 overflow-auto">
+          <div class="bg-[#ECF4FF] pl-2">
+            <span class="text-xs font-medium">Activos Fijos</span>
+          </div>
+          <div class="flex flex-row gap-2 items-center px-1">
+            <div class="w-full px-1">
+              <app-autocomplete 
+                formControlName="activoSeleccionado" 
+                [items]="activosDisponibles()" 
+                displayKey="activo_fijo_descripcion" 
+                valueKey="activo_fijo_codigo"
+                [placeholder]="camponuevo ? 'Buscar activos por nombre o código' : ''" 
+                width="w-full"
+                (itemSelected)="onActivoSeleccionado($event)">
+              </app-autocomplete>
+            </div>
+          </div>
+          <div class="min-h-[300px] overflow-auto">
+            <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowDataActivos" [defaultColDef]="defaultColDef"
+              [columnDefs]="colDefsActivos" [columnTypes]="columnTypes" [rowHeight]="20" [headerHeight]="24"
+              [localeText]="localeText" [paginationPageSize]="20" (gridReady)="onGridReadyActivos($event)"
+              (cellClicked)="onCellClickedActivo($event)" />
+          </div>
+        </div>}
+        <div class="contenedor-btn">
+          @if(tabSeleccionado === 'datosGenerales'){<ion-button
+            (click)="nextTab()">Siguiente</ion-button>}
+            @if(tabSeleccionado === 'ubicaciontraslado'){<ion-button
+              (click)="botonGuardar()">{{ camponuevo ? 'Registrar' : 'Editar' }}</ion-button>}
+              <ion-button color="medium" fill="outline" (click)="botonNuevoTraslado()">Cancelar</ion-button>
+            </div>
+      </div>
+    </form>
+
+  </div>
+</div>

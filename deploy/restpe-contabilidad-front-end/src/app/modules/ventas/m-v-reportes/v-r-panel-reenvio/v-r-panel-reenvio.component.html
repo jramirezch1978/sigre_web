@@ -1,0 +1,94 @@
+<div class="contenedor-filtros-tabla">
+  <div class="sub-content-filtros-tabla">
+    <div class="cont-title">
+      <span>Panel de reenvío</span>
+    </div>
+    <div class="contenido-filtros-tabla">
+      <div class="contenedor-formulario !flex-row !gap-10">
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Comprobante</span>
+            <ion-select [(ngModel)]="comprobanteSeleccionado" placeholder="Selecciona comprobante" interface="popover"
+              fill="outline" class="w-[180px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(comprob of comprobantes; track comprob){<ion-select-option [value]="comprob.value">{{comprob.label}}</ion-select-option>}
+            </ion-select>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Tipo de documento</span>
+            <ion-select [(ngModel)]="tipoSeleccionado" placeholder="Selecciona tipo de documento" interface="popover"
+              fill="outline" class="w-[195px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(tipo of tiposDoc; track tipo){<ion-select-option [value]="tipo.value">{{tipo.label}}</ion-select-option>}
+            </ion-select>
+          </div>
+        </div>
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Estado</span>
+            <ion-select [(ngModel)]="estadoSeleccionado" placeholder="Selecciona estado" interface="popover"
+              fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(estado of estados; track estado){<ion-select-option [value]="estado.value">{{estado.label}}</ion-select-option>}
+            </ion-select>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha</span>
+            <app-base-calendar-new class="flex-none " mode="range" [initialStartDate]="startDate" [initialEndDate]="endDate"
+              [minDate]="minDate" [maxDate]="maxDate" position="center" (dateRangeSelected)="filtrarPorFechas($event)"></app-base-calendar-new>
+          </div>
+        </div>
+      </div>
+      <!-- Botones de acción -->
+      <div class="flex items-center gap-3 w-full justify-end">
+        <ion-button fill="outline" class="w-fit" (click)="notificacionMasiva()">
+          <fa-icon [icon]="fasPaperPlane" class="mr-2 text-xxs"></fa-icon>
+          <span>Notificar los documentos</span>
+        </ion-button>
+        <ion-button class="w-fit" (click)="generarReporte()">Generar Reporte</ion-button>
+      </div>
+    </div>
+    <div class="min-h-[400px] flex grow flex-col">
+      <div class="cont-title">
+        <span>Ventas por notificar</span>
+      </div>
+      <div class="contenedor-filtros">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por N° de documento" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+        <div class="filtros-absolutos">
+          <ion-button fill="outline" class="w-[115px] flex-none text-text-85" id="panelReenvio" [disabled]="!reporteGenerado">
+            <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+            <span>Exportar</span>
+            <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+          </ion-button>
+          <ion-popover trigger="panelReenvio" triggerAction="click" [dismissOnSelect]="true"
+            class="popoverCustomButtonUbicacionActivos " [showBackdrop]="false">
+            <ng-template>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            </ng-template>
+          </ion-popover>
+        </div>
+      </div>
+      @if(reporteGenerado){
+        <!-- Tabla de resultados -->
+        <div class="flex flex-grow relative pt-1.5"  [appLoader]="isLoading()">
+          <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+
+          <ag-grid-angular style="width: 100%; height: 100%;" class="ag-theme-alpine"
+            [rowSelection]="rowSelection"
+            [initialState]="initialState"
+            [rowData]="rowData" [columnDefs]="colDefs" [columnTypes]="columnTypes"
+            [gridOptions]="gridOptions" [pagination]="true" [localeText]="localeText" [rowHeight]="20" [headerHeight]="24"
+            [defaultColDef]="defaultColDef"
+            [domLayout]="'normal'"
+            [paginationPageSize]="20"
+            [suppressLoadingOverlay]="true"
+            [purgeClosedRowNodes]="true"
+            (gridReady)="onGridReady($event)"
+            (selectionChanged)="onSelectionChanged()" />
+        </div>
+      }
+    </div>
+  </div>
+</div>

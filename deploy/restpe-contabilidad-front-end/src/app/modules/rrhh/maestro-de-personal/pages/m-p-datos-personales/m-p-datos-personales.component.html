@@ -1,0 +1,664 @@
+<div class="contenedor-principal">
+  @if(!panelLateralVisible){
+  <div class="flex items-center justify-center w-[15px] bg-[#E6E8F4]" (click)="togglePanel()">
+    <fa-icon [icon]="fasChevronsRight" class="text-xs text-primary cursor-pointer"></fa-icon>
+  </div>
+  }
+  @if(panelLateralVisible){
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de empleados (Selecciona un empleado para visualizarlo)</span>
+      <fa-icon [icon]="fasChevronsLeft" class="text-xs text-primary cursor-pointer" (click)="togglePanel()"></fa-icon>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por código o nombre de empleado"
+          style="--padding-start:30px"></ion-input>
+      </div>
+      <div class="filtros-absolutos">
+        <app-base-calendar-new class="!w-[180px] flex-none" mode="range" [initialStartDate]="startDate"
+          [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="center">
+        </app-base-calendar-new>
+        <ion-button fill="outline" class="text-text-85 w-[115px]" id="datospersonales">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="datospersonales" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" [disabled]="!filaSeleccionada" (click)="botonNuevoEmpleado()" >
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span>Nuevo empleado</span>
+        </ion-button>
+      </div>
+    </div>
+  
+    <div class="flex h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="columnDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowSelection]="'single'" [localeText]="localeText"
+        [rowHeight]="20" [purgeClosedRowNodes]="true" [headerHeight]="24" [paginationPageSize]="20"
+        [suppressRowClickSelection]="true" (rowClicked)="onCellClicked($event)" (gridReady)="onGridReady($event)" />
+    </div>
+  </div>
+  }
+  <div class="panel-derecho !overflow-hidden" [ngClass]="{'!w-full !flex-1': !panelLateralVisible}" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      <span>{{ filaSeleccionada ? 'Empleado: ' + filaSeleccionada.empleado_codigo : 'Nuevo empleado' }}</span>
+    </div>
+    @if(filaSeleccionada){
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" ></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+    <div class="cont-tabs">
+      @if (panelLateralVisible) {
+      <div class="btn-scroll" (click)="scrollLeft()">
+        <fa-icon [icon]="fasChevronLeft"></fa-icon>
+      </div>
+      }
+      <div class="flex overflow-hidden">
+        <ion-segment [(ngModel)]="tabSeleccionadoDetalle" [ngModelOptions]="{standalone: true}" mode="md" scrollable class="company-tabs" #scrollBox>
+            <ion-segment-button  value="general" class="boton-subsubtitulo">
+              <ion-label>Datos generales</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="info" class="boton-subsubtitulo">
+              <ion-label>Información laboral</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="equipamiento" class="boton-subsubtitulo">
+              <ion-label>Equipamiento</ion-label>
+            </ion-segment-button>
+        </ion-segment>
+      </div>
+      @if (panelLateralVisible) {
+      <div class="btn-scroll" (click)="scrollRight()">
+        <fa-icon [icon]="fasChevronRight"></fa-icon>
+      </div>
+      }
+    </div>
+
+    <form class="overflow-y-auto" [formGroup]="datosEmpleadoForm">
+      @if(tabSeleccionadoDetalle === 'general') {
+      <div class="p-1.5 cols5 overflow-x-hidden" [ngClass]="{'!flex-row': !panelLateralVisible}"> 
+        <div class="flex-1 cols5">
+          <fieldset class="card-fieldset">
+            <legend class="text-xxs font-medium px-1">Información personal</legend>
+            <div class="contenedor-formulario" [ngClass]="{'!flex-row !gap-4': !panelLateralVisible}">
+              <div class="">
+                <!-- Input file oculto -->
+                <input 
+                  type="file" 
+                  #fileInput 
+                  style="display: none;" 
+                  accept="image/jpeg,image/png,image/jpg" 
+                  (change)="onFileSelected($event)">
+                
+                <!-- Contenedor de la imagen o zona de carga -->
+                <div *ngIf="!logoPreview" 
+                    class="w-[146px] h-[146px] flex flex-col gap-2 items-center justify-center bg-[#F3F7FF] border-[#C0C7DF] rounded border border-dashed cursor-pointer hover:bg-[#E8EFFF] transition-colors" 
+                    (click)="fileInput.click()">
+                  <div class="flex items-center justify-center">
+                    <fa-icon [icon]="fasCloudArrowUp" class="text-2xl text-[#8C93AB]"></fa-icon>
+                  </div>
+                  <div class="flex flex-col items-center px-2">
+                    <span class="text-stone-500 text-xxs font-bold text-center">Da clic para subir una imagen</span>
+                    <span class="text-xxss font-normal text-center">(Archivo JPG, PNG)</span>
+                  </div>
+                </div>
+                
+                <!-- Vista previa de la imagen cargada -->
+                <div *ngIf="logoPreview" class="relative w-[146px] h-[146px] group cursor-pointer" (click)="fileInput.click()">
+                  <img 
+                    [src]="logoPreview" 
+                    alt="Logo preview" 
+                    class="w-full h-full object-contain rounded border border-[#C0C7DF] bg-white">
+                                
+                    <!-- Botón para eliminar imagen -->
+                    <button 
+                      type="button"
+                      (click)="removeImage()"
+                      class="w-4 h-4 absolute top-1 right-1 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-slate-50 transition-colors">
+                      <fa-icon [icon]="fasXmark" class="text-xxss text-black"></fa-icon>
+                    </button>
+                  
+                  <!-- Botones sobre la imagen -->
+                    <!-- Botón para cambiar imagen -->
+                    <button 
+                      type="button"
+                      class="w-max absolute top-[40%] left-[25%] bg-white rounded-full px-1.5 py-[2px] shadow-md flex items-center justify-center hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100">
+                      <span> Editar <fa-icon [icon]="fasEdit" class="text-xs text-[#8C93AB]"></fa-icon></span>
+                    </button>
+  
+                  
+                  <!-- Nombre del archivo -->
+                  <!-- <div class="mt-2 text-xxs text-gray-600 text-center truncate w-[126px]" [title]="selectedFileName">
+                    {{ selectedFileName }}
+                  </div> -->
+                </div>
+                <div class="flex flex-row gap-1 text-xxs items-center text-text-65 mt-1">
+                  <fa-icon [icon]="farInfoCircle"></fa-icon>
+                  <span class="">Imagen 146 x 146px</span>
+                </div>
+              </div>
+              <div class="contenedor-formulario !p-0">
+                <div class="contenido-formulario">
+                  <span class="label-fieldset">Doc. del empleado <span class="text-danger">*</span></span>
+                  <div class="flex flex-row">
+                      <ion-select placeholder="" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                        interface="popover" fill="outline" class="min-w-[55px] text-xxs -mr-0.5" style="width: 55px !important; --border-top-right-radius: 0px !important; --border-bottom-right-radius: 0px !important;"
+                        formControlName="empleado_tipo_documento">
+                        @for(doc of tiposDocumento; track doc.value) {
+                          <ion-select-option [value]="doc.value">{{ doc.label }}</ion-select-option>
+                        }
+                      </ion-select>
+                      <ion-input type="text" fill="outline"
+                      style="--border-radius: 0px !important" 
+                      placeholder="Ingrese documento"
+                      formControlName="empleado_documento" [ngClass]="!panelLateralVisible ? '!w-[150px]' : '!w-[72px] 2xl:!w-[118px]'"></ion-input>
+                      <ion-button class="!w-[28px] bg-primary rounded-r-sm" (click)="buscarEmpleado()"
+                        [disabled]="!datosEmpleadoForm.get('empleado_documento')?.value">
+                        <fa-icon [icon]="fasSearch" class="text-xs text-white"></fa-icon>
+                      </ion-button>
+                  </div>
+                </div>
+                <div class="contenido-formulario">
+                  <span class="label-fieldset">Nombres y apellidos <span class="text-danger">*</span></span>
+                  <ion-input fill="outline" placeholder="Ingrese nombres y apellidos" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[175px] text-xxs'"
+                    formControlName="empleado_nombres_apellidos"></ion-input>
+                </div>
+                <div class="contenido-formulario">
+                  <span class="label-fieldset">Fecha de nacimiento <span class="text-danger">*</span></span>
+                  <app-base-calendar-new class="flex-none" mode="single" position="center" [initialDate]="datosEmpleadoForm.get('empleado_fecha_nacimiento')?.value" (dateSelected)="onFechaNacimientoSelected($event)"/>
+                </div>
+                <div class="contenido-formulario">
+                  <span class="label-fieldset">Sexo <span class="text-danger">*</span></span>
+                  <ion-select placeholder="Seleccione sexo" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                    interface="popover" fill="outline" class="w-[120px] text-xxs"
+                    formControlName="empleado_sexo">
+                    @for(genero of generos; track genero.value) {
+                      <ion-select-option [value]="genero.value">{{ genero.label }}</ion-select-option>
+                    }
+                  </ion-select>
+                </div>
+                <div class="contenido-formulario">
+                  <span class="label-fieldset">Nacionalidad <span class="text-danger">*</span></span>
+                  <ion-select placeholder="Seleccione una nacionalidad" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[170px] text-xxs'"
+                  formControlName="empleado_nacionalidad">
+                  @for(pais of paises; track pais.nombre) {
+                    <ion-select-option [value]="pais.nombre">{{ pais.nombre }}</ion-select-option>
+                  }
+                </ion-select>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="card-fieldset">
+            <legend class="text-xxs font-medium px-1">Documentos</legend>
+            <div class="contenedor-formulario" [ngClass]="{ 'h-[157px]': !panelLateralVisible}">
+              <div class="contenido-formulario">
+                <span class="label !whitespace-normal">Copia de documento de identidad</span>
+                <app-file-upload
+                  [accept]="'.pdf,.jpg,.png,.jpeg'"
+                  [placeholder]="'Haz clic para subir documento'"
+                  [maxFileSize]="5"
+                  [width]="'w-[140px]'"
+                  [required]="true"
+                  (fileSelected)="onDocumentoIdentidadSelected($event)"
+                  (fileRemoved)="onDocumentoIdentidadRemoved()"
+                  (error)="showFileError($event)">
+                </app-file-upload>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label !whitespace-normal">Licencia de conducir</span>
+                <app-file-upload
+                  [accept]="'.pdf,.jpg,.png,.jpeg'"
+                  [placeholder]="'Haz clic para subir documento'"
+                  [maxFileSize]="5"
+                  [width]="'w-[140px]'"
+                  [required]="true"
+                  (fileSelected)="onDocumentoIdentidadSelected($event)"
+                  (fileRemoved)="onDocumentoIdentidadRemoved()"
+                  (error)="showFileError($event)">
+                </app-file-upload>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label !whitespace-normal">Antecedentes penales</span>
+                <app-file-upload
+                  [accept]="'.pdf,.jpg,.png,.jpeg'"
+                  [placeholder]="'Haz clic para subir documento'"
+                  [maxFileSize]="5"
+                  [width]="'w-[140px]'"
+                  [required]="true"
+                  (fileSelected)="onDocumentoIdentidadSelected($event)"
+                  (fileRemoved)="onDocumentoIdentidadRemoved()"
+                  (error)="showFileError($event)">
+                </app-file-upload>
+              </div> 
+              <div class="contenido-formulario">
+                <span class="label">Curriculum vitae (PDF)</span>
+                <app-file-upload
+                  [accept]="'.pdf'"
+                  [placeholder]="'Haz clic para subir curriculum vitae'"
+                  [maxFileSize]="5"
+                  [width]="'w-[137px]'"
+                  [required]="true"
+                  (fileSelected)="onContratoSelected($event)"
+                  (fileRemoved)="onContratoRemoved()"
+                  (error)="showFileError($event)">
+                </app-file-upload>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+        <div class="flex-1 cols5">
+          <fieldset class="card-fieldset">
+            <legend class="text-xxs font-medium px-1">Ubicación</legend>
+            <div class="contenedor-formulario">
+              <div class="contenido-formulario">
+                <span class="label">País</span>
+                <ion-select placeholder="Seleccione un país" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" class="w-[143px] text-xxs"
+                  formControlName="empleado_pais" (ionChange)="onPaisChange($event)">
+                  @for(pais of paises; track pais.nombre) {
+                    <ion-select-option [value]="pais.nombre">{{ pais.nombre }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">{{ubicacionpais[0].label}}</span>
+                <ion-select placeholder="Seleccione un departamento" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[175px] text-xxs'"
+                  formControlName="empleado_departamento" (ionChange)="onDepartamentoChange($event)">
+                  @for(depart of departamentos; track depart.nombre) {
+                    <ion-select-option [value]="depart.nombre">{{ depart.nombre }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">{{ubicacionpais[1].label}}</span>
+                <ion-select placeholder="Seleccione una provincia" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[175px] text-xxs'"
+                  formControlName="empleado_provincia" (ionChange)="onProvinciaChange($event)">
+                  @for(provincia of provincias; track provincia.nombre) {
+                    <ion-select-option [value]="provincia.nombre">{{ provincia.nombre }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+              @if(pais != 'CO' && pais != 'GT') {
+              <div class="contenido-formulario">
+                <span class="label">{{ubicacionpais[2].label}}</span>
+                <ion-select placeholder="Seleccione un distrito" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[175px] text-xxs'"
+                  formControlName="empleado_distrito">
+                  @for(distrito of distritos; track distrito) {
+                    <ion-select-option [value]="distrito">{{ distrito }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+              }
+              <div class="contenido-formulario">
+                <span class="label">Dirección</span>
+                <ion-input fill="outline" placeholder="Ingrese dirección" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[175px] text-xxs'"
+                  formControlName="empleado_direccion"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="card-fieldset">
+            <legend class="text-xxs font-medium px-1">Contacto privado</legend>
+            <div class="contenedor-formulario">
+              <div class="contenido-formulario">
+                <span class="label">Teléfono</span>
+                <ion-input fill="outline" type="number" placeholder="Ingrese teléfono" class="w-[143px] text-xxs"
+                  formControlName="empleado_telefono_privado"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Correo</span>
+                <ion-input fill="outline" placeholder="Ingrese correo" class="w-[143px] text-xxs"
+                  formControlName="empleado_correo_privado"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="card-fieldset">
+            <legend class="text-xxs font-medium px-1">Contacto de emergencia</legend>
+            <div class="contenedor-formulario">
+              <div class="contenido-formulario">
+                <span class="label">Contacto (nombre)</span>
+                <ion-input fill="outline" placeholder="Ingrese nombre de contacto" class="w-[143px] text-xxs"
+                  formControlName="empleado_contacto_emergencia_nombre"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Telefono</span>
+                <ion-input fill="outline" type="number" placeholder="Ingrese teléfono" class="w-[143px] text-xxs"
+                  formControlName="empleado_contacto_emergencia_telefono"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+      }
+      @if(tabSeleccionadoDetalle === 'info') {
+      <div class="overflow-y-auto">
+        <div class="contenedor-formulario" [ngClass]="{'!flex-row': !panelLateralVisible}">
+            <div class="contenedor-formulario !p-0">
+              <div class="contenido-formulario">
+                <span class="label">Tipo de contrato</span>
+                <app-autocomplete
+                  [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[200px]'"
+                  formControlName="empleado_tipo_contrato"
+                  [items]="tiposContrato"
+                  displayKey="label"
+                  valueKey="value"
+                  placeholder="Selecciona un tipo"
+                  (itemSelected)="onTipoContratoSeleccionado($event)">
+                </app-autocomplete>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Sucursal</span>
+                <app-autocomplete
+                  [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[200px]'"
+                  formControlName="empleado_sucursal"
+                  [items]="sucursales"
+                  labelKey="nombre"
+                  placeholder="Selecciona una sucursal"
+                  (itemSelected)="onSucursalSeleccionada($event)">
+                </app-autocomplete>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Jornada laboral</span>
+                <ion-select placeholder="Seleccione una jornada" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline"  [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[200px] text-xxs'"
+                  formControlName="empleado_jornada">
+                  @for(jornada of jornadasLaborales; track jornada.value) {
+                    <ion-select-option [value]="jornada.value">{{ jornada.label }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Modalidad</span>
+                <ion-select placeholder="Seleccione una modalidad" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[200px] text-xxs'"
+                  formControlName="empleado_modalidad">
+                  @for(modalidad of modalidades; track modalidad.value) {
+                    <ion-select-option [value]="modalidad.value">{{ modalidad.label }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Cargo</span>
+                <ion-select placeholder="Seleccione una cargo" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[200px] text-xxs'"
+                  formControlName="empleado_cargo">
+                  @for(cargo of cargos; track $index) {
+                    <ion-select-option [value]="cargo.value">{{ cargo.nombre }}</ion-select-option>
+                  } 
+                </ion-select>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Centro de costo</span>
+                <app-autocomplete 
+                  formControlName="empleado_centro_costos"
+                  [items]="centrosCostos" 
+                  labelKey="nombre"
+                  placeholder="Selecciona un centro de costos"
+                  (itemSelected)="onCentroCostoSeleccionado($event)"
+                  [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[185px]'">
+                </app-autocomplete>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Fecha de inicio</span>
+                <app-base-calendar-new class="flex-none" mode="single" position="center" [initialDate]="datosEmpleadoForm.get('empleado_fecha_inicio')?.value" (dateSelected)="onFechaInicioSelected($event)"/>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Fecha de fin</span>
+                <app-base-calendar-new class="flex-none" mode="single" position="center" [initialDate]="datosEmpleadoForm.get('empleado_fecha_fin')?.value" (dateSelected)="onFechaFinSelected($event)"/>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Estado</span>
+                <ion-select placeholder="Seleccione estado" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" class="w-[100px] text-xxs"
+                  formControlName="empleado_estado">
+                  @for(estado of estados; track $index) {
+                    <ion-select-option [value]="estado">{{ estado }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+            </div>
+            <div class="contenedor-formulario !p-0">
+              <div class="contenido-formulario">
+                <span class="label">Regimen de salud</span>
+              @if(pais != 'GT' && pais != 'CO'){
+                <ion-select placeholder="Seleccione regimen de salud" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[200px] text-xxs'"
+                  formControlName="empleado_regimen_salud">
+                  @for(regimen of regimenesSalud; track regimen.value) {
+                    <ion-select-option [value]="regimen.value">{{ regimen.label }}</ion-select-option>
+                  }
+                </ion-select>
+              }
+              @else{
+                <ion-input fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[200px] text-xxs'"
+                  [value]="regimensalud" [disabled]="true"></ion-input>
+              }
+              </div>
+              @if(pais != 'GT' && pais != 'EC'){
+              <div class="contenido-formulario">
+                <span class="label">Regimen pensionario</span>
+                <ion-select placeholder="Seleccione regimen pensionario" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[200px] text-xxs'"
+                  formControlName="empleado_regimen_pensionario">
+                  @for(regimen of regimenesPensionarios; track regimen.value) {
+                    <ion-select-option [value]="regimen.value">{{ regimen.label }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+              @if(datosEmpleadoForm.get('empleado_regimen_pensionario')?.value && datosEmpleadoForm.get('empleado_regimen_pensionario')?.value !== 'onp') {
+              <div class="contenido-formulario">
+                <span class="label">CUS</span>
+                <ion-input fill="outline" class="w-[143px] text-xxs"></ion-input>
+              </div>
+              }
+              }
+              <div class="contenido-formulario">
+                <span class="label">Moneda</span>
+                <ion-select placeholder="Seleccione moneda" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" class="w-[143px] text-xxs"
+                  formControlName="empleado_moneda">
+                  @for(moneda of monedas; track moneda.value) {
+                    <ion-select-option [value]="moneda.value">{{ moneda.label }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Remuneración</span>
+                <ion-input fill="outline" class="w-[143px] text-xxs" type="number" placeholder="0.00"
+                  formControlName="empleado_remuneracion"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Periodicidad de pago <span class="text-danger">*</span></span>
+                <ion-select placeholder="Selecciona una periodicidad" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[200px] text-xxs'"
+                  formControlName="empleado_periodicidad_pago">
+                  @for(periodicidad of periodicidadesPago; track periodicidad.value) {
+                    <ion-select-option [value]="periodicidad.value">{{ periodicidad.label }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Documento del alta (PDF)</span>
+                <app-file-upload
+                  [accept]="'.pdf'"
+                  [placeholder]="'Haz clic para subir documento del alta'"
+                  [maxFileSize]="5"
+                  [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[175px] text-xxs'"
+                  [required]="true"
+                  (fileSelected)="onCurriculumSelected($event)"
+                  (fileRemoved)="onCurriculumRemoved()"
+                  (error)="showFileError($event)">
+                </app-file-upload>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Adjuntar contrato (PDF)</span>
+                <app-file-upload
+                  [accept]="'.pdf'"
+                  [placeholder]="'Haz clic para subir contrato'"
+                  [maxFileSize]="5"
+                  [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[175px] text-xxs'"
+                  [required]="true"
+                  (fileSelected)="onContratoSelected($event)"
+                  (fileRemoved)="onContratoRemoved()"
+                  (error)="showFileError($event)">
+                </app-file-upload>
+              </div>
+              @if(pais === 'PE' || pais === 'EC'){
+              <div class="contenido-formulario">
+                <span class="label">Carga familiar</span>
+                  <ion-radio-group formControlName="cargaFamiliar">
+                    <div class="flex flex-row">
+                      <ion-item lines="none" class="p-0 mr-4">
+                        <ion-radio slot="start" value="Si"></ion-radio>
+                        <ion-label class="text-xxs">Si</ion-label>
+                      </ion-item>
+                      <ion-item lines="none" class="p-0">
+                        <ion-radio slot="start" value="No"></ion-radio>
+                        <ion-label class="text-xxs">No</ion-label>
+                      </ion-item>
+                    </div>
+                  </ion-radio-group>
+              </div>
+              }
+              @if(pais === 'EC'){
+              <div class="contenido-formulario" *ngIf="datosEmpleadoForm.get('cargaFamiliar')?.value === 'Si'">
+                <span class="label">N° de carga familiar</span>
+                <ion-input fill="outline" class="w-[100px] text-xxs" type="number" placeholder="00"></ion-input>
+              </div>
+              <div class="contenido-formulario" *ngIf="datosEmpleadoForm.get('cargaFamiliar')?.value === 'Si'">
+                <span class="label">Adjuntar docs. (PDF)</span>
+                <app-file-upload
+                  [accept]="'.pdf'"
+                  [placeholder]="'Haz clic para subir documentos'"
+                  [maxFileSize]="5"
+                  [width]="'w-[137px]'"
+                  [required]="true"
+                  (fileSelected)="onCurriculumSelected($event)"
+                  (fileRemoved)="onCurriculumRemoved()"
+                  (error)="showFileError($event)">
+                </app-file-upload>
+              </div>
+              }
+              <div class="contenido-formulario">
+                <span class="label">Formas de pago</span>
+                <ion-select placeholder="Seleccione forma de pago" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  interface="popover" fill="outline" [ngClass]="!panelLateralVisible ? 'w-[200px]' : 'w-[150px] 2xl:w-[175px] text-xxs'"
+                  formControlName="formaPago">
+                  @for(forma of formasDePago; track forma.value) {
+                    <ion-select-option [value]="forma.value">{{ forma.label }}</ion-select-option>
+                  }
+                </ion-select>
+              </div>
+              <div class="contenido-formulario !items-start" *ngIf="datosEmpleadoForm.get('formaPago')?.value === 'transferencia'">
+                <span class="label mt-2">Cuenta bancaria</span>
+                <app-agregar-cuenta [cuentasFormArray]="cuentasBancariasControl" [panelLateralVisible]="panelLateralVisible"></app-agregar-cuenta>
+              </div>
+            </div>
+        </div>
+      
+        <div class="cont-title">
+          <span>Historial laboral</span>
+        </div>
+        <div class="contenedor-filtros">
+          <div class="buscador">
+            <fa-icon [icon]="farSearch"></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar acción por tipo"
+              style="--padding-start:30px"></ion-input>
+          </div>
+          <div class="filtros-absolutos">
+            <ion-button  id="nuevaAccion" class="w-[115px]">
+              <fa-icon [icon]="fasPlusCircle" class="mr-1"></fa-icon>
+              <span>Acciones</span>
+              <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+            </ion-button>
+            <ion-popover trigger="nuevaAccion" triggerAction="click" [dismissOnSelect]="true"
+              class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+              <ng-template>
+                <ion-item lines="none" [button]="true" [detail]="false" (click)="ModalRenovarContrato(null)">Renovar contrato</ion-item>
+                <ion-item lines="none" [button]="true" [detail]="false" (click)="ModalCambioPuesto(null)">Registrar cambio de puesto</ion-item>
+                <ion-item lines="none" [button]="true" [detail]="false" (click)="ModalRegistrarSancion(null)">Registrar sanción</ion-item>
+              </ng-template>
+            </ion-popover>
+          </div>
+        </div>
+        
+        <ag-grid-angular 
+          style="width: 100%; height: 250px;" 
+          class="ag-theme-alpine" 
+          [rowData]="rowDataHistorial" 
+          [columnDefs]="columnDefsHistorial"
+          [context]="{ componentParent: this }"
+          [rowHeight]="20" 
+          [getRowClass]="getRowClass"
+          [localeText]="localeText" 
+          [headerHeight]="24"
+          [paginationPageSize]="10"
+          (gridReady)="onGridHistorialReady($event)">
+        </ag-grid-angular>
+      </div>
+      }
+      @if(tabSeleccionadoDetalle === 'equipamiento'){
+      <div class="p-1.5">
+        <div class="contenedor-filtros">
+          <div class="buscador">
+            <fa-icon [icon]="farSearch"></fa-icon>
+            <ion-input fill="outline" placeholder="Ingrese una operación y presione Enter"
+              style="--padding-start:30px"></ion-input>
+          </div>
+          <ion-button class="w-[151px] whitespace-nowrap" (click)="abrirmodalequipamiento(null,false)">
+            <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+            <span>Nuevo equipamiento</span>
+          </ion-button>
+        </div>
+        <div class="text-xs font-medium mb-2">Equipamiento asignado al empleado</div>
+        <ag-grid-angular
+          style="width: 100%; height: 300px;" 
+          [rowData]="rowDataEquipamiento" 
+          [columnDefs]="columnDefsEquipamiento"
+          [context]="{ componentParent: this }"
+          [rowHeight]="20" 
+          [localeText]="localeText" 
+          [headerHeight]="24"
+          [paginationPageSize]="10"
+          (gridReady)="onGridEquipamientoReady($event)">
+        </ag-grid-angular>
+      </div>
+      }
+    </form>
+
+    <div class="contenedor-btn !py-2 mt-auto">
+      <div class="flex items-center gap-3">
+        @if(filaSeleccionada && tabSeleccionadoDetalle == "info"){<ion-button fill="outline" class="text-text-85 w-[115px]" id="datospersonalesunic">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="datospersonalesunic" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar TXT</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar T-Registro</ion-item>
+          </ng-template>
+        </ion-popover>}
+        <ion-button class="w-[75px]" (click)="botonGuardar()">{{ filaSeleccionada ? 'Guardar' : 'Registrar' }}</ion-button>
+      </div>
+      <ion-button fill="outline" color="medium" class="w-fit" (click)="botonNuevoEmpleado()" >Cancelar</ion-button>
+    </div>
+  </div>
+</div>

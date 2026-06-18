@@ -1,0 +1,384 @@
+<div class="admin-page ion-padding admin-page--fluid">
+  <div class="admin-page__head">
+    <div>
+      <h1 class="admin-page__title">Empresas</h1>
+      <p class="admin-page__subtitle">Listado de todas las empresas registradas en la plataforma.</p>
+    </div>
+    <ion-button color="primary" (click)="abrirNueva()">
+      <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+      Nueva empresa
+    </ion-button>
+  </div>
+
+  <ion-searchbar [(ngModel)]="filtro" placeholder="Buscar empresa..." animated="true" class="admin-search"></ion-searchbar>
+
+  @if (loading) {
+    <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+  }
+
+  @if (!loading) {
+    <div class="admin-table-wrapper">
+      <table class="admin-table admin-table--plain">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>RUC</th>
+            <th>Razón social</th>
+            <th>Nombre comercial</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+            <th>BD</th>
+            <th>Estado</th>
+            <th class="admin-acciones-col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of empresasFiltradas; track e.id) {
+            <tr (dblclick)="abrirEditar(e)">
+              <td>{{ e.id }}</td>
+              <td>{{ e.codigo }}</td>
+              <td>{{ e.ruc }}</td>
+              <td>{{ e.razonSocial }}</td>
+              <td>{{ e.nombreComercial ?? '—' }}</td>
+              <td>{{ e.correoContacto ?? '—' }}</td>
+              <td>{{ e.telefonoContacto ?? '—' }}</td>
+              <td><code>{{ e.dbName }}</code></td>
+              <td>
+                @if (e.activo) {
+                  <span class="badge-estado badge-activo">Activa</span>
+                } @else {
+                  <span class="badge-estado badge-inactivo">Inactiva</span>
+                }
+              </td>
+              <td class="admin-acciones-col">
+                <div class="admin-acciones-wrap" (click)="$event.stopPropagation()">
+                  <ion-button fill="clear" size="small" class="admin-acciones-btn" title="Gestionar usuarios"
+                    (click)="abrirGestionUsuarios(e)">
+                    <ion-icon slot="icon-only" name="people-outline"></ion-icon>
+                  </ion-button>
+                  <ion-button fill="clear" size="small" class="admin-acciones-btn" title="Editar"
+                    (click)="abrirEditar(e)">
+                    <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                  </ion-button>
+                  @if (e.activo) {
+                    <ion-button fill="clear" size="small" class="admin-acciones-btn" color="warning" title="Anular"
+                      (click)="confirmarCambioEstado(e, false)">
+                      <ion-icon slot="icon-only" name="ban-outline"></ion-icon>
+                    </ion-button>
+                  } @else {
+                    <ion-button fill="clear" size="small" class="admin-acciones-btn" color="success" title="Reactivar"
+                      (click)="confirmarCambioEstado(e, true)">
+                      <ion-icon slot="icon-only" name="checkmark-circle-outline"></ion-icon>
+                    </ion-button>
+                  }
+                  <ion-button fill="clear" size="small" class="admin-acciones-btn" color="danger" title="Eliminar BD y registro"
+                    (click)="abrirEliminar(e)">
+                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                  </ion-button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="10" class="empty-msg">No hay empresas registradas.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<ion-modal [isOpen]="mostrandoNueva" (didDismiss)="cerrarNueva()"
+  [style]="{ '--width': '680px', '--max-width': '95vw', '--height': '90vh', '--max-height': '90vh', '--border-radius': '16px' }">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Nueva empresa</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarNueva()"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div class="modal-nueva-body">
+        <p class="modal-readonly-hint">
+          Se registrará la empresa en <strong>master</strong> y se creará la base de datos tenant en una sola operación.
+          La sigla define el nombre de BD: <code>restaurant_pe_emp_&lt;sigla&gt;</code>.
+        </p>
+        <form [formGroup]="formNueva" (ngSubmit)="guardarNueva()">
+          <div class="form-row">
+            <ion-item class="full-row secret-item">
+              <ion-label position="stacked">Secreto de aprovisionamiento <span class="req">*</span></ion-label>
+              <ion-input type="password" formControlName="provisionSecret" autocomplete="off"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Sigla <span class="req">*</span></ion-label>
+              <ion-input formControlName="sigla" maxlength="50" autocapitalize="characters" placeholder="Ej. HOTELPERU"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">RUC <span class="req">*</span></ion-label>
+              <ion-input formControlName="ruc" maxlength="11" inputmode="numeric"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item class="full-row">
+              <ion-label position="stacked">Razón social <span class="req">*</span></ion-label>
+              <ion-input formControlName="razonSocial" maxlength="200"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Nombre comercial</ion-label>
+              <ion-input formControlName="nombreComercial" maxlength="200"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Representante legal</ion-label>
+              <ion-input formControlName="represLegal" maxlength="200"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Correo de contacto</ion-label>
+              <ion-input type="email" formControlName="correoContacto" maxlength="150"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Celular</ion-label>
+              <ion-input formControlName="celular" maxlength="30"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item class="full-row">
+              <ion-label position="stacked">Dirección fiscal</ion-label>
+              <ion-input formControlName="direccion" maxlength="300"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Distrito</ion-label>
+              <ion-input formControlName="dirDistrito" maxlength="120"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Provincia</ion-label>
+              <ion-input formControlName="dirProvincia" maxlength="120"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Departamento</ion-label>
+              <ion-input formControlName="dirDepartamento" maxlength="120"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">País</ion-label>
+              <ion-input formControlName="dirPais" maxlength="120"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item class="full-row">
+              <ion-label position="stacked">Ubigeo</ion-label>
+              <ion-input formControlName="dirUbigeo" maxlength="12" inputmode="numeric"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-actions">
+            <ion-button type="submit" color="primary" [disabled]="guardandoNueva">
+              @if (guardandoNueva) {
+                <ion-spinner name="crescent" aria-label="Creando"></ion-spinner>
+              } @else {
+                Crear empresa y base de datos
+              }
+            </ion-button>
+            <ion-button type="button" fill="outline" color="medium" (click)="cerrarNueva()" [disabled]="guardandoNueva">Cancelar</ion-button>
+          </div>
+        </form>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="mostrandoEditar" (didDismiss)="cerrarEditar()"
+  [style]="{ '--width': '580px', '--max-width': '95vw', '--border-radius': '16px' }">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Editar empresa</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarEditar()"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      @if (empresaEditando) {
+        <p class="modal-readonly-hint">
+          <strong>Código:</strong> {{ empresaEditando.codigo }} · <strong>RUC:</strong> {{ empresaEditando.ruc }} ·
+          <strong>BD:</strong> <code>{{ empresaEditando.dbName }}</code>
+        </p>
+        <form [formGroup]="formEditar" (ngSubmit)="guardarEdicion()">
+          <div class="form-row">
+            <ion-item class="full-row">
+              <ion-label position="stacked">Razón social <span class="req">*</span></ion-label>
+              <ion-input formControlName="razonSocial" maxlength="200"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Nombre comercial</ion-label>
+              <ion-input formControlName="nombreComercial" maxlength="200"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Teléfono</ion-label>
+              <ion-input formControlName="telefonoContacto" maxlength="30"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item class="full-row">
+              <ion-label position="stacked">Dirección fiscal</ion-label>
+              <ion-input formControlName="direccionFiscal" maxlength="300"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item class="full-row">
+              <ion-label position="stacked">Correo de contacto</ion-label>
+              <ion-input type="email" formControlName="correoContacto" maxlength="150"></ion-input>
+            </ion-item>
+          </div>
+          <div class="form-actions">
+            <ion-button type="submit" color="primary">Guardar</ion-button>
+            <ion-button type="button" fill="outline" color="medium" (click)="cerrarEditar()">Cancelar</ion-button>
+          </div>
+        </form>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="mostrandoEliminar" (didDismiss)="cerrarEliminar()"
+  [style]="{ '--width': '460px', '--max-width': '95vw', '--border-radius': '16px' }">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Eliminar empresa</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarEliminar()"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      @if (empresaEliminar) {
+        <p class="modal-danger-msg">
+          Se eliminará el registro en <strong>master</strong> y la base de datos del tenant
+          «<strong>{{ empresaEliminar.dbName }}</strong>». No se puede deshacer.
+        </p>
+        <p><strong>{{ empresaEliminar.razonSocial }}</strong> · RUC {{ empresaEliminar.ruc }}</p>
+        <ion-item>
+          <ion-label position="stacked">Secreto de aprovisionamiento</ion-label>
+          <ion-input type="password" [(ngModel)]="secretoEliminar" autocomplete="off"></ion-input>
+        </ion-item>
+        <div class="form-actions">
+          <ion-button color="danger" (click)="ejecutarEliminar()">Eliminar definitivamente</ion-button>
+          <ion-button fill="outline" color="medium" (click)="cerrarEliminar()">Cancelar</ion-button>
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="mostrandoUsuarios" (didDismiss)="cerrarGestionUsuarios()"
+  [style]="{ '--width': '720px', '--max-width': '95vw', '--height': '650px', '--max-height': '90vh', '--border-radius': '16px' }">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Gestionar usuarios de empresa</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarGestionUsuarios()"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div style="max-height: 550px; overflow-y: auto; padding: 1rem;">
+        @if (empresaGestionUsuarios) {
+          <div class="modal-empresa-info">
+            <strong>{{ empresaGestionUsuarios.razonSocial }}</strong>
+            <span>RUC {{ empresaGestionUsuarios.ruc }} · <code>{{ empresaGestionUsuarios.dbName }}</code></span>
+          </div>
+
+          @if (loadingUsuarios) {
+            <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+          }
+
+          @if (!loadingUsuarios) {
+          <!-- Asociar nuevo usuario -->
+          <div class="section-block">
+            <h3 class="section-subtitle">Asociar nuevo usuario</h3>
+            <p class="section-info">Total: {{ todosLosUsuarios.length }} · Asociados: {{ usuariosAsociados.length }} · Disponibles: {{ usuariosDisponibles.length }}</p>
+
+            @if (usuariosDisponibles.length === 0) {
+              <div class="info-box">
+                <ion-icon name="information-circle" class="info-icon"></ion-icon>
+                <p>Todos los usuarios ya están asociados a esta empresa.</p>
+                <p>Cree nuevos usuarios en Admin &gt; Usuarios para poder asociarlos.</p>
+              </div>
+            } @else {
+              <ion-item class="secret-item">
+                <ion-label position="stacked">Secreto de aprovisionamiento <span class="req">*</span></ion-label>
+                <ion-input type="password" [(ngModel)]="provisionSecretUsuarios" placeholder="Ingrese el secreto" autocomplete="off"></ion-input>
+              </ion-item>
+
+              <ion-searchbar 
+                [(ngModel)]="busquedaUsuarioDisponible" 
+                placeholder="Buscar usuario por nombre, username o email..." 
+                animated="true"
+                style="--background: #f8fafc; --border-radius: 8px; padding: 0;">
+              </ion-searchbar>
+
+              @if (busquedaUsuarioDisponible.trim() && usuariosDisponiblesFiltrados.length === 0) {
+                <p class="empty-msg" style="margin-top: 1rem;">No se encontraron usuarios con ese criterio de búsqueda.</p>
+              }
+
+              @if (usuariosDisponiblesFiltrados.length > 0) {
+                <div class="disponibles-list">
+                  @for (u of usuariosDisponiblesFiltrados; track u.id) {
+                    <div class="usuario-item">
+                      <div class="usuario-info">
+                        <strong>{{ u.nombreCompleto }}</strong>
+                        <span>{{ u.username }} · {{ u.email }}</span>
+                      </div>
+                      <ion-button fill="clear" size="small" color="success"
+                        [disabled]="!provisionSecretUsuarios.trim()"
+                        (click)="asociarUsuario(u.id)">
+                        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+                      </ion-button>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Usuarios asociados -->
+          <div class="section-block">
+            <h3 class="section-subtitle">Usuarios asociados ({{ usuariosAsociados.length }})</h3>
+            @if (usuariosAsociados.length === 0) {
+              <p class="empty-msg">No hay usuarios asociados a esta empresa.</p>
+            } @else {
+              <div class="usuarios-list">
+                @for (u of usuariosAsociados; track u.id) {
+                  <div class="usuario-item">
+                    <div class="usuario-info">
+                      <strong>{{ u.nombreCompleto }}</strong>
+                      <span>{{ u.username }} · {{ u.email }}</span>
+                    </div>
+                    <ion-button fill="clear" size="small" color="danger" (click)="retirarUsuario(u.id)">
+                      <ion-icon slot="icon-only" name="remove-circle-outline"></ion-icon>
+                    </ion-button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          }
+        }
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

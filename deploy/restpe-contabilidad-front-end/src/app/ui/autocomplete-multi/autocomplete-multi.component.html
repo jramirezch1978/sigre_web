@@ -1,0 +1,112 @@
+<div class="relative w-full">
+
+  <!-- INPUT SIMULADO -->
+  <div class="border border-text-5 rounded-sm h-7 px-2 flex items-center justify-between gap-2 cursor-pointer !bg-white relative"
+        [ngClass]="{
+          'pl-7': selectedItems.length == 0 && mostrarBuscador, 
+          'pr-7': !mostrarBuscador && selectedItems.length == 0,
+          '!cursor-default !text-text-10': disabled
+        }"
+        [style.width]="inputWidth"
+       (click)="toggleDropdown()">
+       @if(selectedItems.length == 0 && mostrarBuscador){<fa-icon [icon]="farSearch" class=" absolute left-2.5 top-1.5 text-xxs text-[#878787] z-40"></fa-icon>}
+    
+    <!-- Texto principal -->
+    <span class="xl:text-xs text-xxs text-black whitespace-nowrap overflow-hidden" [ngClass]="{'!text-text-25': selectedItems.length == 0, '!text-text-10': disabled }">
+     {{ getDisplayText() }}
+    </span>
+    <!-- Iconos derecha -->
+    @if(selectedItems.length == 0 && !mostrarBuscador){<fa-icon [icon]="fasChevronDown" class=" absolute right-2.5 top-1.5 text-xxs text-text-85 z-40"></fa-icon>}
+
+
+
+    @if(selectedItems.length > 0) {<div class="flex items-center gap-1.5">
+
+      <!-- ICONO OJO MODAL -->
+      @if(modoModal){<div class="relative group flex" (click)="abrirModal($event)">
+        <fa-icon [icon]="farEye"  class="text-text-25 text-xs"></fa-icon>
+      </div>}
+
+      <!-- ICONO OJO (VER DETALLE) -->
+      @if(!modoModal){<div class="relative group flex" (click)="verDetalle($event)">
+        <fa-icon [icon]="farEye"  class="text-text-25 text-xs"></fa-icon>
+
+        <!-- DETALLE AL HOVER -->
+        <div class="absolute -right-[30px] top-[22px] w-40 !bg-white border border-gray-200 shadow-lg rounded
+                    opacity-0 group-hover:opacity-100 transition-all p-2 z-[500] pointer-events-none">
+
+          <div class="text-[10px] text-gray-600 max-h-40 overflow-y-auto">
+            @for(item of selectedItems; track item) {
+              <div class="py-1 flex items-center gap-2">
+                <fa-icon [icon]="fasCircle" class="text-[4px]"></fa-icon> {{ getDisplayValue(getItem(item)) }}
+              </div>
+            }
+          </div>
+        </div>
+      </div>}
+
+      <!-- LIMPIAR -->
+      
+        <fa-icon [icon]="farXmark" class="text-gray-500 text-xs hover:text-danger cursor-pointer"  [ngClass]="{'!text-text-10 !cursor-default': disabled}"
+                  (click)="clearSelection($event)">
+        </fa-icon>
+      </div>
+    }
+  </div>
+
+
+  <!-- DROPDOWN -->
+  @if(showDropdown) {
+    <div class="absolute left-0 right-0 !bg-white border border-gray-300 rounded shadow-lg z-[500]">
+
+      <!-- BUSCADOR -->
+      @if(mostrarBuscador){<div class=" flex items-center p-2 pb-0">
+        <ion-input
+          placeholder="Buscar..."
+          [(ngModel)]="searchText"
+          (ionInput)="filterItems()"
+          class="text-xs"
+          fill="outline">
+        </ion-input>
+        @if(buttonCrear){<button class="btn-guardar" (click)="onButtonClick()">
+          <fa-icon [icon]="fasPlusCircle"></fa-icon>
+        </button>}
+      </div>}
+
+      <div class="py-1 px-2 flex items-center justify-between w-full">
+        @if(tempSelectedItems.length === 0) {
+          <div class="flex items-center w-fit cursor-pointer" (click)="seleccionarTodo(); $event.stopPropagation()">
+            <span class="text-xxs underline text-primary">Seleccionar todo</span>
+          </div>
+        }
+        @if(tempSelectedItems.length > 0) {
+          <div class="flex items-center w-fit cursor-pointer" (click)="deseleccionarTodo(); $event.stopPropagation()">
+            <span class="text-xxs underline text-primary">Deseleccionar todo</span>
+          </div>
+        }
+      </div>
+
+      <!-- LISTA -->
+      <ion-list lines="none" class="max-h-48 overflow-y-auto !bg-white">
+        @for(item of filteredItems; track item[valueKey]) {
+          <ion-item (click)="toggleItem(item)" class="!text-xxs cursor-pointer py-[2px] bg-white">
+            <ion-checkbox
+              slot="start"
+              class="!mr-2"
+              [checked]="isSelected(item[valueKey])">
+            </ion-checkbox>
+
+            <ion-label class="!text-xxs">
+              {{ getDisplayValue(item) }}
+            </ion-label>
+          </ion-item>
+        }
+      </ion-list>
+      <div class="contenedor-btn !p-2">
+        <ion-button (click)="toggleDropdown()">Confirmar</ion-button>
+        <ion-button fill="outline" color="medium" (click)="cancelar()">Cancelar</ion-button>
+      </div>
+
+    </div>
+  }
+</div>

@@ -1,0 +1,66 @@
+<div class="contenedor-modal">
+  <div class="header">
+    <div class="flex items-center gap-1">
+      <fa-icon [icon]="farCirclePlus" class="text-xs text-primary"></fa-icon>
+      <span class="text-sm font-bold">Agregar un accesorio</span>
+    </div>
+    <fa-icon [icon]="farXmark" class="text-sm cursor-pointer" (click)="dismissModal()"></fa-icon>
+  </div>
+  
+  <div class="cont-modal">
+    <form [formGroup]="accesorioForm">
+      <div class="contenedor-formulario !p-0 !pb-6">
+        <div class="contenido-formulario">
+            <span class="label">Descripción <span class="text-danger">*</span></span>
+            <ion-input 
+              fill="outline" 
+              formControlName="descripcion"
+              placeholder="Parrilla de Gas"
+              class="w-48">
+            </ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+            <span class="label">Valor Individual <span class="text-danger">*</span></span>
+            <ion-input 
+              fill="outline" 
+              type="number"
+              formControlName="valorIndividual"
+              placeholder="10,000"
+              class="w-fit">
+            </ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+            <span class="label">Relación con Act. Fijo <span class="text-danger">*</span></span>
+            <ion-input 
+              fill="outline" 
+              formControlName="relacionActivo"
+              placeholder="Cocina Industrial"
+              class="w-48">
+            </ion-input>
+        </div>
+        <div class="contenido-formulario">
+            <span class="label">Selección de moneda <span class="text-danger">*</span></span>
+            <ion-select placeholder="Selecciona moneda" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                            formControlName="selecciondemoneda" interface="popover" fill="outline" class="w-[150px]">
+                            <ion-select-option *ngFor="let moneda of monedas" [value]="moneda.value">
+                                {{moneda.label}}
+                            </ion-select-option>
+                        </ion-select>
+            <!-- <ion-input 
+              fill="outline" 
+              formControlName=""
+              placeholder="Soles"
+              class="w-[121px]">
+            </ion-input> -->
+        </div>
+      </div>
+    </form>
+
+    <div class="contenedor-btn !p-0">
+      <ion-button class="w-[171px]" (click)="guardarAccesorio()">Agregar accesorio</ion-button>
+      <ion-button class="w-[108px]" color="medium" fill="outline" (click)="dismissModal()">Cancelar</ion-button>
+    </div>
+  </div>
+</div>

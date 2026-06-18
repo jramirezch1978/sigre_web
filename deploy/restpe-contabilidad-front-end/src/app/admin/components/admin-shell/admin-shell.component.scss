@@ -1,0 +1,165 @@
+$sidebar-width: 230px;
+$sidebar-collapsed: 56px;
+$sidebar-bg: #0f172a;
+$sidebar-text: #94a3b8;
+$sidebar-active-bg: #1e293b;
+$sidebar-active-text: #ffffff;
+$sidebar-hover: #1e293b;
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: #f1f5f9;
+
+  &--collapsed .admin-sidebar {
+    width: $sidebar-collapsed;
+  }
+
+  &--collapsed .admin-main {
+    margin-left: $sidebar-collapsed;
+  }
+}
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: $sidebar-width;
+  background: $sidebar-bg;
+  color: $sidebar-text;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: width 0.2s ease;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.9rem 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    min-height: 52px;
+  }
+
+  &__logo {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 6px;
+  }
+
+  &__brand {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+
+  &__toggle-btn {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: $sidebar-text;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+
+    &:hover {
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    ion-icon {
+      font-size: 1.1rem;
+    }
+  }
+
+  &__nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.35rem 0;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.55rem 0.85rem;
+    border: none;
+    background: transparent;
+    color: $sidebar-text;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    text-align: left;
+    white-space: nowrap;
+    border-left: 3px solid transparent;
+
+    ion-icon {
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: $sidebar-hover;
+      color: #e2e8f0;
+    }
+
+    &--active {
+      background: $sidebar-active-bg;
+      color: $sidebar-active-text;
+      font-weight: 600;
+      border-left-color: #3b82f6;
+    }
+
+    &--danger:hover {
+      color: #f87171;
+    }
+  }
+
+  &__footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0.4rem 0;
+  }
+
+  &__context {
+    display: block;
+    padding: 0.2rem 0.85rem;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.35);
+  }
+}
+
+.admin-main {
+  flex: 1;
+  margin-left: $sidebar-width;
+  transition: margin-left 0.2s ease;
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: $sidebar-collapsed;
+  }
+  .admin-main {
+    margin-left: $sidebar-collapsed;
+  }
+}

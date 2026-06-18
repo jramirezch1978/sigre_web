@@ -1,0 +1,82 @@
+<div class="contenedor-principal-modal !w-[460px]">
+  <div class="titulo-modal">
+    <div class="flex flex-row gap-1 items-center">
+      <fa-icon [icon]="farPlusCircle" class="text-primary text-xs"></fa-icon>
+      <span>{{ esEdicion ? 'Editar' : 'Agregar' }} equipamiento</span>
+    </div>
+    <fa-icon [icon]="fasXmark" class="text-xs cursor-pointer" (click)="closemodal()"></fa-icon>
+  </div>
+  <div class="contenido-modal">
+    <form [formGroup]="formulario" class="contenedor-formulario">
+
+      <div class="contenido-formulario">
+        <span class="label">Tipo de elemento<span class="text-danger">*</span></span>
+        <ion-select placeholder="Seleccionar" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[141px] flex-none" formControlName="tipo">
+          @for(tipo of tipos; track $index) {
+            <ion-select-option [value]="tipo">{{ tipo }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      @if(formulario.value.tipo == 'Uniforme'){<div class="contenido-formulario !items-start">
+        <span class="label">Descripción <span class="text-danger">*</span></span>
+        <ion-textarea fill="outline" formControlName="descripcion" rows="2" class="w-full"></ion-textarea>
+      </div>}
+
+      @if(formulario.value.tipo == 'Activo fijo'){<div class="contenido-formulario">
+        <span class="label">Activo fijo<span class="text-danger">*</span></span>
+        <ion-select placeholder="Seleccionar" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[141px] flex-none" formControlName="activoF">
+          @for(activo of activosF; track $index) {
+            <ion-select-option [value]="activo">{{ activo }}</ion-select-option>
+          }
+        </ion-select>
+      </div>}
+      
+      <div class="contenido-formulario">
+        <span class="label">Cantidad <span class="text-danger">*</span></span>
+        <ion-input fill="outline" class="w-20" formControlName="cantidad" type="number">
+        </ion-input>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Responsable de entrega<span class="text-danger">*</span></span>
+        <ion-select placeholder="Seleccionar" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[141px] flex-none" formControlName="responsable">
+          @for(responsable of responsables; track $index) {
+            <ion-select-option [value]="responsable">{{ responsable }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Adjuntar documento</span>
+        <app-file-upload
+          [accept]="'.pdf'"
+          [placeholder]="'Haz clic para subir un archivo'"
+          [maxFileSize]="5"
+          [width]="'w-[169px]'"
+          [required]="true"
+          (fileSelected)="onArchivoSelected($event)"
+          (fileRemoved)="onArchivoRemoved()"
+          (error)="showFileError($event)">
+        </app-file-upload>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Estado<span class="text-danger">*</span></span>
+        <ion-select placeholder="Seleccionar" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[141px] flex-none" formControlName="estado">
+          @for(estado of estados; track $index) {
+            <ion-select-option [value]="estado">{{ estado }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+    </form>
+    <div class="conjunto-btn">
+      <ion-button color="medium" fill="outline" class="w-[68px]" (click)="closemodal()">
+        <span>Cancelar</span>
+      </ion-button>
+      <ion-button class="w-fit" [disabled]="!habilitarBoton()" (click)="registrarContrato()">
+        <span>{{ esEdicion ? 'Guardar' : 'Agregar equipamiento' }}</span>
+      </ion-button>
+    </div>
+  </div>
+</div>

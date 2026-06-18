@@ -1,0 +1,266 @@
+<div class="contenedor-principal" [ngClass]="{mostrartabla}">
+  @if(!mostrartabla){
+  <div class="barra-desplegable" (click)="mostrarTabla(true)" *ngIf="!mostrartabla">
+    <fa-icon [icon]="fasChevronsRight" class=""></fa-icon>
+  </div>
+  }
+  @if(mostrartabla){
+  <div class="panel-izquierdo" *ngIf="mostrartabla">
+    <div class="cont-title">
+      <span>Lista de facturas de proveedores (Selecciona una factura de tu lista para visualizarlos o editarlos)</span>
+      <fa-icon [icon]="fasChevronsLeft"
+        (click)="mostrarTabla(false)" class="text-xs text-primary cursor-pointer"></fa-icon>
+    </div>
+
+    <!-- Filtros -->
+    <div class="contenedor-filtros">
+          <div class="buscador">
+            <fa-icon [icon]="farSearch" class=""></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar facturas de proveedores" class="w-full"
+              style="--padding-start:30px" (ionInput)="onBuscarLista($event)"></ion-input>
+          </div>
+
+          <!-- calendario -->
+          <div class="flex items-center">
+            <ion-select placeholder="De registro" [(ngModel)]="tipoSeleccionado" [ngModelOptions]="{standalone: true}"
+              interface="popover" fill="outline" class="w-[110px] flex-none" toggleIcon="chevron-down"
+              expandedIcon="chevron-up" (ionChange)="onTipoFechaChange()">
+              @for(tipo of tipoFs; track tipo){<ion-select-option [value]="tipo.value">{{ tipo.nombre
+                }}</ion-select-option>}
+            </ion-select>
+            <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+              [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="center"
+              (dateRangeSelected)="filtrarPorFechas($event)">
+            </app-base-calendar-new>
+          </div>
+
+      <div class="filtros-absolutos">
+        <ion-button fill="outline" class="w-[115px] flex-none" id="reportesFacturas">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesFacturas" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" (click)="exportarExcel()" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" (click)="exportarPdf()" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" (click)="nuevaFactura()" [disabled]="modoCreacion">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span>Nueva factura</span>
+        </ion-button>
+      </div>
+
+    </div>
+
+  <!-- Tabla -->
+    <div class="contenedor-primera-tabla" [appLoader]="isLoadingObtener()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+    <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+      [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [localeText]="localeText" [headerHeight]="24"
+      [rowSelection]="'single'" [paginationPageSize]="20" (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+   </div>
+  </div>
+  }
+
+<div class="panel-derecho" [appLoader]="isLoadingObtener()" [ngClass]="{'!w-full !flex-1': !mostrartabla}">
+  <div class="cont-title">
+    <span>
+      @if(modoCreacion) {
+        Nueva factura
+      } @else {
+        {{tituloFormulario}} {{ filaSeleccionada?.factura_proveedor_nro_comprobante }}
+      }
+    </span>
+  </div>
+  @if(filaSeleccionada){
+    <div class="cont-actualizaciones">
+        <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+          <fa-icon [icon]="farBook" ></fa-icon>
+          <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+        </div>     
+    </div>
+  }
+    <form action="" [formGroup]="FacturaProveedorForm" class="contenedor-formulario"
+      [ngClass]="{'!flex-row': !mostrartabla}">
+      <!-- Columna 1 -->
+      <div class="contenedor-formulario !p-0">
+        <div class="contenido-formulario">
+          <span class="label">Tipo de comprobante <span class="text-danger">*</span></span>
+          <ion-select placeholder="Selecciona tipo" (ionChange)="seleccionarcomprobante($event)" formControlName="tipocomprobante" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline" [ngClass]="'w-[163px] 2xl:w-[195px] text-xxs'">
+            <ion-select-option *ngFor="let tipo of tiposComprobante" [value]="tipo.value">{{tipo.nombre}}</ion-select-option>
+          </ion-select>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">{{labelSerie }} <span class="text-danger">*</span></span>
+          <ion-input fill="outline" formControlName="serie" [ngClass]="'w-[163px] 2xl:w-[195px]'"></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Número @if(pais === 'EC'){ de autotrización } <span class="text-danger">*</span></span>
+          <ion-input fill="outline" formControlName="numero" [ngClass]="'w-[163px] 2xl:w-[195px]'"></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label"></span>
+          <div class="flex flex-row gap-1 items-center">
+            <ion-checkbox 
+              class="w-[20px] h-[20px]"
+              formControlName="checkboxOrdenAsociada"
+              (ionChange)="onCheckboxOrdenAsociadaChange($event)"></ion-checkbox>
+            <span class="text-xxs xl:text-xs">Orden asociada</span>
+          </div>
+        </div>
+        <div class="contenido-formulario" *ngIf="mostrarOrdenAsociada">
+          <span class="label">Orden asociada <span class="text-danger">*</span></span>
+          <div class="flex flex-row">
+          <ion-select placeholder="" formControlName="tipoOrden" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline"class="min-w-[70px] text-xxs" style="width: 75px;">
+            @for(item of ordenAsociada; track $index){
+            <ion-select-option value="{{item.value}}">{{item.label}}</ion-select-option>
+            }
+          </ion-select>
+            <app-autocomplete
+              formControlName="ordenAsociada"
+              [items]="ordenesCompra"
+              [displayKey]="'numeroOrden'"
+              [valueKey]="'numeroOrden'"
+              [placeholder]="'Buscar'"
+              [ngClass]="'w-[80px] 2xl:w-[120px]'"
+              (itemSelected)="onOrdenSeleccionada($event)">
+            </app-autocomplete>
+          </div>
+        </div>
+        <div class="contenido-formulario">
+            <span class="label">Documento fiscal<span class="text-danger">*</span></span>
+              <div class="flex flex-row">
+                <!-- <ion-select placeholder="" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                  formControlName="documentoproveedor" interface="popover" fill="outline" class="min-w-[55px] text-xxs" style="width: 55px !important; --border-top-right-radius: 0px !important; --border-bottom-right-radius: 0px !important;">
+                  @for(doc of tipoDoc; track doc){<ion-select-option [value]="doc">{{ doc }}</ion-select-option>}
+                </ion-select> -->
+                <ion-input type="number" fill="outline" formControlName="documentoproveedorinput"
+                [ngClass]="'w-[130px] 2xl:w-[171px]'"
+                style="--border-right-radius: 0px !important"></ion-input>
+                <ion-button (click)="buscarproveedor()" class="!w-[24px] flex-none -ml-0.5 z-10 bg-primary rounded-r-sm">
+                <fa-icon [icon]="fasSearch" class="text-xs text-white"></fa-icon>
+                </ion-button>
+              </div>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Razón social</span>
+          <ion-input fill="outline" formControlName="proveedor" [ngClass]="'w-[163px] 2xl:w-[195px]'"></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Fecha de emisión <span class="text-danger">*</span></span>
+          <app-base-calendar-new
+              class="flex-none"
+              mode="single"
+              [initialDate]="FacturaProveedorForm.get('fechaEmision')?.value"
+              position="right"
+               [disabled]="filaSeleccionada?.factura_proveedor_estado == 'Anulada'"
+              (dateSelected)="onFechaEmisionSelected($event)">
+            </app-base-calendar-new>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Fecha de vencimiento</span>
+          <app-base-calendar-new
+              class="flex-none"
+              mode="single"
+              [initialDate]="FacturaProveedorForm.get('fechaVencimiento')?.value"
+              position="right"
+               [disabled]="filaSeleccionada?.factura_proveedor_estado == 'Anulada'"
+              (dateSelected)="onFechaVencimientoSelected($event)">
+              </app-base-calendar-new>
+        </div>
+        </div>
+
+      <div class="contenedor-formulario !p-0">
+        <div class="contenido-formulario">
+          <span class="label">Moneda <span class="text-danger">*</span></span>
+          <ion-select 
+            placeholder="" 
+            formControlName="moneda" 
+            toggleIcon="chevron-down" 
+            expandedIcon="chevron-up" 
+            interface="popover" 
+            fill="outline"
+            [ngClass]="'w-[100px] 2xl:w-[100px] text-xxs'">
+            <ion-select-option *ngFor="let moneda of monedasOptions" [value]="moneda.value">{{moneda.label}}</ion-select-option>
+          </ion-select>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Centro de costo</span>
+          <app-autocomplete
+            [items]="centrosCosto"
+            [displayKey]="'nombre'"
+            [valueKey]="'id'"
+            [placeholder]="'Buscar centro de costo'"
+            [width]="'w-[163px] 2xl:w-[195px]'"
+            formControlName="centroCostoId"/>
+        </div>
+      </div>
+    </form>
+    <div class="cont-title">
+      <span>Lista de productos</span>
+    </div>
+    <div class="contenedor-filtros">
+           <app-autocomplete
+              #autocompleteProductos
+              [items]="productos"
+              [displayKey]="'descripcion'"
+              [valueKey]="'codigo'"
+              [placeholder]="'Buscar el producto o servicio por nombre o código'"
+              [disabled]="filaSeleccionada?.factura_proveedor_estado == 'Anulada'"
+              (itemSelected)="onProductoSeleccionado($event)"
+              clasS="w-full">
+            </app-autocomplete>
+      <ion-button fill="solid" class="w-[74px] mr-1" [disabled]="filaSeleccionada?.factura_proveedor_estado == 'Anulada'" (click)="abrirModalCrearProductoActivoFijo()">
+        <fa-icon [icon]="fasCirclePlus" class="text-xs text-white"></fa-icon>
+        <span>Nuevo</span>
+      </ion-button>
+    </div>
+    <div class="relative">
+      <ag-grid-angular 
+        style="width: 100%; height: 200px;" 
+        [rowData]="productosData" 
+        [columnDefs]="productosColDefs"
+        [columnTypes]="columnTypes"
+        [rowHeight]="20"
+        [headerHeight]="24"
+        [localeText]="localeText"
+        (gridReady)="onGridReadyProductos($event)"
+        (cellValueChanged)="onCellValueChangedProductos($event)">
+      </ag-grid-angular>
+    </div>
+        <div class="flex items-start justify-end mt-2">
+          <div class="resumen-totales">
+            <div class="resumen-fila">
+              <span class="resumen-label">Subtotal</span>
+              <span class="text-xxs font-medium">S/{{ subtotalGeneral | number:'1.2-2' }}</span>
+            </div>
+            <div class="resumen-fila">
+              <span class="resumen-label">Impuestos</span>
+              <span class="resumen-valor">S/0.00</span>
+            </div>
+            <div class="resumen-fila">
+              <span class="text-xxs text-primary">Total</span>
+              <span class="text-xxs">S/{{ totalGeneral | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contenedor-btn">
+          <ion-button expand="block" class="w-[70px]" [disabled]="filaSeleccionada?.factura_proveedor_estado == 'Anulada'"
+            (click)="guardarCambios()">
+            {{modoCreacion ? 'Registrar' : 'Guardar'}}
+          </ion-button>
+          <div class="flex gap-3">
+            @if(filaSeleccionada?.factura_proveedor_estado != 'Anulada'){<ion-button fill="outline" color="medium" (click)="nuevaFactura()">
+              Cancelar
+            </ion-button>}
+            <ion-button (click)="modaanular()" [disabled]="!filaSeleccionada || filaSeleccionada?.factura_proveedor_estado == 'Anulada'" fill="outline" color="danger" class="w-[57px] whitespace-nowrap"
+              >Anular</ion-button>
+          </div>
+        </div>
+  </div>
+</div>

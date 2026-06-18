@@ -1,0 +1,168 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Consulta de devoluciones a proveedores</span>
+    </div>
+
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por código o producto" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+      <div class="filtros-absolutos">
+        <div class="flex items-center">
+          <ion-select placeholder="Creación" [(ngModel)]="tipoSeleccionado" [ngModelOptions]="{standalone: true}" interface="popover" fill="outline" class="w-[80px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(tipo of tipoFs; track tipo){<ion-select-option [value]="tipo.value">{{ tipo.nombre }}</ion-select-option>}
+            </ion-select>
+
+          <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+            [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="center"
+            (dateRangeSelected)="filtrarPorFechas($event)">
+          </app-base-calendar-new>
+        </div>
+
+
+        <ion-button class="w-[115px]" fill="outline" id="gestionG">
+          <fa-icon [icon]="fasDownload" class="mr-1 text-text-85"></fa-icon>
+          <span class="text-text-85">Exportar</span>
+          <fa-icon class="ml-1 text-text-85" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="gestionG" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" (click)="exportarExcel()">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" (click)="exportarPdf()">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+    <div class="cont-cards !pt-0">
+      @for(item of cards; track $index){
+      <div class="card">
+        <div class="contenido">
+          <span class="title">{{item.nombre}}  @if(item.id===2){<span class="font-bold">{{item.desde}} - {{item.hasta}}</span>}</span>
+          <ion-skeleton-text *ngIf="isLoading()" [animated]="true" style="width: 100%;height: 20px;"></ion-skeleton-text>
+          <span *ngIf="!isLoading()" class="cantidad">{{item.valor}}</span>
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="item.icono"></fa-icon>
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="facade.consultaDevoluciones()" [columnDefs]="colDefs"
+        [rowSelection]="'multiple'" [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [headerHeight]="24"
+        [localeText]="localeText" [paginationPageSize]="20" [suppressLoadingOverlay]="true"
+        (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)">
+      </ag-grid-angular>
+    </div>
+
+
+  </div>
+
+  <div class="panel-derecho !overflow-hidden" [appLoader]="isLoading()">
+    <div class="cont-title">
+      <span>{{ filaSeleccionada ? 'Información: ' + filaSeleccionada?.devolucion_codigo : 'Detalles de devolución'
+        }}</span>
+    </div>
+
+    <div class="flex flex-col overflow-auto">
+      <form [formGroup]="devolucionForm">
+        <div class="contenedor-formulario">
+          <div class="contenido-formulario">
+            <span class="label">Proveedor</span>
+            <ion-input fill="outline" type="text" [value]="filaSeleccionada?.devolucion_proveedor"
+              formControlName="proveedor"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Almacén</span>
+            <ion-input fill="outline" type="text" [value]="filaSeleccionada?.devolucion_almacen"
+              formControlName="almacen"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Nombre del producto</span>
+            <ion-input fill="outline" type="text" [value]="filaSeleccionada?.devolucion_producto"
+              formControlName="producto"></ion-input>
+          </div>
+
+          <!-- <div class="contenido-formulario">
+            <span class="label">Usuario responsable</span>
+            <ion-input fill="outline" type="text" [value]="filaSeleccionada?.usuario"
+              formControlName="usuarioRes"></ion-input>
+          </div> -->
+
+          <div class="contenido-formulario">
+            <span class="label">Orden de compra asoc.</span>
+            <ion-input fill="outline" type="text" [value]="filaSeleccionada?.devolucion_ordenAsociada"
+              formControlName="ordenAsociada"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Fecha de registro</span>
+            <ion-input fill="outline" type="text" [value]="today | date:'dd/MM/yyyy'" class="h-[28px]"
+              formControlName="fechaRegistro"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label required">Fecha de la devolución</span>
+            <ion-input fill="outline" type="text" [value]="devolucionFecha | date:'dd/MM/yyyy'" class="h-[28px]"
+              formControlName="fechaDevolucion"></ion-input>
+            <!-- <app-base-calendar-new class="flex-none" mode="single" [initialStartDate]="devolucionFecha"
+              [minDate]="minDate" [maxDate]="maxDate" position="center" (dateSelected)="onFechaDevolucion($event)">
+            </app-base-calendar-new> -->
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Unidad de medida</span>
+            <ion-input fill="outline" type="text" [value]="filaSeleccionada?.devolucion_unidadMedida"
+              formControlName="unidadMedida"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label"> Tipo de documento</span>
+            <ion-input fill="outline" type="text" [value]="filaSeleccionada?.devolucion_tipoDoc"
+              formControlName="tipoDoc"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Cantidad a devolver</span>
+            <ion-input fill="outline" type="number" formControlName="cantidadDevolver"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Precio unitario</span>
+            <ion-input fill="outline" type="text" [value]="(filaSeleccionada?.devolucion_precioUnitario !== null && filaSeleccionada?.devolucion_precioUnitario !== undefined ? monedapais + ' ' + (filaSeleccionada.devolucion_precioUnitario | number:'1.2-2') : '')"
+              formControlName="precioUnitario"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Saldo pendiente</span>
+            <ion-input fill="outline" type="text" [value]="(filaSeleccionada?.devolucion_saldo !== null && filaSeleccionada?.devolucion_saldo !== undefined ? monedapais + ' ' + (filaSeleccionada.devolucion_saldo | number:'1.2-2') : '')" formControlName="saldo"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Estado</span>
+            <ion-input fill="outline" type="text" [value]="filaSeleccionada?.estado"
+              formControlName="estado"></ion-input>
+          </div>
+        </div>
+      </form>
+    </div>
+
+
+
+    <!-- Botón Registrar/Actualizar -->
+    <!-- <div class="contenedor-btn pl-2">
+      <ion-button color="primary" class="w-fit" (click)="registrarDevolucion()" *ngIf="facturaSeleccionada">
+        <span>{{ modoEdicion ? 'Actualizar' : 'Registrar' }}</span>
+      </ion-button>
+
+      <ion-button fill="outline" color="danger" (click)="abrirModalAnular()"
+        *ngIf="devolucionRegistrada && filaSeleccionada?.estado !== 'Anulado'">
+        Anular
+      </ion-button>
+    </div> -->
+  </div>
+</div>

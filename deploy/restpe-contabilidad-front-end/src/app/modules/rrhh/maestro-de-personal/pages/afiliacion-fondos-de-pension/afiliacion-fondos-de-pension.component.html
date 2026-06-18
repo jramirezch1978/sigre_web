@@ -1,0 +1,581 @@
+<div class="contenedor-principal">
+  @if(!panelLateralVisible){
+  <div class="barra-desplegable" (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight"></fa-icon>
+  </div>
+  }
+  @if(panelLateralVisible){
+
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de configuraciones de planilla (Selecciona una configuración para
+        visualizarlo)</span>
+      @if (panelLateralVisible) {
+      <div class="btn-mostrarform" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>
+      }
+    </div>
+
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Ingresa el código y presiona enter"
+          style="--padding-start:28px"></ion-input>
+      </div>
+
+      <div class="filtros-absolutos">
+        <app-base-calendar-new class="!w-[180px] flex-none" mode="range" [initialStartDate]="startDate"
+          [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="center">
+        </app-base-calendar-new>
+        <ion-button class="w-[115px]" fill="outline" id="planillatrabajador">
+          <fa-icon [icon]="fasDownload" class="mr-1 text-text-85"></fa-icon>
+          <span class="text-text-85">Exportar</span>
+          <fa-icon class="ml-1 text-text-85" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="planillatrabajador" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" [disabled]="modoCreacion" (click)="botonNuevo()"><fa-icon
+            [icon]="fasCirclePlus" class="mr-1"></fa-icon> <span class="font-normal">Nueva config. para
+            planilla</span></ion-button>
+      </div>
+    </div>
+
+    <div class="h-full relative tabla-3" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [pagination]="true" [rowSelection]="'single'" [localeText]="localeText" [paginationPageSize]="20"
+        [rowHeight]="30" [headerHeight]="24" [suppressRowClickSelection]="true" (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+  }
+
+  <div class="panel-derecho" [ngClass]="{'!w-full !flex-1':!panelLateralVisible}" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      @if(filaSeleccionada){<span class="line-clamp-1">Config. para planilla de: {{filaSeleccionada.afiliacion_fondo_pension_trabajador}}</span>}
+      @if(!filaSeleccionada){<span>Nueva configuración</span>}
+    </div>
+
+    @if(filaSeleccionada){<div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+
+    <!-- Tabs -->
+    <div class="cont-tabs">
+      @if (panelLateralVisible) {
+      <div class="btn-scroll" (click)="scrollLeft()">
+        <fa-icon [icon]="fasChevronLeft"></fa-icon>
+      </div>
+      }
+      <div class="flex overflow-hidden">
+        <ion-segment [(ngModel)]="tabSeleccionado" [ngModelOptions]="{standalone: true}" mode="md" scrollable
+          class="company-tabs" #scrollBox>
+          @for(tab of tabs; track tab){<ion-segment-button [value]="tab.value" class="boton-subsubtitulo">
+            <ion-label>{{ tab.label }}</ion-label>
+          </ion-segment-button>}
+        </ion-segment>
+      </div>
+
+      @if (panelLateralVisible) {
+      <div class="btn-scroll" (click)="scrollRight()">
+        <fa-icon [icon]="fasChevronRight"></fa-icon>
+      </div>
+      }
+    </div>
+
+
+
+    <form [formGroup]="AfiliacionForm">
+      <!-- <div class="contenedor-formulario"> -->
+      @if(tabSeleccionado === 'informacion'){
+      <div class="contenedor-formulario" [ngClass]="{'!flex-row': !panelLateralVisible}">
+        <div class="contenedor-formulario !p-0">
+
+          <div class="contenido-formulario">
+            <span class="label">Fecha de creación</span>
+            <ion-input fill="outline" type="date" formControlName="fechaEmision" class="w-[120px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Nombre del trabajador<span class="text-danger">*</span></span>
+            <app-autocomplete formControlName="afiliacion_fondo_pension_trabajador" [items]="trabajadores" displayKey="nombre" valueKey="nombre"
+              placeholder="Ingresa un nombre o ID" (itemSelected)="onTrabajadorSeleccionado($event)">
+            </app-autocomplete>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Sucursal</span>
+            <ion-input fill="outline" placeholder="Sucursal" formControlName="afiliacion_fondo_pension_dc_sucursal" class="w-[163px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Centro de costo</span>
+            <ion-input fill="outline" placeholder="Centro de costo" formControlName="afiliacion_fondo_pension_dc_centro_costo"
+              class="w-[163px]"></ion-input>
+          </div>
+        </div>
+
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Tipo de contrato asoc. <span class="text-danger">*</span></span>
+            <ion-select fill="outline" placeholder="Selecciona un tipo" toggleIcon="chevron-down"
+              expandedIcon="chevron-up" interface="popover" class="w-[140px]" formControlName="afiliacion_fondo_pension_dc_fondo">
+              @for(tipoC of tiposC; track tipoC){<ion-select-option [value]="tipoC">{{ tipoC
+                }}</ion-select-option>}
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Beneficios asociados<span class="text-danger">*</span></span>
+            <app-autocomplete-multi formControlName="afiliacion_fondo_pension_dc_beneficios_asociados" [items]="beneciciosAsociados"
+              [mostrarBuscador]="false" displayKey="nombre" valueKey="value" placeholder="Seleccionar tus beneficios"(changed)="seleccionarBeneficios($event)" >
+            </app-autocomplete-multi>
+          </div>
+
+
+          <div class="contenido-formulario">
+            <span class="label">Estado<span class="text-danger">*</span></span>
+            <ion-select fill="outline" placeholder="Selecciona un estado" toggleIcon="chevron-down"
+              expandedIcon="chevron-up" interface="popover" class="w-[100px]" formControlName="afiliacion_fondo_pension_estado">
+              @for(estado of estados; track estado){<ion-select-option [value]="estado">{{ estado
+                }}</ion-select-option>}
+            </ion-select>
+          </div>
+        </div>
+      </div>
+      }
+
+      @if(tabSeleccionado === 'afiliacion_fondo_pension_retenciones'){
+      <div class="contenedor-formulario" [ngClass]="{'!flex-row': !panelLateralVisible}">
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label" [ngClass]="is3xlScreen ? '!w-[170px]' : '!w-[130px]'">Retenciones por trabajador <span
+                class="text-danger">*</span></span>
+            <app-autocomplete-multi formControlName="afiliacion_fondo_pension_retenciones" [items]="retencionesTrabajador"
+              [inputWidth]="is3xlScreen ? '202px' : '157px'" [mostrarBuscador]="false" displayKey="nombre"
+              valueKey="value" placeholder="Seleccionar tus beneficios">
+            </app-autocomplete-multi>
+          </div>
+
+
+          @if(!(AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value && AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value.length > 0)){
+          <div class="contenido-formulario">
+            <div class="badge-descripcion-gris">
+              <fa-icon [icon]="farInfoCircle"></fa-icon>
+              <span>No tienes retenciones agregadas</span>
+            </div>
+          </div>
+          }
+
+          @if(pais ==='PE' && AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value?.includes(1)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>Retención de 5ta categoría</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Ingresa un monto<span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number" formControlName="afiliacion_fondo_pension_dc_monto_quinta"
+                  [placeholder]="simboloMoneda + ' 0.00'"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+          @if(pais ==='PE' && AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value?.includes(2)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>Retención de 4ta categoría</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Ingresa un monto<span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number" formControlName="afiliacion_fondo_pension_dc_monto_cuarta"
+                  [placeholder]="simboloMoneda + ' 0.00'"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+        </div>
+        <div class="contenedor-formulario !p-0">
+         @if(pais ==='PE' && AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value?.includes(3)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>Fondo de pensiones</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Tipo de fondo<span class="text-danger">*</span></span>
+                <ion-select fill="outline" placeholder="Selecciona un fondo" toggleIcon="chevron-down"
+                  expandedIcon="chevron-up" interface="popover"
+                  [ngClass]="{'w-[130px]': isXlScreen && !is3xlScreen, 'w-[150px]': is3xlScreen}"
+                  formControlName="afiliacion_fondo_pension_dc_tipo_fondo">
+                  @for(fondo of fondos; track fondo){<ion-select-option [value]="fondo">{{ fondo }}</ion-select-option>}
+                </ion-select>
+              </div>
+
+              @if(AfiliacionForm.get('afiliacion_fondo_pension_dc_tipo_fondo')?.value === 'AFP'){
+                <div class="contenido-formulario">
+                  <span class="label">AFP afiliada<span class="text-danger">*</span></span>
+                  <ion-select fill="outline" placeholder="Selecciona una AFP" toggleIcon="chevron-down"
+                    expandedIcon="chevron-up" interface="popover"
+                    [ngClass]="{'w-[130px]': isXlScreen && !is3xlScreen, 'w-[150px]': is3xlScreen}"
+                    formControlName="afiliacion_fondo_pension_dc_afp_afiliada">
+                    @for(afp of afps; track afp){<ion-select-option [value]="afp">{{ afp }}</ion-select-option>}
+                  </ion-select>
+                </div>
+              }
+
+              @if(AfiliacionForm.get('afiliacion_fondo_pension_dc_tipo_fondo')?.value === 'AFP' || AfiliacionForm.get('afiliacion_fondo_pension_dc_tipo_fondo')?.value === 'ONP'){
+                <div class="contenido-formulario">
+                  <span class="label">Base de calculo ({{simboloMoneda}})<span class="text-danger">*</span></span>
+                  <ion-input fill="outline" class="w-28" type="number" formControlName="afiliacion_fondo_pension_dc_calculo_monto"
+                    [placeholder]="simboloMoneda + ' 0.00'"></ion-input>
+                </div>
+
+                <div class="contenido-formulario">
+                  <span class="label">Porcentaje (%)<span class="text-danger">*</span></span>
+                  <ion-input fill="outline" class="w-28" type="number" formControlName="afiliacion_fondo_pension_dc_porcentaje"
+                    placeholder="0.00%"></ion-input>
+                </div>
+              }
+              <div class="contenido-formulario">
+                <span class="label"> </span>
+                <div class="flex items-center gap-1 text-xxss">
+                  <fa-icon [icon]="farInfoCircle"></fa-icon>
+                  <span>Valor referencial según última actualización</span>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          }
+          <!-- GUATEMALA -->
+        @if(pais ==='GT' && AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value?.includes(1)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>ISR</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Porcentaje <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number"
+                  placeholder="0.00%"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Monto <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number"
+                  [placeholder]="simboloMoneda + ' 0.00'"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+          @if(pais ==='GT' && AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value?.includes(2)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>IGSS</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Fecha de afiliación <span class="text-danger">*</span></span>
+                <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaAfiliacion" position="right"
+                  (dateSelected)="onFechaAfiliacionSelected($event)">
+                </app-base-calendar-new>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Tasa empleador <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" formControlName="afiliacion_fondo_pension_dc_empleador_essalud"
+                  placeholder="Ingresa un %"></ion-input>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Monto <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" formControlName="afiliacion_fondo_pension_dc_porcentaje_essalud"
+                  placeholder="Ingresa un monto"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+        @if(pais ==='EC' && AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value?.includes(1)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>Aporte personal IESS</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Porcentaje <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number"
+                  placeholder="0.00%"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Monto <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number"
+                  [placeholder]="simboloMoneda + ' 0.00'"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+          @if(pais ==='EC' && AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value?.includes(2)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>Extensión conyugal IESS</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Porcentaje <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number"
+                  placeholder="0.00%"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Monto <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number"
+                  [placeholder]="simboloMoneda + ' 0.00'"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+          @if(pais ==='EC' && AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value?.includes(3)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>Impuesto a la Renta</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Porcentaje <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number"
+                  placeholder="0.00%"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Monto <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number"
+                  [placeholder]="simboloMoneda + ' 0.00'"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+        @if(AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value?.includes(4) || AfiliacionForm.get('afiliacion_fondo_pension_retenciones')?.value?.includes(3) && pais ==='GT'){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>Otro descuento</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Concepto<span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" formControlName="afiliacion_fondo_pension_dc_concepto_desc"
+                  placeholder="Ingresa un concepto"></ion-input>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Monto<span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number" formControlName="afiliacion_fondo_pension_dc_monto_otro_desc"
+                  [placeholder]="simboloMoneda + ' 0.00'"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Cuotas<span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-28" type="number" formControlName="afiliacion_fondo_pension_dc_concepto_desc"
+                  placeholder="Ingresa cantidad de cuotas"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+        </div>
+        
+      </div>
+      }
+
+      @if(tabSeleccionado === 'afiliacion_fondo_pension_aportes'){
+      <div class="contenedor-formulario" [ngClass]="{'!flex-row': !panelLateralVisible}">
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Aportes del empleador <span class="text-danger">*</span></span>
+            <app-autocomplete-multi formControlName="afiliacion_fondo_pension_dc_aportes_empleador" [items]="afiliacion_fondo_pension_dc_aportes_empleador"
+              [mostrarBuscador]="false" displayKey="nombre" valueKey="value" placeholder="Seleccionar tus aportes">
+            </app-autocomplete-multi>
+          </div>
+
+          @if(!(AfiliacionForm.get('afiliacion_fondo_pension_dc_aportes_empleador')?.value && AfiliacionForm.get('afiliacion_fondo_pension_dc_aportes_empleador')?.value.length > 0)){
+          <div class="contenido-formulario">
+            <div class="badge-descripcion-gris">
+              <fa-icon [icon]="farInfoCircle"></fa-icon>
+              <span>No tienes aportes agregados</span>
+            </div>
+          </div>
+          }
+
+          @if(pais === 'PE' && AfiliacionForm.get('afiliacion_fondo_pension_dc_aportes_empleador')?.value?.includes(1)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>Essalud</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Fecha de afiliación <span class="text-danger">*</span></span>
+                <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaAfiliacion" position="right"
+                  (dateSelected)="onFechaAfiliacionSelected($event)">
+                </app-base-calendar-new>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Tasa empleador <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" type="number" formControlName="afiliacion_fondo_pension_dc_empleador_essalud"
+                  placeholder="0.00%"></ion-input>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Porcentaje <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" type="number" formControlName="afiliacion_fondo_pension_dc_porcentaje_essalud"
+                  placeholder="0.00%"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+
+          @if(pais === 'PE' && AfiliacionForm.get('afiliacion_fondo_pension_dc_aportes_empleador')?.value?.includes(2)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>EPS</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Fecha de afiliación <span class="text-danger">*</span></span>
+                <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaAfiliacion" position="right"
+                  (dateSelected)="onFechaEPSSelected($event)">
+                </app-base-calendar-new>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Entidad Salud <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" formControlName="afiliacion_fondo_pension_dc_entidad_salud_eps"
+                  placeholder="Nombre entidad"></ion-input>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Porcentaje <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" type="number" formControlName="afiliacion_fondo_pension_dc_porcentaje_eps"
+                  placeholder="0.00%"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+          <!-- Ecuador -->
+          @if(pais === 'EC' && AfiliacionForm.get('afiliacion_fondo_pension_dc_aportes_empleador')?.value?.includes(1)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>Aporte patronal IESS</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Fecha de afiliación <span class="text-danger">*</span></span>
+                <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaAfiliacion" position="right"
+                  (dateSelected)="onFechaEPSSelected($event)">
+                </app-base-calendar-new>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Entidad Salud <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" formControlName="afiliacion_fondo_pension_dc_entidad_salud_eps"
+                  placeholder="Nombre entidad"></ion-input>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Porcentaje <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" type="number" formControlName="afiliacion_fondo_pension_dc_porcentaje_eps"
+                  placeholder="0.00%"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+          @if(pais === 'EC' && AfiliacionForm.get('afiliacion_fondo_pension_dc_aportes_empleador')?.value?.includes(2)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>Otros aportes</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Fecha de afiliación <span class="text-danger">*</span></span>
+                <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaAfiliacion" position="right"
+                  (dateSelected)="onFechaEPSSelected($event)">
+                </app-base-calendar-new>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Entidad Salud <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" formControlName="afiliacion_fondo_pension_dc_entidad_salud_eps"
+                  placeholder="Nombre entidad"></ion-input>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Porcentaje <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" type="number" formControlName="afiliacion_fondo_pension_dc_porcentaje_eps"
+                  placeholder="0.00%"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+          <!-- Guatemala -->
+           @if(pais === 'GT' && AfiliacionForm.get('afiliacion_fondo_pension_dc_aportes_empleador')?.value?.includes(1)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>IGSS Cuota patronal</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Fecha de afiliación <span class="text-danger">*</span></span>
+                <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaAfiliacion" position="right"
+                  (dateSelected)="onFechaAfiliacionSelected($event)">
+                </app-base-calendar-new>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Tasa empleador <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" type="number" formControlName="afiliacion_fondo_pension_dc_empleador_essalud"
+                  placeholder="0.00%"></ion-input>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Monto <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" type="number" formControlName="afiliacion_fondo_pension_dc_porcentaje_essalud"
+                  [placeholder]="simboloMoneda + ' 0.00'"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+        </div>
+        <div class="contenedor-formulario !p-0">
+           @if(pais === 'GT' && AfiliacionForm.get('afiliacion_fondo_pension_dc_aportes_empleador')?.value?.includes(3)){
+          <fieldset class="card-fieldset !p-4"
+            [ngClass]="{'w-[195px]': isXlScreen && !is3xlScreen, 'w-[380px]': is3xlScreen}">
+            <legend>SCRT</legend>
+            <div class="cont-field">
+              <div class="contenido-formulario">
+                <span class="label">Fecha de afiliación <span class="text-danger">*</span></span>
+                <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaAfiliacion" position="right"
+                  (dateSelected)="onFechaSCRTSelected($event)">
+                </app-base-calendar-new>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Entidad Salud <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" formControlName="afiliacion_fondo_pension_dc_entidad_salud_scrt"
+                  placeholder="Nombre entidad"></ion-input>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Porcentaje <span class="text-danger">*</span></span>
+                <ion-input fill="outline" class="w-20" type="number" formControlName="afiliacion_fondo_pension_dc_porcentaje_scrt"
+                  placeholder="0.00%"></ion-input>
+              </div>
+            </div>
+          </fieldset>
+          }
+          
+        </div>
+      </div>
+      }
+      
+
+
+      <!-- </div> -->
+      <div class="contenedor-btn">
+        <ion-button class="w-[65px]" (click)="guardarEdicion()">{{ modoEdicion ? 'Guardar' : 'Registrar' }}</ion-button>
+        <ion-button color="medium" fill="outline" (click)="botonNuevo()">Cancelar</ion-button>
+      </div>
+
+    </form>
+
+
+  </div>
+</div>

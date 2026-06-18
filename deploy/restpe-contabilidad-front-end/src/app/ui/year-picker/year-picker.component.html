@@ -1,0 +1,54 @@
+<div class="relative">
+  <div class="flex items-center justify-between px-2 h-[28px] border border-[#E4E4E4] rounded-sm cursor-pointer bg-white min-w-[125px] input-responsive"
+    [ngClass]="{'!cursor-default border-[#e5e7eb] opacity-30 pointer-events-none': disabled}"
+    (click)="toggleDropdown()">
+    <span [ngClass]="{'text-text-25 line-clamp-1': getDisplayText() == placeholder }">{{ getDisplayText() }}</span>
+    <fa-icon [icon]="fasChevronDown" class="text-text-3"></fa-icon>
+  </div>
+
+  @if (showDropdown) {
+    <div [ngClass]="{
+           'left-0': position === 'left',
+           'right-0': position === 'right',
+           'left-1/2 -translate-x-1/2': position === 'center'
+         }"  class="absolute top-full mt-1 rounded shadow-2xl z-[500] p-1.5 bg-[#E7E7E7]">
+      <!-- Header con navegación de década -->
+      <div class="flex items-center justify-center gap-8 mb-2">
+        <button 
+          type="button"
+          (click)="previousDecade()">
+          <fa-icon [icon]="fasChevronLeft" class="text-sm"></fa-icon>
+        </button>
+        <span class="text-xs font-bold">{{ currentDecadeStart }} - {{ currentDecadeStart + 11 }}</span>
+        <button 
+          type="button"
+          (click)="nextDecade()">
+          <fa-icon [icon]="fasChevronRight" class="text-sm"></fa-icon>
+        </button>
+      </div>
+
+      <!-- Grid de años -->
+      <div class="grid grid-cols-4 gap-2 w-[224px]">
+        @for (year of years; track year) {
+          <button
+            type="button"
+            class="h-9 text-xs font-bold"
+            [ngClass]="{
+              'bg-primary text-white': selectedYear === year,
+              'bg-white': selectedYear !== year
+            }"
+            (click)="selectYear(year)">
+            {{ year }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  @if (showDropdown) {
+    <div 
+      class="fixed inset-0 z-40" 
+      (click)="closeDropdown()">
+    </div>
+  }
+</div>

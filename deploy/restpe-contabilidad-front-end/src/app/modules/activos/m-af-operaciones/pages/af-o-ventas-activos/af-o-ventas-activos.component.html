@@ -1,0 +1,380 @@
+<div class="contenedor-principal">
+  @if(!panelLateralVisible) {
+  <div class="barra-desplegable" (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight" class=""></fa-icon>
+  </div>
+  }
+  <div class="panel-izquierdo" [style.display]="panelLateralVisible ? 'flex' : 'none'">
+    <div class="cont-title">
+      <span>Gestión de Baja de Activos</span>
+      <div class="" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft" class="text-primary text-xs cursor-pointer"></fa-icon>
+      </div>
+    </div>
+    <!-- Filtros -->
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="relative w-full">
+          <Div class="buscador">
+            <fa-icon [icon]="farSearch"></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar por código de baja" style="--padding-start:28px" class="w-full text-xxs"></ion-input>
+          </Div>
+        </div>
+
+        <div class="flex gap-3 justify-start flex-none">
+          <div class="flex flex-row">
+            <!-- <ion-select placeholder="De registro" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              interface="popover" fill="outline" class="w-[95px] text-xxs">
+              <ion-select-option value="todos">Todos</ion-select-option>
+              <ion-select-option value="aprobado">De registro</ion-select-option>
+              <ion-select-option value="pendiente">De entrega</ion-select-option>
+            </ion-select> -->
+
+            <!-- calendario -->
+            <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+              [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="top-left"
+              (dateRangeSelected)="filtrarPorFechas($event)">
+            </app-base-calendar-new>
+          </div>
+        </div>
+      </div>
+
+      <div class="filtros-absolutos">
+        <ion-button fill="outline" class="w-[115px] flex-none text-text-85" id="reportesOrdenes">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesOrdenes" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos " [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+
+        <ion-button class="w-fit flex flex-none" [disabled]="!selectedRowData" (click)="nuevotipodebaja()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span class="font-normal whitespace-nowrap">Nuevo tipo de baja</span>
+        </ion-button>
+      </div>
+
+    </div>
+    <div class="h-full relative" [appLoader]="isLoadingVentasActivos()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData()" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [localeText]="localeText" [headerHeight]="24"
+        [rowSelection]="'single'" [paginationPageSize]="20" [paginationPageSizeSelector]="[20, 50, 100]" [defaultColDef]="defaultColDef"
+        (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+  <div class="panel-derecho" [appLoader]="isLoadingVentasActivos()" [ngClass]="{'!w-full !flex-auto': !panelLateralVisible}">
+    <div class="cont-title">
+      <span>{{ !selectedRowData ? 'Nuevo proceso de baja' : 'Proceso de baja: ' + (selectedRowData?.venta_activo_codigo_baja || '') }}</span>
+    </div>
+
+    <div class="cont-tabs">
+      @if (panelLateralVisible) {
+        <div class="btn-scroll" (click)="scrollLeft()">
+          <fa-icon [icon]="fasChevronLeft"></fa-icon>
+        </div>
+      }
+      <div class="flex overflow-hidden">
+        <ion-segment [(ngModel)]="tabSeleccionadoDetalle" [ngModelOptions]="{standalone: true}" mode="md" scrollable class="company-tabs" #scrollBox>
+          <ion-segment-button value="tipo" class="boton-subsubtitulo">
+            <ion-label>Tipo de baja</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="seleccion" class="boton-subsubtitulo" [disabled]="!seleccionTabEnabled">
+            <ion-label>Selección del activo</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="resumen" class="boton-subsubtitulo" [disabled]="!isResumenTabEnabled()">
+            <ion-label>Resumen del activo</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+      @if (panelLateralVisible) {
+        <div class="btn-scroll" (click)="scrollRight()">
+          <fa-icon [icon]="fasChevronRight"></fa-icon>
+        </div>
+      }
+    </div>
+
+    @if(tabSeleccionadoDetalle === 'tipo'){
+    <form [formGroup]="formularioBaja" class="contenedor-formulario"
+      [ngClass]="{'!flex-row gap-2': !panelLateralVisible && formularioBaja.get('tipoDebaja')?.value}">
+      <div class="flex flex-1 flex-col gap-1">
+        <div class="contenido-formulario">
+          <span class="label">Tipo de baja <span class="text-danger">*</span></span>
+          <ion-select [placeholder]="!selectedRowData ? 'Seleccione tipo de baja' : ''" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            interface="popover" fill="outline" [ngClass]="'!w-[163px] 2xl:!w-[175px] text-xxss'" formControlName="tipoDebaja"
+            (ionChange)="onTipoDebajaSelected($event)">
+            @for(item of tipodebaja; track $index){
+            <ion-select-option value="{{item.value}}">{{item.label}}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+        @if(formularioBaja.get('tipoDebaja')?.value === 'venta'){
+        <div class="contenido-formulario">
+          <span class="label">Valor de la venta<span class="text-danger">*</span></span>
+          <ion-input fill="outline" class="w-[163px]" type="number" [placeholder]="!selectedRowData ? 'Ingrese el valor' : ''" formControlName="valorVenta"></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Comprador<span class="text-danger">*</span></span>
+          <div class="flex flex-row">
+            <ion-select placeholder="" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+              fill="outline" class="min-w-[55px] text-xxs" formControlName="tipoDocumentoComprador"
+              style="width: 55px !important; --border-top-right-radius: 0px !important; --border-bottom-right-radius: 0px !important;">
+              <ion-select-option value="DNI">DNI</ion-select-option>
+              <ion-select-option value="RUC">RUC</ion-select-option>
+            </ion-select>
+            <ion-input type="number" fill="outline" class="w-[90px] -ml-1" style="--border-radius: 0px !important"
+              [placeholder]="!selectedRowData ? 'Nº documento' : ''" formControlName="numeroDocumentoComprador"></ion-input>
+            <ion-button class="!w-[24px] bg-primary" (click)="buscarComprador()" [disabled]="formularioBaja.disabled">
+              <fa-icon [icon]="fasSearch" class="text-xs text-white"></fa-icon>
+            </ion-button>
+          </div>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Nombre del comprador<span class="text-danger">*</span></span>
+          <ion-input fill="outline" class="w-[163px]" [placeholder]="!selectedRowData ? 'Ingrese el nombre' : ''" formControlName="nombreComprador"></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Tipo de documento <span class="text-danger">*</span></span>
+          <ion-select fill="outline" interface="popover" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            [placeholder]="!selectedRowData ? 'Selecciona un documento' : ''" class="w-[163px]" formControlName="tipoDocumentoVenta">
+            @for(item of tipodoc; track $index){
+            <ion-select-option value="{{item.value}}">{{item.label}}</ion-select-option>}
+          </ion-select>
+
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Nº de documento <span class="text-danger">*</span></span>
+          <ion-input fill="outline" class="w-[163px]" [placeholder]="!selectedRowData ? 'Ingrese número' : ''" formControlName="numeroDocumentoVenta"></ion-input>
+        </div>
+        }
+        @if(formularioBaja.get('tipoDebaja')?.value === 'siniestro'){
+        <div class="contenido-formulario">
+          <span class="label">Tipo de siniestro <span class="text-danger">*</span></span>
+          <ion-select fill="outline" interface="popover" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            [placeholder]="!selectedRowData ? 'Selecciona un tipo' : ''" class="w-[163px]" formControlName="tipoSiniestro">
+            @for(item of tipodesiniestro; track $index){
+            <ion-select-option value="{{item.value}}">{{item.label}}</ion-select-option>}
+          </ion-select>
+
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Parte policial/seguro<span class="text-danger">*</span></span>
+          <ion-input fill="outline" class="w-[163px]" [placeholder]="!selectedRowData ? 'Ingrese número' : ''" formControlName="partePolicial"></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Monto Indemnización<span class="text-danger">*</span></span>
+          <ion-input fill="outline" class="w-[163px]" type="number" [placeholder]="!selectedRowData ? 'Ingrese el monto' : ''" formControlName="montoIndemnizacion"></ion-input>
+        </div>
+        <div class="contenido-formulario !items-start">
+          <span class="label">Descripcion del siniestro</span>
+          <ion-textarea fill="outline" [placeholder]="!selectedRowData ? 'Escribe aquí...' : ''" class="w-[163px]" rows="3" auto-grow
+            formControlName="descripcionSiniestro"></ion-textarea>
+        </div>
+        }
+        @if(formularioBaja.get('tipoDebaja')?.value === 'obsolencia'){
+        <div class="contenido-formulario">
+          <span class="label">Motivo <span class="text-danger">*</span></span>
+          <ion-select fill="outline" interface="popover" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            [placeholder]="!selectedRowData ? 'Selecciona un tipo' : ''" class="w-[163px]" formControlName="motivoObsolescencia">
+            @for(item of motivo; track $index){
+            <ion-select-option value="{{item.value}}">{{item.label}}</ion-select-option>}
+          </ion-select>
+
+        </div>
+
+        <div class="contenido-formulario !items-start">
+          <span class="label">Descripcion <span class="text-danger">*</span></span>
+          <ion-textarea fill="outline" [placeholder]="!selectedRowData ? 'Escribe aquí...' : ''" class="w-[250px]" rows="3" auto-grow
+            formControlName="descripcionObsolescencia"></ion-textarea>
+        </div>
+        }
+        @if(formularioBaja.get('tipoDebaja')?.value === 'donacion'){
+        <div class="contenido-formulario">
+          <span class="label">Beneficiario<span class="text-danger">*</span></span>
+          <div class="flex flex-row">
+            <ion-select placeholder="" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+              fill="outline" class="min-w-[55px] text-xxs" formControlName="tipoDocumentoBeneficiario"
+              style="width: 55px !important; --border-top-right-radius: 0px !important; --border-bottom-right-radius: 0px !important;">
+              <ion-select-option value="DNI">DNI</ion-select-option>
+              <ion-select-option value="RUC">RUC</ion-select-option>
+            </ion-select>
+            <ion-input type="number" fill="outline" class="w-[90px] -ml-1" style="--border-radius: 0px !important"
+              [placeholder]="!selectedRowData ? 'Nº documento' : ''" formControlName="numeroDocumentoBeneficiario"></ion-input>
+            <ion-button class="!w-[24px] bg-primary" (click)="buscarBeneficiario()" [disabled]="formularioBaja.disabled">
+              <fa-icon [icon]="fasSearch" class="text-xs text-white"></fa-icon>
+            </ion-button>
+          </div>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Nombre del beneficiario<span class="text-danger">*</span></span>
+          <ion-input fill="outline" class="w-[230px]" [placeholder]="!selectedRowData ? 'Ingrese el nombre' : ''" formControlName="nombreBeneficiario"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Doc. de respaldo<span class="text-danger">*</span></span>
+
+          <div class="flex items-center gap-2 w-[163px] h-[28px] border border-text-5 rounded-sm px-2"
+            [ngClass]="{ 'bg-Background-light': documentoRespaldo }">
+            <input type="file" #fileInput (change)="onFileSelected($event)" class="hidden" accept=".pdf,.xml" />
+            @if (documentoRespaldo) {
+            <span class="text-xxs flex-1 line-clamp-1">{{ documentoRespaldo }}</span>
+            <fa-icon [icon]="farCircleXmark" class="text-danger cursor-pointer text-xs"
+              (click)="removeFile()"></fa-icon>
+            } @else {
+            <span class="text-xxs cursor-pointer flex-1 line-clamp-1 underline text-primary"
+              (click)="fileInput.click()">
+              Haz clic para subir un archivo
+            </span>
+            }
+          </div>
+        </div>
+
+        <div class="contenido-formulario !items-start">
+          <span class="label">Descripcion <span class="text-danger">*</span></span>
+          <ion-textarea fill="outline" [placeholder]="!selectedRowData ? 'Escribe aquí...' : ''" class="w-[250px]" rows="3" auto-grow
+            formControlName="descripcionDonacion"></ion-textarea>
+        </div>
+        }
+      </div>
+      <div class="flex flex-1 flex-col gap-1">
+        <div class="contenido-formulario">
+          <span class="label">Fecha de baja <span class="text-danger">*</span></span>
+          <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaSolicitud" position="center"
+            [disabled]="formularioBaja.disabled"
+            (dateSelected)="onFechaSolicitud($event)">
+          </app-base-calendar-new>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Moneda <span class="text-danger">*</span></span>
+          <ion-select [placeholder]="!selectedRowData ? 'Selecciona una moneda' : ''" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            interface="popover" fill="outline" class="w-[141px] text-xxs" formControlName="moneda"
+            (ionChange)="onMonedaSelected($event)">
+            @for(item of moneda; track $index){
+            <ion-select-option value="{{item.value}}">{{item.label}}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label whitespace-nowrap">Cta. contable asociada <span class="text-danger">*</span></span>
+          <app-autocomplete formControlName="cuentaContable" [items]="cuentasContables" [displayKey]="'nombre'" [valueKey]="'codigo'"
+            [placeholder]="!selectedRowData ? 'Buscar cuenta contable...' : ''" [width]="'w-[163px]'"
+            (itemSelected)="onCuentaContableSeleccionada($event)">
+          </app-autocomplete>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Estado</span>
+          <ion-input fill="outline" placeholder="En proceso" formControlName="estado" class="w-[150px]"></ion-input>
+        </div>
+
+      </div>
+    </form>
+    }
+
+    <!-- Tab Contable -->
+    <ng-container *ngIf="tabSeleccionadoDetalle === 'seleccion'" class="">
+      <div class="cont-title">
+        <span>Selección de activos fijos</span>
+      </div>
+      <div class="p-[5px]">
+        <app-autocomplete #activoAC [items]="activosDisponibles()" displayKey="activo_fijo_descripcion" valueKey="activo_fijo_codigo"
+          [placeholder]="!selectedRowData ? 'Buscar activo(s) por nombre o código' : ''" width="w-full"
+          (itemSelected)="onActivoSeleccionado($event)">
+        </app-autocomplete>
+      </div>
+      <div>
+        <ag-grid-angular style="width: 100%; height: 300px;" class="" [rowData]="rowDataActivosSeleccionados"
+          [columnDefs]="colDefsActivosSeleccionados" [columnTypes]="columnTypes" [rowHeight]="20"
+          [localeText]="localeText" [headerHeight]="24" [rowSelection]="'single'" [paginationPageSize]="5"
+          [defaultColDef]="defaultColDef" (gridReady)="onGridReadyActivosSeleccionados($event)"
+          (cellClicked)="onCellClickedActivosSeleccionados($event)" />
+      </div>
+    </ng-container>
+
+    <!-- Tab Adjuntos -->
+    <div *ngIf="tabSeleccionadoDetalle === 'resumen'" class="">
+      <div class="flex flex-col">
+        <div class="flex flex-row p-2.5" [ngClass]="{'!flex-col': panelLateralVisible}">
+          <div class="flex flex-col flex-1">
+            <div class="contenido-formulario">
+              <span class="label">Activo <span class="text-danger">*</span></span>
+              <ion-input class="w-[157px]" fill="outline" [disabled]="true"
+                [value]="activoSeleccionadoResumen?.activo_fijo_codigo + ' - ' + activoSeleccionadoResumen?.activo_fijo_descripcion"></ion-input>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Comprador <span class="text-danger">*</span></span>
+              <ion-input class="w-[230px]" fill="outline" [disabled]="true" [value]="formularioBaja.get('nombreComprador')?.value"></ion-input>
+            </div>
+          </div>
+          <div class="flex flex-1">
+            <fieldset class="card-fieldset flex flex-col gap-1 p-2">
+              <legend class="text-xxs font-medium px-1">Resultado de la Venta</legend>
+              <div class="contenido-formulario">
+                <span class="label">Valor de Venta <span class="text-danger">*</span></span>
+                <ion-input class="w-[230px]" fill="outline" [disabled]="true" [value]="formularioBaja.get('valorVenta')?.value | number:'1.2-2'"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Valor neto contable <span class="text-danger">*</span></span>
+                <ion-input class="w-[230px]" fill="outline" [disabled]="true" [value]="activoSeleccionadoResumen?.activo_fijo_valor_neto_libros | number:'1.2-2'"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Ganancia / Pérdida <span class="text-danger">*</span></span>
+                <ion-input class="w-[230px]" fill="outline" [disabled]="true" [value]="(formularioBaja.get('valorVenta')?.value - (activoSeleccionadoResumen?.activo_fijo_valor_neto_libros || 0)) | number:'1.2-2'"></ion-input>
+              </div>
+              <div class="contenido-formulario">
+                <span class="label">Cuenta de Resultado <span class="text-danger">*</span></span>
+                <ion-input class="w-[87px]" fill="outline" [disabled]="true" value="520101000000"></ion-input>
+              </div>
+            </fieldset>
+          </div>
+        </div>
+        <div class="cont-title">
+          <span>Asiento: AUT-2025-01-001</span>
+        </div>
+        <div>
+          <ag-grid-angular style="width: 100%; height: 250px;" class="" [rowData]="rowDataAsiento"
+            [columnDefs]="colDefsAsiento" [columnTypes]="columnTypes" [rowHeight]="20" [localeText]="localeText"
+            [headerHeight]="24" [rowSelection]="'single'" [paginationPageSize]="10" [defaultColDef]="defaultColDef"
+            (gridReady)="onGridReadyAsiento($event)" (cellClicked)="onCellClickedAsiento($event)" />
+        </div>
+        <div class="w-full flex flex-col gap-1 justify-end border border-solid p-2.5 m-2">
+          <div class="flex justify-between">
+            <span class="text-sm font-bold">Total Debe(S/)</span>
+            <span class="text-sm font-bold">S/13,000.00</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm font-bold">Total Haber(S/)</span>
+            <span class="text-sm font-bold">S/13,000.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contenedor-btn">
+      @if(!isViewingExistingRecord) {
+        @if(isLastTab()) {
+          <ion-button class="w-fit" (click)="navegarSiguienteTab()">
+            Finalizar
+          </ion-button>
+        } @else {
+          <ion-button class="w-fit" (click)="navegarSiguienteTab()">
+            Siguiente
+            <fa-icon [icon]="fasAngleRight" class="ml-1 text-white"></fa-icon>
+          </ion-button>
+        }
+      }
+      @if(selectedRowData?.venta_activo_estado === 'Contabilizado') {
+        <ion-button fill="outline" color="danger" class="w-fit" (click)="abrirModalAnular()">Anular</ion-button>
+      }
+      <ion-button class="w-fit" color="medium" fill="outline" (click)="nuevotipodebaja()">
+        Cancelar
+      </ion-button>
+    </div>
+
+  </div>
+</div>

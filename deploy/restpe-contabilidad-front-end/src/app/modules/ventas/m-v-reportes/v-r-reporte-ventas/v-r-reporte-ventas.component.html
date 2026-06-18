@@ -1,0 +1,153 @@
+<div class="w-full flex flex-col overflow-auto flex-grow h-full" >
+  <div class="cont-title">
+    <span>Nuevo reporte de ventas</span>
+  </div>
+  <div class="contenedor-formulario !gap-2.5">
+    <div class="filtros-responsive">
+      <div class="form-column2">
+        <div class="contenido-formulario">
+          <span class="label">Caja </span>
+          <ion-select placeholder="Selecciona caja" interface="popover" fill="outline" [(ngModel)]="cajaSeleccionada"
+            class="w-[240px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+            @for(item of cajas; track item){<ion-select-option [value]="item">
+              {{ item.label }}
+            </ion-select-option>}
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Canal de venta </span>
+          <ion-select placeholder="Selecciona canal" interface="popover" fill="outline" [(ngModel)]="canalSeleccionado"
+            class="w-[145px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+            @for(item of canales; track item){<ion-select-option [value]="item">
+              {{ item.label }}
+            </ion-select-option>}
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Tipo de comprobante </span>
+          <app-autocomplete-multi
+            [items]="comprobantes"
+            displayKey="label"
+            valueKey="value"
+            placeholder="Selecciona tipo comprobantes"
+            (changed)="onComprobanteSeleccionado($event)">
+          </app-autocomplete-multi>
+        </div>
+
+        <div
+          class="contenido-formulario">
+          <span class="label">Estado </span>
+          <ion-select placeholder="Todos los estados" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            [(ngModel)]="estadoSeleccionado" interface="popover" fill="outline" class="w-[145px] flex-none">
+            @for(estado of estados; track estado){<ion-select-option [value]="estado.value">{{ estado.label
+              }}</ion-select-option>}
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Turno </span>
+          <ion-select placeholder="Selecciona turno" interface="popover" fill="outline" [(ngModel)]="turnoSeleccionado"
+            class="w-[145px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+            @for(item of turnos; track item){<ion-select-option [value]="item">
+              {{ item.label }}
+            </ion-select-option>}
+          </ion-select>
+        </div>
+
+      </div>
+    </div>
+    <!-- Botones de acción -->
+    <div class="flex items-center gap-3 w-full justify-end">
+      <ion-button class="w-fit" (click)="generarReporte()">
+        <span class="font-normal">Generar reporte</span>
+      </ion-button>
+    </div>
+  </div>
+
+  <div class="flex flex-col w-full h-full overflow-auto">
+    <div class="cont-title">
+      <span>Reporte generado</span>
+    </div>
+    @if(reporteGenerado){
+    <div class="cont-cards">
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Subtotal</span>
+          <span class="cantidad">{{simboloMoneda}} 1,351.13</span>
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasDollarSign"></fa-icon>
+        </div>
+      </div>
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Total de ventas </span>
+          <span class="cantidad">{{simboloMoneda}} 1,623.93</span>
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasChartLine"></fa-icon>
+        </div>
+      </div>
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Impuestos </span>
+          <span class="cantidad">{{simboloMoneda}} 272.80</span>
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasPercent"></fa-icon>
+        </div>
+      </div>
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Total NC vinculadas </span>
+          <span class="cantidad">{{simboloMoneda}} 0.00</span>
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasFileInvoice"></fa-icon>
+        </div>
+      </div>
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Ventas sin NC Vin, </span>
+          <span class="cantidad">{{simboloMoneda}} 1,623.93</span>
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasExclamationCircle"></fa-icon>
+        </div>
+      </div>
+    </div>
+    <div class="contenedor-filtros !pt-0">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por numero de comprobante o por nombre del cliente" class="w-full"
+          style="--padding-start:30px"></ion-input>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px] flex-none" fill="outline" id="planC" [disabled]="filasGeneradas.length == 0">
+          <fa-icon [icon]="fasDownload" class="mr-1 text-text-85"></fa-icon>
+          <span class="text-text-85">Exportar</span>
+        </ion-button>
+        <ion-popover trigger="planC" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos dezplegableAcciones2" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+
+    <!-- Tabla de resultados -->
+    <div class="flex h-full relative tabla-2" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" 
+        [rowData]="reporteGenerado ? filasGeneradas : []"
+        [columnDefs]="columnDefs"
+        [columnTypes]="columnTypes" [gridOptions]="gridOptions" [pagination]="true" [localeText]="localeText"
+        [rowHeight]="40" [headerHeight]="24" [defaultColDef]="defaultColDef" [paginationPageSize]="20"
+        (gridReady)="onGridReady($event)" />
+    </div>}
+  </div>
+</div>

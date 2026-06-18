@@ -1,0 +1,43 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Consulta de Stock y Movimientos</span>
+    </div>
+
+    <!-- Filtros -->
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="relative w-full">
+          <fa-icon [icon]="farSearch" class=" absolute left-2.5 top-1.5 text-xxs text-[#878787] z-40"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar código, nombre, medida, stock" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+      <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+        [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="right"
+        (dateRangeSelected)="filtrarPorFechas($event)">
+      </app-base-calendar-new>
+
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px] flex-none" id="reporteskardex1" fill="outline">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reporteskardex1" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos dezplegableAcciones2" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarPdf()">Exportar PDF</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarExcel()">Exportar Excel</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+    <div class="h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="facade.consultaKardex()" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [headerHeight]="24" [localeText]="localeText"
+        [paginationPageSize]="20" [suppressLoadingOverlay]="true" (gridReady)="onGridReady($event)" />
+    </div>
+  </div>
+</div>

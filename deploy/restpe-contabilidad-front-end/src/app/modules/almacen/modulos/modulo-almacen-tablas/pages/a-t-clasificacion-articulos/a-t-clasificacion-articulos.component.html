@@ -1,0 +1,148 @@
+<div class="contenedor-principal"><div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Estructura Jerárquica de Categorías (Selecciona una categoría de tu lista para visualizarlo)</span>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por categoría" class="w-full" style="--padding-start:30px"></ion-input>
+      </div>
+      <app-base-calendar-new
+        class="flex-none "
+        mode="range"
+        [initialStartDate]="startDate"
+        [initialEndDate]="endDate"
+        [minDate]="minDate"
+        [maxDate]="maxDate"
+        position="center"
+        (dateRangeSelected)="filtrarPorFechas($event)">
+      </app-base-calendar-new>
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px] flex-none" fill="outline" id="clasificacion">
+          <fa-icon [icon]="fasCog" class="mr-1 text-text-85"></fa-icon>
+          <span class="text-text-85">Acciones</span>
+          <fa-icon class="ml-1 text-text-85" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="clasificacion" triggerAction="click" [dismissOnSelect]="true" class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+            <ng-template>
+              <ion-item lines="none" [button]="true"  (click)="exportarExcel()">Exportar Excel</ion-item>
+              <ion-item lines="none" [button]="true"  (click)="exportarPdf()">Exportar PDF</ion-item>
+              <ion-item lines="none" [button]="true" (click)="modalImportar()" >Importar</ion-item>
+            </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" [disabled]="!filaSeleccionada && !formularioConCambios" (click)="botonRegistrarCategoria()"><fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon> <span class="font-normal">Nueva categoría</span></ion-button>
+      </div>
+    </div>
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular 
+        style="width: 100%; height: 100%;" 
+        class="ag-theme-alpine"
+        [rowData]="rowData" 
+        [columnDefs]="colDefs" 
+        [columnTypes]="columnTypes"
+        [pagination]="true"
+        [rowSelection]="'single'"
+        [localeText]="localeText"
+        [defaultColDef]="defaultColDef"
+        [autoGroupColumnDef]="autoGroupColumnDef"
+        [treeData]="treeData"
+        [getDataPath]="getDataPath"
+        [getRowClass]="getRowClass"
+        [groupDefaultExpanded]="groupDefaultExpanded"
+        [rowHeight]="20"
+        [headerHeight]="24"
+        (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)"/>
+    </div>
+  </div>
+
+  <div class="panel-derecho" [appLoader]="isLoading()">
+    <div class="cont-title">
+      <span>{{ filaSeleccionada ? 'Información de: ' + filaSeleccionada.categoria_articulo_descripcion : 'Nueva categoría' }}</span>
+    </div>
+    @if(filaSeleccionada){<div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" ></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+    <form action="" [formGroup]="registroForm">
+      <!-- Contenido del formulario -->
+      <div class="contenedor-formulario">
+        <!-- <div class="contenido-formulario">
+          <span class="label">Usuario que registra</span>
+          <ion-input fill="outline" placeholder="Eduardo Jimenez Lopez" formControlName="usuario" class="w-[160px]"></ion-input>
+        </div> -->
+
+        <div class="contenido-formulario">
+          <span class="label">Fecha del registro</span>
+          <ion-input fill="outline" type="date"  formControlName="fechaR" class="w-[120px]"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Nombre / Descripción <span class="text-danger">*</span></span>
+          <ion-input fill="outline" formControlName="descripcion" 
+            [placeholder]="!filaSeleccionada ? 'Ingresa un nombre o descripción' : ''" 
+            class="w-[160px]"></ion-input>
+        </div>
+        
+        <div class="contenido-formulario">
+          <span class="label">Sucursales<span class="text-danger">*</span></span>
+          <app-autocomplete-multi
+            formControlName="sucursales"
+            [items]="sucursales()"
+            displayKey="nombre"
+            valueKey="id"
+            [placeholder]="!filaSeleccionada ? 'Selecciona sucursales' : 'Selecciona sucursales'"
+            (changed)="onSucursalSeleccionada($event)">
+          </app-autocomplete-multi>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Nivel<span class="text-danger">*</span></span>
+          <ion-select [placeholder]="!filaSeleccionada ? 'Selecciona un nivel' : 'Seleccionar'" formControlName="nivel" interface="popover" fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+            @for(nivel of nivelSelect; track nivel){<ion-select-option [value]="nivel">{{ nivel }}</ion-select-option>}
+          </ion-select>
+        </div>
+
+        @if(registroForm.get('nivel')?.value == 'Subcategoría' || registroForm.get('nivel')?.value == 'Familia' || registroForm.get('nivel')?.value == 'Linea'){<div class="contenido-formulario">
+          @if(registroForm.get('nivel')?.value == 'Subcategoría'){<span class="label">Categoría asociada<span class="text-danger">*</span></span>}
+          @if(registroForm.get('nivel')?.value == 'Familia'){<span class="label">Subcategoria asociada<span class="text-danger">*</span></span>}
+          @if(registroForm.get('nivel')?.value == 'Linea'){<span class="label">Familia asociada<span class="text-danger">*</span></span>}
+          <app-autocomplete
+            formControlName="categoriaP"
+            [items]="categoriaFiltrada"
+            displayKey="nombre"
+            valueKey="id"
+            [placeholder]="!filaSeleccionada ? 'Selecciona una opción' : 'Selecciona una opción'"
+            (itemSelected)="onpadreSeleccionado($event)">
+          </app-autocomplete>
+        </div>}
+
+        <div class="contenido-formulario !items-start">
+          <span class="label">Observaciones</span>
+          <ion-textarea fill="outline" 
+            [placeholder]="!filaSeleccionada ? 'Ingresa algún dato adicional para tu categoría' : ''" 
+            formControlName="observacion" rows="2" class="w-[160px]"></ion-textarea>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Estado</span>
+          @if(!filaSeleccionada || registroForm.get('estado')?.value == 'Anulada'){<ion-input fill="outline" placeholder="Pendiente" formControlName="estado" class="w-[150px]"></ion-input>}
+          @if(filaSeleccionada && registroForm.get('estado')?.value != 'Anulada'){<ion-select placeholder="Selecciona un estado" formControlName="estado" interface="popover" fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+            @for(est of estadoSelect; track est){<ion-select-option [value]="est.id">{{ est.nombre }}</ion-select-option>}
+          </ion-select>}
+        </div>
+        
+      </div>
+    </form>
+    <div class="contenedor-btn py-2.5">
+      <ion-button  (click)="botonGuardar()">{{ filaSeleccionada ? 'Guardar' : 'Registrar' }}</ion-button>
+      <div class="flex gap-2">
+        <ion-button color="medium" fill="outline" class="w-fit" (click)="botonRegistrarCategoria()">Cancelar</ion-button>
+        <ion-button fill="outline" color="danger" *ngIf="filaSeleccionada" (click)="botonEliminarCategoria()">Eliminar</ion-button>
+      </div>
+    </div>
+  </div>
+</div>

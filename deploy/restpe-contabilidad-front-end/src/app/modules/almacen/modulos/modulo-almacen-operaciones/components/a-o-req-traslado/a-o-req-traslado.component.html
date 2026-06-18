@@ -1,0 +1,166 @@
+<div class="contenedor-principal">
+  @if(!mostrartabla){
+  <div class="btn-mostrartabla" (click)="mostrartabla=!mostrartabla">
+    <fa-icon [icon]="fasChevronsRight"></fa-icon>
+  </div>
+  }
+  @if(mostrartabla){
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span class="">Lista de requerimientos (Selecciona un requerimiento de tu lista para visualizarlo o
+        editarlo)</span>
+      <div class="btn-mostrarform">
+        <fa-icon [icon]="fasChevronsLeft" (click)="mostrartabla=!mostrartabla"></fa-icon>
+      </div>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por n° de requerimiento" style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+
+      <div class="filtros-absolutos">
+        <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate" [initialEndDate]="endDate"
+          [minDate]="minDate" [maxDate]="maxDate" position="center" (dateRangeSelected)="filtrarPorFechas($event)">
+        </app-base-calendar-new>
+
+        <ion-button class="w-fit" [disabled]="!tieneModificaciones()" (click)="botonNuevoRequerimiento()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span>Nuevo Requerimiento</span>
+        </ion-button>
+      </div> 
+    </div>
+    <div class="flex h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()"
+        class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" [rowData]="rowData" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [localeText]="localeText" [rowHeight]="20" [headerHeight]="24"
+        [paginationPageSize]="20" [rowSelection]="'single'" [gridOptions]="gridOptions" [suppressLoadingOverlay]="true"
+        (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+  }
+  <div class="panel-derecho" [ngClass]="{'!w-full !flex-1':!mostrartabla}" [appLoader]="isLoading()">
+    <div class="cont-title">
+      <span class="">Requerimiento: {{ filaSeleccionada?.req_traslado_nro }}</span>
+    </div>
+    @if(filaSeleccionada){<div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+    <div class="flex flex-col overflow-auto">
+      <form [formGroup]="requerimientoForm">
+        <div class="contenedor-formulario" [ngClass]="{'!flex-row !gap-20': !mostrartabla}">
+          <div class="contenedor-formulario !p-0">
+            <!-- Motivo de traslado - EDITABLE -->
+            <div class="contenido-formulario">
+              <span class="label">Motivo de traslado<span class="text-red-500">*</span></span>
+              <ion-input fill="outline" [ngClass]="'w-[163px] 2xl:w-[185px]'" placeholder="Ingrese el motivo del traslado"
+                formControlName="motivoTrastlado"></ion-input>
+            </div>
+            <!-- Origen - EDITABLE -->
+            <div class="contenido-formulario">
+              <span class="label">Origen<span class="text-red-500">*</span></span>
+              @if(requerimientoAnulado){
+              <ion-input fill="outline" [ngClass]="'w-[163px] 2xl:w-[185px]'" formControlName="origen" readonly></ion-input>
+              } @else {
+              <app-autocomplete label="" [items]="origen" labelKey="nombre" placeholder="Selecciona un origen"
+                (itemSelected)="onOrigenSeleccionado($event)" [formControlName]="'origen'" [ngClass]="'w-[163px] 2xl:w-[185px]'">
+              </app-autocomplete>
+              }
+            </div>
+            <!-- Centro de Costo - EDITABLE -->
+            <div class="contenido-formulario">
+              <span class="label">Centro de costo<span class="text-red-500">*</span></span>
+              @if(requerimientoAnulado){
+              <ion-input fill="outline" [ngClass]="'w-[163px] 2xl:w-[185px]'" formControlName="centroDeCosto" readonly></ion-input>
+              } @else {
+              <app-autocomplete label="" [items]="centrocostos" labelKey="nombre"
+                placeholder="Selecciona un centro de costo" (itemSelected)="onCentroCostoSeleccionado($event)"
+                [formControlName]="'centroDeCosto'" [ngClass]="'w-[163px] 2xl:w-[185px]'">
+              </app-autocomplete>
+              }
+            </div>
+          </div>
+
+          <div class="contenedor-formulario !p-0">
+            
+             <!-- Destino - EDITABLE -->
+            <div class="contenido-formulario">
+              <span class="label">Destino<span class="text-red-500">*</span></span>
+              @if(requerimientoAnulado){
+              <ion-input fill="outline" [ngClass]="'w-[163px] 2xl:w-[185px]'" formControlName="destino" readonly></ion-input>
+              } @else {
+              <app-autocomplete label="" [items]="destino" labelKey="nombre" placeholder="Selecciona un destino"
+                (itemSelected)="onDestinoSeleccionado($event)" [formControlName]="'destino'" [ngClass]="'w-[163px] 2xl:w-[185px]'">
+              </app-autocomplete>
+              }
+            </div>
+            <!-- Prioridad - EDITABLE -->
+            <div class="contenido-formulario">
+              <span class="label">Prioridad<span class="text-red-500">*</span></span>
+              <ion-select placeholder="Selecciona una prioridad" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                interface="popover" fill="outline" [ngClass]="'w-[163px] 2xl:w-[185px]'" formControlName="prioridad">
+                <ion-select-option value="Alta">Alta</ion-select-option>
+                <ion-select-option value="Media">Media</ion-select-option>
+                <ion-select-option value="Baja">Baja</ion-select-option>
+              </ion-select>
+            </div>
+            <!-- Observaciones - EDITABLE -->
+            <div class="contenido-formulario !items-start">
+              <span class="label">Observaciones</span>
+              <ion-textarea fill="outline" [ngClass]="'w-[163px] 2xl:w-[185px]'" formControlName="observaciones"
+                placeholder="Ingrese observaciones"></ion-textarea>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="cont-title">
+        <span class="">Detalle de los artículos</span>
+      </div>
+      <div class="flex flex-col">
+        <div class="contenedor-filtros">
+          @if(!filaSeleccionada){
+          <app-autocomplete #autocompleteProductos [items]="productos" [displayKey]="'descripcion'"
+            [valueKey]="'almacen_codigo'" [placeholder]="'Buscar artículo por nombre o código...'" class="w-full"
+            (itemSelected)="onProductoSeleccionado($event)">
+          </app-autocomplete>
+          }
+          @if(filaSeleccionada){
+          <div class="buscador">
+            <fa-icon [icon]="farSearch"></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar artículo por nombre o código..." [disabled]="true"
+              class="w-full" style="--padding-start:30px"></ion-input>
+          </div>
+          }
+        </div>
+
+        <div class="min-h-[150px]">
+          <ag-grid-angular style="width: 100%; height: 100%;" [rowData]="sucursalesRowData"
+            [columnDefs]="sucursalesColDefs" [columnTypes]="columnTypes" [pagination]="false" [localeText]="localeText"
+            [rowHeight]="20" [headerHeight]="24" [rowSelection]="'single'" [gridOptions]="gridOptions"
+            (gridReady)="onSucursalesGridReady($event)" />
+        </div>
+
+        <!-- Panel de resumen debajo de la tabla -->
+        <div class="flex flex-col items-end gap-2.5 w-full justify-end p-1.5">
+          <div class="p-2 bg-white border border-[#E4E4E4] rounded-[2px] flex flex-col gap-0.5 w-[200px]">
+            <div class="flex items-center justify-between">
+              <span class="text-xxs text-gray-700">Total solicitado</span>
+              <span class="text-sm font-semibold">{{ totalSolicitada }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="contenedor-btn">
+          <ion-button (click)="confirmarRequerimiento()">{{ btnTexto }}</ion-button>
+          <ion-button color="medium" fill="outline" (click)="botonNuevoRequerimiento()">Cancelar</ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,81 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de movimientos por almacén (Selecciona un movimiento de tu lista para visualizarlo)</span>
+    </div>
+
+    <!-- Filtros -->
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar movimientos por código"
+            style="--padding-start:28px"></ion-input>
+        </div>
+      </div>
+      <!-- <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate" [initialEndDate]="endDate"
+        [minDate]="minDate" [maxDate]="maxDate" position="center" (dateRangeSelected)="filtrarPorFechas($event)">
+      </app-base-calendar-new> -->
+
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px] text-text-85" fill="outline" id="reportesOrdenes">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesOrdenes" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarExcel()">Exportar Excel</ion-item>
+            <!-- <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarPdf()">Exportar PDF</ion-item> -->
+          </ng-template>
+        </ion-popover>
+
+        <ion-button class="w-fit flex flex-none" [disabled]="!selectedMotivo"
+          (click)="nuevoMotivo()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span class="font-normal whitespace-nowrap">Nuevo motivo</span>
+        </ion-button>
+      </div>
+
+    </div>
+
+    <div class="h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [headerHeight]="24" [localeText]="localeText"
+        [paginationPageSize]="20" rowSelection="single" [suppressLoadingOverlay]="true"
+        (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+  <div class="panel-derecho" [appLoader]="isLoading()">
+    <div class="cont-title">
+      <span class="text-xs font-medium">{{ !selectedMotivo ? 'Nuevo Motivo' : 'Información del Motivo: ' +
+        (selectedMotivo?.codigo || '') }}</span>
+    </div>
+    <form [formGroup]="motivoForm" class="flex flex-col gap-1 p-2.5">
+      <div class="flex flex-row gap-2 items-start">
+        <span class="w-[120px] text-xxs">Motivo del traslado <span class="text-danger">*</span></span>
+        <ion-input fill="outline" formControlName="nombre" [placeholder]="!selectedMotivo ? 'Ingresa un motivo' : ''"
+          class="w-[163px]"></ion-input>
+      </div>
+      <div class="flex flex-row gap-2 items-center">
+        <span class="w-[120px] text-xxs">Estado <span class="text-danger">*</span></span>
+        <ion-select placeholder="Activo" toggleIcon="chevron-down" expandedIcon="chevron-up" formControlName="estado"
+          interface="popover" fill="outline" class="w-[100px]">
+          <ion-select-option value="1">Activo</ion-select-option>
+          <ion-select-option value="0">Inactivo</ion-select-option>
+        </ion-select>
+      </div>
+    </form>
+    <div class="contenedor-btn">
+      <ion-button class="w-[80px]" (click)="toastsuccess()">{{ !selectedMotivo ? 'Registrar' : 'Guardar'
+        }}</ion-button>
+      <div class="flex gap-2">
+        <ion-button color="medium" fill="outline" class="w-fit" (click)="nuevoMotivo()">Cancelar</ion-button>
+        <ion-button fill="outline" color="danger" class="w-[80px]" *ngIf="selectedMotivo"
+          (click)="modalEliminar()">Eliminar</ion-button>
+      </div>
+    </div>
+  </div>
+</div>

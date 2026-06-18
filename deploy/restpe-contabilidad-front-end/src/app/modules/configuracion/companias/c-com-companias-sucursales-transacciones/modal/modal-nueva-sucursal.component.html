@@ -1,0 +1,125 @@
+<div class="flex flex-col bg-[#e7e7e7] p-1.5 gap-0.5 w-[550px]">
+  <div class="flex justify-between items-center w-full py-1 px-2">
+    <div class="flex items-center gap-1.5">
+      <fa-icon [icon]="farCirclePlus" class="text-primary text-sm"></fa-icon>
+      <span class="text-sm font-bold">Nueva Sucursal</span>
+    </div>
+    <fa-icon [icon]="farXmark" class="text-base cursor-pointer" (click)="cerrarModal()"></fa-icon>
+  </div>
+  <div class="flex flex-col bg-white p-2.5 gap-2">
+    <form [formGroup]="sucursalForm" class="flex flex-col gap-2">
+      <div class="contenido-formulario">
+        <span class="label">Nombre de sucursal <span class="text-danger">*</span></span>
+        <ion-input 
+          fill="outline" 
+          placeholder="Ingresa un nombre para la sucursal" 
+          formControlName="nombre"
+          class="w-[230px] text-xxs">
+        </ion-input>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Correo electrónico <span class="text-danger">*</span></span>
+        <ion-input 
+          fill="outline" 
+          placeholder="Ingresa un correo electrónico" 
+          type="email"
+          formControlName="correoElectronico"
+          class="w-[230px] text-xxs">
+        </ion-input>
+      </div>
+
+      <div class="contenido-formulario !items-start">
+        <span class="label">Dirección fiscal <span class="text-danger">*</span></span>
+        <ion-textarea 
+          fill="outline" 
+          placeholder="Ingresa una dirección fiscal"
+          rows="4"
+          formControlName="direccionFiscal"
+          class="w-[230px] text-sm">
+        </ion-textarea>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">RUC <span class="text-danger">*</span></span>
+        <ion-input 
+          fill="outline" 
+          placeholder="Ingresa un RUC" 
+          type="number"
+          maxlength="11"
+          formControlName="ruc"
+          class="w-[230px] text-xxs">
+        </ion-input>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Zona horaria <span class="text-danger">*</span></span>
+        <ion-select 
+          placeholder="Selecciona una zona horaria" 
+          toggleIcon="chevron-down" 
+          expandedIcon="chevron-up"
+          interface="popover" 
+          fill="outline"
+          formControlName="zonaHoraria"
+          class="w-[166px] text-xxs">
+          @for(zona of zonasHorarias; track zona.value) {
+            <ion-select-option [value]="zona.value">{{ zona.label }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Año/mes contable inicial <span class="text-danger">*</span></span>
+        <app-month-year-picker-string 
+          class="w-[118px]" 
+              [selectedMonth]="mesActual"
+              [selectedYear]="anioActual"
+          placeholder="Selecciona un periodo"
+          (monthYearChange)="onPeriodoContableInicialChange($event)">
+        </app-month-year-picker-string>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Idioma <span class="text-danger">*</span></span>
+        <ion-select 
+          placeholder="Seleccionar" 
+          toggleIcon="chevron-down" 
+          expandedIcon="chevron-up"
+          interface="popover" 
+          fill="outline"
+          formControlName="idioma"
+          class="w-[90px] text-xxs">
+          @for(idioma of idiomas; track idioma.value) {
+            <ion-select-option [value]="idioma.value">{{ idioma.label }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Estado <span class="text-danger">*</span></span>
+        <ion-select 
+          placeholder="Seleccionar" 
+          toggleIcon="chevron-down" 
+          expandedIcon="chevron-up"
+          interface="popover" 
+          fill="outline"
+          formControlName="estado"
+          class="w-[90px] text-xxs">
+          @for(estado of estados; track estado.value) {
+            <ion-select-option [value]="estado.value">{{ estado.label }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+    </form>
+
+    <div class="flex justify-end flex-row gap-3 mt-2">
+      <ion-button color="medium" fill="outline" class="w-fit" (click)="cerrarModal()">Cancelar</ion-button>
+      <ion-button 
+        class="w-fit" 
+        [disabled]="!validarFormulario()" 
+        (click)="agregarSucursal()">
+        Agregar sucursal
+      </ion-button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="relative" [ngClass]="width">
+  <fa-icon [icon]="farSearch" class="absolute left-2.5 top-[7px] text-xxs text-[#878787] z-10"
+  [ngClass]="{'select-disabled' : disabled}"></fa-icon>
+  <ion-input 
+    fill="outline" 
+    [type]="tipo"
+    [placeholder]="placeholder" 
+    [(ngModel)]="searchText"
+    (ionInput)="onSearch($event)"
+    (ionFocus)="onFocus()"
+    (ionBlur)="onBlur()"
+    [disabled]="disabled"
+    [style.height.!important]="height"
+    style="--padding-start:30px;--padding-end: 20px;">
+  </ion-input>
+  
+  @if(selectedItem) {
+    <div class=" cursor-pointer flex" [ngClass]="{'absolute right-1 top-[7px] z-[900]': pseudo == false,'pointer-events-none' : disabled}" (click)="clearSelection()">
+      <fa-icon [icon]="fasTimes" class="text-xxs text-[#878787] hover:text-danger" [ngClass]="{'!text-text-10': disabled}"></fa-icon>
+    </div>
+  }
+  
+  @if(showDropdown && filteredItems.length > 0) {
+    <div class="mt-1 bg-white rounded-b-md max-h-60 overflow-y-auto" [ngClass]="{'absolute top-[18px] left-0 right-0 border border-gray-300  z-[999] shadow-lg': pseudo == false}">
+      @for(item of filteredItems; track item[valueKey]) {
+        <div 
+          class="px-3 py-1 hover:bg-[#ECF4FF] cursor-pointer text-xxs xl:text-xs last:border-b-0"
+          (click)="selectItem(item)">
+          {{ getDisplayValue(item) }}
+        </div>
+      }
+    </div>
+  }
+  
+  @if(showDropdown && filteredItems.length === 0 && searchText.length > 0) {
+    <div class="mt-1 bg-white rounded-md" [ngClass]="{'absolute top-full left-0 right-0 z-50 shadow-lg': pseudo == false}">
+      <div class="px-3 py-2 text-xs text-gray-500 text-center">
+        No se encontraron resultados
+      </div>
+    </div>
+  }
+</div>

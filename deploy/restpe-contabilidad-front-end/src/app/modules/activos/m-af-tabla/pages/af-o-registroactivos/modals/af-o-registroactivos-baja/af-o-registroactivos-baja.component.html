@@ -1,0 +1,254 @@
+<div class="flex flex-col bg-[#e7e7e7] p-1.5 gap-0.5 w-[461px]">
+  <div class="flex justify-between items-center w-full py-1">
+    <div class="flex items-center gap-1">
+      <fa-icon [icon]="fasArrowTrendDown" class="text-xs text-danger"></fa-icon>
+      <span class="text-sm font-bold">Baja de activo</span>
+    </div>
+    <fa-icon [icon]="farXmark" class="text-sm cursor-pointer" (click)="dismissModal()"></fa-icon>
+  </div>
+  
+  <div class="flex flex-col bg-white p-2.5 gap-2"> 
+    <form [formGroup]="bajaForm">
+      <div class="contenedor-formulario !p-0 !pb-6">
+        <!-- Tipo de baja - Siempre visible -->
+        <div class="contenido-formulario">
+          <span class="label">Tipo de baja <span class="text-danger">*</span></span>
+          <ion-select 
+            fill="outline" 
+            formControlName="tipoBaja" 
+            placeholder="Selecciona un tipo" 
+            toggleIcon="chevron-down"
+            expandedIcon="chevron-up" 
+            interface="popover"
+            class="w-[270px]"
+            (ionChange)="onTipoBajaSeleccionado($event)">
+            @for(tipo of tiposBaja; track tipo.id) {
+              <ion-select-option [value]="tipo.id">{{ tipo.nombre }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <!-- Campos específicos para OBSOLESCENCIA -->
+        @if(tipoBajaSeleccionado === 'Obsolescencia') {
+          <div class="contenido-formulario">
+            <span class="label">Motivo <span class="text-danger">*</span></span>
+            <ion-select 
+              fill="outline" 
+              formControlName="motivo" 
+              placeholder="Selecciona un tipo" 
+              toggleIcon="chevron-down"
+              expandedIcon="chevron-up" 
+              interface="popover"
+              class="w-[270px]"
+              (ionChange)="onMotivoSeleccionado($event)">
+              @for(motivo of motivos; track motivo.id) {
+                <ion-select-option [value]="motivo.id">{{ motivo.nombre }}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario !items-start">
+            <span class="label">Descripción</span>
+            <ion-textarea 
+              fill="outline" 
+              formControlName="descripcion"
+              placeholder="Escribe aquí..."
+              rows="3"
+              class="w-[590px]">
+            </ion-textarea>
+          </div>
+        }
+
+        <!-- Campos específicos para SINIESTRO -->
+        @if(tipoBajaSeleccionado === 'Siniestro') {
+          <div class="contenido-formulario">
+            <span class="label">Tipo de siniestro <span class="text-danger">*</span></span>
+            <ion-select 
+              fill="outline" 
+              formControlName="tipoSiniestro" 
+              placeholder="Selecciona un tipo" 
+              toggleIcon="chevron-down"
+              expandedIcon="chevron-up" 
+              interface="popover"
+              class="w-[270px]"
+              (ionChange)="onTipoSiniestroSeleccionado($event)">
+              @for(tipo of tiposSiniestro; track tipo.id) {
+                <ion-select-option [value]="tipo.id">{{ tipo.nombre }}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Parte policial/seguro <span class="text-danger">*</span></span>
+            <ion-input 
+              fill="outline" 
+              formControlName="partePolicialSeguro"
+              type="text"
+              placeholder=""
+              class="w-[300px]">
+            </ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Monto Indemnización <span class="text-danger">*</span></span>
+            <ion-input 
+              fill="outline" 
+              formControlName="montoIndemnizacion"
+              type="text"
+              placeholder=""
+              class="w-[300px]">
+            </ion-input>
+          </div>
+
+          <div class="contenido-formulario !items-start">
+            <span class="label">Descripción del siniestro</span>
+            <ion-textarea 
+              fill="outline" 
+              formControlName="descripcionSiniestro"
+              placeholder="Escribe aquí..."
+              rows="3"
+              class="w-[590px]">
+            </ion-textarea>
+          </div>
+        }
+
+        <!-- Campos específicos para VENTA -->
+        @if(tipoBajaSeleccionado === 'Venta') {
+          <div class="contenido-formulario">
+            <span class="label">Valor de la venta <span class="text-danger">*</span></span>
+            <ion-input 
+              fill="outline" 
+              formControlName="valorVenta"
+              type="text"
+              placeholder=""
+              class="w-[300px]">
+            </ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Comprador <span class="text-danger">*</span></span>
+            <div class="flex items-center">
+              <ion-select 
+                fill="outline" 
+                formControlName="tipoCompradorRUC" 
+                toggleIcon="chevron-down"
+                expandedIcon="chevron-up" 
+                interface="popover"
+                class="w-[80px] -mr-0.5"
+                (ionChange)="onTipoCompradorRUCSeleccionado($event)">
+                @for(tipo of tiposCompradorRUC; track tipo.id) {
+                  <ion-select-option [value]="tipo.id">{{ tipo.nombre }}</ion-select-option>
+                }
+              </ion-select>
+              <ion-input 
+                fill="outline" 
+                formControlName="numeroComprador"
+                type="text"
+                placeholder="00000000000"
+                class="w-[150px]">
+              </ion-input>
+              <ion-button class="w-fit h-[28px] -ml-0.5" (click)="buscarComprador()">
+                <fa-icon [icon]="fasSearch" class="text-xs"></fa-icon>
+              </ion-button>
+            </div>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Nombre del comprador <span class="text-danger">*</span></span>
+            <ion-input 
+              fill="outline" 
+              formControlName="nombreComprador"
+              type="text"
+              placeholder=""
+              class="w-[350px]">
+            </ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Tipo de documento <span class="text-danger">*</span></span>
+            <ion-select 
+              fill="outline" 
+              formControlName="tipoDocumento" 
+              placeholder="Selecciona un documento" 
+              toggleIcon="chevron-down"
+              expandedIcon="chevron-up" 
+              interface="popover"
+              class="w-[270px]"
+              (ionChange)="onTipoDocumentoSeleccionado($event)">
+              @for(tipo of tiposDocumento; track tipo.id) {
+                <ion-select-option [value]="tipo.id">{{ tipo.nombre }}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">N° de documento <span class="text-danger">*</span></span>
+            <ion-input 
+              fill="outline" 
+              formControlName="numeroDocumento"
+              type="text"
+              placeholder=""
+              class="w-[300px]">
+            </ion-input>
+          </div>
+        }
+
+        <!-- Campos comunes - Siempre visibles -->
+        <div class="contenido-formulario">
+          <span class="label">Fecha de baja <span class="text-danger">*</span></span>
+          <app-base-calendar-new 
+            class="flex-none w-[150px]" 
+            mode="single" 
+            [initialDate]="fechaBaja"
+            position="center" 
+            (dateSelected)="onFechaBaja($event)">
+          </app-base-calendar-new>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Moneda <span class="text-danger">*</span></span>
+          <ion-select 
+            fill="outline" 
+            formControlName="moneda" 
+            placeholder="Selecciona una moneda" 
+            toggleIcon="chevron-down"
+            expandedIcon="chevron-up" 
+            interface="popover"
+            class="w-[270px]"
+            (ionChange)="onMonedaSeleccionada($event)">
+            @for(moneda of monedas; track moneda.id) {
+              <ion-select-option [value]="moneda.id">{{ moneda.nombre }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Cuenta contable asociada <span class="text-danger">*</span></span>
+          <app-autocomplete 
+            [items]="cuentasContables" 
+            [displayKey]="'nombre'" 
+            [valueKey]="'id'"
+            [placeholder]="'Buscar cuenta contable'" 
+            [width]="'w-[250px]'"
+            (itemSelected)="onCuentaContableSeleccionada($event)">
+          </app-autocomplete>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Estado <span class="text-danger">*</span></span>
+          <ion-input 
+            fill="outline" 
+            formControlName="estado"
+            readonly
+            class="w-[230px]">
+          </ion-input>
+        </div>
+      </div>
+    </form>
+
+    <div class="contenedor-btn !p-0">
+      <ion-button [disabled]="!bajaForm.valid" (click)="confirmarBaja()">Dar de baja</ion-button>
+      <ion-button color="medium" fill="outline" (click)="dismissModal()">Cancelar</ion-button>
+    </div>
+  </div>
+</div>

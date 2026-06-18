@@ -1,0 +1,58 @@
+<div class="contenedor-principal-modal" [style.width]="widthModal">
+  <div class="titulo-modal">
+    <div class="flex gap-1 items-center">
+      <fa-icon [icon]="farMoneyBill" class="mr-1 text-sm text-primary flex"></fa-icon>
+      <span class="text-sm font-bold">{{tituloModal}}</span>
+    </div>
+    <fa-icon [icon]="farXmark" class="text-sm cursor-pointer" (click)="cerrarModal()"></fa-icon>
+  </div>
+  <div class="contenido-modal">
+    <span class="text-xs font-bold">{{subtitulomodal}}</span>
+    <div class="flex flex-col gap-2.5">
+      <div class="grid grid-cols-1 gap-2 gap-y-1">
+        @for (detalle of detalles; track detalle.label; let i = $index) {
+        <div class="flex text-xxs font-semibold gap-2">
+          <span class="w-[100px] flex flex-none">{{detalle.label}}:</span>
+          <span class="font-normal line-clamp-1">{{detalle.value}}</span>
+        </div>
+        }
+      </div>
+      @if(TextoMediosPago){
+      <div class="flex justify-between">
+        <span class="text-xs font-bold">{{TextoMediosPago}}</span>
+        @if (BotonAgregarMedioPago) {
+        <ion-button class="w-fit whitespace-nowrap" (click)="agregarMedioPago()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span>Agregar medio de pago</span>
+        </ion-button>
+        }
+      </div>
+      }
+
+      @if (mostrarTabla) {
+      <div class="flex flex-col gap-2">
+        <ag-grid-angular style="width: 100%; height: 150px;" class="ag-theme-quartz" [rowData]="rowData"
+          [columnDefs]="colDefs" [rowHeight]="20" [headerHeight]="24" [domLayout]="'autoHeight'" />
+      </div>
+      }
+
+      <div class="p-2 bg-white border border-[#E4E4E4] rounded-[2px] flex flex-col gap-0.5 w-[200px] ml-auto ">
+        <div class="flex justify-between text-xxs">
+          <span>Monto pendiente</span>
+          <span class="text-right text-[#EF4444]">S/0.00</span>
+        </div>
+        <div class="flex justify-between text-xxs">
+          <span>Monto recibido</span>
+          <span class="text-right">S/20.000.00</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="flex justify-end gap-3">
+      @if (textoBotonCancelar) {<ion-button color="medium" fill="outline" class="w-fit"
+        (click)="cancelar()">{{textoBotonCancelar}}</ion-button>}
+      @if (mostrarBotonConfirmar) {<ion-button  class="w-fit" 
+        (click)="confirmar()">{{textoBotonConfirmar}}</ion-button>}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,245 @@
+<div class="contenedor-principal-col !overflow-auto">
+  <div class="cont-title">
+    <span>Dashboard indicadores clave por sede</span>
+  </div>
+  <!-- filtros -->
+  <div class="contenedor-filtros justify-between">
+    <div class="filtros-absolutos">
+      <ion-select placeholder="Seleccione una sucursal" toggleIcon="chevron-down" expandedIcon="chevron-up"
+        [(ngModel)]="sucursalSeleccionada" interface="popover" fill="outline"
+        class="w-[180px]">
+        <span slot="start" class="!mx-1 font-bold text-xxs">Sucursal: </span>
+        @for(sucursal of sucursales; track sucursal.id){<ion-select-option [value]="sucursal.id">{{sucursal.nombre}}</ion-select-option>}
+      </ion-select>
+
+      <ion-select placeholder="Seleccione un canal" toggleIcon="chevron-down" expandedIcon="chevron-up"
+        [(ngModel)]="canalSeleccionado" interface="popover" fill="outline"
+        class="w-[180px]">
+        <span slot="start" class="!mx-1 font-bold text-xxs">Canal: </span>
+        @for(canal of canales; track canal.id){<ion-select-option [value]="canal.id">{{canal.nombre}}</ion-select-option>}
+      </ion-select>
+
+      <div class="relative">
+        <span class="font-bold text-xxs absolute top-[7px] left-[8px] z-10">Rango de fechas:</span>
+        <app-base-calendar-new class="moverpaddingcalendar" mode="range" [initialStartDate]="startDate" [initialEndDate]="endDate"
+          [minDate]="minDate" [maxDate]="maxDate" position="right" (dateRangeSelected)="filtrarPorFechas($event)">
+        </app-base-calendar-new>
+      </div>
+
+    </div>
+    <div class="filtros-absolutos">
+      <ion-button fill="outline" class="w-[115px]" id="dashboard">
+        <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+        <span>Exportar</span>
+        <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+      </ion-button>
+      <ion-popover trigger="dashboard" triggerAction="click" [dismissOnSelect]="true"
+        class="popoverCustomButtonUbicacionActivos dezplegableAcciones2 " [showBackdrop]="false">
+        <ng-template>
+          <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+          <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+        </ng-template>
+      </ion-popover>
+    </div>
+  </div>
+  <!-- Dashboard -->
+  <div class="contenedor-dashboard pb-2 !overflow-auto">
+    <div class="cont-card-dashboard">
+
+      <div class="contenedor-charts !gap-1">
+        <div class="cont-title-chart">
+          <span class="title">Accesos rápidos</span>
+        </div>
+        <div class="cont-btn-accrapido flex-col">
+          <div class="cont-btn-accrapido">
+            <button class="btn-accrapido" routerLink="/ventas/facturacion-de-regalias">
+              <div class="icon">
+                <fa-icon [icon]="fasDollar"></fa-icon>
+              </div>
+              <span class="btn-title">Ventas</span>
+              <span class="btn-subtitle">Registro de facturas</span>
+            </button>
+            <button class="btn-accrapido" routerLink="/compras/operaciones/facturas-proveedores">
+              <div class="icon">
+                <fa-icon [icon]="farFile"></fa-icon>
+              </div>
+              <span class="btn-title">Compras</span>
+              <span class="btn-subtitle">Registro de facturas</span>
+            </button>
+          </div>
+          <div class="cont-btn-accrapido">
+            <button class="btn-accrapido" routerLink="/finanzas/consultas/consultas-saldos-caja-bancos">
+              <div class="icon">
+                <fa-icon [icon]="farFileInvoiceDollar"></fa-icon>
+              </div>
+              <span class="btn-title">Estados financieros</span>
+              <span class="btn-subtitle">Balance y resultados</span>
+            </button>
+            <button class="btn-accrapido" routerLink="/finanzas/tesoreria/mov-cuentas-banc-y-cajas">
+              <div class="icon">
+                <fa-icon [icon]="farBank"></fa-icon>
+              </div>
+              <span class="btn-title">Conciliación bancaria</span>
+              <span class="btn-subtitle">Cuentas de bancos</span>
+            </button>
+          </div>
+        </div>
+        
+      </div>
+
+      <div class="contenedor-charts !gap-1">
+        <div class="cont-title-chart">
+          <span class="title">Estado contable</span>
+        </div>
+        <div class="cont-btn-accrapido flex-col !gap-2.5">
+          <div class="card-estados success">
+            <div class="icon">
+              <fa-icon [icon]="fasFileCheck"></fa-icon>
+            </div>
+            <div class="card-detalle">
+              <span class="title">Asientos del periodo registrados</span>
+              <span class="subtitle">136 de 142 asientos contabilizados</span>
+            </div>
+          </div>
+          <div class="card-estados warning">
+            <div class="icon">
+              <fa-icon [icon]="fasTriangleExclamation"></fa-icon>
+            </div>
+            <div class="card-detalle">
+              <span class="title">Balance de comprobación cuadrado</span>
+              <span class="subtitle">1 diferencia detectada por {{monedapais}} 245.00</span>
+            </div>
+          </div>
+          <div class="card-estados danger">
+            <div class="icon">
+              <fa-icon [icon]="fasBank"></fa-icon>
+            </div>
+            <div class="card-detalle ">
+              <span class="title">Conciliación bancaria</span>
+              <span class="subtitle">2 cuentas por conciliar</span>
+            </div>
+          </div>
+          <div class="card-estados primary">
+            <div class="icon">
+              <fa-icon [icon]="fasList"></fa-icon>
+            </div>
+            <div class="card-detalle">
+              <span class="title">Cierre de periodo</span>
+              <span class="subtitle">Pendiente de aprobación</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contenedor-charts !gap-1">
+        <div class="cont-title-chart">
+          <span class="title">Informacion de planilla</span>
+        </div>
+        <div class="chart">
+          <canvas #infoPlanillaChart></canvas>
+        </div>
+      </div>
+
+    </div>
+    <div class="cont-card-dashboard">
+
+      <div class="contenedor-charts !h-[288px]">
+        <div class="cont-title-chart">
+          <span class="title">Comparativo de cuentas por cobrar vs pagar</span>
+        </div>
+        <div class="chart">
+          <canvas #cobrarPagarChart></canvas>
+        </div>
+      </div>
+      <div class="cont-card-dashboard w-full flex-col">
+
+        <div class="contenedor-charts !h-[140px] !gap-1 ">
+          <div class="cont-title-chart">
+            <span class="title">Cuentas por cobrar</span>
+          </div>
+          <div class="flex items-center gap-2 w-full">
+            <div class="flex flex-col border-l-4 border-solid border-primary pl-3 py-2 w-full">
+              <span class="text-sm font-bold">TOTAL</span>
+              <span class="text-lg font-bold">{{monedapais}} 126,000.00</span>
+              <span class="text-xs font-medium">23 documentos</span>
+            </div>
+            <div class="flex flex-col border-l-4 border-solid border-success pl-3 py-2 w-full">
+              <span class="text-sm font-bold">Vigentes</span>
+              <span class="text-lg font-bold">{{monedapais}} 124,000.00</span>
+              <span class="text-xs font-medium">20 documentos</span>
+            </div>
+            <div class="flex flex-col border-l-4 border-solid border-danger pl-3 py-2 w-full">
+              <span class="text-sm font-bold">Vencidas</span>
+              <span class="text-lg font-bold">{{monedapais}} 1,230.00</span>
+              <span class="text-xs font-medium">3 documentos</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contenedor-charts !h-[140px] !gap-1">
+          <div class="cont-title-chart">
+            <span class="title">Cuentas por pagar</span>
+          </div>
+          <div class="flex items-center gap-2 w-full">
+            <div class="flex flex-col border-l-4 border-solid border-primary pl-3 py-2 w-full">
+              <span class="text-sm font-bold">TOTAL</span>
+              <span class="text-lg font-bold">{{monedapais}} 126,000.00</span>
+              <span class="text-xs font-medium">23 documentos</span>
+            </div>
+            <div class="flex flex-col border-l-4 border-solid border-success pl-3 py-2 w-full">
+              <span class="text-sm font-bold">Vigentes</span>
+              <span class="text-lg font-bold">{{monedapais}} 124,000.00</span>
+              <span class="text-xs font-medium">20 documentos</span>
+            </div>
+            <div class="flex flex-col border-l-4 border-solid border-danger pl-3 py-2 w-full">
+              <span class="text-sm font-bold">Vencidas</span>
+              <span class="text-lg font-bold">{{monedapais}} 1,230.00</span>
+              <span class="text-xs font-medium">3 documentos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="contenedor-charts !h-[164px]">
+      <div class="cont-title-chart">
+        <span class="title">{{tipoImpuesto}} del periodo</span>
+      </div>
+      <div class="cont-cards !p-0">
+        <div class="cardv2">
+          <div class="cont-tituloc">
+            <div class="icon">
+              <fa-icon [icon]="farShoppingCart"></fa-icon>
+            </div>
+            <span class="tituloc">{{tipoImpuesto}} de Ventas</span>
+          </div>
+          <span class="cantidad">{{monedapais}} {{ventasperiodo}}</span>
+          <span class="text-xs" [ngClass]="{'text-success': porcVenta > 0 , 'text-danger': porcVenta < 0}">
+            @if(porcVenta > 0){<span>+</span>} {{porcVenta}}% vs anterior</span>
+
+        </div>
+        <div class="cardv2">
+          <div class="cont-tituloc">
+            <div class="icon">
+              <fa-icon [icon]="fasDollarSign"></fa-icon>
+            </div>
+            <span class="tituloc">{{tipoImpuesto}} de Compras</span>
+          </div>
+          <span class="cantidad">{{monedapais}} {{comprasperiodo}}</span>
+          <span class="text-xs" [ngClass]="{'text-success': porcCompra > 0 , 'text-danger': porcCompra < 0}">
+            @if(porcCompra > 0){<span>+</span>} {{porcCompra}}% vs anterior</span>
+        </div>
+        <div class="cardv2">
+          <div class="cont-tituloc">
+            <div class="icon">
+              <fa-icon [icon]="fasCalculator"></fa-icon>
+            </div>
+            <span class="tituloc">{{tipoImpuesto}} del período</span>
+          </div>
+          <span class="cantidad">{{monedapais}} {{periodo}}</span>
+          @if(porcVenta > porcCompra || ventasperiodo > comprasperiodo){<span class="text-xs text-warning">Por pagar</span>}
+          @if(porcVenta < porcCompra && ventasperiodo < comprasperiodo){<span class="text-xs text-success">Crédito fiscal</span>}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

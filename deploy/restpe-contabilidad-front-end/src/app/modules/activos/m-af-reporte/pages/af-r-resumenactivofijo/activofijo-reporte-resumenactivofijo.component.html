@@ -1,0 +1,130 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Listado general de activos con valores y depreciación acumulada</span>
+    </div>
+
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="flex items-center gap-3 w-full flex-row">
+          <div class="buscador">
+            <fa-icon [icon]="farSearch"></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar activo por descripción o código" class="w-full"
+              style="--padding-start:30px"></ion-input>
+          </div>
+          <!-- <ion-select placeholder="Activo" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+            fill="outline" class="w-[163px]"> @for(item of selectorestado; track $index){
+            <ion-select-option value="{{item.value}}">{{item.nombre}}</ion-select-option>
+            }
+          </ion-select> -->
+        </div>
+
+        <div class="filtros-absolutos">
+          <ion-select placeholder="Tipo depreciación" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+            fill="outline" class="w-[140px]">
+            @for(item of selectordepreciacion; track $index){ <ion-select-option
+              value="{{item.value}}">{{item.nombre}}</ion-select-option>
+            }
+          </ion-select>
+          <div class="flex">
+            <ion-select placeholder="Adquisición" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+              fill="outline" class="w-[120px]">
+              @for(item of selectoradquisicion; track $index){
+              <ion-select-option value={{item.value}}>{{item.nombre}}</ion-select-option>
+              }
+            </ion-select>
+            <app-base-calendar-new class="flex-none -ml-px" mode="range" [initialStartDate]="startDate"
+              [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="left"
+              (dateRangeSelected)="filtrarPorFechas($event)">
+            </app-base-calendar-new>
+          </div>
+          <app-selector-rango-montos
+            [(ngModel)]="rangoSeleccionado"
+            placeholder="Montos de adquisición"
+            width="w-[158px]"
+            (rangoSeleccionado)="onRangoSeleccionado($event)">
+          </app-selector-rango-montos>
+        </div>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button class="w-fit" (click)="actualizar()" fill="outline">
+          <span>Actualizar datos</span>
+        </ion-button>
+        <ion-button class="w-[115px]" id="reportesresumen" fill="outline">
+          <fa-icon [icon]="fasGear" class="mr-1"></fa-icon>
+          <span>Acciones</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesresumen" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos dezplegableAcciones2" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Imprimir</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+
+    <div class="flex flex-row gap-3 p-1.5 pt-0">
+      <div class="flex flex-1 border border-solid flex-row h-[56px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Total de Activos Registrados</span>
+          @if (!facade.loadingObtener()) {
+            <span class="font-bold text-sm">10</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 30px; height: 20px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasList" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[56px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Valor Total de Adquisición</span>
+          @if (!facade.loadingObtener()) {
+            <span class="font-bold text-sm">S/ 234,900.00</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 100px; height: 20px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasHandHoldingDollar" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[56px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Depreciación Acumulada Total</span>
+          @if (!facade.loadingObtener()) {
+            <span class="font-bold text-sm">S/ 154,050.00</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 100px; height: 20px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasPerson" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[56px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Total del Valor Neto Contable</span>
+          @if (!facade.loadingObtener()) {
+            <span class="font-bold text-sm">S/ 80,850.00</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 100px; height: 20px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasFiles" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+    </div>
+    <div class="h-full relative" [appLoader]="facade.loadingObtener()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs" [defaultColDef]="defaultColDef"
+        [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20" [purgeClosedRowNodes]="true"
+        [localeText]="localeText" [suppressLoadingOverlay]="true" (gridReady)="onGridReady($event)" />
+    </div>
+  </div>
+</div>

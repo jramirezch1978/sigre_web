@@ -1,0 +1,26 @@
+@if(cuentas.length === 0) {
+  <ion-button fill="outline" (click)="abrirModalCuentasBancarias()" [ngClass]="{'w-[137]': panelLateralVisible , 'w-[163]':!panelLateralVisible}">
+    <fa-icon [icon]="fasPlusCircle" class="mr-1"></fa-icon>
+    <span class="line-clamp-1">Agregar cuenta bancaria</span>
+  </ion-button>
+}
+
+@if(cuentas.length > 0) {
+  <div class="flex items-start gap-2 w-[160px]">
+    <div class="flex flex-col gap-1 w-full">
+      @for(cta of cuentas; track cta.id; let idx = $index) {
+        <div class="input-simulado gap-1 justify-between w-full">
+          <span class="text-xxs text-text-45 line-clamp-1">{{ cta.nroCuenta }}</span>
+          <div class="flex items-center gap-1">
+            <fa-icon [icon]="farEdit" class="text-xxs text-primary cursor-pointer" 
+              (click)="abrirModalCuentasBancarias(idx)"></fa-icon>
+            <fa-icon [icon]="farTrashAlt" class="text-xxs text-danger cursor-pointer" 
+              (click)="borrarCuenta(idx)"></fa-icon>
+          </div>
+        </div>
+      }
+    </div>
+    <fa-icon [icon]="farPlusCircle" class="text-xxs text-primary cursor-pointer mt-2" 
+      (click)="abrirModalCuentasBancarias()"></fa-icon>
+  </div>
+}

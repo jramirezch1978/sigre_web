@@ -1,0 +1,306 @@
+<div class="contenedor-principal">
+  @if (!panelLateralVisible) {
+  <div class="btn-mostrartabla"
+    (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight"></fa-icon>
+  </div>
+  }
+  
+  @if(panelLateralVisible){<div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de cartera de cobros (Selecciona un documento para visualizarlo o editarlo)</span>
+      @if (panelLateralVisible) {<div class="btn-mostrarform" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>}
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por cliente o tipo de documento" class="w-full" style="--padding-start:30px"></ion-input>
+      </div>
+      <div class="flex flex-row">
+          <ion-select placeholder="De emisión" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+            fill="outline" class="w-[110px] text-xxs -mr-0.5" value="0">
+            <ion-select-option value="0">De emisión</ion-select-option>
+            <ion-select-option value="1">De vencimiento</ion-select-option>
+          </ion-select>
+
+          <!-- calendario -->
+          <app-base-calendar-new
+            class="flex-none "
+            mode="range"
+            [initialStartDate]="startDate"
+            [initialEndDate]="endDate"
+            [minDate]="minDate"
+            [maxDate]="maxDate"
+            position="left"
+            (dateRangeSelected)="filtrarPorFechas($event)">
+          </app-base-calendar-new>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px]" fill="outline" id="gestionG">
+          <fa-icon [icon]="fasDownload" class="mr-1 text-text-85"></fa-icon>
+          <span class="text-text-85">Exportar</span>
+          <fa-icon class="ml-1 text-text-85" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="gestionG" triggerAction="click" [dismissOnSelect]="true" class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+            <ng-template>
+              <ion-item lines="none" [button]="true" >Exportar Excel</ion-item>
+              <ion-item lines="none" [button]="true" >Exportar PDF</ion-item>
+            </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+
+    <!-- Información resumen -->
+    <div class="cont-cards">
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Documentos vencidos</span>
+          @if(loaderActivo()){
+            <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+          }@else{
+            <span class="cantidad">20 doc. (10%)</span>
+          }
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasTriangleExclamation"></fa-icon>
+        </div>
+      </div>
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Promedio de días de cobro</span>
+          @if(loaderActivo()){
+            <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+          }@else{
+            <span class="cantidad">10</span>
+          }
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasDesktop"></fa-icon>
+        </div>
+      </div>
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Monto total anticipos</span>
+          @if(loaderActivo()){
+            <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+          }@else{
+            <span class="cantidad">S/ 10,000.00</span>
+          }
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasDollarSign"></fa-icon>
+        </div>
+      </div>
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Importe de notas de crédito aplicadas</span>
+          @if(loaderActivo()){
+            <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+          }@else{
+            <span class="cantidad">S/ 10,000.00</span>
+          }
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasChartLine"></fa-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex h-full relative" [appLoader]="loaderActivo()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" 
+        class="" [rowData]="rowData" 
+        [columnDefs]="colDefs"
+        [pagination]="true" 
+        [rowSelection]="'single'" 
+        [localeText]="localeText"
+        [paginationPageSize]="20" 
+        [rowHeight]="20"
+        [headerHeight]="24" 
+        (gridReady)="onGridReady($event)" 
+        (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>}
+
+  <div class="panel-derecho" [appLoader]="loaderActivo()" [ngClass]="{'!w-full !flex-auto': !panelLateralVisible}">
+    <div class="cont-title">
+      @if(filaSeleccionada){<span>Información de doc.: {{filaSeleccionada.cc_tipoDoc}} - {{filaSeleccionada.cc_serieNum}}</span>}        
+      @if(!filaSeleccionada){<span>Selecciona un documento</span>}        
+    </div>
+    @if(filaSeleccionada){<div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" ></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+    <form action="" [formGroup]="cobroForm">
+      <!-- Contenido del formulario -->
+      <div class="contenedor-formulario"  [ngClass]="{'!flex-row !gap-10': !panelLateralVisible}">
+        <div class="contenedor-formulario !p-0">
+          
+          <div class="contenido-formulario">
+            <span class="label">Cliente</span>
+            <ion-input fill="outline" placeholder="Cliente" formControlName="cliente" class="w-[200px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Tipo de comprobante</span>
+            <ion-input fill="outline" placeholder="Tipo de doc." formControlName="tipoDoc" class="w-[90px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Serie/N° comprobante</span>
+            <ion-input fill="outline" placeholder="Serie/N° doc." formControlName="serieNumDoc" class="w-[120px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Fecha de emisión</span>
+            <ion-input fill="outline" type="date" formControlName="fechaEmision" class="w-[110px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Fecha de vencimiento</span>
+            <ion-input fill="outline" type="date" formControlName="fechaVencimiento" class="w-[110px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Moneda</span>
+            @if(cobroForm.value.estado != 'Parcial'){<ion-input fill="outline" class="w-[120px]" formControlName="moneda"></ion-input>}
+            @if(cobroForm.value.estado == 'Parcial'){
+              <ion-select placeholder="Soles (S/)" formControlName="moneda" interface="popover" fill="outline" class="w-[120px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(mon of monedas; track mon){<ion-select-option [value]="mon.id">{{ mon.nombre }}</ion-select-option>}
+            </ion-select>}
+          </div>
+
+          @if(mostrarTipoCambio){
+          <div class="contenido-formulario">
+            <span class="label">Tipo de cambio</span>
+            <ion-input fill="outline" placeholder="S/ 3.40" formControlName="tipoCambio" class="w-[90px]"></ion-input>
+          </div>
+        }
+
+          <div class="contenido-formulario">
+            <span class="label">Monto total</span>
+            <ion-input fill="outline" placeholder="S/ 1,500.00" formControlName="montoTotal" class="w-[120px]"></ion-input>
+          </div>
+
+          @if(filaSeleccionada?.cc_estado == 'Cobrado'){<div class="contenido-formulario">
+            <span class="label">Monto cobrado</span>
+            <ion-input fill="outline" placeholder="S/ 1,500.00" formControlName="montoCobrado" class="w-[120px]"></ion-input>
+          </div>}
+
+          @if(filaSeleccionada?.cc_estado != 'Cobrado'){<div class="contenido-formulario">
+            <span class="label">Saldo pendiente</span>
+            <ion-input fill="outline" placeholder="S/ 1,500.00" formControlName="montoTotal" class="w-[120px]"></ion-input>
+          </div>}
+
+          <div class="contenido-formulario">
+            <span class="label">Sucursales</span>
+            @if(cobroForm.value.estado != 'Parcial'){<ion-input fill="outline" formControlName="sucursales" class="w-[180px]"></ion-input>}
+            @if(cobroForm.value.estado == 'Parcial'){<app-autocomplete
+              formControlName="sucursales"
+              [items]="sucursales"
+              displayKey="nombre"
+              valueKey="nombre"
+              placeholder="La Molina, Lima"
+              class="w-[180px]">
+            </app-autocomplete>}
+          </div>
+
+          <!-- Campos que cambian según el estado -->
+            <div class="contenido-formulario">
+              <span class="label">Estado</span>
+              @if(filaSeleccionada?.cc_estado == 'Vencido' || filaSeleccionada?.cc_estado == 'Cobrado'){
+              <ion-input fill="outline" placeholder="Cobrado" formControlName="estado" class="w-[140px]"></ion-input>}
+              @if(filaSeleccionada?.cc_estado != 'Cobrado' && filaSeleccionada?.cc_estado != 'Vencido'){
+              <ion-select placeholder="Pendiente" formControlName="estado" interface="popover" fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+                @for(est of estadoSelect; track est){<ion-select-option [value]="est.id">{{ est.nombre }}</ion-select-option>}
+              </ion-select>}
+            </div>
+          
+
+          <!-- Estado Parcial -->
+          @if(cobroForm.value?.estado == 'Parcial') {
+
+            <div class="contenido-formulario">
+              <span class="label">Medio de cobro</span>
+              <ion-select placeholder="Selecciona medio de cobro" formControlName="mediodeCobro" interface="popover" fill="outline" class="w-[170px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+                @for(medio of mediosdeCobro; track medio){<ion-select-option [value]="medio.id">{{ medio.nombre }}</ion-select-option>}
+              </ion-select>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Fecha de Cobro parcial</span>
+              <app-base-calendar-new
+                class="flex-none"
+                mode="single"
+                [initialDate]="cobroForm.get('fechaCobroParcial')?.value"
+                position="center"
+                (dateSelected)="onFechadeCobroParcialSeleccionada($event)">
+              </app-base-calendar-new>
+            </div>
+
+          }
+          <!-- Checkbox para aplicar nota de crédito -->
+          @if(filaSeleccionada?.cc_estado !== 'Parcial'){<div class="flex items-center gap-2 py-2">
+            <ion-checkbox [(ngModel)]="aplicarNotaCredito" [ngModelOptions]="{standalone: true}" (ionChange)="onCheckboxNotaCreditoChange($event)"></ion-checkbox>
+            <span class="text-xxs lg:text-xs text-text-85">Aplicar nota de crédito</span>
+          </div>}
+
+          <!-- Autocomplete de nota de crédito (aparece solo si el checkbox está marcado) -->
+          @if(aplicarNotaCredito) {
+            <div class="contenido-formulario">
+              <span class="label">Nota de crédito asoc.</span>
+              <app-autocomplete
+                formControlName="notaCredito"
+                [items]="notasCredito"
+                displayKey="nombre"
+                valueKey="id"
+                placeholder="Selecciona una nota"
+                class="w-[180px]">
+              </app-autocomplete>
+            </div>
+          }
+
+          <!-- Estado Cobrado -->
+          @if(filaSeleccionada?.cc_estado == 'Cobrado') {
+
+            <div class="contenido-formulario">
+              <span class="label">Medio de cobro</span>
+              <ion-input fill="outline" placeholder="Medio de cobro" formControlName="mediodeCobro" class="w-[180px]"></ion-input>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Fecha de cobro</span>
+              <ion-input fill="outline" type="date" formControlName="fechadeCobro" class="w-[110px]"></ion-input>
+            </div>
+
+          }
+          @if(cobroForm.value?.estado != 'Pendiente'){<div class="contenido-formulario">
+            <span class="label">N° de asiento contable</span>
+            <div class="flex items-center gap-2">
+              <ion-input fill="outline" placeholder="ASC-2025-000148" formControlName="asientoContable"  class="opacity-60">
+                <fa-icon slot="end" [icon]="farEye" class="text-xxs text-text-85 cursor-pointer bg-white"
+                  (click)="verAsientoContable()"></fa-icon>
+              </ion-input>
+            </div>
+          </div>}
+        <div class="contenido-formulario !items-start">
+          <span class="label">Observaciones</span>
+          <ion-textarea fill="outline" formControlName="observacion" placeholder="Escribe aquí..." class="w-[163px]"></ion-textarea>
+        </div>
+
+        </div>
+      </div>
+    </form>
+    <div class="contenedor-btn py-2.5">
+      @if(filaSeleccionada?.cc_estado == 'Pendiente' || filaSeleccionada?.cc_estado == 'Parcial') {
+        <div class="flex gap-2">
+          <ion-button class="" (click)="botonGuardar()">Registrar pago</ion-button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

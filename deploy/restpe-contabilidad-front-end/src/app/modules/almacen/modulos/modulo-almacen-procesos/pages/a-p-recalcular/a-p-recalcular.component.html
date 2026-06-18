@@ -1,0 +1,161 @@
+<div class="contenedor-principal">
+  @if(!mostrartabla){
+  <div class="flex items-center justify-center w-[15px] bg-[#E6E8F4]" (click)="mostrartabla=!mostrartabla">
+    <fa-icon [icon]="fasChevronsRight" class="text-xs text-primary cursor-pointer"></fa-icon>
+  </div>
+  }
+  @if(mostrartabla){
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span class="">Lista de productos a recalcular (Precio promedio)</span>
+      <fa-icon [icon]="fasChevronsLeft" class="text-xs text-primary cursor-pointer"
+        (click)="mostrartabla=!mostrartabla"></fa-icon>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="relative flex-1">
+          <fa-icon [icon]="farSearch" class="absolute left-2.5 top-1.5 text-xxs text-[#878787] z-40"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por código o descripción" style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+      <div class="filtros-absolutos">
+      <app-base-calendar-new class="flex-none -ml-px" mode="range" [initialStartDate]="startDate"
+          [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="left"
+          (dateRangeSelected)="filtrarPorFechas($event)">
+        </app-base-calendar-new>
+      </div>
+      <div class="flex items-center gap-3 flex-none">
+        <ion-button class="w-fit" (click)="recalcularProductosSeleccionados()" [disabled]="!filaSeleccionada || filaSeleccionada?.estado == 'Recalculado' || filasSeleccionadasCount <= 1">
+          Recalcular
+        </ion-button>
+      </div>
+    </div>
+
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="ag-theme-alpine" [rowSelection]="rowSelection"
+        [defaultColDef]="defaultColDef" [initialState]="initialState" [rowData]="rowData" [rowHeight]="20"
+        [headerHeight]="24" [pagination]="true" [columnDefs]="colDefs" [rowSelection]="'multiple'"
+        (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" (selectionChanged)="onSelectionChanged()" [domLayout]="'normal'"
+        [purgeClosedRowNodes]="true" />
+    </div>
+  </div>
+  }
+  <div class="panel-derecho" [ngClass]="{'!w-full !flex-auto':!mostrartabla}" [appLoader]="isLoading">
+    <div class="cont-title mb-1.5">
+      <span class="">Producto @if(filaSeleccionada){: {{filaSeleccionada.almacen_codigo }} - {{ filaSeleccionada.descripcion }} }</span>
+    </div>
+    @if(filaSeleccionada){<div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" ></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+
+    <div class="flex flex-col overflow-y-auto h-full">
+      <form [formGroup]="recalculoForm">
+        <div class="contenedor-formulario" [ngClass]="{'!flex-row !gap-20': !mostrartabla}">
+            <div class="contenedor-formulario !p-0">
+              <div class="contenido-formulario">
+                <span class="label">Unidad de medida</span>
+                <ion-input fill="outline" formControlName="unidadMedida" class="w-[163px]" placeholder="Kilogramos"></ion-input>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Precio prom. actual</span>
+                <ion-input fill="outline" formControlName="precioPromActual" class="w-[82px]" type="number" placeholder="10.00"></ion-input>
+              </div>
+
+              <div class="contenido-formulario">
+                <span class="label">Precio prom. recalculado</span>
+                <ion-input fill="outline" formControlName="precioPromRecalculado" class="w-[82px]" type="number" placeholder="15.00"></ion-input>
+              </div>
+  
+              <div class="contenido-formulario">
+                <span class="label">Moneda</span>
+                <ion-input fill="outline" formControlName="moneda" class="w-[163px]" placeholder="Soles"></ion-input>
+              </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 px-2.5 justify-end py-2">
+          <ion-button fill="outline" class="text-text-85 w-[115px]" id="reportesasignacionratios" [disabled]="!filaSeleccionada">
+            <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+            <span>Exportar</span>
+            <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+          </ion-button>
+          <ion-popover trigger="reportesasignacionratios" triggerAction="click" [dismissOnSelect]="true"
+            class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+            <ng-template>
+              <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarExcel()">Exportar Excel</ion-item>
+              <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarPdf()">Exportar PDF</ion-item>
+            </ng-template>
+          </ion-popover>
+          <ion-button class="w-fit" (click)="recalcularConDados()" [disabled]="!filaSeleccionada || filaSeleccionada?.estado == 'Recalculado' || filasSeleccionadasCount > 1">
+            Recalcular
+          </ion-button>
+        </div>
+      </form>
+
+      <div class="cont-title mb-1.5">
+        <span class="">Detalle del recálculo</span>
+      </div>
+
+      <div class="cont-cards"> 
+
+        <div class="card">
+          <div class="contenido">
+            <span class="title">Precio promedio actual</span>
+            <span class="cantidad">S/ {{ stockActualCalculado | number:'1.2-2' }}</span>
+          </div>
+          <div class="icon">
+            <fa-icon [icon]="fasHandHoldingDollar"></fa-icon>
+          </div>
+        </div>
+
+        @if(!mostrartabla){<div class="card">
+          <div class="contenido">
+            <span class="title">Precio promedio recalculado</span>
+            <span class="cantidad">S/ {{ stockRecalculadoCalculado | number:'1.2-2' }}</span>
+          </div>
+          <div class="icon">
+            <fa-icon [icon]="fasDisplayChartUpCircleDollar"></fa-icon>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="contenido">
+            <span class="title">Diferencia</span>
+            <span class="cantidad"
+              [ngClass]="{
+                'text-[#6DC560]': diferenciaCalculada > 0,
+                'text-red-600': diferenciaCalculada < 0,
+                'text-gray-600': diferenciaCalculada === 0
+              }">
+              {{ diferenciaCalculada > 0 ? '+' : '' }}S/ {{ diferenciaCalculada | number:'1.2-2' }}
+            </span>
+          </div>
+          <div class="icon">
+            <fa-icon [icon]="fasChartLine"></fa-icon>
+          </div>
+        </div>}
+
+      </div>
+
+      <div class="h-[200px] flex flex-auto">
+        <ag-grid-angular style="width: 100%; height: 100%;" [rowData]="movimientosRowData"
+          [columnDefs]="movimientosColDefs" [columnTypes]="columnTypes" [pagination]="false" [localeText]="localeText"
+          [rowHeight]="20" [headerHeight]="24" [overlayNoRowsTemplate]="overlayNoRowsTemplate" (gridReady)="onGridReadyDetalle($event)"/>
+      </div>
+      
+      <!-- Botones debajo de la tabla -->
+      <div class="flex gap-3 justify-end py-2 px-2.5">
+        <ion-button fill="outline" class="w-fit whitespace-nowrap" [disabled]="!botonesHabilitados || btnDisabled">
+          Generar asiento contable
+        </ion-button>
+        <ion-button class="w-fit whitespace-nowrap" color="primary" [disabled]="!botonesHabilitados || btnDisabled" (click)="confirmacionRecalculo()">
+          Confirmar recálculo
+        </ion-button>
+      </div>
+    </div>
+  </div>

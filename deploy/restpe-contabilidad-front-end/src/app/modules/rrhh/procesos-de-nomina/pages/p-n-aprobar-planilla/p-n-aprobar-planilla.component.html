@@ -1,0 +1,250 @@
+<div class="contenedor-principal">
+  @if(!panelLateralVisible){
+  <div class="barra-desplegable" (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight"></fa-icon>
+  </div>
+  }
+
+  @if(panelLateralVisible){
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de cálculos de planilla (Selecciona un cálculo para aprobar o devolver)</span>
+      @if (panelLateralVisible) {
+      <div class="btn-mostrarform" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>
+      }
+    </div>
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar configuraciones por código o nombre"
+            style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+
+      <div class="filtros-absolutos">
+        <div class="flex items-center flex-none">
+          <ion-select placeholder="Desde" [(ngModel)]="planillaSeleccionada" [ngModelOptions]="{standalone: true}"
+            interface="popover" fill="outline" class="w-[45px]" toggleIcon="chevron-down"
+            expandedIcon="chevron-up">
+            <ion-select-option value="Desde">Desde</ion-select-option>
+            <ion-select-option value="Hasta">Hasta</ion-select-option>
+          </ion-select>
+          <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+            [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="center">
+          </app-base-calendar-new>
+        </div>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button fill="outline" class="text-text-85 w-[115px]" id="conceptos">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="conceptos" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+    <div class="contenedor-primera-tabla"  [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="columnDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [localeText]="localeText" [headerHeight]="24"
+        [paginationPageSize]="20" [rowSelection]="'single'" [suppressRowClickSelection]="true" (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+  }
+
+  <div class="panel-derecho" [ngClass]="{'!w-full !flex-1': !panelLateralVisible}" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      @if(filaSeleccionada){
+      <span>Información de: {{ filaSeleccionada.planilla_codigo }}</span>
+      } @else {
+      <span>Aprobación de planilla</span>
+      }
+    </div>
+
+    <div class="flex flex-col">
+      <form action="" [formGroup]="informacionForm" class="contenedor-formulario"
+        [ngClass]="{'!flex-row !gap-20': !panelLateralVisible}">
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Periodo</span>
+            <ion-input fill="outline" formControlName="planilla_periodo" class="w-[160px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Sucursal</span>
+            <ion-input fill="outline" formControlName="planilla_sucursal" class="w-[145px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Periodicidad de pago</span>
+            <ion-input fill="outline" formControlName="periodicidadPago" class="w-[143px]"></ion-input>
+          </div>
+        </div>
+
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Calcular desde</span>
+            <ion-input fill="outline" type="date" formControlName="calcularDesde" class="w-[150px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Calcular hasta</span>
+            <ion-input fill="outline" type="date" formControlName="calcularHasta" class="w-[150px]"></ion-input>
+          </div>
+
+          @if(filaSeleccionada){
+          <div class="contenido-formulario">
+            <span class="label">Estado</span>
+            <ion-input fill="outline" formControlName="estadoSelect" class="w-[70px]"></ion-input>
+          </div>
+          }
+        </div>
+      </form>
+
+      @if(mostrarListaTrabajadores) {
+      <div class="cont-title !whitespace-nowrap">
+        <span>Lista de trabajadores (Haz clic en un trabajador para ver o editar su información)</span>
+      </div>
+      <div class="min-h-[200px] flex-1">
+        <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowDataDetalle"
+          [columnDefs]="colDefsDetalle" [rowHeight]="20" [headerHeight]="24" [localeText]="localeText"
+          [rowSelection]="'single'" [paginationPageSize]="20" (gridReady)="onGridReadyDetalle($event)"
+          (cellClicked)="onCellClickedDetalle($event)" />
+      </div>
+      }
+
+      @if(trabajadorSeleccionado) {
+      <div class="cont-title">
+        @if(trabajadorSeleccionado){
+        <span>Información de trabajador: {{ trabajadorSeleccionado.empleado_codigo }}</span>
+        } @else {
+        <span>Información de trabajador</span>
+        }
+      </div>
+      <div class="cont-tabs">
+        <div class="flex overflow-hidden">
+          <ion-segment [(ngModel)]="tabSeleccionado" class="company-tabs" #scrollBox
+            [ngModelOptions]="{standalone: true}" mode="md" scrollable class="company-tabs">
+            <ion-segment-button value="jornadaLaboral" class="boton-subsubtitulo">
+              <ion-label>Jornada Laboral</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="ingresos" class="boton-subsubtitulo">
+              <ion-label>Ingresos</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="descuentos" class="boton-subsubtitulo">
+              <ion-label>Descuentos</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="tributos" class="boton-subsubtitulo">
+              <ion-label>Tributos y aportes</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </div>
+      </div>
+      }
+
+      <form [formGroup]="ConceptosFijosForm" class="flex flex-col flex-grow">
+        @if(trabajadorSeleccionado) {
+        @if (tabSeleccionado === 'jornadaLaboral') {
+        <div class="contenedor-formulario" [ngClass]="{'!flex-row !gap-20 !w-2/3': !panelLateralVisible}">
+          <div class="contenedor-formulario !p-0">
+            <div class="cont-titulo-tabs">
+              <span>Días de Jornada</span>
+            </div>
+
+            <div class="contenido-formulario pt-1.5">
+              <span class="label !w-[155px]">Laborados</span>
+              <ion-input fill="outline" formControlName="diasLaborados" class="w-[82px]"></ion-input>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label !w-[155px]">Subsidiados</span>
+              <ion-input fill="outline" formControlName="diasSubsidiados" class="w-[82px]"></ion-input>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label !w-[155px]">No laborados ni subsidiados</span>
+              <ion-input fill="outline" formControlName="diasNoLaborados" class="w-[82px]"></ion-input>
+            </div>
+
+            <div class="contenido-formulario pt-3">
+              <span class="label !w-[155px] !font-extrabold">Total:</span>
+              <ion-input fill="outline" formControlName="diasTotal" class="w-[82px]"></ion-input>
+            </div>
+          </div>
+
+          <div class="contenedor-formulario !p-0">
+            <div class="cont-titulo-tabs">
+              <span>Horas Laboradas</span>
+            </div>
+
+            <div class="contenido-formulario pt-1.5">
+              <span class="label">Ordinarias (HHH:MM)</span>
+              <ion-input fill="outline" formControlName="ordinaria" class="w-[82px]"></ion-input>
+              <span class="flex-row">:</span>
+              <ion-input fill="outline" formControlName="ordinaria2" class="w-[82px] flex-row"></ion-input>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Sobretiempo (HHH:MM)</span>
+              <ion-input fill="outline" formControlName="diasSubsidiados" class="w-[82px]"></ion-input>
+              <span class="flex-row">:</span>
+              <ion-input fill="outline" formControlName="ordinaria2" class="w-[82px] flex-row"></ion-input>
+            </div>
+
+            <div class="contenido-formulario pt-3">
+              <span class="label !font-extrabold">TOTAL HORAS:</span>
+              <ion-input fill="outline" formControlName="diasTotal" class="w-[82px]"></ion-input>
+              <span class="flex-row">:</span>
+              <ion-input fill="outline" formControlName="ordinaria2" class="w-[82px] flex-row"></ion-input>
+            </div>
+          </div>
+        </div>
+        }
+
+        @if (tabSeleccionado === 'ingresos') {
+        <div class="flex flex-col gap-1 w-full">
+          <ag-grid-angular style="width: 100%; height: 300px;" [rowData]="rowDataIngresos"
+            [columnDefs]="colDefsIngresos" [columnTypes]="columnTypes" [pagination]="false" [localeText]="localeText"
+            [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20" (gridReady)="onGridReadyIngresos($event)"
+            [defaultColDef]="defaultColDef" />
+        </div>
+        }
+
+        @if (tabSeleccionado === 'descuentos') {
+        <div class="flex flex-col gap-1 w-full">
+          <ag-grid-angular style="width: 100%; height: 300px;" [rowData]="rowDataDescuentos"
+            [columnDefs]="colDefsDescuentos" [columnTypes]="columnTypes" [pagination]="false" [localeText]="localeText"
+            [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20" (gridReady)="onGridReadyDescuentos($event)"
+            [defaultColDef]="defaultColDef"/>
+        </div>
+        }
+
+        @if (tabSeleccionado === 'tributos') {
+        <div class="flex flex-col gap-1 w-full">
+          <ag-grid-angular style="width: 100%; height: 300px;" [rowData]="rowDataTributos"
+            [columnDefs]="colDefsTributos" [columnTypes]="columnTypes" [pagination]="false" [localeText]="localeText"
+            [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20" (gridReady)="onGridReadyTributos($event)"
+            [defaultColDef]="defaultColDef"/>
+        </div>
+        }
+        }
+      </form>
+       @if(filaSeleccionada){
+      <div class="contenedor-btn">
+        <ion-button (click)="aprobarPlanilla()" [disabled]="filaSeleccionada.planilla_estado === 'Aprobado'"> Aprobar </ion-button>
+        <ion-button fill="outline" (click)="devolverPlanilla()"> Devolver </ion-button>
+      </div>
+      }
+    </div>
+  </div>
+</div>

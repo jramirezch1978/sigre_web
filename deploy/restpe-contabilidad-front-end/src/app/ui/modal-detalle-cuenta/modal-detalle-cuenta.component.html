@@ -1,0 +1,197 @@
+<div class="w-[900px] h-[580px] flex flex-col p-1.5 bg-[#E7E7E7]">
+  <div class="flex flex-row justify-between pb-1">
+    <span class="font-bold text-sm">Detalle de cuenta: Banco de Crédito del Perú - 194-2145896-0-15</span>
+    <fa-icon [icon]="fasXmark" class="cursor-pointer" (click)="dismissModal()"></fa-icon>
+  </div>
+  <div class="w-full bg-[#FFFFFF] p-2.5 flex flex-col gap-2 h-full">
+    @if(existendiferencias === false){
+    <div class="flex flex-row gap-1 py-1 px-2.5 bg-[#FAFCFE] items-center">
+      <fa-icon [icon]="farInfoCircle" class="text-xs"></fa-icon>
+      <span class="text-xxs">Esta cuenta está cerrada. Los movimientos son de solo lectura y no pueden modificarse.</span>
+    </div>
+    }
+    @else{
+    <div class="flex flex-row gap-1 py-1 px-2.5 bg-[#FFF9E7] items-center text-[#F2A626]">
+      <fa-icon [icon]="farInfoCircle" class="text-xs"></fa-icon>
+      <span class="text-xxs">Existen diferencias entre los movimientos del sistema y el extracto bancario. Revise las transacciones pendientes de conciliar.</span>
+    </div>
+    }
+    <div class="cont-cards">
+        @for(item of cards; track $index){
+          <div class="card">
+            <div class="contenido">
+              <span class="title">{{item.nombre}}</span>
+              <span class="cantidad" [ngClass]="{'!text-danger': item.nombre === 'Diferencia' && existendiferencias === true }">{{item.valor}}</span>
+            </div>
+            <div class="icon">
+              <fa-icon [icon]="item.icono"></fa-icon>
+            </div>
+          </div>
+        }
+      </div>
+      <div>
+        <ion-segment [(ngModel)]="tabSeleccionadoDetalle" mode="md" class="company-tabs">
+          <ion-segment-button value="movimientos" class="boton-tabs-formulario flex flex-1">
+            <ion-label>Movimientos conciliados (5)</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="pendientes" class="boton-tabs-formulario flex flex-1">
+            <ion-label>Pendientes por conciliar (0)</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="historial" class="boton-tabs-formulario flex flex-1">
+            <ion-label>Historial</ion-label>
+          </ion-segment-button>
+      </ion-segment>
+      </div>
+      @if(tabSeleccionadoDetalle === 'movimientos'){
+      <div class="contenedor-tablas">
+        <div class="tabla">
+          <div class="cont-title">
+            <span>Movimientos del sistema</span>
+            <span class="mr-2">6 mov.</span>
+          </div>
+          <div class="h-full height30">
+            <ag-grid-angular
+              style="width: 100%; height: 100%;"
+              class=""
+              [rowData]="rowDataMovimientos"
+              [columnDefs]="colDefsMovimientos"
+              [columnTypes]="columnTypes"
+              [pagination]="true"
+              [localeText]="localeText"
+              [rowHeight]="30"
+              [headerHeight]="24"
+              [paginationPageSize]="20"
+              />
+          </div>
+        </div>
+        <div class="tabla">
+          <div class="cont-title">
+            <span>Extracto bancario BCP</span>
+            <span class="mr-2">6 mov.</span>
+          </div>
+          <div class="h-full height30">
+            <ag-grid-angular
+              style="width: 100%; height: 100%;"
+              class=""
+              [rowData]="rowDataBancario"
+              [columnDefs]="colDefsBancario"
+              [columnTypes]="columnTypes"
+              [pagination]="true"
+              [localeText]="localeText"
+              [rowHeight]="30"
+              [headerHeight]="24"
+              [paginationPageSize]="20"
+              />
+          </div>
+        </div>
+      </div>
+      }
+      @if(tabSeleccionadoDetalle === 'pendientes'){
+      <div class="flex flex-col flex-grow p-1.5">
+        @if(existendiferencias === false){
+          <app-empty-state 
+            [imageSrc]="'assets/imagenes/emptyBuscar.svg'"
+            [imageAlt]="'conciliados'"
+            [imageWidth]="'112px'"
+            [imageHeight]="'112px'"
+            [title]="'Esta cuenta está completamente conciliada y cerrada'"
+            [description]="'No hay movimientos pendientes'"
+            class="grow flex items-center justify-center">
+          </app-empty-state>
+        }
+        @else{
+          <div class="conjunto-btn">
+            <ion-button fill="outline" class="w-fit">
+              <fa-icon [icon]="farLinkSimple" class="mr-1"></fa-icon>
+              <span class="text-cont">Vincular</span>
+            </ion-button>
+            <ion-button fill="outline" class="w-fit">
+              <fa-icon [icon]="farLinkSlash" class="mr-1"></fa-icon>
+              <span class="text-cont">Desvincular</span>
+            </ion-button>
+            <ion-button fill="outline" class="w-fit" (click)="ajustecontable()">
+              <fa-icon [icon]="farGear" class="mr-1"></fa-icon>
+              <span class="text-cont">Ajuste contable</span>
+            </ion-button>
+          </div>
+          <div class="contenedor-tablas">
+            <div class="tabla">
+              <div class="cont-title">
+                <span>Movimientos del sistema</span>
+                <span class="mr-2">6 mov.</span>
+              </div>
+              <div class="h-full height30">
+                <ag-grid-angular
+                  style="width: 100%; height: 100%;"
+                  class=""
+                  [rowData]="rowDataMovimientosMultiple"
+                  [columnDefs]="colDefsMovimientosMultiple"
+                  [columnTypes]="columnTypes"
+                  [rowSelection]="'multiple'"
+                  [pagination]="true"
+                  [localeText]="localeText"
+                  [rowHeight]="30"
+                  [headerHeight]="24"
+                  [paginationPageSize]="20"
+                  />
+              </div>
+            </div>
+            <div class="tabla">
+              <div class="cont-title">
+                <span>Extracto bancario BCP</span>
+                <span class="mr-2">6 mov.</span>
+              </div>
+              <div class="h-full height30">
+                <ag-grid-angular
+                  style="width: 100%; height: 100%;"
+                  class=""
+                  [rowData]="rowDataBancarioMultiple"
+                  [columnDefs]="colDefsBancarioMultiple"
+                  [columnTypes]="columnTypes"
+                  [rowSelection]="'multiple'"
+                  [pagination]="true"
+                  [localeText]="localeText"
+                  [rowHeight]="30"
+                  [headerHeight]="24"
+                  [paginationPageSize]="20"
+                  [context]="{componentParent: this}"
+                  (gridReady)="onGridReadyBancarioMultiple($event)"
+                  />
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+      }
+      @if(tabSeleccionadoDetalle === 'historial'){
+      <ag-grid-angular
+              style="width: 100%; height: 100%;"
+              class=""
+              [rowData]="rowDataHistorial"
+              [columnDefs]="colDefsHistorial"
+              [columnTypes]="columnTypes"
+              [rowSelection]="'multiple'"
+              [localeText]="localeText"
+              [rowHeight]="20"
+              [headerHeight]="24"
+              [paginationPageSize]="20"
+              />
+        }
+      <div class="w-full justify-between gap-2 flex flex-row" [ngClass]="{'!justify-between': existendiferencias}">
+          <ion-button fill="outline" color="medium" class="w-fit" (click)="dismissModal()">
+            Cancelar
+          </ion-button>
+          <div class="flex flex-row gap-2">
+            <ion-button fill="outline" class="w-fit">
+              <span class="text-cont">Reporte de diferencias (Excel)</span>
+            </ion-button>
+            <ion-button fill="outline" class="w-fit">
+              <span class="text-cont">Reporte de diferencias (PDF)</span>
+            </ion-button>
+            <ion-button class="w-fit" (click)="dismissModal()">
+            Cerrar conciliación
+            </ion-button>
+          </div>
+      </div>
+  </div>
+</div>

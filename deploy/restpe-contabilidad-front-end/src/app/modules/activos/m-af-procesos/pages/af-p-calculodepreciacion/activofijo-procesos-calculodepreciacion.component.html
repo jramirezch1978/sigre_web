@@ -1,0 +1,334 @@
+<div class="contenedor-principal">
+  @if (!mostrarTabla && !modoNuevoCalculo) {
+  <div class="btn-mostrartabla" (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight"></fa-icon>
+  </div>
+  }
+  <!-- Panel izquierdo - Tabla -->
+  @if(mostrarTabla && !modoNuevoCalculo){
+    <div class="panel-izquierdo">
+      <div class="cont-title">
+        <span>Cálculo de depreciación masivo mensual/anual (Selecciona un cálculo de tu lista para visualizarlo)</span>
+          <div class="btn-mostrarform" (click)="togglePanelLateral()">
+            <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+          </div>
+      </div>
+
+      <!-- Indicadores -->
+      <div class="cont-cards">
+        <div class="card">
+          <div class="contenido">
+            <span class="title">Cálculos ejecutados</span>
+            @if (!facade.loadingObtener()) {
+              <span class="cantidad">{{ rowData.length }}</span>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+            }
+          </div>
+          <div class="icon">
+            <fa-icon [icon]="fasList"></fa-icon>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="contenido">
+            <span class="title">Depreciación acumulada</span>
+            @if (!facade.loadingObtener()) {
+              <span class="cantidad">{{ depreciacionAcumuladaTotal }}</span>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 100px; height: 16px;"></ion-skeleton-text>
+            }
+          </div>
+          <div class="icon">
+            <fa-icon [icon]="fasDollarSign"></fa-icon>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="contenido">
+            <span class="title">Depreciación mensual</span>
+            @if (!facade.loadingObtener()) {
+              <span class="cantidad">{{ depreciacionMensualTotal }}</span>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 100px; height: 16px;"></ion-skeleton-text>
+            }
+          </div>
+          <div class="icon">
+            <fa-icon [icon]="fasCalendarDays"></fa-icon>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="contenido">
+            <span class="title">Prom. desgaste global</span>
+            @if (!facade.loadingObtener()) {
+              <span class="cantidad">{{ promedioDesgasteGlobal }}</span>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 40px; height: 16px;"></ion-skeleton-text>
+            }
+          </div>
+          <div class="icon">
+            <fa-icon [icon]="fasPercent"></fa-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="contenedor-filtros !pt-0">
+        <div class="filtros-responsive">
+          <div class="buscador">
+            <fa-icon [icon]="farSearch"></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar por código o usuario" style="--padding-start:30px"></ion-input>
+          </div>
+          <div class="filtros-absolutos">
+            <app-month-year-picker [selectedMonth]="mesSeleccionado" [selectedYear]="anioSeleccionado"
+              (monthYearChange)="onMonthYearChange($event)">
+            </app-month-year-picker>
+      
+            <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate" [initialEndDate]="endDate"
+              [minDate]="minDate" [maxDate]="maxDate" position="left" (dateRangeSelected)="filtrarPorFechas($event)">
+            </app-base-calendar-new>
+          </div>
+        </div>
+
+        <div class="filtros-absolutos">
+          <ion-button fill="outline" class="text-text-85 w-[115px]" id="reportesactivosdepreciacion">
+            <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+            <span>Exportar</span>
+            <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+          </ion-button>
+          <ion-popover trigger="reportesactivosdepreciacion" triggerAction="click" [dismissOnSelect]="true"
+            class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+            <ng-template>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            </ng-template>
+          </ion-popover>
+          <ion-button class="w-fit flex-none" (click)="nuevoCalculo()" [disabled]="!filaSeleccionada">
+            <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+            <span class="font-normal">Nuevo cálculo</span>
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="h-full flex-grow-1 relative" [appLoader]="facade.loadingObtener()">
+        <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+        <ag-grid-angular style="width: 100%; height: 100%" 
+          [rowData]="rowData" 
+          [columnDefs]="colDefs" 
+          [defaultColDef]="defaultColDef"
+          [columnTypes]="columnTypes" 
+          [pagination]="true" 
+          [localeText]="localeText" 
+          [rowHeight]="20" 
+          [headerHeight]="24"
+          [paginationPageSize]="20" 
+          [rowSelection]="'single'" 
+          [suppressLoadingOverlay]="true"
+          (gridReady)="onGridReady($event)"
+          (cellClicked)="onCellClicked($event)" />
+      </div>
+    </div>
+  }
+
+
+  <!-- Panel derecho - Formulario -->
+  <div class="panel-derecho" [ngClass]="{'!w-full !flex-1': !mostrarTabla || modoNuevoCalculo}" [appLoader]="facade.loadingObtener()">
+    <div class="cont-title">
+      @if (filaSeleccionada) {<span>Información Calculo Masivo: {{ filaSeleccionada?.cd_codigo }}</span>}
+      @if (!filaSeleccionada) {<span>Cálculo de Depreciación Masivo Mensual/Anual</span>}
+    </div>
+    <form [formGroup]="depreciacionForm">
+      <div class="contenedor-formulario" [ngClass]="{'!flex-row': !mostrarTabla || modoNuevoCalculo}">
+        <div class="contenedor-formulario !p-0">
+
+          <div class="contenido-formulario">
+            <span class="label">Fecha de ejecución</span>
+            @if (!facade.loadingObtener()) {
+              <ion-input fill="outline" type="date" class="w-[150px]" formControlName="fechaE"></ion-input>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 150px; height: 28px; border-radius: 4px;"></ion-skeleton-text>
+            }
+          </div>
+          
+          <div class="contenido-formulario">
+            <span class="label">Tipo de cálculo</span>
+          @if (!facade.loadingObtener()) {
+            @if(filaSeleccionada){<ion-input fill="outline" class="w-[150px]" formControlName="tipoC"></ion-input>}
+            @else{<ion-select placeholder="Selecciona un tipo" formControlName="tipoC" interface="popover" fill="outline" class="w-[150px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+                @for(tipoC of tipoCSelect; track tipoC){<ion-select-option [value]="tipoC.id">{{ tipoC.nombre }}</ion-select-option>}
+              </ion-select>}
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 150px; height: 28px; border-radius: 4px;"></ion-skeleton-text>
+          }
+          </div>
+
+          @if(filaSeleccionada?.cd_tipo_calculo == 'Mensual' || depreciacionForm.get('tipoC')?.value == 'Mensual'){<div class="contenido-formulario">
+            <span class="label">Periodo contable <span class="text-danger">*</span></span>
+            @if(filaSeleccionada){
+            @if (!facade.loadingObtener()) {
+              <ion-input fill="outline" class="w-[150px]" formControlName="periodoC"></ion-input>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 150px; height: 28px; border-radius: 4px;"></ion-skeleton-text>
+            }
+          }
+            @if(!filaSeleccionada){<app-month-year-picker [selectedMonth]="mesSeleccionadoP" [selectedYear]="anioSeleccionadoP"
+              (monthYearChange)="onMonthYearChangePeriodo($event)">
+            </app-month-year-picker>}
+          </div>}
+
+          <div class="contenido-formulario">
+            <span class="label">Tipo de depreciación<span class="text-danger">*</span></span>
+            @if(filaSeleccionada){
+            @if (!facade.loadingObtener()) {
+              <ion-input fill="outline" class="w-[150px]" formControlName="tipoD"></ion-input>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 150px; height: 28px; border-radius: 4px;"></ion-skeleton-text>
+            }
+          }
+            @if(!filaSeleccionada){<ion-select placeholder="Selecciona un tipo" formControlName="tipoD" interface="popover" fill="outline" class="w-[150px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(tipoD of tipoDSelect; track tipoD){<ion-select-option [value]="tipoD.id">{{ tipoD.nombre }}</ion-select-option>}
+            </ion-select>}
+          </div>
+
+        </div>
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Método de cálculo<span class="text-danger">*</span></span>
+            @if(filaSeleccionada){
+            @if (!facade.loadingObtener()) {
+              <ion-input fill="outline" class="w-[150px]" formControlName="metodoC"></ion-input>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 150px; height: 28px; border-radius: 4px;"></ion-skeleton-text>
+            }
+          }
+            @if(!filaSeleccionada){<ion-select placeholder="Selecciona un método" formControlName="metodoC" interface="popover" fill="outline" class="w-[150px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(metodoC of metodoCSelect; track metodoC){<ion-select-option [value]="metodoC.id">{{ metodoC.nombre }}</ion-select-option>}
+            </ion-select>}
+          </div>
+
+          <div class="contenido-formulario">
+            <ion-checkbox formControlName="incluirAR"></ion-checkbox>
+            <label class="text-xxs">Incluir Activos Revaluados</label>
+          </div>
+
+          <div class="contenido-formulario">
+            <ion-checkbox formControlName="incluirAM"></ion-checkbox>
+            <label class="text-xxs">Incluir Activos en Mejora</label>
+          </div>
+        </div>
+
+      </div>
+
+      @if (!filaSeleccionada && !calculoEjecutado) {
+      <div class="contenedor-btn py-2">
+        <ion-button class="w-fit text-text-85" fill="outline" (click)="ejecutarCalculoMasivo()">
+          Ejecutar cálculo masivo
+        </ion-button>
+      </div>
+      }
+    </form>
+
+    @if (calculoEjecutado || filaSeleccionada) {
+      <!-- Sección de resultados -->
+      
+      <div class="cont-cards">
+        <div class="card">
+          <div class="contenido">
+            <span class="title">Depreciación Total del Periodo (S/)</span>
+            @if (!facade.loadingObtener()) {
+              <span class="cantidad">{{ depreciacionTotalPeriodo }}</span>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 100px; height: 16px;"></ion-skeleton-text>
+            }
+          </div>
+          <div
+            class="icon">
+            <fa-icon [icon]="fasCalculator"></fa-icon>
+          </div>
+        </div>
+
+        @if (!mostrarTabla) {
+        <div class="card">
+          <div class="contenido">
+            <span class="title">Costo Neto Total (S/)</span>
+            @if (!facade.loadingObtener()) {
+              <span class="cantidad">{{ costoNetoTotal }}</span>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 100px; height: 16px;"></ion-skeleton-text>
+            }
+          </div>
+          <div
+            class="icon">
+            <fa-icon [icon]="fasDollarSign"></fa-icon>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="contenido">
+            <span class="title">Promedio de Desgaste x periodo (%)</span>
+            @if (!facade.loadingObtener()) {
+              <span class="cantidad">{{ promedioDesgastePeriodo }}</span>
+            } @else {
+              <ion-skeleton-text [animated]="true" style="width: 40px; height: 16px;"></ion-skeleton-text>
+            }
+          </div>
+          <div
+            class="icon">
+            <fa-icon [icon]="fasPercent"></fa-icon>
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="contenedor-filtros !pt-0">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por código o activo" style="--padding-start:30px"></ion-input>
+        </div>
+        @if (!mostrarTabla) {
+
+        <div class="filtros-absolutos">
+          <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDateActivos" [initialEndDate]="endDateActivos"
+            [minDate]="minDate" [maxDate]="maxDate" position="center" (dateRangeSelected)="filtrarPorFechasActivos($event)">
+          </app-base-calendar-new>
+    
+          <ion-button fill="outline" class="text-text-85 w-[115px]" id="reportesactivos">
+            <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+            <span>Exportar</span>
+            <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+          </ion-button>
+          <ion-popover trigger="reportesactivos" triggerAction="click" [dismissOnSelect]="true"
+            class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+            <ng-template>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            </ng-template>
+          </ion-popover>
+        </div>
+        }
+      </div>
+
+      <div class="h-full flex-grow-1">
+        <ag-grid-angular style="width: 100%; height: 100%" 
+          [rowData]="rowDataActivos" 
+          [columnDefs]="colDefsActivos"
+          [defaultColDef]="defaultColDef"
+          [columnTypes]="columnTypes" 
+          [pagination]="false" 
+          [rowHeight]="20" 
+          [headerHeight]="24"
+          [paginationPageSize]="20" 
+          (gridReady)="onGridReadyActivos($event)" />
+      </div>
+
+      @if (mostrarBotones) {
+        <div class="contenedor-btn">
+          <ion-button (click)="confirmarCalculo()">Confirmar cálculo</ion-button>
+          <ion-button (click)="cancelarCalculo()" color="medium" fill="outline">Cancelar cálculo</ion-button>
+        </div>
+      }
+    }
+  </div>
+
+</div>

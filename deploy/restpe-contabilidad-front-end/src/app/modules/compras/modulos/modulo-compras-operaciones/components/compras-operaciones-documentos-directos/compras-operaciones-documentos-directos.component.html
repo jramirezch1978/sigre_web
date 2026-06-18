@@ -1,0 +1,130 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Documentos por Pagar Directo (selecciona uno para visualizarlo, editarlo o anularlo)</span>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por código, comprobante o proveedor" class="w-full"
+          style="--padding-start:30px" (ionInput)="onBuscarLista($event)"></ion-input>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px] text-text-85" fill="outline" id="reportesDpd">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesDpd" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" (click)="exportarExcel()" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" (click)="exportarPdf()" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit flex flex-none" [disabled]="modoCreacion" (click)="nuevoDocumento()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span class="font-normal whitespace-nowrap">Nuevo documento</span>
+        </ion-button>
+      </div>
+    </div>
+    <div class="contenedor-primera-tabla" [appLoader]="loadingObtener()">
+      <fa-icon [icon]="fasRotateRight" (click)="refrescar()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" [columnDefs]="colDefs" [localeText]="localeText"
+        [pagination]="true" [rowHeight]="22" [headerHeight]="26" [paginationPageSize]="20" rowSelection="single"
+        (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+
+  <div class="panel-derecho" [appLoader]="loadingGuardar()">
+    <div class="cont-title">
+      <span>{{ modoCreacion ? 'Nuevo documento directo' : 'Documento directo: ' + (filaSeleccionada?.dpd_codigo || '') }}</span>
+    </div>
+
+    <form class="contenedor-formulario" [formGroup]="form">
+      <div class="contenido-formulario">
+        <span class="label">Tipo de comprobante <span class="text-danger">*</span></span>
+        <ion-select placeholder="Selecciona" formControlName="tipoComprobante" interface="popover" fill="outline"
+          toggleIcon="chevron-down" expandedIcon="chevron-up" class="w-[180px]">
+          @for(t of tiposComprobante; track t.value){
+          <ion-select-option [value]="t.value">{{ t.label }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">RUC / Documento <span class="text-danger">*</span></span>
+        <div class="flex gap-1 w-[180px]">
+          <ion-input fill="outline" formControlName="ruc" placeholder="RUC" class="flex-1"></ion-input>
+          <ion-button size="small" (click)="buscarProveedor()">
+            <fa-icon [icon]="farSearch"></fa-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Proveedor</span>
+        <ion-input fill="outline" formControlName="proveedor" readonly class="w-[180px]"
+          placeholder="Razón social"></ion-input>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Serie / Número</span>
+        <div class="flex gap-1 w-[180px]">
+          <ion-input fill="outline" formControlName="serie" placeholder="Serie" class="flex-1"></ion-input>
+          <ion-input fill="outline" formControlName="numero" placeholder="Número" class="flex-1"></ion-input>
+        </div>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Fecha emisión <span class="text-danger">*</span></span>
+        <ion-input fill="outline" type="date" formControlName="fechaEmision" class="w-[180px]"></ion-input>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Fecha vencimiento</span>
+        <ion-input fill="outline" type="date" formControlName="fechaVencimiento" class="w-[180px]"></ion-input>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Moneda <span class="text-danger">*</span></span>
+        <ion-select placeholder="PEN" formControlName="moneda" interface="popover" fill="outline"
+          toggleIcon="chevron-down" expandedIcon="chevron-up" class="w-[180px]">
+          @for(m of monedas; track m.codigo){
+          <ion-select-option [value]="m.codigo">{{ m.codigo }} - {{ m.nombre }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Total</span>
+        <ion-input fill="outline" type="number" formControlName="total" readonly class="w-[180px]"></ion-input>
+      </div>
+    </form>
+
+    <div class="cont-title flex items-center justify-between">
+      <span>Detalle del documento</span>
+      <ion-button size="small" fill="outline" (click)="agregarLinea()">
+        <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+        <span>Agregar línea</span>
+      </ion-button>
+    </div>
+
+    <div style="width:100%; height:220px;">
+      <ag-grid-angular style="width: 100%; height: 100%;" [columnDefs]="detalleColDefs" [localeText]="localeText"
+        [rowHeight]="24" [headerHeight]="26" rowSelection="single" [singleClickEdit]="true"
+        (gridReady)="onDetalleGridReady($event)" (cellClicked)="onDetalleCellClicked($event)"
+        (cellValueChanged)="onDetalleCellValueChanged()" />
+    </div>
+
+    <div class="contenedor-btn">
+      <ion-button (click)="guardar()" [disabled]="loadingGuardar()">
+        {{ modoCreacion ? 'Registrar' : 'Guardar' }}
+      </ion-button>
+      @if(!modoCreacion){
+      <ion-button fill="outline" color="danger" (click)="anular()">Anular</ion-button>
+      }
+      <ion-button fill="outline" color="medium" (click)="nuevoDocumento()">Cancelar</ion-button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,217 @@
+<div class="contenedor-principal">
+  @if (!panelLateralVisible) {
+  }
+
+  @if (panelLateralVisible) {
+  <!-- Panel izquierdo - Tabla -->
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Listado de revaluaciones aprobadas (Selecciona una revaluación de tu lista para visualizarlo)</span>
+    </div>
+
+    <!-- Filtros -->
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por código o usuario" class="w-full"
+            style="--padding-start:28px"></ion-input>
+        </div>
+      </div>
+          <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+            [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="right"
+            (dateRangeSelected)="filtrarPorFechas($event)">
+          </app-base-calendar-new>
+      <div class="filtros-absolutos">
+        <ion-button fill="outline" class="text-text-85 w-[115px]" id="reportesactivosrevaluacion">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesactivosrevaluacion" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+
+
+    <!-- Tabla -->
+
+    <div class="h-full relative" [appLoader]="facade.loadingObtener()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height:100%" [rowData]="rowData" [columnDefs]="colDefs" [defaultColDef]="defaultColDef"
+        [columnTypes]="columnTypes" [context]="context" [gridOptions]="gridOptions" [pagination]="true"
+        [localeText]="localeText" [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20"
+        [rowSelection]="'single'" (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)"
+        [purgeClosedRowNodes]="true" [suppressLoadingOverlay]="true" />
+    </div>
+  </div>
+  }
+
+  <!-- Panel derecho - Formulario -->
+  <div class="flex flex-col  overflow-auto" [appLoader]="facade.loadingObtener()"
+    [ngClass]="{'panel-derecho': panelLateralVisible}">
+    <div class="cont-title">
+      <span class="text-xs font-medium">{{ selectedCalculo ? 'Información Cálculo Revaluación: ' + selectedCalculo.gar_codigo : 'Generación de asientos de revaluación' }}</span>
+    </div>
+
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+
+    <form [formGroup]="formRevaluacion" class="contenedor-formulario">
+        <!-- <div class="contenido-formulario">
+          <span class="w-[120px] flex-none">Razón social</span>
+          <ion-input fill="outline" [disabled]="true" placeholder="Importadora de vinos del Sur EIRL"
+            [value]="selectedCalculo?.razonSocial || 'Importadora de vinos del Sur EIRL'"
+            class="w-full max-w-[163px] text-[#363636]" [disabled]="isContabilizado()"></ion-input>
+        </div> -->
+
+        <div class="contenido-formulario">
+          <span class="label">Fecha de registro</span>
+          <!-- <app-base-calendar-new class="flex-none" mode="single" [disabled]="isContabilizado()"
+            [initialDate]="fechaRegistro" position="center" (dateSelected)="onFechaRegistro($event)">
+          </app-base-calendar-new> -->
+          <ion-input formControlName="fechaRegistro" fill="outline" class="w-[150px]" type="date"></ion-input>
+        </div>
+
+        <!-- <div class="contenido-formulario">
+          <span class="label">Usuario ejecutor</span>
+          <ion-input fill="outline" placeholder="Alessandra Orlandela Herrada"
+            [value]="selectedCalculo?.usuarioEjecutor || 'Alessandra Orlandela Herrada'"
+            class="w-full max-w-[163px] text-[#363636]" [disabled]="isContabilizado()"></ion-input>
+        </div> -->
+
+        <div class="contenido-formulario">
+          <span class="label">Periodo contable</span>
+          @if(isContabilizado()){<ion-input fill="outline" formControlName="periodoContable" class="w-[82px]" [disabled]="isContabilizado()"></ion-input>}
+          @else{<app-month-year-picker [position]="'center'" [disabled]="selectedCalculo?.gai_estado === 'Contabilizado'"
+            [selectedMonth]="mesSeleccionado" [selectedYear]="anioSeleccionado"
+            (monthYearChange)="onMonthYearChange($event)">
+          </app-month-year-picker>}
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Tipo de revaluación <span class="text-danger" *ngIf="!isContabilizado()">*</span></span>
+          <ion-select placeholder="Comercial" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            formControlName="tipoRevaluacion" interface="popover" fill="outline" class="w-[163px]">
+            <ion-select-option value="Comercial">Comercial</ion-select-option>
+            <ion-select-option value="Técnica">Técnica</ion-select-option>
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Origen de datos <span class="text-danger" *ngIf="!isContabilizado()">*</span></span>
+          <ion-select placeholder="Activo" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            formControlName="origenDatos" interface="popover" fill="outline" class="w-[163px]">
+            <ion-select-option *ngIf="selectedCalculo?.origenDatos" [value]="selectedCalculo?.origenDatos">{{
+              selectedCalculo?.origenDatos }}</ion-select-option>
+            <ion-select-option value="Activo">----</ion-select-option>
+            <ion-select-option value="Inactivo">---</ion-select-option>
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Tipo de moneda <span class="text-danger" *ngIf="!isContabilizado()">*</span></span>
+          @if(estadoseleccionado != 'Contabilizado') {
+            <ion-select toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="tipoMoneda" interface="popover" fill="outline" class="w-[163px]">
+            @for(item of moneda; track $index){
+              <ion-select-option [value]="item.value">{{item.nombre}}</ion-select-option>
+            }
+            </ion-select>
+          }
+          @else if(estadoseleccionado === 'Contabilizado') {
+            <ion-input formControlName="tipoMoneda" fill="outline" placeholder="Agrega un prefijo"
+            class="w-full max-w-[200px]" [disabled]="isContabilizado()"></ion-input>
+          }
+        </div>
+
+
+
+        <div class="contenido-formulario">
+          <span class="label"> Fecha de contabilización <span class="text-danger" *ngIf="!isContabilizado()">*</span></span>
+          <app-base-calendar-new class="flex-none" mode="single" [initialDate]="formRevaluacion.get('fechaContabilizacion')?.value" position="center"
+            (dateSelected)="onFechaContabilizacion($event)">
+          </app-base-calendar-new>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label"> Libro contable <span class="text-danger" *ngIf="!isContabilizado()">*</span></span>
+          <ion-select placeholder="Principal" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            formControlName="libroContable" interface="popover" fill="outline" class="w-[163px]">
+            <ion-select-option value="Principal">Principal</ion-select-option>
+            <ion-select-option value="Tributario">Tributario</ion-select-option>
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Prefijo de doc.</span>
+          <ion-input formControlName="prefijo" fill="outline" placeholder="Agrega un prefijo"
+            class="w-full max-w-[200px]" [disabled]="isContabilizado()"></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Centro de costo</span>
+          <!-- <ion-input fill="outline" [value]="selectedCalculo?.fechaContabilizacion" type="date"
+            class="w-[150px]"></ion-input> -->
+          <ion-select placeholder="Activo" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            formControlName="centroCosto" interface="popover" fill="outline" placeholder="Seleciona un centro de costo"
+            class="w-full max-w-[200px]" [disabled]="isContabilizado()">
+            <ion-select-option value="Recursos humanos">Recursos humanos</ion-select-option>
+            <ion-select-option value="Oficina administrativa">Oficina administrativa</ion-select-option>
+            <ion-select-option value="Marketing">Marketing</ion-select-option>
+            <ion-select-option value="Operaciones">Operaciones</ion-select-option>
+            <ion-select-option value="Área de producción">Área de producción</ion-select-option>
+            <ion-select-option value="Centro de soporte">Centro de soporte</ion-select-option>
+
+
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario !items-start">
+          <span class="label">Observaciones</span>
+          <ion-textarea formControlName="observaciones" fill="outline" placeholder="Escribe aquí..."
+            class="w-[200px]" rows="3" [disabled]="isContabilizado()"></ion-textarea>
+        </div>
+    </form>
+    <div class="contenedor-btn">
+      @if(selectedCalculo) {
+      @if(selectedCalculo.gar_estado === 'Pendiente') {
+        <ion-button class="w-fit" color="primary" (click)="contabilizar()">
+          Contabilizar
+        </ion-button>
+        <ion-button fill="outline" class="w-fit">
+          Validar datos previos
+        </ion-button>
+      }
+      @if(selectedCalculo.gar_estado === 'Contabilizado') {
+      <ion-button class="w-fit" color="primary" (click)="reprocesar()">
+        Reprocesar
+      </ion-button>
+      <div fill="outline" class="w-fit flex" (click)="exportar()">
+        <ion-button fill="outline" class="text-text-85 w-[115px]" id="reportesactivos">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesactivos" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+      }
+      }
+    </div>
+  </div>
+
+</div>

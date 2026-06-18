@@ -1,0 +1,1822 @@
+openapi: 3.0.3
+info:
+  title: ms-auth-security
+  description: >
+    # Resumen
+
+    Microservicio **ms-auth-security** (puerto típico **9001**): autenticación JWT, recuperación de contraseña,
+    **RBAC** bajo `/api/auth/seguridad`, y envoltorio estándar **`ApiResponse<T>`** (`pe.restaurant.common.dto`).
+
+    # Alcance de este OAS
+
+    Documenta **`/api/auth/**`**. Las rutas **`/api/admin/**`** y **`/api/internal/**`** se describen en el contrato
+    markdown del repositorio (`CONTRATO_API_MS-AUTH-SECURITY.md`).
+
+    # Recursos
+
+    * YAML estático: `GET /openapi/openapi-ms-auth-security.yaml`
+    * Springdoc: `/api/auth/v3/api-docs`, Swagger UI `/api/auth/swagger-ui.html`
+
+  contact:
+    name: Restaurant.pe — Plataforma ERP
+    email: soporte@restaurant.pe
+  license:
+    name: Propietario — uso interno proyecto Restaurant.pe
+    url: https://restaurant.pe
+  version: 2.1.0
+  x-domain: Restaurant.pe / Plataforma ERP
+  x-capability: Autenticación y seguridad (auth + RBAC)
+  x-capability-acronym: mash
+
+servers:
+  - description: ms-auth-security (directo)
+    url: http://localhost:9001
+  - description: API Gateway (prefijo /api/auth/**)
+    url: http://localhost:8080
+
+tags:
+  - name: Auth
+    description: Login, empresas, sesión, refresh, perfil
+  - name: Recuperación
+    description: Flujo olvidé mi contraseña
+  - name: Seguridad RBAC
+    description: Módulos, menú, acciones, roles y asignaciones (JWT definitivo; empresa en token)
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login (JWT temporal)
+      security: []
+      operationId: login
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-login'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseLoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/empresas:
+    get:
+      tags: [Auth]
+      summary: Empresas asignadas al usuario
+      operationId: listarEmpresas
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmpresaUsuarioDtoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/seleccionar-empresa:
+    post:
+      tags: [Auth]
+      summary: Seleccionar empresa y sucursal (JWT definitivo + refresh token)
+      description: >
+        Con **Authorization: Bearer** (JWT temporal o definitivo) se usa el flujo clásico.
+        Sin **Authorization**, envíe **email**, **password** y **passwordHash** (mismo esquema que en login)
+        junto con **empresaId** y **sucursalId** para obtener JWT definitivo en un solo paso.
+      operationId: seleccionarEmpresa
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Bearer JWT temporal (u opcionalmente definitivo). Omitir si envía credenciales en el cuerpo.
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-seleccion-empresa'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseLoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Cerrar sesión (invalida tokens_session si aplica)
+      operationId: logout
+      security: []
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+            example: Bearer <jwt>
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Renovar access y refresh (rotación)
+      security: []
+      operationId: refreshToken
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-refresh'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRefreshTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Perfil desde claims del access JWT
+      operationId: getMe
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuthMeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/recuperar/obtener-email-ofuscado:
+    post:
+      tags: [Recuperación]
+      summary: Email enmascarado por username
+      security: []
+      operationId: obtenerEmailOfuscado
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-recuperar'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMapString'
+
+  /api/auth/recuperar/verificar-email:
+    post:
+      tags: [Recuperación]
+      security: []
+      operationId: verificarEmailRecuperar
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-recuperar'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMapString'
+
+  /api/auth/recuperar/enviar-codigo:
+    post:
+      tags: [Recuperación]
+      security: []
+      operationId: enviarCodigoRecuperar
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-recuperar'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+
+  /api/auth/recuperar/validar-codigo:
+    post:
+      tags: [Recuperación]
+      security: []
+      operationId: validarCodigoRecuperar
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-recuperar'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+
+  /api/auth/recuperar/cambiar-password:
+    post:
+      tags: [Recuperación]
+      security: []
+      operationId: cambiarPasswordRecuperar
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-recuperar'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+
+  /api/auth/recuperar/limpiar-expirados:
+    post:
+      tags: [Recuperación]
+      security: []
+      summary: Limpieza async de códigos expirados
+      operationId: limpiarCodigosExpirados
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+
+  # --- Seguridad RBAC (JWT definitivo; empresa en ruta = empresa del token) ---
+
+  /api/auth/seguridad/admin/dashboard-telemetry:
+    get:
+      tags: [Seguridad RBAC]
+      summary: Telemetría del panel de administración
+      description: >
+        Agregados de solo lectura desde la BD security (tamaños de BD tenant, usuarios, sesiones, bloqueos,
+        latencia media vía token_uso_log, sesiones activas). Requiere rol administrador en la empresa del JWT.
+      operationId: seguridadAdminDashboardTelemetry
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAdminDashboardTelemetry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/modulos:
+    get:
+      tags: [Seguridad RBAC]
+      summary: Listar módulos
+      operationId: seguridadListarModulos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseModuloDtoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Seguridad RBAC]
+      summary: Crear módulo (admin empresa)
+      operationId: seguridadCrearModulo
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-modulo'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseModuloDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/modulos/{id}:
+    put:
+      tags: [Seguridad RBAC]
+      summary: Actualizar módulo
+      operationId: seguridadActualizarModulo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-modulo'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseModuloDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/auth/seguridad/opciones-menu:
+    get:
+      tags: [Seguridad RBAC]
+      summary: Listar opciones de menú
+      operationId: seguridadListarOpcionesMenu
+      parameters:
+        - name: moduloId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseOpcionMenuDtoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Seguridad RBAC]
+      summary: Crear opción de menú
+      operationId: seguridadCrearOpcionMenu
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-opcion-menu'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseOpcionMenuDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/opciones-menu/{id}:
+    put:
+      tags: [Seguridad RBAC]
+      operationId: seguridadActualizarOpcionMenu
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-opcion-menu'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseOpcionMenuDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/acciones:
+    get:
+      tags: [Seguridad RBAC]
+      operationId: seguridadListarAcciones
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAccionDtoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Seguridad RBAC]
+      operationId: seguridadCrearAccion
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-accion'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAccionDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/acciones/{id}:
+    put:
+      tags: [Seguridad RBAC]
+      operationId: seguridadActualizarAccion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-accion'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAccionDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/empresas:
+    get:
+      tags: [Seguridad RBAC]
+      operationId: seguridadListarEmpresasMaster
+      summary: Listado master de empresas (admin sistema)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmpresaAdminDtoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/empresas/{empresaId}:
+    put:
+      tags: [Seguridad RBAC]
+      operationId: seguridadActualizarEmpresaMaster
+      summary: Actualizar datos maestros de empresa (sin BD tenant)
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmpresaAdminUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmpresaAdminDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Empresa no encontrada
+
+  /api/auth/seguridad/empresas/{empresaId}/estado:
+    patch:
+      tags: [Seguridad RBAC]
+      operationId: seguridadCambiarEstadoEmpresaMaster
+      summary: Anular o reactivar empresa en master (flag_estado)
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmpresaEstadoRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmpresaAdminDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Empresa no encontrada
+
+  /api/auth/seguridad/empresas/{empresaId}/roles:
+    get:
+      tags: [Seguridad RBAC]
+      operationId: seguridadListarRoles
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRolDtoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Seguridad RBAC]
+      operationId: seguridadCrearRol
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-rol'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRolDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/empresas/{empresaId}/roles/{rolId}:
+    put:
+      tags: [Seguridad RBAC]
+      operationId: seguridadActualizarRol
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/RolIdPath'
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-rol'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRolDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/empresas/{empresaId}/roles/{rolId}/opciones-menu:
+    get:
+      tags: [Seguridad RBAC]
+      operationId: seguridadListarRolOpcionesMenu
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/RolIdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRolOpcionMenuDtoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/seguridad/empresas/{empresaId}/roles/{rolId}/opciones-menu/{opcionMenuId}:
+    post:
+      tags: [Seguridad RBAC]
+      summary: Asignar opción al rol
+      operationId: seguridadAsignarOpcionRol
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/RolIdPath'
+        - $ref: '#/components/parameters/OpcionMenuIdPath'
+        - name: activo
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRolOpcionMenuDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [Seguridad RBAC]
+      operationId: seguridadQuitarOpcionRol
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/RolIdPath'
+        - $ref: '#/components/parameters/OpcionMenuIdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/empresas/{empresaId}/roles/{rolId}/opciones-menu/{opcionMenuId}/acciones:
+    get:
+      tags: [Seguridad RBAC]
+      operationId: seguridadListarAccionesRolOpcion
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/RolIdPath'
+        - $ref: '#/components/parameters/OpcionMenuIdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRolOpcionAccionDtoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/seguridad/empresas/{empresaId}/roles/{rolId}/opciones-menu/{opcionMenuId}/acciones/{accionId}:
+    put:
+      tags: [Seguridad RBAC]
+      summary: Upsert permiso de acción sobre la opción del rol
+      operationId: seguridadUpsertAccionRolOpcion
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/RolIdPath'
+        - $ref: '#/components/parameters/OpcionMenuIdPath'
+        - $ref: '#/components/parameters/AccionIdPath'
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-rol-opcion-accion-permiso'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRolOpcionAccionDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/empresas/{empresaId}/usuarios/{usuarioId}/roles:
+    get:
+      tags: [Seguridad RBAC]
+      operationId: seguridadListarRolesUsuario
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/UsuarioIdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRolUsuarioDtoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Seguridad RBAC]
+      operationId: seguridadAsignarRolUsuario
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/UsuarioIdPath'
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-asignar-rol-usuario'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRolUsuarioDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/empresas/{empresaId}/usuarios/{usuarioId}/roles/{rolId}:
+    delete:
+      tags: [Seguridad RBAC]
+      operationId: seguridadQuitarRolUsuario
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/UsuarioIdPath'
+        - $ref: '#/components/parameters/RolIdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/empresas/{empresaId}/usuarios/{usuarioId}/permisos-menu-roles:
+    get:
+      tags: [Seguridad RBAC]
+      summary: Roles del usuario y opciones de menú con acciones (unión si tiene varios roles)
+      operationId: seguridadPermisosMenuPorRoles
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/UsuarioIdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUsuarioPermisosMenuRolesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/empresas/{empresaId}/usuarios/{usuarioId}/opciones-libres:
+    get:
+      tags: [Seguridad RBAC]
+      operationId: seguridadListarOpcionesLibres
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/UsuarioIdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUsuarioOpcionLibreDtoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Seguridad RBAC]
+      operationId: seguridadUpsertOpcionLibre
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/UsuarioIdPath'
+      requestBody:
+        $ref: '#/components/requestBodies/rq-ms-auth-usuario-opcion-libre'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUsuarioOpcionLibreDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/empresas/{empresaId}/usuarios/{usuarioId}/opciones-libres/{opcionMenuId}:
+    delete:
+      tags: [Seguridad RBAC]
+      operationId: seguridadEliminarOpcionLibre
+      parameters:
+        - $ref: '#/components/parameters/EmpresaIdPath'
+        - $ref: '#/components/parameters/UsuarioIdPath'
+        - $ref: '#/components/parameters/OpcionMenuIdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/seguridad/mi-menu:
+    get:
+      tags: [Seguridad RBAC]
+      summary: Menú efectivo (roles + opciones libres)
+      operationId: seguridadMiMenu
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMiMenuResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  requestBodies:
+    rq-ms-auth-login:
+      description: Credenciales y metadatos opcionales de cliente para login (JWT temporal).
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+    rq-ms-auth-seleccion-empresa:
+      description: >
+        Selección de empresa y sucursal para emitir JWT definitivo y refresh token.
+        Si no se envía Authorization, deben incluirse email y contraseña cifrada como en login.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SeleccionEmpresaRequest'
+    rq-ms-auth-refresh:
+      description: Renovación de access token mediante refresh token.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefreshTokenRequest'
+    rq-ms-auth-recuperar:
+      description: >
+        Flujo recuperación de contraseña; los campos usados dependen del paso
+        (username/email, código, nueva contraseña, etc.).
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RecuperarPasswordRequest'
+    rq-ms-auth-modulo:
+      description: Alta o actualización de módulo RBAC.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ModuloRequest'
+    rq-ms-auth-opcion-menu:
+      description: Alta o actualización de opción de menú.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OpcionMenuRequest'
+    rq-ms-auth-accion:
+      description: Alta o actualización de acción.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccionRequest'
+    rq-ms-auth-rol:
+      description: Alta o actualización de rol en la empresa.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RolRequest'
+    rq-ms-auth-rol-opcion-accion-permiso:
+      description: Permiso (permitido/activo) sobre una acción en una opción de menú del rol.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RolOpcionAccionPermisoRequest'
+    rq-ms-auth-asignar-rol-usuario:
+      description: Asignación de rol a usuario en la empresa.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AsignarRolUsuarioRequest'
+    rq-ms-auth-usuario-opcion-libre:
+      description: Opción de menú habilitada fuera de roles (opción libre).
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UsuarioOpcionLibreRequest'
+
+  responses:
+    BadRequest:
+      description: Validación o regla de negocio
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseError'
+          example:
+            success: false
+            message: Datos de entrada inválidos o regla de negocio no cumplida
+            errorCode: BAD_REQUEST
+            timestamp: "03/04/2026 10:15:00"
+            data: null
+    Unauthorized:
+      description: Token ausente, expirado o inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseError'
+          example:
+            success: false
+            message: No autenticado o token inválido
+            errorCode: UNAUTHORIZED
+            timestamp: "03/04/2026 10:15:00"
+            data: null
+    Forbidden:
+      description: Sin permiso (empresa, admin, etc.)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseError'
+          example:
+            success: false
+            message: No tiene permiso para esta operación
+            errorCode: FORBIDDEN
+            timestamp: "03/04/2026 10:15:00"
+            data: null
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseError'
+          example:
+            success: false
+            message: Recurso no encontrado
+            errorCode: NOT_FOUND
+            timestamp: "03/04/2026 10:15:00"
+            data: null
+
+  parameters:
+    EmpresaIdPath:
+      name: empresaId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    RolIdPath:
+      name: rolId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    UsuarioIdPath:
+      name: usuarioId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    OpcionMenuIdPath:
+      name: opcionMenuId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    AccionIdPath:
+      name: accionId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  schemas:
+    ApiResponseBase:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        errorCode:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          description: dd/MM/yyyy HH:mm:ss (America/Lima)
+
+    ApiResponseError:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              nullable: true
+
+    ApiResponseVoid:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              nullable: true
+
+    ApiResponseMapString:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              additionalProperties:
+                type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        passwordHash:
+          type: string
+        ipAddress:
+          type: string
+        ipPrivada:
+          type: string
+        browser:
+          type: string
+        sistemaOperativo:
+          type: string
+        deviceName:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+          nullable: true
+        tokenType:
+          type: string
+        expiresInSeconds:
+          type: integer
+          format: int64
+        temporal:
+          type: boolean
+        userId:
+          type: integer
+          format: int64
+        email:
+          type: string
+        username:
+          type: string
+        nombres:
+          type: string
+        apellidos:
+          type: string
+        nombreCompleto:
+          type: string
+        empresaId:
+          type: integer
+          format: int64
+        empresaCodigo:
+          type: string
+        empresaNombre:
+          type: string
+        empresaRuc:
+          type: string
+        sucursalId:
+          type: integer
+          format: int64
+        sucursalNombre:
+          type: string
+        adminSistema:
+          type: boolean
+          description: true si auth.usuario.flag_admin_sistema = '1'
+
+    ApiResponseLoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/LoginResponse'
+
+    SeleccionEmpresaRequest:
+      type: object
+      required: [empresaId, sucursalId]
+      properties:
+        empresaId:
+          type: integer
+          format: int64
+        sucursalId:
+          type: integer
+          format: int64
+        ipAddress:
+          type: string
+        ipPrivada:
+          type: string
+        browser:
+          type: string
+        sistemaOperativo:
+          type: string
+        email:
+          type: string
+          format: email
+          description: Requerido si no hay Bearer (mismo uso que en login).
+        password:
+          type: string
+          description: Contraseña cifrada (misma que en login).
+        passwordHash:
+          type: string
+          description: Hash de verificación HMAC (misma que en login).
+
+    EmpresaUsuarioDto:
+      type: object
+      properties:
+        empresaId:
+          type: integer
+          format: int64
+        codigo:
+          type: string
+        razonSocial:
+          type: string
+        ruc:
+          type: string
+        dbName:
+          type: string
+
+    ApiResponseEmpresaUsuarioDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/EmpresaUsuarioDto'
+
+    SucursalDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        codigo: { type: string }
+        nombre: { type: string }
+        direccion: { type: string }
+        ciudad: { type: string }
+        pais: { type: string }
+        departamento: { type: string }
+        provincia: { type: string }
+        distrito: { type: string }
+
+    ApiResponseSucursalDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SucursalDto'
+
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    RefreshTokenResponse:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        tokenType: { type: string }
+        expiresInSeconds: { type: integer, format: int64 }
+        userId: { type: integer, format: int64 }
+        email: { type: string }
+        username: { type: string }
+        nombres: { type: string }
+        apellidos: { type: string }
+        nombreCompleto: { type: string }
+        empresaId: { type: integer, format: int64 }
+        empresaCodigo: { type: string }
+        empresaNombre: { type: string }
+        empresaRuc: { type: string }
+        sucursalId: { type: integer, format: int64 }
+        sucursalNombre: { type: string, nullable: true }
+
+    ApiResponseRefreshTokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/RefreshTokenResponse'
+
+    AuthMeResponse:
+      type: object
+      properties:
+        temporal: { type: boolean }
+        userId: { type: integer, format: int64 }
+        username: { type: string }
+        email: { type: string }
+        nombres: { type: string }
+        apellidos: { type: string }
+        nombreCompleto: { type: string }
+        tokensSessionId: { type: integer, format: int64, nullable: true }
+        empresaId: { type: integer, format: int64, nullable: true }
+        empresaCodigo: { type: string, nullable: true }
+        empresaNombre: { type: string, nullable: true }
+        empresaRuc: { type: string, nullable: true }
+        dbName: { type: string, nullable: true }
+        sucursalId: { type: integer, format: int64, nullable: true }
+        sucursalNombre: { type: string, nullable: true }
+        usuario:
+          $ref: '#/components/schemas/MeUsuarioClaims'
+        empresa:
+          $ref: '#/components/schemas/MeEmpresaClaims'
+        sucursal:
+          $ref: '#/components/schemas/MeSucursalClaims'
+
+    MeUsuarioClaims:
+      type: object
+      nullable: true
+      properties:
+        id: { type: integer, format: int64 }
+        username: { type: string }
+        nombres: { type: string }
+        apellidos: { type: string }
+        email: { type: string }
+
+    MeEmpresaClaims:
+      type: object
+      nullable: true
+      properties:
+        id: { type: integer, format: int64 }
+        nombre: { type: string }
+        ruc: { type: string }
+        codigo: { type: string }
+
+    MeSucursalClaims:
+      type: object
+      nullable: true
+      properties:
+        id: { type: integer, format: int64 }
+        nombre: { type: string, nullable: true }
+        ciudad: { type: string, nullable: true }
+
+    ApiResponseAuthMeResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/AuthMeResponse'
+
+    RecuperarPasswordRequest:
+      type: object
+      properties:
+        username: { type: string }
+        email: { type: string, format: email }
+        codigo: { type: string }
+        nuevaPassword: { type: string }
+        nuevaPasswordHash: { type: string }
+
+    ModuloDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        codigo: { type: string }
+        nombre: { type: string }
+        activo: { type: boolean }
+
+    ModuloRequest:
+      type: object
+      required: [codigo, nombre]
+      properties:
+        codigo: { type: string }
+        nombre: { type: string }
+        activo: { type: boolean, default: true }
+
+    OpcionMenuDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        moduloId: { type: integer, format: int64 }
+        codigo: { type: string }
+        nombre: { type: string }
+        rutaFrontend: { type: string }
+        opcionPadreId: { type: integer, format: int64, nullable: true }
+        orden: { type: integer }
+        activo: { type: boolean }
+
+    OpcionMenuRequest:
+      type: object
+      required: [moduloId, codigo, nombre]
+      properties:
+        moduloId: { type: integer, format: int64 }
+        codigo: { type: string }
+        nombre: { type: string }
+        rutaFrontend: { type: string }
+        opcionPadreId: { type: integer, format: int64 }
+        orden: { type: integer }
+        activo: { type: boolean, default: true }
+
+    AccionDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        codigo: { type: string }
+        nombre: { type: string }
+        activo: { type: boolean }
+
+    AccionRequest:
+      type: object
+      required: [codigo, nombre]
+      properties:
+        codigo: { type: string }
+        nombre: { type: string }
+        activo: { type: boolean, default: true }
+
+    AdminDashboardTelemetryResponse:
+      type: object
+      properties:
+        empresasBd:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmpresaTamanoItemDto'
+        totalUsuariosPlataforma:
+          type: integer
+          format: int64
+        usuariosPorEmpresa:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsuariosPorEmpresaItemDto'
+        histogramaSesionesPorEmpresa:
+          type: array
+          items:
+            $ref: '#/components/schemas/SesionHistogramaItemDto'
+        sesionesIncorrectasUltimos30Dias:
+          type: integer
+          format: int64
+        usuariosBloqueadosPorSeguridad:
+          type: integer
+          format: int64
+        usuariosBloqueadosPorIntentosLogin:
+          type: integer
+          format: int64
+          description: Bloqueo por >=3 intentos fallidos con bloqueado_hasta vigente
+        usuariosProximosDesbloqueoAutomatico:
+          type: integer
+          format: int64
+          description: Subconjunto cuyo desbloqueo ocurre en las próximas 6 horas
+        latenciaPromedioMsUltimas24h:
+          type: integer
+          format: int64
+          nullable: true
+        usuariosConectadosPorEmpresa:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsuariosConectadosItemDto'
+        sesionesBloqueoPorBaseDatos:
+          type: array
+          items:
+            $ref: '#/components/schemas/SesionesBloqueoDbItemDto'
+
+    ApiResponseAdminDashboardTelemetry:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/AdminDashboardTelemetryResponse'
+
+    SesionesBloqueoDbItemDto:
+      type: object
+      properties:
+        alcance:
+          type: string
+          description: SECURITY (BD seguridad) o TENANT
+        empresaId:
+          type: integer
+          format: int64
+          nullable: true
+        etiqueta:
+          type: string
+        sesionesEsperandoLock:
+          type: integer
+          format: int64
+        sesionesActivasSinEsperaLock:
+          type: integer
+          format: int64
+        errorMuestreo:
+          type: string
+          nullable: true
+
+    EmpresaTamanoItemDto:
+      type: object
+      properties:
+        empresaId: { type: integer, format: int64 }
+        codigo: { type: string }
+        razonSocial: { type: string }
+        dbName: { type: string }
+        tamanoMb: { type: number, format: double }
+
+    SesionHistogramaItemDto:
+      type: object
+      properties:
+        dia:
+          type: string
+          description: Fecha ISO yyyy-MM-dd
+        empresaId: { type: integer, format: int64 }
+        empresaNombre: { type: string }
+        sesiones:
+          type: integer
+          format: int64
+
+    UsuariosConectadosItemDto:
+      type: object
+      properties:
+        empresaId: { type: integer, format: int64 }
+        razonSocial: { type: string }
+        usuariosConectados:
+          type: integer
+          format: int64
+
+    UsuariosPorEmpresaItemDto:
+      type: object
+      properties:
+        empresaId: { type: integer, format: int64 }
+        razonSocial: { type: string }
+        usuarios:
+          type: integer
+          format: int64
+
+    RolDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        empresaId: { type: integer, format: int64 }
+        codigo: { type: string }
+        nombre: { type: string }
+        esAdmin: { type: boolean }
+        activo: { type: boolean }
+
+    RolRequest:
+      type: object
+      required: [codigo, nombre]
+      properties:
+        codigo: { type: string }
+        nombre: { type: string }
+        esAdmin: { type: boolean, default: false }
+        activo: { type: boolean, default: true }
+
+    RolOpcionMenuDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        rolId: { type: integer, format: int64 }
+        opcionMenuId: { type: integer, format: int64 }
+        opcionMenu:
+          $ref: '#/components/schemas/OpcionMenuDto'
+        activo: { type: boolean }
+
+    RolOpcionAccionDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        rolOpcionMenuId: { type: integer, format: int64 }
+        accionId: { type: integer, format: int64 }
+        accion:
+          $ref: '#/components/schemas/AccionDto'
+        permitido: { type: boolean }
+        activo: { type: boolean }
+
+    RolOpcionAccionPermisoRequest:
+      type: object
+      properties:
+        permitido: { type: boolean, default: true }
+        activo: { type: boolean, default: true }
+
+    RolUsuarioDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        usuarioId: { type: integer, format: int64 }
+        rolId: { type: integer, format: int64 }
+        rol:
+          $ref: '#/components/schemas/RolDto'
+        activo: { type: boolean }
+
+    AsignarRolUsuarioRequest:
+      type: object
+      required: [rolId]
+      properties:
+        rolId: { type: integer, format: int64 }
+        activo: { type: boolean, default: true }
+
+    UsuarioOpcionLibreDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        usuarioId: { type: integer, format: int64 }
+        empresaId: { type: integer, format: int64 }
+        opcionMenuId: { type: integer, format: int64 }
+        opcionMenu:
+          $ref: '#/components/schemas/OpcionMenuDto'
+        habilitado: { type: boolean }
+        activo: { type: boolean }
+
+    UsuarioOpcionLibreRequest:
+      type: object
+      required: [opcionMenuId]
+      properties:
+        opcionMenuId: { type: integer, format: int64 }
+        habilitado: { type: boolean, default: true }
+        activo: { type: boolean, default: true }
+
+    MiMenuItemDto:
+      type: object
+      properties:
+        origen:
+          type: string
+          description: ROL o LIBRE
+          enum: [ROL, LIBRE]
+        opcionMenu:
+          $ref: '#/components/schemas/OpcionMenuDto'
+        acciones:
+          type: array
+          items:
+            $ref: '#/components/schemas/RolOpcionAccionDto'
+
+    MiMenuResponse:
+      type: object
+      properties:
+        empresaId: { type: integer, format: int64 }
+        usuarioId: { type: integer, format: int64 }
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MiMenuItemDto'
+
+    UsuarioPermisosMenuRolesResponse:
+      type: object
+      properties:
+        empresaId: { type: integer, format: int64 }
+        usuarioId: { type: integer, format: int64 }
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RolDto'
+        opcionesMenu:
+          type: array
+          description: >-
+            Solo RBAC (rol–opción–acción); acciones fusionadas si varios roles cubren la misma opción.
+          items:
+            $ref: '#/components/schemas/MiMenuItemDto'
+
+    ApiResponseModuloDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ModuloDto'
+
+    ApiResponseModuloDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ModuloDto'
+
+    ApiResponseOpcionMenuDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/OpcionMenuDto'
+
+    ApiResponseOpcionMenuDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/OpcionMenuDto'
+
+    ApiResponseAccionDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccionDto'
+
+    ApiResponseAccionDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/AccionDto'
+
+    EmpresaAdminDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        codigo: { type: string }
+        ruc: { type: string }
+        razonSocial: { type: string }
+        nombreComercial: { type: string, nullable: true }
+        direccionFiscal: { type: string, nullable: true }
+        correoContacto: { type: string, nullable: true }
+        telefonoContacto: { type: string, nullable: true }
+        dbName: { type: string }
+        activo: { type: boolean }
+
+    EmpresaAdminUpdateRequest:
+      type: object
+      required: [razonSocial]
+      properties:
+        razonSocial: { type: string, maxLength: 200 }
+        nombreComercial: { type: string, maxLength: 200 }
+        direccionFiscal: { type: string, maxLength: 300 }
+        correoContacto: { type: string, maxLength: 150 }
+        telefonoContacto: { type: string, maxLength: 30 }
+
+    EmpresaEstadoRequest:
+      type: object
+      required: [activo]
+      properties:
+        activo: { type: boolean }
+
+    ApiResponseEmpresaAdminDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/EmpresaAdminDto'
+
+    ApiResponseEmpresaAdminDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/EmpresaAdminDto'
+
+    ApiResponseRolDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RolDto'
+
+    ApiResponseRolDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/RolDto'
+
+    ApiResponseRolOpcionMenuDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RolOpcionMenuDto'
+
+    ApiResponseRolOpcionMenuDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/RolOpcionMenuDto'
+
+    ApiResponseRolOpcionAccionDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RolOpcionAccionDto'
+
+    ApiResponseRolOpcionAccionDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/RolOpcionAccionDto'
+
+    ApiResponseRolUsuarioDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RolUsuarioDto'
+
+    ApiResponseRolUsuarioDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/RolUsuarioDto'
+
+    ApiResponseUsuarioOpcionLibreDtoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UsuarioOpcionLibreDto'
+
+    ApiResponseUsuarioOpcionLibreDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UsuarioOpcionLibreDto'
+
+    ApiResponseUsuarioPermisosMenuRolesResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UsuarioPermisosMenuRolesResponse'
+
+    ApiResponseMiMenuResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/MiMenuResponse'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Cabecera `Authorization: Bearer <token>`. El token es JWT temporal (post-login)
+        o definitivo (post-selección de empresa / refresh), según la operación.

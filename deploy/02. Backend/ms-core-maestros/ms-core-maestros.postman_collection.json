@@ -1,0 +1,224 @@
+{
+  "info": {
+    "name": "ms-core-maestros API",
+    "_postman_id": "d0d5f56b-2b5d-4adf-8fc3-66f0e97f4e10",
+    "description": "Collection generada para ms-core-maestros.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9002"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Articulo",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/articulos?page=0&size=20&sort=&codigo=&nombre=&categoriaId=" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/articulos/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"ART001\",\n  \"nombre\": \"Articulo demo\"\n}" }, "url": "{{baseUrl}}/api/core/articulos" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"ART001\",\n  \"nombre\": \"Articulo actualizado\"\n}" }, "url": "{{baseUrl}}/api/core/articulos/{{id}}" } },
+        { "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/articulos/{{id}}" } },
+        { "name": "Listar proveedores", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/articulos/{{articuloId}}/proveedores" } },
+        { "name": "Agregar proveedor", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"proveedorId\": 1\n}" }, "url": "{{baseUrl}}/api/core/articulos/{{articuloId}}/proveedores" } },
+        { "name": "Listar configuracion almacenes", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/articulos/{{articuloId}}/almacenes-config" } },
+        { "name": "Actualizar configuracion almacenes", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"configuraciones\": []\n}" }, "url": "{{baseUrl}}/api/core/articulos/{{articuloId}}/almacenes-config" } }
+      ]
+    },
+    {
+      "name": "Condicion Pago",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/condiciones-pago?page=0&size=20&sort=" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/condiciones-pago/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"CONTADO\",\n  \"nombre\": \"Pago al contado\",\n  \"diasPlazo\": 0,\n  \"activo\": true\n}" }, "url": "{{baseUrl}}/api/core/condiciones-pago" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"CREDITO\",\n  \"nombre\": \"Pago a credito\",\n  \"diasPlazo\": 30,\n  \"activo\": true\n}" }, "url": "{{baseUrl}}/api/core/condiciones-pago/{{id}}" } },
+        { "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/condiciones-pago/{{id}}" } }
+      ]
+    },
+    {
+      "name": "Configuracion",
+      "item": [
+        { "name": "Listar claves", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/config/claves?modulo=&nivel=&activo=" } },
+        { "name": "Resolver", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"claves\": [\"IMPUESTO_IGV\"],\n  \"empresaId\": 1,\n  \"sucursalId\": 1,\n  \"usuarioId\": 1\n}" }, "url": "{{baseUrl}}/api/core/config/resolver" } },
+        { "name": "Obtener config empresa", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/config/empresa?empresaId=1&claves=" } },
+        { "name": "Guardar config empresa", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"empresaId\": 1,\n  \"valores\": {}\n}" }, "url": "{{baseUrl}}/api/core/config/empresa" } },
+        { "name": "Obtener config sucursal", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/config/sucursal?sucursalId=1&claves=" } },
+        { "name": "Guardar config sucursal", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"sucursalId\": 1,\n  \"valores\": {}\n}" }, "url": "{{baseUrl}}/api/core/config/sucursal" } },
+        { "name": "Obtener config usuario", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/config/usuario?usuarioId=1&claves=" } },
+        { "name": "Guardar config usuario", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"usuarioId\": 1,\n  \"valores\": {}\n}" }, "url": "{{baseUrl}}/api/core/config/usuario" } }
+      ]
+    },
+    {
+      "name": "Conversion Unidad",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/conversiones-unidad?page=0&size=20&sort=&articuloId=&umOrigenId=&umDestinoId=" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/conversiones-unidad/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"articuloId\": 1,\n  \"umOrigenId\": 1,\n  \"umDestinoId\": 2,\n  \"factor\": 1.0\n}" }, "url": "{{baseUrl}}/api/core/conversiones-unidad" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"factor\": 2.0\n}" }, "url": "{{baseUrl}}/api/core/conversiones-unidad/{{id}}" } },
+        { "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/conversiones-unidad/{{id}}" } }
+      ]
+    },
+    {
+      "name": "Detraccion Bienes y Servicios",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/detracciones-bienes-servicios?page=0&size=20&sort=" } },
+        { "name": "Obtener por bienServ", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/detracciones-bienes-servicios/{{bienServ}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"bienServ\": \"001\",\n  \"descripcion\": \"Servicio de intermediacion laboral\",\n  \"flagEstado\": \"1\",\n  \"flagReplicacion\": \"1\",\n  \"codSunatPdbe\": \"02\",\n  \"tasaPdbe\": 12.00,\n  \"flagIndImp\": \"1\",\n  \"cntblTipoDetraccionId\": 1,\n  \"montoMinDepre\": 700.00\n}" }, "url": "{{baseUrl}}/api/core/detracciones-bienes-servicios" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"bienServ\": \"001\",\n  \"descripcion\": \"Servicio de intermediacion laboral actualizado\",\n  \"flagEstado\": \"1\",\n  \"codSunatPdbe\": \"02\",\n  \"tasaPdbe\": 10.00,\n  \"flagIndImp\": \"1\",\n  \"cntblTipoDetraccionId\": 1,\n  \"montoMinDepre\": 700.00\n}" }, "url": "{{baseUrl}}/api/core/detracciones-bienes-servicios/{{bienServ}}" } },
+        { "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/detracciones-bienes-servicios/{{bienServ}}" } }
+      ]
+    },
+    {
+      "name": "Ejercicio Periodo",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/ejercicios-periodos?empresaId=&anio=" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/ejercicios-periodos/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"empresaId\": 1,\n  \"anio\": 2026\n}" }, "url": "{{baseUrl}}/api/core/ejercicios-periodos" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"anio\": 2026\n}" }, "url": "{{baseUrl}}/api/core/ejercicios-periodos/{{id}}" } },
+        { "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/ejercicios-periodos/{{id}}" } }
+      ]
+    },
+    {
+      "name": "Empresa",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/empresas" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/empresas/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"ruc\": \"20100070970\",\n  \"razonSocial\": \"Empresa demo\"\n}" }, "url": "{{baseUrl}}/api/core/empresas" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"razonSocial\": \"Empresa actualizada\"\n}" }, "url": "{{baseUrl}}/api/core/empresas/{{id}}" } }
+      ]
+    },
+    {
+      "name": "Empresa Sucursal",
+      "item": [
+        { "name": "Sucursales por empresa", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/empresas/{{empresaId}}/sucursales" } },
+        { "name": "Mis sucursales por empresa", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/empresas/{{empresaId}}/sucursales/mias" } },
+        { "name": "Asignar sucursal a usuario", "request": { "method": "POST", "url": "{{baseUrl}}/api/core/empresas/{{empresaId}}/usuarios/{{usuarioId}}/sucursales/{{sucursalId}}" } },
+        { "name": "Desasignar sucursal a usuario", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/empresas/{{empresaId}}/usuarios/{{usuarioId}}/sucursales/{{sucursalId}}" } }
+      ]
+    },
+    {
+      "name": "Forma Pago",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/formas-pago" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/formas-pago/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"EFECT\",\n  \"nombre\": \"Efectivo\",\n  \"tipo\": \"CONTADO\",\n  \"activo\": true\n}" }, "url": "{{baseUrl}}/api/core/formas-pago" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"TRANS\",\n  \"nombre\": \"Transferencia\",\n  \"tipo\": \"CONTADO\",\n  \"activo\": true\n}" }, "url": "{{baseUrl}}/api/core/formas-pago/{{id}}" } },
+        { "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/formas-pago/{{id}}" } }
+      ]
+    },
+    {
+      "name": "Geografia",
+      "item": [
+        { "name": "Listar paises", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/geografia/paises" } },
+        { "name": "Listar departamentos", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/geografia/departamentos?paisId=1" } },
+        { "name": "Listar provincias", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/geografia/provincias?departamentoId=1" } },
+        { "name": "Listar distritos", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/geografia/distritos?provinciaId=1" } }
+      ]
+    },
+    {
+      "name": "Moneda",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/monedas" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/monedas/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"PEN\",\n  \"nombre\": \"Sol\"\n}" }, "url": "{{baseUrl}}/api/core/monedas" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Sol peruano\"\n}" }, "url": "{{baseUrl}}/api/core/monedas/{{id}}" } }
+      ]
+    },
+    {
+      "name": "Naturaleza Contable",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/naturalezas-contables" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/naturalezas-contables/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"A\",\n  \"descripcion\": \"Activo\"\n}" }, "url": "{{baseUrl}}/api/core/naturalezas-contables" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"descripcion\": \"Activo corriente\"\n}" }, "url": "{{baseUrl}}/api/core/naturalezas-contables/{{id}}" } },
+        { "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/naturalezas-contables/{{id}}" } }
+      ]
+    },
+    {
+      "name": "Numerador",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/numeradores" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/numeradores/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipoDocumentoId\": 1,\n  \"serie\": \"F001\"\n}" }, "url": "{{baseUrl}}/api/core/numeradores" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"serie\": \"F001\"\n}" }, "url": "{{baseUrl}}/api/core/numeradores/{{id}}" } },
+        { "name": "Siguiente numerador", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipoDocumentoId\": 1,\n  \"serie\": \"F001\"\n}" }, "url": "{{baseUrl}}/api/core/numeradores/siguiente" } }
+      ]
+    },
+    {
+      "name": "Parametro Sistema",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/parametros-sistema?codigo=&modulo=" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/parametros-sistema/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"IGV\",\n  \"valor\": \"18\"\n}" }, "url": "{{baseUrl}}/api/core/parametros-sistema" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"valor\": \"18\"\n}" }, "url": "{{baseUrl}}/api/core/parametros-sistema/{{id}}" } },
+        { "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/parametros-sistema/{{id}}" } }
+      ]
+    },
+    {
+      "name": "Relacion Comercial",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/relaciones-comerciales?page=0&size=20&sort=&esProveedor=&esCliente=" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/relaciones-comerciales/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipoDoc\": \"RUC\",\n  \"numeroDoc\": \"20100070970\"\n}" }, "url": "{{baseUrl}}/api/core/relaciones-comerciales" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"razonSocial\": \"Cliente actualizado\"\n}" }, "url": "{{baseUrl}}/api/core/relaciones-comerciales/{{id}}" } },
+        { "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/relaciones-comerciales/{{id}}" } },
+        { "name": "Listar contactos", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/relaciones-comerciales/{{relacionId}}/contactos" } },
+        { "name": "Crear contacto", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Contacto demo\",\n  \"email\": \"demo@correo.com\"\n}" }, "url": "{{baseUrl}}/api/core/relaciones-comerciales/{{relacionId}}/contactos" } },
+        { "name": "Listar cuentas bancarias", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/relaciones-comerciales/{{relacionId}}/cuentas-bancarias" } },
+        { "name": "Crear cuenta bancaria", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"banco\": \"BCP\",\n  \"numeroCuenta\": \"1234567890\"\n}" }, "url": "{{baseUrl}}/api/core/relaciones-comerciales/{{relacionId}}/cuentas-bancarias" } }
+      ]
+    },
+    {
+      "name": "Retencion (Transaccional, no expuesto en ms-core-maestros)",
+      "item": []
+    },
+    {
+      "name": "Sucursal",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/sucursales" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/sucursales/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"empresaId\": 1,\n  \"nombre\": \"Sucursal principal\"\n}" }, "url": "{{baseUrl}}/api/core/sucursales" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Sucursal central\"\n}" }, "url": "{{baseUrl}}/api/core/sucursales/{{id}}" } }
+      ]
+    },
+    {
+      "name": "Tipo Cambio",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/tipos-cambio?monedaId=&fechaDesde=&fechaHasta=" } },
+        { "name": "Obtener por fecha", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/tipos-cambio/por-fecha?fecha=2026-01-01&monedaId=1" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fecha\": \"2026-01-01\",\n  \"monedaId\": 1,\n  \"compra\": 3.70,\n  \"venta\": 3.72\n}" }, "url": "{{baseUrl}}/api/core/tipos-cambio" } }
+      ]
+    },
+    {
+      "name": "Tipo Doc Identidad",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/tipos-documento-identidad?activo=" } }
+      ]
+    },
+    {
+      "name": "Unidad Medida",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/unidades-medida" } },
+        { "name": "Obtener por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/core/unidades-medida/{{id}}" } },
+        { "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"UND\",\n  \"descripcion\": \"Unidad\"\n}" }, "url": "{{baseUrl}}/api/core/unidades-medida" } },
+        { "name": "Actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"descripcion\": \"Unidad actualizada\"\n}" }, "url": "{{baseUrl}}/api/core/unidades-medida/{{id}}" } },
+        { "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/core/unidades-medida/{{id}}" } }
+      ]
+    }
+  ]
+}

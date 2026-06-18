@@ -1,0 +1,130 @@
+<div class="flex items-center justify-between h-full bg-primary pl-[15px]">
+  <div class="flex items-center gap-5 py-[13px]">
+    <div class="flex flex-row gap-2.5 items-center cursor-pointer">
+      <img src="assets/imagenes/auth/svg-logo-restaurant-contabilidad.svg" alt="" class="w-[122px] h-[28px] object-contain object-left" routerLink="/inicio">
+
+      <div class="bg-white w-px h-8"></div>
+
+      <!-- <div class="flex flex-row gap-2 items-center cursor-pointer" (click)="presentPopoverEmpresa($event)">
+        <div class="rounded-full bg-white flex justify-center items-center w-[30px] h-[30px] overflow-hidden">
+          <fa-icon [icon]="fasBuilding" class="text-primary text-sm"></fa-icon>
+        </div>
+        <div class="flex flex-col text-white items-start max-w-[200px]">
+            <span class="font-bold text-sm line-clamp-1">{{ empresaNombre }}</span>
+            <span class="text-xxs">{{ empresaRuc }}</span>
+        </div>
+        <fa-icon [icon]="fasAngleDown" class="text-white"></fa-icon>
+      </div> -->
+      <!-- <ion-popover #popoverEmpresa [isOpen]="isOpenEmpresaMenu" [showBackdrop]="false" (didDismiss)="isOpenEmpresaMenu = false"
+        class="empresa-popover" style="--max-width: 220px">
+        <ng-template>
+          <ion-content class="empresa-popover-content">
+            <div class="flex flex-col">
+              <div class="px-4 py-3 border-b border-gray-100">
+                <span class="text-xs font-bold text-gray-800 block line-clamp-2">{{ empresaNombre }}</span>
+                <span class="text-xxs text-gray-500 block mt-0.5">RUC: {{ empresaRuc }}</span>
+                @if(sucursalNombre){
+                  <span class="text-xxs text-primary block mt-1">
+                    <fa-icon [icon]="fasLocationDot" class="mr-1"></fa-icon>{{ sucursalNombre }}
+                  </span>
+                }
+              </div>
+              <div class="flex flex-col py-1">
+                <div class="flex items-center gap-2.5 px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors" (click)="irASeleccionarSucursal()">
+                  <fa-icon [icon]="fasStore" class="text-gray-500 text-sm w-4 text-center"></fa-icon>
+                  <span class="text-sm text-gray-700">Seleccionar sucursal</span>
+                </div>
+                <div class="flex items-center gap-2.5 px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors" (click)="irAListarSucursales()">
+                  <fa-icon [icon]="fasListUl" class="text-gray-500 text-sm w-4 text-center"></fa-icon>
+                  <span class="text-sm text-gray-700">Listar sucursales</span>
+                </div>
+              </div>
+            </div>
+          </ion-content>
+        </ng-template>
+      </ion-popover> -->
+    </div>
+  </div>
+  <div class="flex items-center text-sm gap-4 pr-3">
+    <div class="flex flex-row items-center gap-2">
+      <span class="text-white">Selecciona el país</span>
+      <ion-select placeholder="País" toggleIcon="chevron-down" [(ngModel)]="paisseleccionado" (ngModelChange)="onPaisChange($event)"
+        [ngModelOptions]="{ standalone: true }" expandedIcon="chevron-up"
+        interface="popover" fill="outline" class="w-[100px] bg-white text-primary rounded-md">
+        @for(item of paises; track item.codigo){
+          <ion-select-option [value]="item.codigo">{{ item.nombre }}</ion-select-option>
+        }
+      </ion-select>
+    </div>
+    <div (click)="modalayuda()" class="px-2.5 text-text-85 flex gap-1.5 items-center rounded-md cursor-pointer h-6 bg-[#F5F7FC]">
+      <fa-icon [icon]="farCircleQuestion" class="text-primary text-sm flex items-center"></fa-icon>
+      <span class="text-[#636E95] text-xs font-medium">Ayuda</span>
+    </div>
+    <app-notificaciones></app-notificaciones>
+    <div class="flex items-center gap-4">
+      <div class="bg-white w-px h-6"></div>
+      <div #userMenuTrigger class="flex flex-row gap-2 items-center cursor-pointer" (click)="presentPopoverUser(userMenuTrigger)">
+        <div class="cont-img-perfil">
+          @if(imagenUsuario){ <img [src]="imagenUsuario" alt=""> }
+          @else { <img src="assets/shapes.svg" alt=""> }
+        </div>
+        <div class="flex flex-col text-white">
+          <span class="text-sm font-bold line-clamp-1 leading-tight">{{ empresaNombre }}</span>
+          <div class="flex items-center">
+            <fa-icon class="text-[9px] leading-none" [icon]="fasUser"></fa-icon>
+            <span class="text-xxs line-clamp-1 leading-none">{{ nombreUsuario }}</span>
+          </div>
+        </div>
+        <fa-icon [icon]="fasAngleDown" class="text-white text-xs"></fa-icon>
+      </div>
+      <ion-popover #popoverUser [isOpen]="isOpenUserMenu" [showBackdrop]="false" (didDismiss)="isOpenUserMenu = false"
+        side="bottom" alignment="end" class="user-popover" style="--max-width: 240px">
+        <ng-template>
+          <ion-content class="user-popover-content">
+            <div class="flex flex-col">
+              <div class="cont-empresas">
+                @for( empr of razones();track empr.id){
+                  <div class="btn-empresa" [class.active]="razonSocialSeleccionada()?.id === empr.id" (click)="seleccionarRazon(empr)">
+                    <div class="cont-icono">
+                      <fa-icon [icon]="falBuilding"></fa-icon>
+                    </div>
+                    <div class="detalle">
+                      <span class="empresa">{{empr.nombre}}</span>
+                      <span class="ruc">RUC: {{empr.docFiscal}}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="flex flex-col py-1 border-t border-text-5">
+                @if (mostrarAdministracionEmpresas) {
+                  <div class="flex items-center gap-2.5 px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors" (click)="irAAdministracionEmpresas()">
+                    <fa-icon [icon]="fasBuilding" class="text-gray-500 text-sm w-4 text-center"></fa-icon>
+                    <span class="text-sm text-gray-700">Administración de empresas</span>
+                  </div>
+                }
+                <div class="flex items-center gap-2.5 px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors" (click)="irAPerfil()">
+                  <fa-icon [icon]="fasUser" class="text-gray-500 text-sm w-4 text-center"></fa-icon>
+                  <span class="text-sm text-gray-700">Mi perfil</span>
+                </div>
+                <div class="flex items-center gap-2.5 px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors" (click)="irAConfiguracion()">
+                  <fa-icon [icon]="fasGear" class="text-gray-500 text-sm w-4 text-center"></fa-icon>
+                  <span class="text-sm text-gray-700">Configuración</span>
+                </div>
+                <div class="flex items-center gap-2.5 px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors" (click)="irANotificaciones()">
+                  <fa-icon [icon]="fasBell" class="text-gray-500 text-sm w-4 text-center"></fa-icon>
+                  <span class="text-sm text-gray-700">Notificaciones</span>
+                </div>
+              </div>
+              <div class="border-t border-gray-100 py-1">
+                <div class="flex items-center gap-2.5 px-4 py-2 cursor-pointer hover:bg-red-50 transition-colors" (click)="cerrarSesionDesdeMenu()">
+                  <fa-icon [icon]="fasRightFromBracket" class="text-red-500 text-sm w-4 text-center"></fa-icon>
+                  <span class="text-sm text-red-600 font-medium">Cerrar sesión</span>
+                </div>
+              </div>
+            </div>
+          </ion-content>
+        </ng-template>
+      </ion-popover>
+    </div>
+  </div>
+</div>

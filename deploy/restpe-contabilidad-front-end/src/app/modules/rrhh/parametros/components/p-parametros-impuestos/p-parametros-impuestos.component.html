@@ -1,0 +1,272 @@
+<div class="contenedor-principal">
+  @if(!panelLateralVisible){
+    <div class="flex items-center justify-center w-[15px] bg-[#E6E8F4]" (click)="togglePanelLateral()">
+      <fa-icon [icon]="fasChevronsRight" class="text-xs text-primary cursor-pointer"></fa-icon>
+    </div>
+  }
+
+  @if(panelLateralVisible){
+    <div class="panel-izquierdo">
+      <div class="cont-title">
+        <span>Lista de reglas de distribución (Selecciona una regla de tu lista para visualizarla)</span>
+      </div>
+
+      <!-- Filtros -->
+      <div class="contenedor-filtros">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por código o nombre" class="w-full" style="--padding-start:30px"></ion-input>
+        </div>
+
+        <div class="filtros-absolutos">
+          <ion-button class="w-[115px]" fill="outline" id="exportar">
+            <fa-icon [icon]="fasDownload" class="mr-1 text-text-85"></fa-icon>
+            <span class="text-text-85">Exportar</span>
+            <fa-icon class="ml-1 text-text-85" [icon]="fasAngleDown"></fa-icon>
+          </ion-button>
+          <ion-popover trigger="exportar" triggerAction="click" [dismissOnSelect]="true" class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+            <ng-template>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            </ng-template>
+          </ion-popover>
+
+          <ion-button class="w-fit" (click)="botonNuevaRegla()">
+            <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+            <span>Nueva regla</span>
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Tabla AG-Grid -->
+      <div class="contenedor-primera-tabla">
+        <fa-icon [icon]="fasRotateRight" class="btn-refresh" (click)="onBtReset()"></fa-icon>
+        <ag-grid-angular
+          style="width: 100%; height: 100%;"
+          class="ag-theme-quartz"
+          [rowData]="rowData"
+          [columnDefs]="colDefs"
+          [pagination]="true"
+          [rowHeight]="20"
+          [localeText]="localeText"
+          [headerHeight]="24"
+          [paginationPageSize]="20"
+          [rowSelection]="'single'"
+          (gridReady)="onGridReady($event)"
+          (cellClicked)="onCellClicked($event)"
+        />
+      </div>
+    </div>
+  }
+
+  <!-- Panel derecho - Formulario -->
+  <div class="panel-derecho">
+    <div class="cont-title">
+      <span>{{ tituloPanelDerecho }}</span>
+    </div>
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+
+    <form [formGroup]="reglaForm">
+      <div class="contenedor-formulario">
+        <!-- Selector principal -->
+        <div class="contenido-formulario">
+          <span class="label">Impuesto @if(pais != 'GT'){<ng-container>/ Contribución </ng-container>}<span class="text-danger">*</span></span>
+          <ion-select 
+            fill="outline" 
+            placeholder="Seleccione" 
+            toggleIcon="chevron-down" 
+            expandedIcon="chevron-up"
+            interface="popover" 
+            formControlName="impuestoContribucion">
+            <ion-select-option *ngFor="let impuesto of impuestosContribuciones" [value]="impuesto.value">{{ impuesto.label }}</ion-select-option>
+          </ion-select>
+        </div>
+  
+        <!-- Campos para Fondo de Pensiones -->
+        @if(tipoImpuestoSeleccionado === 'afp'){
+          @if(pais != 'GT'){
+          <div class="contenido-formulario">
+            <span class="label">Fondo de pensiones <span class="text-danger">*</span></span>
+            <ion-select 
+              fill="outline" 
+              placeholder="Seleccione" 
+              toggleIcon="chevron-down" 
+              expandedIcon="chevron-up"
+              interface="popover" 
+              formControlName="fondoPensiones">
+              <ion-select-option *ngFor="let fondo of fondosPensiones" [value]="fondo">{{ fondo }}</ion-select-option>
+            </ion-select>
+          </div>
+        }
+          <div class="contenido-formulario">
+            <span class="label">Concepto <span class="text-danger">*</span></span>
+            <ion-input fill="outline" formControlName="concepto"></ion-input>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Base de cálculo (S/)<span class="text-danger">*</span></span>
+            <ion-input fill="outline" type="number" formControlName="baseCalculo"></ion-input>
+          </div>
+  
+          <div class="contenido-formulario !items-start">
+            <span class="label pt-1">Porcentaje (%) <span class="text-danger">*</span></span>
+            <div class="flex flex-col gap-0.5 w-full">
+              <div class="flex flex-row gap-2 items-center">
+                <ion-input fill="outline" formControlName="porcentaje" 
+                  type="number">
+                  <fa-icon slot="end" [icon]="farEye" class="text-xxs text-text-85 cursor-pointer bg-white"
+                    (click)="modalDetalleComisiones()"></fa-icon>
+                </ion-input>
+              </div>
+              <div class="flex items-center gap-1 text-xxss">
+                <fa-icon [icon]="farInfoCircle"></fa-icon>
+                <span>Valor referencial según última actualización</span>
+              </div>
+            </div>
+          </div>
+        }
+  
+        <!-- Campos para Quinta Categoría -->
+        @if(tipoImpuestoSeleccionado === 'quintaCategoria'){
+          <div class="contenido-formulario">
+            <span class="label">Concepto <span class="text-danger">*</span></span>
+            <ion-input fill="outline" placeholder="" formControlName="concepto"></ion-input>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Base de cálculo (S/) <span class="text-danger">*</span></span>
+            <ion-input fill="outline" type="number" formControlName="baseCalculo"></ion-input>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Tipo de monto <span class="text-danger">*</span></span>
+            <ion-select 
+              fill="outline" 
+              placeholder="Seleccione" 
+              toggleIcon="chevron-down" 
+              expandedIcon="chevron-up"
+              interface="popover" 
+              formControlName="tipoMonto">
+              <ion-select-option *ngFor="let tipo of tiposMonto" [value]="tipo">{{ tipo }}</ion-select-option>
+            </ion-select>
+          </div>
+  
+          <div class="contenido-formulario !items-start">
+            <span class="label pt-1">Monto mínimo (S/) <span class="text-danger">*</span></span>
+            <div class="flex flex-col gap-0.5 w-full">
+              <div class="flex flex-row gap-2 items-center">
+                <ion-input fill="outline" formControlName="montoMinimo" 
+                  [disabled]="true" type="number">
+                </ion-input>
+              </div>
+              <div class="flex items-center gap-1 text-xxss">
+                <fa-icon [icon]="farInfoCircle"></fa-icon>
+                <span>Monto límite de remuneración</span>
+              </div>
+            </div>
+          </div>
+        }
+  
+        <!-- Campos comunes -->
+        <div class="contenido-formulario">
+          <span class="label">Vigencia desde <span class="text-danger">*</span></span>
+          <app-base-calendar-new
+            mode="single"
+            [initialDate]="reglaForm.get('vigenciaDesde')?.value"
+            position="right"
+            (dateSelected)="reglaForm.patchValue({ vigenciaDesde: $event })">
+          </app-base-calendar-new>
+        </div>
+  
+        <div class="contenido-formulario">
+          <span class="label">Vigencia hasta</span>
+          <app-base-calendar-new
+            mode="single"
+            [initialDate]="reglaForm.get('vigenciaHasta')?.value"
+            position="right"
+            (dateSelected)="reglaForm.patchValue({ vigenciaHasta: $event })">
+          </app-base-calendar-new>
+        </div>
+  
+        <div class="contenido-formulario">
+          <span class="label">Responsable de pago <span class="text-danger">*</span></span>
+          <ion-select 
+            fill="outline" 
+            placeholder="Seleccione" 
+            toggleIcon="chevron-down" 
+            expandedIcon="chevron-up"
+            interface="popover" 
+            formControlName="responsablePago">
+            <ion-select-option *ngFor="let resp of responsablesPago" [value]="resp">{{ resp }}</ion-select-option>
+          </ion-select>
+        </div>
+  
+        <div class="contenido-formulario">
+          <span class="label">Estado <span class="text-danger">*</span></span>
+          <ion-select 
+            fill="outline" 
+            placeholder="Seleccione" 
+            toggleIcon="chevron-down" 
+            expandedIcon="chevron-up"
+            interface="popover" 
+            formControlName="estado">
+            <ion-select-option *ngFor="let est of estadosSelect" [value]="est">{{ est }}</ion-select-option>
+          </ion-select>
+        </div>
+  
+        <div class="contenido-formulario">
+          <span class="label">Observaciones</span>
+          <ion-textarea fill="outline" rows="3" placeholder="Ingrese observaciones" formControlName="observaciones"></ion-textarea>
+        </div>
+      </div>
+  
+      <!-- Tabla de tramos solo para Quinta Categoría -->
+      @if(tipoImpuestoSeleccionado === 'quintaCategoria'){
+          <div class="cont-title">
+            <span>Definición de tramos</span>
+          </div>
+          <div class="flex flex-col p-1 gap-1">
+            <div class="text-xxs text-text-65 bg-light flex items-center gap-1 rounded-lg px-2 py-1">
+              <fa-icon [icon]="farCircleInfo" class="text-xs"></fa-icon>
+              <span>El valor de estos porcentajes son referenciales según última actualización registrada.</span>
+            </div>
+
+            <!-- Valor UIT -->
+             @if(pais != 'GT'){
+            <div class="contenido-formulario ">
+              <span class="label">Valor de la UIT</span>
+              <ion-input fill="outline" class="w-20" type="text" value="S/5,500.00" [disabled]="true"></ion-input>
+            </div>
+          }
+            
+          </div>
+
+          <!-- Tabla de tramos con AG-Grid -->
+          <div style="height: 220px; width: 100%;">
+            <ag-grid-angular
+              style="width: 100%; height: 100%;"
+              class="ag-theme-quartz"
+              [rowData]="tramos"
+              [columnDefs]="colDefsTramos"
+              [rowHeight]="20"
+              [headerHeight]="24"
+              [domLayout]="'normal'"
+              [suppressMovableColumns]="true"
+            />
+        </div>
+      }
+        
+    </form>
+
+    <div class="conjunto-btn">
+      <ion-button class="w-[70px]" (click)="botonGuardar()">
+        <span>{{ modoEdicion ? 'Guardar' : 'Registrar' }}</span>
+      </ion-button>
+    </div>
+  </div>
+</div>

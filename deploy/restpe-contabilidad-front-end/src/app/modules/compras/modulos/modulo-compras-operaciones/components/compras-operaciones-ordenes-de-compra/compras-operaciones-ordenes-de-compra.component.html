@@ -1,0 +1,274 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo" *ngIf="mostrartabla">
+    <div class="cont-title">
+      <span>Lista de órdenes de compra (Selecciona una orden de tu lista para visualizarla o
+        editarla)</span>
+      <fa-icon [icon]="fasChevronsLeft" class="text-xs text-primary cursor-pointer"
+        (click)="mostrarTabla(false)"></fa-icon>
+    </div>
+
+    <!-- Filtros -->
+    <div class="contenedor-filtros">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por n° de orden de compra o proveedor" style="--padding-start:28px"
+            class="w-full text-xxs" (ionInput)="onBuscarLista($event)"></ion-input>
+        </div>
+
+        <div class="flex gap-3 justify-start flex-none">
+          <div class="flex">
+          <ion-select placeholder="De registro" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+            fill="outline" class="w-[90px] text-xxs -mr-0.5" [(ngModel)]="tipoFechaFiltro"
+            [ngModelOptions]="{standalone: true}" (ionChange)="onTipoFechaChange()">
+            <ion-select-option value="0">De registro</ion-select-option>
+            <ion-select-option value="1">De entrega</ion-select-option>
+          </ion-select>
+
+          <!-- calendario -->
+              <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+                [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="center"
+                (dateRangeSelected)="filtrarPorFechas($event)">
+              </app-base-calendar-new>
+          </div>
+        </div>
+
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px] flex-none" fill="outline" id="reportesOrdenes">
+          <fa-icon [icon]="fasGear" class="mr-1"></fa-icon>
+          <span>Acciones</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesOrdenes" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" (click)="exportarPdf()" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            <ion-item lines="none" (click)="exportarExcel()" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" (click)="abrirmodalImportar()" [button]="true" [detail]="false">Importar ordenes de compra</ion-item>
+          </ng-template>
+        </ion-popover>
+
+        <ion-button class="w-fit flex flex-none" [disabled]="modoCreacion" (click)="crearNuevaOrden()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span class="font-normal whitespace-nowrap">Nueva orden de compra</span>
+        </ion-button>
+      </div>
+
+    </div>
+
+
+    <div class="contenedor-primera-tabla" [appLoader]="loadingObtener()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [localeText]="localeText" [headerHeight]="24"
+        [paginationPageSize]="20" [rowSelection]="'single'" (gridReady)="onGridReady($event)"  (rowClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+
+  <div class="barra-desplegable" (click)="mostrarTabla(true)"
+    *ngIf="!mostrartabla">
+    <fa-icon [icon]="fasChevronsRight" class=""></fa-icon>
+  </div>
+  <div class="panel-derecho !overflow-hidden" [appLoader]="loadingObtener()" [ngClass]="{'!w-full !flex-auto': !mostrartabla}">
+   <div class="cont-title">
+      <span>{{ modoCreacion ? 'Nueva Orden de Compra' : 'Información de la Orden: ' + (ordenSeleccionada?.orden_compra_numero || '') }}</span>
+    </div>
+    @if(filaSeleccionada){<div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" ></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+    <div class="flex flex-col overflow-auto">
+      <form action="" [formGroup]="OrdenesDeCompraForm" class="contenedor-formulario"
+        [ngClass]="{'!flex-row': !mostrartabla}">
+        <div class="contenedor-formulario !p-0">
+        <!-- Columna 1: Razón Social, Dirección fiscal, Fecha de entrega, Dirección de entrega, Moneda, Condición de pago -->
+         <div class="contenido-formulario" >
+            <span class="label">Documento Fiscal<span class="text-danger">*</span></span>
+              <!-- Versión con componentes normales -->
+              <div class="flex flex-row" *ngIf="!mostrarCamposDeshabilitados">
+                <ion-input type="text" fill="outline" formControlName="documentoproveedorinput"
+                class="w-[130px] input-left" 
+                placeholder="Ingrese documento"></ion-input>
+                <ion-button (click)="buscarproveedor()" class="!w-[24px] btn-right">
+                <fa-icon [icon]="fasSearch" class="text-xs text-white"></fa-icon>
+                </ion-button>
+              </div>
+              <!-- Versión deshabilitada -->
+              <div class="flex flex-row" *ngIf="mostrarCamposDeshabilitados">
+                <!-- <ion-input fill="outline" formControlName="documentoproveedor"
+                  class="w-[55px] text-xxs"></ion-input> -->
+                <ion-input fill="outline" formControlName="documentoproveedorinput"
+                  class="w-[114px] text-xxs"></ion-input>
+              </div>
+            </div>
+        <div class="contenido-formulario">
+            <span class="label">Razón social</span>
+            <ion-input class="w-[169px]" formControlName="proveedor" placeholder="Proveeedor Ejemplo" fill="outline" ></ion-input>
+          </div>
+      
+          <div class="contenido-formulario">
+            <span class="label">Fecha de registro</span>
+            <ion-input fill="outline" type="date" formControlName="fechaRegistro"
+              class="w-[100px]"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de entrega
+              <span class="text-danger">*</span></span>
+            <!-- Versión con calendario -->
+            <app-base-calendar-new *ngIf="!mostrarCamposDeshabilitados" class="flex" mode="single" [initialDate]="fechaEntrega" position="center"
+              (dateSelected)="onFechaEntrega($event)">
+            </app-base-calendar-new>
+            <!-- Versión deshabilitada -->
+            <ion-input *ngIf="mostrarCamposDeshabilitados" fill="outline" type="date" formControlName="fechaEntrega"
+              class="w-[100px]"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+              <span class="label">Almacén <span class="text-danger">*</span></span>
+              <!-- Versión con autocomplete cuando puede editar -->
+              <app-autocomplete
+                [items]="almacenes"
+                [displayKey]="'nombre'"
+                [valueKey]="'value'"
+                [placeholder]="'Seleccionar almacén'"
+                [width]="'w-[140px]'"
+                formControlName="almacen"
+                (itemSelected)="onAlmacenSeleccionado($event)">
+              </app-autocomplete>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Sucursal<span class="text-danger">*</span></span>
+            <!-- Versión con autocomplete solo en modo creación -->
+            <app-autocomplete 
+              [items]="sucursales"
+              [displayKey]="'nombre'"
+              [valueKey]="'id'"
+              [placeholder]="'Buscar sucursal...'"
+              [width]="'w-[140px]'"
+              formControlName="localentrega"
+              (itemSelected)="onSucursalSeleccionada($event)">
+            </app-autocomplete>
+          </div>
+          <!-- Observacion de marieala -->
+            <div class="contenido-formulario">
+              <span class="label">Dirección de entrega <span class="text-danger">*</span></span>
+              <ion-input fill="outline" formControlName="direccionEntrega" class="w-[169px]" placeholder=""></ion-input>
+          </div>
+        </div>
+
+        <!-- Columna 2: RUC, Emitido por, Local de entrega, Proveedor, Tipo de cambio, Estado (solo cuando tabla oculta) -->
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Centro de costos<span class="text-danger">*</span></span>
+            <app-autocomplete
+              [items]="centrosC"
+              [displayKey]="'nombre'"
+              [valueKey]="'id'"
+              [placeholder]="'Buscar centro de costos'"
+              [width]="'w-[140px]'"
+              [disabled]="mostrarCamposDeshabilitados || !puedeEditarFormulario"
+              formControlName="centrocosto"
+              (itemSelected)="onCentroCSeleccionado($event)"/>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Moneda <span
+                class="text-danger">*</span></span>
+            <!-- Versión con select -->
+            <ion-select *ngIf="!mostrarCamposDeshabilitados" placeholder="Selecciona una moneda" toggleIcon="chevron-down" expandedIcon="chevron-up" formControlName="moneda"
+              interface="popover" fill="outline"
+              class="text-xxs w-[140px]">
+              <ion-select-option *ngFor="let moneda of monedas" [value]="moneda.codigo">{{ moneda.nombre }}</ion-select-option>
+            </ion-select>
+            <!-- Versión deshabilitada -->
+            <ion-input *ngIf="mostrarCamposDeshabilitados" fill="outline" formControlName="moneda"
+              class="w-[140px]"></ion-input>
+          </div>
+          <div class="contenido-formulario" *ngIf="mostrarTipoCambio">
+            <span class="label">Tipo de cambio</span>
+            <ion-input fill="outline" formControlName="tipoCambio" class="w-[65px]" readonly></ion-input>
+          </div>
+          <div class="contenido-formulario !items-start">
+            <span class="label pt-1">Condición de pago<span class="text-danger">*</span></span>
+            <!-- Versión con select -->
+            <div *ngIf="!mostrarCamposDeshabilitados" class="flex flex-col gap-2" [ngClass]="{'!flex-row': !mostrartabla}">
+            <ion-select placeholder="Seleccionar condición" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="condicionPago" interface="popover" fill="outline"
+              class="text-xxs w-[140px]">
+              <ion-select-option *ngFor="let condicion of condicionesPago" [value]="condicion.codigo">
+                {{ condicion.nombre }}
+              </ion-select-option>
+            </ion-select>
+            <div *ngIf="!mostrarCamposDeshabilitados && isCondicionPagoWithCuotas()" class="flex flex-row gap-1 cursor-pointer items-center" (click)="abrirmodalcuotas()">
+              <fa-icon [icon]="fasEdit" class="text-xs text-primary"></fa-icon>
+              <span class="text-xs underline text-primary">{{botoncuotas}}</span>
+            </div>
+            </div>
+            <!-- Versión deshabilitada: muestra el NOMBRE de la condición, no el código -->
+            <ion-input *ngIf="mostrarCamposDeshabilitados" fill="outline" [value]="condicionPagoNombre" readonly
+              class="w-[169px]"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Estado </span>
+            <ion-input 
+              formControlName="estado" interface="popover" fill="outline" class="w-[100px] text-xxs" />
+          </div>
+        </div>
+      </form>
+        <div class="cont-title">
+          <span>Detalle de los artículos</span>
+        </div>
+        <div class="contenedor-filtros !overflow-visible">
+          <div class="w-full relative z-[1200] overflow-visible" *ngIf="puedeEditarFormulario">
+            <app-autocomplete
+              #autocompleteProductos
+              [items]="productos"
+              [displayKey]="'descripcion'"
+              [valueKey]="'codigo'"
+              [placeholder]="'Buscar producto por nombre o código...'"
+              [width]="'w-full'"
+              (searchChanged)="buscarProductos($event)"
+              (itemSelected)="onProductoSeleccionado($event)">
+            </app-autocomplete>
+          </div>
+          <div class="w-full" *ngIf="!puedeEditarFormulario">
+            <ion-input fill="outline" placeholder="Buscar producto por nombre o código..." [disabled]="true"
+              class="w-full"></ion-input>
+          </div>
+          <ion-button class="w-fit flex flex-none" (click)="abrirModalCrearProductoActivoFijo()">
+            <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+            <span class="font-normal whitespace-nowrap">Nuevo producto</span>
+          </ion-button>
+        </div>
+        <div class="min-h-[150px] ag-theme-alpine relative z-0">
+          <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowDataArticulos"
+            [columnDefs]="colDefsArticulos" [columnTypes]="columnTypes" [rowHeight]="20" [headerHeight]="24"
+            [localeText]="localeText" [paginationPageSize]="20" (gridReady)="onGridReadyArticulos($event)"
+            (cellClicked)="onCellClickedArticulo($event)" (cellValueChanged)="onCellValueChangedArticulo($event)" />
+        </div>
+        <div class="flex flex-row gap-2 items-start justify-between px-2 mt-2" [formGroup]="OrdenesDeCompraForm">
+          <ion-textarea fill="outline" formControlName="observaciones" placeholder="Agregar notas adicionales" class="max-w-[459px] !h-[60px]"></ion-textarea>
+          <div class="resumen-totales">
+            <div class="resumen-fila">
+              <span class="resumen-label">Subtotal</span>
+              <span class="resumen-valor">S/{{ subtotalGeneral | number:'1.2-2' }}</span>
+            </div>
+            <div class="resumen-fila">
+              <span class="resumen-label">Impuestos</span>
+              <span class="resumen-valor">S/{{ impuestosGenerales | number:'1.2-2' }}</span>
+            </div>
+            <div class="resumen-fila">
+              <span class="text-xxs text-primary">Total</span>
+              <span class="text-xxs">S/{{ totalGeneral | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="contenedor-btn">
+        <ion-button expand="block" class="w-fit" [disabled]="!puedeEditarFormulario" (click)="guardarCambios()">{{ modoCreacion ? 'Registrar' : 'Guardar' }}</ion-button>
+        @if(!modoCreacion && ordenSeleccionada?.['id']){
+        <ion-button color="danger" fill="outline" class="w-fit" [disabled]="loadingEliminar()" (click)="anularOrden()">Anular OC</ion-button>
+        }
+        <ion-button color="medium" fill="outline" class="w-fit" (click)="cancelar()">Cancelar</ion-button>
+    </div>
+  </div>
+</div>

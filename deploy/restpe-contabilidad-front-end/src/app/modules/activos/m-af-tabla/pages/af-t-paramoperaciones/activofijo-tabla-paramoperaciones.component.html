@@ -1,0 +1,157 @@
+<form action="" [formGroup]="ParametrosGroup" class="w-full">
+  <div class="w-full p-5 flex flex-col gap-3"[appLoader]="isLoading()">
+    <div class="flex flex-row gap-5">
+      <fieldset class="card-fieldset p-2 w-[405px] h-[142px]">
+        <legend class="legend">Parámetros de depreciación</legend>
+        <div class="cont-field">
+          <div class="contenido-param gap-5">
+            <span class="label-param">Metodo de Depreciación <span class="text-danger">*</span></span>
+            <ion-select placeholder="Activo" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="estadoDepreciacion" interface="popover" fill="outline"
+              class="w-[130px]  !h-[22px] !min-h-[22px] text-xxs">
+              <ion-select-option value="Activo">Lineal</ion-select-option>
+              <ion-select-option value="Inactivo">Suma de dígitos</ion-select-option>
+              <ion-select-option value="Inactivo">Otro</ion-select-option>
+
+            </ion-select>
+          </div>
+          <div class="contenido-param gap-5">
+            <span class="label-param">Libro contable<span class="text-danger">*</span></span>
+            <ion-select placeholder="Seleccione" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="libroContable" interface="popover" fill="outline"
+              class="w-[102px] !h-[22px] !min-h-[22px]  text-xxs">
+              <ion-select-option value="Financiero">Financiero</ion-select-option>
+              <ion-select-option value="Tributario">Tributario</ion-select-option>
+              <ion-select-option value="NIF">NIIF</ion-select-option>
+              <ion-select-option value="Otro">Otro</ion-select-option>
+            </ion-select>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset class="card-fieldset p-3 w-[405px] h-[142px] flex items-center">
+        <legend class="legend">Contabilidad general</legend>
+        <div class="cont-field">
+          <div class="contenido-param gap-2">
+            <span class="w-[145px] text-xxs">Cuenta Global de Activo Fijo <span class="text-danger">*</span></span>
+            <app-autocomplete
+              formControlName="cuentaGlobalActivoFijo"
+              [items]="cuentasContables"
+              displayKey="nombre"
+              valueKey="id"
+              placeholder="Selecciona cuenta"
+              width="w-[160px]"
+              [height]="'22px'"
+              (itemSelected)="onCuentaGlobalActivoFijoSeleccionada($event)">
+            </app-autocomplete>
+          </div>
+          <div class="contenido-param gap-2">
+            <span class="w-[145px] text-xxs">Cuenta Global de Depreciación<span class="text-danger">*</span></span>
+            <app-autocomplete
+              formControlName="cuentaGlobalDepreciacion"
+              [items]="cuentasContables"
+              displayKey="nombre"
+              valueKey="id"
+              placeholder="Selecciona cuenta"
+              width="w-[160px]"
+              [height]="'22px'"
+              (itemSelected)="onCuentaGlobalDepreciacionSeleccionada($event)">
+            </app-autocomplete>
+          </div>
+          <div class="contenido-param gap-2">
+            <span class="w-[145px] text-xxs">Cuenta de Gasto de Depr.<span class="text-danger">*</span></span>
+            <app-autocomplete
+              formControlName="cuentaGastoDepr"
+              [items]="cuentasContables"
+              displayKey="nombre"
+              valueKey="id"
+              placeholder="Selecciona cuenta"
+              width="w-[160px]"
+              [height]="'22px'"
+              (itemSelected)="onCuentaGastoDeprSeleccionada($event)">
+            </app-autocomplete>
+          </div>
+          <div class="contenido-param gap-2">
+            <span class="w-[145px] text-xxs">Centro de Costo por Defecto<span class="text-danger">*</span></span>
+            <app-autocomplete
+              formControlName="centroCostoPorDefecto"
+              [items]="centrosCosto"
+              displayKey="nombre"
+              valueKey="id"
+              placeholder="Selecciona centro"
+              width="w-[160px]"
+              [height]="'22px'"
+              (itemSelected)="onCentroCostoSeleccionado($event)">
+            </app-autocomplete>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+    <div class="flex flex-row gap-5">
+      <fieldset class="card-fieldset p-2 w-[405px] h-[105px]">
+        <legend class="legend">Numeración de Activos</legend>
+        <div class="flex flex-row gap-5">
+          <div class="flex flex-row gap-2 items-start mt-1">
+            <span class="w-[120px] text-xxs">Formato de numeración<span class="text-danger">*</span></span>
+          </div>
+          <div class="flex flex-col gap-4">
+            <ion-input fill="outline" formControlName="formatodenumeracion"
+              class="w-[150px] !h-[22px] !min-h-[22px] text-xxs"></ion-input>
+            <span class="text-xxs flex items-center gap-1">
+              <ion-checkbox formControlName="correlativomanualcheck"></ion-checkbox>
+              Correlativo manual
+            </span>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset class="card-fieldset p-3 w-[405px] h-[105px] flex items-center">
+        <legend class="legend">Integración con Módulos</legend>
+        <div class="flex flex-col gap-1">
+          <div class="flex flex-row gap-1">
+            <ion-checkbox formControlName="modulocontablecheck"></ion-checkbox>
+            <span class="text-xxs flex items-center gap-1">
+              Módulo Contable
+            </span>
+          </div>
+          <div class="flex flex-row gap-1">
+            <ion-checkbox formControlName="modulocomprascheck"></ion-checkbox>
+            <span class="text-xxs flex items-center gap-1">
+              Módulo de Compras
+            </span>
+          </div>
+          <div class="flex flex-row gap-1">
+            <ion-checkbox formControlName="moduloinventariocheck"></ion-checkbox>
+            <span class="text-xxs flex items-center gap-1">
+              Módulo de Inventario
+            </span>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+    <div class="flex flex-row gap-5">
+      <fieldset class="card-fieldset p-2 w-[405px] h-[105px]">
+        <legend class="legend">Numeración de Activos</legend>
+        <div class="flex flex-row gap-5">
+          <div class="flex flex-row gap-2 items-start mt-1">
+            <span class="w-[120px] text-xxs">Días previos al cierre<span class="text-danger">*</span></span>
+          </div>
+          <div class="flex flex-col gap-4">
+            <ion-input fill="outline" formControlName="previosalcierre"
+              class="w-[150px] !h-[22px] !min-h-[22px] text-xxs"></ion-input>
+            <span class="text-xxs flex items-center gap-1">
+              <ion-checkbox formControlName="modificacioncheck"></ion-checkbox>
+              Modificación Post Cierre
+            </span>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset class="card-fieldset p-3 w-[405px] h-[105px] flex items-start">
+        <legend class="text-xs text-[#3B82F6]">Integración con Módulos</legend>
+        <div class="flex flex-row gap-2 items-center">
+          <span class="w-[145px] text-xxs">Observaciones Generales <span class="text-danger">*</span></span>
+          <ion-textarea fill="outline" formControlName="observacionesgenerales" class="w-[163px]"></ion-textarea>
+        </div>
+      </fieldset>
+    </div>
+    <ion-button class="w-[65px] text-white text-sm rounded" type="button" (click)="guardarParametros()">Guardar</ion-button>
+  </div>
+</form>

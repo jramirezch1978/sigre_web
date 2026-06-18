@@ -1,0 +1,312 @@
+{
+  "info": {
+    "name": "ms-rrhh — Trabajadores API",
+    "description": "Colección Postman (v2.1) para los 17 endpoints de Trabajadores, Contratos Laborales y Horarios.\n\n- **baseUrl:** http://localhost:9007\n- **accessToken:** JWT Bearer del gateway/login.\n- Variables {{...Id}} son ejemplos; ajustar a datos reales.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token2}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:9007" },
+    { "key": "token2", "value": "" },
+    { "key": "trabajadorId", "value": "1" },
+    { "key": "contratoId", "value": "1" },
+    { "key": "horarioId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Trabajador",
+      "item": [
+        {
+          "name": "Listar trabajadores (paginado + filtros)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores?page=0&size=10&flagEstado=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "flagEstado", "value": "1" },
+                { "key": "codigoTrabajador", "value": "", "disabled": true },
+                { "key": "nombres", "value": "", "disabled": true },
+                { "key": "apellidoPaterno", "value": "", "disabled": true },
+                { "key": "numeroDocumento", "value": "", "disabled": true },
+                { "key": "areaId", "value": "", "disabled": true },
+                { "key": "cargoId", "value": "", "disabled": true },
+                { "key": "sucursalId", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener trabajador por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear trabajador",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigoTrabajador\": \"TRB-001\",\n  \"nombres\": \"Carlos Alberto\",\n  \"apellidoPaterno\": \"García\",\n  \"apellidoMaterno\": \"López\",\n  \"tipoDocumento\": \"DNI\",\n  \"numeroDocumento\": \"45678912\",\n  \"fechaNacimiento\": \"1990-05-20\",\n  \"sexo\": \"M\",\n  \"estadoCivil\": \"SOLTERO\",\n  \"direccion\": \"Av. Larco 1234, Miraflores\",\n  \"telefono\": \"987654321\",\n  \"email\": \"carlos.garcia@empresa.com\",\n  \"cuentaBancariaSueldo\": \"1234567890123456\",\n  \"cuentaCts\": \"6543210987654321\",\n  \"adminAfpId\": 1,\n  \"cuspp\": \"CUSPP12345\",\n  \"regimenLaboral\": \"GENERAL\",\n  \"areaId\": 1,\n  \"cargoId\": 1,\n  \"sucursalId\": 1,\n  \"fechaIngreso\": \"2024-03-15\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar trabajador",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigoTrabajador\": \"TRB-001\",\n  \"nombres\": \"Carlos Alberto\",\n  \"apellidoPaterno\": \"García\",\n  \"apellidoMaterno\": \"López\",\n  \"tipoDocumento\": \"DNI\",\n  \"numeroDocumento\": \"45678912\",\n  \"fechaNacimiento\": \"1990-05-20\",\n  \"sexo\": \"M\",\n  \"estadoCivil\": \"CASADO\",\n  \"direccion\": \"Av. Javier Prado 500, San Isidro\",\n  \"telefono\": \"912345678\",\n  \"email\": \"carlos.garcia@empresa.com\",\n  \"cuentaBancariaSueldo\": \"1234567890123456\",\n  \"cuentaCts\": \"6543210987654321\",\n  \"adminAfpId\": 1,\n  \"cuspp\": \"CUSPP12345\",\n  \"regimenLaboral\": \"GENERAL\",\n  \"areaId\": 1,\n  \"cargoId\": 2,\n  \"sucursalId\": 1,\n  \"fechaIngreso\": \"2024-03-15\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Activar trabajador",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/activar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "activar"]
+            }
+          }
+        },
+        {
+          "name": "Desactivar trabajador",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/desactivar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "desactivar"]
+            }
+          }
+        },
+        {
+          "name": "Cesar trabajador",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fechaCese\": \"2026-05-31\",\n  \"motivoCese\": \"Renuncia voluntaria\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/cesar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "cesar"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contrato Laboral",
+      "item": [
+        {
+          "name": "Listar contratos del trabajador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/contratos?flagEstado=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "contratos"],
+              "query": [
+                { "key": "flagEstado", "value": "1", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener contrato por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/contratos/{{contratoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "contratos", "{{contratoId}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear contrato",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"INDEFINIDO\",\n  \"fechaInicio\": \"2024-03-15\",\n  \"fechaFin\": null,\n  \"remuneracion\": 4200.00,\n  \"asignacionFamiliar\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/contratos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "contratos"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar contrato",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"PLAZO_FIJO\",\n  \"fechaInicio\": \"2024-03-15\",\n  \"fechaFin\": \"2025-03-14\",\n  \"remuneracion\": 4500.00,\n  \"asignacionFamiliar\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/contratos/{{contratoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "contratos", "{{contratoId}}"]
+            }
+          }
+        },
+        {
+          "name": "Desactivar contrato",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/contratos/{{contratoId}}/desactivar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "contratos", "{{contratoId}}", "desactivar"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Horario Trabajador",
+      "item": [
+        {
+          "name": "Listar horarios del trabajador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/horarios?flagEstado=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "horarios"],
+              "query": [
+                { "key": "flagEstado", "value": "1", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener horario por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/horarios/{{horarioId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "horarios", "{{horarioId}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear horario",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"turnoId\": 1,\n  \"fechaDesde\": \"2024-03-15\",\n  \"fechaHasta\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/horarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "horarios"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar horario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"turnoId\": 2,\n  \"fechaDesde\": \"2026-06-01\",\n  \"fechaHasta\": \"2026-12-31\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/horarios/{{horarioId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "horarios", "{{horarioId}}"]
+            }
+          }
+        },
+        {
+          "name": "Desactivar horario",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rrhh/trabajadores/{{trabajadorId}}/horarios/{{horarioId}}/desactivar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rrhh", "trabajadores", "{{trabajadorId}}", "horarios", "{{horarioId}}", "desactivar"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

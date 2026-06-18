@@ -1,0 +1,896 @@
+{
+  "info": {
+    "_postman_id": "b7e1c9a2-3d44-4f1a-9c10-pendientesapidog1",
+    "name": "ms-compras — Pendientes Apidog (langulo2)",
+    "description": "Endpoints faltantes y correcciones detectados para Apidog en ms-compras.\n\nOrden por issue (langulo2 / Luis Angel Angulo):\n1. Órdenes de Compra: PATCH /{id}/igv, POST /{id}/recepcionar-almacen (+ corrección PDF GET→POST).\n2. Contratos Marco: GET /por-vencer.\n3. Actas de Conformidad: GET /pendientes, GET /{id}/pdf.\n4. Solicitudes de Compra (flujo SC→OC): listar, crear, convertir, trazabilidad.\n5. Órdenes de Servicio: 24 endpoints (carpeta nueva).\n6. Artículo-Estructuras (BOM): 5 endpoints (carpeta nueva, clave compuesta).\n7. Cotizaciones: GET /comparativo, POST /{id}/convertir-oc.\n8. Maestros · Artículo Precios Pactados (path corregido /maestros/articulo-precios-pactados).\n9. Maestros · Tipos Entidad Contribuyente (path corregido /maestros/tipos-entidad-contribuyente).\n\nMismas variables que la colección ms-compras (baseUrl, accessToken). Todo bajo /api/compras.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.dev.contabilidad.restaurant.pe" },
+    { "key": "accessToken", "value": "" },
+    { "key": "sucursalId", "value": "1" },
+    { "key": "ordenCompraId", "value": "1" },
+    { "key": "contratoMarcoId", "value": "1" },
+    { "key": "actaConformidadId", "value": "1" },
+    { "key": "solicitudCompraId", "value": "1" },
+    { "key": "ordenServicioId", "value": "1" },
+    { "key": "cotizacionId", "value": "1" },
+    { "key": "lineaId", "value": "1" },
+    { "key": "articuloPadreId", "value": "100" },
+    { "key": "articuloHijoId", "value": "200" },
+    { "key": "precioPactadoId", "value": "1" },
+    { "key": "tipoEntidadContribuyenteId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "01. Ordenes de Compra (faltantes + correccion)",
+      "item": [
+        {
+          "name": "PATCH /{id}/igv — Modificar IGV de lineas",
+          "request": {
+            "method": "PATCH",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lineas\": [\n    { \"lineaId\": 1, \"tipoImpuestoId\": 1 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/ordenes-compra/{{ordenCompraId}}/igv",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "ordenes-compra", "{{ordenCompraId}}", "igv" ]
+            },
+            "description": "Actualiza el tipo de impuesto (IGV) por línea de la orden de compra."
+          }
+        },
+        {
+          "name": "POST /{id}/recepcionar-almacen — Generar recepcion",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"articuloMovTipoId\": 1,\n  \"almacenId\": 1,\n  \"fechaMov\": \"2026-05-30\",\n  \"observaciones\": \"Recepcion total de la OC\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/ordenes-compra/{{ordenCompraId}}/recepcionar-almacen",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "ordenes-compra", "{{ordenCompraId}}", "recepcionar-almacen" ]
+            },
+            "description": "Genera la recepción en almacén de los artículos de la OC."
+          }
+        },
+        {
+          "name": "POST /{id}/pdf — Descargar PDF (CORRECCION: era GET)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/ordenes-compra/{{ordenCompraId}}/pdf",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "ordenes-compra", "{{ordenCompraId}}", "pdf" ]
+            },
+            "description": "Corrección: el código usa @PostMapping. En Apidog estaba documentado como GET (devolvía 405 Method Not Allowed). Debe ser POST. Responde application/pdf."
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Contratos Marco",
+      "item": [
+        {
+          "name": "GET /por-vencer — Contratos proximos a vencer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/contratos-marco/por-vencer?dias=30&page=0&size=20",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "contratos-marco", "por-vencer" ],
+              "query": [
+                { "key": "dias", "value": "30", "description": "Días de anticipación (default 30)" },
+                { "key": "proveedorId", "value": "", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Lista paginada de contratos marco que vencen dentro de los próximos N días."
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Actas de Conformidad",
+      "item": [
+        {
+          "name": "GET /pendientes — Ordenes de servicio por conformar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/actas-conformidad/pendientes?page=0&size=20",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "actas-conformidad", "pendientes" ],
+              "query": [
+                { "key": "proveedorId", "value": "", "disabled": true },
+                { "key": "fechaDesde", "value": "", "disabled": true },
+                { "key": "fechaHasta", "value": "", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Listado de OS pendientes de conformidad (por conformar)."
+          }
+        },
+        {
+          "name": "GET /{id}/pdf — Descargar acta en PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/actas-conformidad/{{actaConformidadId}}/pdf",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "actas-conformidad", "{{actaConformidadId}}", "pdf" ]
+            },
+            "description": "Descarga el acta de conformidad en PDF. Responde application/pdf."
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Solicitudes de Compra (flujo SC -> OC)",
+      "item": [
+        {
+          "name": "GET / — Listar solicitudes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/solicitudes-compra?page=0&size=20",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "solicitudes-compra" ],
+              "query": [
+                { "key": "sucursalId", "value": "", "disabled": true },
+                { "key": "flagEstado", "value": "", "disabled": true },
+                { "key": "prioridad", "value": "", "disabled": true },
+                { "key": "fechaDesde", "value": "", "disabled": true },
+                { "key": "fechaHasta", "value": "", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST / — Crear solicitud",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sucursalId\": 1,\n  \"fecha\": \"2026-05-30\",\n  \"solicitanteId\": 1,\n  \"prioridad\": \"ALTA\",\n  \"justificacion\": \"Reposicion de stock\",\n  \"lineas\": [\n    {\n      \"articuloId\": 1,\n      \"almacenId\": 1,\n      \"cantidad\": 10,\n      \"especificaciones\": \"Marca preferente\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/solicitudes-compra",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "solicitudes-compra" ]
+            }
+          }
+        },
+        {
+          "name": "POST /{id}/convertir — Convertir a OC/Cotizacion",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destino\": \"ORDEN_COMPRA\",\n  \"proveedorIds\": [ 1 ],\n  \"monedaId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/solicitudes-compra/{{solicitudCompraId}}/convertir",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "solicitudes-compra", "{{solicitudCompraId}}", "convertir" ]
+            },
+            "description": "Convierte la solicitud en OC o Cotización según 'destino'."
+          }
+        },
+        {
+          "name": "GET /{id}/trazabilidad — Trazabilidad de documentos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/solicitudes-compra/{{solicitudCompraId}}/trazabilidad",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "solicitudes-compra", "{{solicitudCompraId}}", "trazabilidad" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Ordenes de Servicio (24 endpoints)",
+      "item": [
+        {
+          "name": "5.1 CRUD basico",
+          "item": [
+            {
+              "name": "GET / — Listar",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio?page=0&size=20",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio" ],
+                  "query": [
+                    { "key": "sucursalId", "value": "", "disabled": true },
+                    { "key": "proveedorId", "value": "", "disabled": true },
+                    { "key": "flagEstado", "value": "", "disabled": true },
+                    { "key": "codOrigen", "value": "", "disabled": true },
+                    { "key": "numero", "value": "", "disabled": true },
+                    { "key": "fechaDesde", "value": "", "disabled": true },
+                    { "key": "fechaHasta", "value": "", "disabled": true },
+                    { "key": "monedaId", "value": "", "disabled": true },
+                    { "key": "compradorId", "value": "", "disabled": true },
+                    { "key": "flagReqServ", "value": "", "disabled": true },
+                    { "key": "ordenTrabajoId", "value": "", "disabled": true },
+                    { "key": "jobCodigo", "value": "", "disabled": true },
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "20" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /pendientes-aprobacion",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/pendientes-aprobacion?page=0&size=20",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "pendientes-aprobacion" ],
+                  "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "20" } ]
+                }
+              }
+            },
+            {
+              "name": "GET /{id} — Detalle",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}" ]
+                }
+              }
+            },
+            {
+              "name": "POST / — Crear",
+              "request": {
+                "method": "POST",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sucursalId\": 1,\n  \"codOrigen\": \"MANUAL\",\n  \"proveedorId\": 1,\n  \"nomVendedor\": \"Juan Perez\",\n  \"docTipoId\": 1,\n  \"fecRegistro\": \"2026-05-30\",\n  \"monedaId\": 1,\n  \"tipoCambio\": 3.75,\n  \"formaPagoId\": 1,\n  \"flagReqServ\": \"0\",\n  \"flagSolicitaActa\": false,\n  \"ordenTrabajoId\": null,\n  \"descripcion\": \"Servicio de mantenimiento\",\n  \"lineas\": [\n    {\n      \"servicioId\": 1,\n      \"descripcion\": \"Mantenimiento preventivo\",\n      \"fecProyect\": \"2026-06-01\",\n      \"importe\": 1000.00,\n      \"dsctoPorcentaje\": 0,\n      \"tiposImpuestoId\": 1,\n      \"tiposImpuesto2Id\": null,\n      \"centrosCostoId\": null,\n      \"conceptoFinancieroId\": null,\n      \"operacionesDetId\": null\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio" ]
+                }
+              }
+            },
+            {
+              "name": "PUT /{id} — Actualizar",
+              "request": {
+                "method": "PUT",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sucursalId\": 1,\n  \"codOrigen\": \"MANUAL\",\n  \"proveedorId\": 1,\n  \"nomVendedor\": \"Juan Perez\",\n  \"docTipoId\": 1,\n  \"fecRegistro\": \"2026-05-30\",\n  \"monedaId\": 1,\n  \"tipoCambio\": 3.75,\n  \"formaPagoId\": 1,\n  \"flagReqServ\": \"0\",\n  \"flagSolicitaActa\": false,\n  \"descripcion\": \"Servicio de mantenimiento (editado)\",\n  \"lineas\": [\n    {\n      \"servicioId\": 1,\n      \"descripcion\": \"Mantenimiento preventivo\",\n      \"fecProyect\": \"2026-06-01\",\n      \"importe\": 1200.00,\n      \"dsctoPorcentaje\": 0,\n      \"tiposImpuestoId\": 1\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}" ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.2 Flujo de aprobacion",
+          "item": [
+            {
+              "name": "POST /{id}/enviar-aprobacion",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/enviar-aprobacion",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "enviar-aprobacion" ]
+                }
+              }
+            },
+            {
+              "name": "POST /{id}/aprobar",
+              "request": {
+                "method": "POST",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"observacion\": \"Aprobado\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/aprobar",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "aprobar" ]
+                },
+                "description": "Body opcional (observacion)."
+              }
+            },
+            {
+              "name": "POST /{id}/rechazar",
+              "request": {
+                "method": "POST",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"motivo\": \"Presupuesto excedido\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/rechazar",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "rechazar" ]
+                }
+              }
+            },
+            {
+              "name": "POST /{id}/devolver",
+              "request": {
+                "method": "POST",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"motivo\": \"Corregir lineas\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/devolver",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "devolver" ]
+                }
+              }
+            },
+            {
+              "name": "POST /{id}/anular",
+              "request": {
+                "method": "POST",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"motivo\": \"Servicio cancelado\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/anular",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "anular" ]
+                }
+              }
+            },
+            {
+              "name": "POST /{id}/cerrar",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/cerrar",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "cerrar" ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.3 Conformidad",
+          "item": [
+            {
+              "name": "POST /{id}/lineas/{lineaId}/conformidad — Registrar",
+              "request": {
+                "method": "POST",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"observacion\": \"Conforme\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/lineas/{{lineaId}}/conformidad",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "lineas", "{{lineaId}}", "conformidad" ]
+                }
+              }
+            },
+            {
+              "name": "DELETE /{id}/lineas/{lineaId}/conformidad — Revertir",
+              "request": {
+                "method": "DELETE",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"observacion\": \"Revertir conformidad\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/lineas/{{lineaId}}/conformidad",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "lineas", "{{lineaId}}", "conformidad" ]
+                }
+              }
+            },
+            {
+              "name": "GET /pendientes-conformidad",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/pendientes-conformidad?modo=APROBACION&page=0&size=20",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "pendientes-conformidad" ],
+                  "query": [
+                    { "key": "modo", "value": "APROBACION", "description": "Default APROBACION" },
+                    { "key": "proveedorId", "value": "", "disabled": true },
+                    { "key": "fechaDesde", "value": "", "disabled": true },
+                    { "key": "fechaHasta", "value": "", "disabled": true },
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "20" }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.4 Valor y asignacion OC",
+          "item": [
+            {
+              "name": "POST /{id}/ajuste-valor",
+              "request": {
+                "method": "POST",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"lineaId\": 1,\n  \"nuevoImporte\": 1500.00,\n  \"motivo\": \"Reajuste por mayor alcance\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/ajuste-valor",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "ajuste-valor" ]
+                }
+              }
+            },
+            {
+              "name": "POST /{id}/asignar-oc",
+              "request": {
+                "method": "POST",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"ordenCompraId\": 1,\n  \"lineas\": [\n    { \"lineaOsId\": 1, \"lineaOcId\": 1, \"monto\": 500.00 }\n  ]\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/asignar-oc",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "asignar-oc" ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.5 Consultas",
+          "item": [
+            {
+              "name": "GET /{id}/historial-aprobaciones",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/historial-aprobaciones",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "historial-aprobaciones" ]
+                }
+              }
+            },
+            {
+              "name": "GET /{id}/saldo-pendiente",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/saldo-pendiente",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "saldo-pendiente" ]
+                }
+              }
+            },
+            {
+              "name": "GET /{id}/cuentas-pagar",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/cuentas-pagar",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "cuentas-pagar" ]
+                }
+              }
+            },
+            {
+              "name": "GET /servicios-disponibles",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/servicios-disponibles",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "servicios-disponibles" ],
+                  "query": [
+                    { "key": "proveedorId", "value": "", "disabled": true },
+                    { "key": "monedaId", "value": "", "disabled": true },
+                    { "key": "fechaRegistro", "value": "", "disabled": true },
+                    { "key": "codSubCat", "value": "", "disabled": true }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /datos-servicio",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/datos-servicio?servicioId=1&proveedorId=1&monedaId=1&sucursalId=1",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "datos-servicio" ],
+                  "query": [
+                    { "key": "servicioId", "value": "1" },
+                    { "key": "proveedorId", "value": "1" },
+                    { "key": "monedaId", "value": "1" },
+                    { "key": "sucursalId", "value": "1" }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.6 Envio y PDFs",
+          "item": [
+            {
+              "name": "POST /{id}/enviar-proveedor",
+              "request": {
+                "method": "POST",
+                "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"emailDestino\": \"proveedor@correo.com\",\n  \"asunto\": \"Orden de servicio\",\n  \"mensaje\": \"Adjunto OS para su atencion\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/enviar-proveedor",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "enviar-proveedor" ]
+                },
+                "description": "Body opcional."
+              }
+            },
+            {
+              "name": "GET /{id}/pdf — PDF de la OS",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/pdf",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "pdf" ]
+                }
+              }
+            },
+            {
+              "name": "GET /{id}/acta-conformidad/pdf — Acta de la OS en PDF",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/compras/ordenes-servicio/{{ordenServicioId}}/acta-conformidad/pdf",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "compras", "ordenes-servicio", "{{ordenServicioId}}", "acta-conformidad", "pdf" ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06. Articulo-Estructuras (BOM)",
+      "item": [
+        {
+          "name": "GET / — Listar (filtro articuloPadreId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-estructuras?page=0&size=20",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-estructuras" ],
+              "query": [
+                { "key": "articuloPadreId", "value": "", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /{articuloPadreId}/{articuloHijoId} — Detalle",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-estructuras/{{articuloPadreId}}/{{articuloHijoId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-estructuras", "{{articuloPadreId}}", "{{articuloHijoId}}" ]
+            }
+          }
+        },
+        {
+          "name": "POST / — Crear",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"articuloPadreId\": 100,\n  \"articuloHijoId\": 200,\n  \"cantidad\": 2.5\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-estructuras",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-estructuras" ]
+            }
+          }
+        },
+        {
+          "name": "PUT /{articuloPadreId}/{articuloHijoId} — Actualizar",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"articuloPadreId\": 100,\n  \"articuloHijoId\": 200,\n  \"cantidad\": 3.0\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-estructuras/{{articuloPadreId}}/{{articuloHijoId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-estructuras", "{{articuloPadreId}}", "{{articuloHijoId}}" ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /{articuloPadreId}/{articuloHijoId} — Eliminar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-estructuras/{{articuloPadreId}}/{{articuloHijoId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-estructuras", "{{articuloPadreId}}", "{{articuloHijoId}}" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Cotizaciones",
+      "item": [
+        {
+          "name": "GET /comparativo — Comparar proveedores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/cotizaciones/comparativo?proveedorIds=1&proveedorIds=2",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "cotizaciones", "comparativo" ],
+              "query": [
+                { "key": "proveedorIds", "value": "1", "description": "Repetir el parametro por cada proveedor" },
+                { "key": "proveedorIds", "value": "2" },
+                { "key": "fechaDesde", "value": "", "disabled": true },
+                { "key": "fechaHasta", "value": "", "disabled": true }
+              ]
+            },
+            "description": "Cuadro comparativo de cotizaciones entre proveedores."
+          }
+        },
+        {
+          "name": "POST /{id}/convertir-oc — Convertir cotizacion en OC",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"fechaEmision\": \"2026-05-30\",\n  \"fechaEntrega\": \"2026-06-05\",\n  \"formaPagoId\": 1,\n  \"observaciones\": \"Convertida desde cotizacion\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/cotizaciones/{{cotizacionId}}/convertir-oc",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "cotizaciones", "{{cotizacionId}}", "convertir-oc" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Maestros - Articulo Precios Pactados (path corregido)",
+      "item": [
+        {
+          "name": "GET / — Listar (CORRECCION path)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-precios-pactados?page=0&size=20",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-precios-pactados" ],
+              "query": [
+                { "key": "articuloId", "value": "", "disabled": true },
+                { "key": "proveedorId", "value": "", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "CORRECCION: el path correcto es /maestros/articulo-precios-pactados (antes documentado como /maestros/entidad-articulo-precios -> daba 404)."
+          }
+        },
+        {
+          "name": "GET /{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-precios-pactados/{{precioPactadoId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-precios-pactados", "{{precioPactadoId}}" ]
+            }
+          }
+        },
+        {
+          "name": "POST / — Crear",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"articuloId\": 1,\n  \"proveedorId\": 1,\n  \"precio\": 25.50,\n  \"monedaId\": 1,\n  \"fechaDesde\": \"2026-01-01\",\n  \"fechaHasta\": \"2026-12-31\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-precios-pactados",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-precios-pactados" ]
+            }
+          }
+        },
+        {
+          "name": "PUT /{id} — Actualizar",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"articuloId\": 1,\n  \"proveedorId\": 1,\n  \"precio\": 28.00,\n  \"monedaId\": 1,\n  \"fechaDesde\": \"2026-01-01\",\n  \"fechaHasta\": \"2026-12-31\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-precios-pactados/{{precioPactadoId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-precios-pactados", "{{precioPactadoId}}" ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-precios-pactados/{{precioPactadoId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-precios-pactados", "{{precioPactadoId}}" ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /{id}/activar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-precios-pactados/{{precioPactadoId}}/activar",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-precios-pactados", "{{precioPactadoId}}", "activar" ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /{id}/desactivar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/articulo-precios-pactados/{{precioPactadoId}}/desactivar",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "articulo-precios-pactados", "{{precioPactadoId}}", "desactivar" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Maestros - Tipos Entidad Contribuyente (path corregido)",
+      "item": [
+        {
+          "name": "GET / — Listar (CORRECCION path)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/tipos-entidad-contribuyente?page=0&size=20",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "tipos-entidad-contribuyente" ],
+              "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "20" } ]
+            },
+            "description": "CORRECCION: el path correcto es /maestros/tipos-entidad-contribuyente (antes documentado como /maestros/tipos-entidad -> daba 404)."
+          }
+        },
+        {
+          "name": "GET /{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/tipos-entidad-contribuyente/{{tipoEntidadContribuyenteId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "tipos-entidad-contribuyente", "{{tipoEntidadContribuyenteId}}" ]
+            }
+          }
+        },
+        {
+          "name": "POST / — Crear",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"tipo\": \"PROVEEDOR\",\n  \"descripcion\": \"Proveedor de bienes y servicios\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/tipos-entidad-contribuyente",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "tipos-entidad-contribuyente" ]
+            }
+          }
+        },
+        {
+          "name": "PUT /{id} — Actualizar",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"tipo\": \"PROVEEDOR\",\n  \"descripcion\": \"Proveedor de bienes y servicios (editado)\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/tipos-entidad-contribuyente/{{tipoEntidadContribuyenteId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "tipos-entidad-contribuyente", "{{tipoEntidadContribuyenteId}}" ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/tipos-entidad-contribuyente/{{tipoEntidadContribuyenteId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "tipos-entidad-contribuyente", "{{tipoEntidadContribuyenteId}}" ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /{id}/activar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/tipos-entidad-contribuyente/{{tipoEntidadContribuyenteId}}/activar",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "tipos-entidad-contribuyente", "{{tipoEntidadContribuyenteId}}", "activar" ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /{id}/desactivar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/maestros/tipos-entidad-contribuyente/{{tipoEntidadContribuyenteId}}/desactivar",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "compras", "maestros", "tipos-entidad-contribuyente", "{{tipoEntidadContribuyenteId}}", "desactivar" ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

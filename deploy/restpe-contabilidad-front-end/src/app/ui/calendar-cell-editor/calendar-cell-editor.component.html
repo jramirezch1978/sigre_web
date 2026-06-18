@@ -1,0 +1,51 @@
+<div class="bg-[#E7E7E7] rounded-sm shadow-lg overflow-hidden p-1.5" style="box-shadow: 0px 2px 6px 1px rgb(99 117 142 / 15%)">
+  <!-- Encabezado -->
+  <div class="w-[208px]">
+    <div class="flex justify-between items-center h-[28px] w-full flex-none">
+      <button (click)="prevMonth()" class="p-0.5 hover:bg-gray-100 rounded-sm">
+        <fa-icon [icon]="fasChevronLeft" class="text-xs"></fa-icon>
+      </button>
+      <div class="relative">
+        <span (click)="toggleYearSelection()" class="cursor-pointer text-xs font-semibold">
+          {{ getFormattedMonthYear(currentDate) }}
+        </span>
+        @if (showYearSelection) {
+          <div class="absolute mt-2 bg-white shadow-lg rounded-sm p-2 z-10 left-[20%]">
+            <div class="gap-2 max-h-28 overflow-y-auto flex flex-col">
+              @for (year of availableYears; track year) {
+                <button (click)="selectYear(year)"
+                  class="px-3 py-1 rounded hover:bg-primary-5 text-xs"
+                  [ngClass]="{'!bg-primary text-white': isCurrentYear(year)}">
+                  {{ year }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <button (click)="nextMonth()" class="p-0.5 hover:bg-gray-100 rounded-sm">
+        <fa-icon [icon]="fasChevronRight" class="text-xs"></fa-icon>
+      </button>
+    </div>
+    <!-- Días de semana -->
+    <div class="bg-white grid grid-cols-7 gap-0.5 items-center h-[28px] flex-none text-center text-xs text-[#020617]">
+      @for (day of weekDays; track day) {
+        <span>{{ day }}</span>
+      }
+    </div>
+  </div>
+  <!-- Cuerpo días -->
+  <div class="bg-white pb-2.5">
+    <div class="grid grid-cols-7 gap-0.5 text-xs">
+      @for (week of calendar; track $index) {
+        @for (day of week; track $index) {
+          <div [class]="getDayClasses(day)" (click)="selectDate(day)"
+            [attr.role]="day ? 'button' : null"
+            [attr.tabindex]="day ? 0 : -1">
+            <span>{{ day?.getDate() }}</span>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>

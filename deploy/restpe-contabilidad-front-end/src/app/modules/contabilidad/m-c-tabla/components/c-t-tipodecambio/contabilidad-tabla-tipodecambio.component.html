@@ -1,0 +1,131 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de tipos de cambio</span>
+    </div>
+    <!-- filtros -->
+    <div class="contenedor-filtros">
+      <!-- <ion-select placeholder="Todos los estados" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            [(ngModel)]="estadoSeleccionado" [ngModelOptions]="{standalone: true}" interface="popover" fill="outline"
+            class="w-[163px] flex-none">
+            <ion-select-option value="todos">Todos los estados</ion-select-option>
+            <ion-select-option value="activo">Activo</ion-select-option>
+            <ion-select-option value="inactivo">Inactivo</ion-select-option>
+          </ion-select> -->
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por moneda, fecha, monto o estado" class="w-full"
+          style="--padding-start:30px" [(ngModel)]="busqueda" [ngModelOptions]="{standalone: true}"
+          (ionInput)="onBuscar()"></ion-input>
+      </div>
+
+      <app-base-calendar-new mode="range" [initialStartDate]="startDate" [initialEndDate]="endDate" [minDate]="minDate"
+        [maxDate]="maxDate" position="left" (dateRangeSelected)="filtrarPorFechas($event)">
+      </app-base-calendar-new>
+
+      <div class="filtros-absolutos">
+        <ion-button fill="outline" class="w-[115px] flex-none text-text-85" id="reportes">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportes" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos " [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarExcel()">Exportar Excel</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" (click)="botonNuevoTipodeCambio()" [disabled]="!filaSeleccionada">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon> 
+          <span class="font-normal">Nuevo tipo de cambio</span>
+        </ion-button>
+      </div>
+    </div>
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [defaultColDef]="defaultColDef" [columnTypes]="columnTypes" [pagination]="true" [localeText]="localeText"
+        [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20" [rowSelection]="'single'"
+        (gridReady)="onGridReady($event)" (firstDataRendered)="onFirstDataRendered($event)"
+        (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+  <div class="panel-derecho">
+    <div class="cont-title">
+      <span> {{ filaSeleccionada? 'Información de tipo de cambio':'Registro de tipo de cambio'}}</span>
+    </div>
+    @if(filaSeleccionada){
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+  }
+    <form [formGroup]="tipodeCambioForm" class="contenedor-formulario" [appLoader]="isLoading()">
+      <div class="contenido-formulario">
+        <span class="label">Fecha de registro </span>
+        <ion-input fill="outline" type="date" formControlName="fechaCreacion" class="w-[144px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Fecha de vigencia <span class="text-danger">*</span></span>
+        <app-base-calendar-new class="flex-none" mode="single" placeholder="Selecciona una fecha"
+          [initialDate]="tipodeCambioForm.get('fechaVigencia')?.value" position="right"
+          (dateSelected)="onFechaVigencia($event)" [disabled]="filaSeleccionada">
+        </app-base-calendar-new>
+      </div>
+       <div class="contenido-formulario">
+          <span class="label"> </span>
+          <div class="flex items-center gap-1">
+            <fa-icon [icon]="falInfoCircle" class="text-xxss"></fa-icon>
+            <span class="text-xxss">Solo afecta al día seleccionado</span>
+          </div>
+        </div>
+      <div class="contenido-formulario">
+        <span class="label">Moneda<span class="text-danger">*</span></span>
+        <ion-select fill="outline" placeholder="Selecciona una moneda" toggleIcon="chevron-down"
+          expandedIcon="chevron-up" interface="popover" class="w-[163px]" formControlName="moneda">
+          @for(moneda of monedas; track moneda.id) {
+          <ion-select-option [value]="moneda.id">{{moneda.nombre}}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">TC Compra<span class="text-danger">*</span></span>
+        <ion-input fill="outline" formControlName="tcCompra" type="text" inputmode="decimal"
+          (ionInput)="onTCInput($event, 'tcCompra')" class="w-[120px]" placeholder="0.00"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">TC Venta<span class="text-danger">*</span></span>
+        <ion-input fill="outline" formControlName="tcVenta" type="text" inputmode="decimal"
+          (ionInput)="onTCInput($event, 'tcVenta')" class="w-[120px]" placeholder="0.00"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Fuente<span class="text-danger">*</span></span>
+        <ion-select fill="outline" placeholder="Selecciona una fuente" toggleIcon="chevron-down"
+          expandedIcon="chevron-up" interface="popover" class="w-[163px]" formControlName="fuente">
+          @for(fuente of fuentes; track fuente.id) {
+          <ion-select-option [value]="fuente.id">{{fuente.nombre}}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Estado</span>
+        <ion-select placeholder="Activo" toggleIcon="chevron-down" expandedIcon="chevron-up" formControlName="estado"
+          interface="popover" fill="outline" class="w-[100px]" (ionChange)="onEstadoChange($event)">
+          <ion-select-option value="Activo">Activo</ion-select-option>
+          <ion-select-option value="Inactivo">Inactivo</ion-select-option>
+        </ion-select>
+      </div>
+    </form>
+    <div class="contenedor-btn">
+      <ion-button class="w-[65px]" [disabled]="botonGuardarDeshabilitado"
+        (click)="botonGuardar()"> {{ filaSeleccionada ? 'Guardar' : 'Registrar' }} </ion-button>
+
+      <ion-button color="medium" fill="outline" class="w-fit" (click)="botonCancelar()">Cancelar</ion-button>
+
+      @if(filaSeleccionada){
+      <ion-button color="danger" fill="outline" class="w-fit" (click)="eliminar()">Eliminar</ion-button>
+      }
+    </div>
+  </div>

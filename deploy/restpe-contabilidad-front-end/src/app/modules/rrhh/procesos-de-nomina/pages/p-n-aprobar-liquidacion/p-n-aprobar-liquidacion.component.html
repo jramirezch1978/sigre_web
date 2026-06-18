@@ -1,0 +1,243 @@
+﻿<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de liquidaciones (Selecciona una liquidación para visualizarlo)</span>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por código" class="w-full"
+          style="--padding-start:30px"></ion-input>
+      </div>
+      <div class="filtros-absolutos">
+        <div class="flex flex-row">
+          <ion-select placeholder="Ingreso" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            [(ngModel)]="ingresoSeleccionado" interface="popover" fill="outline" class="w-[106px] flex-none">
+            @for(ingreso of ingresos; track ingreso){<ion-select-option [value]="ingreso.value">{{
+              ingreso.label }}</ion-select-option>}
+          </ion-select>
+          <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+            [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="left"
+            (dateRangeSelected)="filtrarPorFechas($event)">
+          </app-base-calendar-new>
+        </div>
+
+        <ion-button class="w-[115px] text-text-85" fill="outline" id="aprobarliquidacion">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="aprobarliquidacion" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <!-- <ion-button class="w-fit" (click)="botonNuevaLiquidacion()"><fa-icon [icon]="fasCirclePlus"
+            class="mr-1"></fa-icon> <span class="font-normal">Nueva liquidación</span></ion-button> -->
+      </div>
+    </div>
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowSelection]="'single'" [localeText]="localeText"
+        [rowHeight]="20" [purgeClosedRowNodes]="true" [headerHeight]="24" [paginationPageSize]="20"
+        [suppressLoadingOverlay]="true"
+        (rowClicked)="onCellClicked($event)" (gridReady)="onGridReady($event)" />
+    </div>
+  </div>
+  <div class="panel-derecho" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      <span>{{ filaSeleccionada ? 'Liquidación: ' + filaSeleccionada.liquidacion_codigo : 'Seleccione una liquidación' }}</span>
+    </div>
+    @if(filaSeleccionada){
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+
+    <form [formGroup]="LiquidacionForm">
+      <div class="contenedor-formulario">
+
+        <div class="contenido-formulario">
+          <span class="label">Trabajador</span>
+          <ion-input fill="outline" class="w-full" formControlName="liquidacion_trabajador" readonly></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Sueldo básico</span>
+          <ion-input fill="outline" class="w-[160px]" formControlName="liquidacion_sueldo_basico" readonly></ion-input>
+        </div>
+
+        @if(country === 'GT'){
+        <div class="contenido-formulario !items-start">
+          <span class="label mt-1.5">Promedio salario ordinario </span>
+          <div class="flex flex-col gap-1 !justify-start">
+            <ion-input fill="outline" class="w-[160px]" formControlName="liquidacion_asignacion_familiar" readonly></ion-input>
+            <div class="info-circle">
+              <fa-icon [icon]="farInfoCircle" class=""></fa-icon>
+              <span>Promedio de los últimos 6 meses de salario ordinario</span>
+            </div>
+          </div>
+        </div>
+        }
+        @if(country != 'GT'){
+        <div class="contenido-formulario">
+          <span class="label">Asignación familiar </span>
+          <ion-input fill="outline" class="w-[160px]" formControlName="liquidacion_asignacion_familiar" readonly></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Promedio gratificación </span>
+          <ion-input fill="outline" class="w-[160px]" formControlName="liquidacion_promedio_gratificacion" readonly></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label"> </span>
+          <div class="flex items-center gap-1">
+            <fa-icon [icon]="falInfoCircle" class="text-xxss"></fa-icon>
+            <span class="text-xxss">Promedia con última gratificación recibida</span>
+          </div>
+        </div>
+        }
+
+        <div class="contenido-formulario">
+          <span class="label">Fecha de ingreso </span>
+          <ion-input fill="outline" type="date" class="w-[100px]" formControlName="liquidacion_fecha_inicio" readonly></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Fecha de cese</span>
+          <ion-input fill="outline" type="date" class="w-[100px]" formControlName="liquidacion_fecha_cese" readonly></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Tipo de cese</span>
+          <ion-input fill="outline" class="w-[160px]" formControlName="liquidacion_tipo_cese" readonly></ion-input>
+        </div>
+
+        @if(country != 'GT'){
+        <div class="contenido-formulario">
+          <span class="label">CTS trunca</span>
+          <div class="cont-icon-rigth">
+            <ion-input fill="outline" class="w-[100px]" formControlName="liquidacion_cts_total" type="number" readonly></ion-input>
+            <fa-icon [icon]="farEye" class="text-text-85 cursor-pointer" (click)="modalDetalleCTS()"></fa-icon>
+          </div>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Gratificación trunca</span>
+          <div class="cont-icon-rigth">
+            <ion-input fill="outline" class="w-[100px]" formControlName="liquidacion_gratificacion_total" type="number" readonly></ion-input>
+            <fa-icon [icon]="farEye" class="text-text-85 cursor-pointer"
+              (click)="modalDetalleGrati()"></fa-icon>
+          </div>
+        </div>
+        }
+
+        @if(country === 'GT'){
+        <div class="contenido-formulario">
+          <span class="label">Aguinaldo</span>
+          <div class="cont-icon-rigth">
+            <ion-input fill="outline" formControlName="aguinaldo" class="w-[100px]" type="number" readonly></ion-input>
+            <fa-icon [icon]="farEye" class="text-text-85 cursor-pointer"
+              (click)="abrirModalAguinaldo()"></fa-icon>
+          </div>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Bono 14</span>
+          <div class="cont-icon-rigth">
+            <ion-input fill="outline" class="w-[100px]" formControlName="liquidacion_gratificacion_total" type="number" readonly></ion-input>
+            <fa-icon [icon]="farEye" class="text-text-85 cursor-pointer" (click)="abrirModalBono()"></fa-icon>
+          </div>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Vacaciones</span>
+          <div class="cont-icon-rigth">
+            <ion-input fill="outline" class="w-[100px]" formControlName="liquidacion_vacaciones_total" type="number"
+              readonly></ion-input>
+            <fa-icon [icon]="farEye" class="text-text-85 cursor-pointer"
+              (click)="abrirModalVacaciones()"></fa-icon>
+          </div>
+        </div>
+        }
+        <div class="contenido-formulario">
+          <span class="label">Otros beneficios</span>
+          <ion-input fill="outline" class="w-[100px]" formControlName="liquidacion_otros_beneficios" type="number" readonly></ion-input>
+        </div>
+        @if(country != 'GT'){
+        <div class="contenido-formulario">
+          <span class="label">Vacaciones truncas</span>
+          <div class="cont-icon-rigth">
+            <ion-input fill="outline" class="w-[100px]" formControlName="liquidacion_vacaciones_total" type="number"
+              readonly></ion-input>
+            <fa-icon [icon]="farEye" class="text-text-85 cursor-pointer" (click)="modalDetalleVac()"></fa-icon>
+          </div>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Bonificación especial</span>
+          <ion-input fill="outline" class="w-[100px]" formControlName="liquidacion_bonificacion_extraordinaria" type="number" readonly></ion-input>
+        </div>
+        }
+
+        <div class="contenido-formulario">
+          <span class="label">Descuentos remunerativos</span>
+          <ion-input fill="outline" class="w-[100px]" formControlName="liquidacion_descuento_rr" type="number" readonly></ion-input>
+        </div>
+        @if(country === 'GT'){
+        @if(indemnizacion){
+        <div class="contenido-formulario">
+          <span class="label">Indemnización</span>
+          <div class="cont-icon-rigth">
+            <ion-input fill="outline" class="w-[100px]" formControlName="indemnizacion" type="number"
+              readonly></ion-input>
+            <fa-icon [icon]="farEye" class="text-text-85 cursor-pointer"
+              (click)="abrirModalIndemnizacion()"></fa-icon>
+          </div>
+        </div>
+        }
+        <div class="contenido-formulario">
+          <span class="label"></span>
+          <div class="label flex items-center gap-2">
+            <ion-checkbox fill="outline" labelPlacement="end" (ionChange)="onIndemnizacionChange($event)" disabled>
+            </ion-checkbox>
+            <span>Aplicar indemnización</span>
+          </div>
+        </div>
+        }
+        <div class="contenido-formulario">
+          <span class="label">Total a pagar</span>
+          <ion-input fill="outline" class="w-[100px]" formControlName="liquidacion_total_pagar" type="number" readonly></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Estado</span>
+          <ion-input fill="outline" class="w-[80px]" formControlName="liquidacion_estado" readonly></ion-input>
+        </div>
+
+        <div class="contenido-formulario !items-start">
+          <span class="label">Observaciones</span>
+          <ion-textarea fill="outline" placeholder="Escribe aqui..." class="w-[160px]" formControlName="liquidacion_observaciones"
+            readonly></ion-textarea>
+        </div>
+
+      </div>
+    </form>
+    <div class="contenedor-btn !justify-start">
+      @if(filaSeleccionada){
+      <ion-button class="w-[75px]" (click)="botonAprobar()"
+        [disabled]="filaSeleccionada.liquidacion_estado === 'Aprobada' || filaSeleccionada.liquidacion_estado === 'Devuelto'">
+        Aprobar
+      </ion-button>
+      <ion-button class="w-[75px]" fill="outline" (click)="botonDevolver()"
+        [disabled]="filaSeleccionada.liquidacion_estado === 'Aprobada' || filaSeleccionada.liquidacion_estado === 'Devuelto'">
+        Devolver
+      </ion-button>
+      }
+    </div>
+  </div>
+</div>

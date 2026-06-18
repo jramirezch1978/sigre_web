@@ -1,0 +1,160 @@
+<div class="contenedor-principal">
+  @if (!panelLateralVisible) {
+  <div class="btn-mostrartabla"
+    (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight"></fa-icon>
+  </div>
+  }
+  
+  @if(panelLateralVisible){<div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Registro de Pérdidas por Causas inevitables (Selecciona un registro de tu lista para visualizarlo)</span>
+      @if (panelLateralVisible) {<div class="btn-mostrarform" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>}
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por código, código de producto o responsable" class="w-full" style="--padding-start:30px"></ion-input>
+      </div>
+      <app-base-calendar-new
+        class="flex-none "
+        mode="range"
+        [initialStartDate]="startDate"
+        [initialEndDate]="endDate"
+        [minDate]="minDate"
+        [maxDate]="maxDate"
+        position="center"
+        (dateRangeSelected)="filtrarPorFechas($event)">
+      </app-base-calendar-new>
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px]" fill="outline" id="gestionG3">
+          <fa-icon [icon]="fasDownload" class="mr-1 text-text-85"></fa-icon>
+          <span class="text-text-85">Exportar</span>
+          <fa-icon class="ml-1 text-text-85" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="gestionG3" triggerAction="click" [dismissOnSelect]="true" class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+            <ng-template>
+              <ion-item lines="none" [button]="true"  (click)="exportarExcel()">Exportar Excel</ion-item>
+              <ion-item lines="none" [button]="true"  (click)="exportarPdf()">Exportar PDF</ion-item>
+            </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" [disabled]="!tieneModificaciones()" (click)="botonRegistrarPerdida()"><fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon> <span class="font-normal">Nueva pérdida</span></ion-button>
+      </div>
+    </div>
+    <div class="flex h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" 
+        class="" [rowData]="facade.registroPerdidas()" 
+        [columnDefs]="colDefs"
+        [pagination]="true" [suppressLoadingOverlay]="true" 
+        [rowSelection]="'single'" 
+        [localeText]="localeText"
+        [paginationPageSize]="20" 
+        [rowHeight]="20"
+        [headerHeight]="24" 
+        (gridReady)="onGridReady($event)" 
+        (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>}
+
+  <div class="panel-derecho" [ngClass]="{'!w-full !flex-auto': !panelLateralVisible}" [appLoader]="isLoading()">
+    <div class="cont-title">
+      @if(modoCreacion){<span>Nueva pérdida</span>}
+      @if(!modoCreacion && filaSeleccionada){<span>Información de pérdida: {{filaSeleccionada.registro_perdidas_codigo}}</span>}
+    </div>
+    @if(filaSeleccionada){<div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" ></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+    <form action="" [formGroup]="registroForm">
+      <!-- Contenido del formulario -->
+      <div class="contenedor-formulario"  [ngClass]="{'!flex-row !gap-10': !panelLateralVisible}">
+        <div class="contenedor-formulario !p-0">
+  
+          <div class="contenido-formulario">
+            <span class="label">Fecha del registro</span>
+            <ion-input fill="outline" type="date"  formControlName="fechaR" class="w-[120px]"></ion-input>
+          </div>
+          
+          <div class="contenido-formulario">
+            <span class="label">Almacén<span class="text-danger">*</span></span>
+            <app-autocomplete
+              formControlName="almacen"
+              [items]="almacenes()"
+              displayKey="almacen_nombre"
+              valueKey="almacen_nombre"
+              placeholder="Selecciona un almacén"
+              (itemSelected)="onAlmacenSeleccionado($event)">
+            </app-autocomplete>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Cód. o nombre del prod.<span class="text-danger">*</span></span>
+            <app-autocomplete
+              formControlName="producto"
+              [items]="productos()"
+              displayKey="producto_nombre"
+              valueKey="producto_id"
+              placeholder="Selecciona un producto"
+              (itemSelected)="onproductoSeleccionado($event)">
+            </app-autocomplete>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Tipo de pérdida<span class="text-danger">*</span></span>
+            <ion-select placeholder="Selecciona un tipo" formControlName="tipoP" interface="popover" fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(perdida of perdidaSelect; track perdida){<ion-select-option [value]="perdida.id">{{ perdida.nombre }}</ion-select-option>}
+            </ion-select>
+          </div>
+          
+          <div class="contenido-formulario">
+            <span class="label">Cantidad perdida<span class="text-danger">*</span></span>
+            <div class="flex items-center">
+                <ion-input fill="outline" placeholder="200" formControlName="cantidadP" class="w-[50px] -mr-0.5"></ion-input>
+                <ion-select placeholder="UND" formControlName="medida" interface="popover" fill="outline" class="!w-[50px]" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(medida of unidadesMedida(); track medida.id){<ion-select-option [value]="medida.codigo">{{ medida.codigo }}</ion-select-option>}
+            </ion-select>
+            </div>
+          </div>
+  
+        </div>
+        <div class="contenedor-formulario !p-0">
+
+          <div class="contenido-formulario">
+            <span class="label">Valor unitario</span>
+            <ion-input fill="outline" placeholder="S/ 9.99" formControlName="valorU" class="w-[100px]"></ion-input>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Valor total</span>
+            <ion-input fill="outline" placeholder="S/ 99.99" formControlName="valorT" class="w-[100px]"></ion-input>
+          </div>
+  
+          <div class="contenido-formulario !items-start">
+            <span class="label">Observaciones</span>
+            <ion-textarea fill="outline" placeholder="Ingrese sus observaciones" formControlName="observacion" rows="2" class="w-[160px]"></ion-textarea>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Estado</span>
+            @if(!filaSeleccionada || registroForm.get('estado')?.value == 'Anulada'){<ion-input fill="outline" placeholder="Pendiente" formControlName="estado" class="w-[150px]"></ion-input>}
+            @if(filaSeleccionada && registroForm.get('estado')?.value != 'Anulada'){<ion-select placeholder="Selecciona un estado" formControlName="estado" interface="popover" fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(est of estadoSelect; track est){<ion-select-option [value]="est.id">{{ est.nombre }}</ion-select-option>}
+            </ion-select>}
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="contenedor-btn py-2.5">
+      <ion-button (click)="botonGuardar()">{{ filaSeleccionada ? 'Guardar' : 'Registrar' }}</ion-button>
+      <div class="flex gap-2">
+        <ion-button fill="outline" color="medium" (click)="botonRegistrarPerdida()">Cancelar</ion-button>
+        @if(filaSeleccionada?.estado == 'Pendiente'){<ion-button fill="outline" color="danger" (click)="botonAnularPerdida()">Anular</ion-button>}
+      </div>
+    </div>
+  </div>
+</div>

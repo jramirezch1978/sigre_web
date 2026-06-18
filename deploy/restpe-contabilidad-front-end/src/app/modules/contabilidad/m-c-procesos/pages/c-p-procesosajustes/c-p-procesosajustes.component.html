@@ -1,0 +1,199 @@
+<div class="contenedor-principal">
+  @if(!panelLateralVisible){<div class="barra-desplegable"
+    (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight"></fa-icon>
+  </div>}
+  @if(panelLateralVisible){
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Ajustes contables</span>
+      @if (panelLateralVisible) {<div class="btn-mostrarform" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>}
+    </div>
+    <form [formGroup]="formFiltro">
+      <div class="contenedor-formulario !gap-2.5">
+        <div class="filtros-responsive">
+          <div class="form-column2">
+
+            <div class="contenido-formulario">
+              <span class="label">Periodo contable <span class="text-danger">*</span></span>
+              <app-month-year-picker #periodoPickerRef class="flex-none w-[170px]"
+                [placeholder]="'Selecciona un periodo'" (monthYearChange)="onPeriodoSeleccionado($event)">
+              </app-month-year-picker>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Estado<span class="text-danger">*</span></span>
+              <ion-select placeholder="Selecciona un estado" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                formControlName="estado" interface="popover" fill="outline" class="w-[180px] flex-none">
+                @for(estado of estados; track estado){<ion-select-option [value]="estado.value">{{ estado.nombre
+                  }}</ion-select-option>}
+              </ion-select>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Tipo de ajuste <span class="text-danger">*</span></span>
+              <ion-select placeholder="selecciona un tipo de ajuste" formControlName="tipoAjuste" interface="popover"
+                fill="outline" class="w-[180px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+                @for(tipo of tipoAjs; track tipo){<ion-select-option [value]="tipo.value">{{ tipo.nombre
+                  }}</ion-select-option>}
+              </ion-select>
+            </div>
+
+          </div>
+        </div>
+
+           <!-- Botones de acción -->
+        <div class="contenedor-btn py-0.5">
+          <ion-button class="w-fit" (click)="buscarAsiento()" [disabled]="!formFiltro.valid">
+            <span class="font-normal">Buscar asientos</span>
+          </ion-button>
+        </div>
+    
+      </div>
+    </form>
+
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowFiltrado" [columnDefs]="colDefs"
+        [pagination]="true" [rowSelection]="'single'" [localeText]="localeText" [paginationPageSize]="20"
+        [rowHeight]="20" [headerHeight]="24" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>}
+
+  <div class="panel-derecho" [appLoader]="isLoading()" [ngClass]="{'!w-full': !panelLateralVisible}">
+    <div class="cont-title">
+      <span>Asiento @if(filaSeleccionada){ {{ filaSeleccionada.proc_ajuste_nasiento }} }</span>
+    </div>
+    <!-- Mostrar botón de buscar asientos cuando el panel derecho está visible -->
+      <!-- @if(!panelLateralVisible) {
+      <div class="flex w-full justify-end">
+        <ion-button class="w-fit" (click)="buscarAsiento()" [disabled]="!formFiltro.valid">
+          <span class="font-normal">Buscar asientos</span>
+        </ion-button>
+      </div>
+      } -->
+
+    <form action="" [formGroup]="ajusteCForm">
+      <!-- Contenido del formulario -->
+      <div class="contenedor-formulario" [ngClass]="{'!flex-row': !panelLateralVisible}">
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Fecha de registro</span>
+            <ion-input fill="outline" placeholder="Selecciona un asiento" type="date" formControlName="fechaRegistro" class="w-[130px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Origen</span>
+            <ion-input fill="outline" placeholder="Selecciona un asiento" formControlName="origen"class="w-[150px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Fecha contable<span class="text-danger">*</span> </span>
+            <ion-input fill="outline" placeholder="Selecciona un asiento" type="date" formControlName="fechaContable" class="w-[130px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Libro<span class="text-danger">*</span> </span>
+            <ion-select placeholder="Selecciona un asiento" formControlName="tipoFlujo" interface="popover" fill="outline"
+              class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(libro of libroSelect; track libro){<ion-select-option [value]="libro.value">{{ libro.nombre
+                }}</ion-select-option>}
+            </ion-select>
+          </div>
+
+        </div>
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Moneda</span>
+            <ion-select placeholder="Selecciona un asiento" formControlName="moneda" interface="popover" fill="outline"
+              class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(moneda of monedaSelect; track moneda){<ion-select-option [value]="moneda.value">{{ moneda.nombre
+                }}</ion-select-option>}
+            </ion-select>
+          </div>
+          @if(pais!='EC'){
+          <div class="contenido-formulario">
+            <span class="label">Tipo de cambio </span>
+            <!-- <ion-select placeholder="" formControlName="tasaC"
+              interface="popover" fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down"
+              expandedIcon="chevron-up">
+              @for(tasa of tasaCSelect; track tasa){<ion-select-option [value]="tasa.value">{{ tasa.nombre
+                }}</ion-select-option>}
+            </ion-select> -->
+            <ion-input fill="outline" placeholder="Selecciona un asiento" formControlName="tasaC" class="w-[150px]"></ion-input>
+          </div>
+          }
+
+          <div class="contenido-formulario">
+            <span class="label">Estado<span class="text-danger">*</span> </span>
+            <ion-select placeholder="Selecciona un asiento" formControlName="estado" interface="popover" fill="outline"
+              class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(est of estadoSelect; track est){<ion-select-option [value]="est.value">{{ est.nombre
+                }}</ion-select-option>}
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Situacion contable</span>
+            <ion-input fill="outline" placeholder="Selecciona un asiento" formControlName="situacion" class="w-[150px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario !items-start">
+            <span class="label">Glosa contable</span>
+            <ion-textarea fill="outline" placeholder="Selecciona un asiento" formControlName="glosa" class="w-[200px]"></ion-textarea>
+          </div>
+
+        </div>
+      </div>
+    </form>
+    <div class="flex flex-col h-full">
+      <div class="cont-title">
+        <span>Lista de cuentas</span>
+      </div>
+      <div class="contenedor-filtros">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar cuenta por número o descripción " class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+      <div class="min-h-[200px] flex-1 relative">
+        <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowDataDetalle"
+          [columnDefs]="colDefsDetalle" [rowHeight]="20" [headerHeight]="24" [defaultColDef]="defaultColDef"
+          [localeText]="localeText" [paginationPageSize]="20" />
+      </div>
+      <div class="flex w-full justify-center p-[6px]" [ngClass]="{'!justify-end': !panelLateralVisible}">
+        <div class="contenedorTotal">
+          <div class="contenido">
+            <div class="filas">
+              <span>Total Debe ({{ monedasignificado }})</span> <span>S/{{ cantidad?.debeS ? cantidad?.debeS: '0.00' }}</span>
+            </div>
+            @if(pais != 'EC'){
+            <div class="filas">
+              <span>Total Debe (USD)</span> <span>${{ cantidad?.debeD ? cantidad?.debeD: '0.00' }}</span>
+            </div>
+            }
+          </div>
+          <div class="w-[1px] bg-text-5 h-full"></div>
+          <div class="contenido">
+            <div class="filas">
+              <span>Total Haber ({{ monedasignificado }})</span> <span>S/{{ cantidad?.haberS ? cantidad?.haberS: '0.00' }}</span>
+            </div>
+            @if(pais != 'EC'){
+            <div class="filas">
+              <span>Total Haber (USD)</span> <span>${{ cantidad?.haberD ? cantidad?.haberD: '0.00' }}</span>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="contenedor-btn py-2.5">
+        <ion-button class="w-[150px]" (click)="botonAjustarAsiento()" [disabled]="ajusteCForm.valid">Ajustar
+          asiento</ion-button>
+      </div>
+    </div>
+  </div>
+</div>

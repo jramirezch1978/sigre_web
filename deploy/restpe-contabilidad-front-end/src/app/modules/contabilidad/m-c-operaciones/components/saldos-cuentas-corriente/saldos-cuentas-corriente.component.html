@@ -1,0 +1,130 @@
+<div class="w-full flex flex-col overflow-auto flex-grow h-full">
+  <div class="w-full flex-grow flex flex-col h-full">
+    <div class="cont-title">
+      <span>Buscar cuentas contables (Seleccione al menos un filtro)</span>
+    </div>
+    <div class="p-2.5 flex flex-col items-start gap-2.5 w-full">
+      <div class="filtros-responsive">
+        <div class="form-column2">
+          <div class="contenido-formulario">
+            <span class="label">Tipo de cuenta corriente</span>
+            <ion-select placeholder="Selecciona un tipo de cuenta corriente" interface="popover" fill="outline"
+              class="w-[265px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              (ionChange)="onFilterChange()">
+              @for(tipo of tiposCuentaCorriente; track tipo.value){
+              <ion-select-option [value]="tipo.value">{{tipo.label}}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Periodo contable</span>
+            <app-month-year-picker class="flex-none w-[170px]" [placeholder]="'Selecciona un periodo'"
+              (dateSelected)="onPeriodoSeleccionado($event)">
+            </app-month-year-picker>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Cuenta contable</span>
+            <ion-select placeholder="Selecciona una cuenta contable" interface="popover" fill="outline"
+              class="w-[260px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              (ionChange)="onFilterChange()">
+              @for(cuenta of cuentasContables; track cuenta.value){
+              <ion-select-option [value]="cuenta.value">{{cuenta.label}}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Tipo de documento</span>
+            <ion-select placeholder="Selecciona un tipo" interface="popover" fill="outline" class="w-[170px] flex-none"
+              toggleIcon="chevron-down" expandedIcon="chevron-up" (ionChange)="onFilterChange()">
+              @for(tipo of tiposDocumento; track tipo.value){
+              <ion-select-option [value]="tipo.value">{{tipo.label}}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Nombre cuenta contable</span>
+            <app-autocomplete [items]="buscarNombreCuenta" displayKey="nombre"
+              placeholder="Buscar por código o descripción" width="w-full" (itemSelected)="buscarDetalle($event)">
+            </app-autocomplete>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">N° de documento</span>
+            <app-autocomplete [items]="buscarNroDocumento" displayKey="numero" placeholder="Buscar n° de documento"
+              width="w-full" (itemSelected)="buscarDetalle($event)">
+            </app-autocomplete>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Tercero</span>
+            <ion-select placeholder="Selecciona un tercero" interface="popover" fill="outline"
+              class="w-[230px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              (ionChange)="onFilterChange()">
+              @for(tercero of tiposTercero; track tercero.value){
+              <ion-select-option [value]="tercero.value">{{tercero.label}}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Rango de fechas</span>
+            <app-base-calendar-new class="flex-none w-[230px]" mode="range" [placeholder]="'Selecciona un rango'"
+              [minDate]="minDate" [maxDate]="maxDate" position="center" (dateRangeSelected)="filtrarPorFechas($event)">
+            </app-base-calendar-new>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Nombre del tercero</span>
+            <app-autocomplete [items]="buscarNombreTercero" valueKey="codigo" displayKey="nombre"
+              placeholder="Buscar por código o descripción" width="w-full" (itemSelected)="buscarDetalle($event)">
+            </app-autocomplete>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Estado</span>
+            <ion-select placeholder="Selecciona un estado del documento" interface="popover" fill="outline"
+              class="w-[230px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              (ionChange)="onFilterChange()">
+              @for(estado of estadosDocumento; track estado.value){
+              <ion-select-option [value]="estado.value">{{estado.label}}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+
+        </div>
+      </div>
+      <!-- Botones de acción -->
+      <div class="flex items-center gap-3 w-full justify-end">
+        <ion-button class="w-[115px]" fill="outline" id="saldoscuentacorriente" [disabled]="!canExport">
+          <fa-icon [icon]="fasDownload" class="mr-1 text-text-85"></fa-icon>
+          <span class="text-text-85">Exportar</span>
+          <fa-icon class="ml-1 text-text-85" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="saldoscuentacorriente" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" (click)="buscar()" [disabled]="!hasFilter">
+          <span class="font-normal">Buscar</span>
+        </ion-button>
+      </div>
+    </div>
+    <div class="cont-title">
+      <span>Lista de cuentas corrientes</span>
+    </div>
+    <!-- Tabla de resultados -->
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [gridOptions]="gridOptions" [pagination]="true" [localeText]="localeText"
+        [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20" [defaultColDef]="defaultColDef"
+        (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+</div>

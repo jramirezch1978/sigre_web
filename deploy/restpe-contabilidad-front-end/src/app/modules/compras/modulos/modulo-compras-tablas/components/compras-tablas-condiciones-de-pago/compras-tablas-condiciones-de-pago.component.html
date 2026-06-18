@@ -1,0 +1,146 @@
+  <div class="contenedor-principal">
+    <div class="panel-izquierdo">
+      <div class="cont-title">
+        <span>Lista de condiciones de pago (Selecciona una condición de tu lista para
+          visualizarla o editarla)</span>
+      </div>
+      <div class="contenedor-filtros">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch" class=""></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar condiciones de pago por código, nombre o tipo de condición" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+        <div class="filtros-absolutos">
+          <ion-button class="w-[115px] flex-none" fill="outline" id="reportesCondiciones">
+            <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+            <span>Exportar</span>
+            <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+          </ion-button>
+          <ion-popover trigger="reportesCondiciones" triggerAction="click" [dismissOnSelect]="true"
+            class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+            <ng-template>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            </ng-template>
+          </ion-popover>
+          <ion-button class="w-fit flex flex-none" [disabled]="modoCreacion" (click)="botonNuevaCondicion()">
+            <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+            <span class="font-normal whitespace-nowrap">Nueva Condición</span>
+          </ion-button>
+        </div>
+      </div>
+      <div class="contenedor-primera-tabla" [appLoader]="loadingObtener()">
+        <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+        <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+          [localeText]="localeText" [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [headerHeight]="24"
+          [paginationPageSize]="20" rowSelection="single" (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+      </div>
+    </div>
+
+    <div class="panel-derecho" [appLoader]="loadingObtener()">
+      <div class="cont-title">
+        <span>
+          {{ modoCreacion ? 'Nueva condición de pago' : 'Información de condición de pago: ' + (filaSeleccionada?.codigo || '') }}
+        </span>
+      </div>
+      @if(filaSeleccionada){<div class="cont-actualizaciones">
+        <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+          <fa-icon [icon]="farBook"></fa-icon>
+          <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+        </div>
+      </div>}
+  <form class="h-full w-full" [formGroup]="CondicionesPagoForm" class="contenedor-formulario">
+        <div class="contenido-formulario">
+          <span class="label">Nombre <span class="text-danger">*</span></span>
+          <ion-input fill="outline" formControlName="nombre" class="w-[163px]" placeholder="Ingrese el nombre de la condición"></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Tipo de condición <span class="text-danger">*</span></span>
+          @if(camponuevo){
+          <ion-select placeholder="Selecciona tipo" formControlName="tipoCondicion" toggleIcon="chevron-down"
+            expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[163px]">
+            @for(tipo of tiposCondicion; track tipo.value){
+            <ion-select-option [value]="tipo.value">{{tipo.label}}</ion-select-option>
+            }
+          </ion-select>
+          }
+          @if(!camponuevo){
+          <ion-select formControlName="tipoCondicion" toggleIcon="chevron-down"
+            expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[163px]">
+            @for(tipo of tiposCondicion; track tipo.value){
+            <ion-select-option [value]="tipo.value">{{tipo.label}}</ion-select-option>
+            }
+          </ion-select>
+          }
+        </div>
+        @if(camponuevo && (CondicionesPagoForm.get('tipoCondicion')?.value === 'Crédito' || CondicionesPagoForm.get('tipoCondicion')?.value === 'Mixto')){
+        <div class="contenido-formulario">
+          <span class="label">Plazo de pagos (Días)<span class="text-danger">*</span></span>
+          <ion-input fill="outline" formControlName="plazopagos" type="number" class="w-[163px]" placeholder="Ejm: 10"></ion-input>
+        </div>
+        }
+        @if(!camponuevo && (CondicionesPagoForm.get('tipoCondicion')?.value === 'Crédito' || CondicionesPagoForm.get('tipoCondicion')?.value === 'Mixto')){
+        <div class="contenido-formulario">
+          <span class="label">Plazo de pagos (Días)<span class="text-danger">*</span></span>
+          <ion-input fill="outline" formControlName="plazopagos" type="number" class="w-[163px]" placeholder="Ejm: 10"></ion-input>
+        </div>
+        }
+        <!-- @if(camponuevo && (CondicionesPagoForm.get('tipoCondicion')?.value === 'credito' || CondicionesPagoForm.get('tipoCondicion')?.value === 'mixto')){
+        <div class="contenido-formulario">
+          <span class="label">Número de cuotas<span class="text-danger">*</span></span>
+          <ion-input fill="outline" formControlName="cuotas" type="number" class="w-[163px]"></ion-input>
+        </div>
+        }
+        @if(!camponuevo && (CondicionesPagoForm.get('tipoCondicion')?.value === 'credito' || CondicionesPagoForm.get('tipoCondicion')?.value === 'mixto')){
+        <div class="contenido-formulario">
+          <span class="label">Número de cuotas<span class="text-danger">*</span></span>
+          <ion-input fill="outline" formControlName="cuotas" type="number" class="w-[163px]"></ion-input>
+        </div>
+        } -->
+        @if(camponuevo && CondicionesPagoForm.get('tipoCondicion')?.value === 'Crédito'){
+        <div class="contenido-formulario">
+          <span class="label">Periocidad de cuotas <span class="text-danger">*</span></span>
+          <ion-select placeholder="Selecciona periocidad" formControlName="periocidadCuotas" toggleIcon="chevron-down"
+            expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[163px]">
+            @for(periocidad of periocidadesCuotas; track periocidad.value){
+            <ion-select-option [value]="periocidad.value">{{periocidad.label}}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+        }
+        @if(!camponuevo && CondicionesPagoForm.get('tipoCondicion')?.value === 'Crédito'){
+        <div class="contenido-formulario">
+          <span class="label">Periocidad de cuotas <span class="text-danger">*</span></span>
+          <ion-select [value]="CondicionesPagoForm.get('periocidadCuotas')?.value" toggleIcon="chevron-down"
+            expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[163px]">
+            @for(periocidad of periocidadesCuotas; track periocidad.value){
+            <ion-select-option [value]="periocidad.value">{{periocidad.label}}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+        }
+        <div class="contenido-formulario !items-start">
+          <span class="label">Descripción</span>
+          <ion-textarea fill="outline" formControlName="descripcion" class="w-[163px]" placeholder="Escribe aquí..."></ion-textarea>
+        </div>
+        
+        <div class="contenido-formulario">
+          <span class="label">Estado <span class="text-danger">*</span></span>
+          <ion-select placeholder="Activo" formControlName="estado" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            interface="popover" fill="outline" class="w-[80px] text-xxs">
+            @for(estado of estadosCondicion; track estado.value){
+            <ion-select-option [value]="estado.value">{{estado.label}}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+  </form>
+      
+      <div class="contenedor-btn">
+        <ion-button class="w-[65px]" (click)="botonGuardar()"> {{filaSeleccionada? 'Guardar':'Registrar' }} </ion-button>
+        <ion-button fill="outline" color="medium" (click)="botonNuevaCondicion()">
+          Cancelar
+        </ion-button>
+      </div>
+    </div>
+  </div>

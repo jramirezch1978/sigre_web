@@ -1,0 +1,101 @@
+<div class="contenedor-principal">
+  @if(!panelLateralVisible){
+  <div class="flex items-center justify-center w-[15px] bg-[#E6E8F4]" (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight" class="text-xs text-primary cursor-pointer"></fa-icon>
+  </div>
+  }
+
+  @if(panelLateralVisible){
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Cartera de pagos — documentos por pagar (selecciona para pagar)</span>
+      <div class="btn-mostrarform" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por documento, proveedor o estado" class="w-full"
+          style="--padding-start:30px" [(ngModel)]="busqueda" [ngModelOptions]="{standalone: true}"
+          (ionInput)="onBuscar()"></ion-input>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px]" fill="outline" id="cartPagosExport">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="cartPagosExport" triggerAction="click" [dismissOnSelect]="true" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarExcel()">Exportar Excel</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+    <div class="h-full relative" [appLoader]="loaderActivo()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" [columnDefs]="colDefs" [pagination]="true"
+        [rowSelection]="'multiple'" [suppressRowClickSelection]="true" [rowHeight]="20" [headerHeight]="24"
+        [paginationPageSize]="20" [localeText]="localeText"
+        (gridReady)="onGridReady($event)" (selectionChanged)="onSelectionChanged()" />
+    </div>
+  </div>
+  }
+
+  <div class="panel-derecho !overflow-hidden" [appLoader]="loaderActivo()" [ngClass]="{'!w-full !flex-1': !panelLateralVisible}">
+    <div class="cont-title">
+      <span>Registrar pago</span>
+    </div>
+
+    <div class="flex flex-col overflow-auto">
+      <form [formGroup]="form">
+        <div class="contenedor-formulario" [ngClass]="{'!flex-row !gap-20': !panelLateralVisible}">
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Cuenta bancaria <span class="text-danger">*</span></span>
+              <ion-select placeholder="Selecciona una cuenta" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                interface="popover" fill="outline" formControlName="bancoCntaId" class="w-[230px]">
+                @for(b of bancos; track b.id){<ion-select-option [value]="b.id">{{b.nombre}}</ion-select-option>}
+              </ion-select>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Concepto financiero <span class="text-danger">*</span></span>
+              <ion-select placeholder="Selecciona un concepto" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                interface="popover" fill="outline" formControlName="conceptoFinancieroId" class="w-[230px]">
+                @for(c of conceptos; track c.id){<ion-select-option [value]="c.id">{{c.nombre}}</ion-select-option>}
+              </ion-select>
+            </div>
+          </div>
+
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Fecha de pago <span class="text-danger">*</span></span>
+              <ion-input fill="outline" type="date" formControlName="fechaEmision" class="w-[160px]"></ion-input>
+            </div>
+
+            <div class="contenido-formulario !items-start">
+              <span class="label">Observación</span>
+              <ion-textarea fill="outline" formControlName="observacion" placeholder="Escribe aquí..." rows="2"
+                class="w-[300px]"></ion-textarea>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="px-2 py-1 text-sm">
+        <strong>{{ cantidadSeleccionadas }}</strong> documento(s) seleccionado(s) · Total a pagar:
+        <strong>{{ totalSeleccionado.toFixed(2) }}</strong>
+      </div>
+    </div>
+
+    <div class="contenedor-btn">
+      <ion-button (click)="registrarPago()">
+        <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>Registrar pago
+      </ion-button>
+      <ion-button color="success" fill="outline" [disabled]="ultimoPagoId == null" (click)="ejecutarPago()">Ejecutar</ion-button>
+      <ion-button color="danger" fill="outline" [disabled]="ultimoPagoId == null" (click)="anularPago()">Anular</ion-button>
+    </div>
+  </div>
+</div>

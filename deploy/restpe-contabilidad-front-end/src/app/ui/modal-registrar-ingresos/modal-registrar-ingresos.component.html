@@ -1,0 +1,66 @@
+<div class="contenedor-principal-modal !w-[488px]">
+  <div class="titulo-modal">
+    <div class="flex flex-row gap-1 items-center">
+      @if (!ajustarregistro) {<fa-icon [icon]="farCirclePlus" class="text-xs text-primary"></fa-icon>}
+      @if (ajustarregistro) {<fa-icon [icon]="farScrewdriverWrench" class="text-xs text-primary"></fa-icon>}
+    @if (!ajustarregistro) {<span>Registrar Ingresos</span>}
+    @if (ajustarregistro){<span>Ajustar registro</span>}
+    </div>
+    <fa-icon [icon]="farXmark" class="text-xs font-bold cursor-pointer" (click)="cancelar()"></fa-icon>
+  </div>
+  <div class="contenido-modal">
+    @if (!ajustarregistro) {
+    <div class="contenido-formulario">
+      <span class="label">Caja <span class="text-danger">*</span></span>
+      <ion-select fill="outline" placeholder="Selecciona una caja" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" class="w-[150px]">
+        @for(caja of cajasList; track caja.id) {
+          <ion-select-option [value]="caja.id">{{ caja.nombre }}</ion-select-option>
+        }
+      </ion-select>
+    </div>
+    <div class="contenido-formulario">
+      <span class="label">Medio de pago <span class="text-danger">*</span></span>
+      <ion-select fill="outline" placeholder="Seleccionar un medio de pago" toggleIcon="chevron-down" interface="popover" expandedIcon="chevron-up" class="w-[190px]">
+        @for(medio of mediosPagoList; track medio.id) {
+          <ion-select-option [value]="medio.id">{{ medio.nombre }}</ion-select-option>
+        }
+      </ion-select>
+    </div>
+    <div class="contenido-formulario">
+      <span class="label">Moneda</span>
+      <ion-select fill="outline" placeholder="Seleccionar moneda" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" class="w-[150px]">
+        @for(moneda of monedasList; track moneda.id) {
+          <ion-select-option [value]="moneda.id">{{ moneda.nombre }}</ion-select-option>
+        }
+      </ion-select>
+    </div>
+    <div class="contenido-formulario">
+      <span class="label">Monto <span class="text-danger">*</span></span>
+      <ion-input fill="outline" type="number" class="w-[169px]" placeholder="0.00"></ion-input>
+    </div>
+    }
+    @if (ajustarregistro) {
+      @for (detalle of detalles; track detalle.label; let i = $index) {
+        <div class="flex text-xxs font-semibold flex-row gap-2">
+          <span class="w-[100px] flex flex-none">{{detalle.label}}:</span>
+          <span class="font-normal line-clamp-1">{{detalle.value}}</span>
+        </div>
+      }
+    <div class="contenido-formulario">
+      <span class="w-[100px] text-xxs">Monto ajustado <span class="text-danger">*</span></span>
+      <ion-input fill="outline" type="text" class="w-[169px]" placeholder="0.00" 
+        [formControl]="$any(formularioAjuste.controls['montoAjustado'])"
+        (input)="formatearMonto($event)"></ion-input>
+    </div>
+    <div class="flex flex-col gap-2">
+      <span class="text-sm font-bold">Motivo de ajuste </span>
+      <ion-textarea fill="outline" rows="3" class="w-full" placeholder="Describe el motivo del ajuste"
+        [formControl]="$any(formularioAjuste.controls['motivoAjuste'])"></ion-textarea>
+    </div>
+  }
+    <div class="flex flex-row gap-1 justify-end w-full">
+      <ion-button fill="outline" color="medium" class="w-fit" (click)="cancelar()">Cancelar</ion-button>
+      <ion-button class="w-fit" (click)="confirmar()">{{botonguardar}}</ion-button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,193 @@
+<div class="contenedor-filtros-tabla">
+  <div class="sub-content-filtros-tabla">
+    <div class="cont-title">
+      <span>Reporte tributario por periodo</span>
+    </div>
+    <div class="contenido-filtros-tabla">
+      <div class="sub-content-filtros-tabla">
+        <div class="badge-descripcion">
+          <fa-icon [icon]="farInfoCircle"></fa-icon>
+          <span>
+            Solo se pueden generar reportes para periodos cerrados contablemente. Los periodos disponibles muestran su
+            fecha de cierre. Cada reporte tiene una vigencia de 5 días calendario.
+          </span>
+        </div>
+      </div>
+      <div class="filtros-responsive">
+        <div class="contenedor-formulario !flex-row !gap-10">
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Sucursal <span class="text-danger">*</span></span>
+              <app-autocomplete-multi [(ngModel)]="sucursalesSeleccionadas" (ngModelChange)="onsucursalesSeleccionadas($event)" [items]="sucursales" displayKey="nombre"
+                valueKey="id" placeholder="Todas las sucursales" (changed)="onsucursalesSeleccionadas($event)">
+              </app-autocomplete-multi>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Periodo inicio <span class="text-danger">*</span></span>
+              <app-month-year-picker placeholder="Selecciona mes de inicio" (monthYearChange)="onPeriodoInicioChange($event)"></app-month-year-picker>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Periodo fin</span>
+              <app-month-year-picker placeholder="Selecciona un periodo" (monthYearChange)="onPeriodoFinChange($event)"></app-month-year-picker>
+            </div>
+          </div>
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Tipo de impuesto <span class="text-danger">*</span></span>
+              <app-autocomplete-multi [(ngModel)]="tipoImpuestoSeleccionado" (ngModelChange)="ontipoImpuestoSeleccionado($event)" [items]="tipoISelect" displayKey="nombre"
+                valueKey="id" placeholder="Seleccionar tipo(s) de impuesto" (changed)="ontipoImpuestoSeleccionado($event)">
+              </app-autocomplete-multi>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Nivel de detalle <span class="text-danger">*</span></span>
+              <ion-select [(ngModel)]="nivelDetalleSeleccionado" (ngModelChange)="onNivelDetalleChange($event)" placeholder="Selecciona nivel" interface="popover"
+                fill="outline" class="w-[180px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+                <ion-select-option value="consolidado">Consolidado</ion-select-option>
+                <ion-select-option value="detallado">Detallado</ion-select-option>
+              </ion-select>
+            </div>
+            <div class="contenido-formulario flex items-center">
+              <div class="label"></div>
+              <fa-icon [icon]="farInfoCircle" class="text-xxss"></fa-icon>
+              <span *ngIf="nivelDetalleSeleccionado === 'consolidado'" class="label !text-xxss">Muestra totales
+                agrupados por tipo de impuesto. Recomendado para <br> declaración tributaria</span>
+              <span *ngIf="nivelDetalleSeleccionado === 'detallado'" class="label !text-xxss">Muestra el desglose por
+                comprobante de venta y compra. <br>Recomendado para revisión y auditoría.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Botones de acción -->
+      <div class="flex items-center gap-3 w-full justify-end mt-2">
+        <ion-button class="w-[115px]" fill="outline" id="reportetributario" [disabled]="!reporteGenerado">
+          <fa-icon [icon]="fasDownload" class="mr-1 text-text-85"></fa-icon>
+          <span class="text-text-85">Exportar</span>
+          <fa-icon class="ml-1 text-text-85" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportetributario" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true">Exportar PDF</ion-item>
+            <ion-item lines="none" [button]="true">Exportar TXT</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button color="primary" class="w-fit" (click)="generarReporte()" [disabled]="!camposValidos">
+          <span class="font-normal">Generar Reporte</span>
+        </ion-button>
+      </div>
+    </div>
+    <div class="min-h-[400px] flex grow flex-col">
+      <div class="cont-title">
+        <span>Reporte generado</span>
+      </div>
+      @if(reporteGenerado){<div class="px-1.5 pt-1.5 flex-none" >
+        <div class="flex px-2 py-2.5 bg-gray-50 items-center rounded w-full h-[55px] justify-between" *ngIf="reporteGenerado">
+          <div class="flex gap-3">
+            <div class="items-center flex justify-center rounded-3xl h-7 w-7 flex-none bg-success-5">
+              <fa-icon [icon]="farCheckCircle" class="text-success text-xs"></fa-icon>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xxs"><span class="font-semibold">Reporte generado:</span> {{ periodoReporteGenerado }}</span>
+              <div class="flex gap-1 items-center">
+                <fa-icon [icon]="farClock" class="text-text-10 text-xxss"></fa-icon>
+                <span class="text-xxss text-text-10"> Generado: {{ fechaGeneracionReporte }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-3 items-center">
+            <div class="flex flex-col items-end ">
+              <span class="text-xxss text-text-10">Vigencia hasta</span>
+              <span class="text-xxs font-semibold"> {{ fechaVigenciaReporte }}</span>
+            </div>
+            <div class=" flex justify-center rounded-full w-12 flex-none bg-[#DCFDE7] px-2">
+              <span class="text-[#16A34A] font-semibold text-xxss ">Vigente</span>
+            </div>
+          </div>
+        </div>
+        <!-- Contenedores de totales con iconos -->
+        <div class="cont-cards">
+          <div class="card">
+            <div class="contenido">
+              <span class="title">Base imponible total</span>
+              <span class="cantidad">{{ reporteGenerado ? totalBaseImponibleFmt : 'S/0.00' }}</span>
+            </div>
+            <div class="icon">
+              <fa-icon [icon]="fasFileInvoiceDollar"></fa-icon>
+            </div>
+          </div>
+          <div class="card">
+            <div class="contenido">
+              <span class="title">Débitos fiscales</span>
+              <span class="cantidad">{{ reporteGenerado ? totalDebitosFiscalesFmt : 'S/0.00' }}</span>
+            </div>
+            <div class="icon">
+              <fa-icon [icon]="fasCalculator"></fa-icon>
+            </div>
+          </div>
+          <div class="card">
+            <div class="contenido">
+              <span class="title">Créditos fiscales</span>
+              <span class="cantidad">{{ reporteGenerado ? totalCreditosFiscalesFmt : 'S/0.00' }}</span>
+            </div>
+            <div class="icon">
+              <fa-icon [icon]="fasMinusCircle"></fa-icon>
+            </div>
+          </div>
+          <div class="card">
+            <div class="contenido">
+              <span class="title">Impuesto neto a pagar</span>
+              <span class="cantidad">{{ reporteGenerado ? totalImpuestoNetoFmt : 'S/0.00' }}</span>
+            </div>
+            <div class="icon">
+              <fa-icon [icon]="fasCoins"></fa-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vista Detallado: Tabs y tabla con tree data -->
+        <div *ngIf="nivelDetalleSeleccionado === 'detallado'">
+          <div class="flex h-[30px] flex-none">
+            <div (click)="cambiarTab('ventas')" [ngClass]="{
+              'border-primary': tabActivo === 'ventas',
+              'border-text-5': tabActivo !== 'ventas'
+            }" class="border-b-[3px] items-center flex w-[251px] justify-center cursor-pointer">
+              <span [ngClass]="{
+                'text-primary': tabActivo === 'ventas',
+                'text-text-85': tabActivo !== 'ventas'
+              }" class="text-sm font-medium">Ventas</span>
+            </div>
+            <div (click)="cambiarTab('compras')" [ngClass]="{
+              'border-primary': tabActivo === 'compras',
+              'border-text-5': tabActivo !== 'compras'
+            }" class="border-b-[3px] items-center flex w-[251px] justify-center cursor-pointer">
+              <span [ngClass]="{
+                'text-primary': tabActivo === 'compras',
+                'text-text-85': tabActivo !== 'compras'
+              }" class="text-sm font-medium">Compras</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Tabla de resultados -->
+      <div class="flex flex-grow relative pt-1.5"  [appLoader]="isLoading()">
+        <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+
+        <!-- Tabla detallada con tree data -->
+        <ag-grid-angular *ngIf="nivelDetalleSeleccionado === 'detallado'" style="width: 100%; height: 100%;" class=""
+          [rowData]="rowData" [columnDefs]="colDefs" [columnTypes]="columnTypes" [gridOptions]="gridOptions"
+          [pagination]="true" [localeText]="localeText" [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20"
+          [treeData]="treeData" [getDataPath]="getDataPath" [autoGroupColumnDef]="autoGroupColumnDef"
+          [getRowClass]="getRowClass" [groupDefaultExpanded]="groupDefaultExpanded" (gridReady)="onGridReady($event)">
+        </ag-grid-angular>
+
+        <!-- Tabla consolidada sin tree data -->
+        <ag-grid-angular *ngIf="nivelDetalleSeleccionado === 'consolidado'" style="width: 100%; height: 100%;" class=""
+          [rowData]="rowDataConsolidado" [columnDefs]="colDefsConsolidado" [columnTypes]="columnTypes"
+          [gridOptions]="gridOptions" [pagination]="true" [localeText]="localeText" [rowHeight]="20" [headerHeight]="24"
+          [paginationPageSize]="20" (gridReady)="onGridReady($event)">
+        </ag-grid-angular>
+      </div>}
+    </div>
+  </div>
+</div>

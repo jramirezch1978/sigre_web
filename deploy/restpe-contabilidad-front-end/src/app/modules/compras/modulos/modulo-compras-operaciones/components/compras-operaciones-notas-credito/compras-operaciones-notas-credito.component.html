@@ -1,0 +1,298 @@
+<div class="contenedor-principal">
+  <div class="barra-desplegable" (click)="mostrarTabla(true)" *ngIf="!mostrartabla">
+    <fa-icon [icon]="fasChevronsRight" class="text-xs text-primary cursor-pointer"></fa-icon>
+  </div>
+  <div class="panel-izquierdo" *ngIf="mostrartabla">
+    <div class="cont-title">
+      <span class="text-xs font-medium">Lista de ajustes hechos a facturas (Selecciona un ajuste de la lista para
+        visualizarlos o editarlos)</span>
+      <fa-icon [icon]="fasChevronsLeft" class="text-xs text-primary cursor-pointer"
+        (click)="mostrarTabla(false)"></fa-icon>
+    </div>
+
+    <!-- Filtros -->
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="flex items-center gap-3 w-full 2xl:!flex-row">
+          <div class="relative w-full">
+            <fa-icon [icon]="farSearch" class=" absolute left-2.5 top-1.5 text-xxs text-[#878787] z-40"></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar por código, serie, número, factura afectada" class="w-full"
+              style="--padding-start:30px" (ionInput)="onBuscarLista($event)"></ion-input>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="filtros-absolutos">
+        <div class="flex flex-row">
+          <ion-select placeholder="De registro" [(ngModel)]="tipoSeleccionado" [ngModelOptions]="{standalone: true}"
+            interface="popover" fill="outline" class="w-[80px] flex-none" toggleIcon="chevron-down"
+            expandedIcon="chevron-up" (ionChange)="onTipoFechaChange()">
+            @for(tipo of tipoFs; track tipo){<ion-select-option [value]="tipo.value">{{ tipo.nombre
+              }}</ion-select-option>}
+          </ion-select>
+          <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+            [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="center"
+            (dateRangeSelected)="filtrarPorFechas($event)">
+          </app-base-calendar-new>
+        </div>
+
+        <ion-button class="w-[115px] text-text-85" fill="outline" id="reportesNotas">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesNotas" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" (click)="exportarExcel()" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" (click)="exportarPdf()" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit flex flex-none" [disabled]="esNuevoRegistro" (click)="nuevoAjuste()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span class="font-normal whitespace-nowrap">Nuevo ajuste</span>
+        </ion-button>
+      </div>
+    </div>
+
+    <div class="contenedor-primera-tabla" [appLoader]="isLoadingObtener()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" , [rowSelection]="'single'" [headerHeight]="24"
+        [localeText]="localeText" [paginationPageSize]="20" (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)" />
+    </div>
+    <!-- <div class="barra-desplegable" *ngIf="!mostrartabla" (click)="mostrarTabla(true)">
+      <fa-icon [icon]="fasChevronsRight" class=""></fa-icon>
+    </div> -->
+  </div>
+
+  <div class="panel-derecho" [appLoader]="isLoadingObtener()" [ngClass]="{'!w-full !flex-auto': !mostrartabla}">
+    <div class="cont-title">
+      @if(esNuevoRegistro) {
+      <span>Nuevo ajuste</span>
+      } @else if(filaSeleccionada) {
+      <span>Información: {{filaSeleccionada.nota_credito_codigo}}</span>
+      } @else {
+      <span>Información</span>
+      }
+    </div>
+    @if(filaSeleccionada){
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+    }
+    <div class="overflow-y-auto overflow-x-hidden h-full ">
+      <form action="" [formGroup]="NotaCreditoForm" class="contenedor-formulario"
+        [ngClass]="{'!flex-row': !mostrartabla}">
+        <!-- columna 1 -->
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Fecha de registro</span>
+            <ion-input fill="outline" type="date" class="w-[169px]" formControlName="fechaReg" [disabled]="true"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Tipo de documento <span class="text-danger">*</span></span>
+            @if(desactivarcampos){
+            <ion-input fill="outline" class="w-[169px]" formControlName="tipoAjuste"></ion-input>
+            }
+            @else{
+            <ion-select placeholder="Seleciona un tipo" formControlName="tipoAjuste" toggleIcon="chevron-down"
+              expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[169px] text-xxs">
+              @for(tipo of tiposAjuste; track tipo.value){
+              <ion-select-option [value]="tipo.value">{{tipo.label}}</ion-select-option>
+              }
+            </ion-select>
+            }
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Serie<span class="text-danger">*</span></span>
+            <ion-input fill="outline" placeholder="Ingresa un número de serie" formControlName="serie"
+              class="w-[169px]"></ion-input>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Número<span class="text-danger">*</span></span>
+            <ion-input fill="outline" placeholder="Ingresa un número" formControlName="numero"
+              class="w-[169px]"></ion-input>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Fecha de emisión<span class="text-danger">*</span></span>
+            @if(desactivarcampos){
+            <ion-input fill="outline" class="w-[106px]" formControlName="fechaEmisionNota" [disabled]="true"></ion-input>
+            }
+            @else{
+            <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaEmisionNota" position="center"
+              (dateSelected)="onFechaEmisionNotaSelected($event)">
+            </app-base-calendar-new>
+            }
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Moneda <span class="text-danger">*</span></span>
+            @if(desactivarcampos){
+            <ion-input fill="outline" class="w-[169px]" formControlName="moneda"></ion-input>
+            }
+            @else{
+            <ion-select placeholder="" formControlName="moneda" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              interface="popover" fill="outline" class="w-[169px] text-xxs">
+              @for(moneda of monedas; track moneda.value){
+              <ion-select-option [value]="moneda.value">{{moneda.label}}</ion-select-option>
+              }
+            </ion-select>
+            }
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Centro de costo</span>
+            <app-autocomplete
+              [items]="centrosCosto"
+              [displayKey]="'nombre'"
+              [valueKey]="'id'"
+              [placeholder]="'Buscar centro de costo'"
+              [width]="'w-[169px]'"
+              formControlName="centroCostoId"/>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Motivo de ajuste <span class="text-danger">*</span></span>
+            @if(desactivarcampos){
+            <ion-input fill="outline" class="w-[169px]" formControlName="motivoAjuste"></ion-input>
+            }
+            @else{
+            <ion-select placeholder="" formControlName="motivoAjuste" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              interface="popover" fill="outline" class="w-[169px] text-xxs">
+              @for(motivo of motivosAjuste; track motivo.value){
+              <ion-select-option [value]="motivo.value">{{motivo.label}}</ion-select-option>
+              }
+            </ion-select>
+            }
+          </div>
+  
+          <!-- <div class="contenido-formulario">
+            <span class="label">Documento Fiscal<span class="text-danger">*</span></span>
+            <div class="flex flex-row">
+              <ion-input type="text" fill="outline" formControlName="documentoproveedorinput" class="w-[143px]"
+                style="--border-radius: 0px !important" placeholder="Ingrese documento"></ion-input>
+              <ion-button (click)="buscarproveedor()" class="!w-[24px]">
+                <fa-icon [icon]="fasSearch" class="text-xs text-white"></fa-icon>
+              </ion-button>
+            </div>
+          </div> -->
+  
+  
+  
+        </div>
+        <!-- columna 2 -->
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario !items-start">
+            <span class="label">Descripción detallada <span class="text-danger">*</span></span>
+            <ion-textarea fill="outline" placeholder="Escribe aquí..." formControlName="descripcionDetallada" rows="3"
+              class="w-[169px]"></ion-textarea>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Documento fiscal <span class="text-danger">*</span></span>
+            <div class="flex flex-row">
+              <!-- <ion-select placeholder="" toggleIcon="chevron-down" expandedIcon="chevron-up"
+                formControlName="documentoproveedor" interface="popover" fill="outline" class="min-w-[55px] text-xxs"
+                (ionchange)="onchangedocs($event)"
+                style="width: 55px !important; --border-right-radius: 0px !important;">
+                <ion-select-option *ngFor="let tipo of tiposIdentificacion" [value]="tipo.value">{{ tipo.label
+                  }}</ion-select-option>
+              </ion-select> -->
+              <ion-input type="number" fill="outline" formControlName="documentoproveedorinput"
+                [ngClass]="'w-[120px] 2xl:w-[151px]'"
+                placeholder="Ingresa número documento"
+                style="--border-right-radius: 0px !important"></ion-input>
+              <ion-button class="!w-[24px] flex-none -ml-0.5 z-10 bg-primary rounded-r-sm" (click)="buscarproveedor()">
+                <fa-icon [icon]="fasSearch" class="text-xs text-white"></fa-icon>
+              </ion-button>
+            </div>
+          </div>
+  
+          <div class="contenido-formulario">
+            <span class="label">Razón social <span class="text-danger">*</span></span>
+            <ion-input fill="outline" class="w-[169px]" formControlName="proveedor" placeholder="Ingrese proveedor"></ion-input>  
+          </div>
+  
+  
+          <div class="contenido-formulario">
+            <span class="label">Factura asociada <span class="text-danger">*</span></span>
+            @if(desactivarcampos){
+            <ion-input fill="outline" class="w-[149px] xl:w-[169px]" formControlName="facturaafectada"></ion-input>
+            }
+            @else{
+            <app-autocomplete [items]="facturasAutocomplete" [displayKey]="'nombre'" [valueKey]="'id'"
+              [placeholder]="facturasAutocomplete.length === 0 ? 'Selecciona un proveedor primero' : 'Selecciona una factura'"
+              [width]="'w-[149px]'" [disabled]="desactivarcampos" (itemSelected)="onFacturaSelected($event)">
+            </app-autocomplete>
+            }
+          </div>
+  
+  
+          <div class="contenido-formulario" *ngIf="mostrarCuentaYTotal || desactivarcampos">
+            <span class="label">Cuenta contable asoc. <span class="text-danger">*</span></span>
+            @if(desactivarcampos){
+            <ion-input fill="outline" class="w-[169px]" formControlName="cuentaContable"></ion-input>
+            }
+            @else{
+            <app-autocomplete [items]="cuentasContables" [displayKey]="'nombre'" [valueKey]="'id'"
+              [placeholder]="'Selecciona una cuenta'" [width]="'w-[169px]'"
+              (itemSelected)="onCuentaContableSelected($event)">
+            </app-autocomplete>
+            }
+          </div>
+          <div class="contenido-formulario" *ngIf="mostrarCuentaYTotal">
+            <span class="label">Total del ajuste <span class="text-danger">*</span></span>
+            <ion-input fill="outline" formControlName="totalAjuste" type="number" class="w-[169px]"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Adjuntar (PDF, XML) <span class="text-danger">*</span></span>
+            <app-file-upload [accept]="'.pdf,.xml'" [placeholder]="'Haz clic para subir un archivo'" [maxFileSize]="5"
+              [width]="'w-40'" [required]="true" (fileSelected)="onFileSelected($event)" (fileRemoved)="removeFile()"
+              (error)="onFileError($event)">
+            </app-file-upload>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Estado <span class="text-danger">*</span></span>
+            <ion-input fill="outline" value="estado" formControlName="estado" class="w-[82px]"></ion-input>
+          </div>
+        </div>
+      </form>
+      <div class="cont-title flex items-center justify-between">
+        <span>Detalle de la nota{{ NotaCreditoForm.get('facturaafectada')?.value ? ' (Ref: ' + NotaCreditoForm.get('facturaafectada')?.value + ')' : '' }}</span>
+        <ion-button size="small" fill="outline" class="flex-none" (click)="agregarLineaDetalle()"
+          [disabled]="desactivarcampos">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span class="font-normal whitespace-nowrap">Agregar línea</span>
+        </ion-button>
+      </div>
+      <div class="h-[200px]">
+        <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowDataProductos"
+          [columnDefs]="colDefsProductos" [columnTypes]="columnTypes" [localeText]="localeText"
+          [rowSelection]="'multiple'" [rowHeight]="20" [headerHeight]="24" [suppressRowClickSelection]="true"
+          (gridReady)="onGridReadyProductos($event)" (cellValueChanged)="onCellValueChangedProductos($event)" />
+      </div>
+    </div>
+
+    <div class="contenedor-btn mt-auto flex-none">
+      <ion-button expand="block" class="w-fit whitespace-nowrap"
+        (click)="aplicarAjuste()">
+        {{ esNuevoRegistro ? 'Registrar' : 'Guardar' }}
+      </ion-button>
+      
+      <ion-button class="w-fit flex flex-none" fill="outline" color="medium" (click)="nuevoAjuste()">
+        <span class="font-normal whitespace-nowrap">Cancelar</span>
+      </ion-button>
+
+      @if(!esNuevoRegistro && filaSeleccionada) {
+      <ion-button class="w-fit flex flex-none" fill="outline" color="danger" (click)="abrirModalAnular()">
+        <span class="font-normal whitespace-nowrap">Anular</span>
+      </ion-button>
+      }
+    </div>
+  </div>
+</div>

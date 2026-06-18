@@ -1,0 +1,261 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de movimiento entre cuentas bancarias y cajas (Selecciona un movimiento para visualizarlo o editarlo)</span>
+    </div>
+    
+    <!-- filtros -->
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por código o usuario ejecutor" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+
+      
+      <div class="filtros-absolutos">
+        
+        <div class="flex flex-row">
+            <ion-select placeholder="De registro" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+              fill="outline" class="w-[100px] text-xxs -mr-0.5" value="0">
+              <ion-select-option value="aprobado">De registro</ion-select-option>
+              <ion-select-option value="pendiente">De transferencia</ion-select-option>
+            </ion-select>
+
+            <!-- calendario -->
+            <app-base-calendar-new
+              class="flex-none "
+              mode="range"
+              [initialStartDate]="startDate"
+              [initialEndDate]="endDate"
+              [minDate]="minDate"
+              [maxDate]="maxDate"
+              position="center"
+              (dateRangeSelected)="filtrarPorFechas($event)">
+            </app-base-calendar-new>
+        </div>
+
+        <ion-button class="w-[115px] text-text-85" fill="outline"  id="movimientosdecuentas">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="movimientosdecuentas" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        
+        <ion-button class="w-fit" (click)="botonRegistrarMov()" [disabled]="!filaSeleccionada">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span class="font-normal">Registrar mov.</span>
+        </ion-button>
+      </div>
+    </div>
+
+    <div class="cont-cards">
+      @for(item of cards; track $index){
+      <div class="card">
+        <div class="contenido">
+          <span class="title">{{item.nombre}}  @if(item.id===2){<span class="font-bold">{{item.desde}}</span>}</span>
+          @if(isLoading()){
+            <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+          } @else{
+            <span class="cantidad">{{item.valor}}</span>
+          }
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="item.icono"></fa-icon>
+        </div>
+      </div>
+      }
+    </div>
+    
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="ag-theme-alpine"
+        [rowData]="rowData" [columnDefs]="colDefs" [defaultColDef]="defaultColDef"
+        [pagination]="true" [localeText]="localeText" [rowHeight]="20" [headerHeight]="24"
+        [paginationPageSize]="20" [rowSelection]="'single'" (gridReady)="onGridReady($event)"
+        (firstDataRendered)="onFirstDataRendered($event)" [getRowClass]="getRowClass"
+        (cellClicked)="onCellClicked($event)" [domLayout]="'normal'" />
+    </div>
+  </div>
+  
+  <div class="panel-derecho" [appLoader]="isLoading()">
+    <div class="cont-title">
+      <span>{{ tituloFormulario }}</span>
+    </div>
+    
+    <div class="flex justify-end w-full bg-[#F5F5F5] px-1" *ngIf="!modoCreacion" (click)="modalverActualizaciones()">
+      <div class="flex flex-row gap-2 p-1 cursor-pointer">
+        <fa-icon [icon]="farBook" class="text-xs text-[#636E95]"></fa-icon>
+        <span class="text-[#636E95] text-xs font-semibold underline cursor-pointer">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+    
+    <form [formGroup]="movimientoForm" class="contenedor-formulario">
+      
+      <div class="contenido-formulario">
+        <span class="label">Fecha de registro</span>
+        <ion-input fill="outline" formControlName="fechaRegistro" placeholder="DD/MM/YYYY" 
+          [disabled]="true" class="w-48"></ion-input>
+      </div>
+      
+      <div class="contenido-formulario">
+        <span class="label">Fecha de transferencia <span class="text-[#FF0000]">*</span></span>
+        <app-base-calendar-new mode="single" [initialDate]="fechaTransferenciaSeleccionada"
+          [minDate]="minDate" [maxDate]="maxDate" [disabled]="formularioDeshabilitado"
+          (dateSelected)="onFechaTransferenciaSelected($event)" class="w-48" position="right">
+        </app-base-calendar-new>
+      </div>
+      
+      <div class="contenido-formulario">
+        <span class="label">Tipo de movimiento <span class="text-[#FF0000]">*</span></span>
+        <ion-select fill="outline" formControlName="tipoMovimiento" placeholder="Selecciona un tipo"
+          toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" class="w-48">
+          @for(tipo of tiposMovimiento; track tipo.id) {
+            <ion-select-option [value]="tipo.id">{{ tipo.nombre }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+      
+      @if(mostrarSucursales) {
+        <div class="contenido-formulario">
+          <span class="label">Sucursal origen <span class="text-[#FF0000]">*</span></span>
+          <app-autocomplete formControlName="sucursalOrigen" [items]="sucursales" displayKey="nombre" valueKey="nombre"
+            placeholder="Selecciona una sucursal origen" class="w-48"></app-autocomplete>
+        </div>
+        
+        <div class="contenido-formulario">
+          <span class="label">Sucursal destino <span class="text-[#FF0000]">*</span></span>
+          <app-autocomplete formControlName="sucursalDestino" [items]="sucursales" displayKey="nombre" valueKey="nombre"
+            placeholder="Selecciona una sucursal destino" class="w-48"></app-autocomplete>
+        </div>
+      }
+      
+      <div class="contenido-formulario">
+        <span class="label">Cuenta origen <span class="text-[#FF0000]">*</span></span>
+        <app-autocomplete formControlName="cuentaOrigen" [items]="cuentas" displayKey="nombre" valueKey="nombre"
+          placeholder="Selecciona una cuenta" type="number" class="w-48"></app-autocomplete>
+      </div>
+      
+      <div class="contenido-formulario">
+        <span class="label">Cuenta destino <span class="text-[#FF0000]">*</span></span>
+        <app-autocomplete formControlName="cuentaDestino" [items]="cuentas" displayKey="nombre" valueKey="nombre"
+          placeholder="Selecciona una cuenta" type="number" class="w-48"></app-autocomplete>
+      </div>
+
+      @if(mostrarCamposMoneda) {
+        <div class="contenido-formulario">
+          <span class="label">Moneda de origen</span>
+          <ion-select fill="outline" formControlName="monedaOrigen" placeholder="Selecciona una moneda"
+            toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" class="w-48">
+            @for(moneda of monedas; track moneda.id) {
+              <ion-select-option [value]="moneda.id">{{ moneda.nombre }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Tipo de cambio </span>
+          <ion-input fill="outline" formControlName="tipoCambio" placeholder="3.40" 
+            type="number" step="0.01" class="w-48"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">{{ modoCreacion ? 'Monto a transferir' : 'Monto transferido' }} <span class="text-[#FF0000]">*</span></span>
+          <div class="flex flex-col">
+            <ion-input fill="outline" formControlName="montoTransferido" [placeholder]="modoCreacion ? 'Monto a transferir' : 'Monto transferido'" 
+            type="number" class="w-[164px]"></ion-input>
+            <div class="flex gap-1 text-danger text-xxs items-center">
+              @if(movimientoForm.get('montoTransferido')?.hasError('min') && movimientoForm.get('montoTransferido')?.touched) {
+                <fa-icon [icon]="farInfoCircle" class="text-xxss"></fa-icon>
+                <span class="text-danger text-xxs">El monto debe ser mayor a 0.</span>
+              }
+              @if(movimientoForm.get('montoTransferido')?.hasError('max') && movimientoForm.get('montoTransferido')?.touched) {
+                <fa-icon [icon]="farInfoCircle" class="text-xxss"></fa-icon>
+                <span class="text-danger text-xxs">El monto no puede superar el límite de {{montoLimite}}.</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Medio de transferencia <span class="text-[#FF0000]">*</span></span>
+          <ion-select fill="outline" formControlName="medioTransferencia" placeholder="Selecciona un medio"
+            toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" class="w-48">
+            @for(medio of mediosTransferencia; track medio.id) {
+              <ion-select-option [value]="medio.id">{{ medio.nombre }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+      }
+
+      <div class="contenido-formulario">
+        <span class="label">Adjuntar</span>
+        <div class="flex items-center gap-2 w-40 h-[28px] border border-text-5 rounded-sm px-2"
+          [ngClass]="{
+            'bg-Background-light': movimientoForm.get('archivoAdjunto')?.value,
+            'opacity-50 pointer-events-none': formularioDeshabilitado
+          }">
+          @if (movimientoForm.get('archivoAdjunto')?.value) {
+            <span class="text-xxs flex-1 line-clamp-1">{{ movimientoForm.get('archivoAdjunto')?.value }}</span>
+            <fa-icon [icon]="farCircleXmark" class="text-danger cursor-pointer text-xs" (click)="removeFile()">
+            </fa-icon>
+          } @else {
+            <input type="file" #fileInput (change)="subirArchivo($event)" class="hidden" accept=".pdf,.jpg,.png">
+            <span class="text-xxs cursor-pointer flex-1 line-clamp-1 underline text-primary"
+              (click)="!formularioDeshabilitado && fileInput.click()">
+              Haz clic para subir un archivo
+            </span>
+          }
+        </div>
+      </div>
+
+      <!-- Campo Estado - Siempre visible, deshabilitado en modo creación -->
+      <div class="contenido-formulario">
+        <span class="label">Estado</span>
+        <ion-select fill="outline" formControlName="estado" placeholder="Estado"
+          toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" class="w-48">
+          @for(estado of estados; track estado.id) {
+            <ion-select-option [value]="estado.id">{{ estado.nombre }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      <!-- Campo N° asiento - Solo visible cuando está Confirmado o Anulado -->
+      <div class="contenido-formulario" *ngIf="!modoCreacion">
+        <span class="label">N° de asiento contable</span>
+        <div class="flex flex-row gap-2 items-center">
+          <ion-input fill="outline" formControlName="numeroAsiento" placeholder="N° de asiento" 
+            [disabled]="true" class="opacity-60">
+            <fa-icon slot="end" [icon]="farEye" class="text-xxs text-text-85 cursor-pointer bg-white"
+              (click)="verAsientoContable()"></fa-icon>
+          </ion-input>
+        </div>
+      </div>
+
+      <div class="contenido-formulario !items-start">
+        <span class="label">Observaciones</span>
+        <ion-textarea fill="outline" formControlName="observaciones" 
+          placeholder="Sin observaciones" rows="3"></ion-textarea>
+      </div>
+
+    </form>
+    
+    <!-- Botones según el modo -->
+    <div class="contenedor-btn">
+      <div class="flex item-center gap-3">
+        @if(filaSeleccionada?.mcb_estado == 'Pendiente'){<ion-button fill="outline" color="danger" (click)="botonAnular()">Anular</ion-button>}
+        @if(modoCreacion){<ion-button (click)="botonRegistrar()">Registrar</ion-button>}
+        @if(!modoCreacion){<ion-button (click)="botonGuardar()">Guardar</ion-button>}
+      </div>
+      <ion-button fill="outline" color="medium" (click)="botonCancelar()">Cancelar</ion-button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,186 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Gestión del catálogo de tipo de documentos (Selecciona un tipo de documento de tu lista para
+        visualizarlo)</span>
+    </div>
+
+    <!-- Filtros -->
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="contenedor-filtros !p-0">
+          <div class="buscador">
+            <fa-icon [icon]="farSearch"></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar por código o nombre" class="w-full" [(ngModel)]="textoSearch"
+              (ionInput)="onBuscar()" style="--padding-start:30px"></ion-input>
+          </div>
+
+        </div>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px] text-text-85" fill="outline" id="gestionC">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="gestionC" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" (click)="exportarExcel()">Exportar Excel</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" (click)="botonNuevaCuenta()" [disabled]="disabledValidar"><fa-icon
+            [icon]="fasCirclePlus" class="mr-1"></fa-icon> <span class="font-normal">Nuevo documento</span>
+        </ion-button>
+      </div>
+    </div>
+
+
+    <div class="h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [localeText]="localeText" [rowHeight]="20" [headerHeight]="24"
+        [paginationPageSize]="20" [rowSelection]="'single'" (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+  <div class="panel-derecho" [appLoader]="isLoading()">
+    <div class="cont-title">
+      @if(!filaSeleccionada){
+      <span>Nuevo documento</span>
+      }
+      @if(filaSeleccionada){
+      <span>Documento: {{filaSeleccionada.catalogo_codigo}}</span>
+      }
+    </div>
+    @if(filaSeleccionada){
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+    }
+
+    <!-- Tabs -->
+    <form action="" [formGroup]="tipoDocumentoForm">
+      <div class="flex flex-col gap-1 h-full w-full">
+        <!-- Contenido del formulario -->
+        <div class="contenedor-formulario">
+
+          <!-- <div class="contenido-formulario">
+            <span class="label">Fecha de creación</span>
+            <ion-input type="date" fill="outline" formControlName="fechaCreacion" class="w-[110px]"></ion-input>
+          </div> -->
+          <div class="contenido-formulario">
+            <span class="label">Nombre de documento <span class="text-danger">*</span></span>
+            <ion-input fill="outline" formControlName="nombreD" placeholder="Ingrese un nombre"
+              class="w-[163px]"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Documento SUNAT</span>
+            <ion-select placeholder="Selecciona un tipo de documento" toggleIcon="chevron-down"
+              expandedIcon="chevron-up" formControlName="sunatCodigo" interface="popover" fill="outline"
+              [ngClass]="'w-[163px] 2xl:w-[210px]'" (ionChange)="onSelectChange()">
+              @for(documento of sunatTiposDocumento; track documento){<ion-select-option
+                [value]="documento.codigoItem">{{
+                documento.nombreItem }}</ion-select-option>}
+            </ion-select>
+          </div>
+          <!-- <div class="contenido-formulario">
+            <span class="label">Tipo de documento<span class="text-danger">*</span></span>
+            <ion-select placeholder="Selecciona un tipo de documento" toggleIcon="chevron-down"
+              expandedIcon="chevron-up" [(ngModel)]="tipoDocumentoSeleccionado" [ngModelOptions]="{standalone: true}"
+              interface="popover" fill="outline" [ngClass]="'w-[163px] 2xl:w-[210px]'" (ionChange)="onSelectChange()">
+              @for(documento of tDocumentos; track documento){<ion-select-option [value]="documento.value">{{
+                documento.label }}</ion-select-option>}
+            </ion-select>
+          </div> -->
+          <!-- <div class="contenido-formulario">
+            <span class="label">Naturaleza contable<span class="text-danger">*</span></span>
+            <ion-select placeholder="Selecciona una naturaleza contable" toggleIcon="chevron-down"
+              expandedIcon="chevron-up" [(ngModel)]="naturalezaContableFormSeleccionada"
+              [ngModelOptions]="{standalone: true}" interface="popover" fill="outline"
+              [ngClass]="'w-[163px] 2xl:w-[210px]'" (ionChange)="onSelectChange()">
+              @for(nacontable of nContables; track nacontable){<ion-select-option [value]="nacontable.value">{{
+                nacontable.label }}</ion-select-option>}
+            </ion-select>
+          </div> -->
+          <!-- <div class="contenido-formulario">
+            <span class="label">Uso del documento<span class="text-danger">*</span></span>
+            <ion-select placeholder="Selecciona un uso de documento" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              [(ngModel)]="usoDocumentoSeleccionado" [ngModelOptions]="{standalone: true}" interface="popover"
+              fill="outline" [ngClass]="'w-[163px] 2xl:w-[210px]'" (ionChange)="onSelectChange()">
+              @for(usodocument of usoDocumentos; track usodocument){<ion-select-option [value]="usodocument.value">{{
+                usodocument.label }}</ion-select-option>}
+            </ion-select>
+          </div> -->
+          <!-- <div class="contenido-formulario">
+            <span class="label">Cta. Contable Asociada <span class="text-danger">*</span></span>
+            <app-autocomplete formControlName="cuentaContable" [items]="cuentas" displayKey="nombre" valueKey="id"
+              placeholder="Selecciona cuenta contable" [ngClass]="'w-[163px] 2xl:w-[210px]'"
+              (itemSelected)="onCuentaSeleccionada($event)">
+            </app-autocomplete>
+          </div> -->
+          <!-- <div class="contenido-formulario">
+            <span class="label">¿Requiere referencia? <span class="text-danger">*</span></span>
+            <ion-radio-group [(ngModel)]="tieneReferenciaBancaria" [ngModelOptions]="{standalone: true}"
+              class="flex gap-4">
+              <div class="flex flex-row gap-2 items-center">
+                <ion-item lines="none" class="p-0 mr-4">
+                  <ion-radio value="si" labelPlacement="end" justify="start"><span>Sí</span></ion-radio>
+                  <ion-label class="text-xxs ml-1">Si</ion-label>
+                </ion-item>
+                <ion-item lines="none" class="p-0 mr-4">
+                  <ion-radio value="no" labelPlacement="end" justify="start"></ion-radio>
+                  <ion-label class="text-xxs ml-1">No</ion-label>
+                </ion-item>
+              </div>
+            </ion-radio-group>
+          </div> -->
+          <!-- @if(tieneReferenciaBancaria === 'si'){
+          <div class="contenido-formulario">
+            <span class="label">N° de referencia bancaria</span>
+            <ion-input fill="outline" formControlName="refBancaria" placeholder="Ejem: 21418112237" class="w-[141px]" (ionInput)="guiones($event)"></ion-input>
+          </div>
+          } -->
+
+          <!-- <div class="contenido-formulario">
+            <span class="label">¿Requiere comprobante? <span class="text-danger">*</span></span>
+            <ion-radio-group [(ngModel)]="nrocomprobante" [ngModelOptions]="{standalone: true}" class="flex gap-4">
+              <div class="flex flex-row gap-2 items-center">
+                <ion-item lines="none" class="p-0 mr-4">
+                  <ion-radio value="si" labelPlacement="end" justify="start"><span>Sí</span></ion-radio>
+                  <ion-label class="text-xxs ml-1">Si</ion-label>
+                </ion-item>
+                <ion-item lines="none" class="p-0 mr-4">
+                  <ion-radio value="no" labelPlacement="end" justify="start"></ion-radio>
+                  <ion-label class="text-xxs ml-1">No</ion-label>
+                </ion-item>
+              </div>
+            </ion-radio-group>
+          </div> -->
+          <!-- @if(nrocomprobante === 'si'){
+          <div class="contenido-formulario">
+            <span class="label">N° de comprobante</span>
+            <ion-input fill="outline" formControlName="nroComprobante" placeholder="Ejem: 123000987" class="w-[141px]" (ionInput)="guiones($event)"></ion-input>
+          </div>
+          } -->
+          <div class="contenido-formulario">
+            <span class="label">Estado <span class="text-danger">*</span></span>
+            <ion-select placeholder="Activo" formControlName="estado" interface="popover" fill="outline"
+              class="w-[82px]" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              <ion-select-option value="1">Activo</ion-select-option>
+              <ion-select-option value="0">Inactivo</ion-select-option>
+            </ion-select>
+          </div>
+        </div>
+
+        <div class="contenedor-btn">
+          <ion-button class="w-fit" (click)="botonGuardar()">{{ camponuevo ? 'Registrar' : 'Guardar' }} </ion-button>
+          <ion-button color="medium" fill="outline" (click)="botonCancelar()">Cancelar</ion-button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

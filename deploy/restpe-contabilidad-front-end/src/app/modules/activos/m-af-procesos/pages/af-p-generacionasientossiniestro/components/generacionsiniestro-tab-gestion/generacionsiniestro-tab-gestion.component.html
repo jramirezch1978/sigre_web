@@ -1,0 +1,65 @@
+<div class="flex flex-row w-full gap-1" [ngClass]="{'!flex-col': mostrartabla}" [formGroup]="formGroup">
+  <div class="contenedor-formulario !p-0">
+    <div class="contenido-formulario">
+      <span class="label">Fecha de recupero</span>
+      @if(soloVista) {
+        <ion-input fill="outline" class="w-[163px]" type="date" formControlName="fechaRecupero"></ion-input>
+      } @else {
+        <app-base-calendar-new
+          class="flex-none"
+          mode="single"
+          position="center"
+          [initialDate]="formGroup.get('fechaRecupero')?.value"
+          (dateSelected)="onFechaRecupero($event)">
+        </app-base-calendar-new>
+      }
+    </div>
+    <div class="contenido-formulario">
+      <span class="label">Monto indemnizado</span>
+      <div class="flex flex-col xl:flex-row gap-1 xl:gap-0" [ngClass]="{'!flex-row !gap-0': !mostrartabla}">
+        <ion-input fill="outline" placeholder="0.00" class="w-[63px]" formControlName="montoIndemnizado"/>
+        <ion-select interface="popover" toggleIcon="chevron-down" expandedIcon="chevron-up" fill="outline" class="!w-[50px] flex-none" formControlName="monedaIndemnizado">
+          <ion-select-option value="soles">Soles</ion-select-option>
+          <ion-select-option value="dolares">Dolares</ion-select-option>
+        </ion-select>
+      </div>
+    </div>
+    <div class="contenido-formulario">
+      <span class="label">Estado final del activo</span>
+      @if(soloVista) {
+        <ion-input fill="outline" class="w-[163px]" formControlName="estadoFinalActivo"></ion-input>
+      } @else {
+        <ion-select placeholder="Selecciona un estado" interface="popover" toggleIcon="chevron-down" expandedIcon="chevron-up" fill="outline" class="w-[163px] flex-none" formControlName="estadoFinalActivo">
+          @for(item of selectcausa; track item.value){
+            <ion-select-option [value]="item.value">{{item.nombre}}</ion-select-option>
+          }
+        </ion-select>
+      }
+    </div>
+  </div>
+  <div class="contenedor-formulario !p-0">
+    <div class="contenido-formulario">
+      <span class="label">Tipo de recupero</span>
+      @if(soloVista) {
+        <ion-input fill="outline" class="w-[163px] capitalize" formControlName="tipoRecupero"></ion-input>
+      } @else {
+        <ion-select placeholder="Selecciona tipo" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[163px] flex-none" formControlName="tipoRecupero">
+          @for(item of selectrecuper; track item.value){
+            <ion-select-option [value]="item.value">{{item.nombre}}</ion-select-option>
+          }
+        </ion-select>
+      }
+    </div>
+    <div class="contenido-formulario">
+      <span class="label">Cuenta conta. del ingreso</span>
+      @if(soloVista) {
+        <ion-input fill="outline" class="w-[163px]" formControlName="cuentaContableIngreso"></ion-input>
+      } @else {
+        <app-autocomplete [items]="cuentasList" [displayKey]="'nombre'" [valueKey]="'id'"
+          placeholder="Buscar cuenta" [width]="'w-[163px]'"
+          (itemSelected)="onCuentaSelected($event)">
+        </app-autocomplete>
+      }
+    </div>
+  </div>
+</div>

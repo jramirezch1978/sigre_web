@@ -1,0 +1,75 @@
+<div class="flex flex-col bg-[#e7e7e7] h px-[7px] gap-0.5 py-[5px]" [style.width]="widthModal" [style.height]="heightModal">
+  <div class="flex justify-between items-center w-full py-1">
+    <div class="flex items-center gap-1">
+      <span class="text-sm font-bold">{{ tituloModal }}</span>
+    </div>
+    <fa-icon [icon]="farXmark" class="text-sm cursor-pointer" (click)="cerrarModal()"></fa-icon>
+  </div>
+  
+  <div class="flex flex-col bg-white p-2.5 gap-3">
+    <!-- Información general -->
+    <div class="flex flex-col gap-1">
+      <div class="grid grid-cols-1 gap-1.5 text-xxs">
+        <div class="flex gap-1.5">
+          <span class="w-[100px]">Periodo:</span>
+          <span>{{ periodo }}</span>
+        </div>
+        <div class="flex gap-1.5">
+          <span class="w-[100px]">Saldo inicial:</span>
+          <span>{{ formatearMonto(saldoInicial) }}</span>
+        </div>
+        <div class="flex gap-1.5">
+          <span class="w-[100px]">Saldo final:</span>
+          <span>{{ formatearMonto(saldoFinal) }}</span>
+        </div>
+        <div class="flex gap-1.5">
+          <span class="w-[100px]">Variación:</span>
+          <span>{{ formatearVariacion(variacion) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex">
+      <button 
+        (click)="cambiarTab('ingresos')"
+        class="px-4 py-1 w-full text-xs border border-text-5 font-semibold transition-colors"
+        [ngClass]="{
+          'bg-[#E7E7E7]': tabSeleccionado === 'ingresos',
+          'bg-[#F5F5F5]': tabSeleccionado !== 'ingresos'
+        }">
+        Ingresos ({{ ingresosData.length }})
+      </button>
+      <button 
+        (click)="cambiarTab('egresos')"
+        class="px-4 py-2 w-full text-xs border border-text-5 font-semibold transition-colors"
+        [ngClass]="{
+          'bg-[#E7E7E7]': tabSeleccionado === 'egresos',
+          'bg-[#F5F5F5]': tabSeleccionado !== 'egresos'
+        }">
+        Egresos ({{ egresosData.length }})
+      </button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="flex flex-col">
+      <ag-grid-angular 
+        style="width: 100%; height: 245px;" 
+        class="ag-theme-quartz"
+        [rowData]="currentRowData" 
+        [columnDefs]="currentColDefs"
+        [rowHeight]="20"
+        [headerHeight]="24"
+        [pagination]="false"
+        [paginationPageSize]="10"
+        [domLayout]="'normal'" />
+    </div>
+
+    <!-- Botón cerrar -->
+    <div class="flex justify-end">
+      <ion-button color="medium" fill="outline" class="w-fit" (click)="cerrarModal()">
+        Cerrar
+      </ion-button>
+    </div>
+  </div>
+</div>

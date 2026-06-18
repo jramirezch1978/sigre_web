@@ -1,0 +1,137 @@
+<div class="flex flex-col bg-[#e7e7e7] p-1.5 gap-0.5 w-[461px]">
+  <div class="flex justify-between items-center w-full py-1">
+    <div class="flex items-center gap-1 ">
+      <fa-icon [icon]="fasArrowTrendUp" class="text-xs text-primary"></fa-icon>
+      <span class="text-sm font-bold">Revaluar activo</span>
+    </div>
+    <fa-icon [icon]="farXmark" class="text-sm cursor-pointer" (click)="dismissModal()"></fa-icon>
+  </div>
+  
+  <div class="flex flex-col bg-white p-2.5 gap-2"> 
+    <form [formGroup]="revaluacionForm">
+      <div class="contenedor-formulario !p-0 !pb-6">
+        <div class="contenido-formulario">
+            <span class="label">Tipo de Revaluación <span class="text-danger">*</span></span>
+            <ion-select 
+              fill="outline" 
+              formControlName="tipoRevaluacion" 
+              placeholder="Selecciona un tipo de revaluación" 
+              toggleIcon="chevron-down"
+              expandedIcon="chevron-up" 
+              interface="popover"
+              class="w-[230px]"
+              (ionChange)="onTipoRevaluacionSeleccionado($event)">
+              @for(tipo of tiposRevaluacion; track tipo.id) {
+                <ion-select-option [value]="tipo.id">{{ tipo.nombre }}</ion-select-option>
+              }
+            </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+            <span class="label">Fecha de Revaluación <span class="text-danger">*</span></span>
+            <app-base-calendar-new 
+              class="flex-none w-[150px]" 
+              mode="single" 
+              [initialDate]="fechaRevaluacion"
+              position="center" 
+              (dateSelected)="onFechaRevaluacion($event)">
+            </app-base-calendar-new>
+        </div>
+
+        <div class="contenido-formulario">
+            <span class="label">Fuente de Revaluación <span class="text-danger">*</span></span>
+            <ion-select 
+              fill="outline" 
+              formControlName="fuenteRevaluacion" 
+              placeholder="Selecciona una fuente" 
+              toggleIcon="chevron-down"
+              expandedIcon="chevron-up" 
+              interface="popover"
+              class="w-[230px]"
+              (ionChange)="onFuenteRevaluacionSeleccionada($event)">
+              @for(fuente of fuentesRevaluacion; track fuente.id) {
+                <ion-select-option [value]="fuente.id">{{ fuente.nombre }}</ion-select-option>
+              }
+            </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+            <span class="label">Factor de Revaluación <span class="text-danger">*</span></span>
+            <ion-input 
+              fill="outline" 
+              formControlName="factorRevaluacion"
+              type="number"
+              placeholder="Ingresa el factor"
+              class="w-[230px]">
+            </ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+            <span class="label">Nuevo Valor <span class="text-danger">*</span></span>
+            <ion-input 
+              fill="outline" 
+              formControlName="nuevoValor"
+              type="number"
+              placeholder="Ingresa el nuevo valor"
+              class="w-[230px]">
+            </ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+            <span class="label">Moneda <span class="text-danger">*</span></span>
+            <ion-select 
+              fill="outline" 
+              formControlName="moneda" 
+              placeholder="Selecciona una moneda" 
+              toggleIcon="chevron-down"
+              expandedIcon="chevron-up" 
+              interface="popover"
+              class="w-[230px]"
+              (ionChange)="onMonedaSeleccionada($event)">
+              @for(moneda of monedas; track moneda.id) {
+                <ion-select-option [value]="moneda.id">{{ moneda.nombre }}</ion-select-option>
+              }
+            </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Documento de soporte <span class="text-danger">*</span></span>
+          <div class="flex items-center gap-2 w-[230px] h-[28px] border border-text-5 rounded-sm px-2"
+            [ngClass]="{'bg-Background-light': revaluacionForm.get('documentoSoporte')?.value}">
+            @if (revaluacionForm.get('documentoSoporte')?.value) {
+              <span class="text-xxs flex-1 line-clamp-1">{{ revaluacionForm.get('documentoSoporte')?.value }}</span>
+              <fa-icon [icon]="farCircleXmark" class="text-danger cursor-pointer text-xs" (click)="removeFile()"></fa-icon>
+            } @else {
+              <input type="file" #fileInput (change)="subirArchivo($event)" class="hidden" accept=".pdf,.jpg,.png">
+              <span class="text-xxs cursor-pointer flex-1 line-clamp-1 underline text-primary" (click)="fileInput.click()">
+                Haz clic para subir un archivo
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="contenido-formulario">
+            <span class="label">Responsable/Valuador <span class="text-danger">*</span></span>
+            <ion-select 
+              fill="outline" 
+              formControlName="responsable" 
+              placeholder="Usuario" 
+              toggleIcon="chevron-down"
+              expandedIcon="chevron-up" 
+              interface="popover"
+              class="w-[230px]"
+              (ionChange)="onResponsableSeleccionado($event)">
+              @for(responsable of responsables; track responsable.id) {
+                <ion-select-option [value]="responsable.id">{{ responsable.nombre }}</ion-select-option>
+              }
+            </ion-select>
+        </div>
+      </div>
+    </form>
+
+    <div class="contenedor-btn !p-0">
+      <ion-button [disabled]="!revaluacionForm.valid" (click)="confirmarRevaluacion()">Confirmar revaluación</ion-button>
+      <ion-button color="medium" fill="outline" (click)="dismissModal()">Cancelar</ion-button>
+    </div>
+  </div>
+</div>

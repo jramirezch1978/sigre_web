@@ -1,0 +1,122 @@
+<div class="w-full flex flex-col overflow-auto flex-grow h-full">
+  <div class="w-full flex-grow flex flex-col h-full">
+    <div class="cont-title">
+      <span>Validación de consistencia de asientos</span>
+    </div>
+    <form [formGroup]="form">
+      <div class="contenedor-formulario !gap-2.5">
+        <div class="filtros-responsive">
+          <div class="form-column2">
+            <div class="contenido-formulario">
+              <span class="label">Fecha de ejecución</span>
+              <ion-input 
+                fill="outline" 
+                [value]="fechaEjecucion | date:'dd/MM/yyyy'"
+                [disabled]="true" 
+                class="w-[130px]">
+              </ion-input>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Periodo contable <span class="text-danger">*</span></span>
+              <app-month-year-picker
+                #periodoPickerRef
+                class="flex-none w-[170px]"
+                [placeholder]="'Selecciona un periodo'"
+                (monthYearChange)="onPeriodoSeleccionado($event)">
+              </app-month-year-picker>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Rango de fechas</span>
+              <app-base-calendar-new
+                class="flex-none !w-[185px]"
+                mode="range"
+                [initialStartDate]="startDate"
+                [initialEndDate]="endDate"
+                [minDate]="minDate"
+                [maxDate]="maxDate"
+                position="left"
+                (dateRangeSelected)="filtrarPorFechas($event)">
+              </app-base-calendar-new>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Moneda</span>
+            <ion-select placeholder="Todas las monedas" toggleIcon="chevron-down" expandedIcon="chevron-up" formControlName="moneda" interface="popover" fill="outline" class="w-32 flex-none">
+              @for(moneda of monedas; track moneda){<ion-select-option [value]="moneda.value">{{ moneda.label }}</ion-select-option>}
+            </ion-select>
+          </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Nivel de detalle</span>
+              <ion-select placeholder="Selecciona un nivel" formControlName="nivel" interface="popover" fill="outline" class="w-[150px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+                @for(nivel of nivelesSelect; track nivel){<ion-select-option [value]="nivel.id">{{ nivel.nombre }}</ion-select-option>}
+              </ion-select>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label"></span>
+              <div class="flex gap-1 flex-none">
+                <ion-checkbox formControlName="incluirNul"></ion-checkbox>
+                <span class="text-xxs">Incluir asientos automáticos</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!-- Botones de acción -->
+        <div class="flex items-center gap-3 w-full justify-end">
+          <ion-button class="w-fit" (click)="generarValidacion()">
+            <span class="font-normal">Generar validación</span>
+          </ion-button>
+        </div>
+      </div>
+    </form>
+
+    <div class="flex flex-col w-full h-full overflow-auto">
+      <div class="cont-title">
+        <span>Proceso de validación</span>
+      </div>
+      <div class="contenedor-filtros">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por N° de asiento o cuenta contable" class="w-full" style="--padding-start:30px"></ion-input>
+        </div>
+        <div class="filtros-absolutos">
+            <ion-button class="w-[115px]" fill="outline" id="planC" [disabled]="filasGeneradas.length == 0">
+              <fa-icon [icon]="fasDownload" class="mr-1 text-text-85"></fa-icon>
+              <span class="text-text-85">Exportar</span>
+              <fa-icon class="ml-1 text-text-85" [icon]="fasAngleDown"></fa-icon>
+            </ion-button>
+            <ion-popover trigger="planC" triggerAction="click" [dismissOnSelect]="true" class="popoverCustomButtonUbicacionActivos dezplegableAcciones2" [showBackdrop]="false">
+                <ng-template>
+                  <ion-item lines="none" [button]="true" >Exportar Excel</ion-item>
+                  <ion-item lines="none" [button]="true" >Exportar PDF</ion-item>
+                </ng-template>
+            </ion-popover>
+          </div>
+      </div>
+
+      <!-- Tabla de resultados -->
+      <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+        <ag-grid-angular 
+          style="width: 100%; height: 100%;" 
+          class=""
+          [rowData]="filasGeneradas" 
+          [columnDefs]="colErrores" 
+          [columnTypes]="columnTypes"
+          [gridOptions]="gridOptions"
+          [pagination]="true"
+          [localeText]="localeText"
+          [rowHeight]="20"
+          [headerHeight]="24"
+          [paginationPageSize]="20"
+          [defaultColDef]="defaultColDef"
+          (gridReady)="onGridReady($event)"/>
+      </div>
+
+    </div>
+  </div>
+</div>

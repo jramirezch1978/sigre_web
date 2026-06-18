@@ -1,0 +1,196 @@
+<div class="contenedor-principal">
+   @if (!panelLateralVisible) {
+    <div class="flex-none flex items-center bg-[#E6E8F4] text-primary text-xs cursor-pointer"
+        (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsRight"></fa-icon>
+    </div>
+    }
+
+  @if (panelLateralVisible) {<div class="panel-izquierdo-pequenio">
+    <div class="cont-title">
+      <span>Lista de usuarios</span>
+      @if (panelLateralVisible) {<div class="px-2 text-primary text-xs cursor-pointer" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>}
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por usuario, nombre o apellido." class="w-full" style="--padding-start:30px"></ion-input>
+      </div>
+      <ion-button class="w-fit whitespace-nowrap" [disabled]="modoCreacion" (click)="nuevoUsuario()">
+        <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+        <span>Nuevo usuario</span>
+      </ion-button>
+    </div>
+
+    <div class="flex h-full relative ag-theme-alpine" [appLoader]="isLoading()">
+      <ag-grid-angular 
+        style="width: 100%; height: 100%;" 
+        class=""
+        [rowData]="rowData" 
+        [columnDefs]="colDefs" 
+        [columnTypes]="columnTypes"
+        [localeText]="localeText"
+        [rowSelection]="'single'"
+        [rowHeight]="20"
+        [headerHeight]="24"
+        [defaultColDef]="defaultColDef"
+        [suppressLoadingOverlay]="true"
+        [suppressRowClickSelection]="true"
+        (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)"/>
+    </div>
+
+  </div>}
+
+  <div class="panel-derecho-full relative" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      <span>{{modoCreacion ? 'Nuevo Usuario' : 'Usuario: ' + (filaSeleccionada?.usuario_usuario || '')}}</span>
+    </div>
+     @if(filaSeleccionada){
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+    }
+    <form [formGroup]="usuarioForm">
+      <div class="contenedor-formulario h-full">
+        <!-- USUARIO -->
+        <div class="subtitulo">
+          <fa-icon [icon]="falUser"></fa-icon>
+          <span>Usuario del sistema</span>
+        </div>
+        <div class="flex gap-5 w-full">
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Usuario <span class="text-danger">*</span></span>
+              <ion-input fill="outline" formControlName="usuario" class="w-[200px]" type="text" placeholder="Ingrese el nombre de usuario"></ion-input>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Clave <span class="text-danger">*</span></span>
+              <ion-input fill="outline" formControlName="clave" class="w-[160px]" [type]="tipo" placeholder="Ingrese la contraseña">
+                <div slot="end" class="!mx-2">
+                  <fa-icon [icon]="this.tipo == 'text' ? farEye : farEyeSlash" class="text-text-50 cursor-pointer" (click)="togglePassword()"></fa-icon>
+                </div>
+              </ion-input>
+            </div>
+          </div>
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Cargo <span class="text-danger">*</span></span>
+              <ion-select formControlName="cargo" class="w-[150px]" placeholder="Selecciona cargo" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline">
+                @for(cargo of cargos; track $index){<ion-select-option [value]="cargo">{{ cargo }}</ion-select-option>}
+              </ion-select>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Estado <span class="text-danger">*</span></span>
+              <ion-select formControlName="estado" class="w-[130px]" placeholder="Selecciona estado" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline">
+                @for(est of estados; track $index ){<ion-select-option [value]="est">{{ est }}</ion-select-option>}
+              </ion-select>
+            </div>
+          </div>
+        </div>
+        <!-- DATOS -->
+        <div class="subtitulo">
+          <fa-icon [icon]="farIdCard"></fa-icon>
+          <span>Datos personales</span>
+        </div>
+        <div class="flex gap-5 w-full">
+          <div class="contenedor-formulario !px-0">
+            <div class="contenido-formulario">
+              <span class="label">Nombres <span class="text-danger">*</span></span>
+              <ion-input fill="outline" formControlName="nombres" class="w-[200px]" type="text" placeholder="Ingrese los nombres"></ion-input>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Apellidos <span class="text-danger">*</span></span>
+              <ion-input fill="outline" formControlName="apellidos" class="w-[200px]" type="text" placeholder="Ingrese los apellidos"></ion-input>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Teléfono </span>
+              <ion-input fill="outline" formControlName="telefono" class="w-[120px]" type="number" placeholder="987654321"></ion-input>
+            </div>
+          </div>
+          <div class="contenedor-formulario !px-0">
+            <div class="contenido-formulario">
+              <span class="label">Email <span class="text-danger">*</span></span>
+              <ion-input fill="outline" formControlName="email" class="w-[200px]" type="email" placeholder="ejemplo@correo.com"></ion-input>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">DNI <span class="text-danger">*</span></span>
+              <ion-input fill="outline" formControlName="dni" class="w-[120px]" type="number" placeholder="12345678"></ion-input>
+            </div>
+            <div class="contenido-formulario">
+              <span class="label">Dirección</span>
+              <ion-input fill="outline" formControlName="direccion" class="w-[200px]" type="text" placeholder="Av. Principal 123, Lima"></ion-input>
+            </div>
+          </div>
+        </div>
+        <!-- PERMISOS -->
+        <div class="subtitulo">
+          <fa-icon [icon]="farLock"></fa-icon>
+          <span>Permisos</span>
+        </div>
+        <div class="badge-descripcion">
+          <fa-icon [icon]="falInfoCircle"></fa-icon>
+          <span>Te sugerimos ciertos permisos por cargo. Si deseas agregar o quitar algunos permisos, puedes realizarlo.</span>
+        </div>
+        <div class="contenedor-permisos">
+          <div class="flex flex-col w-1/3 pr-2 border-r border-text-5">
+            <div class="flex items-center h-7 w-full">
+              <span class="titulo-perm">Módulos</span>
+            </div>
+            <div class="flex flex-col">
+              @for(modulo of modulos; track $index) {
+                <div [class.active]="$index === moduloSeleccionadoIndex" class="flex px-2 items-center justify-between h-7 w-full border-b border-text-10 cursor-pointer hover:bg-primary-5 active:bg-primary-5" (click)="seleccionarModulo(modulo)">
+                  <span class="permiso">{{ modulo.nombre }}</span>
+                  <div class="flex items-center gap-3 text-xxs">
+                    <span class="permiso">{{ obtenerTotalSeleccionados(modulo) }}/{{ obtenerTotalItems(modulo) }}</span>
+                    <fa-icon [icon]="farAngleRight"></fa-icon>
+                  </div>
+                </div>
+              }
+            </div>
+
+          </div>
+          <div class="flex flex-col w-2/3 overflow-auto">
+            @if(moduloSeleccionado) {
+              @for(submod of moduloSeleccionado.submodulo; track $index) {
+                <div class="flex items-center !h-7 justify-between w-full p-2 !pt-4">
+                  <span class="titulo-perm">{{ submod.nombre }}</span>
+                  <div class="flex items-center gap-1 text-xxss">
+                    <span>Seleccionar todos</span>
+                    <ion-checkbox [checked]="submod.selectodos" (ionChange)="submod.selectodos = $event.detail.checked; seleccionarTodosTabla(submod)"></ion-checkbox>
+                  </div>
+                </div>
+                <div class="flex flex-col pl-2">
+                  @for(item of submod.items; track $index) {
+                    <div class="flex px-2 items-center justify-between h-7 w-full border-b border-text-5">
+                      <span class="permiso">{{ item.nombre }}</span>
+                      <ion-checkbox [checked]="item.seleccionado" (ionChange)="item.seleccionado = $event.detail.checked"></ion-checkbox>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+           
+        </div>
+
+      </div>
+
+    </form>
+    <div class="contenedor-btn mt-auto">
+      <ion-button class="w-fit" [disabled]="!botonRegistroHabilitado" (click)="botonGuardar()">
+        <span>{{ modoCreacion ? 'Registrar' : 'Guardar'}}</span>
+      </ion-button>
+      <ion-button color="medium" fill="outline" (click)="nuevoUsuario()">
+        Cancelar
+      </ion-button>
+    </div>
+    
+  </div>
+  
+</div>

@@ -1,0 +1,187 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de categorías laborales (Selecciona una categoría para visualizarla)</span>
+    </div>
+
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Ingresa el código o nombre y presiona enter"
+            style="--padding-start:28px"></ion-input>
+        </div>
+
+        <div class="filtros-absolutos">
+          <ion-checkbox
+            labelPlacement="end"
+            class="flex-none text-xxs checkbox-custom">
+            Filtrar por vigencia indefinida
+          </ion-checkbox>
+          <div class="flex items-center">
+            <ion-select placeholder="Creación" [(ngModel)]="tipoSeleccionado" [ngModelOptions]="{standalone: true}"
+              interface="popover" fill="outline" class="w-[80px] flex-none" toggleIcon="chevron-down"
+              expandedIcon="chevron-up">
+              @for(tipo of tipoFs; track tipo){<ion-select-option [value]="tipo.value">{{ tipo.categoria_laboral_nombre
+                }}</ion-select-option>}
+            </ion-select>
+            <app-base-calendar-new class="flex-none " mode="range" [initialStartDate]="startDate"
+              [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="left"
+              (dateRangeSelected)="filtrarPorFechas($event)">
+            </app-base-calendar-new>
+          </div>
+        </div>
+      </div>
+
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px]" fill="outline" id="categoriaslaborales">
+          <fa-icon [icon]="fasDownload" class="mr-1 text-text-85"></fa-icon>
+          <span class="text-text-85">Exportar</span>
+          <fa-icon class="ml-1 text-text-85" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="categoriaslaborales" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" [disabled]="modoCreacion"  (click)="crearNuevaCategoria()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon> 
+          <span class="font-normal">Nueva categoría laboral</span>
+        </ion-button>
+      </div>
+    </div>
+
+    <div class="flex h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [pagination]="true" [rowSelection]="'single'" [localeText]="localeText" [paginationPageSize]="20"
+        [rowHeight]="20" [headerHeight]="24" (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+  <div class="panel-derecho" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      @if(filaSeleccionada){<span>Información de categoría laboral: {{filaSeleccionada.categoria_laboral_codigo}}</span>}
+      @if(!filaSeleccionada){<span>Nuevo categoría laboral</span>}
+    </div>
+    @if(filaSeleccionada){<div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+
+    <div class="cont-tabs !w-full">
+      <div class="flex overflow-hidden">
+        <ion-segment [(ngModel)]="tabSeleccionado" [ngModelOptions]="{standalone: true}" mode="md" scrollable
+          class="company-tabs" #scrollBox>
+          @for(tab of tabs; track tab){<ion-segment-button [value]="tab.value" class="boton-subsubtitulo">
+            <ion-label>{{ tab.label }}</ion-label>
+          </ion-segment-button>}
+        </ion-segment>
+      </div>
+    </div>
+
+    <form [formGroup]="CatLaboralesForm" class="contenedor-formulario">
+      @if (tabSeleccionado === 'datos') {
+      <div class="contenedor-formulario">
+        <div class="contenido-formulario">
+          <span class="label">Fecha de creación</span>
+          <ion-input fill="outline" formControlName="fechaCreacion" class="w-[86px]"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Nombres/Descripción <span class="text-danger" *ngIf="modoCreacion">*</span></span>
+          <ion-input fill="outline" formControlName="nombres" placeholder="Escriba un nombre" class="w-[163px]"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Tipo de contrato asoc. <span class="text-danger" *ngIf="modoCreacion">*</span></span>
+          @if(modoCreacion){
+          <ion-select fill="outline" placeholder="Selecciona un tipo" toggleIcon="chevron-down"
+            expandedIcon="chevron-up" interface="popover" class="w-[163px]" formControlName="contrato"
+            name="contratoSeleccionado">
+            @for(contrato of contratos; track contrato){<ion-select-option [value]="contrato">{{ contrato
+              }}</ion-select-option>}
+          </ion-select>
+          }
+          @if(modoEdicion){
+          <ion-input fill="outline" formControlName="contrato" class="w-[163px]"></ion-input>
+          }
+        </div>
+
+        <div class="contenido-formulario" *ngIf="!CatLaboralesForm.get('conceptoVigencia')?.value">
+          <span class="label">Vigencia hasta<span class="text-danger" *ngIf="modoCreacion">*</span></span>
+          <app-base-calendar-new class="flex-none" mode="single" [initialDate]="CatLaboralesForm.get('categoria_laboral_vigencia')?.value" position="right"
+            (dateSelected)="onFechaVigenciaHastaSelected($event)">
+          </app-base-calendar-new>
+        </div>
+
+        <div class="contenido-formulario">
+          <ion-checkbox formControlName="conceptoVigencia"
+            (ionChange)="onConceptoVigenciaChange($event)"></ion-checkbox>
+          <label class="text-xxs">Categoría con vigencia indefinida</label>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Estado</span>
+          @if(modoCreacion){
+          <ion-input fill="outline" formControlName="categoria_laboral_estado" class="w-[121px]"></ion-input>
+          }
+          @if(modoEdicion){
+          <ion-select fill="outline" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+            class="w-[121px]" formControlName="categoria_laboral_estado" name="estadoSeleccionado">
+            @for(estado of estados; track estado){<ion-select-option [value]="estado">{{ estado
+              }}</ion-select-option>}
+          </ion-select>
+          }
+        </div>
+      </div>
+      }
+
+      @if (tabSeleccionado === 'trabajadores') {
+      <div class="contenedor-formulario">
+        <div class="contenido-formulario">
+          <span class="label">Agregar trabajador <span class="text-danger">*</span></span>
+          <app-autocomplete formControlName="trabajador" [items]="trabajadores" displayKey="empleado_nombres_apellidos" valueKey="empleado_codigo"
+            placeholder="Selecciona un trabajador" (itemSelected)="seleccionarTrabajador($event)">
+          </app-autocomplete>
+        </div>
+
+        @if(trabajadoresAsociados.length > 0){
+        <div class="contenido-formulario">
+          <fieldset class="card-fieldset !p-4 w-full">
+            <legend>Lista de trabajadores asociados</legend>
+            <div class="cont-field">
+              @for(trabajador of trabajadoresAsociados; track trabajador.empleado_codigo){
+              <div class="contenido-formulario !justify-between items-start">
+                <span class="label">{{ trabajador.empleado_nombres_apellidos }}</span>
+                <fa-icon [icon]="falTimesCircle" class="text-danger cursor-pointer" (click)="eliminarTrabajador(trabajador)"></fa-icon>
+              </div>
+              }
+            </div>
+          </fieldset>
+        </div>
+        }
+
+        @if(trabajadoresAsociados.length === 0){
+        <div class="contenido-formulario">
+          <div class="badge-descripcion-gris">
+            <fa-icon [icon]="farInfoCircle"></fa-icon>
+            <span>No tienes trabajadores asociados</span>
+          </div>
+        </div>
+        }
+      </div>
+      }
+
+      <div class="contenedor-btn !p-0">
+        <ion-button (click)="guardarNuevaCategoria()" *ngIf="modoCreacion">Registrar</ion-button>
+        <ion-button (click)="guardarEdicion()" *ngIf="modoEdicion">Guardar</ion-button>
+        <ion-button class="w-fit" fill="outline" color="medium" (click)="crearNuevaCategoria()"><span>Cancelar</span>
+        </ion-button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,141 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Configuración de tipos de operaciones</span>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por código o descripción" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px] flex-none" fill="outline" id="reportes">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportes" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" [disabled]="camponuevo" (click)="botonNuevaOperacion()"><fa-icon [icon]="fasCirclePlus"
+            class="mr-1"></fa-icon> <span class="font-normal">Nueva operación</span></ion-button>
+      </div>
+    </div>
+    <div class="flex h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowSelection]="'single'" [localeText]="localeText"
+        [rowHeight]="20" [purgeClosedRowNodes]="true" [headerHeight]="24" [paginationPageSize]="20"
+        (rowClicked)="onCellClicked($event)" (gridReady)="onGridReady($event)" />
+    </div>
+  </div>
+  <div class="panel-derecho" [appLoader]="isLoading()">
+    <div class="cont-title">
+      <span>{{ camponuevo ? 'Nueva operación' : 'Operación: ' + (filaSeleccionada?.operacion_codigo || '') }}</span>
+    </div>
+    @if(filaSeleccionada){
+  <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" ></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+
+    <form action="" [formGroup]="OperacionesForm">
+      <div class="flex flex-col gap-1 h-full w-full">
+        <div class="contenedor-formulario">
+          <div class="contenido-formulario">
+            <span class="label">Descripción <span class="text-danger">*</span></span>
+            <ion-textarea fill="outline" [placeholder]="camponuevo ? 'Ingrese descripción' : ''" formControlName="descripcion" [ngClass]="'!w-[163px] 2xl:!w-[185px]'"></ion-textarea>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Naturaleza <span class="text-danger">*</span></span>
+            <ion-select placeholder="Aumento" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="naturaleza" interface="popover" fill="outline" class="w-[90px]">
+              <ion-select-option value="Aumento">Aumento</ion-select-option>
+              <ion-select-option value="Disminución">Disminución</ion-select-option>
+              <ion-select-option value="Neutro">Neutro</ion-select-option>
+            </ion-select>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Tipo de Cálculo <span class="text-danger">*</span></span>
+            <ion-select placeholder="Depreciación" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="tipoCalculo" interface="popover" fill="outline" class="w-[110px]">
+              <ion-select-option value="Depreciación">Depreciación</ion-select-option>
+              <ion-select-option value="Revaluación">Revaluación</ion-select-option>
+              <ion-select-option value="Mejora">Mejora</ion-select-option>
+              <ion-select-option value="Baja">Baja</ion-select-option>
+              <ion-select-option value="Transferencia">Transferencia</ion-select-option>
+              <ion-select-option value="Otros">Otros</ion-select-option>
+            </ion-select>
+          </div>
+          @if(OperacionesForm.get('tipoCalculo')?.value === 'Depreciación'){
+          <div class="contenido-formulario">
+            <span class="label">Método de Cálculo <span class="text-danger">*</span></span>
+            <ion-select placeholder="Seleccione método" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="metodoCalculo" interface="popover" fill="outline" [ngClass]="'!w-[185px] 2xl:!w-[220px]'">
+              <ion-select-option value="Línea recta">Línea recta</ion-select-option>
+              <ion-select-option value="Unidades de producción">Unidades de producción</ion-select-option>
+              <ion-select-option value="Doble saldo decreciente (Acelerada)">Doble saldo decreciente (Acelerada)</ion-select-option>
+              <ion-select-option value="Suma de dígitos de los años (Acelerada)">Suma de dígitos de los años (Acelerada)</ion-select-option>
+            </ion-select>
+          </div>
+          }
+          @if(OperacionesForm.get('tipoCalculo')?.value === 'Revaluación'){
+          <div class="contenido-formulario">
+            <span class="label">Método de Cálculo <span class="text-danger">*</span></span>
+            <ion-select placeholder="Seleccione método" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="metodoCalculo" interface="popover" fill="outline" [ngClass]="'!w-[185px] 2xl:!w-[220px]'">
+              <ion-select-option value="Método de reexpresión">Método de reexpresión</ion-select-option>
+              <ion-select-option value="Método de eliminación (compensado)">Método de eliminación (compensado)</ion-select-option>
+            </ion-select>
+          </div>
+          }
+          <div class="contenido-formulario">
+            <span class="label">Cta. Contable Asociada<span class="text-danger">*</span></span>
+            <app-autocomplete formControlName="ctaContable" [items]="cuentasContables" displayKey="nombre" valueKey="id"
+              placeholder="Buscar cuenta contable" [ngClass]="'!w-[163px] 2xl:!w-[185px]'" (itemSelected)="onCuentaSeleccionada($event)">
+            </app-autocomplete>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Centro de Costo <span class="text-danger">*</span></span>
+            <app-autocomplete [items]="centrosCosto" [displayKey]="'nombre'" [valueKey]="'id'"
+              [placeholder]="'Selecciona centro de costo'" [ngClass]="'!w-[163px] 2xl:!w-[185px]'" formControlName="centroCosto"
+              (itemSelected)="onCentroCostoSeleccionado($event)">
+            </app-autocomplete>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Estado <span class="text-danger">*</span></span>
+            <ion-select placeholder="Activo" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="estado" interface="popover" fill="outline" class="w-[80px]">
+              <ion-select-option value="Activo">Activo</ion-select-option>
+              <ion-select-option value="Inactivo">Inactivo</ion-select-option>
+            </ion-select>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label"></span>
+            <div class="flex items-center gap-1">
+              <ion-checkbox formControlName="afectaContabilidad"></ion-checkbox>
+              <span class="text-xxs">Afecta contabilidad</span>
+            </div>
+          </div>
+          <div class="contenido-formulario !items-start">
+            <span class="label">Observaciones</span>
+            <ion-textarea fill="outline" [placeholder]="camponuevo ? 'Ingrese una observación' : ''" [ngClass]="'!w-[163px] 2xl:!w-[185px]'" formControlName="observaciones"></ion-textarea>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="contenedor-btn">
+      <ion-button (click)="botonGuardar()">{{ camponuevo ? 'Registrar' : 'Guardar' }}</ion-button>
+        <ion-button fill="outline" color="medium" (click)="botonNuevaOperacion()">Cancelar</ion-button>
+    </div>
+  </div>
+</div>

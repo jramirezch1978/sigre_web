@@ -1,0 +1,160 @@
+<div class="contenedor-principal">
+  @if(!panelLateralVisible){
+  <div class="flex items-center justify-center w-[15px] bg-[#E6E8F4]" (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight" class="text-xs text-primary cursor-pointer"></fa-icon>
+  </div>}
+
+  @if(panelLateralVisible){
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de asientos por provisión (Selecciona un asiento para visualizarlo)</span>
+      @if (panelLateralVisible) {
+      <div class="btn-mostrarform" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>}
+    </div>
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar provisiones por código o descripción" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+
+      <div class="filtros-absolutos">
+        <app-base-calendar-new class="flex-none w-[175px]" mode="range" [initialStartDate]="startDate"
+          [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="left"
+          (dateRangeSelected)="filtrarPorFechas($event)">
+        </app-base-calendar-new>
+
+        <ion-button class="w-[115px] text-text-85" fill="outline" id="provisiongasto">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="provisiongasto" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit whitespace-nowrap" (click)="botonNuevoCalculo()" [disabled]="botonNuevoAsientoDeshabilitado">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span class="font-normal">Nuevo asiento por provisión</span>
+        </ion-button>
+      </div>
+    </div>
+    <div class="flex h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [pagination]="true" [rowSelection]="'single'" [suppressRowClickSelection]="true" [localeText]="localeText" [context]="context"
+        [paginationPageSize]="20" [rowHeight]="20" [headerHeight]="24" (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>}
+
+  <div class="panel-derecho" [ngClass]="{'!w-full !flex-1':!panelLateralVisible}" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      @if(!filaSeleccionada){<span>Generación de asiento por provisión</span>}
+      @if(filaSeleccionada){<span>Asiento: {{filaSeleccionada.provision_gasto_codigo }}</span>}
+    </div>
+    @if(filaSeleccionada){
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+    <div class="flex flex-col h-full !overflow-y-auto !overflow-x-hidden">
+      <form action="" [formGroup]="AsientoForm">
+        <!-- Contenido del formulario -->
+        <div class="contenedor-formulario" [ngClass]="{'!flex-row !gap-10': !panelLateralVisible}">
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Sucursal<span class="text-danger">*</span></span>
+              <ion-select placeholder="Selecciona sucursal" formControlName="proceso_especial_sucursal" interface="popover" fill="outline"
+                class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+                @for(sucursal of sucursales; track sucursal.id){<ion-select-option [value]="sucursal.id">{{ sucursal.nombre }}</ion-select-option>}
+              </ion-select>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Periodo de nómina <span class="text-danger">*</span></span>
+              @if(!filaSeleccionada){
+              <app-month-year-picker placeholder="Selecciona un periodo" class="flex-none w-[155px]" position="right"
+                [selectedMonth]="mesSeleccionadoC" [selectedYear]="anioSeleccionadoC"
+                (monthYearChange)="onMonthYearChangePeriodoC($event)">
+              </app-month-year-picker>}
+              @if(filaSeleccionada){
+              <ion-input fill="outline" formControlName="periodoN" class="w-[155px]"></ion-input>}
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Tipo de provisión<span class="text-danger">*</span></span>
+              @if(!filaSeleccionada){
+              <ion-select placeholder="Selecciona un tipo" formControlName="provision_gasto_tipo" interface="popover" fill="outline"
+                class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+                @for(tipo of tipoP; track tipo){<ion-select-option [value]="tipo.value">{{ tipo.label }}</ion-select-option>}
+              </ion-select>}
+
+              @if(filaSeleccionada){
+              <ion-input fill="outline" formControlName="provision_gasto_tipo" class="w-[140px]"></ion-input>}
+            </div>
+
+          </div>
+
+          <div class="contenedor-formulario !p-0">
+
+            <div class="contenido-formulario">
+              <span class="label">Fecha contable<span class="text-danger">*</span></span>
+              @if(!filaSeleccionada){
+              <app-base-calendar-new class="flex-none" mode="single" placeholder="Seleccione una fecha" position="right"
+                (dateSelected)="onFechaSeleccionadaC($event)" [initialDate]="AsientoForm.get('fechaC')?.value || null">
+              </app-base-calendar-new>
+              }
+              @if(filaSeleccionada){
+              <ion-input fill="outline" formControlName="fechaC" class="w-[175px]"></ion-input>
+              }
+
+            </div>
+
+          </div>
+        </div>
+      </form>
+      <div class="contenedor-btn py-1">
+        <ion-button fill="outline" [disabled]="deshabilitado" (click)="botonGenerarP()">Generar
+          previsualización</ion-button>
+      </div>
+      <div class="cont-title">
+        <span class="">Previsualización de asiento</span>
+      </div>
+      <div class="contenedor-filtros">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar cuenta por número o descripción" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+
+      <div class="min-h-[300px]">
+        <ag-grid-angular style="width: 100%; height: 100%;" [rowData]="cuentasFiltradas" [columnDefs]="colDefsDetalle"
+          [pagination]="false" [localeText]="localeText" [rowHeight]="20" [headerHeight]="24" [rowSelection]="'single'"
+          (gridReady)="onDetalleGridReady($event)" />
+      </div>
+
+    </div>
+
+    <div class="contenedor-btn !justify-start p-2.5">
+      @if(filaSeleccionada){
+      <ion-button (click)="botonGuardar()" [disabled]="botonGuardarDeshabilitado">Guardar</ion-button>
+      <ion-button fill="outline" (click)="botonRevertir()" [disabled]="botonRevertirDeshabilitado">Revertir</ion-button>
+      }
+      @if(!filaSeleccionada){<ion-button (click)="botonGuardar()" [disabled]="deshabilitado">Confirmar y contabilizar
+        asiento</ion-button>}
+      <ion-button class="w-fit whitespace-nowrap" fill="outline" color="medium" (click)="botonNuevoCalculo()"> Cancelar </ion-button>
+    </div>
+
+  </div>
+</div>

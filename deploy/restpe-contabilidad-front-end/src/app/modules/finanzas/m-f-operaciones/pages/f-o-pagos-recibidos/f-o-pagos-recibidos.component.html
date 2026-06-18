@@ -1,0 +1,119 @@
+<div class="contenedor-principal">
+
+  <div class="panel-derecho-full">
+    <div class="cont-title">
+      <span>Aplicación de pagos recibidos</span>
+    </div>
+    
+      <!-- Contenido del filtro -->
+      <div class="contenedor-formulario !flex-row !gap-10">
+        <div class="contenedor-formulario !p-0">
+  
+          <div class="contenido-formulario">
+            <span class="label">Cliente</span>
+            <ion-select placeholder="Todos los clientes" [(ngModel)]="clienteSeleccionado" (ngModelChange)="onFiltroChange()" [ngModelOptions]="{standalone: true}" interface="popover" fill="outline" class="w-[200px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(cliente of clientes; track $index){<ion-select-option [value]="cliente.value">{{ cliente.nombre }}</ion-select-option>}
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Tipo de documento</span>
+            <ion-select placeholder="Todos los tipos" [(ngModel)]="tipoSeleccionado" (ngModelChange)="onFiltroChange()" [ngModelOptions]="{standalone: true}" interface="popover" fill="outline" class="w-[150px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(tipo of tipoDoc; track $index){<ion-select-option [value]="tipo.value">{{ tipo.nombre }}</ion-select-option>}
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Estado de documento</span>
+            <ion-select placeholder="Todos los estados" [(ngModel)]="estadoSeleccionado" (ngModelChange)="onFiltroChange()" [ngModelOptions]="{standalone: true}" interface="popover" fill="outline" class="w-[160px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(est of estadoSelect; track $index){<ion-select-option [value]="est">{{ est }}</ion-select-option>}
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Moneda</span>
+            <ion-select placeholder="Todas las monedas" [(ngModel)]="monedaSeleccionada" (ngModelChange)="onFiltroChange()" [ngModelOptions]="{standalone: true}" 
+              interface="popover" fill="outline" class="w-[180px] flex-none" toggleIcon="chevron-down"
+              expandedIcon="chevron-up">
+              @for(moneda of monedaSelect; track $index){<ion-select-option [value]="moneda">{{ moneda }}</ion-select-option>}
+            </ion-select>
+          </div>
+        </div>
+  
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Fecha de emisión</span>
+          <app-month-year-picker-string placeholder="Selecciona un mes" [selectedMonth]="mesSeleccionadoE" [selectedYear]="anioSeleccionadoE"
+            (monthYearChange)="onMonthYearChangePeriodoE($event)">
+          </app-month-year-picker-string>
+          </div>
+          
+          <div class="contenido-formulario">
+            <span class="label">Fecha de vencimiento</span>
+           <app-month-year-picker-string placeholder="Selecciona un mes" [selectedMonth]="mesSeleccionadoE" [selectedYear]="anioSeleccionadoE"
+            (monthYearChange)="onMonthYearChangePeriodoE($event)">
+          </app-month-year-picker-string>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Sucursal</span>
+            <app-autocomplete [(ngModel)]="sucursalSeleccionada" [items]="sucursales" displayKey="nombre" valueKey="id" 
+              placeholder="Todas las sucursales" (itemSelected)="onsucursalSeleccionada($event)">
+            </app-autocomplete>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="contenedor-btn !py-[5px]">
+        <ion-button class="w-fit" (click)="buscarDoc()" [disabled]="!tieneFiltrosSeleccionados()">Buscar</ion-button>
+      </div>
+    
+    <div class="flex flex-col h-full">
+      <div class="cont-title">
+        <span>Lista de documentos</span>
+      </div>
+
+      <!-- Indicadores -->
+      <div class="contenedor-filtros">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por código o descripción" class="w-full"
+            style="--padding-start:30px" [disabled]="!docBuscados"></ion-input>
+        </div>
+        <div class="filtros-absolutos">
+        <ion-button class="w-[115px] text-text-85" id="operacionespagosreci" fill="outline" [disabled]="!docBuscados">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon> 
+        </ion-button>
+        <ion-popover trigger="operacionespagosreci" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+          </ng-template>
+        </ion-popover>
+          <ion-button class="w-fit" (click)="abrirModalPagar($event)" [disabled]="!docBuscados">
+            Aplicar pago
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="flex h-full relative" [appLoader]="loaderActivo()">
+        <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+        <ag-grid-angular style="width: 100%; height: 100%;" 
+        class="" [rowData]="rowData" 
+        [columnDefs]="colDefs"
+        [pagination]="true" 
+        [rowSelection]="'multiple'" 
+        [localeText]="localeText"
+        [paginationPageSize]="20" 
+        [rowHeight]="20"
+        [headerHeight]="24"
+        [context]="context"
+        (gridReady)="onGridReady($event)"/>
+      </div>
+    </div>
+  </div>
+</div>

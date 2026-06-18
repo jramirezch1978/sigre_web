@@ -1,0 +1,299 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de compañías registradas (Selecciona una compañía para visualizarla)</span>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline"
+          placeholder="Buscar compañía por código, razón social, dirección fiscal o correo electrónico."
+          style="--padding-start:30px"></ion-input>
+      </div>
+      <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate" [initialEndDate]="endDate"
+        [minDate]="minDate" [maxDate]="maxDate" position="center">
+      </app-base-calendar-new>
+
+      <div class="filtros-absolutos">
+        <ion-button fill="outline" class="text-text-85 w-[115px]" id="exportarcompanias">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="exportarcompanias" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" [disabled]="modoCreacion" (click)="botonNuevaCompania()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span>Nueva compañía</span>
+        </ion-button>
+      </div>
+    </div>
+    <div class="h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="columnDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowSelection]="'single'" [localeText]="localeText"
+        [rowHeight]="20" [purgeClosedRowNodes]="true" [headerHeight]="24" [paginationPageSize]="20"
+        [suppressLoadingOverlay]="true" [suppressRowClickSelection]="true" (rowClicked)="onCellClicked($event)" (gridReady)="onGridReady($event)" />
+    </div>
+  </div>
+  <div class="panel-derecho" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      <span>
+        {{modoCreacion ? 'Nueva compañía' : 'Información de compañía: ' + (filaSeleccionada?.compania_codigo || '')}}
+      </span>
+    </div>
+    @if(filaSeleccionada){
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+    }
+    <div class="cont-tabs">
+      <!-- <div class="flex overflow-hidden w-full">
+        <ion-segment [(ngModel)]="tabSeleccionadoDetalle" [ngModelOptions]="{standalone: true}" mode="md" class="company-tabs w-full" #scrollBox>
+            <ion-segment-button value="general" class="boton-subsubtitulo flex-1">
+              <ion-label>Datos Generales</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="sucursales" class="boton-subsubtitulo flex-1" [disabled]="!tabSucursalesDesbloqueado">
+              <ion-label>Sucursales</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="transacciones" class="boton-subsubtitulo flex-1" [disabled]="!tabTransaccionesDesbloqueado">
+              <ion-label>Transacciones</ion-label>
+            </ion-segment-button>
+        </ion-segment>
+      </div> -->
+
+      <div class="flex overflow-hidden">
+        <ion-segment [(ngModel)]="tabSeleccionado" [ngModelOptions]="{standalone: true}" mode="md" scrollable
+          class="company-tabs" #scrollBox>
+          @for(tab of tabs; track tab){<ion-segment-button [value]="tab.value" class="boton-subsubtitulo" [disabled]="isTabDisabled(tab.value)">
+            <ion-label>{{ tab.label }}</ion-label>
+          </ion-segment-button>}
+        </ion-segment>
+      </div>
+
+    </div>
+
+    <form action="" [formGroup]="datosCompaniaForm">
+      @if(tabSeleccionado === 'general') {
+      <div class="p-1.5">
+        <div class="contenedor-formulario">
+          <div class="contenido-formulario !items-start">
+            <span class="label ">Logotipo de empresa<span class="text-danger">*</span></span>
+            <div class="flex flex-col">
+              <!-- Input file oculto -->
+              <input type="file" #fileInput style="display: none;" accept="image/jpeg,image/png,image/jpg"
+                (change)="onFileSelected($event)">
+
+              <!-- Contenedor de la imagen o zona de carga -->
+              <div *ngIf="!imagenUrl"
+                class="w-[146px] h-[146px] flex flex-col gap-2 items-center justify-center bg-[#F3F7FF] border-[#C0C7DF] rounded border border-dashed cursor-pointer hover:bg-[#E8EFFF] transition-colors"
+                (click)="fileInput.click()">
+                <div class="flex items-center justify-center">
+                  <fa-icon [icon]="fasCloudArrowUp" class="text-2xl text-[#8C93AB]"></fa-icon>
+                </div>
+                <div class="flex flex-col items-center px-2">
+                  <span class="text-stone-500 text-xxs font-bold text-center">Da clic para subir una imagen</span>
+                  <span class="text-xxss font-normal text-center">(Archivo JPG, PNG)</span>
+                </div>
+              </div>
+
+              <!-- Vista previa de la imagen cargada -->
+              <div *ngIf="imagenUrl" class="relative w-[146px] h-[146px] group cursor-pointer"
+                (click)="fileInput.click()">
+                <img [src]="imagenUrl" alt="Logo empresa"
+                  class="w-full h-full object-contain rounded border border-[#C0C7DF] bg-white">
+
+                <!-- Botón para eliminar imagen -->
+                <button type="button" (click)="eliminarImagen(); $event.stopPropagation()"
+                  class="w-4 h-4 absolute top-1 right-1 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-slate-50 transition-colors">
+                  <fa-icon [icon]="fasXmark" class="text-xxss text-black"></fa-icon>
+                </button>
+
+                <!-- Botón para cambiar imagen -->
+                <button type="button"
+                  class="w-max absolute top-[40%] left-[21%] bg-white rounded-full px-1.5 py-[2px] shadow-md flex items-center justify-center hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100">
+                  <span> Editar <fa-icon [icon]="fasEdit" class="text-xs text-[#8C93AB]"></fa-icon></span>
+                </button>
+              </div>
+
+              <div class="flex flex-row gap-1 text-xxs items-center text-text-65 mt-1">
+                <fa-icon [icon]="farInfoCircle"></fa-icon>
+                <span class="">Imagen 146 x 146px</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Documento fiscal<span class="text-danger">*</span></span>
+            <div class="flex flex-row">
+              <ion-input type="number" fill="outline" [placeholder]="modoCreacion ? '20123456789' : ''"
+                formControlName="ruc" class="w-[135px] " style="--border-radius: 0px !important"></ion-input>
+              <ion-button (click)="buscarrdfiscal()" class="!w-[24px] bg-primary">
+                <fa-icon [icon]="fasSearch" class="text-xs text-white"></fa-icon>
+              </ion-button>
+            </div>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Razón social <span class="text-danger">*</span></span>
+            <ion-input fill="outline" class="w-[160px] text-xxs" placeholder="Ingresar su documento fiscal"
+              formControlName="razonSocial"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Correo electrónico <span class="text-danger">*</span></span>
+            <ion-input fill="outline" class="w-[160px] text-xxs" placeholder="Ingrese correo electrónico" type="email"
+              formControlName="correoElectronico"></ion-input>
+          </div>
+          <div class="contenido-formulario !items-start">
+            <span class="label">Dirección fiscal <span class="text-danger">*</span></span>
+            <ion-textarea fill="outline" placeholder="Ingresa una dirección fiscal" formControlName="direccionFiscal"
+              class="w-[160px]"></ion-textarea>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Zona horaria <span class="text-danger">*</span></span>
+            <ion-select placeholder="Selecciona una zona horaria" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              interface="popover" fill="outline" class="w-[180px] text-xxs" formControlName="zonaHoraria">
+              @for(zona of zonasHorarias; track zona.value) {
+              <ion-select-option [value]="zona.value">{{ zona.label }}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Nombre comercial<span class="text-danger">*</span></span>
+            <ion-input fill="outline" class="w-[170px] text-xxs" placeholder="Ingrese nombre comercial"
+              formControlName="nombreComercial"></ion-input>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Período contable inicial <span class="text-danger">*</span></span>
+
+            <app-month-year-picker placeholder="Selecciona un periodo" position="right"
+              [ngClass]="'w-[140px] 2xl:w-[163px]'" [selectedMonth]="mesSeleccionadoC"
+              [selectedYear]="anioSeleccionadoC" (monthYearChange)="onMonthYearChangePeriodoC($event)">
+            </app-month-year-picker>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Idioma <span class="text-danger">*</span></span>
+            <ion-select placeholder="Seleccionar" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              interface="popover" fill="outline" class="w-[90px] text-xxs" formControlName="idioma">
+              @for(idioma of idiomas; track idioma.value) {
+              <ion-select-option [value]="idioma.value">{{ idioma.label }}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Estado <span class="text-danger">*</span></span>
+            <ion-select placeholder="Seleccionar" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              interface="popover" fill="outline" class="w-[90px] text-xxs" formControlName="estado">
+              @for(estado of estados; track estado.value) {
+              <ion-select-option [value]="estado.value">{{ estado.label }}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+        </div>
+      </div>
+      }
+      @if(tabSeleccionado === 'sucursales') {
+      <div class="p-1.5">
+
+        <div class="contenido-formulario">
+          <span class="label">Sucursales asociadas</span>
+          <div class="flex gap-2 items-center w-full">
+            <app-autocomplete #autocompleteSucursales [items]="sucursalesDisponibles" displayKey="nombre" valueKey="id"
+              placeholder="Selecciona una sucursal" class="flex-1" (itemSelected)="onSucursalSeleccionada($event)">
+            </app-autocomplete>
+            <ion-button class="-ml-2.5" (click)="abrirModalNuevaSucursal()">
+              <fa-icon [icon]="fasCirclePlus"></fa-icon>
+            </ion-button>
+          </div>
+        </div>
+
+        <fieldset class="border border-[#C0C7DF] p-3 mt-3">
+          <legend class="text-xs font-medium px-1 text-primary">Lista de sucursales asociadas</legend>
+          <div class="flex flex-col gap-2">
+            @for(sucursal of sucursalesAsociadas; track sucursal.id) {
+            <div class="flex items-center justify-between py-1.5 px-2">
+              <span class="text-xxs">{{ sucursal.nombre }}</span>
+              <button type="button" class="text-danger cursor-pointer" (click)="eliminarSucursal(sucursal.id)">
+                <fa-icon [icon]="farCircleXmark" class="text-xs"></fa-icon>
+              </button>
+            </div>
+            }
+            @if(sucursalesAsociadas.length === 0) {
+            <div class="flex items-center justify-start gap-1 py-2.5 text-xxs text-gray-400">
+              <fa-icon [icon]="farInfoCircle" class="text-xxss text-center"></fa-icon>
+              <span>Aún no tienes sucursales asociadas</span>
+            </div>
+            }
+          </div>
+        </fieldset>
+      </div>
+      }
+      @if(tabSeleccionado === 'transacciones') {
+      <div class="p-1.5">
+        <div class="contenedor-formulario">
+          <div class="flex flex-col gap-2">
+            <div class="contenido-formulario items-start">
+              <ion-checkbox labelPlacement="end" class="flex-none text-xxs">Generar facturas y reembolsos</ion-checkbox>
+            </div>
+            <div class="contenido-formulario items-start">
+              <ion-checkbox labelPlacement="end" class="flex-none text-xxs">Generar órdenes de venta</ion-checkbox>
+            </div>
+            <div class="contenido-formulario items-start">
+              <ion-checkbox labelPlacement="end" class="flex-none text-xxs">Generar órdenes de compra</ion-checkbox>
+            </div>
+            <div class="contenido-formulario items-start">
+              <ion-checkbox labelPlacement="end" class="flex-none text-xxs">Sincronizar entregas y
+                recepciones</ion-checkbox>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+      @if(tabSeleccionado === 'general') {
+      <div class="contenedor-btn pb-2">
+        @if(modoCreacion) {
+        <ion-button class="w-[85px]" (click)="siguienteTab()">Siguiente</ion-button>
+        } @else {
+        <ion-button class="w-[85px]" (click)="botonGuardar()">Guardar</ion-button>
+        }
+        <ion-button color="medium" fill="outline" (click)="botonNuevaCompania()">
+          Cancelar
+        </ion-button>
+      </div>
+      }
+      @if(tabSeleccionado === 'sucursales') {
+      <div class="contenedor-btn pb-2">
+        @if(modoCreacion) {
+        <ion-button class="w-[85px]" (click)="siguienteTab()"
+          [disabled]="sucursalesAsociadas.length === 0">Siguiente</ion-button>
+        } @else {
+        <ion-button class="w-[85px]" (click)="botonGuardar()">Guardar</ion-button>
+        }
+        <ion-button color="medium" fill="outline" (click)="botonNuevaCompania()">
+          Cancelar
+        </ion-button>
+      </div>
+      }
+      @if(tabSeleccionado === 'transacciones') {
+      <div class="contenedor-btn pb-2">
+        @if(modoCreacion) {
+        <ion-button class="w-[85px]" (click)="botonGuardar()">Registrar</ion-button>
+        } @else {
+        <ion-button class="w-[85px]" (click)="botonGuardar()">Guardar</ion-button>
+        }
+        <ion-button color="medium" fill="outline" (click)="botonNuevaCompania()">
+          Cancelar
+        </ion-button>
+      </div>
+      }
+    </form>
+
+  </div>
+</div>

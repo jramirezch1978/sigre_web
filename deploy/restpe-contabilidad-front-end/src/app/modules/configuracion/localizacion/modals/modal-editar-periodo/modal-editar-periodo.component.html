@@ -1,0 +1,55 @@
+<div class="contenedor-principal-modal !w-[461px]">
+  <div class="titulo-modal">
+    <div class="flex flex-row gap-1 items-center">
+      <fa-icon [icon]="farEdit" class="text-primary text-xs"></fa-icon>
+      <span>Editar Periodo</span>
+    </div>
+    <fa-icon [icon]="fasXmark" class="text-xs cursor-pointer" (click)="cerrarModal()"></fa-icon>
+  </div>
+  <div class="cont-modal">
+    <div class="flex flex-col gap-2">
+      <form [formGroup]="formulario" class="contenedor-formulario !p-0">
+        <div class="contenido-formulario">
+          <span class="label !w-[155px]">Nombre <span class="text-danger">*</span></span>
+          <ion-input fill="outline" formControlName="modalNombre" class="w-[140px]"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label !w-[155px]">Fecha de inicio <span class="text-danger">*</span></span>
+          <ion-input fill="outline" type="date" formControlName="modalfechaFinInput" class="w-[115px]"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label !w-[155px]">Fecha de Fin <span class="text-danger">*</span></span>
+          <ion-input fill="outline" type="date" formControlName="modalfechaFinInput" class="w-[115px]"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label !w-[155px]">Recordatorio (días) <span class="text-danger">*</span></span>
+          <ion-input fill="outline" formControlName="recordatorioDias" type="number" class="w-[82px]"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label !w-[155px]">Selecciona un tipo de cierre <span class="text-danger">*</span></span>
+          <ion-select placeholder="Selecciona un tipo de cierre" toggleIcon="chevron-down" expandedIcon="chevron-up" [(ngModel)]="cierreSeleccionado" interface="popover" fill="outline" class="w-[163px] flex-none">
+              @for(cierre of tipoCierre; track cierre){<ion-select-option [value]="cierre.value">{{ cierre.label }}</ion-select-option>}
+            </ion-select>
+
+          
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label !w-[155px]">Ciere de módulos <span class="text-danger">*</span></span>
+          <app-autocomplete-multi formControlName="cierresModulos" [items]="modulos" displayKey="nombre"
+            valueKey="nombre" placeholder="Seleccione módulos" (changed)="onModulosSeleccionadas($event)">
+          </app-autocomplete-multi>
+        </div>
+      </form>
+    </div>
+
+    <div class="flex justify-end gap-3">
+      <ion-button color="medium" fill="outline" (click)="cerrarModal()">Cancelar</ion-button>
+      <ion-button (click)="guardar()">Guardar</ion-button>
+    </div>
+  </div>
+</div>

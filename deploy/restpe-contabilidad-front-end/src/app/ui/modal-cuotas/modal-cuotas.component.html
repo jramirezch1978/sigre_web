@@ -1,0 +1,45 @@
+<div class="contenedor-principal-modal !w-[517px]">
+  <div class="titulo-modal">
+    <span>Configuración de cuotas</span>
+    <fa-icon [icon]="fasXmark" class="cursor-pointer" (click)="cerrarmodal()"></fa-icon>
+  </div>
+  <div class="contenido-modal">
+    <div class="card-info">
+      <fa-icon [icon]="farInfoCircle" class="info-icon"></fa-icon>
+      <span class="info !text-black">Para pagos a crédito, indique el interés aplicable para generar el cronograma de
+        pagos.</span>
+
+    </div>
+    <div class="flex flex-col gap-1 flex-row">
+      <div class="contenido-formulario !p-0 gap-2 ">
+        <div class="contenido-formulario">
+          <span class="label w-[75px]">Nº de cuotas</span>
+          <ion-input type="number" fill="outline" class="w-[91px]" [(ngModel)]="numerodecuotas" disabled="true"
+            (ionChange)="onNumeroCuotasChange()"></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label w-[75px]">% Interés</span>
+          <ion-input type="number" fill="outline" class="w-[91px]" [(ngModel)]="porcentajeInteres"></ion-input>
+        </div>
+      </div>
+      @if (isCondicionPagoMixta()) {
+      <div class="contenido-formulario !p-0 gap-2">
+        <span class="label w-[75px]"> Monto ingresado</span>
+        <ion-input type="number" fill="outline" class="w-[91px]" [(ngModel)]="montoIngresado"
+          (ionChange)="onMontoIngresadoChange()"></ion-input>
+      </div>
+      }
+    </div>
+
+      <div class="h-full">
+        <ag-grid-angular #agGridCuotas style="width: 100%; height: 100px;" class="" [rowData]="rowDataCuotas"
+          [columnDefs]="colDefsCuotas" [localeText]="localeText" [rowHeight]="20" [headerHeight]="24"
+          [paginationPageSize]="20" [gridOptions]="gridOptions" (gridReady)="onGridReady($event)" />
+
+      </div>
+
+    <div class="flex flex-row justify-end gap-2">
+      <ion-button fill="outline" color="medium" class="w-fit" (click)="cerrarmodal()">Cerrar</ion-button>
+      <ion-button class="w-fit" (click)="guardarCuotas()">Guardar</ion-button>
+    </div>
+  </div>

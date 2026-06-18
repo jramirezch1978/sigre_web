@@ -1,0 +1,225 @@
+  <ion-content [fullscreen]="true">
+    <div class="flex flex-col h-full
+    ">
+      <div class="px-5 h-[60px] flex justify-between items-center">
+        <span class="font-bold text-[26px]">Configuración de la Empresa</span>
+        <!-- <ion-button>
+          <fa-icon [icon]="farCalendar" class="pr-1"></fa-icon>
+          Calendario de vencimientos
+        </ion-button> -->
+      </div>
+      <div class="flex flex-col flex-grow">
+        <div class="company-tabs-wrap">
+            <ion-segment
+              [(ngModel)]="tab"
+              value="talonarios"
+              mode="md"
+              scrollable
+              class="company-tabs"
+              (ionChange)="onTabChange($event)"
+            >
+              <ion-segment-button value="generales"><ion-label>Datos generales</ion-label></ion-segment-button>
+              <ion-segment-button value="impositivos"><ion-label>Datos impositivos</ion-label></ion-segment-button>
+              <ion-segment-button value="clientes"><ion-label>Clientes/Proveedores</ion-label></ion-segment-button>
+              <ion-segment-button value="talonarios"><ion-label>Talonarios</ion-label></ion-segment-button>
+              <ion-segment-button value="portal"><ion-label>Portal clientes</ion-label></ion-segment-button>
+              <ion-segment-button value="tesoreria"><ion-label>Tesorería</ion-label></ion-segment-button>
+              <ion-segment-button value="integraciones"><ion-label>Integraciones</ion-label></ion-segment-button>
+              <ion-segment-button value="centro"><ion-label>Centros de costos</ion-label></ion-segment-button>
+            </ion-segment>
+          </div>
+
+          <!-- Contenido -->
+
+            <ng-container [ngSwitch]="tab">
+              <div *ngSwitchCase="'generales'">…</div>
+              <div *ngSwitchCase="'impositivos'">…</div>
+              <div *ngSwitchCase="'clientes'">…</div>
+              <div *ngSwitchCase="'talonarios'">
+                <form [formGroup]="form">
+                <div class="flex flex-grow w-full">
+                  <div class="flex flex-col flex-[0_0_500px]">
+                    <div class="flex items-center px-[10px] bg-[#ECF4FF] text-sm h-[25px]">
+                      <span class="font-semibold">Lista de Talonarios</span>
+                    </div>
+                    <ag-grid-angular
+                      style="width: 100%; height: 100%;"
+                      [columnDefs]="colDefsColIzq"
+                      [rowData]="rowDataColIzq"
+                      [rowSelection]="'single'"
+                      [getRowId]="getRowId"
+                      [rowHeight]="21" 
+                      [headerHeight]="23"
+                      [theme]="theme"
+                      (gridReady)="onGridReady($event)"
+                      (rowClicked)="onRowClicked($event)"
+                    />
+                      <!-- <table class="table-fixed text-xs">
+                        <thead>
+                          <tr>
+                            <th class="text-left border-r border-[#d0d0d0] w-[202px]">
+                              <div class="flex items-center">
+                                <span>Talonario</span>
+                                <fa-icon [icon]="fasSortDown" class="text-xxs text-blue-600"></fa-icon>
+                              </div>
+                            </th>
+                            <th class="border-r border-[#d0d0d0] w-[50px]">Prefijo</th>
+                            <th class="border-r border-[#d0d0d0] w-[71px]">Número desde</th>
+                            <th class="border-r border-[#d0d0d0] w-[71px]">Número hasta</th>
+                            <th class="border-r border-[#d0d0d0] w-[71px]">Próximo Número</th>
+                            <th class="w-[71px]"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr class="border-b border-[#d0d0d0]" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]">
+                            <td class="text-left pl-2 border-r border-[#d0d0d0] w-[202px]">Ajustes</td>
+                            <td class="text-center border-r border-[#d0d0d0] w-[50px]">009</td>
+                            <td class="text-center border-r border-[#d0d0d0] w-[71px]">00000000...</td>
+                            <td class="text-center border-r border-[#d0d0d0] w-[71px]">00000000...</td>
+                            <td class="text-center border-r border-[#d0d0d0] w-[71px]">00000000...</td>
+                            <td class="text-center border-r border-[#d0d0d0] w-[30px]">
+                              <fa-icon [icon]="fasXmark" class="text-sm text-danger"></fa-icon>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table> -->
+                  </div>
+                  <div class="flex flex-col flex-grow">
+                    <div class="w-full px-4 bg-[#ECF4FF] text-sm h-[25px] flex justify-between items-center">
+                      <span class="font-semibold">Remito x</span>
+                      <fa-icon [icon]="fasAnglesUp" class="text-[#3B82F6] text-sm"></fa-icon>
+                    </div>
+                    <div class="w-full flex flex-col flex-grow border-l border-[#cfcfcf]">
+                      <div class="flex bg-[#fbf7f7]">
+                        <div class="border border-text-5 flex justify-center items-center px-4 h-7 cursor-pointer text-sm">
+                          <span>Datos talonario</span>
+                        </div>
+                        <div class="border border-text-5 flex justify-center items-center px-4 h-7 cursor-pointer text-sm">
+                          <span>Asociacion a punto de venta</span>
+                        </div>
+                      </div>
+                      <div class="flex flex-col gap-1 p-2.5">
+                        <div class="flex items-center">
+                          <span class="text-left w-[155px] font-medium text-xs">Descripcion talonario:</span>
+                          <ion-input fill="outline" value="Remito x" class="w-[352px]" formControlName="talonario"></ion-input>
+                        </div>
+                        <div class="flex items-center">
+                          <span class="text-left w-[155px] font-medium text-xs">Prefijo:</span>
+                          <ion-input fill="outline" value="001" class="w-10"formControlName="Prefijo"></ion-input>
+                        </div>
+                        <div class="flex gap-6">
+                          <div class="flex items-center">
+                            <span class="text-left w-[155px] font-medium text-xs">Número Desde:</span>
+                            <ion-input fill="outline" value="001" class="w-28" formControlName="número desde"></ion-input>
+                          </div>
+                          <div class="flex items-center">
+                            <span class="text-left w-[155px] font-medium text-xs">Número Hasta:</span>
+                            <ion-input fill="outline" value="001" class="w-28" formControlName="número hasta"></ion-input>
+                          </div>
+                        </div>
+                        <div class="flex gap-6">
+                          <div class="flex items-center">
+                            <span class="text-left w-[155px] font-medium text-xs">Próximo Número:</span>
+                            <ion-input fill="outline" value="001" class="w-28" formControlName="próximo número"></ion-input>
+                          </div>
+                          <div class="flex items-center">
+                            <span class="text-left w-[155px] font-medium text-xs">Talonario por defecto:</span>
+                            <div class="flex items-center gap-2">
+                              <ion-checkbox formControlName="porDefecto"></ion-checkbox>
+                              <div><fa-icon [icon]="farQuestionCircle" class="text-sm text-primary"></fa-icon></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex items-center">
+                          <span class="text-left w-[155px] font-medium text-xs">Metodo de numeracion:</span>
+                            <ion-select fill="outline" interface="popover" placeholder="Favorite Fruit" class="w-60">
+                              <ion-select-option value="apple">Apple</ion-select-option>
+                              <ion-select-option value="banana">Banana</ion-select-option>
+                              <ion-select-option value="orange">Orange</ion-select-option>
+                            </ion-select>
+                        </div>
+                        <div class="flex gap-10">
+                          <div class="flex items-center">
+                            <span class="text-xs w-32">Factura de venta:</span>
+                            <ion-checkbox></ion-checkbox>
+                          </div>
+                          <div class="flex items-center">
+                            <span class="text-xs w-32">Nota de debito:</span>
+                            <ion-checkbox></ion-checkbox>
+                          </div>
+                          <div class="flex items-center">
+                            <span class="text-xs w-32">Nota de credito:</span>
+                            <ion-checkbox></ion-checkbox>
+                          </div>
+                          <div class="flex items-center">
+                            <span class="text-xs w-32">Tipo comprobante:</span>
+                            <ion-select fill="outline" interface="popover" class="w-fit">
+                              <ion-select-option value="apple">x</ion-select-option>
+                              <ion-select-option value="banana">i</ion-select-option>
+                              <ion-select-option value="orange">o</ion-select-option>
+                            </ion-select>
+                          </div>
+                        </div>
+                        <div class="flex gap-10">
+                          <div class="flex items-center">
+                            <span class="text-xs w-32">Orden de pago:</span>
+                            <ion-checkbox></ion-checkbox>
+                          </div>
+                          <div class="flex items-center">
+                            <span class="text-xs w-32">Recibo:</span>
+                            <ion-checkbox></ion-checkbox>
+                          </div>
+                          <div class="flex items-center">
+                            <span class="text-xs w-32">Remito:</span>
+                            <ion-checkbox></ion-checkbox>
+                          </div>
+                        </div>
+                        <div class="flex gap-10">
+                          <div class="flex items-center">
+                            <span class="text-xs w-32">Factura electronica:</span>
+                            <ion-checkbox></ion-checkbox>
+                          </div>
+                          <ion-button>
+                            Datos adicionales
+                          </ion-button>
+                        </div>
+                      </div>
+                      <div class="flex flex-col pr-4">
+                        <div class="flex justify-end pb-4 gap-4">
+                          <ion-button>
+                            Nuevo talonario
+                          </ion-button>
+                          <ion-button>
+                            Guardar
+                          </ion-button>
+                        </div>
+                        <div class="w-full px-4 bg-primary-5 font-medium text-sm py-1 flex justify-between items-center">
+                          <span>Documento de talonario</span>
+                          <img src="assets/imagenes/excel-icon.svg" alt="" class="w-3">
+                        </div>
+                        <!-- <table class="w-full text-xs">
+                          <tr>
+                            <th class="text-left pl-2 border-r border-text-5"><span>Talonario </span></th>
+                            <th class="border-r border-text-5">Fecha</th>
+                            <th class="text-left pl-2 border-r border-text-5"><span>Numero <fa-icon [icon]="fasSortDown" class=""></fa-icon></span></th>
+                            <th class="border-r border-text-5">Num</th>
+                            <th class="border-r border-text-5">Proximo</th>
+                            <th></th>
+                          </tr>
+                        </table> -->
+                        <div class="content" style="width: 100%; height: 100%;">
+                            <!-- The AG Grid component, with Dimensions, CSS Theme, Row Data, and Column Definition -->
+                           
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </form>
+              </div>
+              <div *ngSwitchDefault>…</div>
+            </ng-container>
+         
+      </div>
+    </div>
+  </ion-content>

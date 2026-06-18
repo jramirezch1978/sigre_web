@@ -1,0 +1,219 @@
+@import '../admin-page-common';
+
+// ─── Tree: opciones de menú jerárquicas ──────────────────
+
+.arbol-opciones-wrapper {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  margin-top: 0.5rem;
+}
+
+.arbol-opciones {
+  margin-top: 0;
+  padding: 0.5rem;
+}
+
+.arbol-modulo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  margin-top: 0.75rem;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  border-radius: 8px;
+  border-left: 3px solid #6366f1;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #312e81;
+  letter-spacing: 0.01em;
+
+  ion-icon {
+    font-size: 1.1rem;
+    color: #6366f1;
+    flex-shrink: 0;
+  }
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.arbol-carpeta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  position: relative;
+  font-size: 0.8rem;
+  color: #475569;
+  font-weight: 600;
+
+  ion-icon {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    flex-shrink: 0;
+  }
+}
+
+.arbol-conector {
+  position: absolute;
+  left: calc(var(--conector-left, 0.5rem));
+  top: 0;
+  bottom: 50%;
+  width: 1px;
+  pointer-events: none;
+}
+
+.arbol-hoja-wrapper {
+  position: relative;
+}
+
+.arbol-hoja {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.65rem;
+  margin: 2px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  position: relative;
+
+  &:hover {
+    background: #f0f7ff;
+    border-color: #bfdbfe;
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.08);
+  }
+
+  &--expandida {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  /** Fila sólo agrupadora (padre: sin papelera ni acciones) */
+  &--agrupador {
+    background: #fafbfc;
+    border-style: dashed;
+    cursor: pointer;
+
+    .arbol-hoja__nombre {
+      font-weight: 600;
+      color: #334155;
+    }
+  }
+
+  &--nodo-expandido {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+  }
+
+  .arbol-chevron {
+    font-size: 0.85rem;
+    color: #64748b;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  &--expandida .arbol-chevron {
+    color: #2563eb;
+  }
+
+  &__codigo {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #2563eb;
+    background: #eff6ff;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+    border: 1px solid #bfdbfe;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  &__nombre {
+    font-size: 0.8rem;
+    color: #1e293b;
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__eliminar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #cbd5e1;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+
+    ion-icon { font-size: 0.9rem; }
+
+    &:hover {
+      background: #fef2f2;
+      color: #ef4444;
+    }
+  }
+}
+
+.arbol-acciones {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  padding: 0.75rem 1rem 0.75rem;
+  margin-bottom: 2px;
+}
+
+.acciones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.25rem;
+}
+
+.accion-check {
+  display: flex;
+  align-items: center;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.12s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+
+  &--activa {
+    background: #ecfdf5;
+
+    &:hover {
+      background: #d1fae5;
+    }
+  }
+
+  ion-checkbox {
+    --size: 16px;
+    --border-radius: 3px;
+    --checkbox-background-checked: #2563eb;
+    font-size: 0.8rem;
+    color: #334155;
+  }
+}

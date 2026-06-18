@@ -1,0 +1,71 @@
+<div class="contenedor-principal-modal !w-[460px]">
+  <div class="titulo-modal">
+    <div class="flex flex-row gap-1 items-center">
+      @if(esVista){<fa-icon [icon]="farEye" class="text-primary text-xs"></fa-icon>}
+      @if(!esVista){<fa-icon [icon]="fasArrowsRotate" class="text-primary text-xs"></fa-icon>}
+      <span>{{ esVista ? 'Ver' : 'Renovar' }} contrato</span>
+    </div>
+    <fa-icon [icon]="fasXmark" class="text-xs cursor-pointer" (click)="closemodal()"></fa-icon>
+  </div>
+  <div class="contenido-modal">
+    <form [formGroup]="formulario" class="contenedor-formulario">
+
+      <div class="contenido-formulario">
+        <span class="label">Tipo de contrato<span class="text-danger">*</span></span>
+        <ion-select placeholder="Seleccionar" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[141px] flex-none" formControlName="tipo">
+          @for(tipo of tipos; track tipo.value) {
+            <ion-select-option [value]="tipo.value">{{ tipo.label }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Fecha de inicio<span class="text-danger">*</span></span>
+        <app-base-calendar-new [initialDate]="formulario.get('fechaI')?.value"  class="flex-none" mode="single" position="center"/>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Fecha de fin<span class="text-danger">*</span></span>
+        <app-base-calendar-new [initialDate]="formulario.get('fechaF')?.value" class="flex-none" mode="single" position="center"/>
+      </div>
+      
+      <div class="contenido-formulario">
+        <span class="label">Remuneración <span class="text-danger">*</span></span>
+        <ion-input fill="outline" class="w-20" formControlName="remuneracion" type="number">
+          <div slot="start" class="pr-2 font-semibold">S/</div>
+        </ion-input>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Adjuntar documento (PDF)</span>
+        <app-file-upload
+          [accept]="'.pdf'"
+          [placeholder]="'Haz clic para subir un archivo'"
+          [maxFileSize]="5"
+          [width]="'w-[169px]'"
+          [required]="true"
+          (fileSelected)="onContratoSelected($event)"
+          (fileRemoved)="onContratoRemoved()"
+          (error)="showFileError($event)">
+        </app-file-upload>
+      </div>
+
+        <div class="flex flex-col gap-2">
+          <span class="text-xs font-bold">Motivo de renovación</span>
+          <ion-textarea
+            formControlName="motivo"
+            rows="4" fill="outline"
+            class="w-full text-sm" 
+            placeholder="Describe el motivo"></ion-textarea>
+        </div>
+    </form>
+    <div class="conjunto-btn">
+      <ion-button color="medium" fill="outline" class="w-[68px]" (click)="closemodal()">
+        <span>Cancelar</span>
+      </ion-button>
+      @if(!esVista){<ion-button class="w-fit" [disabled]="formulario.invalid" (click)="registrarContrato()">
+        <span>Renovar contrato</span>
+      </ion-button>}
+    </div>
+  </div>
+</div>

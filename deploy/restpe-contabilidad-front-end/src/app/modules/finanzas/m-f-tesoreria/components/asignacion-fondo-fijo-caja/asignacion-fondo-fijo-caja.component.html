@@ -1,0 +1,160 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de asignación de fondo fijo de caja (Selecciona una asignación para visualizarla o editarla)</span>
+    </div>
+
+    <!-- filtros -->
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por código o caja" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+
+      <div class="filtros-absolutos">
+
+        <div class="flex flex-row">
+          <!-- calendario -->
+          <app-base-calendar-new class="flex-none " mode="range" [initialStartDate]="startDate"
+            [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="center"
+            (dateRangeSelected)="filtrarPorFechas($event)">
+          </app-base-calendar-new>
+        </div>
+
+        <ion-button fill="outline" class="w-[115px] flex-none text-text-85" id="reportes">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportes" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+
+        <ion-button class="w-fit" (click)="botonNuevaAsignacion()" [disabled]="!filaSeleccionada">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span class="font-normal">Nueva asignación</span>
+        </ion-button>
+      </div>
+    </div>
+
+    <div class="h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="ag-theme-alpine" [rowData]="rowData"
+        [columnDefs]="colDefs" [defaultColDef]="defaultColDef" [pagination]="true" [localeText]="localeText"
+        [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20" [rowSelection]="'single'"
+        (gridReady)="onGridReady($event)" (firstDataRendered)="onFirstDataRendered($event)"
+        (cellClicked)="onCellClicked($event)" [domLayout]="'normal'" />
+    </div>
+  </div>
+
+  <div class="panel-derecho" [appLoader]="isLoading()">
+    <div class="cont-title">
+      <span>{{ tituloFormulario }}</span>
+    </div>
+
+    <div class="flex justify-end w-full bg-[#F5F5F5] px-1" *ngIf="!modoCreacion" (click)="modalverActualizaciones()">
+      <div class="flex flex-row gap-2 p-1 cursor-pointer">
+        <fa-icon [icon]="farBook" class="text-xs text-[#636E95]"></fa-icon>
+        <span class="text-[#636E95] text-xs font-semibold underline cursor-pointer">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+
+    <form [formGroup]="asignacionForm" class="contenedor-formulario">
+      <div class="contenido-formulario">
+        <span class="label">Sucursal <span class="text-danger">*</span></span>
+        <app-autocomplete 
+          [items]="sucursales" 
+          displayKey="nombre" 
+          valueKey="id" 
+          formControlName="sucursal"
+          placeholder="Buscar sucursal" 
+          [disabled]="formularioDeshabilitado"
+          (itemSelected)="onSucursalSeleccionada($event)">
+        </app-autocomplete>
+      </div> 
+      <div class="contenido-formulario">
+        <span class="label">Caja <span class="text-danger">*</span></span>
+        <ion-select fill="outline" formControlName="caja" placeholder="Selecciona una caja" toggleIcon="chevron-down"
+          expandedIcon="chevron-up" interface="popover">
+          @for(caja of cajas; track caja.id) {
+          <ion-select-option [value]="caja.nombre">{{ caja.nombre }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Fecha de asignación <span class="text-danger">*</span></span>
+        <app-base-calendar-new mode="single" [initialDate]="fechaAsignacionSeleccionada" [minDate]="minDate"
+          [maxDate]="maxDate" [disabled]="formularioDeshabilitado" (dateSelected)="onFechaAsignacionSelected($event)">
+        </app-base-calendar-new>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Moneda <span class="text-danger">*</span></span>
+        <ion-select fill="outline" formControlName="moneda" placeholder="Selecciona una moneda"
+          toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover">
+          @for(moneda of monedas; track moneda.id) {
+          <ion-select-option [value]="moneda.id">{{ moneda.nombre }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      @if(pais != 'EC'){  
+        @if (asignacionForm.get('moneda')?.value === 'Dólares') {
+          <div class="contenido-formulario">
+            <span class="label">Tipo de cambio</span>
+            <ion-input fill="outline" formControlName="tipoCambio" placeholder="Tipo de cambio" type="number"></ion-input>
+          </div>
+        }
+      }
+
+      <div class="contenido-formulario">
+        <span class="label">Monto total <span class="text-danger">*</span></span>
+        <ion-input fill="outline" formControlName="montoTotal" type="number"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Monto máximo de egreso <span class="text-danger">*</span></span>
+        <ion-input fill="outline" formControlName="montoMaximo" type="number"></ion-input>
+      </div>
+
+      <div class="contenido-formulario">
+        <span class="label">Responsable <span class="text-danger">*</span></span>
+        <ion-select fill="outline" formControlName="responsable" placeholder="Selecciona un responsable"
+          toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover">
+          @for(responsable of responsables; track responsable.id) {
+          <ion-select-option [value]="responsable.nombre">{{ responsable.nombre }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      <!-- Campo Estado - Solo visible cuando NO es modo creación -->
+      <div class="contenido-formulario">
+        <span class="label">Estado</span>
+        <ion-input fill="outline" formControlName="estado" class="w-24"></ion-input>
+      </div>
+
+      <div class="contenido-formulario !items-start">
+        <span class="label">Observaciones</span>
+        <ion-textarea fill="outline" formControlName="observaciones" placeholder="Escriba aquí..."
+          rows="3"></ion-textarea>
+      </div>
+
+    </form>
+
+    <!-- Botones según el modo -->
+    <div class="contenedor-btn">
+      @if(!filaSeleccionada){<ion-button (click)="botonRegistrar()">Registrar</ion-button>}
+      @else{
+        <ion-button (click)="botonReintegrarFondo()" [disabled]="filaSeleccionada?.affc_estado === 'Reintegrado'">Reintegrar fondo</ion-button>
+      }
+      <ion-button class="w-fit" fill="outline" color="medium" (click)="botonNuevaAsignacion()">Cancelar</ion-button>
+    </div>
+  </div>
+</div>

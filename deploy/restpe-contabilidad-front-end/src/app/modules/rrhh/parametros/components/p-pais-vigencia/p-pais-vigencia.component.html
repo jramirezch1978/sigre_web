@@ -1,0 +1,121 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de remuneraciones mínimas (Selecciona una configuración para visualizarla)</span>
+      <!-- <fa-icon [icon]="fasChevronsLeft" class="text-xs text-primary cursor-pointer" (click)="mostrarpanelizquierdo = false"></fa-icon> -->
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Ingresa el código y presiona enter"
+          style="--padding-start:30px"></ion-input>
+      </div>
+
+      <div class="filtros-absolutos">
+        <app-base-calendar-new mode="range" [initialStartDate]="startDate" [initialEndDate]="endDate"
+          [minDate]="minDate" [maxDate]="maxDate" position="center">
+        </app-base-calendar-new>
+
+        <ion-button fill="outline" class="text-text-85 w-[115px]" id="datospersonales">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="datospersonales" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" (click)="nuevaVigencia()" [disabled]="!filaSeleccionada">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span>Nueva remuneración</span>
+        </ion-button>
+      </div>
+    </div>
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" class="btn-refresh" (click)="onBtReset()"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class=""   [rowData]="rowData" [columnDefs]="columnDefs"
+        [pagination]="true" [rowHeight]="20" [localeText]="localeText" [headerHeight]="24" [paginationPageSize]="20"
+        [rowSelection]="'single'" (cellClicked)="onCellClicked($event)" (gridReady)="onGridReady($event)" [suppressLoadingOverlay]="true" />
+    </div>
+  </div>
+  <div class="panel-derecho" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      <span>{{ tituloPanelDerecho }}</span>
+    </div>
+     @if(filaSeleccionada){
+  <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" ></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+    <form [formGroup]="formularioRemuneracion" class="contenedor-formulario">
+      <div class="contenido-formulario">
+        <span class="label">Vigencia desde <span class="text-danger">*</span></span>
+        <app-base-calendar-new class="w-[163px]" mode="single"
+          [initialDate]="formularioRemuneracion.get('vigenciaDesde')?.value" [minDate]="minDate" [maxDate]="maxDate"
+          position="right" [initInNull]="true" (dateSelected)="onFechaDesdeSelected($event)" />
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Vigencia hasta</span>
+        <app-base-calendar-new class="w-[163px]" mode="single"
+          [initialDate]="formularioRemuneracion.get('vigenciaHasta')?.value" [minDate]="minDate" [maxDate]="maxDate"
+          position="right" [initInNull]="true" (dateSelected)="onFechaHastaSelected($event)" />
+      </div>
+      @if(pais === 'GT'){
+      <div class="contenido-formulario">
+        <span class="label">Salario ordinario <span class="text-danger">*</span> </span>
+        <ion-input fill="outline" formControlName="pais_vigencia_salario_ordinario" class="w-[167px]"></ion-input>
+      </div>
+      <!-- <div class="contenido-formulario">
+        <span class="label">Bonificación <span class="text-danger">*</span></span>
+        <ion-input fill="outline" formControlName="pais_vigencia_bonificacion" class="w-[167px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">KPI`s <span class="text-danger">*</span></span>
+        <ion-input fill="outline" formControlName="pais_vigencia_kpi" class="w-[167px]"></ion-input>
+      </div> -->
+      }
+      <div class="contenido-formulario">
+        <span class="label">Remuneración mín. (<span>{{monedapais}}</span>) <span class="text-danger">*</span></span>
+        <ion-input fill="outline" type="number" class="w-[167px]" formControlName="pais_vigencia_remuneracion_soles"
+          (ionChange)="onRemuneracionSolesChange($event)"></ion-input>
+      </div>
+      @if(pais != 'EC'){
+      <div class="contenido-formulario">
+        <span class="label">Remuneración mín. ($)</span>
+        <ion-input fill="outline" type="number" class="w-[167px]" formControlName="pais_vigencia_remuneracion_dolares"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Tipo de cambio</span>
+        <ion-input fill="outline" type="number" class="w-[82px]" formControlName="pais_vigencia_tipo_cambio"></ion-input>
+      </div>
+      }
+      <div class="contenido-formulario">
+        <span class="label">Tipo de trabajador <span class="text-danger">*</span></span>
+        <ion-select fill="outline" placeholder="Seleccione tipo de trabajador" class="w-[167px]"
+          toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" formControlName="pais_vigencia_tipo_trabajador">
+          <ion-select-option *ngFor="let tipo of tiposTrabajador" [value]="tipo.value">{{ tipo.label
+            }}</ion-select-option>
+        </ion-select>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Estado de registro</span>
+        <ion-select fill="outline" class="w-[100px]" toggleIcon="chevron-down" expandedIcon="chevron-up"
+          interface="popover" formControlName="estadoRegistro">
+          <ion-select-option *ngFor="let estado of estadosRegistro" [value]="estado.value">{{ estado.label
+            }}</ion-select-option>
+        </ion-select>
+      </div>
+    </form>
+    <div class="contenedor-btn">
+      <ion-button (click)="guardarCambios()">
+        <span>{{ textoBotonGuardar }}</span>
+      </ion-button>
+      <ion-button fill="outline" color="medium" (click)="cancelar()"><span>Cancelar</span></ion-button>
+    </div>
+  </div>
+</div>

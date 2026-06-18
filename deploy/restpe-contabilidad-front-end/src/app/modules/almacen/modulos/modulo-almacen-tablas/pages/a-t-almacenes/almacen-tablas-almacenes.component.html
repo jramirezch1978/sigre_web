@@ -1,0 +1,111 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de almacenes registrados (Selecciona un almacén de tu lista para
+        visualizarlo)</span>
+    </div>
+
+    <!-- Filtros -->
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+          <div class="buscador">
+            <fa-icon [icon]="farSearch"></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar almacén por código, dirección o persona responsable" class="w-full"
+              style="--padding-start:30px"></ion-input>
+          </div>
+        </div>
+        <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+          [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="center"
+          (dateRangeSelected)="filtrarPorFechas($event)">
+        </app-base-calendar-new>
+      <div class="filtros-absolutos">
+        <ion-button class="w-[115px] text-text-85" id="reportesalmacen" fill="outline">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesalmacen" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarExcel()">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarPdf()">Exportar CSV</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit whitespace-nowrap" [disabled]="modoCreacion && !formularioConCambios" (click)="nuevoAlmacen()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span>Nuevo Almacén</span>
+        </ion-button>
+      </div>
+    </div>
+
+    <div class=" flex h-full relative" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()"
+        class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [headerHeight]="24" [localeText]="localeText"
+        [paginationPageSize]="20" rowSelection="single" [suppressLoadingOverlay]="true"
+        (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+
+  <div class="panel-derecho" [appLoader]="isLoading()">
+    <div class="cont-title">
+      <span>{{ modoCreacion ? 'Nuevo almacén' : 'Información del Almacén:  ' + (selectedAlmacen?.almacen_codigo || '') }}</span>
+    </div>
+    @if(selectedAlmacen){<div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" ></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+    
+    <form [formGroup]="almacenForm" class="flex flex-col gap-1 p-3">
+       <div class="contenido-formulario">
+          <span class="label">Fecha de creación</span>
+          <ion-input fill="outline" type="date"  formControlName="fechaC" class="w-[100px]"></ion-input>
+        </div>
+      <div class="contenido-formulario">
+        <span class="label">Código <span class="text-danger">*</span></span>
+        <ion-input fill="outline" formControlName="codigo" maxlength="20" [readonly]="!modoCreacion"
+          [placeholder]="modoCreacion ? 'Ingresa un código' : ''" class="w-[163px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Nombre de almacén <span class="text-danger">*</span></span>
+        <ion-input fill="outline" formControlName="nombredealmacen"
+          [placeholder]="modoCreacion ? 'Ingresa un nombre de almacén' : ''" class="w-[163px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Tipo de almacén <span class="text-danger">*</span></span>
+        <ion-select [placeholder]="modoCreacion ? 'Selecciona un tipo' : 'Seleccionar'" toggleIcon="chevron-down"
+          expandedIcon="chevron-up" formControlName="tipo" interface="popover" fill="outline" class="w-[163px]">
+          @for (t of tiposAlmacen(); track t.id) {
+          <ion-select-option [value]="t.id">{{ t.nombre }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Sucursal asociada</span>
+        <app-autocomplete [items]="sucursales()" [displayKey]="'nombre'" [valueKey]="'id'"
+          [placeholder]="modoCreacion ? 'Asocia una sucursal' : 'Asocia una sucursal'" [width]="'w-[163px]'"
+          formControlName="distritoAuto" (itemSelected)="onDistritoSeleccionado($event)">
+        </app-autocomplete>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label">Estado <span class="text-danger">*</span></span>
+        <ion-select placeholder="Activo" toggleIcon="chevron-down" expandedIcon="chevron-up" formControlName="estado"
+          interface="popover" fill="outline" class="w-[100px]">
+          <ion-select-option value="activo">Activo</ion-select-option>
+          <ion-select-option value="inactivo">Inactivo</ion-select-option>
+        </ion-select>
+      </div>
+    </form>
+    <div class="contenedor-btn">
+      <ion-button class="w-[80px]" (click)="guardarOCrearAlmacen()">{{ modoCreacion ? 'Registrar' : 'Guardar' }}</ion-button>
+      <div class="flex gap-2">
+        <ion-button color="medium" fill="outline" class="w-fit" (click)="nuevoAlmacen()">Cancelar</ion-button>
+        <ion-button fill="outline" color="danger" class="w-[80px]" *ngIf="!modoCreacion"
+          (click)="modaleliminar()">Eliminar</ion-button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,58 @@
+<div class="contenedor-modal !w-[600px]">
+  <div class="header">
+    <div class="flex items-center gap-1">
+      @if(mostrarIcono){<fa-icon [icon]="falFileLines" class="text-xs text-primary"></fa-icon>}
+      <span class="text-sm font-bold">{{tituloModal}}</span>
+    </div>
+    <fa-icon [icon]="farXmark" class="text-sm cursor-pointer" (click)="dismissModal()"></fa-icon>
+  </div>
+
+  <div class="cont-modal">
+    @if(mostrardatos){
+      <div class="flex flex-row">
+        <div class="contenido-formulario !flex-1">
+          <span class="label">{{datos1}}</span>
+          <span class="label">{{dato1cantidad}}</span>
+        </div>
+        <div class="contenido-formulario !flex-1">
+          <span class="label">{{datos2}}</span>
+          <span class="label">{{dato2cantidad}}</span>
+        </div>
+      </div>
+    }
+    @if (mostrarTabla1) {
+      <div class="flex flex-col gap-2">
+        <span class="font-semibold text-xs">{{tituloTabla1}}</span>
+        <ag-grid-angular 
+          style="width: 100%; height: 150px; max-height: 300px;" 
+          class="ag-theme-quartz"
+          [rowData]="rowData1" 
+          [columnDefs]="colDefs1"
+          [rowHeight]="20"
+          [headerHeight]="24"
+          [rowSelection]="'single'"
+          [getRowStyle]="getRowStyle" />
+      </div>
+    }
+    @if (mostrarTabla2) {
+      <div class="flex flex-col gap-2">
+        <span class="font-semibold text-xs">{{tituloTabla2}}</span>
+        <ag-grid-angular 
+          style="width: 100%; height: 120px;" 
+          class="ag-theme-quartz"
+          [rowData]="rowData2" 
+          [columnDefs]="colDefs2"
+          [rowHeight]="20"
+          [headerHeight]="24"
+          [rowSelection]="'single'"
+          [getRowStyle]="getRowStyle"
+          [domLayout]="'autoHeight'" />
+      </div>
+    }
+
+    <div class="contenedor-btn !p-0">
+      <ion-button class="w-[68px]" color="medium" fill="outline" (click)="dismissModal()">Cerrar</ion-button>
+    </div>
+  </div>
+
+</div>

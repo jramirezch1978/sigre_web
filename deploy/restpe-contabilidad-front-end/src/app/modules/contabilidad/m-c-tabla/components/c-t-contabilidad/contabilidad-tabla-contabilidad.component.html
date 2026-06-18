@@ -1,0 +1,81 @@
+<div class="contenedor-principal">
+   @if (!panelLateralVisible) {
+    <div class="flex-none flex items-center bg-[#E6E8F4] text-primary text-xs cursor-pointer"
+        (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsRight"></fa-icon>
+    </div>
+    }
+
+  @if (panelLateralVisible) {<div class="panel-izquierdo-pequenio">
+    <div class="cont-title">
+      <span>Matriz contable</span> 
+      @if (panelLateralVisible) {<div class="px-2 text-primary text-xs cursor-pointer" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>}
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por código o descripción" class="w-full" style="--padding-start:30px"></ion-input>
+      </div>
+    </div>
+
+    <div class="flex h-full sin-separador ag-theme-alpine" [appLoader]="isLoading()">
+      <ag-grid-angular 
+        style="width: 100%; height: 100%;" 
+        class=""
+        [rowData]="rowDataFiltro()" 
+        [columnDefs]="colDefsFiltro" 
+        [columnTypes]="columnTypes"
+        [localeText]="localeText"
+        [rowSelection]="'single'"
+        [autoGroupColumnDef]="autoGroupColumnDef"
+        [treeData]="treeData" 
+        [getDataPath]="getDataPath" 
+        [groupDefaultExpanded]="groupDefaultExpanded" 
+        [rowHeight]="20"
+        [headerHeight]="24"
+        (gridReady)="onGridReadyFiltro($event)"
+        (cellClicked)="onCellFiltroClicked($event)"/>
+    </div>
+
+  </div>}
+
+  <div class="panel-derecho-full">
+    <div class="cont-title">
+      <span>Ítems para {{filaSeleccionada?.t_contabilidad_codigo}} </span>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por cuenta contable, tipo" class="w-full" style="--padding-start:30px"></ion-input>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button class="w-fit" (click)="agregarItem()">
+          <fa-icon [icon]="fasPlusCircle"></fa-icon>
+          <span>Agregar ítem</span>
+        </ion-button>
+      </div>
+    </div>
+    <div class="flex h-full relative ag-theme-alpine" [appLoader]="isLoading()" >
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular 
+        style="width: 100%; height: 100%;" 
+        class=""
+        [rowData]="rowData()" 
+        [columnDefs]="colDefs" 
+        [columnTypes]="columnTypes"
+        [pagination]="true"
+        [localeText]="localeText"
+        [context]="gridContext"
+        [rowSelection]="'single'"
+        [rowHeight]="20"
+        [headerHeight]="24"
+        [paginationPageSize]="20"
+        [defaultColDef]="defaultColDef"
+        (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)"/>
+    </div>
+  </div>
+  
+</div>

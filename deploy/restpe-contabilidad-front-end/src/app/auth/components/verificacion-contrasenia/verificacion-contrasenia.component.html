@@ -1,0 +1,195 @@
+<div class="flex flex-col gap-5 w-full h-full">
+  <div class="flex gap-2 items-center w-full" [ngClass]="{'items-start': paso === 4}">
+    <ion-button fill="clear" class="btn-icon-primary" (click)="regresar()">
+      <fa-icon [icon]="fasAngleLeft"></fa-icon>
+    </ion-button>
+    <span class="text-xl font-semibold">{{tituloActual}}</span>
+  </div>
+
+  <!-- Paso 1: Ingresar usuario -->
+  @if(paso === 1){<div class="flex flex-col gap-[15px] w-full min-h-[274px]">
+    <span class=".mensaje-verificacion">Ingresa tu nombre de usuario para iniciar la recuperación de contraseña.</span>
+
+    <form [formGroup]="usernameForm" (ngSubmit)="continuarPaso1()">
+      <div class="flex flex-col gap-1 w-full">
+        <span class="field-label">Usuario</span>
+        <ion-input 
+          fill="outline" 
+          class="input-login"
+          placeholder="usuario" 
+          formControlName="username"
+          type="text">
+        </ion-input>
+        @if(campoInvalido(usernameForm, 'username') && usernameForm.get('username')?.errors?.['required']){
+          <span class="texto-error-campo">Este campo es obligatorio</span>
+        }
+      </div>
+    </form>
+  </div>}
+
+  <!-- Paso 2: Mostrar email ofuscado + ingresar email completo -->
+  @if(paso === 2){<div class="flex flex-col gap-[15px] w-full min-h-[274px]">
+    <span class=".mensaje-verificacion">Tu correo registrado es:</span>
+    <div class="flex items-center justify-center py-2">
+      <span class="text-lg font-bold text-primary">{{emailOculto}}</span>
+    </div>
+    <span class=".mensaje-verificacion">Ingresa tu correo electrónico completo para confirmar tu identidad.</span>
+
+    <form [formGroup]="validarEmailForm" (ngSubmit)="continuarPaso2()">
+      <div class="flex flex-col gap-1 w-full">
+        <span class="field-label">Correo electrónico</span>
+        <ion-input 
+          fill="outline" 
+          class="input-login"
+          placeholder="usuario@empresa.com" 
+          formControlName="email"
+          type="email">
+        </ion-input>
+        @if(campoInvalido(validarEmailForm, 'email') && validarEmailForm.get('email')?.errors?.['required']){
+          <span class="texto-error-campo">Este campo es obligatorio</span>
+        }
+        @if(campoInvalido(validarEmailForm, 'email') && validarEmailForm.get('email')?.errors?.['email']){
+          <span class="texto-error-campo">Ingrese un correo electrónico válido</span>
+        }
+      </div>
+    </form>
+  </div>}
+
+  <!-- Paso 3: Código de verificación -->
+  @if(paso === 3){<div class="flex flex-col items-center justify-center gap-3 w-full min-h-[255px]">
+    <div class="flex items-center justify-center">
+      <ion-icon name="mail-outline" class="text-[64px] text-primary"></ion-icon>
+    </div>
+    <span class="text-xl font-bold">Código de verificación</span>
+    <span class="text-sm font-medium text-center">Hemos enviado un código de 8 caracteres a <strong>{{emailCompleto}}</strong></span>
+    <form [formGroup]="codigoForm" (ngSubmit)="continuarPaso3()" class="flex items-center justify-center gap-1.5 flex-nowrap w-full">
+      @for(i of [0,1,2,3,4,5,6,7]; track i){
+        <ion-input #codigoInput fill="outline" [maxlength]="1" inputmode="text" type="text" 
+          class="cont-codigo" [class.cont-codigo-error]="codigoInvalido" 
+          [formControlName]="'c' + (i + 1)"
+          (ionInput)="onCodigoInput($event, i)" (keydown)="onCodigoKeydown($event, i)"
+          (paste)="onCodigoPaste($event, i)">
+        </ion-input>
+      }
+    </form>
+    @if(codigoInvalido){
+      <span class="texto-error-campo">El código ingresado no es válido o ha expirado</span>
+    }
+    <span class="text-xs">
+      @if(timerActivo){
+        El código expira en <strong>{{contadorFormato}}</strong>
+      } @else {
+        El código ha expirado
+      }
+    </span>
+  </div>}
+
+  <!-- Paso 4: Nueva contraseña -->
+  @if(paso === 4){<form [formGroup]="nuevaClave" (ngSubmit)="enviar()" class="flex flex-col gap-3 w-full">
+
+    <div class="card-info">
+      <fa-icon [icon]="farInfoCircle" class="info-icon"></fa-icon>
+      <span class="text-xs xl:text-sm text-[#4F4F4F]">Tu contraseña debe tener mínimo <strong>8 caracteres</strong>, combinar <strong>mayúsculas, minúsculas, números</strong> y al menos un <strong>carácter especial</strong>.</span>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Nueva contraseña</span>
+      <ion-input 
+        [class.input-error]="claveInvalida('clave')"
+        fill="outline" 
+        class="input-login"
+        [type]="mostrar1 ? 'text' : 'password'" 
+        placeholder="**********" 
+        formControlName="clave">
+        <ion-button
+          fill="clear" slot="end"
+          (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
+          (mousedown)="$event.preventDefault(); $event.stopPropagation()"
+          (click)="mostrarOcultar1($event)">
+          <fa-icon [icon]="mostrar1 ? farEye : farEyeSlash" class="password-toggle-icon"></fa-icon>
+        </ion-button>
+      </ion-input>
+      @if(claveInvalida('clave')){
+        <span class="texto-error-campo">{{getCampoError('clave')}}</span>
+      }
+      @if(claveValue.length > 0){
+      <div class="flex flex-col gap-1 mt-2">
+        <span class="text-xs" [class.text-green-600]="reglaMinLength" [class.text-red-500]="!reglaMinLength">
+          {{reglaMinLength ? '✓' : '✗'}} Mínimo 8 caracteres
+        </span>
+        <span class="text-xs" [class.text-green-600]="reglaMayuscula" [class.text-red-500]="!reglaMayuscula">
+          {{reglaMayuscula ? '✓' : '✗'}} Al menos una mayúscula
+        </span>
+        <span class="text-xs" [class.text-green-600]="reglaMinuscula" [class.text-red-500]="!reglaMinuscula">
+          {{reglaMinuscula ? '✓' : '✗'}} Al menos una minúscula
+        </span>
+        <span class="text-xs" [class.text-green-600]="reglaNumero" [class.text-red-500]="!reglaNumero">
+          {{reglaNumero ? '✓' : '✗'}} Al menos un número
+        </span>
+        <span class="text-xs" [class.text-green-600]="reglaEspecial" [class.text-red-500]="!reglaEspecial">
+          {{reglaEspecial ? '✓' : '✗'}} Al menos un carácter especial (!@#$%...)
+        </span>
+      </div>
+      }
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Confirmar contraseña</span>
+      <ion-input 
+        [class.input-error]="claveInvalida('confirmarClave') || ((nuevaClave.get('confirmarClave')?.dirty || nuevaClave.get('confirmarClave')?.touched) && !nuevaClave.get('confirmarClave')?.errors && nuevaClave.errors?.['clavesNoCoinciden'])"
+        fill="outline" 
+        [type]="mostrar2 ? 'text' : 'password'" 
+        class="input-login"
+        placeholder="**********" 
+        formControlName="confirmarClave">
+        <ion-button
+          fill="clear" slot="end"
+          (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
+          (mousedown)="$event.preventDefault(); $event.stopPropagation()"
+          (click)="mostrarOcultar2($event)">
+          <fa-icon [icon]="mostrar2 ? farEye : farEyeSlash" class="password-toggle-icon"></fa-icon>
+        </ion-button>
+      </ion-input>
+      @if(claveInvalida('confirmarClave')){
+        <span class="texto-error-campo">{{getCampoError('confirmarClave')}}</span>
+      }
+      <!-- @if(nuevaClave.get('confirmarClave')?.touched && !nuevaClave.get('confirmarClave')?.errors?.['required'] && nuevaClave.errors?.['clavesNoCoinciden']){
+        <span class="texto-error-campo">Las contraseñas no coinciden</span>
+      } -->
+    </div>
+  </form>}
+
+  <!-- Botones -->
+  <div class="submit-row !flex-col">
+    @if(paso === 1){
+      <ion-button class="button-login" (click)="continuarPaso1()" [disabled]="isLoading">
+        @if(isLoading){<ion-spinner name="crescent" class="mr-2"></ion-spinner>}
+        Continuar
+      </ion-button>
+    }
+
+    @if(paso === 2){
+      <ion-button class="button-login" (click)="continuarPaso2()" [disabled]="isLoading">
+        @if(isLoading){<ion-spinner name="crescent" class="mr-2"></ion-spinner>}
+        Verificar correo
+      </ion-button>
+    }
+
+    @if(paso === 3){
+      <ion-button class="button-login" fill="outline" [disabled]="timerActivo || isLoading" (click)="reenviarCodigo()">
+        Reenviar código
+      </ion-button>
+      <ion-button class="button-login" (click)="continuarPaso3()" [disabled]="isLoading">
+        @if(isLoading){<ion-spinner name="crescent" class="mr-2"></ion-spinner>}
+        Verificar código
+      </ion-button>
+    }
+
+    @if(paso === 4){
+      <ion-button class="button-login" (click)="enviar()" [disabled]="isLoading">
+        @if(isLoading){<ion-spinner name="crescent" class="mr-2"></ion-spinner>}
+        Cambiar contraseña
+      </ion-button>
+    }
+  </div>
+</div>

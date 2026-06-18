@@ -1,0 +1,113 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ModalController } from '@ionic/angular';
+import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
+import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
+import { UsuarioAdminDto } from '../../models/admin.models';
+
+@Component({
+  selector: 'app-admin-usuarios',
+  templateUrl: './admin-usuarios.component.html',
+  styleUrls: ['./admin-usuarios.component.scss'],
+  standalone: false,
+})
+export class AdminUsuariosComponent implements OnInit {
+
+  private readonly api = inject(AdminSeguridadApiService);
+  private readonly fb = inject(FormBuilder);
+  private readonly modalCtrl = inject(ModalController);
+
+  usuarios: UsuarioAdminDto[] = [];
+  loading = true;
+  filtro = '';
+  mostrandoForm = false;
+  editandoId: number | null = null;
+  formCrear!: FormGroup;
+  formEditar!: FormGroup;
+
+  ngOnInit(): void {
+    this.formCrear = this.fb.group({
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
+      username: ['', [Validators.required, Validators.maxLength(50)]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      nombres: ['', [Validators.required, Validators.maxLength(100)]],
+      apellidos: ['', [Validators.required, Validators.maxLength(100)]],
+      flagAdminSistema: [false],
+    });
+    this.formEditar = this.fb.group({
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
+      username: ['', [Validators.required, Validators.maxLength(50)]],
+      nombres: ['', [Validators.required, Validators.maxLength(100)]],
+      apellidos: ['', [Validators.required, Validators.maxLength(100)]],
+      activo: [true],
+      bloqueado: [false],
+      flagAdminSistema: [false],
+    });
+    this.cargar();
+  }
+
+  cargar(): void {
+    this.loading = true;
+    this.api.listarUsuarios().subscribe({
+      next: r => { this.loading = false; this.usuarios = r.data ?? []; },
+      error: () => { this.loading = false; },
+    });
+  }
+
+  get usuariosFiltrados(): UsuarioAdminDto[] {
+    if (!this.filtro.trim()) return this.usuarios;
+    const q = this.filtro.toLowerCase();
+    return this.usuarios.filter(u =>
+      u.username.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      u.nombreCompleto.toLowerCase().includes(q)
+    );
+  }
+
+  get formActivo(): FormGroup { return this.editandoId != null ? this.formEditar : this.formCrear; }
+  get esCreacion(): boolean { return this.editandoId == null; }
+
+  abrirCrear(): void {
+    this.editandoId = null;
+    this.formCrear.reset({ email: '', username: '', password: '', nombres: '', apellidos: '', flagAdminSistema: false });
+    this.mostrandoForm = true;
+  }
+
+  abrirEditar(u: UsuarioAdminDto): void {
+    this.editandoId = u.id;
+    this.formEditar.patchValue({
+      email: u.email, username: u.username,
+      nombres: u.nombres, apellidos: u.apellidos,
+      activo: u.activo ?? true, bloqueado: u.bloqueado ?? false,
+      flagAdminSistema: u.flagAdminSistema ?? false,
+    });
+    this.mostrandoForm = true;
+  }
+
+  cancelar(): void { this.mostrandoForm = false; this.editandoId = null; }
+
+  campoInvalido(control: string): boolean {
+    const campo = this.formActivo.get(control);
+    return !!campo && campo.invalid && (campo.dirty || campo.touched);
+  }
+
+  guardar(): void {
+    const form = this.formActivo;
+    if (form.invalid) { 
+      form.markAllAsTouched(); 
+      return; 
+    }
+    const body = form.getRawValue();
+    const obs = this.editandoId != null
+      ? this.api.actualizarUsuario(this.editandoId, body)
+      : this.api.crearUsuario(body);
+    obs.subscribe({
+      next: () => { this.mostrandoForm = false; this.editandoId = null; this.cargar(); },
+      error: async (err: any) => {
+        const modal = await this.modalCtrl.create({ component: ModalConfirmationComponent, cssClass: 'promo',
+          componentProps: { titlemodal: '', tipemodal: 'error', title: 'Error', message: err?.error?.message ?? 'Error al guardar', btnOkTxt: 'Aceptar', mostrarCancelar: false } });
+        await modal.present();
+      },
+    });
+  }
+}

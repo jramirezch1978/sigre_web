@@ -1,0 +1,102 @@
+<div class="admin-page ion-padding admin-page--fluid">
+  <h1 class="admin-page__title">Acciones por rol</h1>
+  <p class="admin-page__subtitle">Gestione las opciones de menú y acciones asignadas a cada rol.</p>
+
+  @if (!rolSeleccionado) {
+    @if (loading) {
+      <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+    }
+    @if (!loading) {
+      <div class="admin-table-wrapper">
+        <table class="admin-table admin-table--plain">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th class="admin-acciones-col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of roles; track r.id) {
+              <tr (click)="seleccionarRol(r)" (dblclick)="seleccionarRol(r)">
+                <td>{{ r.codigo }}</td>
+                <td>{{ r.nombre }}</td>
+                <td>{{ r.esAdmin ? 'Administrador' : 'Normal' }}</td>
+                <td class="admin-acciones-col">
+                  <div class="admin-acciones-wrap" (click)="$event.stopPropagation()">
+                    <ion-button fill="clear" size="small" class="admin-acciones-btn" title="Gestionar opciones del rol"
+                      (click)="seleccionarRol(r)">
+                      <ion-icon slot="icon-only" name="layers-outline"></ion-icon>
+                    </ion-button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" style="text-align:center;color:#6b7280">No hay roles.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (rolSeleccionado) {
+    <ion-button fill="clear" size="small" (click)="volver()">
+      <ion-icon name="arrow-back-outline" slot="start"></ion-icon> Volver a roles
+    </ion-button>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ rolSeleccionado.codigo }} — {{ rolSeleccionado.nombre }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <h3>Asignar opción de menú</h3>
+        <div class="form-row">
+          <ion-item>
+            <ion-select [(ngModel)]="opcionIdAsignar" placeholder="Seleccione opción">
+              @for (o of opcionesDisponibles; track o.id) {
+                <ion-select-option [value]="o.id">{{ o.codigo ?? o.id }} — {{ o.nombre }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          <ion-button [disabled]="!opcionIdAsignar" (click)="asignarOpcion()" color="primary">Asignar</ion-button>
+        </div>
+
+        @if (loadingDetalle) {
+          <ion-spinner name="crescent" style="margin-top:1rem"></ion-spinner>
+        }
+
+        <ion-accordion-group [multiple]="true" style="margin-top:1rem">
+          @for (rom of opcionesDelRol; track rom.id) {
+            <ion-accordion [value]="'op-' + rom.opcionMenuId">
+              <ion-item slot="header">
+                <ion-label>
+                  <strong>{{ rom.opcionMenu?.codigo ?? rom.opcionMenuId }}</strong> — {{ rom.opcionMenu?.nombre ?? '?' }}
+                </ion-label>
+                <ion-button slot="end" fill="clear" color="danger" size="small" (click)="$event.stopPropagation(); quitarOpcion(rom.opcionMenuId)">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </ion-button>
+              </ion-item>
+              <div class="ion-padding" slot="content">
+                <p style="margin-bottom:0.5rem;color:var(--ion-color-medium)">Acciones (marque las permitidas):</p>
+                @for (ac of accionesGlobal; track ac.id) {
+                  <ion-item lines="none">
+                    <ion-checkbox
+                      [checked]="accionEstaPermitida(rom.opcionMenuId, ac.id)"
+                      (ionChange)="toggleAccion(rom.opcionMenuId, ac.id, $any($event).detail.checked)"
+                      labelPlacement="end">
+                      {{ ac.codigo }} — {{ ac.nombre }}
+                    </ion-checkbox>
+                  </ion-item>
+                }
+              </div>
+            </ion-accordion>
+          } @empty {
+            <ion-item><ion-label color="medium">Este rol no tiene opciones de menú asignadas.</ion-label></ion-item>
+          }
+        </ion-accordion-group>
+      </ion-card-content>
+    </ion-card>
+  }
+</div>

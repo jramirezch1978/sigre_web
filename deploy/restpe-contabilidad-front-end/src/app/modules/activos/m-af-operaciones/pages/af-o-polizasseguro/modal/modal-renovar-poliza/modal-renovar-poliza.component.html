@@ -1,0 +1,140 @@
+<div class="contenedor-modal">
+  <!-- Header -->
+  <div class="header">
+    <h2 class="text-sm font-bold">Renovar Póliza de Seguro: {{ poliza?.codigo }}</h2>
+    <fa-icon [icon]="fasXmark" class="text-sm cursor-pointer" (click)="cerrarModal()"></fa-icon>
+  </div>
+
+  <!-- Body -->
+  <div class="cont-modal">
+    <div class="contenedor-formulario !p-0 ">
+      <!-- N° de Póliza -->
+      <div class="contenido-formulario">
+        <label class="label">
+          N° de Póliza <span class="text-red-500">*</span>
+        </label>
+        <ion-input 
+          fill="outline" 
+          [(ngModel)]="numeroPoliza"
+          class="w-36">
+        </ion-input>
+      </div>
+
+      <!-- Fecha de Inicio -->
+      <div class="contenido-formulario">
+        <label class="label">
+          Fecha de Inicio <span class="text-red-500">*</span>
+        </label>
+        <app-base-calendar-new
+          class="w-[178px] flex-none"
+          mode="single"
+          [initialDate]="fechaInicio"
+          (dateSelected)="onFechaInicioSelected($event)">
+        </app-base-calendar-new>
+      </div>
+
+      <!-- Fecha de Vencimiento -->
+      <div class="contenido-formulario">
+        <label class="label">
+          Fecha de Vencimiento <span class="text-red-500">*</span>
+        </label>
+        <app-base-calendar-new
+          class="w-[178px] flex-none"
+          mode="single"
+          [initialDate]="fechaVencimiento"
+          (dateSelected)="onFechaVencimientoSelected($event)">
+        </app-base-calendar-new>
+      </div>
+
+      <!-- Documento soporte -->
+      <div class="contenido-formulario">
+        <label class="label">
+          Documento soporte <span class="text-red-500">*</span>
+        </label>
+        <div class="flex items-center gap-2 w-40 h-[28px] border border-text-5 rounded-sm px-2"
+          [ngClass]="{'bg-Background-light': documentoSoporte}">
+          @if (documentoSoporte) {
+            <span class="text-xxs flex-1 line-clamp-1">{{ documentoSoporte }}</span>
+            <fa-icon 
+              [icon]="farCircleXmark" 
+              class="text-danger cursor-pointer text-xs"
+              (click)="removeFile()">
+            </fa-icon>
+          } @else {
+            <input 
+              type="file" 
+              #fileInput
+              (change)="onFileSelected($event)"
+              class="hidden">
+            <span 
+              class="text-xxs cursor-pointer flex-1 line-clamp-1 underline text-primary"
+              (click)="fileInput.click()">
+              Haz clic para subir un archivo
+            </span>
+          }
+        </div>
+      </div>
+
+      <!-- Suma Asegurada -->
+      <div class="contenido-formulario">
+        <label class="label">
+          Suma Asegurada <span class="text-red-500">*</span>
+        </label>
+        <ion-input 
+          fill="outline" 
+          type="number"
+          [(ngModel)]="sumaAsegurada"
+          class="w-24">
+        </ion-input>
+      </div>
+
+      <!-- Prima Total -->
+      <div class="contenido-formulario">
+        <label class="label">
+          Prima Total <span class="text-red-500">*</span>
+        </label>
+        <ion-input 
+          fill="outline" 
+          type="number"
+          [(ngModel)]="primaTotal"
+          class="w-24">
+        </ion-input>
+      </div>
+
+      <!-- Deducible -->
+      <div class="contenido-formulario">
+        <label class="label">
+          Deducible <span class="text-red-500">*</span>
+        </label>
+        <div class="flex items-center">
+          <ion-input 
+            fill="outline" 
+            type="number"
+            [(ngModel)]="deducible"
+            class="w-14">
+          </ion-input>
+          <ion-select 
+            fill="outline" 
+            interface="popover"
+            [(ngModel)]="tipoDeducible"
+            class="w-12 min-w-12">
+            <ion-select-option value="%">%</ion-select-option>
+            <ion-select-option value="S/">S/</ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+
+    </div>
+
+      <!-- Footer -->
+      <div class="contenedor-btn !p-0">
+        <ion-button fill="outline" color="medium" (click)="cancelarRenovacion()">
+          Cancelar
+        </ion-button>
+        <ion-button (click)="renovarPoliza()">
+          Renovar
+        </ion-button>
+      </div>
+  </div>
+
+</div>

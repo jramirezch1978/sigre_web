@@ -1,0 +1,103 @@
+<div class="w-[700px] flex flex-col bg-[#e7e7e7] p-1.5 gap-0.5 rounded-none">
+  <div class="flex justify-between items-center w-full py-1">
+    <div class="flex items-center gap-1 ">
+      <fa-icon [icon]="fasArrowsRotateReverse" class="text-xs text-primary"></fa-icon>
+      <span class="text-sm font-bold">Recalcular productos</span>
+    </div>
+    <fa-icon [icon]="farXmark" class="text-sm cursor-pointer" (click)="dismissModal()"></fa-icon>
+  </div>
+  <form [formGroup]="filtrarForm">
+    <div class="flex flex-col bg-white p-2.5 gap-2 rounded-none"> 
+      <div class="flex gap-5 w-full">
+        <div class="card-pasos justify-end w-full">
+          <div class="flex flex-col gap-1 w-full mb-2">
+            <div class="flex items-center gap-2 w-full">
+              <div class="w-10">
+                <img src="assets/imagenes/emptyBuscar.png" alt="">
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-sm font-bold text-primary">Paso 01</span>
+                <span class="text-xs font-bold text-text-85">Aplica los siguientes filtros</span>
+              </div>
+            </div>
+            <div class="flex gap-2 px-2.5 py-2 rounded bg-[#FAFCFE]">
+              <fa-icon [icon]="farInfoCircle" class="text-xs"></fa-icon>
+              <span class="text-xxs">Selecciona la fecha y el almacén para ejecutar el recálculo de los productos seleccionados.</span>
+            </div>
+          </div>
+          <div class="contenedor-formulario !p-0">
+
+            <div class="contenido-formulario">
+              <span class="label !w-[110px]">Fecha de corte</span>
+              <div class="flex flex-col gap-1">
+                <app-base-calendar-new 
+                class="flex-none" 
+                mode="range" 
+                [initialStartDate]="startDate" 
+                [initialEndDate]="endDate"
+                [minDate]="minDate" 
+                [maxDate]="maxDate" 
+                position="center" 
+                (dateRangeSelected)="filtrarPorFechas($event)">
+                </app-base-calendar-new>
+                <div class="flex items-center gap-1 text-xxss">
+                  <fa-icon [icon]="farInfoCircle"></fa-icon>
+                  <span>Fecha límite de reproceso de movimientos</span>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label !w-[110px]">Almacén</span>
+              <app-autocomplete
+                formControlName="almacen"
+                [items]="almacenes()"
+                displayKey="nombre"
+                valueKey="id"
+                placeholder="Selecciona un almacén"
+                (itemSelected)="onAlmacenSeleccionado($event)">
+              </app-autocomplete>
+            </div>
+          </div>
+        </div>
+        <div class="card-pasos w-full">
+          <div class="flex flex-col gap-1 w-full">
+            <div class="flex items-center gap-2 w-full">
+              <div class="w-10">
+                <img src="assets/imagenes/formato.svg" alt="">
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-sm font-bold text-primary">Paso 02</span>
+                <span class="text-xs font-bold text-text-85">Descargar el formato del reporte</span>
+              </div>
+            </div>
+            <div class="flex gap-2 px-2.5 py-2 rounded bg-[#FAFCFE]">
+              <fa-icon [icon]="farInfoCircle" class="text-xs"></fa-icon>
+              <span class="text-xxs">Elige el formato en el q deseas descargar el recálculo de los productos seleccionados</span>
+            </div>
+          </div>
+          
+          <div class="flex justify-center w-full my-auto">
+            <ion-button fill="outline" class="w-[115px] flex-none text-text-85" id="recalculo">
+              <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+              <span>Exportar</span>
+              <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+            </ion-button>
+            <ion-popover trigger="recalculo" triggerAction="click" [dismissOnSelect]="true"
+              class="popoverCustomButtonUbicacionActivos " [showBackdrop]="false">
+              <ng-template>
+                <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarExcel()">Exportar Excel</ion-item>
+                <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarPdf()">Exportar PDF</ion-item>
+              </ng-template>
+            </ion-popover>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end w-full gap-3 mt-2">
+        <ion-button class="w-[68px] text-text-85" fill="outline" color="medium" (click)="dismissModal()">Cancelar</ion-button>
+        <ion-button class="w-[68px]" (click)="dismissModal()" [disabled]="!filtrarForm.validator">Guardar</ion-button>
+      </div>
+    </div>
+  </form>
+</div>

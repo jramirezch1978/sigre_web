@@ -1,0 +1,374 @@
+<div class="contenedor-principal">
+  <!-- @if(!mostrarpanelizquierdo){
+    <div class="flex items-center justify-center w-[15px] bg-[#E6E8F4]" (click)="mostrarpanelizquierdo = true">
+      <fa-icon [icon]="fasChevronsRight" class="text-xs text-primary cursor-pointer"></fa-icon>
+    </div>
+  } -->
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de configuraciones de nómina (Selecciona una configuración para visualizarla)</span>
+      <!-- <fa-icon [icon]="fasChevronsLeft" class="text-xs text-primary cursor-pointer" (click)="mostrarpanelizquierdo = false"></fa-icon> -->
+    </div>
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Ingresa el código o nombre y presiona enter"
+            style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button fill="outline" class="text-text-85 w-[115px]" id="calendariospago">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="calendariospago" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+        <ion-button class="w-fit" [disabled]="modoFormulario === 'creacion'" (click)="nuevaConfiguracion()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span>Nueva configuración</span>
+        </ion-button>
+      </div>
+    </div>
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular 
+        style="width: 100%; height: 100%;" 
+        class="" 
+        [rowData]="rowData" 
+        [columnDefs]="columnDefs"
+        [pagination]="true" 
+        [rowHeight]="20" 
+        [localeText]="localeText" 
+        [headerHeight]="24"
+        [paginationPageSize]="20" 
+        [rowSelection]="'single'"
+        [suppressLoadingOverlay]="true"
+        (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)"/>
+    </div>
+  </div>
+  <div class="panel-derecho" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      @if(modoFormulario === 'creacion') {
+        <span>Nueva configuración de nómina</span>
+      } @else {
+        <span>Configuración de nómina</span>
+      }
+    </div>
+    @if(modoFormulario === 'edicion') {
+      <div class="cont-actualizaciones">
+        <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+          <fa-icon [icon]="farBook" ></fa-icon>
+          <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+        </div>
+      </div>
+    }
+    <form [formGroup]="configForm" class="contenedor-formulario">
+        <div class="contenido-formulario">
+          <span class="label">Nombre de configuración <span class="text-danger">*</span></span>
+          <ion-input fill="outline" type="text" class="w-[210px]" placeholder="Ingresa el nombre de configuración" 
+            formControlName="nombreConfiguracion"></ion-input>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Periodo <span class="text-danger">*</span></span>
+          <app-month-year-picker class="w-[163px]" placeholder="Seleccione el periodo"
+           position="right" [selectedMonth]="periodoMes" [selectedYear]="periodoAnio" (monthYearChange)="onPeriodoChange($event)">
+          </app-month-year-picker>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Frecuencia de pago <span class="text-danger">*</span></span>
+          <ion-select fill="outline" placeholder="Seleccione frecuencia de pago" class="w-[163px]" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            interface="popover" formControlName="frecuenciaPagoSeleccionada" (ionChange)="onFrecuenciaChange()">
+            <ion-select-option *ngFor="let frecuencia of frecuenciasPago" [value]="frecuencia.value">{{ frecuencia.label }}</ion-select-option>
+          </ion-select>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Regla de pago en feriado <span class="text-danger">*</span></span>
+          <ion-select fill="outline" placeholder="Seleccione regla de pago" class="w-[163px]" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            interface="popover" formControlName="reglaPagoFeriado">
+            <ion-select-option value="anterior">Pagar día hábil anterior</ion-select-option>
+            <ion-select-option value="posterior">Pagar día hábil posterior</ion-select-option>
+            <ion-select-option value="mantener">Mantener fecha</ion-select-option>
+          </ion-select>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Estado de pago <span class="text-danger">*</span></span>
+          <ion-select fill="outline" placeholder="Seleccione estado de pago" class="w-[163px]" toggleIcon="chevron-down" expandedIcon="chevron-up"
+          interface="popover" formControlName="estadoPago">
+            <ion-select-option value="Activo">Activo</ion-select-option>
+            <ion-select-option value="Inactivo">Inactivo</ion-select-option>
+          </ion-select>
+        </div>
+      </form> 
+      <div class="cont-title">
+        <span>Configuración de pago @if(frecuenciaPagoSeleccionada !== null){ {{frecuenciaPagoSeleccionada}} }</span>
+      </div>
+      <div class="h-full" [ngClass]="{'relative': frecuenciaPagoSeleccionada === 'Semanal'}">
+      @if(frecuenciaPagoSeleccionada === 'Mensual' || frecuenciaPagoSeleccionada === 'Personalizado' ) {
+      <form class="contenedor-formulario">
+        <!-- mensual -->
+         <div class="contenido-formulario">
+          <span class="label">Fecha de inicio <span class="text-danger">*</span></span>
+          <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="mensualFechaInicio || startDate"
+           position="right" (dateSelected)="mensualFechaInicio = $event">
+          </app-base-calendar-new>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Fecha de fin<span class="text-danger">*</span></span>
+          <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="mensualFechaFin || startDate"
+           position="right" (dateSelected)="mensualFechaFin = $event">
+          </app-base-calendar-new>
+        </div>
+        <div class="contenido-formulario">
+          <span class="label">Día de pago <span class="text-danger">*</span></span>
+          <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="mensualDiaPago || startDate"
+           position="right" (dateSelected)="mensualDiaPago = $event">
+          </app-base-calendar-new>
+        </div>
+        <!-- <div class="contenido-formulario">
+          <span class="label">Día de corte <span class="text-danger">*</span></span>
+          <div class="flex flex-col gap-1">
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate"
+              position="right">
+            </app-base-calendar-new>
+            <div class="flex flex-row gap-1 text-xxss font-normal">
+              <fa-icon [icon]="farInfoCircle"></fa-icon>
+              <span class="">Día de cierre del periodo</span>
+            </div>
+          </div>
+        </div> -->
+      </form>
+      }
+      <!-- semanal -->
+      @if(frecuenciaPagoSeleccionada === 'Semanal') {
+      <form action="" class="contenedor-formulario">
+          <div class="flex flex-row gap-1 text-xs font-medium">
+            <fa-icon [icon]="farCalendar"></fa-icon>
+            <span>Primera semana</span>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de inicio <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana1.inicio || startDate"
+            position="right" (dateSelected)="semanalSemana1.inicio = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de fin<span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana1.fin || startDate"
+            position="right" (dateSelected)="semanalSemana1.fin = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Día de pago <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana1.pago || startDate"
+            position="right" (dateSelected)="semanalSemana1.pago = $event">
+            </app-base-calendar-new>
+          </div>
+          <!-- <div class="contenido-formulario">
+            <span class="label">Día de corte <span class="text-danger">*</span></span>
+            <div class="flex flex-col gap-1">
+              <app-base-calendar-new class="w-[163px]" mode="single" [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate"
+                position="right">
+              </app-base-calendar-new>
+              <div class="flex flex-row gap-1 text-xxss font-normal">
+                <fa-icon [icon]="farInfoCircle"></fa-icon>
+                <span class="">Día de cierre del periodo</span>
+              </div>
+            </div>
+          </div> -->
+          <div class="flex flex-row gap-1 text-xs font-medium pt-1">
+            <fa-icon [icon]="farCalendar"></fa-icon>
+            <span>Segunda semana</span>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de inicio <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana2.inicio || startDate"
+            position="right" (dateSelected)="semanalSemana2.inicio = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de fin<span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana2.fin || startDate"
+            position="right" (dateSelected)="semanalSemana2.fin = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Día de pago <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana2.pago || startDate"
+            position="right" (dateSelected)="semanalSemana2.pago = $event">
+            </app-base-calendar-new>
+          </div>
+          <!-- <div class="contenido-formulario">
+            <span class="label">Día de corte <span class="text-danger">*</span></span>
+            <div class="flex flex-col gap-1">
+              <app-base-calendar-new class="w-[163px]" mode="single" [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate"
+                position="right">
+              </app-base-calendar-new>
+              <div class="flex flex-row gap-1 text-xxss font-normal">
+                <fa-icon [icon]="farInfoCircle"></fa-icon>
+                <span class="">Día de cierre del periodo</span>
+              </div>
+            </div>
+          </div> -->
+          <div class="flex flex-row gap-1 text-xs font-medium pt-1">
+            <fa-icon [icon]="farCalendar"></fa-icon>
+            <span>Tercera semana</span>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de inicio <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana3.inicio || startDate"
+            position="right" (dateSelected)="semanalSemana3.inicio = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de fin<span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana3.fin || startDate"
+            position="right" (dateSelected)="semanalSemana3.fin = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Día de pago <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana3.pago || startDate"
+            position="right" (dateSelected)="semanalSemana3.pago = $event">
+            </app-base-calendar-new>
+          </div>
+          <!-- <div class="contenido-formulario">
+            <span class="label">Día de corte <span class="text-danger">*</span></span>
+            <div class="flex flex-col gap-1">
+              <app-base-calendar-new class="w-[163px]" mode="single" [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate"
+                position="right">
+              </app-base-calendar-new>
+              <div class="flex flex-row gap-1 text-xxss font-normal">
+                <fa-icon [icon]="farInfoCircle"></fa-icon>
+                <span class="">Día de cierre del periodo</span>
+              </div>
+            </div>
+          </div> -->
+          <div class="flex flex-row gap-1 text-xs font-medium pt-1">
+            <fa-icon [icon]="farCalendar"></fa-icon>
+            <span>Cuarta semana</span>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de inicio <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana4.inicio || startDate"
+            position="right" (dateSelected)="semanalSemana4.inicio = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de fin<span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana4.fin || startDate"
+            position="right" (dateSelected)="semanalSemana4.fin = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Día de pago <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="semanalSemana4.pago || startDate"
+            position="right" (dateSelected)="semanalSemana4.pago = $event">
+            </app-base-calendar-new>
+          </div>
+          <!-- <div class="contenido-formulario">
+            <span class="label">Día de corte <span class="text-danger">*</span></span>
+            <div class="flex flex-col gap-1">
+              <app-base-calendar-new class="w-[163px]" mode="single" [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate"
+                position="right">
+              </app-base-calendar-new>
+              <div class="flex flex-row gap-1 text-xxss font-normal">
+                <fa-icon [icon]="farInfoCircle"></fa-icon>
+                <span class="">Día de cierre del periodo</span>
+              </div>
+            </div>
+          </div> -->
+      </form>
+      }
+      <!-- quincenal -->
+      @if(frecuenciaPagoSeleccionada === 'Quincenal') {
+      <form action="" class="contenedor-formulario">
+          <div class="flex flex-row gap-1 text-xs font-medium">
+            <fa-icon [icon]="farCalendar"></fa-icon>
+            <span>Primera quincena</span>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de inicio <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="quincenalQuincena1.inicio || startDate"
+            position="right" (dateSelected)="quincenalQuincena1.inicio = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de fin<span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="quincenalQuincena1.fin || startDate"
+            position="right" (dateSelected)="quincenalQuincena1.fin = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Día de pago <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="quincenalQuincena1.pago || startDate"
+            position="right" (dateSelected)="quincenalQuincena1.pago = $event">
+            </app-base-calendar-new>
+          </div>
+          <!-- <div class="contenido-formulario">
+            <span class="label">Día de corte <span class="text-danger">*</span></span>
+            <div class="flex flex-col gap-1">
+              <app-base-calendar-new class="w-[163px]" mode="single" [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate"
+                position="right">
+              </app-base-calendar-new>
+              <div class="flex flex-row gap-1 text-xxss font-normal">
+                <fa-icon [icon]="farInfoCircle"></fa-icon>
+                <span class="">Día de cierre del periodo</span>
+              </div>
+            </div>
+          </div> -->
+          <div class="flex flex-row gap-1 text-xs font-medium pt-1">
+            <fa-icon [icon]="farCalendar"></fa-icon>
+            <span>Segunda quincena</span>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de inicio <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="quincenalQuincena2.inicio || startDate"
+            position="right" (dateSelected)="quincenalQuincena2.inicio = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Fecha de fin<span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="quincenalQuincena2.fin || startDate"
+            position="right" (dateSelected)="quincenalQuincena2.fin = $event">
+            </app-base-calendar-new>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Día de pago <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="w-[163px]" mode="single" [initialStartDate]="quincenalQuincena2.pago || startDate"
+            position="right" (dateSelected)="quincenalQuincena2.pago = $event">
+            </app-base-calendar-new>
+          </div>
+          <!-- <div class="contenido-formulario">
+            <span class="label">Día de corte <span class="text-danger">*</span></span>
+            <div class="flex flex-col gap-1">
+              <app-base-calendar-new class="w-[163px]" mode="single" [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate"
+                position="right">
+              </app-base-calendar-new>
+              <div class="flex flex-row gap-1 text-xxss font-normal">
+                <fa-icon [icon]="farInfoCircle"></fa-icon>
+                <span class="">Día de cierre del periodo</span>
+              </div>
+            </div>
+          </div> -->
+      </form>
+      }
+      </div>
+      <div class="contenedor-btn">
+
+        @if(modoFormulario === 'creacion') {
+          <ion-button (click)="registrar()"><span>Registrar</span></ion-button>
+        } @else {
+          <ion-button class="w-[75px]" (click)="guardar()"><span>Guardar</span></ion-button>
+        }
+          <ion-button class="w-fit" fill="outline" color="medium" (click)="cancelar()"><span>Cancelar</span></ion-button>
+      </div>
+  </div>
+</div>

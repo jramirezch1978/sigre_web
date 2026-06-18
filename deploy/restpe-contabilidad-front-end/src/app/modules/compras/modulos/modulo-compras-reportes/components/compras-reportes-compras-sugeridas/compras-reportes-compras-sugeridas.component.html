@@ -1,0 +1,137 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Generación de sugerencia de cantidad óptima y proveedor sugerido</span>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="buscador">
+        <fa-icon [icon]="farSearch"></fa-icon>
+        <ion-input fill="outline" placeholder="Buscar por código, producto o categoría" class="w-full" style="--padding-start:30px"></ion-input>
+      </div>
+      <div class="filtros-absolutos">
+        <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+          [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="right"
+          (dateRangeSelected)="filtrarPorFechas($event)">
+        </app-base-calendar-new>
+        <ion-button class="w-[115px] flex-none text-text-85" id="reportegestioncomprasugerido" fill="outline">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon> 
+        </ion-button>
+        <ion-popover trigger="reportegestioncomprasugerido" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarPdf()">Exportar PDF</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarCsv()">Exportar Excel</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+    <div class="contenedor-primera-tabla" [appLoader]="loading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular 
+        style="width: 100%; height: 100%;" 
+        class=""
+        [rowData]="rowData" 
+        [columnDefs]="colDefs" 
+        [columnTypes]="columnTypes"
+        [gridOptions]="gridOptions"
+        [pagination]="true"
+        [localeText]="localeText"
+        [rowHeight]="20"
+        [headerHeight]="24"
+        [paginationPageSize]="20"
+        (gridReady)="onGridReady($event)"
+      />
+    </div>
+  </div>
+  <div class="panel-derecho" [appLoader]="loading()" [ngClass]="{'!w-full flex-1': !mostrartabla}">
+    <div class="cont-title">
+      <span>Análisis y sugerencias para: {{ filaSeleccionada ? filaSeleccionada.sugerencia_compra_codigo : 'Seleccionar producto' }}</span>
+    </div>
+    <div class="cont-cards">
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Ahorro estimado x proveedor sugerido</span>
+          @if(loading()){          
+            <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+          }
+          @else{
+          <span class="cantidad">12</span>
+          }
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasHandHoldingDollar"></fa-icon>
+        </div>
+      </div>
+      <div class="card">
+        <div class="contenido">
+          <span class="title">Cumplimiento histórico del proveedor</span>
+          @if(loading()){          
+            <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+          }
+          @else{
+          <span class="cantidad">S/ 999,999.00</span>
+          }
+        </div>
+        <div class="icon">
+          <fa-icon [icon]="fasPerson"></fa-icon>
+        </div>
+      </div>
+    </div>
+    <form action="" [formGroup]="AnalisisSugerenciasForm" class="contenedor-formulario" style="height: calc(100vh - 290px);">
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Fecha registro</span>
+        <ion-input fill="outline" formControlName="fechaRegistro" type="date" class="max-w-[110px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Nombre de producto</span>
+        <ion-input fill="outline" formControlName="nombreProducto" class="max-w-[165px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Consumo promedio (últimos 30)</span>
+        <ion-input fill="outline" formControlName="consumoPromedio" class="max-w-[165px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Punto de reposición</span>
+        <ion-input fill="outline" formControlName="puntoReposicion" class="max-w-[165px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Cantidad óptima sugerida</span>
+        <ion-input fill="outline" formControlName="cantidadOptimaSugerida" class="max-w-[165px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Proveedor sugerido</span>
+        <ion-input fill="outline" formControlName="proveedorSugerido" class="max-w-[165px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Moneda</span>
+        <ion-input fill="outline" formControlName="moneda" class="max-w-[165px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Precio promedio histórico</span>
+        <ion-input fill="outline" formControlName="precioPromedioHistorico" class="max-w-[165px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Condición pago proveedor</span>
+        <ion-input fill="outline" formControlName="condicionPagoProveedor" class="max-w-[165px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Descuento Promedio (%)</span>
+        <ion-input fill="outline" formControlName="descuentoPromedio" class="w-[100px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Costo total estimado</span>
+        <ion-input fill="outline" formControlName="costoTotalEstimado" class="max-w-[165px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Sucursal / Almacén</span>
+        <ion-input fill="outline" formControlName="sucursalAlmacen" class="max-w-[165px]"></ion-input>
+      </div>
+      <div class="contenido-formulario">
+        <span class="label !w-[150px] 2xl:!w-[180px]">Estado de sugerencia</span>
+        <ion-input fill="outline" formControlName="estadoSugerencia" class="w-[100px]"></ion-input>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,181 @@
+<div class="contenedor-principal">
+  @if(!mostrartabla){
+  <div class="barra-desplegable" (click)="mostrarTabla(true)">
+    <fa-icon [icon]="fasChevronsRight" class="text-primary text-xs cursor-pointer"></fa-icon>
+  </div>
+  }
+  @if(mostrartabla){
+  <div class="panel-izquierdo-pequenio">
+    <div class="cont-title">
+      <span>Cruces de extracto bancario</span>
+      <fa-icon [icon]="fasChevronsLeft" class="text-xs text-primary cursor-pointer"
+          (click)="mostrarTabla(false)"></fa-icon>
+    </div>
+    <div class="flex flex-row gap-2 p-2.5">
+      <div class="w-full">
+        <app-autocomplete
+          [items]="bancos"
+          [displayKey]="'nombre'"
+          [valueKey]="'codigo'"
+          [placeholder]="'Buscar por código o descripción'"
+          [width]="'w-full'"
+          (itemSelected)="onBancoSeleccionado($event)">
+          </app-autocomplete>
+      </div>
+        <ion-button class="w-fit flex flex-none" (click)="nuevocruce()">
+            <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+            <span class="text-cont">Nuevo cruce</span>
+        </ion-button>
+    </div>
+    <div class="h-full relative height30" [appLoader]="isLoading()">
+      <ag-grid-angular
+        style="width: 100%; height: 100%;"
+        class=""
+        [rowData]="rowData"
+        [columnDefs]="colDefs"
+        [columnTypes]="columnTypes"
+        [localeText]="localeText"
+        [rowHeight]="30"
+        [rowSelection]="'single'"
+        [headerHeight]="24"
+        [paginationPageSize]="20"
+        (gridReady)="onGridReady($event)"
+        (rowClicked)="onRowClicked($event)"
+        >
+      </ag-grid-angular>
+    </div>
+  </div>
+  }
+  <div class="panel-derecho-full">
+    <span class="cont-title">Cruce de extracto bancario</span>
+    <div class="flex flex-grow flex-col">
+      <div class="cont-cards">
+        @for(item of cards; track $index){
+          <div class="card">
+            <div class="contenido">
+              <span class="title">{{item.nombre}}</span>
+              @if(isLoading()){
+                <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+              }@else {
+                <span class="cantidad" [ngClass]="{'!text-danger': item.nombre === 'Diferencia'}">{{item.valor}}</span>
+              }
+            </div>
+            <div class="icon">
+              <fa-icon [icon]="item.icono"></fa-icon>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="flex flex-row items-center pl-1">
+
+        <div class="conjunto-btn-izqquierda !pr-0">
+          @if(!mostrartabla){
+            <ion-select fill="outline" placeholder="Selecciona un banco" [(ngModel)]="bancoSeleccionado" toggleIcon="chevron-down"
+            expandedIcon="chevron-up" interface="popover" class="w-[120px] xl:w-[150px] flex-none">
+            @for(banco of bancosSelect; track banco){<ion-select-option [value]="banco">{{ banco }}</ion-select-option>}
+          </ion-select>
+          
+          <app-base-calendar-new class="flex-none w-[155px] xl:w-[170px]" mode="range"
+           [maxDate]="maxDate" position="left"
+          (dateRangeSelected)="filtrarPorFechas($event)">
+          </app-base-calendar-new>
+          <ion-button class="w-fit" [disabled]="botonAplicarDeshabilitado"> <span class="text-cont">Aplicar</span></ion-button>
+        }
+        
+        @if(mostrartabla){
+          <ion-button fill="outline" class="w-fit" (click)="abrirModalFiltros()">
+            <fa-icon [icon]="farFilter" class="mr-1"></fa-icon>
+            <span class="text-cont">Filtros</span>
+          </ion-button>
+          }
+          
+        </div>
+      <div class="conjunto-btn !pr-1.5 !pb-1.5">
+        <ion-button fill="outline" class="w-fit" (click)="vincular()" [disabled]="!botonVincularHabilitado || cruceCerrado">
+          <fa-icon [icon]="farLinkSimple" class="mr-1"></fa-icon>
+          <span class="text-cont">Vincular</span>
+        </ion-button>
+        <ion-button fill="outline" class="w-fit" (click)="desvincularseleccionados()" [disabled]="!botonDesvincularHabilitado || cruceCerrado">
+          <fa-icon [icon]="farLinkSlash" class="mr-1"></fa-icon>
+          <span class="text-cont">Desvincular</span>
+        </ion-button>
+        <ion-button fill="outline" class="w-fit" (click)="ajustecontable()" [disabled]="!botonAjusteHabilitado || cruceCerrado">
+          <fa-icon [icon]="farGear" class="mr-1"></fa-icon>
+          <span class="text-cont">Ajuste contable</span>
+        </ion-button>
+        <ion-button class="w-fit" (click)="cruceautomatico()" [disabled]="rowDataBancario.length === 0 || habilitarbotoncerrar || cruceCerrado">
+          <fa-icon [icon]="fasArrowsRotate" class="mr-1"></fa-icon>
+          <span class="text-cont">Cruce automático</span>
+        </ion-button>
+        <ion-button class="w-fit" (click)="abrirmodalUbicaciones()" [disabled]="cruceCerrado">
+          <fa-icon [icon]="farArrowUpFromBracket" class="mr-1"></fa-icon>
+          <span class="text-cont">Importar</span>
+        </ion-button>
+      </div>
+    </div>
+
+      <div class="contenedor-tablas">
+        <div class="tabla">
+          <div class="cont-title">
+            <span>Movimientos del sistema</span>
+            <span class="mr-2">{{cantidaddemovimientos}} mov.</span>
+          </div>
+          <div class="h-full relative height30" [appLoader]="isLoading()">
+            <ag-grid-angular
+              style="width: 100%; height: 100%;"
+              class=""
+              [rowData]="rowDataMovimientos"
+              [columnDefs]="colDefsMovimientos"
+              [columnTypes]="columnTypes"
+              [rowSelection]="'multiple'"
+              [pagination]="true"
+              [localeText]="localeText"
+              [rowHeight]="30"
+              [headerHeight]="24"
+              [paginationPageSize]="20"
+              [context]="{componentParent: this}"
+              (gridReady)="onGridReadyMovimientos($event)" 
+              (selectionChanged)="onSelectionChangedMovimientos($event)"
+              (rowClicked)="onCellClicked($event)"
+              />
+          </div>
+        </div>
+        <div class="tabla">
+          <div class="cont-title">
+            <span>Extracto bancario</span>
+            <span class="mr-2">{{cantidaddeextractos}} mov.</span>
+          </div>
+          <div class="h-full height30">
+            <ag-grid-angular
+              style="width: 100%; height: 100%;"
+              class=""
+              [rowData]="rowDataBancario"
+              [columnDefs]="colDefsBancario"
+              [columnTypes]="columnTypes"
+              [rowSelection]="'multiple'"
+              [pagination]="true"
+              [localeText]="localeText"
+              [rowHeight]="30"
+              [headerHeight]="24"
+              [paginationPageSize]="20"
+              [context]="{componentParent: this}"
+              (gridReady)="onGridReadyBancario($event)"
+              (selectionChanged)="onSelectionChangedBancario($event)" />
+          </div>
+        </div>
+      </div>
+      <div class="conjunto-btn pt-1">
+          <ion-button fill="outline" class="w-fit" [disabled]="!habilitarbotoncerrar">
+            <fa-icon [icon]="farDownload" class="mr-1"></fa-icon>
+            <span class="text-cont">Exportar</span>
+          </ion-button>
+          <ion-button fill="outline" class="w-fit" [disabled]="!habilitarbotoncerrar || cruceCerrado">
+            <span class="text-cont">Guardar</span>
+          </ion-button>
+          <ion-button class="w-fit" [disabled]="!habilitarbotoncerrar || cruceCerrado">
+            <span class="text-cont">Cerrar conciliación</span>
+          </ion-button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,157 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Detalle de cálculos de depreciación anual por cada activo</span>
+    </div>
+
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar activo por descripción o código" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+        <div class="filtros-absolutos">
+          <!-- <ion-select placeholder="Activo" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            interface="popover" fill="outline" class="w-[163px]">
+            <ion-select-option value="Activo">Activo</ion-select-option>
+            <ion-select-option value="Dado de baja">Dado de baja</ion-select-option>
+            <ion-select-option value="Todos">Todos los estados</ion-select-option>
+          </ion-select> -->
+          <ion-select placeholder="Año fiscal" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+            fill="outline" class="w-[95px]">
+            <ion-select-option value="anio">Año fiscal</ion-select-option>
+          </ion-select>
+          <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+            [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="left"
+            (dateRangeSelected)="filtrarPorFechas($event)">
+          </app-base-calendar-new>
+        </div>
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button class="w-fit  text-text-85" (click)="actualizar()" fill="outline">
+          <span>Actualizar datos</span>
+        </ion-button>
+        <ion-button class="w-fit  text-text-85" (click)="abrirModalFormulas()" fill="outline">
+          <fa-icon [icon]="fasQuestionCircle" class="mr-1"></fa-icon>
+          <span>Visualizar fórmulas</span>
+        </ion-button>
+        <ion-button class="w-[115px]  text-text-85" id="reportesdepreciacion" fill="outline">
+          <fa-icon [icon]="fasGear" class="mr-1"></fa-icon>
+          <span>Acciones</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesdepreciacion" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos dezplegableAcciones2" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Imprimir</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+
+    <div class="flex flex-row gap-3 p-1.5 pt-0">
+      <div class="flex flex-1 border border-solid flex-row h-[70px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Total de Activos Registrados</span>
+          @if (!cargando) {
+            <span class="font-bold text-sm">07</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasList" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[70px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Valor neto total</span>
+          @if (!cargando) {
+            <span class="font-bold text-sm">S/ 73,724.75</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 100px; height: 16px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasHandHoldingDollar" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+
+      <div class="flex flex-1 border border-solid flex-row h-[70px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Depreciación Mensual</span>
+          @if (!cargando) {
+            <span class="font-bold text-sm">S/ 690,975.25</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 110px; height: 16px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasPerson" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[70px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Depreciación anual</span>
+          @if (!cargando) {
+            <span class="font-bold text-sm">S/ 690,975.25</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 110px; height: 16px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasPerson" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[70px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Depreciación Acumulada Total</span>
+          @if (!cargando) {
+            <span class="font-bold text-sm">S/ 690,975.25</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 110px; height: 16px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasPerson" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[70px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Porcentaje de depreciación consumida</span>
+          @if (!cargando) {
+            <span class="font-bold text-sm">48.7%</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 50px; height: 16px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasFiles" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[70px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Tasa anual de depreciación promedio (%)</span>
+          @if (!cargando) {
+            <span class="font-bold text-sm">16.4%</span>
+          } @else {
+            <ion-skeleton-text [animated]="true" style="width: 50px; height: 16px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasPercent" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+    </div>
+    <div class="h-full relative" [appLoader]="cargando">
+       <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs" [defaultColDef]="defaultColDef"
+        [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20" [purgeClosedRowNodes]="true"
+        [localeText]="localeText" (gridReady)="onGridReady($event)"/>
+    </div>
+  </div>
+</div>

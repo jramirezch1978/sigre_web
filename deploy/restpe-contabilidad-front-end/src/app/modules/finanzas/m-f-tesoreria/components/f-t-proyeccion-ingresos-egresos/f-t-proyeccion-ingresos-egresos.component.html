@@ -1,0 +1,217 @@
+<div class="contenedor-principal !flex-col">
+  <div class="cont-title">
+    <span>Proyección de ingresos y egresos</span>
+  </div>
+
+  <!-- Filtros -->
+  <div class="contenido-filtros-tabla">
+    <div class="filtros-responsive">
+      <div class="form-column2">
+        <div class="contenido-formulario">
+          <span class="label">Periodo de proyección</span>
+          <ion-select fill="outline" [(ngModel)]="filtroPeriodo" (ionChange)="onFilterChange()" class="w-48"
+            placeholder="Semana" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover">
+            @for(periodo of periodosList; track periodo.id) {
+              <ion-select-option [value]="periodo.id">{{ periodo.nombre }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Tipo de movimiento</span>
+          <ion-select fill="outline" [(ngModel)]="filtroTipoMovimiento" (ionChange)="onFilterChange()" class="w-48"
+            placeholder="Todos los movimientos" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover">
+            <ion-select-option value="">Todos los movimientos</ion-select-option>
+            @for(tipo of tiposMovimientoList; track tipo.id) {
+              <ion-select-option [value]="tipo.id">{{ tipo.nombre }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Fecha de inicio</span>
+          <app-base-calendar-new mode="single" [initialDate]="fechaInicio"
+            [minDate]="minDate" [maxDate]="maxDate" (dateSelected)="onFechaSelected($event)">
+          </app-base-calendar-new>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Categoría</span>
+          <ion-select fill="outline" [(ngModel)]="filtroCategoria" (ionChange)="onFilterChange()" class="w-48"
+            placeholder="Todas las categorías" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover">
+            <ion-select-option value="">Todas las categorías</ion-select-option>
+            @for(cat of categoriasList; track cat.id) {
+              <ion-select-option [value]="cat.id">{{ cat.nombre }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Sucursal</span>
+          <ion-select fill="outline" [(ngModel)]="filtroSucursal" (ionChange)="onFilterChange()" class="w-48"
+            placeholder="Todos las sucursales" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover">
+            <ion-select-option value="">Todos las sucursales</ion-select-option>
+            @for(suc of sucursalesList; track suc.id) {
+              <ion-select-option [value]="suc.id">{{ suc.nombre }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <span class="label">Moneda</span>
+          <ion-select fill="outline" [(ngModel)]="filtroMoneda" (ionChange)="onFilterChange()" class="w-48"
+            placeholder="Soles" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover">
+            @for(mon of monedasList; track mon.id) {
+              <ion-select-option [value]="mon.id">{{ mon.nombre }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+      </div>
+    </div>
+    <div class="conjunto-btn">
+      <ion-button fill="outline" class="w-fit" id="exportar-trigger">
+      <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+      <span>Exportar</span>
+      <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+    </ion-button>
+    <ion-popover trigger="exportar-trigger" triggerAction="click" [dismissOnSelect]="true"
+      class="popoverCustomButtonUbicacionActivos dezplegableAcciones2" [showBackdrop]="false">
+      <ng-template>
+        <ion-item lines="none" [button]="true">Exportar Excel</ion-item>
+        <ion-item lines="none" [button]="true">Exportar PDF</ion-item>
+      </ng-template>
+    </ion-popover>
+      <ion-button class="w-fit" (click)="generarProyeccion()">
+        <span>Generar Proyección</span>
+      </ion-button>
+    </div>
+  </div>
+
+  <div class="cont-title mb-1.5">
+    <span>Proyecciones de flujo de caja</span>
+  </div>
+
+  @if(mostrarProyeccion){<!-- Cards de totales -->
+  <div class="cont-cards">
+    <div class="card">
+      <div class="contenido">
+        <span class="title">Total ingresos</span>
+        @if(isLoading()){
+          <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+        } @else{
+        <span class="cantidad">{{ totalIngresos }}</span>
+        }
+      </div>
+      <div class="icon">
+        <fa-icon [icon]="fasArrowTrendUp"></fa-icon>
+      </div>
+    </div>
+    <div class="card">
+      <div class="contenido">
+        <span class="title">Total egresos</span>
+        @if(isLoading()){
+          <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+        } @else{
+        <span class="cantidad">{{ totalEgresos }}</span>
+        }
+      </div>
+      <div class="icon">
+        <fa-icon [icon]="fasArrowTrendDown"></fa-icon>
+      </div>
+    </div>
+    <div class="card">
+      <div class="contenido">
+        <span class="title">Flujo neto</span>
+        @if(isLoading()){
+          <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+        } @else{
+        <span class="cantidad">{{ flujoNeto }}</span>
+        }
+      </div>
+      <div class="icon">
+        <fa-icon [icon]="fasDollar"></fa-icon>
+      </div>
+    </div>
+    <div class="card">
+      <div class="contenido">
+        <span class="title">Margen de liquidez proyectada</span>
+        @if(isLoading()){
+          <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+        } @else{
+        <span class="cantidad">{{ coberturaEgresos }}</span>
+        }
+      </div>
+      <div class="icon">
+        <fa-icon [icon]="fasShield"></fa-icon>
+      </div>
+    </div>
+    <div class="card">
+      <div class="contenido">
+        <span class="title">% Ingresos Proyectados</span>
+        @if(isLoading()){
+          <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+        } @else{
+        <span class="cantidad">{{ ingresosproyectados }}</span>
+        }
+      </div>
+      <div class="icon">
+        <fa-icon [icon]="faPercent"></fa-icon>
+      </div>
+    </div>
+    <div class="card">
+      <div class="contenido">
+        <span class="title">% Egresos Proyectados</span>
+        @if(isLoading()){
+          <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+        } @else{
+          <span class="cantidad">{{ egresosproyectados }}</span>
+        }
+      </div>
+      <div class="icon">
+        <fa-icon [icon]="faPercent"></fa-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerta de estado -->
+  <div *ngIf="mostrarAlerta" class="px-1.5 pb-1.5">
+    <div class="flex items-center gap-2 px-3 py-2 rounded-md"
+      [ngClass]="{
+        'bg-success-5 text-success': tipoAlerta === 'success',
+        'bg-warning-5 text-warning': tipoAlerta === 'warning',
+        'bg-danger-5 text-danger': tipoAlerta === 'danger',
+        'bg-primary-5 text-primary': tipoAlerta === 'info'
+      }">
+      <fa-icon 
+        [icon]="
+          tipoAlerta === 'success' ? farCircleCheck : 
+          tipoAlerta === 'warning' ? farTriangleExclamation :
+          tipoAlerta === 'danger' ? farCircleXmark : farCircleInfo
+        " 
+        class="text-sm">
+      </fa-icon>
+      <span class="text-sm font-medium">{{ mensajeAlerta }}</span>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="h-full relative" [appLoader]="isLoading()">
+    <ag-grid-angular 
+      style="width: 100%; height: 100%;" 
+      class="ag-theme-alpine"
+      [rowData]="rowData" 
+      [columnDefs]="colDefs" 
+      [defaultColDef]="defaultColDef"
+      [masterDetail]="true"
+      [getRowClass]="getRowClass"
+      [pagination]="true" 
+      [localeText]="localeText" 
+      [rowHeight]="20" 
+      [headerHeight]="24"
+      [paginationPageSize]="20" 
+      [gridOptions]="gridOptions"
+      (gridReady)="onGridReady($event)" 
+      [domLayout]="'normal'" />
+  </div>}
+</div>

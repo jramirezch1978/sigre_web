@@ -1,0 +1,193 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Dashboard indicadores clave por sede</span>
+    </div>
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="flex items-center gap-3 w-full flex-row">
+          <div class="filtros-absolutos">
+            <ion-select placeholder="Seleccione sucursal" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover" fill="outline" class="w-[180px]">
+              @for(sucursal of sucursales; track sucursal.id){
+              <ion-select-option [value]="sucursal.id">{{ sucursal.nombre }}</ion-select-option>}
+            </ion-select>
+
+            <div class="relative">
+              <span class="font-bold text-xxs absolute top-[7px] left-[8px] z-10">Canal:</span>
+              <ion-select placeholder="Canal" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+                style="--padding-start:40px ;" fill="outline" class="w-[140px]" (ionChange)="onCanalChange($event)">
+                @for(canal of canales; track canal){
+                <ion-select-option [value]="canal">{{ canal }}</ion-select-option>
+                }
+              </ion-select>
+            </div>
+            <div class="relative">
+              <span class="font-bold text-xxs absolute top-[7px] left-[8px] z-10">Rango de fechas:</span>
+              <app-base-calendar-new mode="range" class="moverpaddingcalendar" [initialStartDate]="startDate"
+                [initialEndDate]="endDate" position="right" (dateRangeSelected)="onFechasSeleccionadas($event)">
+              </app-base-calendar-new>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 w-full justify-end">
+            <ion-button fill="outline" class="w-[115px]" id="dashboardrrhhexportar">
+              <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+              <span>Exportar</span>
+              <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+            </ion-button>
+            <ion-popover trigger="dashboardrrhhexportar" triggerAction="click" [dismissOnSelect]="true"
+              class="popoverCustomButtonUbicacionActivos dezplegableAcciones2" [showBackdrop]="false">
+              <ng-template>
+                <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+                <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+              </ng-template>
+            </ion-popover>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="contenedor-dashboard relative" [appLoader]="isLoading()">
+      <div class="w-full flex gap-3">
+        <div class="flex flex-col gap-3 w-full">
+          <div class="flex items-center w-full gap-3">
+            <div class="card-dasboard">
+              <div class="contenido">
+                <span class="title">Costo laboral / Venta (%)</span>
+                <span class="subtitle">Eficiencia laboral</span>
+                @if (!isLoading()) {
+                <span class="cantidad">{{dashboardData?.dashboard_rrhh_costo_laboral_venta}}%</span>
+                } @else {
+                <ion-skeleton-text [animated]="true" style="width: 60px; height: 20px;"></ion-skeleton-text>
+                }
+                <span class="comparacion">vs. periodo anterior</span>
+              </div>
+              <div class="icon">
+                <fa-icon [icon]="fasWarning" class="text-2xl"></fa-icon>
+              </div>
+            </div>
+            <div class="card-dasboard">
+              <div class="contenido">
+                <span class="title">Rotación</span>
+                <span class="subtitle">Eficiencia laboral</span>
+                @if (!isLoading()) {
+                <span class="cantidad">{{dashboardData?.dashboard_rrhh_rotacion}}%</span>
+                } @else {
+                <ion-skeleton-text [animated]="true" style="width: 60px; height: 20px;"></ion-skeleton-text>
+                }
+                <span class="comparacion">vs. periodo anterior</span>
+              </div>
+              <div class="icon ">
+                <fa-icon [icon]="fasRotate" class="text-2xl"></fa-icon>
+              </div>
+            </div>
+          </div>
+          <div class="w-full flex gap-3">
+            <div class="flex flex-col gap-3 w-full">
+              <div class="secondary-card-dashboard">
+                <div class="contenido">
+                  <span class="title">Propinas (%)</span>
+                  @if (!isLoading()) {
+                  <span class="cantidad">{{dashboardData?.dashboard_rrhh_propinas}}%</span>
+                  } @else {
+                  <ion-skeleton-text [animated]="true" style="width: 50px; height: 18px;"></ion-skeleton-text>
+                  }
+                </div>
+                <div class="icon">
+                <fa-icon [icon]="fasCoin" class="text-xs"></fa-icon>
+              </div>
+              </div>
+              <div class="secondary-card-dashboard">
+                <div class="contenido">  
+                  <span class="title">Ausentismo (%)</span>
+                  @if (!isLoading()) {
+                  <span class="cantidad">{{dashboardData?.dashboard_rrhh_ausentismo}}%</span>
+                  } @else {
+                  <ion-skeleton-text [animated]="true" style="width: 50px; height: 18px;"></ion-skeleton-text>
+                  }
+                </div>
+                <div class="icon">
+                <fa-icon [icon]="fasCalendarXmark" class="text-xs"></fa-icon>
+              </div>
+              </div>
+            </div>
+            <div class="flex flex-col gap-3 w-full">
+              <div class="secondary-card-dashboard">
+                <div class="contenido">
+                  <span class="title">Horas extra</span>
+                  @if (!isLoading()) {
+                  <span class="cantidad">{{dashboardData?.dashboard_rrhh_horas_extra}} hrs</span>
+                  } @else {
+                  <ion-skeleton-text [animated]="true" style="width: 60px; height: 18px;"></ion-skeleton-text>
+                  }
+                </div>
+                <div class="icon">
+                <fa-icon [icon]="fasClock" class="text-xs"></fa-icon>
+              </div>
+              </div>
+              <div class="secondary-card-dashboard">
+                <div class="contenido">
+                  <span class="title">Personal activo</span>
+                  @if (!isLoading()) {
+                  <span class="cantidad">{{dashboardData?.dashboard_rrhh_personal_activo}} personas</span>
+                  } @else {
+                  <ion-skeleton-text [animated]="true" style="width: 70px; height: 18px;"></ion-skeleton-text>
+                  }
+                </div>
+                <div class="icon">
+                <fa-icon [icon]="fasUsers" class="text-xs"></fa-icon>
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="contenedor-charts w-full h-[295px]">
+          <div class="cont-title-chart">
+            <span class="title">Gráfico de montos de propinas</span>
+          </div>
+          <div class="chart" >
+            <canvas #propinasChart></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3 w-full flex-col">
+        <div class="flex items-center w-full gap-3">
+          <div class="contenedor-charts h-[295px]">
+            <div class="cont-title-chart">
+              <span class="title">Costo laboral sobre ventas</span>
+            </div>
+            <div class="chart" >
+              <canvas #costoLaboralChart></canvas>
+            </div>
+          </div>
+          <div class="contenedor-charts h-[295px]">
+            <div class="cont-title-chart">
+              <span class="title">Gráfico de rotación de personal de últimos 6 meses</span>
+            </div>
+            <div class="chart" >
+              <canvas #rotacionChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3 w-full flex-col pb-5">
+        <div class="flex items-center w-full gap-3">
+          <div class="contenedor-charts h-[295px]">
+            <div class="cont-title-chart">
+              <span class="title">Gráfico de ausentismo de últimos 6 meses</span>
+            </div>
+            <div class="chart" >
+              <canvas #ausentismoChart></canvas>
+            </div>
+          </div>
+          <div class="contenedor-charts h-[295px]">
+            <div class="cont-title-chart">
+              <span class="title">Gráfico de total de horas extra de últimos 6 meses</span>
+            </div>
+            <div class="chart" >
+              <canvas #horasExtraChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

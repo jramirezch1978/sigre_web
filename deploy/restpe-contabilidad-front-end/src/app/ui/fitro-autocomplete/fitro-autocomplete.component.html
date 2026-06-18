@@ -1,0 +1,20 @@
+<div class="relative" [ngClass]="width">
+  <div class="flex items-center px-2 h-[28px] justify-between border border-solid border-[#E4E4E4] rounded-sm cursor-pointer input-responsive" (click)="select()">
+    <span [ngClass]="{'text-text-25': !searchText}" class="truncate">{{searchText?  searchText:placeholder }}</span>
+    <fa-icon [icon]="showDropdown ? fasChevronUp : fasChevronDown" class=" text-text-85 z-40"></fa-icon>
+  </div>
+  
+  @if(showDropdown) {
+    <div class="absolute p-1 top-[18px] left-0 right-0 mt-1 bg-white border border-gray-300 rounded-b-md shadow-lg max-h-60 overflow-y-auto z-50">
+      <app-autocomplete
+      [pseudo]=true
+      [items]="items"
+      [displayKey]="displayKey"
+      [valueKey]="valueKey"
+      [placeholder]="placeholder"
+      (itemSelected)="filtroSeleccionado($event)">
+    </app-autocomplete>
+    </div>
+  }
+  
+</div>

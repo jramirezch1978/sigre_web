@@ -1,0 +1,93 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Lista de formas de pago (Selecciona una para visualizarla o editarla)</span>
+    </div>
+
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por código, nombre o tipo" class="w-full"
+            style="--padding-start:30px" [(ngModel)]="busqueda" [ngModelOptions]="{standalone: true}"
+            (ionInput)="onBuscar()"></ion-input>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <ion-button class="w-fit whitespace-nowrap" fill="outline" id="exportarFormasPago">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="exportarFormasPago" triggerAction="click" [dismissOnSelect]="true"
+          [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false" (click)="exportarExcel()">Exportar Excel</ion-item>
+          </ng-template>
+        </ion-popover>
+
+        <ion-button class="w-fit whitespace-nowrap" [disabled]="modoCreacion" (click)="nuevo()">
+          <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+          <span>Nueva forma de pago</span>
+        </ion-button>
+      </div>
+    </div>
+
+    <div class="h-full relative" [appLoader]="cargando">
+      <fa-icon [icon]="fasRotateRight" (click)="cargar()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [pagination]="true" [rowSelection]="'single'" [rowHeight]="20" [localeText]="localeText" [headerHeight]="24"
+        [paginationPageSize]="20" [suppressRowClickSelection]="true"
+        (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+
+  <div class="panel-derecho">
+    <div class="cont-title">
+      <span>{{ modoCreacion ? 'Nueva forma de pago' : 'Forma de pago: ' + (filaSeleccionada?.nombre || '') }}</span>
+    </div>
+
+    <div class="flex flex-col overflow-visible">
+      <form [formGroup]="form">
+        <div class="contenedor-formulario">
+          <div class="contenido-formulario">
+            <span class="label">Código<span class="text-danger">*</span></span>
+            <ion-input formControlName="codigo" fill="outline" class="w-[163px]" maxlength="20"
+              [readonly]="!modoCreacion" placeholder="Ingrese el código"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Nombre<span class="text-danger">*</span></span>
+            <ion-input formControlName="nombre" fill="outline" class="w-[163px]" maxlength="120"
+              placeholder="Ingrese el nombre"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Tipo<span class="text-danger">*</span></span>
+            <ion-select formControlName="tipo" fill="outline" class="w-[163px]" interface="popover"
+              placeholder="Selecciona un tipo" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(t of tipos; track t){<ion-select-option [value]="t">{{ t }}</ion-select-option>}
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Estado</span>
+            <ion-select formControlName="estado" fill="outline" class="w-[100px]" interface="popover"
+              toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(e of estados; track e){<ion-select-option [value]="e">{{ e }}</ion-select-option>}
+            </ion-select>
+          </div>
+        </div>
+      </form>
+
+      <div class="contenedor-btn">
+        <ion-button class="w-90" (click)="guardar()">{{ modoCreacion ? 'Registrar' : 'Guardar' }}</ion-button>
+        <ion-button color="medium" fill="outline" (click)="nuevo()">Cancelar</ion-button>
+        @if(!modoCreacion){
+        <ion-button color="danger" fill="outline" (click)="eliminar()">Eliminar</ion-button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

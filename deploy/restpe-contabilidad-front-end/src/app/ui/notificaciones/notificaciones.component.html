@@ -1,0 +1,56 @@
+<div class="relative">
+  <!-- CONTADOR DE ALERTAS -->
+  @if(noLeidasCount > 0){
+    <div class="count-alert">{{ noLeidasCount }}</div>
+  }
+  <!-- BOTÓN -->
+  <button class="btn-icon" (click)="toggleDropdown()">
+    <fa-icon [icon]="fasBell"></fa-icon>
+  </button>
+
+  <!-- DROPDOWN -->
+  @if(showDropdown) {
+    <div class="dropdown">
+      <div class="titulo-list">Notificaciones</div>
+
+      <!-- LISTA -->
+      <div class="lista">
+        @if(cargando){
+          <div class="alerta-card">
+            <span class="alert-cont">Cargando notificaciones...</span>
+          </div>
+        } @else if(notificacionesPreview.length === 0){
+          <div class="alerta-card">
+            <span class="alert-cont">No tienes notificaciones para la empresa seleccionada.</span>
+          </div>
+        } @else {
+          @for(alerta of notificacionesPreview; track alerta.id){
+            <div class="alerta-card cursor-pointer" (click)="marcarComoLeida(alerta)">
+              <div class="alert-header">
+                <fa-icon [icon]="farExclamationTriangle"></fa-icon>
+                <span>{{ alerta.titulo }}</span>
+              </div>
+              <div>
+                <span class="alert-cont">{{ alerta.descripcion }}</span>
+              </div>
+              <div class="alert-footer">
+                <div class="fecha-cont pr-2 border-r border-text-10">
+                  <fa-icon [icon]="farCalendar"></fa-icon>
+                  <span>{{ formatearFecha(alerta.creadoEn) }}</span>
+                </div>
+                <div class="fecha-cont">
+                  <fa-icon [icon]="farClock"></fa-icon>
+                  <span>{{ formatearHora(alerta.creadoEn) }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+      <div class="flex flex-row gap-1 justify-center cursor-pointer" (click)="apartadonotificaciones()">
+        <fa-icon [icon]="fasEye" class="text-xxs text-primary"></fa-icon>
+        <div class="text-primary text-xs">Ver todas las notificaciones</div>
+      </div>
+    </div>
+  }
+</div>

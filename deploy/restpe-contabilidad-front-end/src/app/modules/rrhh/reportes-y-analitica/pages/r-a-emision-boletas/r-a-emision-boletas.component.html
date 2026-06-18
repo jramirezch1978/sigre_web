@@ -1,0 +1,228 @@
+<div class="contenedor-principal">
+  @if(!panelLateralVisible){<div class="barra-desplegable"
+    (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight"></fa-icon>
+  </div>}
+
+  @if(panelLateralVisible){
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Emisión de Boletas y Planillas (Seleciona una boleta de tu lista para visualizarla) </span>
+      @if (panelLateralVisible) {<div class="btn-mostrarform" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>}
+    </div>
+
+    <div class="contenedor-filtros">
+        <div class="contenedor-filtros !p-0">
+          <div class="buscador" *ngIf="mostrarBuscadorPrincipal">
+            <fa-icon [icon]="farSearch"></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar por trabajador o número de boleta" class="w-full"
+              style="--padding-start:30px"></ion-input>
+          </div>
+        </div>
+
+      <div class="filtros-absolutos">
+        <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate" [initialEndDate]="endDate"
+          [minDate]="minDate" [maxDate]="maxDate" position="left" (dateRangeSelected)="filtrarPorFechas($event)">
+        </app-base-calendar-new>
+
+        <ion-button class="w-[115px] flex-none text-text-85" fill="outline" id="emisionboletas">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          <span>Exportar</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="emisionboletas" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+      <!-- <ion-button class="w-fit whitespace-nowrap" (click)="botonNuevaBoleta()">
+        <fa-icon [icon]="fasCirclePlus" class="mr-1"></fa-icon>
+        <span>Emitir planilla consolidada</span>
+      </ion-button> -->
+
+
+    </div>
+
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+    <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [pagination]="true" [rowSelection]="'single'" [rowHeight]="20" [localeText]="localeText" [headerHeight]="24"
+        [paginationPageSize]="20" (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+
+  </div>
+  }
+
+  <div class="panel-derecho" [ngClass]="{'!w-full !flex-1': !panelLateralVisible}" [appLoader]="isLoading() && !isResetting">
+    <div class="cont-title">
+      <span>{{filaSeleccionada ? 'Información: ' + filaSeleccionada?.numBoleta : 'Nueva emisión boleta'}}</span>
+    </div>
+
+    @if(filaSeleccionada){
+    <div class="cont-actualizaciones">
+      <div class="btn-actualizaciones" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook"></fa-icon>
+        <span class="text-actualizaciones">Ver últimas actualizaciones</span>
+      </div>
+    </div>
+    }
+
+    <div class="flex flex-col h-full overflow-auto">
+      <form action="" [formGroup]="EmisionForm">
+        <div class="contenedor-formulario" [ngClass]="{'!flex-row !gap-20': !panelLateralVisible}">
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Fecha de emisión</span>
+              <ion-input fill="outline" formControlName="fechaEmision" class="w-[86px]"></ion-input>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Periodo de pago</span>
+              <ion-input fill="outline" formControlName="periodo" class="w-[86px]"></ion-input>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Surcursal</span>
+              <ion-input fill="outline" formControlName="sucursalInput" class="w-[163px]"></ion-input>
+            </div>
+          </div>
+
+          <div class="contenedor-formulario !p-0">
+            <div class="contenido-formulario">
+              <span class="label">Centro de costo</span>
+              <ion-input fill="outline" formControlName="centroCostoInput" class="w-[163px]"></ion-input>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Tipo de planilla</span>
+              <ion-input fill="outline" formControlName="tipoPlanilla" class="w-[163px]"></ion-input>
+
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Tipo de archivo</span>
+              @if(filaSeleccionada){
+              <ion-select fill="outline" placeholder="Selecciona una opción" toggleIcon="chevron-down"
+                expandedIcon="chevron-up" interface="popover" class="w-[150px]" formControlName="tipoArchivo"
+                name="tipoArchivo">
+                @for(archivo of archivos; track archivo){<ion-select-option [value]="archivo">{{ archivo
+                  }}</ion-select-option>}
+              </ion-select>
+              }
+              @if(!filaSeleccionada){
+              <ion-input fill="outline" formControlName="tipoArchivo" class="w-[163px]"></ion-input>
+              }
+            </div>
+          </div>
+        </div>
+        <!-- <div class="contenedor-btn">
+          <ion-button class="w-[90px]" (click)="botonGuardar()" [disabled]="EmisionForm.invalid">{{ camponuevo ? 'Crear'
+            : 'Emitir boleta'
+          }}</ion-button>
+          @if (!filaSeleccionada) {
+          <ion-button class="w-90" [disabled]="EmisionForm.invalid" (click)="botonGuardar()">Emitir boleta</ion-button>
+          <ion-button color="medium" fill="outline" class="w-fit" (click)="botonCancelar()">Cancelar</ion-button>
+          }
+        </div> -->
+      </form>
+
+      @if(filaSeleccionada){
+
+      <div class="cont-title">
+        <span class="line-clamp-1">Lista de boletas emitidas a trabajadores (Seleciona una boleta de tu lista para
+          visualizarla)</span>
+      </div>
+
+      <div class="contenedor-filtros">
+        <div class="buscador" *ngIf="mostrarBuscadorPrincipal">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar por nombre de trabajador" class="w-full"
+            style="--padding-start:30px"></ion-input>
+        </div>
+
+        <div class="filtros-absolutos">
+          <ion-button class="w-[115px] flex-none text-text-85" fill="outline" id="emisionboletasform">
+            <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+            <span>Exportar</span>
+            <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+          </ion-button>
+          <ion-popover trigger="emisionboletasform" triggerAction="click" [dismissOnSelect]="true"
+            class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+            <ng-template>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+              <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            </ng-template>
+          </ion-popover>
+          <ion-button class="w-fit" (click)="descargarBoletasSeleccionadas()">
+            <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+            Descargar
+          </ion-button>
+        </div>
+        
+      </div>
+      }
+      @if(filaSeleccionada){
+      <div class="min-h-[200px] flex-1">
+        <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowDataDetalle"
+          [columnDefs]="colDefsDetalle" [rowSelection]="'multiple'" [rowHeight]="20" [headerHeight]="24" [localeText]="localeText"
+          [paginationPageSize]="20" (gridReady)="onGridReadyDetalle($event)"
+          (cellClicked)="onCellClickedDetalle($event)" />
+      </div>
+      @if(mostrarInformacion){
+      <div class="cont-title">
+        <span>Detalle de boleta emitida a: {{ trabajador }}</span>
+      </div>
+
+      <div class="flex flex-col gap-4 p-2.5">
+        <div class="flex flex-col lg:text-xxs xl:text-xs gap-1">
+          <span class="">Trabajador</span>
+          <span>{{trabajador}}</span>
+        </div>
+        <div class="flex flex-row">
+          <div class="flex flex-col flex-1 lg:text-xxs xl:text-xs gap-1">
+            <span>Periodo</span>
+            <span>{{periodo}}</span>
+          </div>
+          <div class="flex flex-col flex-1 lg:text-xxs xl:text-xs gap-1">
+            <span>Fecha de emisión</span>
+            <span>{{fechaemision}}</span>
+          </div>
+        </div>
+        <div class="flex flex-row">
+          <div class="flex flex-col flex-1 lg:text-xxs xl:text-xs gap-1">
+            <span>Estado</span>
+            <span class="badge-table"
+              [ngClass]="{'bg-[#DCFDE7] text-[#16A34A]': estado === 'Emitido','bg-[#FEE2E2] text-[#DC2626] ': estado === 'Error'}">{{estado}}</span>
+          </div>
+          <div class="flex flex-col flex-1 lg:text-xxs xl:text-xs gap-1">
+            <span>Archivo Generado</span>
+            <span>{{archivogenerado}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-full flex justify-end p-2.5">
+        <ion-button fill="outline" class="w-fit ml-2 mb-2">
+          <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+          Descargar archivo
+        </ion-button>
+      </div>
+      }
+      }
+
+
+    </div>
+
+
+
+
+
+
+
+
+  </div>
+</div>

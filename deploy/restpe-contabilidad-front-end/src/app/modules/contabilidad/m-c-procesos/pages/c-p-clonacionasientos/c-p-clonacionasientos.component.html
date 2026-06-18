@@ -1,0 +1,227 @@
+<div class="contenedor-principal">
+  @if(!panelLateralVisible){<div class="flex items-center justify-center w-[15px] bg-[#E6E8F4]" (click)="togglePanelLateral()">
+    <fa-icon [icon]="fasChevronsRight" class="text-xs text-primary cursor-pointer"></fa-icon>
+  </div>}
+  @if(panelLateralVisible){
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Clonación de Asientos Contables</span>
+      @if (panelLateralVisible) {<div class="btn-mostrarform" (click)="togglePanelLateral()">
+        <fa-icon [icon]="fasChevronsLeft"></fa-icon>
+      </div>}
+    </div>
+    <form [formGroup]="asientoForm">
+      <div class="contenedor-formulario !gap-2.5">
+        <div class="filtros-responsive">
+          <div class="form-column2">
+
+            <div class="contenido-formulario">
+              <span class="label">Periodo contable <span class="text-danger">*</span></span>
+              <app-month-year-picker
+                #periodoPickerRef
+                class="flex-none w-[170px]"
+                [placeholder]="'Selecciona un periodo'"
+                (monthYearChange)="onPeriodoSeleccionado($event)">
+              </app-month-year-picker>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Moneda</span>
+              <ion-select placeholder="Selecciona una moneda" toggleIcon="chevron-down" expandedIcon="chevron-up" formControlName="moneda" interface="popover" fill="outline" class="w-[180px] flex-none">
+                @for(moneda of monedaSelect; track moneda){<ion-select-option [value]="moneda.value">{{ moneda.nombre }}</ion-select-option>}
+              </ion-select>
+            </div>
+
+            <div class="contenido-formulario">
+                <span class="label">Asiento del origen <span class="text-danger">*</span></span>
+                <app-autocomplete 
+                  formControlName="asientoC"
+                  [items]="asientosC()" 
+                  displayKey="nasiento"
+                  valueKey="nasiento"
+                  placeholder="Selecciona el asiento" width="w-[163px]"
+                  (itemSelected)="onAsientoSeleccionado($event)">
+                </app-autocomplete>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Tipo de asiento</span>
+              <ion-input fill="outline" placeholder="" formControlName="tipoAsiento" class="w-[150px]"></ion-input>
+            </div>
+
+            <div class="contenido-formulario">
+              <span class="label">Fecha del nuevo asiento<span class="text-danger">*</span></span>
+              <app-base-calendar-new
+                  class="flex-none"
+                  mode="single"
+                  [initialDate]="asientoForm.get('fechaN')?.value"
+                  position="center"
+                  (dateSelected)="onFechaNSeleccionada($event)">
+                </app-base-calendar-new>
+            </div>
+
+            
+            <div class="contenido-formulario">
+              <span class="label">Periodo contable  destino<span class="text-danger">*</span></span>
+              <app-month-year-picker
+              #periodoPickerRefDestino
+              class="flex-none w-[170px]"
+              [placeholder]="'Selecciona un periodo'"
+              (monthYearChange)="onPeriodoSeleccionadoDestino($event)">
+            </app-month-year-picker>
+          </div>
+          
+          <div class="contenido-formulario !items-start">
+            <span class="label">Glosa/Descripción</span>
+            <ion-textarea fill="outline" formControlName="glosa" class="w-[200px]"></ion-textarea>
+          </div>
+          </div>
+        </div>
+      </div>
+      <!-- Botones de acción -->
+      <div class="contenedor-btn py-0.5">
+        <ion-button class="w-fit" (click)="clonarAsiento()" [disabled]="!asientoForm.valid">
+          <span class="font-normal">Clonar asiento</span>
+        </ion-button>
+      </div>
+    </form>
+  </div>}
+
+  <div class="panel-derecho" [ngClass]="{'!w-full': !panelLateralVisible}">
+    <div class="cont-title">
+      <span>Asiento @if(mostartitulo){{{ asientoSeleccionado?.nasiento }}}</span>        
+    </div>
+    <form action="" [formGroup]="ajusteCForm">
+      <!-- Contenido del formulario -->
+      <div class="contenedor-formulario" [ngClass]="{'!flex-row': !panelLateralVisible}">
+        <div class="contenedor-formulario !p-0">
+
+          <div class="contenido-formulario">
+            <span class="label">Usuario</span>
+            <ion-input fill="outline" placeholder="Click en clonar asiento" formControlName="usuario" class="w-[150px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Fecha de registro</span>
+            <app-base-calendar-new
+                class="flex-none"
+                mode="single"
+                [initialDate]="ajusteCForm.get('fechaR')?.value"
+                position="right"
+                (dateSelected)="onFechaRSeleccionada($event)">
+              </app-base-calendar-new>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Origen</span>
+            <ion-input fill="outline" placeholder="Click en clonar asiento" formControlName="origen" class="w-[150px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Fecha contable<span class="text-danger">*</span> </span>
+            <app-base-calendar-new
+                class="flex-none"
+                mode="single"
+                [initialDate]="ajusteCForm.get('fechaC')?.value"
+                position="right"
+                (dateSelected)="onFechaCSeleccionada($event)">
+              </app-base-calendar-new>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Libro<span class="text-danger">*</span> </span>
+            <ion-select placeholder="Selecciona un libro" formControlName="tipoFlujo" interface="popover" fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(libro of libroSelect; track libro){<ion-select-option [value]="libro.value">{{ libro.nombre }}</ion-select-option>}
+            </ion-select>
+          </div>
+
+        </div>
+        <div class="contenedor-formulario !p-0">
+          <div class="contenido-formulario">
+            <span class="label">Moneda</span>
+            <ion-select placeholder="Selecciona una moneda" formControlName="moneda" interface="popover" fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(moneda of monedaSelect; track moneda){<ion-select-option [value]="moneda.value">{{ moneda.nombre }}</ion-select-option>}
+            </ion-select>
+          </div>
+        @if(pais != 'EC'){
+          <div class="contenido-formulario">
+            <span class="label">Tipo de cambio </span>
+            <!-- <ion-select placeholder="Selecciona una tasa de cambio" formControlName="tasaC" interface="popover" fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(tasa of tasaCSelect; track tasa){<ion-select-option [value]="tasa.value">{{ tasa.nombre }}</ion-select-option>}
+            </ion-select> -->
+            <ion-input fill="outline" type="number" formControlName="tipoC" class="w-[130px]" />
+          </div>
+        }
+          
+          <div class="contenido-formulario">
+            <span class="label">Estado<span class="text-danger">*</span> </span>
+            <ion-select placeholder="Selecciona un estado" formControlName="estado" interface="popover" fill="outline" class="w-[140px] flex-none" toggleIcon="chevron-down" expandedIcon="chevron-up">
+              @for(est of estadoSelect; track est){<ion-select-option [value]="est.value">{{ est.nombre }}</ion-select-option>}
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Situacion contable</span>
+            <ion-input fill="outline"  placeholder="Click en clonar asiento" formControlName="situacion" class="w-[150px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario !items-start">
+            <span class="label">Glosa contable</span>
+            <ion-textarea fill="outline"  placeholder="Click en clonar asiento" formControlName="glosa" class="w-[200px]"></ion-textarea>
+          </div>
+          
+        </div>
+      </div>
+    </form>
+    <div class="flex flex-col h-full">
+      <div class="cont-title">
+        <span>Lista de cuentas</span>
+      </div>
+      <div class="contenedor-filtros">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar cuenta por número o descripción " class="w-full" style="--padding-start:30px"></ion-input>
+        </div>
+      </div>
+      <div class="min-h-[200px] flex-1 relative" [appLoader]="isLoading()">
+        <ag-grid-angular 
+          style="width: 100%; height: 100%;" 
+          class=""
+          [rowData]="rowDataDetalle" 
+          [columnDefs]="colDefsDetalle"
+          [rowHeight]="20"
+          [headerHeight]="24"
+          [localeText]="localeText"
+          [paginationPageSize]="20"
+          [defaultColDef]="defaultColDef"
+          (gridReady)="onGridReadyDetalle($event)"
+        />
+      </div>
+      <div class="flex w-full justify-center p-[6px]" [ngClass]="{'!justify-end': !panelLateralVisible}">
+        <div class="contenedorTotal">
+          <div class="contenido">
+            <div class="filas">
+              <span>Total Debe (S/)</span> <span>S/{{ cantidad?.debeS ? cantidad?.debeS: '0.00' }}</span>
+            </div>
+            <div class="filas">
+              <span>Total Debe ($)</span> <span>${{ cantidad?.debeD ? cantidad?.debeD: '0.00' }}</span>
+            </div>
+          </div>
+          <div class="w-[1px] bg-text-5 h-full"></div>
+          <div class="contenido">
+            <div class="filas">
+              <span>Total Haber (S/)</span> <span>S/{{ cantidad?.haberS ? cantidad?.haberS: '0.00' }}</span>
+            </div>
+            <div class="filas">
+              <span>Total Haber ($)</span> <span>${{ cantidad?.haberD ? cantidad?.haberD: '0.00' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="contenedor-btn py-2.5">
+        <ion-button class="w-[150px]" (click)="botonAjustarAsiento()" [disabled]="!ajusteCForm.valid">Guardar y contabilizar</ion-button>
+        <ion-button fill="outline" class="w-[80px]" (click)="botonAjustarAsiento()" [disabled]="!ajusteCForm.valid">Guardar</ion-button>
+      </div>
+    </div>
+  </div>
+</div>

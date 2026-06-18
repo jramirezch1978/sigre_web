@@ -1,0 +1,111 @@
+server:
+  port: 9008
+spring:
+  application:
+    name: ms-activos-fijos
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: activos
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        boot:
+          allow_jdbc_metadata_access: false
+        query:
+          plan_cache_max_size: 4096
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+        generate_statistics: false
+        jdbc:
+          batch_size: 25
+          fetch_size: 100
+        order_inserts: true
+        order_updates: true
+  flyway:
+    enabled: ${FLYWAY_ENABLED:false}
+    locations: classpath:db/migration
+    schemas: activos
+    default-schema: activos
+    baseline-on-migrate: true
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:restaurant}
+    password: ${RABBIT_PASS:R4bb1t_D3v!}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  health:
+    db:
+      enabled: false
+app:
+  integracion:
+    contabilidad:
+      habilitada: ${INTEGRACION_CONTABILIDAD_HABILITADA:true}
+      contabilizar-automatico: ${INTEGRACION_CONTABILIDAD_AUTO:true}
+      contabilizar-traslado-automatico: ${INTEGRACION_CONTABILIDAD_TRASLADO_AUTO:false}
+      libro-id: ${INTEGRACION_CONTABILIDAD_LIBRO_ID:1}
+      tipo-asiento: ${INTEGRACION_CONTABILIDAD_TIPO:AF-001}
+      # moneda-id opcional (Long); definir INTEGRACION_CONTABILIDAD_MONEDA_ID si aplica
+    compras:
+      habilitada: ${INTEGRACION_COMPRAS_HABILITADA:true}
+      tolerancia-importe: ${INTEGRACION_COMPRAS_TOLERANCIA:0.01}
+  testdata:
+    # POST /api/activos/admin/test-data/seed. En prod desactivar: APP_TESTDATA_ENABLED=false (tiene prioridad sobre este YAML).
+    enabled: true
+  security-datasource:
+    jdbc-url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_SECURITY_NAME:restaurant_pe_security}?sslmode=${DB_SSL_MODE:require}
+    username: ${DB_USER:restaurant_admin}
+    password: ${DB_PASS:R3st4ur4nt_D3v!}
+  tenant:
+    jdbc-ssl-mode: ${DB_SSL_MODE:require}
+    pool:
+      maximum-pool-size: ${TENANT_POOL_MAX:3}
+      minimum-idle: ${TENANT_POOL_MIN_IDLE:0}
+      idle-timeout-ms: ${TENANT_POOL_IDLE_TIMEOUT:30000}
+      max-lifetime-ms: ${TENANT_POOL_MAX_LIFETIME:120000}
+  jwt:
+    secret: ${JWT_SECRET:dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHJlc3RhdXJhbnQucGUgZXJwIGp3dCB0b2tlbiBzaWduaW5n}
+    access-token-expiration: ${JWT_ACCESS_MS:900000}
+    definitive-token-expiration: ${JWT_DEFINITIVE_MS:900000}
+    refresh-token-expiration: ${JWT_REFRESH_MS:604800000}
+  encryption:
+    key: ${APP_ENCRYPTION_KEY:UmVzdGF1cmFudFBlQWVzMjU2S2V5RGV2MjAyNiEhISE=}
+springdoc:
+  api-docs:
+    path: /api/activos/v3/api-docs
+  swagger-ui:
+    path: /api/activos/swagger-ui.html
+
+# Configuración para comunicación con otros microservicios
+api:
+  gateway:
+    url: ${API_GATEWAY_URL:http://localhost:8080}
+
+# Configuración de Feign Client
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: basic
+      ms-contabilidad:
+        url: ${FEIGN_MS_CONTABILIDAD_URL:http://localhost:9006}
+      ms-core-maestros:
+        url: ${FEIGN_MS_CORE_MAESTROS_URL:http://localhost:9002}
+      ms-compras:
+        url: ${FEIGN_MS_COMPRAS_URL:http://localhost:9005}
+  compression:
+    request:
+      enabled: true
+    response:
+      enabled: true

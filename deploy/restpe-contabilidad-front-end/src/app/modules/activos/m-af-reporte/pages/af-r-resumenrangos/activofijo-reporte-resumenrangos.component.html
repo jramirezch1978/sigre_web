@@ -1,0 +1,115 @@
+<div class="contenedor-principal">
+  <div class="panel-izquierdo">
+    <div class="cont-title">
+      <span>Resumen de activos fijos por rangos</span>
+    </div>
+
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="flex items-center gap-3 w-full flex-row">
+          <div class="buscador">
+            <fa-icon [icon]="farSearch"></fa-icon>
+            <ion-input fill="outline" placeholder="Buscar activo por descripción o código" class="w-full"
+              style="--padding-start:30px"></ion-input>
+          </div>
+          <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+            [initialEndDate]="endDate" position="center" (dateRangeSelected)="filtradoRango($event)">
+          </app-base-calendar-new>
+          <!-- <ion-select value="Activo" placeholder="Activo" toggleIcon="chevron-down" expandedIcon="chevron-up"
+            interface="popover" fill="outline" class="w-[163px]">
+            <ion-select-option value="Activo">Activo</ion-select-option>
+            <ion-select-option value="Dado de baja">Dado de baja</ion-select-option>
+            <ion-select-option value="Todos los estados">Todos</ion-select-option>
+          </ion-select> -->
+        </div>
+        <!-- <div class="filtros-absolutos">
+          <app-fitro-autocomplete [items]="responsables" displayKey="nombre" valueKey="id" placeholder="Responsable"
+            width="w-[160px]" (itemSelected)="onResponsableSeleccionado($event)">
+          </app-fitro-autocomplete>
+          <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+            [initialEndDate]="endDate" position="center" (dateRangeSelected)="filtradoRango($event)">
+          </app-base-calendar-new>
+        </div> -->
+      </div>
+      <div class="filtros-absolutos">
+        <ion-button class="w-fit text-text-85" (click)="actualizar() " fill="outline">
+          <span>Actualizar datos</span>
+        </ion-button>
+        <ion-button class="w-[115px] text-text-85" id="reportesrangos" fill="outline">
+          <fa-icon [icon]="fasGear" class="mr-1"></fa-icon>
+          <span>Acciones</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesrangos" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos dezplegableAcciones2" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Imprimir</ion-item>
+          </ng-template>
+        </ion-popover>
+      </div>
+    </div>
+
+    <div class="flex flex-row gap-3 p-1.5 pt-0">
+      <div class="flex flex-1 border border-solid flex-row h-[56px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Total de Activos</span>
+          @if (!facade.loadingObtener()) {
+          <span class="font-bold text-sm">07</span>
+          } @else {
+          <ion-skeleton-text [animated]="true" style="width: 30px; height: 20px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasList" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[56px] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Costo total de activos</span>
+          @if (!facade.loadingObtener()) {
+          <span class="font-bold text-sm">S/ {{sumardatos('costototal') | number:'1.2-2'}}</span>
+          } @else {
+          <ion-skeleton-text [animated]="true" style="width: 100px; height: 20px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasHandHoldingDollar" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[56] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Depre. acumulada total (vigentes)</span>
+          @if (!facade.loadingObtener()) {
+          <span class="font-bold text-sm">S/ {{sumardatos('costoAc') | number:'1.2-2'}}</span>
+          } @else {
+          <ion-skeleton-text [animated]="true" style="width: 100px; height: 20px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasPerson" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+      <div class="flex flex-1 border border-solid flex-row h-[56] p-2 rounded items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xxs">Valor neto total (vigentes)</span>
+          @if (!facade.loadingObtener()) {
+          <span class="font-bold text-sm">S/ {{sumardatos('valorNet') | number:'1.2-2'}}</span>
+          } @else {
+          <ion-skeleton-text [animated]="true" style="width: 100px; height: 20px;"></ion-skeleton-text>
+          }
+        </div>
+        <div class="w-[30px] h-[30px] rounded-full bg-[#ECF4FF] flex items-center justify-center">
+          <fa-icon [icon]="fasFiles" class="text-xs text-primary"></fa-icon>
+        </div>
+      </div>
+    </div>
+    <div class="h-full relative" [appLoader]="facade.loadingObtener()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs" [defaultColDef]="defaultColDef"
+        [columnTypes]="columnTypes" [pagination]="true" [rowHeight]="20" [headerHeight]="24" [paginationPageSize]="20"
+        [purgeClosedRowNodes]="true" [localeText]="localeText" [suppressLoadingOverlay]="true" (gridReady)="onGridReady($event)"/>
+    </div>
+  </div>
+</div>

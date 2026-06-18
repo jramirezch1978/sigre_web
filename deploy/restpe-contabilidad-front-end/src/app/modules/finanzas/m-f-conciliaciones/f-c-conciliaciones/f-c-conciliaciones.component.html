@@ -1,0 +1,121 @@
+<div class="contenedor-principal-col">
+  <div class="flex flex-col">
+    <div class="cont-title">
+      <span>Conciliaciones bancarias por cuenta (Seleccione al menos un filtro)</span>
+    </div>
+    <div class="flex flex-row gap-1 p-2.5">
+      <div class="flex flex-col gap-1 w-full">
+        <div class="contenido-formulario">
+          <label class="label">Banco</label>
+          <ion-select placeholder="Selecciona un banco" class="w-[163px]" fill="outline" toggleIcon="chevron-down"
+            expandedIcon="chevron-up" interface="popover" [(ngModel)]="bancoSeleccionado">
+            @for(banco of bancos; track banco.value){
+            <ion-select-option [value]="banco.value">{{banco.label}}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <label class="label">Cuenta bancaria</label>
+          <app-autocomplete-multi [items]="cuentasBancarias" [displayKey]="'nombre'" [valueKey]="'codigo'"
+            [placeholder]="'Buscar cuenta bancaria'" [(ngModel)]="cuentasSeleccionadas">
+          </app-autocomplete-multi>
+        </div>
+
+        <div class="contenido-formulario">
+          <label class="label">Moneda</label>
+          <ion-select placeholder="Selecciona una moneda" class="w-[163px]" fill="outline" toggleIcon="chevron-down"
+            expandedIcon="chevron-up" interface="popover" [(ngModel)]="monedaSeleccionada">
+            @for(moneda of monedas; track moneda.value){
+            <ion-select-option [value]="moneda.value">{{moneda.label}}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="contenido-formulario">
+          <label class="label">Usuario</label>
+          <app-autocomplete [items]="usuarios" [displayKey]="'nombre'" [valueKey]="'codigo'"
+            [placeholder]="'Buscar usuario'" [width]="'w-full'" [(ngModel)]="usuarioSeleccionado">
+          </app-autocomplete>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1 w-full">
+
+        <div class="contenido-formulario">
+          <label class="label">Saldo mínimo</label>
+          <ion-input type="number" class="w-[100px]" fill="outline" [(ngModel)]="saldoMinimo"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <label class="label">Saldo máximo</label>
+          <ion-input type="number" fill="outline" class="w-[100px]" [(ngModel)]="saldoMaximo"></ion-input>
+        </div>
+
+        <div class="contenido-formulario">
+          <label class="label">Fecha conciliación</label>
+          <app-base-calendar-new></app-base-calendar-new>
+        </div>
+        <div class="contenido-formulario">
+          <label class="label">Estado</label>
+          <ion-select placeholder="Selecciona un estado" fill="outline" class="w-[163px]" toggleIcon="chevron-down"
+            expandedIcon="chevron-up" interface="popover" [(ngModel)]="estadoSeleccionado">
+            @for(estado of estados; track estado.value){
+            <ion-select-option [value]="estado.value">{{estado.label}}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-row w-full justify-end gap-2 p-1.5">
+      <ion-button [disabled]="!puedeExportar()" fill="outline" class="w-[115px] flex-none text-text-85" id="conciliaciones">
+        <fa-icon [icon]="fasDownload" class="mr-1"></fa-icon>
+        <span>Exportar</span>
+        <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+      </ion-button>
+      <ion-popover trigger="conciliaciones" triggerAction="click" [dismissOnSelect]="true"
+        class="popoverCustomButtonUbicacionActivos " [showBackdrop]="false">
+        <ng-template>
+          <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+          <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+        </ng-template>
+      </ion-popover>
+      <ion-button [disabled]="!puedeHacerBusqueda()" class="w-[60px] flex-none" id="conciliaciones" (click)="buscar()">
+        <span>Buscar</span>
+      </ion-button>
+    </div>
+  </div>
+
+  <div class="flex flex-grow flex-col h-full">
+    <div class="cont-title">
+      <span>Cuentas bancarias - Estado de conciliación</span>
+    </div>
+    @if(mostrarTabla) {
+    <div class="cont-cards">
+      @for(item of cards; track $index){
+      <div class="card">
+        <div class="contenido">
+          <span class="title">{{item.nombre}}</span>
+          @if(isLoading()){
+            <ion-skeleton-text [animated]="true" style="width: 30px; height: 16px;"></ion-skeleton-text>
+          }@else {
+            <span class="cantidad" [ngClass]="{'!text-danger': item.nombre === 'Cuentas en riesgo'}">{{item.valor}}</span>
+          }
+        </div>
+        <div class="icon" [ngClass]="{'!bg-danger-5': item.nombre === 'Cuentas en riesgo'}">
+          <fa-icon [icon]="item.icono" [ngClass]="{'!text-danger': item.nombre === 'Cuentas en riesgo'}"></fa-icon>
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="h-full relative" [appLoader]="isLoading()">
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [columnTypes]="columnTypes" [localeText]="localeText" [rowHeight]="20" [headerHeight]="24" [pagination]="true"
+        [paginationPageSize]="20" [getRowClass]="getRowClass" [context]="{componentParent: this}"
+        (gridReady)="onGridReady($event)">
+      </ag-grid-angular>
+    </div>
+
+    }
+  </div>
+</div>

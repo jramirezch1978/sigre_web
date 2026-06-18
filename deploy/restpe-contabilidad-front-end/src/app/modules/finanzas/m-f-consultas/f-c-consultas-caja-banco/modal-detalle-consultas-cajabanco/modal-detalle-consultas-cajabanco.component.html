@@ -1,0 +1,117 @@
+<div class="w-[755px] flex flex-col bg-[#e7e7e7] px-[7px] gap-0.5 py-[5px] ">
+  <div class="flex justify-between items-center w-full py-1">
+    <div class="flex items-center gap-1">
+      <span class="text-sm font-bold">Detalle de Cuenta - {{ numeroCuenta }}</span>
+    </div>
+    <fa-icon [icon]="farXmark" class="text-sm cursor-pointer" (click)="cerrarModal()"></fa-icon>
+  </div>
+  
+  <div class="flex flex-col bg-white gap-0 h-[350px]">
+    <!-- Tabs -->
+    <ion-segment [(ngModel)]="tabSeleccionado" class="company-tabs"
+                 [ngModelOptions]="{standalone: true}" mode="md">
+      <ion-segment-button value="movimientos" class="boton-subsubtitulo min-w-[145px]">
+        <ion-label>Movimientos bancarios</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="asientos" class="boton-subsubtitulo min-w-[125px]">
+        <ion-label>Asientos contables</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    
+    <!-- Contenido de los tabs -->
+    <div class="p-2">
+      @if (tabSeleccionado === 'movimientos') {
+        <!-- Tab Movimientos bancarios -->
+        <div class="flex flex-col gap-2">
+          <!-- Información de la cuenta -->
+            <div class="flex flex-col gap-1 text-xxs">
+              <div class="flex gap-2">
+                <span class="font-semibold w-[120px]">Razón Social:</span>
+                <span class="font-semibold">{{ datosCuenta.razonSocial }}</span>
+              </div>
+              <div class="flex gap-2">
+                <span class="font-semibold w-[120px]">Banco:</span>
+                <span class="font-semibold">{{ datosCuenta.banco }}</span>
+              </div>
+              <div class="flex gap-2">
+                <span class="font-semibold w-[120px]">{{ datosCuenta.esFlujoProyectado ? 'Saldo actual:' : 'Saldo contable:' }}</span>
+                <span class="font-semibold">{{ datosCuenta.saldoContable }}</span>
+              </div>
+              <div class="flex gap-2">
+                <span class="font-semibold w-[120px]">{{ datosCuenta.esFlujoProyectado ? 'Saldo proyectado:' : 'Saldo disponible:' }}</span>
+                <span class="font-semibold">{{ datosCuenta.saldoDisponible }}</span>
+              </div>
+            </div>
+          
+          <!-- Tabla de movimientos -->
+          <div class="flex flex-col gap-2">
+            <ag-grid-angular
+              style="width: 100%; height: 150px;"
+              class="ag-theme-quartz"
+              [rowData]="movimientosBancarios"
+              [columnDefs]="colDefsMovimientos"
+              [rowHeight]="20"
+              [headerHeight]="24"
+              [domLayout]="'autoHeight'" />
+          </div>
+        </div>
+      }
+      
+      @if (tabSeleccionado === 'asientos') {
+        <!-- Tab Asientos contables -->
+        <div class="flex flex-col gap-2">
+          <!-- Información del asiento -->
+            <div class="flex flex-col gap-1 text-xxs">
+              <div class="flex gap-2">
+                <span class="font-semibold w-[120px]">Razón Social:</span>
+                <span class="font-semibold">{{ datosCuenta.razonSocial }}</span>
+              </div>
+              <div class="flex gap-2">
+                <span class="font-semibold w-[120px]">Banco:</span>
+                <span class="font-semibold">{{ datosCuenta.banco }}</span>
+              </div>
+              <div class="form-column2">
+              <div class="flex gap-2">
+                <span class="font-semibold w-[120px]">{{ datosCuenta.esFlujoProyectado ? 'Saldo actual:' : 'Saldo contable:' }}</span>
+                <span class="font-semibold">{{ datosCuenta.saldoContable }}</span>
+              </div>
+              <div class="flex gap-2">
+                <span class="font-semibold w-[120px]">{{ datosCuenta.esFlujoProyectado ? 'Saldo proyectado:' : 'Saldo disponible:' }}</span>
+                <span class="font-semibold">{{ datosCuenta.saldoDisponible }}</span>
+              </div>
+              </div>
+              @if (!datosCuenta.esFlujoProyectado) {
+              <div class="flex gap-2">
+                <span class="font-semibold w-[120px]">Fecha contable:</span>
+                <span class="font-semibold">{{ datosCuenta.fechaContable }}</span>
+              </div>
+              <div class="flex gap-2">
+                <span class="font-semibold w-[120px]">Glosa contable:</span>
+                <span class="font-semibold">{{ datosCuenta.glosaContable }}</span>
+              </div>
+              }
+            </div>    
+          
+          <!-- Tabla de asientos -->
+          <div class="flex flex-col gap-2">
+            <ag-grid-angular
+              style="width: 100%; height: 150px;"
+              class="ag-theme-quartz"
+              [rowData]="asientosContables"
+              [columnDefs]="colDefsAsientos"
+              [rowHeight]="20"
+              [headerHeight]="24"
+              [domLayout]="'autoHeight'" />
+          </div>
+        </div>
+      }
+    </div>
+    
+    <!-- Botón cerrar -->
+    <div class="flex justify-end p-4 pt-2 mt-auto">
+      <ion-button color="medium" fill="outline" class="w-fit" (click)="cerrarModal()">
+        Cerrar
+      </ion-button>
+    </div>
+  </div>
+</div>

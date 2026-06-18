@@ -1,0 +1,211 @@
+<div class="contenedor-principal overflow-auto">
+  @if(!mostrartabla){
+  <div class="barra-desplegable"
+    (click)="mostrartabla=!mostrartabla">
+    <fa-icon [icon]="fasChevronsRight" class=""></fa-icon>
+  </div>
+  }
+  @if(mostrartabla){
+  <div class="panel-izquierdo overflow-auto">
+    <div class="cont-title">
+      <span>Lista de asientos contables automáticos (Selecciona un asiento contable automático para visualizarlo)</span>
+      <fa-icon [icon]="fasChevronsLeft" class="text-xs text-primary cursor-pointer"
+        (click)="mostrartabla=!mostrartabla"></fa-icon>
+    </div>
+    <!-- filtros -->
+    <div class="contenedor-filtros">
+      <div class="filtros-responsive">
+        <div class="buscador">
+          <fa-icon [icon]="farSearch"></fa-icon>
+          <ion-input fill="outline" placeholder="Buscar asientos automáticos" style="--padding-start:28px"
+            class="w-full text-xxs"></ion-input>
+        </div>
+      </div>
+
+      <div class="filtros-absolutos">
+        <div class="flex items-center flex-none">
+          <ion-select placeholder="De registro" toggleIcon="chevron-down" expandedIcon="chevron-up" interface="popover"
+            fill="outline" class="w-[95px] text-xxs">
+            <ion-select-option value="todos">Todos</ion-select-option>
+            <ion-select-option value="aprobado">De registro</ion-select-option>
+          </ion-select>
+
+          <!-- calendario -->
+          <app-base-calendar-new class="flex-none" mode="range" [initialStartDate]="startDate"
+            [initialEndDate]="endDate" [minDate]="minDate" [maxDate]="maxDate" position="left"
+            (dateRangeSelected)="filtrarPorFechas($event)">
+          </app-base-calendar-new>
+        </div>
+
+        <ion-button class="w-[115px] text-text-85" fill="outline" id="reportesOrdenes">
+          <fa-icon [icon]="fasGear" class="mr-1"></fa-icon>
+          <span>Acciones</span>
+          <fa-icon class="ml-1" [icon]="fasAngleDown"></fa-icon>
+        </ion-button>
+        <ion-popover trigger="reportesOrdenes" triggerAction="click" [dismissOnSelect]="true"
+          class="popoverCustomButtonUbicacionActivos" [showBackdrop]="false">
+          <ng-template>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar Excel</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Exportar PDF</ion-item>
+            <ion-item lines="none" [button]="true" [detail]="false">Importar</ion-item>
+
+          </ng-template>
+        </ion-popover>
+      </div>
+
+    </div>
+
+    <div class="contenedor-primera-tabla" [appLoader]="isLoading()">
+      <fa-icon [icon]="fasRotateRight" (click)="onBtReset()" class="btn-refresh"></fa-icon>
+      <ag-grid-angular style="width: 100%; height: 100%;" class="" [rowData]="rowData" [columnDefs]="colDefs"
+        [defaultColDef]="defaultColDef" [columnTypes]="columnTypes" [pagination]="true" [rowSelection]="'single'"
+        [localeText]="localeText" [paginationPageSize]="20" [rowHeight]="20" [headerHeight]="24"
+        (gridReady)="onGridReady($event)" (cellClicked)="onCellClicked($event)" />
+    </div>
+  </div>
+  }
+  <div class="panel-derecho overflow-auto" [appLoader]="isLoading()" [ngClass]="{'!w-full !flex-1':!mostrartabla}">
+    <div class="cont-title">
+      <span class="text-xs font-medium">Asiento: {{ asientoSeleccionado?.asiento_auto_numero_asiento }}</span>
+    </div>
+    @if(asientoSeleccionado){<div class="flex justify-end w-full bg-[#F5F5F5] px-1">
+      <div class="flex flex-row gap-2 p-1 cursor-pointer" (click)="modalverActualizaciones()">
+        <fa-icon [icon]="farBook" class="text-xs text-[#636E95]"></fa-icon>
+        <span class="text-[#636E95] text-xs font-semibold underline">Ver últimas actualizaciones</span>
+      </div>
+    </div>}
+
+    <form [formGroup]="GestionAsientosAutomaticoForm">
+      <div class="contenedor-formulario !pb-1" [ngClass]="{'!flex-row': !mostrartabla}">
+        <div class="contenedor-formulario !p-0">
+
+          <div class="contenido-formulario">
+            <span class="label">Fecha de registro</span>
+            <ion-input type="date" fill="outline" formControlName="fechaRegistro" class="w-[163px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Origen</span>
+            <ion-input fill="outline" formControlName="origen" class="w-[163px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Fecha contable <span class="text-danger">*</span></span>
+            <app-base-calendar-new class="flex-none" mode="single" [initialDate]="fechaContableSelected"
+              [disabled]="calendarioDeshabilitado" position="right" (dateSelected)="onFechaContableSelected($event)">
+            </app-base-calendar-new>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Libro <span class="text-danger">*</span></span>
+            <ion-select placeholder="Seleccionar" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="libro" interface="popover" fill="outline" class="w-[163px] text-xxs">
+              @for(libro of libros; track libro.id) {
+              <ion-select-option [value]="libro.id">{{libro.nombre}}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+
+        </div>
+
+        <div class="contenedor-formulario !p-0">
+
+          <div class="contenido-formulario">
+            <span class="label">Moneda </span>
+            <ion-select placeholder="Seleccionar" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="moneda" interface="popover" fill="outline" class="w-[163px] text-xxs">
+              @for(moneda of monedas; track moneda.id) {
+              <ion-select-option [value]="moneda.id">{{moneda.nombre}}</ion-select-option>
+              }
+            </ion-select>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Tasa de cambio</span>
+            <ion-input fill="outline" formControlName="tasaCambio" class="w-[163px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario">
+            <span class="label">Estado <span class="text-danger">*</span></span>
+            <ion-select placeholder="Seleccionar" toggleIcon="chevron-down" expandedIcon="chevron-up"
+              formControlName="estado" interface="popover" fill="outline" class="w-[100px] text-xxs"
+              (ionChange)="onEstadoChange($event)">
+              <ion-select-option value="Activo">Activo</ion-select-option>
+              <ion-select-option value="Inactivo">Inactivo</ion-select-option>
+            </ion-select>
+          </div>
+          <div class="contenido-formulario">
+            <span class="label">Situación contable</span>
+            <ion-input fill="outline" formControlName="situacionContable" class="w-[163px]"></ion-input>
+          </div>
+
+          <div class="contenido-formulario !items-start">
+            <span class="label">Glosa contable</span>
+            <ion-textarea fill="outline" formControlName="glosaContable" placeholder="Ingresar glosa contable" class="w-[160px]"
+              [ngClass]="{'!w-[300px]':!mostrartabla}" rows="3"></ion-textarea>
+          </div>
+        </div>
+
+
+      </div>
+
+
+    </form>
+    <div class="flex flex-col">
+      <div class="cont-title">
+        <span class="text-xs font-medium">Lista de cuentas</span>
+      </div>
+      <div class="flex flex-col">
+        <div class="p-2 ">
+          <app-autocomplete [items]="cuentasContables" [displayKey]="'nombre'" [valueKey]="'id'"
+            [placeholder]="'Buscar cuentas contables'" (itemSelected)="onCuentaContableSeleccionada($event)">
+          </app-autocomplete>
+        </div>
+
+        <ag-grid-angular style="width: 100%; height: 200px;" [rowData]="rowDataCuentas"
+          [columnDefs]="colDefsCuentas" [columnTypes]="columnTypes" [rowHeight]="20" [headerHeight]="24"
+          [localeText]="localeText" [defaultColDef]="defaultColDef" (gridReady)="onGridReadyCuentas($event)" />
+        <div class="border border-solid p-3 flex flex-row gap-1 rounded-[2px] w-full"
+          [ngClass]="{'!w-[350px] self-end': !mostrartabla}">
+          <div class="flex flex-col flex-1 border-r pr-1 gap-1">
+            <div class="flex flex-row justify-between text-xxs">
+              <span>Total Debe ({{monedasignificado}})</span>
+              <span>S/0.00</span>
+            </div>
+            @if(pais != 'EC'){
+            <div class="flex flex-row justify-between text-xxs gap-1">
+              <span>Total Debe (USD)</span>
+              <span>S/0.00</span>
+            </div>
+            }
+          </div>
+          <div class="flex flex-col flex-1">
+            <div class="flex flex-row justify-between text-xxs gap-1">
+              <span>Total Haber ({{monedasignificado}})</span>
+              <span>S/0.00</span>
+            </div>
+          @if(pais != 'EC'){
+            <div class="flex flex-row justify-between text-xxs gap-1">
+              <span>Total Haber (USD)</span>
+              <span>S/0.00</span>
+            </div>
+          }
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="contenedor-btn">
+      <ion-button class="w-[65px]" [disabled]="!mostrarGuardar" (click)="guardar()">Guardar</ion-button>
+      <div class="flex gap-2">
+        <ion-button fill="outline" color="danger" (click)="abrirModalAnular()">
+          Anular
+        </ion-button>
+        <ion-button fill="outline" class="w-[65px] whitespace-nowrap" [disabled]="!mostrarRevertir"
+          (click)="botonrevertir()">Revertir</ion-button>
+        <ion-button fill="outline" class="w-[65px]" [disabled]="!mostrarDuplicar"
+          (click)="botonduplicar()">Duplicar</ion-button>
+      </div>
+    </div>
+  </div>
+</div>
