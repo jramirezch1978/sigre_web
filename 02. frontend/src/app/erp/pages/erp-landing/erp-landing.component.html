@@ -7,9 +7,46 @@
       <span>SIGRE</span>
     </div>
     <nav class="landing-nav__links">
-      <a href="javascript:void(0)">Módulos</a>
-      <a href="javascript:void(0)">Empresas</a>
-      <a href="javascript:void(0)">Contacto</a>
+      <div class="landing-nav__dropdown" (mouseenter)="showDropdown='modulos'" (mouseleave)="showDropdown=''">
+        <a href="javascript:void(0)">Módulos <span class="landing-nav__arrow">▾</span></a>
+        @if (showDropdown === 'modulos') {
+          <div class="landing-mega-menu">
+            @for (cat of categoriasModulos; track cat.nombre) {
+              <div class="landing-mega-menu__column">
+                <h4 class="landing-mega-menu__title">{{ cat.nombre }}</h4>
+                @for (mod of cat.modulos; track mod.codigo) {
+                  <a class="landing-mega-menu__item" (click)="abrirDetalle(mod)">{{ mod.nombre }}</a>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <div class="landing-nav__dropdown" (mouseenter)="showDropdown='empresas'" (mouseleave)="showDropdown=''">
+        <a href="javascript:void(0)">Empresas <span class="landing-nav__arrow">▾</span></a>
+        @if (showDropdown === 'empresas') {
+          <div class="landing-dropdown-menu">
+            <div class="landing-dropdown-menu__section">
+              <h4>Ediciones del ERP</h4>
+              @for (ed of ediciones; track ed.codigo) {
+                <a class="landing-dropdown-menu__item" (click)="scrollToEdiciones()">
+                  <strong>{{ ed.nombre }}</strong>
+                  <span>{{ ed.descripcion }}</span>
+                </a>
+              }
+            </div>
+            <div class="landing-dropdown-menu__divider"></div>
+            <div class="landing-dropdown-menu__section">
+              <h4>Ventajas</h4>
+              <span class="landing-dropdown-menu__benefit">Multi-empresa y multi-sucursal</span>
+              <span class="landing-dropdown-menu__benefit">100% en la nube</span>
+              <span class="landing-dropdown-menu__benefit">Implementación rápida</span>
+              <span class="landing-dropdown-menu__benefit">Soporte local en Perú</span>
+            </div>
+          </div>
+        }
+      </div>
+      <a href="javascript:void(0)" (click)="scrollToContacto()">Contacto</a>
     </nav>
     <div class="landing-nav__actions">
       <button class="landing-nav__register" (click)="irARegistro()">Registrarse</button>
@@ -50,6 +87,31 @@
     </div>
   </section>
 
+  <!-- Ediciones del ERP -->
+  <section class="landing-editions" id="ediciones">
+    <div class="landing-editions__content">
+      <h2 class="landing-editions__title">Ediciones de SIGRE</h2>
+      <p class="landing-editions__subtitle">Elige la edición que se adapta a tu empresa</p>
+      <div class="landing-editions__grid">
+        @for (ed of ediciones; track ed.codigo) {
+          <div class="landing-edition-card" [class.landing-edition-card--featured]="ed.codigo === 'ENTERPRISE'">
+            @if (ed.codigo === 'ENTERPRISE') {
+              <div class="landing-edition-card__badge">Más popular</div>
+            }
+            <h3 class="landing-edition-card__name">{{ ed.nombre }}</h3>
+            <p class="landing-edition-card__desc">{{ ed.descripcion }}</p>
+            <ul class="landing-edition-card__features">
+              @for (feat of ed.caracteristicas; track feat) {
+                <li>{{ feat }}</li>
+              }
+            </ul>
+            <button class="landing-edition-card__btn" (click)="irARegistro()">Solicitar demo</button>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
   <!-- Sección de valor -->
   <section class="landing-value">
     <div class="landing-value__content">
@@ -79,10 +141,37 @@
     </div>
   </section>
 
+  <!-- Contacto -->
+  <section class="landing-contact" id="contacto">
+    <div class="landing-contact__content">
+      <h2 class="landing-contact__title">Contáctanos</h2>
+      <p class="landing-contact__subtitle">Estamos listos para ayudarte a implementar SIGRE en tu empresa</p>
+      <div class="landing-contact__grid">
+        <div class="landing-contact__card">
+          <div class="landing-contact__card-icon">📧</div>
+          <strong>Email</strong>
+          <a href="mailto:info@npssac.com.pe">info&#64;npssac.com.pe</a>
+        </div>
+        <div class="landing-contact__card">
+          <div class="landing-contact__card-icon">🌐</div>
+          <strong>Web</strong>
+          <a href="https://www.npssac.com.pe" target="_blank">www.npssac.com.pe</a>
+        </div>
+        <div class="landing-contact__card">
+          <div class="landing-contact__card-icon">📍</div>
+          <strong>Ubicación</strong>
+          <span>Lima, Perú</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer class="landing-footer">
-    <span>&copy; {{ currentYear }} SIGRE ERP — Todos los derechos reservados</span>
+    <div class="landing-footer__content">
+      <span>&copy; {{ currentYear }} SIGRE ERP — NPS SAC — Todos los derechos reservados</span>
+      <a href="https://www.npssac.com.pe" target="_blank">www.npssac.com.pe</a>
+    </div>
   </footer>
-
 
 </div>

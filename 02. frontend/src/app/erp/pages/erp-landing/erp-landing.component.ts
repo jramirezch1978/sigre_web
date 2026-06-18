@@ -11,6 +11,18 @@ interface ModuloInfo {
   funciones: string[];
 }
 
+interface CategoriaModulos {
+  nombre: string;
+  modulos: ModuloInfo[];
+}
+
+interface EdicionERP {
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  caracteristicas: string[];
+}
+
 @Component({
   selector: 'app-erp-landing',
   standalone: true,
@@ -21,6 +33,34 @@ interface ModuloInfo {
 export class ErpLandingComponent {
 
   currentYear = new Date().getFullYear();
+  showDropdown = '';
+
+  ediciones: EdicionERP[] = [
+    {
+      codigo: 'MYPE',
+      nombre: 'SIGRE Mype',
+      descripcion: 'Para microempresas y emprendedores',
+      caracteristicas: ['Hasta 3 usuarios', 'Contabilidad básica', 'Facturación electrónica', 'Almacén', 'Soporte por email'],
+    },
+    {
+      codigo: 'SMALL_BUSINESS',
+      nombre: 'SIGRE Small Business',
+      descripcion: 'Para pequeñas empresas en crecimiento',
+      caracteristicas: ['Hasta 15 usuarios', 'Contabilidad completa', 'Compras y Almacén', 'RR.HH. básico', 'Finanzas', 'Soporte prioritario'],
+    },
+    {
+      codigo: 'PROFESSIONAL',
+      nombre: 'SIGRE Professional',
+      descripcion: 'Para medianas empresas',
+      caracteristicas: ['Hasta 50 usuarios', 'Todos los módulos operativos', 'Multi-sucursal', 'Presupuesto', 'Producción', 'Activos Fijos', 'Soporte dedicado'],
+    },
+    {
+      codigo: 'ENTERPRISE',
+      nombre: 'SIGRE Enterprise',
+      descripcion: 'Para grandes corporaciones',
+      caracteristicas: ['Usuarios ilimitados', 'Todos los módulos', 'Multi-empresa', 'SIG y Auditoría', 'API de integración', 'Personalización avanzada', 'Soporte 24/7'],
+    },
+  ];
 
   modulos: ModuloInfo[] = [
     {
@@ -169,7 +209,11 @@ export class ErpLandingComponent {
     },
   ];
 
-  constructor(private router: Router) {}
+  categoriasModulos: CategoriaModulos[] = [];
+
+  constructor(private router: Router) {
+    this.buildCategorias();
+  }
 
   irALogin(): void {
     void this.router.navigateByUrl('/auth/signin');
@@ -180,7 +224,35 @@ export class ErpLandingComponent {
   }
 
   abrirDetalle(modulo: ModuloInfo): void {
+    this.showDropdown = '';
     void this.router.navigateByUrl(`/sigre/modulo/${modulo.codigo.toLowerCase()}`);
+  }
+
+  scrollToEdiciones(): void {
+    this.showDropdown = '';
+    document.getElementById('ediciones')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  scrollToContacto(): void {
+    document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  private buildCategorias(): void {
+    const map: Record<string, string[]> = {
+      'FINANZAS': ['CONTABILIDAD', 'FINANZAS', 'PRESUPUESTO', 'ACTIVOS_FIJOS'],
+      'OPERACIONES': ['ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'PRODUCCION'],
+      'RECURSOS HUMANOS': ['RRHH', 'COMEDOR'],
+      'GESTIÓN DE ACTIVOS': ['FLOTA', 'MANTENIMIENTO'],
+      'SECTORES': ['HORECA', 'CAMPO'],
+      'PRODUCTIVIDAD': ['SIG', 'AUDITORIA', 'OPERACIONES', 'SEGURIDAD'],
+    };
+
+    this.categoriasModulos = Object.entries(map).map(([nombre, codigos]) => ({
+      nombre,
+      modulos: codigos
+        .map(c => this.modulos.find(m => m.codigo === c))
+        .filter((m): m is ModuloInfo => !!m),
+    }));
   }
 
 }
