@@ -84,6 +84,7 @@ CREATE TABLE auth.usuario (
     intentos_fallidos INTEGER NOT NULL DEFAULT 0,
     bloqueado_hasta TIMESTAMPTZ,
     ultimo_login_en TIMESTAMPTZ,
+    flag_demo VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_demo IN ('0', '1')),
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
     flag_admin_sistema VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_admin_sistema IN ('0', '1')),
     fec_creacion TIMESTAMPTZ DEFAULT NOW(),

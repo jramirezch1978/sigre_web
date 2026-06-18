@@ -87,6 +87,9 @@ public class EmpresaMaster {
     @Column(name = "logo", columnDefinition = "BYTEA")
     private byte[] logo;
 
+    @Column(name = "flag_demo", nullable = false, length = 1)
+    private String flagDemo = "0";
+
     @Column(name = "flag_estado", nullable = false, length = 1)
     private String flagEstado;
 

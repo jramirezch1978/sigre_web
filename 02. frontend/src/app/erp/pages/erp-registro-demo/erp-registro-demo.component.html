@@ -1,0 +1,185 @@
+<div class="registro-page">
+  <!-- Navbar -->
+  <nav class="registro-nav">
+    <div class="registro-nav__brand" (click)="volver()">
+      <img src="assets/imagenes/sigre-logo.png" alt="SIGRE" />
+      <span>SIGRE</span>
+    </div>
+    <button class="registro-nav__login" (click)="irALogin()">Ya tengo cuenta</button>
+  </nav>
+
+  <div class="registro-container">
+
+    <!-- Éxito -->
+    <div class="registro-success" *ngIf="registroExitoso">
+      <div class="success-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="11" stroke="#2E7D32" stroke-width="2"/>
+          <path d="M7 12l3 3 7-7" stroke="#2E7D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2>¡Registro exitoso!</h2>
+      <p>Tu empresa demo ha sido creada correctamente. Ya puedes iniciar sesión con tu usuario administrador.</p>
+      <button class="btn-primary" (click)="irALogin()">Iniciar sesión</button>
+    </div>
+
+    <!-- Formulario -->
+    <div class="registro-form" *ngIf="!registroExitoso">
+      <h1>Registrarse para una prueba gratuita</h1>
+      <p class="registro-subtitle">Crea una cuenta demo y explora todas las funcionalidades de SIGRE ERP</p>
+
+      <!-- Stepper -->
+      <div class="stepper">
+        <div class="step" [class.active]="paso >= 1" [class.completed]="paso > 1" (click)="irAPaso(1)">
+          <div class="step-number">1</div>
+          <span>Empresa</span>
+        </div>
+        <div class="step-line" [class.active]="paso > 1"></div>
+        <div class="step" [class.active]="paso >= 2" [class.completed]="paso > 2" (click)="irAPaso(2)">
+          <div class="step-number">2</div>
+          <span>Administrador</span>
+        </div>
+        <div class="step-line" [class.active]="paso > 2"></div>
+        <div class="step" [class.active]="paso >= 3">
+          <div class="step-number">3</div>
+          <span>Usuarios</span>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div class="registro-error" *ngIf="error">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" stroke="#c62828" stroke-width="1.5"/>
+          <path d="M8 5v3M8 10h.01" stroke="#c62828" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        {{ error }}
+      </div>
+
+      <!-- Paso 1: Empresa -->
+      <div class="form-step" *ngIf="paso === 1">
+        <h3>Datos de la empresa</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="ruc">RUC *</label>
+            <input id="ruc" type="text" [(ngModel)]="empresa.ruc" maxlength="11" placeholder="20XXXXXXXXX">
+          </div>
+          <div class="form-group">
+            <label for="razonSocial">Razón social *</label>
+            <input id="razonSocial" type="text" [(ngModel)]="empresa.razonSocial" placeholder="Mi Empresa S.A.C.">
+          </div>
+          <div class="form-group">
+            <label for="nombreComercial">Nombre comercial</label>
+            <input id="nombreComercial" type="text" [(ngModel)]="empresa.nombreComercial" placeholder="Mi Empresa">
+          </div>
+          <div class="form-group">
+            <label for="direccionFiscal">Dirección fiscal</label>
+            <input id="direccionFiscal" type="text" [(ngModel)]="empresa.direccionFiscal" placeholder="Av. Principal 123">
+          </div>
+          <div class="form-group">
+            <label for="correoContacto">Correo de contacto *</label>
+            <input id="correoContacto" type="email" [(ngModel)]="empresa.correoContacto" placeholder="contacto@empresa.com">
+          </div>
+          <div class="form-group">
+            <label for="telefonoContacto">Teléfono</label>
+            <input id="telefonoContacto" type="text" [(ngModel)]="empresa.telefonoContacto" placeholder="+51 999 999 999">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-secondary" (click)="volver()">Cancelar</button>
+          <button class="btn-primary" (click)="irAPaso(2)">Siguiente</button>
+        </div>
+      </div>
+
+      <!-- Paso 2: Usuario admin -->
+      <div class="form-step" *ngIf="paso === 2">
+        <h3>Usuario administrador</h3>
+        <p class="form-help">Este será tu usuario principal con permisos de administrador.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="adminNombres">Nombres *</label>
+            <input id="adminNombres" type="text" [(ngModel)]="adminUser.nombres" placeholder="Juan">
+          </div>
+          <div class="form-group">
+            <label for="adminApellidos">Apellidos</label>
+            <input id="adminApellidos" type="text" [(ngModel)]="adminUser.apellidos" placeholder="Pérez García">
+          </div>
+          <div class="form-group">
+            <label for="adminUsername">Usuario *</label>
+            <input id="adminUsername" type="text" [(ngModel)]="adminUser.username" placeholder="jperez">
+          </div>
+          <div class="form-group">
+            <label for="adminEmail">Email *</label>
+            <input id="adminEmail" type="email" [(ngModel)]="adminUser.email" placeholder="jperez@empresa.com">
+          </div>
+          <div class="form-group">
+            <label for="adminPassword">Contraseña *</label>
+            <input id="adminPassword" type="password" [(ngModel)]="adminUser.password" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirmar contraseña *</label>
+            <input id="confirmPassword" type="password" [(ngModel)]="confirmPassword" placeholder="Repetir contraseña">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-secondary" (click)="irAPaso(1)">Anterior</button>
+          <button class="btn-primary" (click)="irAPaso(3)">Siguiente</button>
+        </div>
+      </div>
+
+      <!-- Paso 3: Usuarios adicionales -->
+      <div class="form-step" *ngIf="paso === 3">
+        <h3>Usuarios adicionales <span class="badge">{{ totalUsuarios }} / 5</span></h3>
+        <p class="form-help">Puedes agregar hasta 4 usuarios más a tu empresa demo. Este paso es opcional.</p>
+
+        <div class="usuarios-lista">
+          <div class="usuario-card" *ngFor="let u of usuariosAdicionales; let i = index">
+            <div class="usuario-card__header">
+              <span>Usuario {{ i + 2 }}</span>
+              <button class="btn-remove" (click)="eliminarUsuario(i)" title="Eliminar">✕</button>
+            </div>
+            <div class="form-grid compact">
+              <div class="form-group">
+                <label>Nombres *</label>
+                <input type="text" [(ngModel)]="u.nombres" placeholder="Nombres">
+              </div>
+              <div class="form-group">
+                <label>Apellidos</label>
+                <input type="text" [(ngModel)]="u.apellidos" placeholder="Apellidos">
+              </div>
+              <div class="form-group">
+                <label>Usuario *</label>
+                <input type="text" [(ngModel)]="u.username" placeholder="usuario">
+              </div>
+              <div class="form-group">
+                <label>Email *</label>
+                <input type="email" [(ngModel)]="u.email" placeholder="email@empresa.com">
+              </div>
+              <div class="form-group full-width">
+                <label>Contraseña *</label>
+                <input type="password" [(ngModel)]="u.password" placeholder="Mínimo 6 caracteres">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-add" *ngIf="puedeAgregarUsuario" (click)="agregarUsuario()">
+          + Agregar usuario
+        </button>
+        <p class="limit-note" *ngIf="!puedeAgregarUsuario">Has alcanzado el límite de 5 usuarios para empresa demo.</p>
+
+        <div class="form-actions">
+          <button class="btn-secondary" (click)="irAPaso(2)">Anterior</button>
+          <button class="btn-primary" (click)="registrar()" [disabled]="cargando">
+            <span *ngIf="!cargando">Crear cuenta demo</span>
+            <span *ngIf="cargando">Registrando...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="registro-footer">
+    <p>&copy; {{ 2026 }} SIGRE ERP — Sistema Integrado de Gestión de Recursos Empresariales</p>
+  </footer>
+</div>

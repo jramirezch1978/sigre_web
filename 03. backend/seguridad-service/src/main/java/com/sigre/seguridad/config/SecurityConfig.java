@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 "/api/auth/seleccionar-empresa",
                                 "/api/auth/refresh",
                                 "/api/auth/recuperar/**",
+                                "/api/auth/seguridad/registro-demo",
                                 "/api/admin/empresas/**",
                                 "/api/internal/tenants/**",
                                 "/actuator/health",

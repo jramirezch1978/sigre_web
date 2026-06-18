@@ -175,6 +175,10 @@ export class ErpLandingComponent {
     void this.router.navigateByUrl('/auth/signin');
   }
 
+  irARegistro(): void {
+    void this.router.navigateByUrl('/sigre/registro');
+  }
+
   abrirDetalle(modulo: ModuloInfo): void {
     void this.router.navigateByUrl(`/sigre/modulo/${modulo.codigo.toLowerCase()}`);
   }

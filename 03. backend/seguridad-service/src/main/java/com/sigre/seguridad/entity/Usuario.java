@@ -53,6 +53,9 @@ public class Usuario {
     @Column(name = "ultimo_login_en")
     private OffsetDateTime ultimoLoginEn;
 
+    @Column(name = "flag_demo", nullable = false, length = 1)
+    private String flagDemo = "0";
+
     @Column(name = "flag_estado", nullable = false, length = 1)
     private String flagEstado = "1";
 

@@ -98,6 +98,7 @@ CREATE TABLE master.empresa (
     db_user VARCHAR(120) NOT NULL CHECK (TRIM(db_user) <> ''),
     db_password_encrypted TEXT NOT NULL CHECK (TRIM(db_password_encrypted) <> ''),
     logo BYTEA,
+    flag_demo VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_demo IN ('0', '1')),
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
     modificado_en TIMESTAMPTZ
 );
