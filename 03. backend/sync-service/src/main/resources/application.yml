@@ -1,9 +1,19 @@
 spring:
   application:
     name: sync-service
+  datasource:
+    worker:
+      url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_SECURITY_NAME:sigre_security}?sslmode=${DB_SSL_MODE:disable}
+      username: ${DB_USER:postgres}
+      password: "${DB_PASS:${POSTGRES_PASSWORD:jarch32b}}"
+      driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+  flyway:
+    enabled: false
 
 server:
-  port: 8088
+  port: ${SERVER_PORT:8088}
 
 eureka:
   client:
@@ -17,20 +27,55 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
       base-path: /actuator
   endpoint:
     health:
       show-details: always
   health:
-    # Deshabilitar TODOS los health checks automáticos
     datasource:
       enabled: false
     db:
       enabled: false
-    # Usar solo nuestro health check personalizado
     customHealthIndicator:
       enabled: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHNpZ3JlLXdlYiBlcnAgand0IHRva2VuIHNpZ25pbmc=}
+  encryption:
+    key: ${APP_ENCRYPTION_KEY:U2lncmVFcnBXZWJBZXMyNTZLZXlEZXYyMDI2ISEhISE=}
+  schema-sync:
+    admin-secret: ${SCHEMA_SYNC_ADMIN_SECRET:dev-schema-sync}
+    template-database: ${SCHEMA_SYNC_TEMPLATE_DB:sigre_template}
+    concurrency: ${SCHEMA_SYNC_CONCURRENCY:3}
+    pool:
+      max-size: ${SCHEMA_SYNC_POOL_MAX_SIZE:2}
+      min-idle: ${SCHEMA_SYNC_POOL_MIN_IDLE:0}
+      idle-timeout-ms: ${SCHEMA_SYNC_POOL_IDLE_TIMEOUT:60000}
+      connection-timeout-ms: ${SCHEMA_SYNC_POOL_CONN_TIMEOUT:10000}
+    schedule:
+      enabled: ${SCHEMA_SYNC_SCHEDULE_ENABLED:false}
+      interval-minutes: ${SCHEMA_SYNC_INTERVAL_MINUTES:60}
+      dry-run: ${SCHEMA_SYNC_SCHEDULE_DRY_RUN:false}
+    data-sync:
+      enabled: ${SCHEMA_SYNC_DATA_ENABLED:false}
+      tables: ${SCHEMA_SYNC_DATA_TABLES:}
+  activos-jobs:
+    enabled: ${ACTIVOS_JOBS_ENABLED:false}
+    base-url: ${ACTIVOS_JOBS_BASE_URL:http://activo-fijo-service:9008}
+    bearer-token: ${ACTIVOS_JOBS_BEARER_TOKEN:}
+    empresa-id: ${ACTIVOS_JOBS_EMPRESA_ID:}
+    db-name: ${ACTIVOS_JOBS_DB_NAME:}
+    contabilizar: ${ACTIVOS_JOBS_CONTABILIZAR:true}
+    depreciacion-cron: ${ACTIVOS_JOBS_DEPRECIACION_CRON:0 0 2 1 * ?}
+    devengo-cron: ${ACTIVOS_JOBS_DEVENGO_CRON:0 0 3 1 * ?}
+
+springdoc:
+  api-docs:
+    path: /api/sync/worker/v3/api-docs
+  swagger-ui:
+    path: /api/sync/worker/swagger-ui.html
 
 ---
 spring:

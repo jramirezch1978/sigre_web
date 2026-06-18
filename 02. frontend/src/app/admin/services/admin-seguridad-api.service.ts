@@ -47,6 +47,14 @@ export class AdminSeguridadApiService extends AbstractAuthenticatedApiService {
     );
   }
 
+  enviarCorreoBienvenida(id: number): Observable<ApiResponse<{ empresaId: number; codigo: string; razonSocial: string; correoContacto: string; mensaje: string }>> {
+    return this.http.post<ApiResponse<{ empresaId: number; codigo: string; razonSocial: string; correoContacto: string; mensaje: string }>>(
+      this.buildUrl(`/auth/seguridad/empresas/${id}/correo-bienvenida`),
+      {},
+      { headers: this.bearerHeaders() }
+    );
+  }
+
   listarModulos(): Observable<ApiResponse<ModuloDto[]>> {
     return this.http.get<ApiResponse<ModuloDto[]>>(
       this.buildUrl('/auth/seguridad/modulos'),
