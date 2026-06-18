@@ -93,6 +93,7 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   seleccionarModulo(modulo: MenuModulo): void {
     this.layout.seleccionarModulo(modulo);
     this.dropdownAbiertoId = null;
+    void this.router.navigateByUrl(this.menuService.rutaDashboardModulo(modulo.codigo));
   }
 
   irADashboard(): void {
@@ -124,12 +125,8 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     void this.router.navigateByUrl(destino);
   }
 
-  get rutaAlmacenActiva(): boolean {
-    return this.router.url.includes('/almacen/');
-  }
-
-  get mostrarPlaceholderModulo(): boolean {
-    return !!this.moduloActivo && !this.rutaAlmacenActiva && !this.enDashboard;
+  get contenidoAnchoCompleto(): boolean {
+    return !this.enDashboard;
   }
 
   get enDashboard(): boolean {
@@ -138,14 +135,13 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
 
   private sincronizarModuloConRuta(): void {
     if (!this.modulos.length) return;
-    const url = this.router.url;
-    if (url.includes('/almacen')) {
-      const mod = this.modulos.find(m => m.codigo === 'ALMACEN');
-      if (mod) this.layout.seleccionarModulo(mod);
-      return;
-    }
     if (this.enDashboard) {
       this.layout.seleccionarModulo(null);
+      return;
+    }
+    const mod = this.menuService.resolverModuloPorUrl(this.router.url, this.modulos);
+    if (mod) {
+      this.layout.seleccionarModulo(mod);
     }
   }
 

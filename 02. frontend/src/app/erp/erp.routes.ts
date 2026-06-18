@@ -30,6 +30,11 @@ export const erpRoutes: Routes = [
           import('./pages/erp-dashboard/erp-dashboard.component').then(m => m.ErpDashboardComponent),
       },
       {
+        path: 'm/:codigo',
+        loadComponent: () =>
+          import('./pages/erp-module-home/erp-module-home.component').then(m => m.ErpModuleHomeComponent),
+      },
+      {
         path: 'almacen',
         loadChildren: () =>
           import('./modules/almacen/almacen.routes').then(m => m.almacenRoutes),

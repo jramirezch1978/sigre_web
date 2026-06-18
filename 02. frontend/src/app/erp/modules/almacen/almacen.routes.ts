@@ -8,7 +8,11 @@ import {
 } from './config/almacen-vistas.config';
 
 export const almacenRoutes: Routes = [
-  { path: '', redirectTo: 'tablas/almacenes', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./pages/almacen-dashboard/almacen-dashboard.component').then(m => m.AlmacenDashboardComponent),
+  },
   ...ALMACEN_TABLAS_OPCIONES.map(opcion => ({
     path: rutaRelativaAlmacen(opcion.rutaFrontend),
     loadComponent: () =>

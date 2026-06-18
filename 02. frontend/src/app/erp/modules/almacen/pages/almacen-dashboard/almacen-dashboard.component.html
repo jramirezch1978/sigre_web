@@ -1,0 +1,57 @@
+<div class="almacen-dashboard">
+  <header class="almacen-dashboard__header">
+    <div class="almacen-dashboard__brand">
+      <img src="assets/imagenes/modulos/almacen.svg" alt="Almacén" />
+      <div>
+        <h1>Almacén</h1>
+        <p>Gestión de inventarios, movimientos y reportes de stock</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="almacen-dashboard__kpis">
+    @for (kpi of kpis; track kpi.label) {
+      <div class="almacen-dashboard__kpi">
+        <div class="almacen-dashboard__kpi-icon" [style.background]="kpi.color + '18'" [style.color]="kpi.color">
+          <mat-icon>{{ kpi.icon }}</mat-icon>
+        </div>
+        <div>
+          <span class="almacen-dashboard__kpi-value">{{ cargando ? '…' : kpi.value }}</span>
+          <span class="almacen-dashboard__kpi-label">{{ kpi.label }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (modulo) {
+    <div class="almacen-dashboard__sections">
+      @for (seccion of modulo.secciones; track seccion.id) {
+        <section class="almacen-dashboard__section">
+          <div class="almacen-dashboard__section-head">
+            <h2>
+              <mat-icon>{{ iconoSeccion(seccion.codigo) }}</mat-icon>
+              {{ seccion.nombre }}
+            </h2>
+            <span>{{ seccion.opciones.length }} opciones</span>
+          </div>
+          <div class="almacen-dashboard__tiles">
+            @for (opcion of accesosRapidos(seccion); track opcion.id) {
+              <button
+                type="button"
+                class="almacen-dashboard__tile"
+                [disabled]="!opcion.rutaFrontend"
+                (click)="abrirOpcion(opcion.codigo, opcion.rutaFrontend)">
+                <span>{{ opcion.nombre }}</span>
+                @if (opcion.rutaFrontend) {
+                  <mat-icon>arrow_forward</mat-icon>
+                } @else {
+                  <small>Próximamente</small>
+                }
+              </button>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>

@@ -208,6 +208,29 @@ export class ErpMenuService {
     return this.resolverRutaFrontend(codigo, ruta);
   }
 
+  /** Ruta del dashboard interno del módulo (al salir del grid principal). */
+  rutaDashboardModulo(codigo: string): string {
+    switch (codigo.toUpperCase()) {
+      case 'ALMACEN':
+        return '/sigre/almacen';
+      default:
+        return `/sigre/m/${codigo.toLowerCase()}`;
+    }
+  }
+
+  /** Resuelve módulo activo a partir de la URL actual. */
+  resolverModuloPorUrl(url: string, modulos: MenuModulo[]): MenuModulo | null {
+    if (url.includes('/almacen')) {
+      return modulos.find(m => m.codigo === 'ALMACEN') ?? null;
+    }
+    const match = url.match(/\/sigre\/m\/([^/?#]+)/i);
+    if (match) {
+      const slug = match[1].toUpperCase();
+      return modulos.find(m => m.codigo.toUpperCase() === slug) ?? null;
+    }
+    return null;
+  }
+
   /** Convierte rutas legacy RestPE (/almacen/...) a rutas SIGRE (/sigre/almacen/...). */
   normalizarRutaFrontend(ruta: string | null): string | null {
     if (!ruta) return null;

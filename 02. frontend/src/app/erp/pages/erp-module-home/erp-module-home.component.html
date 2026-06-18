@@ -1,0 +1,46 @@
+<div class="module-home">
+  @if (cargando) {
+    <p class="module-home__loading">Cargando módulo…</p>
+  } @else if (!modulo) {
+    <p class="module-home__loading">Módulo no disponible.</p>
+  } @else {
+    <header class="module-home__header">
+      @if (modulo.iconoSvg) {
+        <img [src]="modulo.iconoSvg" [alt]="modulo.nombre" class="module-home__logo" />
+      } @else {
+        <mat-icon class="module-home__logo-icon">{{ modulo.icono }}</mat-icon>
+      }
+      <div>
+        <h1>{{ modulo.nombre }}</h1>
+        <p>Seleccione una opción para comenzar</p>
+      </div>
+    </header>
+
+    <div class="module-home__sections">
+      @for (seccion of modulo.secciones; track seccion.id) {
+        <section class="module-home__section">
+          <h2>
+            <mat-icon>{{ iconoSeccion(seccion.codigo) }}</mat-icon>
+            {{ seccion.nombre }}
+          </h2>
+          <div class="module-home__links">
+            @for (opcion of seccion.opciones; track opcion.id) {
+              <button
+                type="button"
+                class="module-home__link"
+                [disabled]="!opcion.rutaFrontend"
+                (click)="abrirOpcion(seccion, opcion.codigo, opcion.rutaFrontend)">
+                <span>{{ opcion.nombre }}</span>
+                @if (!opcion.rutaFrontend) {
+                  <small>Próximamente</small>
+                } @else {
+                  <mat-icon>chevron_right</mat-icon>
+                }
+              </button>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>
