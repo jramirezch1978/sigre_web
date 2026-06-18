@@ -61,7 +61,18 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="ruc">RUC *</label>
-            <input id="ruc" type="text" [(ngModel)]="empresa.ruc" maxlength="11" placeholder="20XXXXXXXXX">
+            <div class="input-with-spinner">
+              <input
+                id="ruc"
+                type="text"
+                inputmode="numeric"
+                [ngModel]="empresa.ruc"
+                (ngModelChange)="onRucChange($event)"
+                maxlength="11"
+                placeholder="20XXXXXXXXX">
+              <span class="ruc-spinner" *ngIf="consultandoRuc" aria-hidden="true"></span>
+            </div>
+            <small class="ruc-hint" *ngIf="rucMensaje">{{ rucMensaje }}</small>
           </div>
           <div class="form-group">
             <label for="razonSocial">Razón social *</label>

@@ -1,9 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ErpConsultaRucService } from '../../services/erp-consulta-ruc.service';
 
 interface UsuarioDemo {
   username: string;
@@ -39,15 +41,22 @@ interface RegistroDemoRequest {
   templateUrl: './erp-registro-demo.component.html',
   styleUrls: ['./erp-registro-demo.component.scss'],
 })
-export class ErpRegistroDemoComponent {
+export class ErpRegistroDemoComponent implements OnDestroy {
 
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
+  private readonly consultaRucService = inject(ErpConsultaRucService);
 
   paso = 1;
   cargando = false;
+  consultandoRuc = false;
+  rucMensaje = '';
   error = '';
   registroExitoso = false;
+
+  private rucConsultaTimer?: ReturnType<typeof setTimeout>;
+  private rucConsultaSub?: Subscription;
+  private ultimoRucConsultado = '';
 
   empresa = {
     ruc: '',
@@ -91,6 +100,59 @@ export class ErpRegistroDemoComponent {
 
   eliminarUsuario(index: number): void {
     this.usuariosAdicionales.splice(index, 1);
+  }
+
+  ngOnDestroy(): void {
+    if (this.rucConsultaTimer) {
+      clearTimeout(this.rucConsultaTimer);
+    }
+    this.rucConsultaSub?.unsubscribe();
+  }
+
+  onRucChange(value: string): void {
+    const ruc = (value ?? '').replace(/\D/g, '').slice(0, 11);
+    this.empresa.ruc = ruc;
+    this.rucMensaje = '';
+
+    if (this.rucConsultaTimer) {
+      clearTimeout(this.rucConsultaTimer);
+    }
+
+    if (ruc.length !== 11) {
+      this.consultandoRuc = false;
+      this.rucConsultaSub?.unsubscribe();
+      this.ultimoRucConsultado = '';
+      return;
+    }
+
+    if (ruc === this.ultimoRucConsultado) {
+      return;
+    }
+
+    this.rucConsultaTimer = setTimeout(() => this.consultarRucSunat(ruc), 450);
+  }
+
+  private consultarRucSunat(ruc: string): void {
+    this.rucConsultaSub?.unsubscribe();
+    this.consultandoRuc = true;
+    this.rucMensaje = '';
+
+    this.rucConsultaSub = this.consultaRucService.consultarRuc(ruc).subscribe({
+      next: (data) => {
+        this.consultandoRuc = false;
+        this.ultimoRucConsultado = ruc;
+        this.empresa.razonSocial = data.razonSocial ?? '';
+        if (!this.empresa.nombreComercial.trim()) {
+          this.empresa.nombreComercial = data.nombreComercial ?? data.razonSocial ?? '';
+        }
+        this.empresa.direccionFiscal = data.direccionFiscal ?? '';
+      },
+      error: (err) => {
+        this.consultandoRuc = false;
+        this.ultimoRucConsultado = '';
+        this.rucMensaje = err.error?.message || err.message || 'No se encontró información para este RUC.';
+      },
+    });
   }
 
   irAPaso(paso: number): void {
