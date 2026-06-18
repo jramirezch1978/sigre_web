@@ -166,7 +166,7 @@ INSERT INTO auth.modulo (codigo, nombre, flag_estado)
 VALUES
     ('ALMACEN', 'Almacén', '1'),
     ('COMPRAS', 'Compras', '1'),
-    ('VENTAS', 'Ventas', '1'),
+    ('COMERCIALIZACION', 'Comercialización', '1'),
     ('FINANZAS', 'Finanzas', '1'),
     ('CONTABILIDAD', 'Contabilidad', '1'),
     ('ACTIVOS_FIJOS', 'Activos fijos', '1'),
@@ -179,7 +179,6 @@ VALUES
     ('CAMPO', 'Campo', '1'),
     ('COMEDOR', 'Comedor', '1'),
     ('SIG', 'SIG', '1'),
-    ('COMERCIALIZACION', 'Comercialización', '1'),
     ('OPERACIONES', 'Operaciones', '1'),
     ('SEGURIDAD', 'Seguridad', '1')
 ON CONFLICT (codigo) DO UPDATE SET
@@ -226,8 +225,8 @@ WITH parent_data AS (
         ('COMPRAS','COMPRAS_OPERACIONES','Operaciones',2),
         ('COMPRAS','COMPRAS_REPORTES','Reportes',3),
 
-        ('VENTAS','VENTAS_OPERACIONES','Operaciones',1),
-        ('VENTAS','VENTAS_REPORTES','Reportes',2),
+        ('COMERCIALIZACION','VENTAS_OPERACIONES','Operaciones',1),
+        ('COMERCIALIZACION','VENTAS_REPORTES','Reportes',2),
 
         ('FINANZAS','FINANZAS_TABLAS','Tablas',1),
         ('FINANZAS','FINANZAS_OPERACIONES','Operaciones',2),

@@ -61,7 +61,7 @@ export interface MenuOpcion {
 const ICONOS_MODULO: Record<string, string> = {
   ALMACEN: 'inventory_2',
   COMPRAS: 'shopping_cart',
-  VENTAS: 'point_of_sale',
+  COMERCIALIZACION: 'storefront',
   FINANZAS: 'account_balance_wallet',
   CONTABILIDAD: 'calculate',
   ACTIVOS_FIJOS: 'domain',
@@ -74,7 +74,6 @@ const ICONOS_MODULO: Record<string, string> = {
   CAMPO: 'grass',
   COMEDOR: 'restaurant',
   SIG: 'monitoring',
-  COMERCIALIZACION: 'storefront',
   OPERACIONES: 'hub',
   SEGURIDAD: 'admin_panel_settings',
 };
@@ -82,7 +81,7 @@ const ICONOS_MODULO: Record<string, string> = {
 const ICONOS_SVG_MODULO: Record<string, string> = {
   ALMACEN: 'assets/imagenes/modulos/almacen.svg',
   COMPRAS: 'assets/imagenes/modulos/compras.svg',
-  VENTAS: 'assets/imagenes/modulos/ventas.svg',
+  COMERCIALIZACION: 'assets/imagenes/modulos/ventas.svg',
   FINANZAS: 'assets/imagenes/modulos/finanzas.svg',
   CONTABILIDAD: 'assets/imagenes/modulos/contabilidad.svg',
   ACTIVOS_FIJOS: 'assets/imagenes/modulos/activos-fijos.svg',
@@ -96,7 +95,6 @@ const ICONOS_SVG_MODULO: Record<string, string> = {
   CAMPO: 'assets/imagenes/modulos/campo.svg',
   COMEDOR: 'assets/imagenes/modulos/comedor.svg',
   SIG: 'assets/imagenes/modulos/sig.svg',
-  COMERCIALIZACION: 'assets/imagenes/modulos/comercializacion.svg',
   OPERACIONES: 'assets/imagenes/modulos/operaciones.svg',
   SEGURIDAD: 'assets/imagenes/modulos/configuracion.svg',
 };
@@ -188,7 +186,8 @@ export class ErpMenuService {
     const nombres: Record<string, string> = {
       ALMACEN: 'Almacén',
       COMPRAS: 'Compras',
-      VENTAS: 'Ventas',
+      COMERCIALIZACION: 'Comercialización',
+      VENTAS: 'Comercialización',
       FINANZAS: 'Finanzas',
       CONTABILIDAD: 'Contabilidad',
       ACTIVOS: 'Activos Fijos',
@@ -202,7 +201,6 @@ export class ErpMenuService {
       CAMPO: 'Campo',
       COMEDOR: 'Comedor',
       SIG: 'SIG',
-      COMERCIALIZACION: 'Comercialización',
       OPERACIONES: 'Operaciones',
       SEGURIDAD: 'Configuración',
     };
