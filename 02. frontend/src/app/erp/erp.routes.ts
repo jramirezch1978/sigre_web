@@ -21,9 +21,9 @@ export const erpRoutes: Routes = [
     path: '',
     canActivate: [erpSessionGuard],
     children: [
-      { path: '', redirectTo: 'app', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
-        path: 'app',
+        path: 'dashboard',
         loadComponent: () =>
           import('./pages/erp-inicio/erp-inicio.component').then(m => m.ErpInicioComponent),
       },
