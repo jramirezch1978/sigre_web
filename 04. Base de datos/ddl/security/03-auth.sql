@@ -52,6 +52,8 @@ DROP TABLE IF EXISTS auth.token_uso_log CASCADE;
 DROP TABLE IF EXISTS auth.codigo_recuperacion CASCADE;
 DROP TABLE IF EXISTS auth.notificacion CASCADE;
 DROP TABLE IF EXISTS auth.log_acceso CASCADE;
+DROP TABLE IF EXISTS auth.edicion_modulo CASCADE;
+DROP TABLE IF EXISTS auth.edicion_erp CASCADE;
 DROP TABLE IF EXISTS auth.tokens_session CASCADE;
 DROP TABLE IF EXISTS auth.sesion CASCADE;
 DROP TABLE IF EXISTS auth.usuario_opcion_menu CASCADE;
@@ -110,6 +112,25 @@ CREATE TABLE auth.modulo (
     nombre VARCHAR(120) NOT NULL,
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1'))
 );
+
+CREATE TABLE auth.edicion_erp (
+    id BIGSERIAL PRIMARY KEY,
+    codigo VARCHAR(40) NOT NULL UNIQUE,
+    nombre VARCHAR(120) NOT NULL,
+    descripcion VARCHAR(500),
+    orden INTEGER NOT NULL DEFAULT 0,
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1'))
+);
+
+CREATE TABLE auth.edicion_modulo (
+    id BIGSERIAL PRIMARY KEY,
+    edicion_id BIGINT NOT NULL REFERENCES auth.edicion_erp(id) ON DELETE CASCADE,
+    modulo_id BIGINT NOT NULL REFERENCES auth.modulo(id) ON DELETE CASCADE,
+    UNIQUE (edicion_id, modulo_id)
+);
+
+CREATE INDEX IX_EDICION_MODULO_EDICION ON auth.edicion_modulo (edicion_id);
+CREATE INDEX IX_EDICION_MODULO_MODULO ON auth.edicion_modulo (modulo_id);
 
 CREATE TABLE auth.opcion_menu (
     id BIGSERIAL PRIMARY KEY,

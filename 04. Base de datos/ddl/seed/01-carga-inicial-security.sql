@@ -188,6 +188,60 @@ ON CONFLICT (codigo) DO UPDATE SET
 
 COMMIT;
 
+-- TX 0.15: Ediciones del ERP y módulos por edición (auth)
+BEGIN;
+
+INSERT INTO auth.edicion_erp (codigo, nombre, descripcion, orden, flag_estado)
+VALUES
+    ('MYPE', 'SIGRE Mype', 'Para microempresas y emprendedores', 1, '1'),
+    ('SMALL_BUSINESS', 'SIGRE Small Business', 'Para pequeñas empresas en crecimiento', 2, '1'),
+    ('PROFESSIONAL', 'SIGRE Professional', 'Para medianas empresas con operaciones completas', 3, '1'),
+    ('ENTERPRISE', 'SIGRE Enterprise', 'Para grandes corporaciones con todos los módulos', 4, '1')
+ON CONFLICT (codigo) DO UPDATE SET
+    nombre = EXCLUDED.nombre,
+    descripcion = EXCLUDED.descripcion,
+    orden = EXCLUDED.orden,
+    flag_estado = EXCLUDED.flag_estado;
+
+INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
+SELECT e.id, m.id
+FROM auth.edicion_erp e
+JOIN auth.modulo m ON m.codigo IN (
+    'CONTABILIDAD', 'COMERCIALIZACION', 'ALMACEN', 'FINANZAS', 'SEGURIDAD'
+)
+WHERE e.codigo = 'MYPE'
+ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
+
+INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
+SELECT e.id, m.id
+FROM auth.edicion_erp e
+JOIN auth.modulo m ON m.codigo IN (
+    'CONTABILIDAD', 'COMERCIALIZACION', 'ALMACEN', 'FINANZAS', 'SEGURIDAD',
+    'COMPRAS', 'RRHH', 'ACTIVOS_FIJOS', 'PRESUPUESTO'
+)
+WHERE e.codigo = 'SMALL_BUSINESS'
+ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
+
+INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
+SELECT e.id, m.id
+FROM auth.edicion_erp e
+JOIN auth.modulo m ON m.codigo IN (
+    'CONTABILIDAD', 'COMERCIALIZACION', 'ALMACEN', 'FINANZAS', 'SEGURIDAD',
+    'COMPRAS', 'RRHH', 'ACTIVOS_FIJOS', 'PRESUPUESTO',
+    'PRODUCCION', 'FLOTA', 'MANTENIMIENTO', 'COMEDOR', 'HORECA', 'CAMPO', 'OPERACIONES'
+)
+WHERE e.codigo = 'PROFESSIONAL'
+ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
+
+INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
+SELECT e.id, m.id
+FROM auth.edicion_erp e
+JOIN auth.modulo m ON m.flag_estado = '1'
+WHERE e.codigo = 'ENTERPRISE'
+ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
+
+COMMIT;
+
 -- TX 0.2: Acciones del sistema (auth)
 BEGIN;
 
