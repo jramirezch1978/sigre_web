@@ -268,6 +268,16 @@ export class ErpLandingComponent implements OnInit {
     document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' });
   }
 
+  readonly whatsappUrl = this.buildWhatsAppUrl();
+
+  private buildWhatsAppUrl(): string {
+    const phone = '51960329223';
+    const message = encodeURIComponent(
+      'Hola, me gustaría conocer las funciones de SIGRE ERP y comentarles mi interés en el sistema para mi empresa.',
+    );
+    return `https://wa.me/${phone}?text=${message}`;
+  }
+
   precioUsuarioAdicional(plan: PlanSuscripcion): number {
     return plan.precio + this.recargoUsuarioExtra;
   }
