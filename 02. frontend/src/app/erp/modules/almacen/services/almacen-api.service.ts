@@ -172,4 +172,20 @@ export class AlmacenApiService {
       })
     );
   }
+
+  /** Consulta genérica para vistas de operaciones, consultas y reportes. */
+  consultarVista(apiPath: string): Observable<Record<string, unknown>[]> {
+    if (apiPath === '/reportes/diagnostico') {
+      return this.http
+        .get<ApiResponse<Record<string, unknown>[]>>(`${this.base}${apiPath}`)
+        .pipe(map(res => (res.data ?? []) as Record<string, unknown>[]));
+    }
+    return this.listarTodoPaginado<Record<string, unknown>>(apiPath);
+  }
+
+  ejecutarProceso(procesoPath: string): Observable<{ mensaje?: string; detalle?: string }> {
+    return this.http
+      .post<ApiResponse<{ mensaje?: string; detalle?: string }>>(`${this.base}${procesoPath}`, {})
+      .pipe(map(res => res.data ?? {}));
+  }
 }

@@ -7,6 +7,7 @@ import {
   PlanSuscripcionDto,
 } from '../../services/erp-landing-catalog.service';
 import { EDICIONES_CONTENIDO } from './ediciones-contenido';
+import { iconoModulo } from '../../shared/modulos-iconos';
 
 interface ModuloInfo {
   codigo: string;
@@ -226,6 +227,7 @@ export class ErpLandingComponent implements OnInit {
   categoriasModulos: CategoriaModulos[] = [];
 
   ngOnInit(): void {
+    this.modulos = this.modulos.map(m => ({ ...m, icono: iconoModulo(m.codigo) }));
     this.buildCategorias();
     this.landingCatalog.obtenerCatalogo().subscribe({
       next: (catalogo) => {

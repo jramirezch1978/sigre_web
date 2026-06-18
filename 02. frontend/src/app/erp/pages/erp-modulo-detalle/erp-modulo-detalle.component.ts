@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MODULOS_INFO, ModuloCompleto } from './modulos-data';
+import { iconoModulo } from '../../shared/modulos-iconos';
 
 @Component({
   selector: 'app-erp-modulo-detalle',
@@ -23,6 +24,9 @@ export class ErpModuloDetalleComponent implements OnInit {
   ngOnInit(): void {
     const codigo = this.route.snapshot.paramMap.get('codigo')?.toUpperCase() ?? '';
     this.modulo = MODULOS_INFO.find(m => m.codigo === codigo) ?? null;
+    if (this.modulo) {
+      this.modulo = { ...this.modulo, icono: iconoModulo(codigo) };
+    }
     if (!this.modulo) {
       void this.router.navigateByUrl('/sigre/inicio');
     }

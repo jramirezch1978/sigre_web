@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiBaseService } from '../../services/api-base.service';
 import { ALMACEN_TABLAS_POR_CODIGO, rutaFrontendPorCodigoOpcion } from '../modules/almacen/config/almacen-opciones-menu.config';
+import { ALMACEN_VISTAS_POR_CODIGO } from '../modules/almacen/config/almacen-vistas.config';
+import { MODULOS_ICONOS } from '../shared/modulos-iconos';
 import { StorageService } from '../../core/services/storage.service';
 
 export interface OpcionMenuDto {
@@ -80,27 +82,7 @@ const ICONOS_MODULO: Record<string, string> = {
   SEGURIDAD: 'admin_panel_settings',
 };
 
-const ICONOS_SVG_MODULO: Record<string, string> = {
-  ALMACEN: 'assets/imagenes/modulos/almacen.png',
-  COMPRAS: 'assets/imagenes/modulos/compras.png',
-  COMERCIALIZACION: 'assets/imagenes/modulos/ventas.png',
-  FINANZAS: 'assets/imagenes/modulos/finanzas.png',
-  CONTABILIDAD: 'assets/imagenes/modulos/contabilidad.png',
-  ACTIVOS_FIJOS: 'assets/imagenes/modulos/activos-fijos.png',
-  ACTIVOS: 'assets/imagenes/modulos/activos-fijos.png',
-  RRHH: 'assets/imagenes/modulos/rrhh.png',
-  PRODUCCION: 'assets/imagenes/modulos/produccion.png',
-  PRESUPUESTO: 'assets/imagenes/modulos/presupuesto.png',
-  FLOTA: 'assets/imagenes/modulos/flota.png',
-  MANTENIMIENTO: 'assets/imagenes/modulos/mantenimiento.png',
-  AUDITORIA: 'assets/imagenes/modulos/auditoria.png',
-  CAMPO: 'assets/imagenes/modulos/campo.png',
-  COMEDOR: 'assets/imagenes/modulos/comedor.png',
-  SIG: 'assets/imagenes/modulos/sig.png',
-  OPERACIONES: 'assets/imagenes/modulos/operaciones.png',
-  HORECA: 'assets/imagenes/modulos/horeca.png',
-  SEGURIDAD: 'assets/imagenes/modulos/configuracion.png',
-};
+const ICONOS_SVG_MODULO: Record<string, string> = { ...MODULOS_ICONOS };
 
 @Injectable({ providedIn: 'root' })
 export class ErpMenuService {
@@ -215,6 +197,8 @@ export class ErpMenuService {
 
   /** Resuelve ruta web: tabla canónica por código → BD → normalización legacy. */
   resolverRutaFrontend(codigo: string, rutaBd: string | null): string | null {
+    const vistaAlmacen = ALMACEN_VISTAS_POR_CODIGO[codigo];
+    if (vistaAlmacen) return vistaAlmacen.rutaFrontend;
     const desdeCodigo = this.normalizarRutaFrontend(rutaFrontendPorCodigoOpcion(codigo));
     if (desdeCodigo) return desdeCodigo;
     return this.normalizarRutaFrontend(rutaBd);

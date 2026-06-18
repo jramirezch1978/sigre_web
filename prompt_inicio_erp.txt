@@ -1,9 +1,178 @@
-http://crisaor.serveftp.com:8080/sigre/inicio  => cuando se levante esta pagina, debeía aparece una pagina de bienveneida generica como odoo, una pantalla de presentación del sigre, todos los modulos que ofrece, cuando pase el mouse por cada modulo que aparezca un popup con la definición del mismo, y cuando se haga click aparezaca una pantalla con todas las opciones y funciones que tiene cada modulo, por cierto agrega el modulo de horeca (hoteles, restaurantes y catering), revisa el codigo en @ws_objects (que esta en powerbuilder) pra que obtengas mas datos, procede, en esta pantalla de presentación debe estar un boton login, como la ventana de inicio de odoo, y con un eslogan con un formato de  letra y bastante bueno como "Todo tu negocio en una sola plataforma" y el otro Sencillo, eficiente y a buen precio!, te paso el html completo @www.odoo.com ; revisa por favor, y hazmel algo genial, revisa los iconos para que me hagas algo asi de profesional por cada modulo que tiene el SIGRE.
+================================================================================
+PROMPT INICIO ERP — SIGRE Web (especificación maestra)
+URL landing: http://crisaor.serveftp.com:8080/sigre/inicio
+================================================================================
 
-por cada modulo debes crea una pagina  de presentación donde se muestre la descripcion del modulo, las opciones que tiene, y si es posible tambien algo del funcionamiento, por jemplo con digramas mermaid (que debes de generar porque va a ser un html), con leguaje tecnico claro y elegante.
+REFERENCIA VISUAL: estilo Odoo (www.odoo.com) — navbar, hero, grid de apps,
+mega-menú, botones Login / Registrarse, scroll libre sin autenticación.
 
-cuando se haga click en iniciar sesion, se debería levantar la pagin de inicio de sesión, por otro lado debe haber un boton para registrar, para pdoer registrar un usuario para demos, ok, en la base de datos, debería tener un flag_demo (cn valor 0 / 1) para indicar que es un usuario demo, asi de esa manera ese usuario solo podría estar asignado a una sola empresa que tambien sea demo (agregar a la tabla empresa el falg_demo tambien), una empresa demo no puede tener mas que 5 usuarios como maximo, en el registro del usuario, tambien debería haber una opcion para registrar la empresa demo, y en dicha pantalla poder añadir mas usuarios (hasta 5 nada mas), por defecto el rol sería admin (por ahora)
+================================================================================
+FASE 1 — LANDING PÚBLICA (/sigre/inicio)                    [COMPLETADO]
+================================================================================
 
-cuando inicie sesion se envia a la pagina de login del erp, y luego direccionarlo a un sigre/dashboard que sería la nueva pagina de inicio, con la estrucrtura que se tenía en inicio, procede por favor (espero que no lo hayas paerdido) e tal caso recupears esa pantalla inicio y lo renombar como dashboard
+Requisitos:
+- Pantalla de presentación genérica del SIGRE (estilo Odoo).
+- Grid de todos los módulos con iconos profesionales (SVG en assets/imagenes/modulos/).
+- Hover sobre módulo → popup/tooltip con definición breve.
+- Click en módulo → /sigre/modulo/:codigo (página de detalle con scroll libre).
+- Eslogan principal: "Todo tu negocio en una sola plataforma"
+- Subtítulo: "Sencillo, eficiente y a buen precio!"
+- Botones: Iniciar sesión → /auth/signin | Registrarse → /sigre/registro
+- Sección Ediciones del ERP (Mype, Small Business, Professional, Enterprise).
+- Sección Precios (por usuario y por empresa, recargo usuario extra).
+- Sección Contacto: datos NPSSAC, www.npssac.com.pe, WhatsApp +51 960 329 223.
 
-se debe poder hacer un sroll a la pagina de /sigre/inicio, ten cuidad, este no debe ser libre, nod ebe pedir sesion ni login, es como una pagina de presentación, tambien debería poder ahcer scroll a cada pagina que se direccion al hacer click en un modulo.
+Archivos:
+  02. frontend/src/app/erp/pages/erp-landing/
+  02. frontend/src/app/erp/pages/erp-modulo-detalle/
+  02. frontend/src/assets/imagenes/modulos/*.svg
+
+Rutas públicas (sin sesión):
+  /sigre/inicio | /sigre/registro | /sigre/modulo/:codigo
+
+================================================================================
+FASE 2 — PÁGINAS POR MÓDULO                                  [COMPLETADO]
+================================================================================
+
+Por cada módulo (19 incl. HORECA y Aprovisionamiento):
+- Descripción técnica y comercial.
+- Listado de opciones/funciones por sección.
+- Beneficios clave.
+- Diagrama de flujo (render HTML simplificado; origen Mermaid en modulos-data.ts).
+
+Fuente de contenido: ws_objects/ (PowerBuilder) + opciones_menu.txt.
+Archivo: erp-modulo-detalle/modulos-data.ts
+
+Pendiente operativo: implementar pantallas ERP reales por módulo (no solo marketing).
+
+================================================================================
+FASE 3 — LOGIN, REGISTRO DEMO Y DASHBOARD                    [COMPLETADO / PARCIAL]
+================================================================================
+
+Login:
+- /auth/signin → token temporal → selección empresa/sucursal → /sigre/dashboard
+
+Registro demo (/sigre/registro):
+- Registrar empresa demo + usuario admin + hasta 4 usuarios adicionales (máx. 5).
+- Rol por defecto: ADMIN con menú completo.
+- flag_demo = '1' en master.empresa y auth.usuario.
+
+Base de datos:
+  master.empresa.flag_demo
+  auth.usuario.flag_demo
+  auth.edicion_erp + auth.edicion_modulo (FK edición ↔ módulo)
+  auth.plan_suscripcion (precios y límites)
+
+Backend:
+  POST /api/auth/seguridad/registro-demo → RegistroDemoService.java
+
+Dashboard post-login:
+- Pantalla original de inicio renombrada/migrada a erp-dashboard.
+- Shell con menú lateral: erp-inicio (layout ERP autenticado).
+- Ruta: /sigre/dashboard
+
+Pendiente Fase 3:
+  [ ] Provisioning BD tenant al registrar demo (TenantProvisioningService).
+  [ ] Validación runtime: usuario demo ↔ solo empresa demo (AuthServiceImpl).
+  [ ] Acotar permisos demo (no menú completo en producción).
+
+================================================================================
+FASE 4 — EDICIONES Y PRECIOS                                 [COMPLETADO]
+================================================================================
+
+Ediciones:
+  MYPE          — Almacén, Compras, Comercialización, Finanzas básico, Seguridad
+  SMALL_BUSINESS— + Finanzas completo, RR.HH., Asistencia
+  PROFESSIONAL  — + Operaciones, Mantenimiento, Producción, Aprovisionamiento
+  ENTERPRISE    — Todos los módulos; Flota, HORECA, Campo, Comedor según giro
+
+Tablas:
+  auth.edicion_erp
+  auth.edicion_modulo (edicion_id FK, modulo_id FK)
+  auth.plan_suscripcion
+
+Seed: 04. Base de datos/ddl/seed/01-carga-inicial-security.sql
+Patches: 20260617-plan-suscripcion.sql, 20260625-edicion-erp-contenido-modulos.sql
+
+================================================================================
+FASE 5 — MIGRACIÓN MÓDULO ALMACÉN                            [EN CURSO]
+================================================================================
+
+Origen: ws_objects/almacen/ (PowerBuilder) + opciones_menu.txt [ALMACEN]
+Destino: frontend Angular + almacen-service + DDL template PostgreSQL 17.
+
+Secciones de menú (34 opciones hoja):
+  [TABLAS]       11 opciones — CRUD maestros                    [COMPLETADO FE]
+  [OPERACIONES]   8 opciones — vales, traslados, despacho...     [EN CURSO FE]
+  [CONSULTAS]     5 opciones — kardex, stock, OC...              [EN CURSO FE]
+  [REPORTES]      7 opciones — valorización, stock fecha...      [EN CURSO FE]
+  [PROCESOS]      3 opciones — recálculo, cuadre, actualización   [EN CURSO FE]
+
+Metodología por opción:
+  1. Leer ventana PowerBuilder (.srw) y dataobject (.srd).
+  2. Extraer SQL del dataobject y adaptar a tablas PostgreSQL (04. Base de datos/ddl/template/).
+  3. Implementar API REST en almacen-service (JSON paginado).
+  4. Pantalla Angular reutilizando erp-data-table o formulario según tipo.
+  5. Validar contra auth.opcion_menu (ruta_frontend bajo /sigre/almacen/...).
+  6. Registrar acciones en auth.opcion_menu_accion.
+
+Backend existente (almacen-service/controllers):
+  AlmacenController, ValeMovController, OrdenTrasladoController, KardexController,
+  ReporteAlmacenController, StockController, InventarioConteoController,
+  AlmacenProcesoController, GuiasRemisionController, ...
+
+Frontend existente:
+  02. frontend/src/app/erp/modules/almacen/
+    config/almacen-tablas.config.ts
+    config/almacen-opciones-menu.config.ts
+    config/almacen-vistas.config.ts          ← consultas, reportes, operaciones
+    pages/almacen-tabla-page/                ← tablas maestras (11/11)
+    pages/almacen-listado-page/              ← consultas y reportes
+    pages/almacen-proceso-page/              ← procesos batch
+
+Rutas frontend (prefijo canónico):
+  /sigre/almacen/tablas/*
+  /sigre/almacen/operaciones/*
+  /sigre/almacen/consultas/*
+  /sigre/almacen/reportes/*
+  /sigre/almacen/procesos/*
+
+Reportes — flujo técnico:
+  1. Leer object window del reporte PB.
+  2. Abrir dataobject asociado → sentencia SQL.
+  3. Adaptar a PostgreSQL 17 (esquema almacen.*).
+  4. Implementar en ReporteAlmacenService → GET /api/almacen/reportes/*
+  5. Frontend: almacen-listado-page consume JSON y muestra erp-data-table.
+
+Próximos módulos a migrar (orden sugerido):
+  Compras → Aprovisionamiento → Comercialización → Finanzas → ...
+
+================================================================================
+FASE 6 — INFRAESTRUCTURA                                     [PENDIENTE]
+================================================================================
+
+HTTPS en puerto 443 (reverse proxy → :8080):
+  WhatsApp y navegadores fuerzan HTTPS; hoy solo HTTP:8080.
+  Solución: Caddy/Nginx + Let's Encrypt o Cloudflare.
+  Documentado en comandos.txt.
+
+Despliegue:
+  cd e:\Work\sigre_web
+  .\database-deploy.bat create-security --force
+  .\deploy.bat frontend --force
+  .\deploy.bat almacen-service --force   (cuando aplique)
+
+================================================================================
+NOTAS DE IMPLEMENTACIÓN
+================================================================================
+
+- Scroll libre: landing y páginas de módulo NO requieren login (erpSessionGuard).
+- Ruta wildcard app: redirige a /sigre/inicio (página pública por defecto).
+- Usuario autenticado post-login usa /sigre/dashboard como home ERP.
+- Iconos módulos: usar .svg (no .png) desde assets/imagenes/modulos/.
+- Scripts temporales: crear, usar y eliminar; no dejar basura en repo.
+- Commits: sin coautor Cursor; subir a Git cuando se complete cada fase.
+
+================================================================================
+FIN DEL PROMPT — actualizado 2026-06-17
+================================================================================

@@ -1,0 +1,27 @@
+<div class="almacen-proceso">
+  <header class="almacen-proceso__header">
+    <h1>{{ titulo }}</h1>
+    @if (subtitulo) {
+      <p>{{ subtitulo }}</p>
+    }
+  </header>
+
+  <div class="almacen-proceso__panel">
+    <p>Ejecute el proceso batch sobre el tenant activo. La operación puede tardar según el volumen de datos.</p>
+    <button mat-flat-button color="primary" type="button" [disabled]="ejecutando" (click)="ejecutar()">
+      @if (ejecutando) {
+        <mat-icon class="spin">sync</mat-icon>
+        Procesando…
+      } @else {
+        <mat-icon>play_arrow</mat-icon>
+        Ejecutar proceso
+      }
+    </button>
+  </div>
+
+  @if (mensaje) {
+    <div class="almacen-proceso__result" [class.almacen-proceso__result--error]="esError">
+      {{ mensaje }}
+    </div>
+  }
+</div>

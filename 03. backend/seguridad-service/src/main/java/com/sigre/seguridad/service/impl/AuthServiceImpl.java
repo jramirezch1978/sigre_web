@@ -145,7 +145,9 @@ public class AuthServiceImpl implements AuthService {
                 SELECT e.id, e.codigo, e.razon_social, e.ruc, e.db_name
                 FROM auth.usuario_empresa ue
                 JOIN master.empresa e ON e.id = ue.empresa_id
+                JOIN auth.usuario u ON u.id = ue.usuario_id
                 WHERE ue.usuario_id = ? AND ue.flag_estado = '1' AND e.flag_estado = '1'
+                  AND (u.flag_demo = '0' OR e.flag_demo = '1')
                 ORDER BY e.razon_social
                 """,
                 (rs, rowNum) -> EmpresaUsuarioDto.builder()
@@ -203,6 +205,21 @@ public class AuthServiceImpl implements AuthService {
         return usuario.getFlagAdminSistema() != null && "1".equals(usuario.getFlagAdminSistema());
     }
 
+    private static void validarCompatibilidadDemo(Usuario usuario, EmpresaMaster empresa) {
+        boolean usuarioDemo = "1".equals(usuario.getFlagDemo());
+        boolean empresaDemo = "1".equals(empresa.getFlagDemo());
+        if (usuarioDemo && !empresaDemo) {
+            throw new BusinessException(
+                    "Los usuarios demo solo pueden acceder a empresas demo.",
+                    HttpStatus.FORBIDDEN, "DEMO_EMPRESA_NO_PERMITIDA");
+        }
+        if (!usuarioDemo && empresaDemo && !isFlagAdminSistema(usuario)) {
+            throw new BusinessException(
+                    "Esta empresa demo solo está disponible para usuarios registrados en modo demo.",
+                    HttpStatus.FORBIDDEN, "DEMO_USUARIO_REQUERIDO");
+        }
+    }
+
     @Override
     @Transactional
     public LoginResponse seleccionarEmpresa(Long usuarioId, SeleccionEmpresaRequest request) {
@@ -232,6 +249,8 @@ public class AuthServiceImpl implements AuthService {
         EmpresaMaster empresa = empresaMasterRepository.findById(empresaId)
                 .orElseThrow(() -> new BusinessException("Empresa no encontrada",
                         HttpStatus.NOT_FOUND, "EMPRESA_NO_ENCONTRADA"));
+
+        validarCompatibilidadDemo(usuario, empresa);
 
         DatosSucursalTenant datosSucursal = obtenerDatosSucursalTenant(empresa.getId(), request.getSucursalId());
         String sucursalNombre = datosSucursal != null ? datosSucursal.nombre() : null;
