@@ -1,105 +1,140 @@
 <div class="erp-layout">
 
-  <!-- Barra superior principal -->
-  <header class="erp-topbar">
-    <div class="erp-topbar__left">
-      <img src="assets/imagenes/auth/logo-sigre.png" alt="SIGRE" class="erp-topbar__logo" />
-      <span class="erp-topbar__brand">SIGRE</span>
+  <!-- Header superior -->
+  <header class="erp-header">
+    <div class="erp-header__left">
+      <img src="assets/imagenes/auth/logo-sigre.png" alt="SIGRE" class="erp-header__logo" />
+      <span class="erp-header__brand">SIGRE</span>
     </div>
+    <div class="erp-header__center">
+      @if (empresaActual) {
+        <span class="erp-header__empresa">{{ empresaActual }}</span>
+      }
+      @if (sucursalActual) {
+        <span class="erp-header__sucursal">{{ sucursalActual }}</span>
+      }
+    </div>
+    <div class="erp-header__right">
+      <span class="erp-header__username">{{ nombreUsuario }}</span>
+      <button mat-icon-button (click)="cerrarSesion()" title="Cerrar sesión" class="erp-header__logout">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </header>
 
-    <nav class="erp-topbar__modules">
+  <!-- Cuerpo: sidebar + contenido -->
+  <div class="erp-body">
+
+    <!-- Sidebar izquierdo con módulos -->
+    <nav class="erp-sidebar">
+      <!-- Dashboard (siempre primero) -->
+      <button class="erp-sidebar__item"
+              [class.erp-sidebar__item--active]="moduloActivo === null"
+              (click)="irADashboard()">
+        <mat-icon>dashboard</mat-icon>
+        <span>Inicio</span>
+      </button>
+
       @for (modulo of modulos; track modulo.moduloId) {
-        <button class="erp-module-tab"
-                [class.erp-module-tab--active]="moduloActivo?.moduloId === modulo.moduloId"
+        <button class="erp-sidebar__item"
+                [class.erp-sidebar__item--active]="moduloActivo?.moduloId === modulo.moduloId"
                 (click)="seleccionarModulo(modulo)">
           <mat-icon>{{ modulo.icono }}</mat-icon>
           <span>{{ modulo.nombre }}</span>
         </button>
       }
+
       @if (cargandoMenu) {
-        <mat-spinner diameter="20" class="erp-topbar__spinner"></mat-spinner>
+        <div class="erp-sidebar__loading">
+          <mat-spinner diameter="22"></mat-spinner>
+        </div>
       }
     </nav>
 
-    <div class="erp-topbar__right">
-      <div class="erp-topbar__session">
-        <span class="erp-topbar__empresa">{{ empresaActual }}</span>
-        @if (sucursalActual) {
-          <span class="erp-topbar__sucursal">{{ sucursalActual }}</span>
-        }
-      </div>
-      <div class="erp-topbar__user-area">
-        <span class="erp-topbar__username">{{ nombreUsuario }}</span>
-        <button mat-icon-button (click)="cerrarSesion()" title="Cerrar sesión" class="erp-topbar__logout">
-          <mat-icon>logout</mat-icon>
-        </button>
-      </div>
-    </div>
-  </header>
+    <!-- Panel derecho (menú + contenido) -->
+    <div class="erp-panel">
 
-  <!-- Barra de secciones (sub-menú del módulo activo) -->
-  @if (moduloActivo) {
-    <nav class="erp-submenu">
-      @for (seccion of moduloActivo.secciones; track seccion.id) {
-        <div class="erp-submenu__item"
-             (mouseenter)="abrirDropdown(seccion.id)"
-             (mouseleave)="cerrarDropdown()">
-          <button class="erp-submenu__trigger">
-            {{ seccion.nombre }}
-            <mat-icon class="erp-submenu__arrow">expand_more</mat-icon>
-          </button>
+      <!-- Barra de menú horizontal (opciones del módulo activo) -->
+      @if (moduloActivo) {
+        <div class="erp-menubar">
+          <div class="erp-menubar__title">
+            <mat-icon>{{ moduloActivo.icono }}</mat-icon>
+            <span>{{ moduloActivo.nombre }}</span>
+          </div>
+          <nav class="erp-menubar__nav">
+            @for (seccion of moduloActivo.secciones; track seccion.id) {
+              <div class="erp-menu-item"
+                   (mouseenter)="abrirDropdown(seccion.id)"
+                   (mouseleave)="cerrarDropdown()">
+                <button class="erp-menu-item__trigger">
+                  {{ seccion.nombre }}
+                  <mat-icon class="erp-menu-item__arrow">expand_more</mat-icon>
+                </button>
 
-          @if (dropdownAbiertoId === seccion.id) {
-            <div class="erp-dropdown" (mouseenter)="abrirDropdown(seccion.id)" (mouseleave)="cerrarDropdown()">
-              @for (opcion of seccion.opciones; track opcion.id) {
-                <a class="erp-dropdown__option"
-                   [class.erp-dropdown__option--disabled]="!opcion.rutaFrontend"
-                   (click)="navegarOpcion(opcion.rutaFrontend)">
-                  {{ opcion.nombre }}
-                  @if (!opcion.rutaFrontend) {
-                    <span class="erp-dropdown__badge">Próximamente</span>
-                  }
-                </a>
-              }
-              @if (seccion.opciones.length === 0) {
-                <span class="erp-dropdown__empty">Sin opciones disponibles</span>
+                @if (dropdownAbiertoId === seccion.id) {
+                  <div class="erp-dropdown"
+                       (mouseenter)="abrirDropdown(seccion.id)"
+                       (mouseleave)="cerrarDropdown()">
+                    @for (opcion of seccion.opciones; track opcion.id) {
+                      <a class="erp-dropdown__option"
+                         [class.erp-dropdown__option--disabled]="!opcion.rutaFrontend"
+                         (click)="navegarOpcion(opcion.rutaFrontend)">
+                        {{ opcion.nombre }}
+                        @if (!opcion.rutaFrontend) {
+                          <span class="erp-dropdown__badge">Próximamente</span>
+                        }
+                      </a>
+                    }
+                    @if (seccion.opciones.length === 0) {
+                      <span class="erp-dropdown__empty">Sin opciones</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </nav>
+        </div>
+      }
+
+      <!-- Contenido principal -->
+      <main class="erp-content">
+        @if (moduloActivo === null && !errorMenu) {
+          <!-- Dashboard de inicio -->
+          <div class="erp-dashboard">
+            <div class="erp-dashboard__welcome">
+              <h1>Bienvenido, {{ nombreUsuario }}</h1>
+              <p>Panel principal del sistema SIGRE ERP</p>
+            </div>
+            <div class="erp-dashboard__cards">
+              @for (modulo of modulos; track modulo.moduloId) {
+                <div class="erp-dashboard__card" (click)="seleccionarModulo(modulo)">
+                  <mat-icon>{{ modulo.icono }}</mat-icon>
+                  <span class="erp-dashboard__card-name">{{ modulo.nombre }}</span>
+                  <span class="erp-dashboard__card-count">{{ modulo.secciones.length }} secciones</span>
+                </div>
               }
             </div>
-          }
-        </div>
-      }
-    </nav>
-  }
+          </div>
+        }
 
-  <!-- Contenido principal -->
-  <main class="erp-main">
-    @if (!moduloActivo && !cargandoMenu && !errorMenu) {
-      <div class="erp-welcome">
-        <img src="assets/imagenes/auth/logo-sigre.png" alt="SIGRE" class="erp-welcome__logo" />
-        <h1>Bienvenido, {{ nombreUsuario }}</h1>
-        <p>Seleccione un módulo en la barra superior para comenzar</p>
-      </div>
-    }
+        @if (errorMenu) {
+          <div class="erp-error">
+            <mat-icon>error_outline</mat-icon>
+            <p>{{ errorMenu }}</p>
+            <button mat-stroked-button (click)="cargarMenu()">Reintentar</button>
+          </div>
+        }
 
-    @if (errorMenu) {
-      <div class="erp-error">
-        <mat-icon>error_outline</mat-icon>
-        <p>{{ errorMenu }}</p>
-        <button mat-stroked-button (click)="cargarMenu()">Reintentar</button>
-      </div>
-    }
+        @if (moduloActivo && !errorMenu) {
+          <div class="erp-module-placeholder">
+            <mat-icon>{{ moduloActivo.icono }}</mat-icon>
+            <h2>{{ moduloActivo.nombre }}</h2>
+            <p>Seleccione una opción del menú superior</p>
+          </div>
+        }
+      </main>
 
-    @if (moduloActivo && !errorMenu) {
-      <div class="erp-module-content">
-        <div class="erp-module-content__header">
-          <mat-icon>{{ moduloActivo.icono }}</mat-icon>
-          <h2>{{ moduloActivo.nombre }}</h2>
-        </div>
-        <p class="erp-module-content__hint">
-          Use los menús superiores para acceder a las opciones de este módulo.
-        </p>
-      </div>
-    }
-  </main>
+    </div>
+  </div>
 
 </div>

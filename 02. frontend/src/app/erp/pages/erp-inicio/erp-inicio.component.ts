@@ -81,7 +81,12 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   }
 
   seleccionarModulo(modulo: MenuModulo): void {
-    this.moduloActivo = this.moduloActivo?.moduloId === modulo.moduloId ? null : modulo;
+    this.moduloActivo = modulo;
+    this.dropdownAbiertoId = null;
+  }
+
+  irADashboard(): void {
+    this.moduloActivo = null;
     this.dropdownAbiertoId = null;
   }
 
