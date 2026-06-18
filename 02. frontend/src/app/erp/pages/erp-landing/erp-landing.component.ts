@@ -234,9 +234,9 @@ export class ErpLandingComponent implements OnInit {
     void this.router.navigateByUrl(`/sigre/modulo/${modulo.codigo.toLowerCase()}`);
   }
 
-  scrollToEdiciones(): void {
+  scrollToPrecios(): void {
     this.showDropdown = '';
-    document.getElementById('ediciones')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('precios')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   scrollToContacto(): void {
