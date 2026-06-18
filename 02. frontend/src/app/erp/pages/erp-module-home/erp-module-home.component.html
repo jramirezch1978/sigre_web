@@ -1,46 +1,63 @@
-<div class="module-home">
+<div class="module-dash">
   @if (cargando) {
-    <p class="module-home__loading">Cargando módulo…</p>
+    <p class="module-dash__loading">Cargando módulo…</p>
   } @else if (!modulo) {
-    <p class="module-home__loading">Módulo no disponible.</p>
+    <p class="module-dash__loading">Módulo no disponible.</p>
   } @else {
-    <header class="module-home__header">
-      @if (modulo.iconoSvg) {
-        <img [src]="modulo.iconoSvg" [alt]="modulo.nombre" class="module-home__logo" />
-      } @else {
-        <mat-icon class="module-home__logo-icon">{{ modulo.icono }}</mat-icon>
-      }
-      <div>
-        <h1>{{ modulo.nombre }}</h1>
-        <p>Seleccione una opción para comenzar</p>
+    <section class="module-dash__hero">
+      <div class="module-dash__hero-visual">
+        @if (modulo.iconoSvg) {
+          <img [src]="modulo.iconoSvg" [alt]="modulo.nombre" />
+        } @else {
+          <mat-icon>{{ modulo.icono }}</mat-icon>
+        }
       </div>
-    </header>
+      <div class="module-dash__hero-text">
+        <h1>{{ modulo.nombre }}</h1>
+        <p>Panel de control — resumen del módulo {{ anio }}</p>
+      </div>
+    </section>
 
-    <div class="module-home__sections">
-      @for (seccion of modulo.secciones; track seccion.id) {
-        <section class="module-home__section">
-          <h2>
-            <mat-icon>{{ iconoSeccion(seccion.codigo) }}</mat-icon>
-            {{ seccion.nombre }}
-          </h2>
-          <div class="module-home__links">
-            @for (opcion of seccion.opciones; track opcion.id) {
-              <button
-                type="button"
-                class="module-home__link"
-                [disabled]="!opcion.rutaFrontend"
-                (click)="abrirOpcion(seccion, opcion.codigo, opcion.rutaFrontend)">
-                <span>{{ opcion.nombre }}</span>
-                @if (!opcion.rutaFrontend) {
-                  <small>Próximamente</small>
-                } @else {
-                  <mat-icon>chevron_right</mat-icon>
-                }
-              </button>
-            }
+    <div class="module-dash__kpis">
+      @for (kpi of kpis; track kpi.label) {
+        <div class="module-dash__kpi">
+          <div class="module-dash__kpi-icon" [style.background]="kpi.color + '18'" [style.color]="kpi.color">
+            <mat-icon>{{ kpi.icon }}</mat-icon>
           </div>
-        </section>
+          <div>
+            <span class="module-dash__kpi-value">{{ kpi.value }}</span>
+            <span class="module-dash__kpi-label">{{ kpi.label }}</span>
+          </div>
+        </div>
       }
+    </div>
+
+    <div class="module-dash__charts">
+      <article class="module-dash__chart-card">
+        <header class="module-dash__chart-head">
+          <div>
+            <h2>Opciones por sección</h2>
+            <p>Distribución del menú de {{ modulo.nombre }}</p>
+          </div>
+          <mat-icon>bar_chart</mat-icon>
+        </header>
+        <div class="module-dash__chart">
+          <canvas baseChart type="bar" [data]="seccionesBarData" [options]="seccionesBarOptions"></canvas>
+        </div>
+      </article>
+
+      <article class="module-dash__chart-card">
+        <header class="module-dash__chart-head">
+          <div>
+            <h2>Estado de opciones</h2>
+            <p>Disponibles vs próximamente</p>
+          </div>
+          <mat-icon>donut_large</mat-icon>
+        </header>
+        <div class="module-dash__chart module-dash__chart--donut">
+          <canvas baseChart type="doughnut" [data]="opcionesDonutData" [options]="opcionesDonutOptions"></canvas>
+        </div>
+      </article>
     </div>
   }
 </div>
