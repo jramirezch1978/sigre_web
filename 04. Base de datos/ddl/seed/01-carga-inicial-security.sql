@@ -180,6 +180,7 @@ VALUES
     ('COMEDOR', 'Comedor', '1'),
     ('SIG', 'SIG', '1'),
     ('OPERACIONES', 'Operaciones', '1'),
+    ('HORECA', 'HORECA', '1'),
     ('SEGURIDAD', 'Seguridad', '1')
 ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,

@@ -1,0 +1,114 @@
+<div class="landing">
+
+  <!-- Navbar -->
+  <header class="landing-nav">
+    <div class="landing-nav__brand">
+      <img src="assets/imagenes/auth/logo-sigre.png" alt="SIGRE" />
+      <span>SIGRE</span>
+    </div>
+    <nav class="landing-nav__links">
+      <a href="javascript:void(0)">Módulos</a>
+      <a href="javascript:void(0)">Empresas</a>
+      <a href="javascript:void(0)">Contacto</a>
+    </nav>
+    <button class="landing-nav__login" (click)="irALogin()">Iniciar sesión</button>
+  </header>
+
+  <!-- Hero -->
+  <section class="landing-hero">
+    <div class="landing-hero__content">
+      <h1 class="landing-hero__title">
+        Todo tu negocio en una <span class="landing-hero__highlight">sola plataforma.</span>
+      </h1>
+      <h2 class="landing-hero__subtitle">
+        ¡Sencillo, eficiente y a la medida de tu empresa!
+      </h2>
+      <div class="landing-hero__actions">
+        <button class="landing-hero__btn-primary" (click)="irALogin()">Iniciar sesión</button>
+        <button class="landing-hero__btn-secondary">Solicitar demo</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Módulos Grid -->
+  <section class="landing-modules">
+    <div class="landing-modules__grid">
+      @for (modulo of modulos; track modulo.codigo) {
+        <div class="landing-module-card" (click)="abrirDetalle(modulo)">
+          <div class="landing-module-card__icon">
+            <img [src]="modulo.icono" [alt]="modulo.nombre" />
+          </div>
+          <span class="landing-module-card__name">{{ modulo.nombre }}</span>
+          <div class="landing-module-card__tooltip">
+            {{ modulo.descripcion }}
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Sección de valor -->
+  <section class="landing-value">
+    <div class="landing-value__content">
+      <h2>ERP completo para empresas peruanas</h2>
+      <p>
+        SIGRE integra todos los procesos de tu negocio: desde la gestión contable y financiera
+        hasta el control de almacenes, producción y recursos humanos. Multi-empresa, multi-sucursal
+        y 100% en la nube.
+      </p>
+      <div class="landing-value__features">
+        <div class="landing-value__feature">
+          <div class="landing-value__feature-icon">🏢</div>
+          <strong>Multi-empresa</strong>
+          <span>Gestiona múltiples razones sociales desde una sola plataforma</span>
+        </div>
+        <div class="landing-value__feature">
+          <div class="landing-value__feature-icon">☁️</div>
+          <strong>100% Cloud</strong>
+          <span>Accede desde cualquier lugar, sin instalación</span>
+        </div>
+        <div class="landing-value__feature">
+          <div class="landing-value__feature-icon">🔒</div>
+          <strong>Seguro</strong>
+          <span>Roles, permisos y auditoría de cada operación</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <span>&copy; {{ currentYear }} SIGRE ERP — Todos los derechos reservados</span>
+  </footer>
+
+  <!-- Modal de detalle del módulo -->
+  @if (moduloDetalle) {
+    <div class="landing-modal-overlay" (click)="cerrarDetalle()">
+      <div class="landing-modal" (click)="$event.stopPropagation()">
+        <button class="landing-modal__close" (click)="cerrarDetalle()">&times;</button>
+        <div class="landing-modal__header">
+          <img [src]="moduloDetalle.icono" [alt]="moduloDetalle.nombre" class="landing-modal__icon" />
+          <div>
+            <h2 class="landing-modal__title">{{ moduloDetalle.nombre }}</h2>
+            <p class="landing-modal__desc">{{ moduloDetalle.descripcion }}</p>
+          </div>
+        </div>
+        <div class="landing-modal__body">
+          <h3>Funcionalidades principales</h3>
+          <div class="landing-modal__functions">
+            @for (fn of moduloDetalle.funciones; track fn) {
+              <div class="landing-modal__fn-item">
+                <span class="landing-modal__fn-check" [style.color]="moduloDetalle.color">✓</span>
+                {{ fn }}
+              </div>
+            }
+          </div>
+        </div>
+        <div class="landing-modal__footer">
+          <button class="landing-hero__btn-primary" (click)="irALogin()">Iniciar sesión</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

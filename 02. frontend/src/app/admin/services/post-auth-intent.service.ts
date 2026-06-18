@@ -27,9 +27,9 @@ export class PostAuthIntentService {
   /**
    * Obtiene la ruta home y limpia la intención (un solo uso).
    */
-  consumeHomeRoute(): '/admin/inicio' | '/sigre/inicio' {
+  consumeHomeRoute(): '/admin/inicio' | '/sigre/app' {
     const raw = sessionStorage.getItem(PostAuthIntentService.STORAGE_KEY);
     sessionStorage.removeItem(PostAuthIntentService.STORAGE_KEY);
-    return raw === 'admin' ? '/admin/inicio' : '/sigre/inicio';
+    return raw === 'admin' ? '/admin/inicio' : '/sigre/app';
   }
 }

@@ -3,12 +3,17 @@ import { erpSessionGuard } from './guards/erp-session.guard';
 
 export const erpRoutes: Routes = [
   {
+    path: 'inicio',
+    loadComponent: () =>
+      import('./pages/erp-landing/erp-landing.component').then(m => m.ErpLandingComponent),
+  },
+  {
     path: '',
     canActivate: [erpSessionGuard],
     children: [
-      { path: '', redirectTo: 'inicio', pathMatch: 'full' },
+      { path: '', redirectTo: 'app', pathMatch: 'full' },
       {
-        path: 'inicio',
+        path: 'app',
         loadComponent: () =>
           import('./pages/erp-inicio/erp-inicio.component').then(m => m.ErpInicioComponent),
       },

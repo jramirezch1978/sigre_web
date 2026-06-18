@@ -75,6 +75,7 @@ const ICONOS_MODULO: Record<string, string> = {
   COMEDOR: 'restaurant',
   SIG: 'monitoring',
   OPERACIONES: 'hub',
+  HORECA: 'hotel',
   SEGURIDAD: 'admin_panel_settings',
 };
 
@@ -96,6 +97,7 @@ const ICONOS_SVG_MODULO: Record<string, string> = {
   COMEDOR: 'assets/imagenes/modulos/comedor.svg',
   SIG: 'assets/imagenes/modulos/sig.svg',
   OPERACIONES: 'assets/imagenes/modulos/operaciones.svg',
+  HORECA: 'assets/imagenes/modulos/horeca.svg',
   SEGURIDAD: 'assets/imagenes/modulos/configuracion.svg',
 };
 
@@ -202,6 +204,7 @@ export class ErpMenuService {
       COMEDOR: 'Comedor',
       SIG: 'SIG',
       OPERACIONES: 'Operaciones',
+      HORECA: 'HORECA',
       SEGURIDAD: 'Configuración',
     };
     return nombres[codigo] ?? codigo;
