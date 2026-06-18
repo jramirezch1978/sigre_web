@@ -87,25 +87,36 @@
     </div>
   </section>
 
-  <!-- Ediciones del ERP -->
-  <section class="landing-editions" id="ediciones">
-    <div class="landing-editions__content">
-      <h2 class="landing-editions__title">Ediciones de SIGRE</h2>
-      <p class="landing-editions__subtitle">Elige la edición que se adapta a tu empresa</p>
-      <div class="landing-editions__grid">
-        @for (ed of ediciones; track ed.codigo) {
-          <div class="landing-edition-card" [class.landing-edition-card--featured]="ed.codigo === 'ENTERPRISE'">
-            @if (ed.codigo === 'ENTERPRISE') {
-              <div class="landing-edition-card__badge">Más popular</div>
-            }
-            <h3 class="landing-edition-card__name">{{ ed.nombre }}</h3>
-            <p class="landing-edition-card__desc">{{ ed.descripcion }}</p>
-            <ul class="landing-edition-card__features">
-              @for (feat of ed.caracteristicas; track feat) {
+  <!-- Precios / Suscripciones -->
+  <section class="landing-pricing" id="ediciones">
+    <div class="landing-pricing__content">
+      <h2 class="landing-pricing__title">¡No estás soñando!</h2>
+      <div class="landing-pricing__grid">
+        @for (plan of planes; track plan.codigo) {
+          <div class="landing-pricing-card" [class.landing-pricing-card--featured]="plan.destacado">
+            <div class="landing-pricing-card__bar" [style.background]="plan.color"></div>
+            <h3 class="landing-pricing-card__name">{{ plan.nombre }}</h3>
+            <div class="landing-pricing-card__price">
+              @if (plan.precio === 0) {
+                <span class="landing-pricing-card__amount">$0</span>
+              } @else {
+                <span class="landing-pricing-card__currency">$</span>
+                <span class="landing-pricing-card__amount">{{ plan.precio }}</span>
+                <span class="landing-pricing-card__period">por usuario al mes</span>
+              }
+            </div>
+            <p class="landing-pricing-card__desc">{{ plan.descripcion }}</p>
+            <ul class="landing-pricing-card__features">
+              @for (feat of plan.caracteristicas; track feat) {
                 <li>{{ feat }}</li>
               }
             </ul>
-            <button class="landing-edition-card__btn" (click)="irARegistro()">Solicitar demo</button>
+            <button class="landing-pricing-card__btn" [class.landing-pricing-card__btn--primary]="plan.destacado" (click)="irARegistro()">
+              {{ plan.precio === 0 ? 'EMPEZAR AHORA' : 'COMPRAR AHORA' }}
+            </button>
+            @if (plan.precio > 0) {
+              <button class="landing-pricing-card__btn-secondary" (click)="irARegistro()">PRUEBA GRATUITA</button>
+            }
           </div>
         }
       </div>

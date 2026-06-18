@@ -16,6 +16,16 @@ interface CategoriaModulos {
   modulos: ModuloInfo[];
 }
 
+interface PlanSuscripcion {
+  codigo: string;
+  nombre: string;
+  precio: number;
+  descripcion: string;
+  caracteristicas: string[];
+  color: string;
+  destacado: boolean;
+}
+
 interface EdicionERP {
   codigo: string;
   nombre: string;
@@ -34,6 +44,45 @@ export class ErpLandingComponent {
 
   currentYear = new Date().getFullYear();
   showDropdown = '';
+
+  planes: PlanSuscripcion[] = [
+    {
+      codigo: 'DEMO',
+      nombre: 'Demo gratuito',
+      precio: 0,
+      descripcion: 'Prueba SIGRE por 15 días sin compromiso',
+      caracteristicas: ['Acceso limitado por 15 días', 'Hasta 5 usuarios', 'Todos los módulos', 'Sin tarjeta de crédito'],
+      color: '#00bcd4',
+      destacado: false,
+    },
+    {
+      codigo: 'STANDARD',
+      nombre: 'Estándar',
+      precio: 8,
+      descripcion: 'Todas las aplicaciones — SIGRE Online',
+      caracteristicas: ['Todas las aplicaciones', 'SIGRE Online', 'Soporte por email', 'Actualizaciones incluidas'],
+      color: '#f5a623',
+      destacado: false,
+    },
+    {
+      codigo: 'PERSONALIZADO',
+      nombre: 'Personalizado',
+      precio: 12,
+      descripcion: 'Todas las aplicaciones — SIGRE Online / On-premise',
+      caracteristicas: ['Todas las aplicaciones', 'SIGRE Online / On-premise', 'Multi-sucursal', 'Múltiples empresas', 'Soporte prioritario'],
+      color: '#714b67',
+      destacado: true,
+    },
+    {
+      codigo: 'ENTERPRISE',
+      nombre: 'Enterprise',
+      precio: 20,
+      descripcion: 'Acceso exclusivo a la edición Enterprise',
+      caracteristicas: ['Todas las aplicaciones', 'Edición Enterprise completa', 'Multi-empresa ilimitado', 'API de integración', 'Personalización avanzada', 'Soporte 24/7 dedicado'],
+      color: '#e11d48',
+      destacado: false,
+    },
+  ];
 
   ediciones: EdicionERP[] = [
     {
