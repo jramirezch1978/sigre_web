@@ -64,6 +64,7 @@ export interface MenuOpcion {
 const ICONOS_MODULO: Record<string, string> = {
   ALMACEN: 'inventory_2',
   COMPRAS: 'shopping_cart',
+  APROVISIONAMIENTO: 'local_shipping',
   COMERCIALIZACION: 'storefront',
   FINANZAS: 'account_balance_wallet',
   CONTABILIDAD: 'calculate',
@@ -173,6 +174,7 @@ export class ErpMenuService {
     const nombres: Record<string, string> = {
       ALMACEN: 'Almacén',
       COMPRAS: 'Compras',
+      APROVISIONAMIENTO: 'Aprovisionamiento',
       COMERCIALIZACION: 'Comercialización',
       VENTAS: 'Comercialización',
       FINANZAS: 'Finanzas',

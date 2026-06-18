@@ -95,3 +95,73 @@ Notas
 - 443 y 8443 del router están ocupados (DVR / SVN); por eso se usa 9043→8043.
 - Cloudflare Tunnel / Zero Trust: descartado (pide tarjeta).
 - El puerto 8080 HTTP sigue disponible para pruebas internas; enlaces públicos usar :9043 HTTPS.
+
+
+
+Qué quedó documentado
+configuracion_ssh.txt — guía HTTPS con puertos 9043/8043
+comandos.txt — URL pública para WhatsApp
+Cambios subidos al repo (1cdfc54b0)
+URL pública definitiva
+https://crisaor.serveftp.com:9043/sigre/inicio
+Comandos en cronos (SSH)
+1. Validación ACME (puerto 80) — solo si aún no tienes certificado; requiere forward temporal 80 → .163:
+
+sudo tee /etc/nginx/conf.d/acme.conf <<'EOF'
+server {
+    listen 80;
+    server_name crisaor.serveftp.com;
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+    location / {
+        return 404;
+    }
+}
+EOF
+sudo mkdir -p /var/www/certbot
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot certonly --webroot \
+  -w /var/www/certbot \
+  -d crisaor.serveftp.com \
+  --email jramirez@npssac.com.pe \
+  --agree-tos \
+  --no-eff-email
+2. Nginx HTTPS en 8043 (coincide con el router):
+
+sudo tee /etc/nginx/conf.d/sigre-https.conf <<'EOF'
+server {
+    listen 8043 ssl http2;
+    server_name crisaor.serveftp.com;
+    ssl_certificate     /etc/letsencrypt/live/crisaor.serveftp.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/crisaor.serveftp.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 120s;
+    }
+}
+EOF
+sudo nginx -t && sudo systemctl reload nginx
+3. Verificar
+
+curl -Ik https://127.0.0.1:8043/sigre/inicio
+ss -tlnp | grep 8043
+Desde fuera (datos móviles):
+
+curl -Ik https://crisaor.serveftp.com:9043/sigre/inicio
+Resumen del flujo
+Internet :9043  →  Router  →  192.168.0.163:8043 (Nginx TLS)
+                                    ↓
+                            127.0.0.1:8080 (Docker sigre-frontend)
+Ya no se usa 8443/9443 ni Cloudflare. Si al ejecutar certbot falla porque el 80 sigue yendo a .159, avisa y vemos el forward temporal del puerto 80 o DNS-01.
+

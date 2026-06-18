@@ -69,7 +69,7 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     this.limpiarTimeout();
   }
 
-  @HostListener('document:click', ['$event'])
+  @HostListener('document:click')
   onDocumentClick(): void {
     this.dropdownAbiertoId = null;
   }
@@ -123,10 +123,6 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     if (!destino) return;
     this.dropdownAbiertoId = null;
     void this.router.navigateByUrl(destino);
-  }
-
-  get contenidoAnchoCompleto(): boolean {
-    return !this.enDashboard;
   }
 
   get enDashboard(): boolean {
