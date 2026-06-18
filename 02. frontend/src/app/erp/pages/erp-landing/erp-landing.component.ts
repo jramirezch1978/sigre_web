@@ -188,7 +188,7 @@ export class ErpLandingComponent implements OnInit {
     {
       codigo: 'HORECA',
       nombre: 'HORECA',
-      descripcion: 'Gestión hotelera, restaurantes y catering: reservas, alojamiento, huéspedes y servicios de hospitalidad.',
+      descripcion: 'Hoteles, restaurantes y catering: reservas, alojamiento, huéspedes, servicios de restaurante y eventos.',
       icono: 'assets/imagenes/modulos/horeca.png',
       color: '#AD1457',
       funciones: ['Maestro de cuartos', 'Alojamiento de huéspedes', 'Reservas', 'Check-in / Check-out', 'Servicios de restaurante', 'Catering y eventos', 'Tarifas y temporadas', 'Facturación hotelera'],

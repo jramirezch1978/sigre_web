@@ -373,8 +373,8 @@ export const MODULOS_INFO: ModuloCompleto[] = [
     nombre: 'HORECA',
     icono: 'assets/imagenes/modulos/horeca.png',
     color: '#AD1457',
-    slogan: 'Hospitalidad, gastronomía y eventos integrados',
-    descripcion: 'Gestión hotelera, de restaurantes y catering: reservas, alojamiento de huéspedes, maestro de habitaciones, servicios de restaurante, eventos y facturación de servicios.',
+    slogan: 'Hoteles, restaurantes y catering',
+    descripcion: 'Hoteles, restaurantes y catering en una sola plataforma: reservas, alojamiento de huéspedes, maestro de habitaciones, servicios de restaurante, eventos y facturación de servicios.',
     secciones: [
       { titulo: 'Tablas maestras', opciones: ['Maestro de cuartos/habitaciones', 'Tipos de habitación', 'Tarifas y temporadas', 'Servicios adicionales'] },
       { titulo: 'Operaciones', opciones: ['Reservas', 'Check-in', 'Alojamiento de huéspedes', 'Servicios de habitación', 'Check-out', 'Facturación hotelera', 'Eventos y catering'] },
