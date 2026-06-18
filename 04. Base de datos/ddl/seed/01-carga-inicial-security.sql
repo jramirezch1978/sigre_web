@@ -181,7 +181,8 @@ VALUES
     ('SIG', 'SIG', '1'),
     ('OPERACIONES', 'Operaciones', '1'),
     ('HORECA', 'Hoteles, Restaurantes y Catering', '1'),
-    ('SEGURIDAD', 'Seguridad', '1')
+    ('SEGURIDAD', 'Seguridad', '1'),
+    ('ASISTENCIA', 'Asistencia', '1')
 ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,
     flag_estado = EXCLUDED.flag_estado;
@@ -193,10 +194,10 @@ BEGIN;
 
 INSERT INTO auth.edicion_erp (codigo, nombre, descripcion, orden, flag_estado)
 VALUES
-    ('MYPE', 'SIGRE Mype', 'Para microempresas y emprendedores', 1, '1'),
-    ('SMALL_BUSINESS', 'SIGRE Small Business', 'Para pequeñas empresas en crecimiento', 2, '1'),
-    ('PROFESSIONAL', 'SIGRE Professional', 'Para medianas empresas con operaciones completas', 3, '1'),
-    ('ENTERPRISE', 'SIGRE Enterprise', 'Para grandes corporaciones con todos los módulos', 4, '1')
+    ('MYPE', 'SIGRE Mype', 'Venta, compra e inventario con facturación y control básico de series y numeradores.', 1, '1'),
+    ('SMALL_BUSINESS', 'SIGRE Small Business', 'Mype ampliado con finanzas completas, planilla, RR.HH. y control de asistencia.', 2, '1'),
+    ('PROFESSIONAL', 'SIGRE Professional', 'Operaciones con OT, mantenimiento, producción y aprovisionamiento avanzado.', 3, '1'),
+    ('ENTERPRISE', 'SIGRE Enterprise', 'Suite completa multi-empresa con módulos sectoriales según su giro de negocio.', 4, '1')
 ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,
     descripcion = EXCLUDED.descripcion,
@@ -207,7 +208,7 @@ INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
 SELECT e.id, m.id
 FROM auth.edicion_erp e
 JOIN auth.modulo m ON m.codigo IN (
-    'CONTABILIDAD', 'COMERCIALIZACION', 'ALMACEN', 'FINANZAS', 'SEGURIDAD'
+    'ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'FINANZAS', 'SEGURIDAD'
 )
 WHERE e.codigo = 'MYPE'
 ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
@@ -216,8 +217,8 @@ INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
 SELECT e.id, m.id
 FROM auth.edicion_erp e
 JOIN auth.modulo m ON m.codigo IN (
-    'CONTABILIDAD', 'COMERCIALIZACION', 'ALMACEN', 'FINANZAS', 'SEGURIDAD',
-    'COMPRAS', 'RRHH', 'ACTIVOS_FIJOS', 'PRESUPUESTO'
+    'ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'FINANZAS', 'SEGURIDAD',
+    'RRHH', 'ASISTENCIA'
 )
 WHERE e.codigo = 'SMALL_BUSINESS'
 ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
@@ -226,9 +227,9 @@ INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
 SELECT e.id, m.id
 FROM auth.edicion_erp e
 JOIN auth.modulo m ON m.codigo IN (
-    'CONTABILIDAD', 'COMERCIALIZACION', 'ALMACEN', 'FINANZAS', 'SEGURIDAD',
-    'COMPRAS', 'RRHH', 'ACTIVOS_FIJOS', 'PRESUPUESTO',
-    'PRODUCCION', 'FLOTA', 'MANTENIMIENTO', 'COMEDOR', 'HORECA', 'CAMPO', 'OPERACIONES'
+    'ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'FINANZAS', 'SEGURIDAD',
+    'RRHH', 'ASISTENCIA',
+    'PRODUCCION', 'MANTENIMIENTO', 'OPERACIONES'
 )
 WHERE e.codigo = 'PROFESSIONAL'
 ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
@@ -256,28 +257,28 @@ VALUES
         'STANDARD', 'Mype', 8,
         'Edición SIGRE Mype — SIGRE Online',
         'MYPE', '#f5a623', FALSE, NULL, 5, 2,
-        '["Hasta 5 usuarios incluidos","Edición SIGRE Mype","SIGRE Online","Módulos incluidos en Mype","Soporte por email","Actualizaciones incluidas"]'::jsonb,
+        '["Hasta 5 usuarios incluidos","Almacén, Compras y Comercialización","Finanzas: series y numeradores de venta","Seguridad y permisos","SIGRE Online","Soporte por email"]'::jsonb,
         '1'
     ),
     (
         'SMALL_BUSINESS', 'Small Business', 10,
         'Edición SIGRE Small Business — SIGRE Online',
         'SMALL_BUSINESS', '#26a69a', FALSE, NULL, 10, 3,
-        '["Hasta 10 usuarios incluidos","Edición SIGRE Small Business","SIGRE Online","Módulos Mype + Compras, RR.HH. y más","Soporte por email","Actualizaciones incluidas"]'::jsonb,
+        '["Hasta 10 usuarios incluidos","Todo SIGRE Mype","Finanzas completo (tesorería y CxC/CxP)","RR.HH. y planilla","Control de asistencia","Soporte por email"]'::jsonb,
         '1'
     ),
     (
         'PERSONALIZADO', 'Professional', 12,
         'Edición SIGRE Professional — SIGRE Online / On-premise',
         'PROFESSIONAL', '#714b67', TRUE, NULL, 20, 4,
-        '["Hasta 20 usuarios incluidos","Edición SIGRE Professional","SIGRE Online / On-premise","Multi-sucursal","Módulos operativos completos","Soporte prioritario"]'::jsonb,
+        '["Hasta 20 usuarios incluidos","Todo Small Business","Operaciones (OT) y Mantenimiento","Producción y aprovisionamiento","Multi-sucursal","Soporte prioritario"]'::jsonb,
         '1'
     ),
     (
         'ENTERPRISE', 'Enterprise', 20,
         'Edición SIGRE Enterprise — acceso completo',
         'ENTERPRISE', '#e11d48', FALSE, NULL, 40, 5,
-        '["Hasta 40 usuarios incluidos","Edición SIGRE Enterprise","Todos los módulos","Multi-empresa ilimitado","API de integración","Personalización avanzada","Soporte 24/7 dedicado"]'::jsonb,
+        '["Hasta 40 usuarios incluidos","Todos los módulos SIGRE","Contabilidad, Presupuesto y Activos fijos","Flota, HORECA, Campo según giro","API e integraciones","Soporte 24/7 dedicado"]'::jsonb,
         '1'
     )
 ON CONFLICT (codigo) DO UPDATE SET

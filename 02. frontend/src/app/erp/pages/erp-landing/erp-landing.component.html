@@ -29,10 +29,10 @@
             <div class="landing-dropdown-menu__section">
               <h4>Ediciones del ERP</h4>
               @for (ed of ediciones; track ed.codigo) {
-                <div class="landing-dropdown-menu__item landing-dropdown-menu__item--static">
+                <button type="button" class="landing-dropdown-menu__item" (click)="scrollToEdiciones()">
                   <strong>{{ ed.nombre }}</strong>
-                  <span>{{ ed.descripcion }}</span>
-                </div>
+                  <span>{{ ed.perfil }}</span>
+                </button>
               }
             </div>
             <div class="landing-dropdown-menu__divider"></div>
@@ -46,6 +46,7 @@
           </div>
         }
       </div>
+      <a href="javascript:void(0)" (click)="scrollToEdiciones()">Ediciones</a>
       <a href="javascript:void(0)" (click)="scrollToPrecios()">Precios</a>
       <a href="javascript:void(0)" (click)="scrollToContacto()">Contacto</a>
     </nav>
@@ -85,6 +86,67 @@
           </div>
         </div>
       }
+    </div>
+  </section>
+
+  <!-- Ediciones del ERP -->
+  <section class="landing-editions" id="ediciones">
+    <div class="landing-editions__content">
+      <h2 class="landing-editions__title">Ediciones SIGRE</h2>
+      <p class="landing-editions__subtitle">
+        Cuatro niveles de funcionalidad que crecen con su empresa. Cada edición incluye
+        <strong>Seguridad</strong> (usuarios, roles y permisos) y puede ampliarse al siguiente nivel sin perder datos.
+      </p>
+      <div class="landing-editions__grid">
+        @for (ed of ediciones; track ed.codigo) {
+          <article class="landing-edition-card">
+            <header class="landing-edition-card__header">
+              <h3>{{ ed.nombre }}</h3>
+              <span class="landing-edition-card__perfil">{{ ed.perfil }}</span>
+            </header>
+            <p class="landing-edition-card__desc">{{ ed.descripcion }}</p>
+            <p class="landing-edition-card__ideal"><strong>Ideal para:</strong> {{ ed.idealPara }}</p>
+
+            <div class="landing-edition-card__block">
+              <h4>Módulos incluidos</h4>
+              <ul class="landing-edition-card__tags">
+                @for (mod of ed.modulosDestacados; track mod) {
+                  <li>{{ mod }}</li>
+                }
+              </ul>
+              @if (ed.modulosApi.length) {
+                <p class="landing-edition-card__api">
+                  Licencia técnica: {{ ed.modulosApi.join(', ') }}
+                </p>
+              }
+            </div>
+
+            <div class="landing-edition-card__block">
+              <h4>Funcionalidades clave</h4>
+              <ul class="landing-edition-card__features">
+                @for (fn of ed.funcionalidades; track fn) {
+                  <li>{{ fn }}</li>
+                }
+              </ul>
+            </div>
+
+            @if (ed.modulosOpcionales.length) {
+              <div class="landing-edition-card__block landing-edition-card__block--optional">
+                <h4>Módulos sectoriales (según giro)</h4>
+                <ul class="landing-edition-card__tags landing-edition-card__tags--optional">
+                  @for (mod of ed.modulosOpcionales; track mod) {
+                    <li>{{ mod }}</li>
+                  }
+                </ul>
+              </div>
+            }
+
+            @if (ed.notaTecnica) {
+              <p class="landing-edition-card__note">{{ ed.notaTecnica }}</p>
+            }
+          </article>
+        }
+      </div>
     </div>
   </section>
 

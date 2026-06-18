@@ -6,6 +6,7 @@ import {
   ErpLandingCatalogService,
   PlanSuscripcionDto,
 } from '../../services/erp-landing-catalog.service';
+import { EDICIONES_CONTENIDO } from './ediciones-contenido';
 
 interface ModuloInfo {
   codigo: string;
@@ -36,6 +37,13 @@ interface EdicionERP {
   codigo: string;
   nombre: string;
   descripcion: string;
+  perfil: string;
+  idealPara: string;
+  modulosDestacados: string[];
+  modulosOpcionales: string[];
+  funcionalidades: string[];
+  notaTecnica: string;
+  modulosApi: string[];
 }
 
 @Component({
@@ -243,6 +251,11 @@ export class ErpLandingComponent implements OnInit {
     document.getElementById('precios')?.scrollIntoView({ behavior: 'smooth' });
   }
 
+  scrollToEdiciones(): void {
+    this.showDropdown = '';
+    document.getElementById('ediciones')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
   scrollToContacto(): void {
     document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' });
   }
@@ -270,10 +283,19 @@ export class ErpLandingComponent implements OnInit {
   }
 
   private mapEdicion(edicion: EdicionErpDto): EdicionERP {
+    const contenido = EDICIONES_CONTENIDO[edicion.codigo];
+    const modulosApi = (edicion.modulos ?? []).map(m => m.nombre);
     return {
       codigo: edicion.codigo,
       nombre: edicion.nombre,
       descripcion: edicion.descripcion,
+      perfil: contenido?.perfil ?? '',
+      idealPara: contenido?.idealPara ?? edicion.descripcion,
+      modulosDestacados: contenido?.modulosDestacados ?? modulosApi,
+      modulosOpcionales: contenido?.modulosOpcionales ?? [],
+      funcionalidades: contenido?.funcionalidades ?? [],
+      notaTecnica: contenido?.notaTecnica ?? '',
+      modulosApi,
     };
   }
 
@@ -291,12 +313,37 @@ export class ErpLandingComponent implements OnInit {
   }
 
   private getEdicionesFallback(): EdicionERP[] {
-    return [
-      { codigo: 'MYPE', nombre: 'SIGRE Mype', descripcion: 'Para microempresas y emprendedores' },
-      { codigo: 'SMALL_BUSINESS', nombre: 'SIGRE Small Business', descripcion: 'Para pequeñas empresas en crecimiento' },
-      { codigo: 'PROFESSIONAL', nombre: 'SIGRE Professional', descripcion: 'Para medianas empresas con operaciones completas' },
-      { codigo: 'ENTERPRISE', nombre: 'SIGRE Enterprise', descripcion: 'Para grandes corporaciones con todos los módulos' },
+    const base = [
+      {
+        codigo: 'MYPE',
+        nombre: 'SIGRE Mype',
+        descripcion: 'Venta, compra e inventario con facturación y control básico de series y numeradores.',
+      },
+      {
+        codigo: 'SMALL_BUSINESS',
+        nombre: 'SIGRE Small Business',
+        descripcion: 'Mype ampliado con finanzas completas, planilla, RR.HH. y control de asistencia.',
+      },
+      {
+        codigo: 'PROFESSIONAL',
+        nombre: 'SIGRE Professional',
+        descripcion: 'Operaciones con OT, mantenimiento, producción y aprovisionamiento avanzado.',
+      },
+      {
+        codigo: 'ENTERPRISE',
+        nombre: 'SIGRE Enterprise',
+        descripcion: 'Suite completa multi-empresa con módulos sectoriales según su giro de negocio.',
+      },
     ];
+    return base.map(e => this.mapEdicion({
+      id: 0,
+      codigo: e.codigo,
+      nombre: e.nombre,
+      descripcion: e.descripcion,
+      orden: 0,
+      activo: true,
+      modulos: [],
+    }));
   }
 
   private getPlanesFallback(): PlanSuscripcion[] {
@@ -316,7 +363,7 @@ export class ErpLandingComponent implements OnInit {
         nombre: 'Mype',
         precio: 8,
         descripcion: 'Edición SIGRE Mype — SIGRE Online',
-        caracteristicas: ['Hasta 5 usuarios incluidos', 'Edición SIGRE Mype', 'SIGRE Online', 'Módulos incluidos en Mype', 'Soporte por email', 'Actualizaciones incluidas'],
+        caracteristicas: ['Hasta 5 usuarios incluidos', 'Almacén, Compras y Comercialización', 'Finanzas: series y numeradores de venta', 'Seguridad y permisos', 'SIGRE Online', 'Soporte por email'],
         color: '#f5a623',
         destacado: false,
         maxUsuarios: 5,
@@ -326,7 +373,7 @@ export class ErpLandingComponent implements OnInit {
         nombre: 'Small Business',
         precio: 10,
         descripcion: 'Edición SIGRE Small Business — SIGRE Online',
-        caracteristicas: ['Hasta 10 usuarios incluidos', 'Edición SIGRE Small Business', 'SIGRE Online', 'Módulos Mype + Compras, RR.HH. y más', 'Soporte por email', 'Actualizaciones incluidas'],
+        caracteristicas: ['Hasta 10 usuarios incluidos', 'Todo SIGRE Mype', 'Finanzas completo (tesorería y CxC/CxP)', 'RR.HH. y planilla', 'Control de asistencia', 'Soporte por email'],
         color: '#26a69a',
         destacado: false,
         maxUsuarios: 10,
@@ -336,7 +383,7 @@ export class ErpLandingComponent implements OnInit {
         nombre: 'Professional',
         precio: 12,
         descripcion: 'Edición SIGRE Professional — SIGRE Online / On-premise',
-        caracteristicas: ['Hasta 20 usuarios incluidos', 'Edición SIGRE Professional', 'SIGRE Online / On-premise', 'Multi-sucursal', 'Módulos operativos completos', 'Soporte prioritario'],
+        caracteristicas: ['Hasta 20 usuarios incluidos', 'Todo Small Business', 'Operaciones (OT) y Mantenimiento', 'Producción y aprovisionamiento', 'Multi-sucursal', 'Soporte prioritario'],
         color: '#714b67',
         destacado: true,
         maxUsuarios: 20,
@@ -346,7 +393,7 @@ export class ErpLandingComponent implements OnInit {
         nombre: 'Enterprise',
         precio: 20,
         descripcion: 'Edición SIGRE Enterprise — acceso completo',
-        caracteristicas: ['Hasta 40 usuarios incluidos', 'Edición SIGRE Enterprise', 'Todos los módulos', 'Multi-empresa ilimitado', 'API de integración', 'Personalización avanzada', 'Soporte 24/7 dedicado'],
+        caracteristicas: ['Hasta 40 usuarios incluidos', 'Todos los módulos SIGRE', 'Contabilidad, Presupuesto y Activos fijos', 'Flota, HORECA, Campo según giro', 'API e integraciones', 'Soporte 24/7 dedicado'],
         color: '#e11d48',
         destacado: false,
         maxUsuarios: 40,
