@@ -29,8 +29,7 @@ public class SunatRucService {
     private static final String DEFAULT_API_BASE_URL = "http://pegazus.serveftp.com:9080/SunatWebServices";
     private static final String DEFAULT_USUARIO = "sigre";
     private static final String DEFAULT_CLAVE = "sigre1234";
-    private static final String DEFAULT_EMPRESA = "TRANSMARINA";
-    private static final String DEFAULT_RUC_ORIGEN = "20100070970";
+    private static final String DEFAULT_EMPRESA = "SIGRE_WEB";
     private static final String DEFAULT_IP_LOCAL = "192.168.1.100";
     private static final String DEFAULT_COMPUTER_NAME = "SIGRE-WEB";
 
@@ -87,7 +86,6 @@ public class SunatRucService {
                 securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_USUARIO", DEFAULT_USUARIO),
                 securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_CLAVE", DEFAULT_CLAVE),
                 securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_EMPRESA", DEFAULT_EMPRESA),
-                securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_RUC_ORIGEN", DEFAULT_RUC_ORIGEN),
                 securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_IP_LOCAL", DEFAULT_IP_LOCAL),
                 securityConfiguracionService.getParametroTexto(MODULO_SUNAT, "API_COMPUTER_NAME", DEFAULT_COMPUTER_NAME)
         );
@@ -148,7 +146,7 @@ public class SunatRucService {
     private JsonNode consultarRucRemoto(SunatApiConfig config, String token, String ruc) throws Exception {
         Map<String, String> body = new LinkedHashMap<>();
         body.put("rucConsulta", ruc);
-        body.put("rucOrigen", config.rucOrigen());
+        body.put("rucOrigen", ruc);
         body.put("computerName", config.computerName());
 
         HttpRequest request = HttpRequest.newBuilder(consultaUri(config.apiBaseUrl()))
@@ -276,7 +274,6 @@ public class SunatRucService {
             String usuario,
             String clave,
             String empresa,
-            String rucOrigen,
             String ipLocal,
             String computerName
     ) {}

@@ -4299,8 +4299,7 @@ VALUES
     ('SUNAT', 'API_BASE_URL', 'TEXT', 'http://pegazus.serveftp.com:9080/SunatWebServices', TRUE, TRUE),
     ('SUNAT', 'API_USUARIO', 'TEXT', 'sigre', TRUE, TRUE),
     ('SUNAT', 'API_CLAVE', 'TEXT', 'sigre1234', TRUE, TRUE),
-    ('SUNAT', 'API_EMPRESA', 'TEXT', 'TRANSMARINA', TRUE, TRUE),
-    ('SUNAT', 'API_RUC_ORIGEN', 'TEXT', '20100070970', TRUE, TRUE),
+    ('SUNAT', 'API_EMPRESA', 'TEXT', 'SIGRE_WEB', TRUE, TRUE),
     ('SUNAT', 'API_IP_LOCAL', 'TEXT', '192.168.1.100', TRUE, TRUE),
     ('SUNAT', 'API_COMPUTER_NAME', 'TEXT', 'SIGRE-WEB', TRUE, TRUE)
 ON CONFLICT (modulo, parametro) DO UPDATE SET
