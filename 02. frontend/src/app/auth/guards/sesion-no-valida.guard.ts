@@ -1,11 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { CanActivate, Router, UrlTree } from '@angular/router';
 import { StorageService } from '../../core/services/storage.service';
 import { PostAuthIntentService } from '../../admin/services/post-auth-intent.service';
 
 /**
- * Impide acceder al login si ya hay sesión activa.
- * Redirige al ERP (/sigre/dashboard) o a selección de empresa si el token es temporal.
+ * Impide acceder al login si ya hay sesión ERP completa (misma regla que erpSessionGuard).
+ * Usa UrlTree para evitar bucles de navegación que congelan la UI.
  */
 @Injectable({
   providedIn: 'root'
@@ -15,26 +15,23 @@ export class SesionNoValidaGuard implements CanActivate {
   private readonly storage = inject(StorageService);
   private readonly postAuthIntent = inject(PostAuthIntentService);
 
-  async canActivate(): Promise<boolean> {
-    if (!this.storage.isAuthenticated()) {
+  canActivate(): boolean | UrlTree {
+    const token = this.storage.getToken();
+    if (!token) {
       return true;
     }
 
-    const token = this.storage.getAccessTokenRaw() ?? this.storage.getToken();
-    const payload = token ? decodeJwtPayload(token) : null;
-
-    if (payload?.temporal === true || !payload?.empresaId) {
-      await this.router.navigateByUrl('/auth/seleccion-razon-social');
-      return false;
+    const payload = decodeJwtPayload(token);
+    if (!payload || payload.temporal === true || payload.empresaId == null) {
+      return this.router.createUrlTree(['/auth/seleccion-razon-social']);
     }
 
     const dest = this.postAuthIntent.isAdminTarget() ? '/admin/inicio' : '/sigre/dashboard';
-    await this.router.navigateByUrl(dest);
-    return false;
+    return this.router.createUrlTree([dest]);
   }
 }
 
-function decodeJwtPayload(token: string): { temporal?: boolean; empresaId?: number } | null {
+function decodeJwtPayload(token: string): { temporal?: boolean; empresaId?: number | string } | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
