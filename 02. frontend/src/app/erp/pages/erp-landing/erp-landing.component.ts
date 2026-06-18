@@ -20,7 +20,6 @@ interface ModuloInfo {
 })
 export class ErpLandingComponent {
 
-  moduloDetalle: ModuloInfo | null = null;
   currentYear = new Date().getFullYear();
 
   modulos: ModuloInfo[] = [
@@ -177,10 +176,7 @@ export class ErpLandingComponent {
   }
 
   abrirDetalle(modulo: ModuloInfo): void {
-    this.moduloDetalle = modulo;
+    void this.router.navigateByUrl(`/sigre/modulo/${modulo.codigo.toLowerCase()}`);
   }
 
-  cerrarDetalle(): void {
-    this.moduloDetalle = null;
-  }
 }

@@ -8,6 +8,11 @@ export const erpRoutes: Routes = [
       import('./pages/erp-landing/erp-landing.component').then(m => m.ErpLandingComponent),
   },
   {
+    path: 'modulo/:codigo',
+    loadComponent: () =>
+      import('./pages/erp-modulo-detalle/erp-modulo-detalle.component').then(m => m.ErpModuloDetalleComponent),
+  },
+  {
     path: '',
     canActivate: [erpSessionGuard],
     children: [

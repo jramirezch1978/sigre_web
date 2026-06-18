@@ -1,0 +1,86 @@
+<div class="modulo-detalle-page" *ngIf="modulo">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand" (click)="volver()">
+      <img src="assets/imagenes/sigre-logo.png" alt="SIGRE" class="brand-logo">
+      <span class="brand-text">SIGRE</span>
+    </div>
+    <div class="navbar-actions">
+      <button class="btn-volver" (click)="volver()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Volver a módulos
+      </button>
+      <button class="btn-login" (click)="irALogin()">Iniciar sesión</button>
+    </div>
+  </nav>
+
+  <!-- Hero del módulo -->
+  <section class="modulo-hero" [style.background]="'linear-gradient(135deg, ' + modulo.color + ' 0%, ' + modulo.color + 'cc 100%)'">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <img [src]="modulo.icono" [alt]="modulo.nombre">
+      </div>
+      <div class="hero-text">
+        <h1>{{ modulo.nombre }}</h1>
+        <p class="hero-slogan">{{ modulo.slogan }}</p>
+        <p class="hero-desc">{{ modulo.descripcion }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Beneficios -->
+  <section class="beneficios-section">
+    <div class="container">
+      <h2>Beneficios clave</h2>
+      <div class="beneficios-grid">
+        <div class="beneficio-card" *ngFor="let b of modulo.beneficios; let i = index">
+          <div class="beneficio-number">{{ i + 1 }}</div>
+          <p>{{ b }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Secciones / Funcionalidades -->
+  <section class="funcionalidades-section">
+    <div class="container">
+      <h2>Funcionalidades</h2>
+      <div class="secciones-grid">
+        <div class="seccion-card" *ngFor="let sec of modulo.secciones">
+          <h3>{{ sec.titulo }}</h3>
+          <ul>
+            <li *ngFor="let op of sec.opciones">{{ op }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Diagrama de flujo -->
+  <section class="diagrama-section">
+    <div class="container">
+      <h2>Flujo de trabajo</h2>
+      <p class="diagrama-desc">Diagrama simplificado del proceso principal del módulo.</p>
+      <div class="diagrama-container">
+        <pre class="mermaid-code">{{ modulo.diagramaMermaid }}</pre>
+        <div class="diagrama-visual" [innerHTML]="renderDiagramaHTML()"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section" [style.background-color]="modulo.color">
+    <div class="container cta-content">
+      <h2>¿Listo para optimizar tu {{ modulo.nombre | lowercase }}?</h2>
+      <p>Inicia sesión y comienza a trabajar con el módulo de {{ modulo.nombre }}.</p>
+      <button class="btn-cta" (click)="irALogin()">Iniciar sesión</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; {{ currentYear }} SIGRE — Sistema Integrado de Gestión de Recursos Empresariales</p>
+  </footer>
+</div>
