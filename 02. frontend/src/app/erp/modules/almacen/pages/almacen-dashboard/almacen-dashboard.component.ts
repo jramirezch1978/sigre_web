@@ -1,10 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartData, ChartOptions } from 'chart.js';
 import { forkJoin } from 'rxjs';
 import { ErpLayoutService } from '../../../../services/erp-layout.service';
-import { ErpMenuService, MenuModulo, MenuSeccion } from '../../../../services/erp-menu.service';
+import { ErpMenuService } from '../../../../services/erp-menu.service';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 
 interface AlmacenKpi {
@@ -14,74 +15,187 @@ interface AlmacenKpi {
   color: string;
 }
 
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const CHART_COLORS = ['#2E7D32', '#1abb9c', '#1565C0', '#E65100', '#6A1B9A', '#00838F', '#C62828', '#4527A0'];
+
 @Component({
   selector: 'app-almacen-dashboard',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, BaseChartDirective],
   templateUrl: './almacen-dashboard.component.html',
   styleUrls: ['./almacen-dashboard.component.scss'],
 })
 export class AlmacenDashboardComponent implements OnInit {
-  private readonly router = inject(Router);
   private readonly layout = inject(ErpLayoutService);
   private readonly menuService = inject(ErpMenuService);
   private readonly almacenApi = inject(AlmacenApiService);
 
-  modulo: MenuModulo | null = null;
+  readonly anio = new Date().getFullYear();
+
   kpis: AlmacenKpi[] = [];
   cargando = true;
+  errorCarga = '';
+
+  ingresosBarData: ChartData<'bar'> = { labels: MESES, datasets: [] };
+  ingresosBarOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => `${ctx.parsed.y} ingreso(s)`,
+        },
+      },
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { beginAtZero: true, ticks: { precision: 0 } },
+    },
+  };
+
+  valorizacionDonutData: ChartData<'doughnut'> = { labels: [], datasets: [{ data: [], backgroundColor: [] }] };
+  valorizacionDonutOptions: ChartOptions<'doughnut'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, pointStyle: 'circle' } },
+    },
+  };
 
   ngOnInit(): void {
     this.menuService.obtenerMiMenu().subscribe({
       next: modulos => {
-        this.modulo = modulos.find(m => m.codigo === 'ALMACEN') ?? null;
-        if (this.modulo) {
-          this.layout.seleccionarModulo(this.modulo);
+        const modulo = modulos.find(m => m.codigo === 'ALMACEN') ?? null;
+        if (modulo) {
+          this.layout.seleccionarModulo(modulo);
         }
       },
     });
 
+    const fechaDesde = `${this.anio}-01-01`;
+    const fechaHasta = `${this.anio}-12-31`;
+
     forkJoin({
+      movimientos: this.almacenApi.listarMovimientosPeriodo(fechaDesde, fechaHasta),
+      diagnostico: this.almacenApi.obtenerDiagnostico(),
       almacenes: this.almacenApi.listarAlmacenes(),
-      tiposMov: this.almacenApi.listarTiposMovimiento(),
-      motivos: this.almacenApi.listarMotivosTraslado(),
     }).subscribe({
-      next: ({ almacenes, tiposMov, motivos }) => {
-        const activos = almacenes.filter(a => a.flagEstado === '1').length;
-        this.kpis = [
-          { label: 'Almacenes registrados', value: String(almacenes.length), icon: 'warehouse', color: '#2E7D32' },
-          { label: 'Almacenes activos', value: String(activos), icon: 'check_circle', color: '#1abb9c' },
-          { label: 'Tipos de movimiento', value: String(tiposMov.length), icon: 'swap_horiz', color: '#1565C0' },
-          { label: 'Motivos de traslado', value: String(motivos.length), icon: 'local_shipping', color: '#E65100' },
-        ];
+      next: ({ movimientos, diagnostico, almacenes }) => {
+        this.construirKpis(movimientos, diagnostico, almacenes.length);
+        this.construirGraficoIngresos(movimientos);
+        this.construirGraficoValorizacion(diagnostico);
         this.cargando = false;
       },
       error: () => {
+        this.errorCarga = 'No se pudo cargar el resumen de almacén.';
         this.kpis = [
-          { label: 'Almacenes', value: '—', icon: 'warehouse', color: '#2E7D32' },
-          { label: 'Movimientos', value: '—', icon: 'swap_horiz', color: '#1565C0' },
+          { label: 'Ingresos del año', value: '—', icon: 'input', color: '#2E7D32' },
+          { label: 'Salidas del año', value: '—', icon: 'output', color: '#C62828' },
+          { label: 'Artículos en stock', value: '—', icon: 'inventory_2', color: '#1565C0' },
+          { label: 'Valor inventario', value: '—', icon: 'paid', color: '#E65100' },
         ];
         this.cargando = false;
       },
     });
   }
 
-  abrirOpcion(codigo: string, ruta: string | null): void {
-    const destino = this.menuService.resolverRutaFrontend(codigo, ruta);
-    if (!destino) return;
-    void this.router.navigateByUrl(destino);
+  private construirKpis(
+    movimientos: { tipoReferenciaOrigen?: string; flagEstado?: string }[],
+    diagnostico: { totalArticulos: number; valorInventario: number }[],
+    totalAlmacenes: number
+  ): void {
+    let ingresos = 0;
+    let salidas = 0;
+
+    for (const mov of movimientos) {
+      if (mov.flagEstado === '0') continue;
+      const clase = (mov.tipoReferenciaOrigen ?? '').trim().toUpperCase();
+      if (clase === 'I' || clase === 'P') {
+        ingresos++;
+      } else if (clase === 'C' || clase === 'S') {
+        salidas++;
+      }
+    }
+
+    const totalArticulos = diagnostico.reduce((sum, d) => sum + (d.totalArticulos ?? 0), 0);
+    const valorInventario = diagnostico.reduce((sum, d) => sum + Number(d.valorInventario ?? 0), 0);
+
+    this.kpis = [
+      { label: `Ingresos ${this.anio}`, value: String(ingresos), icon: 'input', color: '#2E7D32' },
+      { label: `Salidas ${this.anio}`, value: String(salidas), icon: 'output', color: '#C62828' },
+      { label: 'Artículos con stock', value: String(totalArticulos), icon: 'inventory_2', color: '#1565C0' },
+      { label: 'Almacenes activos', value: String(totalAlmacenes), icon: 'warehouse', color: '#1abb9c' },
+      {
+        label: 'Valor inventario',
+        value: this.formatearMoneda(valorInventario),
+        icon: 'paid',
+        color: '#E65100',
+      },
+    ];
   }
 
-  iconoSeccion(codigo: string): string {
-    if (codigo.includes('TABLAS')) return 'table_chart';
-    if (codigo.includes('OPERACIONES')) return 'sync_alt';
-    if (codigo.includes('CONSULTAS')) return 'search';
-    if (codigo.includes('REPORTES')) return 'assessment';
-    if (codigo.includes('PROCESOS')) return 'settings_suggest';
-    return 'folder';
+  private construirGraficoIngresos(movimientos: { fechaMov?: string; tipoReferenciaOrigen?: string; flagEstado?: string }[]): void {
+    const porMes = Array(12).fill(0);
+
+    for (const mov of movimientos) {
+      if (mov.flagEstado === '0') continue;
+      const clase = (mov.tipoReferenciaOrigen ?? '').trim().toUpperCase();
+      if (clase !== 'I' && clase !== 'P') continue;
+      if (!mov.fechaMov) continue;
+      const mes = new Date(`${mov.fechaMov}T12:00:00`).getMonth();
+      if (mes >= 0 && mes < 12) {
+        porMes[mes]++;
+      }
+    }
+
+    this.ingresosBarData = {
+      labels: MESES,
+      datasets: [
+        {
+          label: 'Ingresos',
+          data: porMes,
+          backgroundColor: '#2E7D32',
+          borderRadius: 6,
+          maxBarThickness: 36,
+        },
+      ],
+    };
   }
 
-  accesosRapidos(seccion: MenuSeccion): typeof seccion.opciones {
-    return seccion.opciones.slice(0, 6);
+  private construirGraficoValorizacion(
+    diagnostico: { almacenNombre: string; valorInventario: number }[]
+  ): void {
+    const items = diagnostico
+      .filter(d => Number(d.valorInventario) > 0)
+      .sort((a, b) => Number(b.valorInventario) - Number(a.valorInventario))
+      .slice(0, 8);
+
+    if (!items.length) {
+      this.valorizacionDonutData = {
+        labels: ['Sin datos'],
+        datasets: [{ data: [1], backgroundColor: ['#E2E8F0'] }],
+      };
+      return;
+    }
+
+    this.valorizacionDonutData = {
+      labels: items.map(d => d.almacenNombre),
+      datasets: [
+        {
+          data: items.map(d => Number(d.valorInventario)),
+          backgroundColor: items.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+        },
+      ],
+    };
+  }
+
+  private formatearMoneda(valor: number): string {
+    if (!valor) return 'S/ 0';
+    return new Intl.NumberFormat('es-PE', {
+      style: 'currency',
+      currency: 'PEN',
+      maximumFractionDigits: 0,
+    }).format(valor);
   }
 }

@@ -61,6 +61,26 @@ export interface AlmacenTipoMovDto {
   almacenNombre?: string;
 }
 
+export interface MovimientoListItemDto {
+  id: number;
+  sucursalId?: number;
+  almacenId?: number;
+  articuloMovTipoId?: number;
+  nroVale?: string;
+  tipoReferenciaOrigen?: string;
+  fechaMov?: string;
+  flagEstado?: string;
+}
+
+export interface DiagnosticoAlmacenDto {
+  almacenId: number;
+  almacenCodigo: string;
+  almacenNombre: string;
+  totalArticulos: number;
+  totalUnidades: number;
+  valorInventario: number;
+}
+
 export interface LotePalletDto {
   id: number;
   almacenId: number;
@@ -111,6 +131,24 @@ export class AlmacenApiService {
 
   listarAlmacenes(): Observable<AlmacenDto[]> {
     return this.listarTodoPaginado<AlmacenDto>('/almacenes');
+  }
+
+  listarMovimientosPeriodo(
+    fechaDesde: string,
+    fechaHasta: string,
+    estado = '1'
+  ): Observable<MovimientoListItemDto[]> {
+    return this.listarTodoPaginado<MovimientoListItemDto>('/movimientos', 500, {
+      fechaDesde,
+      fechaHasta,
+      estado,
+    });
+  }
+
+  obtenerDiagnostico(): Observable<DiagnosticoAlmacenDto[]> {
+    return this.http
+      .get<ApiResponse<DiagnosticoAlmacenDto[]>>(`${this.base}/reportes/diagnostico`)
+      .pipe(map(res => res.data ?? []));
   }
 
   listarTiposAlmacen(): Observable<AlmacenTipoDto[]> {
