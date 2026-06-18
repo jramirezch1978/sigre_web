@@ -39,6 +39,7 @@ export interface MenuModulo {
   codigo: string;
   nombre: string;
   icono: string;
+  iconoSvg: string;
   secciones: MenuSeccion[];
 }
 
@@ -67,6 +68,19 @@ const ICONOS_MODULO: Record<string, string> = {
   RRHH: 'groups',
   PRODUCCION: 'precision_manufacturing',
   SEGURIDAD: 'admin_panel_settings',
+};
+
+const ICONOS_SVG_MODULO: Record<string, string> = {
+  ALMACEN: 'assets/imagenes/modulos/almacen.svg',
+  COMPRAS: 'assets/imagenes/modulos/compras.svg',
+  VENTAS: 'assets/imagenes/modulos/ventas.svg',
+  FINANZAS: 'assets/imagenes/modulos/finanzas.svg',
+  CONTABILIDAD: 'assets/imagenes/modulos/contabilidad.svg',
+  ACTIVOS_FIJOS: 'assets/imagenes/modulos/activos-fijos.svg',
+  ACTIVOS: 'assets/imagenes/modulos/activos-fijos.svg',
+  RRHH: 'assets/imagenes/modulos/rrhh.svg',
+  PRODUCCION: 'assets/imagenes/modulos/produccion.svg',
+  SEGURIDAD: 'assets/imagenes/modulos/configuracion.svg',
 };
 
 @Injectable({ providedIn: 'root' })
@@ -138,11 +152,13 @@ export class ErpMenuService {
           };
         });
 
+      const codigoKey = codModulo || primerCodigo.split('_')[0];
       modulos.push({
         moduloId,
         codigo: codModulo,
         nombre: moduloNombres.get(moduloId) ?? 'Módulo',
-        icono: ICONOS_MODULO[codModulo] ?? ICONOS_MODULO[primerCodigo.split('_')[0]] ?? 'apps',
+        icono: ICONOS_MODULO[codigoKey] ?? 'apps',
+        iconoSvg: ICONOS_SVG_MODULO[codigoKey] ?? '',
         secciones,
       });
     }

@@ -39,7 +39,11 @@
         <button class="erp-sidebar__item"
                 [class.erp-sidebar__item--active]="moduloActivo?.moduloId === modulo.moduloId"
                 (click)="seleccionarModulo(modulo)">
-          <mat-icon>{{ modulo.icono }}</mat-icon>
+          @if (modulo.iconoSvg) {
+            <img [src]="modulo.iconoSvg" [alt]="modulo.nombre" class="erp-sidebar__icon-img" />
+          } @else {
+            <mat-icon>{{ modulo.icono }}</mat-icon>
+          }
           <span>{{ modulo.nombre }}</span>
         </button>
       }
@@ -99,18 +103,18 @@
       <!-- Contenido principal -->
       <main class="erp-content">
         @if (moduloActivo === null && !errorMenu) {
-          <!-- Dashboard de inicio -->
           <div class="erp-dashboard">
-            <div class="erp-dashboard__welcome">
-              <h1>Bienvenido, {{ nombreUsuario }}</h1>
-              <p>Panel principal del sistema SIGRE ERP</p>
-            </div>
-            <div class="erp-dashboard__cards">
+            <div class="erp-dashboard__grid">
               @for (modulo of modulos; track modulo.moduloId) {
                 <div class="erp-dashboard__card" (click)="seleccionarModulo(modulo)">
-                  <mat-icon>{{ modulo.icono }}</mat-icon>
+                  <div class="erp-dashboard__card-icon">
+                    @if (modulo.iconoSvg) {
+                      <img [src]="modulo.iconoSvg" [alt]="modulo.nombre" />
+                    } @else {
+                      <mat-icon>{{ modulo.icono }}</mat-icon>
+                    }
+                  </div>
                   <span class="erp-dashboard__card-name">{{ modulo.nombre }}</span>
-                  <span class="erp-dashboard__card-count">{{ modulo.secciones.length }} secciones</span>
                 </div>
               }
             </div>
@@ -127,7 +131,11 @@
 
         @if (moduloActivo && !errorMenu) {
           <div class="erp-module-placeholder">
-            <mat-icon>{{ moduloActivo.icono }}</mat-icon>
+            @if (moduloActivo.iconoSvg) {
+              <img [src]="moduloActivo.iconoSvg" [alt]="moduloActivo.nombre" class="erp-module-placeholder__img" />
+            } @else {
+              <mat-icon>{{ moduloActivo.icono }}</mat-icon>
+            }
             <h2>{{ moduloActivo.nombre }}</h2>
             <p>Seleccione una opción del menú superior</p>
           </div>
