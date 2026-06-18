@@ -12,7 +12,7 @@ INSERT INTO auth.plan_suscripcion (
     dias_demo, max_usuarios, orden, caracteristicas, flag_estado
 )
 VALUES (
-    'SMALL_BUSINESS', 'Small Business', 10,
+    'SMALL_BUSINESS', 'Small Business', 12,
     'Edición SIGRE Small Business — SIGRE Online',
     'SMALL_BUSINESS', '#26a69a', FALSE, NULL, 10, 3,
     '["Hasta 10 usuarios incluidos","Edición SIGRE Small Business","SIGRE Online","Módulos Mype + Compras, RR.HH. y más","Soporte por email","Actualizaciones incluidas"]'::jsonb,

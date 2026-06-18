@@ -391,7 +391,7 @@ export class ErpLandingComponent implements OnInit {
       {
         codigo: 'SMALL_BUSINESS',
         nombre: 'Small Business',
-        precio: 10,
+        precio: 12,
         descripcion: 'Edición SIGRE Small Business — SIGRE Online',
         caracteristicas: ['Hasta 10 usuarios incluidos', 'Todo SIGRE Mype', 'Finanzas completo (tesorería y CxC/CxP)', 'RR.HH. y planilla', 'Control de asistencia', 'Soporte por email'],
         color: '#26a69a',
@@ -401,7 +401,7 @@ export class ErpLandingComponent implements OnInit {
       {
         codigo: 'PERSONALIZADO',
         nombre: 'Professional',
-        precio: 12,
+        precio: 16,
         descripcion: 'Edición SIGRE Professional — SIGRE Online / On-premise',
         caracteristicas: ['Hasta 20 usuarios incluidos', 'Todo Small Business', 'Operaciones (OT) y Mantenimiento', 'Producción y aprovisionamiento', 'Multi-sucursal', 'Soporte prioritario'],
         color: '#714b67',

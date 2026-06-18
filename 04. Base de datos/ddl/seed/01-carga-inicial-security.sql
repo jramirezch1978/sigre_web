@@ -262,14 +262,14 @@ VALUES
         '1'
     ),
     (
-        'SMALL_BUSINESS', 'Small Business', 10,
+        'SMALL_BUSINESS', 'Small Business', 12,
         'Edición SIGRE Small Business — SIGRE Online',
         'SMALL_BUSINESS', '#26a69a', FALSE, NULL, 10, 3,
         '["Hasta 10 usuarios incluidos","Todo SIGRE Mype","Finanzas completo (tesorería y CxC/CxP)","RR.HH. y planilla","Control de asistencia","Soporte por email"]'::jsonb,
         '1'
     ),
     (
-        'PERSONALIZADO', 'Professional', 12,
+        'PERSONALIZADO', 'Professional', 16,
         'Edición SIGRE Professional — SIGRE Online / On-premise',
         'PROFESSIONAL', '#714b67', TRUE, NULL, 20, 4,
         '["Hasta 20 usuarios incluidos","Todo Small Business","Operaciones (OT) y Mantenimiento","Producción y aprovisionamiento","Multi-sucursal","Soporte prioritario"]'::jsonb,
