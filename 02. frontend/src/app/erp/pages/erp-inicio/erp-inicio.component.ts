@@ -113,10 +113,13 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     }, 150);
   }
 
-  navegarOpcion(ruta: string | null): void {
-    if (!ruta) return;
+  navegarOpcion(ruta: string | null, codigo?: string): void {
+    const destino = codigo
+      ? this.menuService.resolverRutaFrontend(codigo, ruta)
+      : this.menuService.normalizarRutaFrontend(ruta);
+    if (!destino) return;
     this.dropdownAbiertoId = null;
-    void this.router.navigateByUrl(this.menuService.normalizarRutaFrontend(ruta));
+    void this.router.navigateByUrl(destino);
   }
 
   get rutaAlmacenActiva(): boolean {

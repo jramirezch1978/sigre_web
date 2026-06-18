@@ -1,27 +1,18 @@
 import { Routes } from '@angular/router';
-import { AlmacenTablaKey } from './config/almacen-tablas.config';
-
-const tabla = (key: AlmacenTablaKey, path: string) => ({
-  path,
-  loadComponent: () =>
-    import('./pages/almacen-tabla-page/almacen-tabla-page.component').then(m => m.AlmacenTablaPageComponent),
-  data: { tablaKey: key },
-});
+import { ALMACEN_TABLAS_OPCIONES, rutaRelativaAlmacen } from './config/almacen-opciones-menu.config';
 
 export const almacenRoutes: Routes = [
   { path: '', redirectTo: 'tablas/almacenes', pathMatch: 'full' },
-  tabla('almacenes', 'tablas/almacenes'),
-  tabla('tipos-movimiento', 'tablas/tipos-movimiento'),
-  tabla('ubicaciones', 'tablas/ubicaciones'),
-  tabla('movimientos-almacen', 'tablas/movimientos-almacen'),
-  tabla('posiciones', 'tablas/posiciones'),
-  tabla('motivos-traslado', 'tablas/motivos-traslado'),
-  tabla('lotes', 'tablas/lotes'),
-  tabla('unidades-conversion', 'tablas/unidades-conversion'),
-  tabla('numeracion-vales', 'tablas/numeracion-vales'),
-  tabla('numeracion-otr', 'tablas/numeracion-otr'),
-  tabla('parametros', 'tablas/parametros'),
-  // Compatibilidad rutas legacy RestPE
+  ...ALMACEN_TABLAS_OPCIONES.map(opcion => ({
+    path: rutaRelativaAlmacen(opcion.rutaFrontend),
+    loadComponent: () =>
+      import('./pages/almacen-tabla-page/almacen-tabla-page.component').then(m => m.AlmacenTablaPageComponent),
+    data: {
+      tablaKey: opcion.tablaKey,
+      opcionMenuCodigo: opcion.codigo,
+      titulo: opcion.nombre,
+    },
+  })),
   { path: 'tablas/tablas-almacenes', redirectTo: 'tablas/almacenes', pathMatch: 'full' },
   { path: 'tablas/almacenes-movimiento', redirectTo: 'tablas/movimientos-almacen', pathMatch: 'full' },
 ];

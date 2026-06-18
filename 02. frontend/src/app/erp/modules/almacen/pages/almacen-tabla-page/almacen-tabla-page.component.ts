@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Observable, map, of } from 'rxjs';
@@ -11,6 +11,7 @@ import {
   filtroNumeradorOtr,
   filtroNumeradorVales,
 } from '../../config/almacen-tablas.config';
+import { tablaKeyPorRutaFrontend } from '../../config/almacen-opciones-menu.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { CoreApiService } from '../../services/core-api.service';
 
@@ -23,6 +24,7 @@ import { CoreApiService } from '../../services/core-api.service';
 })
 export class AlmacenTablaPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly almacenApi = inject(AlmacenApiService);
   private readonly coreApi = inject(CoreApiService);
 
@@ -37,9 +39,12 @@ export class AlmacenTablaPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.data.subscribe(data => {
-      this.tablaKey = (data['tablaKey'] as AlmacenTablaKey) ?? 'almacenes';
+      this.tablaKey =
+        (data['tablaKey'] as AlmacenTablaKey) ??
+        tablaKeyPorRutaFrontend(this.router.url) ??
+        'almacenes';
       const def = ALMACEN_TABLAS[this.tablaKey];
-      this.titulo = def.titulo;
+      this.titulo = (data['titulo'] as string) ?? def.titulo;
       this.subtitulo = def.subtitulo ?? '';
       this.columnas = def.columnas;
       this.cargarDatos();

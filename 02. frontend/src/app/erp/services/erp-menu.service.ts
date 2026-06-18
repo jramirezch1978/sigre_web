@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiBaseService } from '../../services/api-base.service';
+import { ALMACEN_TABLAS_POR_CODIGO, rutaFrontendPorCodigoOpcion } from '../modules/almacen/config/almacen-opciones-menu.config';
 import { StorageService } from '../../core/services/storage.service';
 
 export interface OpcionMenuDto {
@@ -166,7 +167,7 @@ export class ErpMenuService {
               id: h.opcionMenu.id,
               codigo: h.opcionMenu.codigo,
               nombre: h.opcionMenu.nombre,
-              rutaFrontend: this.normalizarRutaFrontend(h.opcionMenu.rutaFrontend),
+              rutaFrontend: this.resolverRutaFrontend(h.opcionMenu.codigo, h.opcionMenu.rutaFrontend),
               acciones: h.acciones,
             })),
           };
@@ -212,11 +213,25 @@ export class ErpMenuService {
     return nombres[codigo] ?? codigo;
   }
 
+  /** Resuelve ruta web: BD → tabla canónica frontend → normalización legacy. */
+  resolverRutaFrontend(codigo: string, rutaBd: string | null): string | null {
+    const desdeBd = this.normalizarRutaFrontend(rutaBd);
+    if (desdeBd) return desdeBd;
+    return this.normalizarRutaFrontend(rutaFrontendPorCodigoOpcion(codigo));
+  }
+
+  navegarOpcionDesdeMenu(codigo: string, ruta: string | null): string | null {
+    return this.resolverRutaFrontend(codigo, ruta);
+  }
+
   /** Convierte rutas legacy RestPE (/almacen/...) a rutas SIGRE (/sigre/almacen/...). */
   normalizarRutaFrontend(ruta: string | null): string | null {
     if (!ruta) return null;
     const trimmed = ruta.trim();
     if (trimmed.startsWith('/sigre/')) return trimmed;
+
+    const canon = ALMACEN_TABLAS_POR_CODIGO[trimmed];
+    if (canon) return canon.rutaFrontend;
 
     const alias: Record<string, string> = {
       '/almacen/tablas/tablas-almacenes': '/sigre/almacen/tablas/almacenes',
