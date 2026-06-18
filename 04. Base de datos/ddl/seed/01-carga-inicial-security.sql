@@ -166,6 +166,7 @@ INSERT INTO auth.modulo (codigo, nombre, flag_estado)
 VALUES
     ('ALMACEN', 'Almacén', '1'),
     ('COMPRAS', 'Compras', '1'),
+    ('APROVISIONAMIENTO', 'Aprovisionamiento', '1'),
     ('COMERCIALIZACION', 'Comercialización', '1'),
     ('FINANZAS', 'Finanzas', '1'),
     ('CONTABILIDAD', 'Contabilidad', '1'),
@@ -229,7 +230,7 @@ FROM auth.edicion_erp e
 JOIN auth.modulo m ON m.codigo IN (
     'ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'FINANZAS', 'SEGURIDAD',
     'RRHH', 'ASISTENCIA',
-    'PRODUCCION', 'MANTENIMIENTO', 'OPERACIONES'
+    'PRODUCCION', 'MANTENIMIENTO', 'OPERACIONES', 'APROVISIONAMIENTO'
 )
 WHERE e.codigo = 'PROFESSIONAL'
 ON CONFLICT (edicion_id, modulo_id) DO NOTHING;

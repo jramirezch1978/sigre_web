@@ -86,6 +86,14 @@ export class ErpLandingComponent implements OnInit {
       funciones: ['Gestión de proveedores', 'Órdenes de compra', 'Aprobación de órdenes', 'Órdenes de servicio', 'Registro de comprobantes', 'Notas de crédito/débito', 'Condiciones de pago', 'Reportes de compras', 'Análisis de proveedores', 'Compras sugeridas'],
     },
     {
+      codigo: 'APROVISIONAMIENTO',
+      nombre: 'Aprovisionamiento',
+      descripcion: 'Abastecimiento de materia prima: recepción, pesaje, liquidación de compra, proyección y generación de órdenes de compra/servicio.',
+      icono: 'assets/imagenes/modulos/aprovisionamiento.svg',
+      color: '#388E3C',
+      funciones: ['Proyección de aprovisionamiento', 'Recepción y pesaje de MP', 'Liquidación de compra', 'Guías de recepción', 'Generación de OC/OS', 'Control de calidad MP', 'Reportes de acopio y pesca', 'Planillas de compra'],
+    },
+    {
       codigo: 'COMERCIALIZACION',
       nombre: 'Comercialización',
       descripcion: 'Gestión comercial de ventas, facturación electrónica, regalías y seguimiento de documentos tributarios.',
@@ -267,7 +275,7 @@ export class ErpLandingComponent implements OnInit {
   private buildCategorias(): void {
     const map: Record<string, string[]> = {
       'FINANZAS': ['CONTABILIDAD', 'FINANZAS', 'PRESUPUESTO', 'ACTIVOS_FIJOS'],
-      'OPERACIONES': ['ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'PRODUCCION'],
+      'OPERACIONES': ['ALMACEN', 'COMPRAS', 'APROVISIONAMIENTO', 'COMERCIALIZACION', 'PRODUCCION'],
       'RECURSOS HUMANOS': ['RRHH', 'COMEDOR'],
       'GESTIÓN DE ACTIVOS': ['FLOTA', 'MANTENIMIENTO'],
       'SECTORES': ['HORECA', 'CAMPO'],

@@ -63,6 +63,27 @@ export const MODULOS_INFO: ModuloCompleto[] = [
     beneficios: ['Flujo de aprobaciones multinivel', 'Control presupuestal integrado', 'Evaluación automática de proveedores', 'Trazabilidad desde requerimiento hasta pago'],
   },
   {
+    codigo: 'APROVISIONAMIENTO',
+    nombre: 'Aprovisionamiento',
+    icono: 'assets/imagenes/modulos/aprovisionamiento.svg',
+    color: '#388E3C',
+    slogan: 'Abastecimiento de materia prima de punta a punta',
+    descripcion: 'Gestión especializada de aprovisionamiento: proyección, recepción y pesaje de materia prima, liquidación de compra, guías de recepción, calidad, acopio y generación automática de órdenes de compra y servicio.',
+    secciones: [
+      { titulo: 'Tablas maestras', opciones: ['Especies y familias', 'Zonas de descarga', 'Trato a proveedores', 'Rutas y transportistas', 'Numeradores de recepción', 'Parámetros de aprovisionamiento'] },
+      { titulo: 'Operaciones', opciones: ['Proyección de aprovisionamiento', 'Recepción, descarga y pesaje', 'Liquidación de compra', 'Guía de recepción MP', 'Calidad de materia prima', 'Parte de cosecha'] },
+      { titulo: 'Procesos', opciones: ['Generación de OC', 'Generación de OS de transporte', 'Generación de OS de procesamiento', 'Generación de GRMP', 'Actualizar costos de compra'] },
+      { titulo: 'Reportes', opciones: ['Recepción MP por especie/proveedor', 'Control de desembarque', 'Planillas de compra', 'Acopio y procesamiento', 'Declaraciones juradas de tolva'] },
+    ],
+    diagramaMermaid: `graph LR
+    A[Proyección] --> B[Recepción MP]
+    B --> C[Pesaje y calidad]
+    C --> D[Liquidación]
+    D --> E[OC / OS]
+    E --> F[Almacén]`,
+    beneficios: ['Trazabilidad de materia prima desde origen', 'Integración con Compras, Almacén y Producción', 'Liquidación automática de compra', 'Reportes sectoriales pesca y agro'],
+  },
+  {
     codigo: 'COMERCIALIZACION',
     nombre: 'Comercialización',
     icono: 'assets/imagenes/modulos/ventas.png',

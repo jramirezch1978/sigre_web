@@ -52,7 +52,7 @@ FROM auth.edicion_erp e
 JOIN auth.modulo m ON m.codigo IN (
     'ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'FINANZAS', 'SEGURIDAD',
     'RRHH', 'ASISTENCIA',
-    'PRODUCCION', 'MANTENIMIENTO', 'OPERACIONES'
+    'PRODUCCION', 'MANTENIMIENTO', 'OPERACIONES', 'APROVISIONAMIENTO'
 )
 WHERE e.codigo = 'PROFESSIONAL'
 ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
@@ -79,3 +79,16 @@ WHERE codigo = 'PERSONALIZADO';
 UPDATE auth.plan_suscripcion SET
     caracteristicas = '["Hasta 40 usuarios incluidos","Todos los módulos SIGRE","Contabilidad, Presupuesto y Activos fijos","Flota, HORECA, Campo según giro","API e integraciones","Soporte 24/7 dedicado"]'::jsonb
 WHERE codigo = 'ENTERPRISE';
+
+INSERT INTO auth.modulo (codigo, nombre, flag_estado)
+VALUES ('APROVISIONAMIENTO', 'Aprovisionamiento', '1')
+ON CONFLICT (codigo) DO UPDATE SET
+    nombre = EXCLUDED.nombre,
+    flag_estado = EXCLUDED.flag_estado;
+
+INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
+SELECT e.id, m.id
+FROM auth.edicion_erp e
+JOIN auth.modulo m ON m.codigo = 'APROVISIONAMIENTO'
+WHERE e.codigo IN ('PROFESSIONAL', 'ENTERPRISE')
+ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
