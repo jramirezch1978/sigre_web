@@ -1,0 +1,169 @@
+Paso 0  → Router + DNS (443→8443)
+Paso 1  → Instalar nginx, certbot (firewalld desactivado)
+Paso 2  → Emitir certificado (Let's Encrypt o Cloudflare)
+Paso 3  → Configurar nginx en 8443 usando ese certificado
+Paso 4  → Probar https://crisaor.serveftp.com
+
+
+Paso 0 — Requisitos previos (router + DNS)
+-----------------------------------------
+
+DNS: crisaor.serveftp.com debe apuntar a tu IP pública (serveftp lo actualiza solo).
+Port forwarding en el router:
+Externo 443 → interno 192.168.0.163:8443
+Recomendado también: externo 80 → interno 192.168.0.163:8080 (solo para renovar el certificado Let's Encrypt; ver abajo).
+Comprueba desde fuera de tu red (datos móviles):
+curl -I http://crisaor.serveftp.com:8080
+
+Paso 1 — Oracle Linux 9: instalar Nginx y Certbot (firewalld OFF)
+-----------------------------------------------------------------
+Conecta por SSH al servidor:
+
+ssh jramirez@crisaor.serveftp.com
+
+# Desactivar firewalld (el router ya hace el filtrado; evita bloquear 80/8443)
+sudo systemctl stop firewalld
+sudo systemctl disable firewalld
+sudo systemctl mask firewalld
+systemctl is-active firewalld    # debe decir: inactive
+
+# Instalar Nginx y Certbot (sin firewalld)
+sudo dnf install -y nginx certbot python3-certbot-nginx
+sudo systemctl enable --now nginx
+sudo nginx -t
+
+Paso 2 — Obtener certificado válido (Let's Encrypt)
+--------------------------------------------------
+Tienes dos caminos. El más simple si puedes abrir el puerto 80:
+
+Opción A — HTTP-01 (recomendada si puedes hacer forward del 80)
+En el router: 80 → 192.168.0.163:80
+Config mínima temporal en Nginx (puerto 80) para el desafío ACME:
+sudo tee /etc/nginx/conf.d/acme.conf <<'EOF'
+server {
+    listen 80;
+    server_name crisaor.serveftp.com;
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+EOF
+sudo mkdir -p /var/www/certbot
+sudo nginx -t && sudo systemctl enable --now nginx && sudo systemctl reload nginx
+Emitir certificado:
+sudo certbot certonly --webroot \
+  -w /var/www/certbot \
+  -d crisaor.serveftp.com \
+  --email jramirez@npssac.com.pe \
+  --agree-tos \
+  --no-eff-email
+Certificados quedan en:
+
+/etc/letsencrypt/live/crisaor.serveftp.com/fullchain.pem
+/etc/letsencrypt/live/crisaor.serveftp.com/privkey.pem
+Renovación automática:
+sudo systemctl enable --now certbot-renew.timer
+sudo certbot renew --dry-run
+Opción B — Solo tienes 443→8443 (sin puerto 80)
+Let's Encrypt HTTP-01 no funcionará sin el 80. Alternativas:
+
+Método	Cuándo usarlo
+Cloudflare (ya lo usas para Turnstile)
+Pones el dominio en Cloudflare, proxy naranja, certificado válido al usuario
+DNS-01 con certbot-dns-cloudflare
+Si el DNS está en Cloudflare
+Certificado Cloudflare Origin
+TLS entre Cloudflare y tu Nginx en 8443
+Cloudflare (más práctico en tu caso):
+
+Agrega crisaor.serveftp.com a Cloudflare (o un subdominio tipo sigre.npssac.com.pe).
+DNS: registro A → IP pública, Proxy activado (nube naranja).
+SSL/TLS → modo Full (strict).
+Origin Server → crear Origin Certificate (15 años).
+Guarda en el Linux:
+sudo mkdir -p /etc/nginx/ssl
+sudo nano /etc/nginx/ssl/cloudflare-origin.pem      # certificado
+sudo nano /etc/nginx/ssl/cloudflare-origin.key      # clave privada
+chmod 600 /etc/nginx/ssl/cloudflare-origin.key
+Router: 443 → 8443 (Cloudflare se conecta a tu origen en 8443).
+Paso 3 — Nginx en el host escuchando 8443 (reverse proxy)
+sudo tee /etc/nginx/conf.d/sigre-https.conf <<'EOF'
+# Redirigir HTTP → HTTPS (si tienes puerto 80)
+server {
+    listen 80;
+    server_name crisaor.serveftp.com;
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 8443 ssl http2;
+    server_name crisaor.serveftp.com;
+    # Let's Encrypt (Opción A)
+    ssl_certificate     /etc/letsencrypt/live/crisaor.serveftp.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/crisaor.serveftp.com/privkey.pem;
+    # Cloudflare Origin (Opción B — comenta las líneas de arriba y usa estas)
+    # ssl_certificate     /etc/nginx/ssl/cloudflare-origin.pem;
+    # ssl_certificate_key /etc/nginx/ssl/cloudflare-origin.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    # SIGRE frontend (Docker sigre-frontend)
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 120s;
+    }
+}
+EOF
+sudo nginx -t
+sudo systemctl reload nginx
+Importante: el contenedor sigre-frontend sigue en :8080 solo HTTP; el TLS lo hace Nginx del host.
+
+Paso 4 — Verificación
+Desde tu PC (fuera de la LAN si es posible):
+
+curl -I https://crisaor.serveftp.com/sigre/inicio
+openssl s_client -connect crisaor.serveftp.com:443 -servername crisaor.serveftp.com </dev/null 2>/dev/null | openssl x509 -noout -issuer -dates
+En el navegador:
+
+https://crisaor.serveftp.com/sigre/inicio → candado verde
+Probar el enlace desde WhatsApp (debe abrir sin error)
+Paso 5 — Ajustes en SIGRE (después de que HTTPS funcione)
+Enlaces públicos: usar siempre
+https://crisaor.serveftp.com/sigre/inicio
+(sin :8080).
+
+CORS / seguridad: revisar que el backend acepte origen
+https://crisaor.serveftp.com.
+
+API: el frontend ya proxy /api/ al gateway dentro de Docker; no hace falta exponer :9080 al internet si todo pasa por el mismo dominio HTTPS.
+
+Opcional en docker-compose.app.yml — si algo usa URL absoluta del gateway:
+
+API_GATEWAY_URL: https://crisaor.serveftp.com
+(solo si la app lo requiere; el proxy interno /api/ suele bastar).
+
+Resumen de decisión
+Situación	Qué hacer
+Puedes abrir 80 y 443 en el router
+Let's Encrypt en el Linux (Opción A)
+Solo 443→8443
+Cloudflare + Origin Certificate (Opción B)
+Dominio propio sigre.npssac.com.pe
+Mejor imagen comercial; mismo procedimiento
+Orden recomendado de ejecución
+Router: 443 → 8443 (+ 80 → 80 si Let's Encrypt).
+Linux: desactivar firewalld, instalar nginx + certbot.
+Obtener certificado (A o B).
+Crear sigre-https.conf en 8443.
+Probar HTTPS y WhatsApp.
+Actualizar enlaces y CORS.
+Si me confirmas cuál camino prefieres (Let's Encrypt con puerto 80 o Cloudflare con solo 8443), te preparo los archivos en deploy/cronos/ listos para copiar al servidor y, si quieres, actualizo comandos.txt con esta sección.
