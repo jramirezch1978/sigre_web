@@ -257,11 +257,14 @@ export class SeleccionRazonSocialComponent implements OnInit, CanComponentDeacti
     ).subscribe({
       next: (response) => {
         this.isSelecting = false;
-        if (response.success) {
+        if (response.success && response.data) {
           this.seleccionCompletada = true;
-          const dest = this.postAuthIntent.consumeHomeRoute();
-          void this.router.navigateByUrl(dest);
+          this.postAuthIntent.markDefault();
+          void this.router.navigateByUrl('/sigre/dashboard');
+          return;
         }
+        const msg = response.message ?? 'No se pudo completar la selección de sucursal';
+        void this.showError('Error', msg);
       },
       error: (err) => {
         this.isSelecting = false;

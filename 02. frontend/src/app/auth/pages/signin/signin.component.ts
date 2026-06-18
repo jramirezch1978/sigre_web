@@ -55,7 +55,8 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   private ipPrivada = '';
 
   ngOnInit(): void {
-    void this.limpiarSesionAlEntrar();
+    this.authService.purgeSessionLocal();
+    this.erpLayout.seleccionarModulo(null);
     this.initializeForm();
     this.cargarCredencialesRecordadas();
     this.suscribirRecargaCredencialesAlVolverALogin();
@@ -82,15 +83,7 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   }
 
   ionViewWillEnter(): void {
-    void this.limpiarSesionAlEntrar();
     this.cargarCredencialesRecordadas();
-  }
-
-  private async limpiarSesionAlEntrar(): Promise<void> {
-    await this.authService.invalidateSession();
-    this.erpLayout.seleccionarModulo(null);
-    this.errorMessage = '';
-    this.isLoading = false;
   }
 
   private suscribirRecargaCredencialesAlVolverALogin(): void {

@@ -18,18 +18,21 @@ export const erpSessionGuard: CanActivateFn = () => {
   }
 
   const payload = decodeJwtPayload(token);
-  if (!payload) {
-    return router.createUrlTree(['/auth/signin']);
-  }
-
-  if (payload.temporal === true || !payload.empresaId) {
+  if (!payload || !sesionErpCompleta(payload)) {
     return router.createUrlTree(['/auth/signin']);
   }
 
   return true;
 };
 
-function decodeJwtPayload(token: string): { temporal?: boolean; empresaId?: number; [key: string]: unknown } | null {
+function sesionErpCompleta(payload: { temporal?: boolean | string; empresaId?: number | string | null }): boolean {
+  const temporal = payload.temporal;
+  const isTemporal = temporal === true || temporal === 'true';
+  const empresaId = payload.empresaId;
+  return !isTemporal && empresaId != null && String(empresaId).trim() !== '';
+}
+
+function decodeJwtPayload(token: string): { temporal?: boolean | string; empresaId?: number | string; [key: string]: unknown } | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
