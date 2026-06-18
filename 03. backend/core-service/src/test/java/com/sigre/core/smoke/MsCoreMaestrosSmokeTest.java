@@ -30,6 +30,7 @@ class MsCoreMaestrosSmokeTest {
             "MonedaController",
             "NaturalezaContableController",
             "NumeradorController",
+            "NumeradorDocumentoController",
             "ParametroSistemaController",
             "RelacionComercialController",
             "SucursalController",

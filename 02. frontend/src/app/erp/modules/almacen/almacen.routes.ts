@@ -11,6 +11,7 @@ export const almacenRoutes: Routes = [
       tablaKey: opcion.tablaKey,
       opcionMenuCodigo: opcion.codigo,
       titulo: opcion.nombre,
+      nombreTablaDocumento: opcion.nombreTablaDocumento ?? null,
     },
   })),
   { path: 'tablas/tablas-almacenes', redirectTo: 'tablas/almacenes', pathMatch: 'full' },

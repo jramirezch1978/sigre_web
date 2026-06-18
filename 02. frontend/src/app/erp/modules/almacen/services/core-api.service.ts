@@ -14,13 +14,13 @@ export interface ConversionUnidadDto {
   flagEstado: string;
 }
 
-export interface NumeradorDto {
-  id: number;
-  codigo: string;
-  nombre: string;
-  serie?: string;
-  ultimoNumero?: number;
-  longitud?: number;
+export interface NumeradorDocumentoDto {
+  nombreTabla: string;
+  sucursalId: number;
+  sucursalCodigo?: string;
+  sucursalNombre?: string;
+  ano: number;
+  ultNro: number;
   flagEstado: string;
 }
 
@@ -50,16 +50,14 @@ export class CoreApiService {
       .pipe(map(res => res.data?.content ?? []));
   }
 
-  listarNumeradores(filtro?: (n: NumeradorDto) => boolean): Observable<NumeradorDto[]> {
-    const params = new HttpParams().set('page', '0').set('size', '500');
+  listarNumeradoresDocumento(nombreTabla: string): Observable<NumeradorDocumentoDto[]> {
+    const params = new HttpParams()
+      .set('nombreTabla', nombreTabla)
+      .set('page', '0')
+      .set('size', '500');
     return this.http
-      .get<ApiResponse<PageData<NumeradorDto>>>(`${this.base}/numeradores`, { params })
-      .pipe(
-        map(res => {
-          const items = res.data?.content ?? [];
-          return filtro ? items.filter(filtro) : items;
-        })
-      );
+      .get<ApiResponse<PageData<NumeradorDocumentoDto>>>(`${this.base}/numeradores-documento`, { params })
+      .pipe(map(res => res.data?.content ?? []));
   }
 
   listarParametrosAlmacen(): Observable<ConfigClaveDto[]> {

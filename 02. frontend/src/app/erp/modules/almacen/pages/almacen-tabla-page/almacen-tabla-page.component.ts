@@ -8,9 +8,11 @@ import { ErpDataTableComponent } from '../../../../shared/erp-data-table/erp-dat
 import {
   ALMACEN_TABLAS,
   AlmacenTablaKey,
-  filtroNumeradorOtr,
-  filtroNumeradorVales,
 } from '../../config/almacen-tablas.config';
+import {
+  ALMACEN_NUMERADOR_TABLA_OTR,
+  ALMACEN_NUMERADOR_TABLA_VALES,
+} from '../../config/almacen-opciones-menu.config';
 import { tablaKeyPorRutaFrontend } from '../../config/almacen-opciones-menu.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { CoreApiService } from '../../services/core-api.service';
@@ -36,6 +38,7 @@ export class AlmacenTablaPageComponent implements OnInit {
   error = '';
 
   private tablaKey: AlmacenTablaKey = 'almacenes';
+  private nombreTablaDocumento: string | null = null;
 
   ngOnInit(): void {
     this.route.data.subscribe(data => {
@@ -43,6 +46,7 @@ export class AlmacenTablaPageComponent implements OnInit {
         (data['tablaKey'] as AlmacenTablaKey) ??
         tablaKeyPorRutaFrontend(this.router.url) ??
         'almacenes';
+      this.nombreTablaDocumento = (data['nombreTablaDocumento'] as string | null) ?? null;
       const def = ALMACEN_TABLAS[this.tablaKey];
       this.titulo = (data['titulo'] as string) ?? def.titulo;
       this.subtitulo = def.subtitulo ?? '';
@@ -92,21 +96,13 @@ export class AlmacenTablaPageComponent implements OnInit {
       case 'unidades-conversion':
         return this.coreApi.listarConversionesUnidad().pipe(mapToRows());
       case 'numeracion-vales':
-        return this.coreApi.listarNumeradores().pipe(
-          map(items => {
-            const filtrados = items.filter(n => filtroNumeradorVales(n.codigo, n.nombre));
-            return filtrados.length ? filtrados : items;
-          }),
-          mapToRows()
-        );
+        return this.coreApi
+          .listarNumeradoresDocumento(this.nombreTablaDocumento ?? ALMACEN_NUMERADOR_TABLA_VALES)
+          .pipe(mapToRows());
       case 'numeracion-otr':
-        return this.coreApi.listarNumeradores().pipe(
-          map(items => {
-            const filtrados = items.filter(n => filtroNumeradorOtr(n.codigo, n.nombre));
-            return filtrados.length ? filtrados : items;
-          }),
-          mapToRows()
-        );
+        return this.coreApi
+          .listarNumeradoresDocumento(this.nombreTablaDocumento ?? ALMACEN_NUMERADOR_TABLA_OTR)
+          .pipe(mapToRows());
       case 'parametros':
         return this.coreApi.listarParametrosAlmacenConValor().pipe(mapToRows());
       default:

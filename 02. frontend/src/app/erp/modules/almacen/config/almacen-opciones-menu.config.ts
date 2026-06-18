@@ -1,13 +1,19 @@
 import { AlmacenTablaKey } from './almacen-tablas.config';
 
-/** Definición canónica: codigo opcion_menu → ruta web + pantalla a cargar. */
+/** Tabla destino en core.numerador_documento (cuando aplica). */
 export interface AlmacenOpcionMenuDef {
   codigo: string;
   nombre: string;
   rutaFrontend: string;
   tablaKey: AlmacenTablaKey;
   orden: number;
+  /** Filtro nombre_tabla en core.numerador_documento (numeración de documentos). */
+  nombreTablaDocumento?: string;
 }
+
+/** Tablas destino para numeración correlativa (core.fn_get_document_number). */
+export const ALMACEN_NUMERADOR_TABLA_VALES = 'almacen.vale_mov';
+export const ALMACEN_NUMERADOR_TABLA_OTR = 'almacen.orden_traslado';
 
 /**
  * Tablas maestras Almacén — alineado con opciones_menu.txt [TABLAS].
@@ -75,6 +81,7 @@ export const ALMACEN_TABLAS_OPCIONES: readonly AlmacenOpcionMenuDef[] = [
     nombre: 'Vales',
     rutaFrontend: '/sigre/almacen/tablas/numeracion-vales',
     tablaKey: 'numeracion-vales',
+    nombreTablaDocumento: ALMACEN_NUMERADOR_TABLA_VALES,
     orden: 9,
   },
   {
@@ -82,6 +89,7 @@ export const ALMACEN_TABLAS_OPCIONES: readonly AlmacenOpcionMenuDef[] = [
     nombre: 'Orden de Traslado',
     rutaFrontend: '/sigre/almacen/tablas/numeracion-otr',
     tablaKey: 'numeracion-otr',
+    nombreTablaDocumento: ALMACEN_NUMERADOR_TABLA_OTR,
     orden: 10,
   },
   {

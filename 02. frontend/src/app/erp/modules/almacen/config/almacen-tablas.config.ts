@@ -113,24 +113,26 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'numeracion-vales': {
-    titulo: 'Vales',
+    titulo: 'Numeración — Vales',
+    subtitulo: 'Correlativo por sucursal y año (tabla almacen.vale_mov)',
     columnas: [
-      { key: 'codigo', header: 'Código', width: '120px' },
-      { key: 'nombre', header: 'Nombre', width: '220px' },
-      { key: 'serie', header: 'Serie', width: '90px' },
-      { key: 'ultimoNumero', header: 'Último N°', width: '110px', format: 'numero' },
-      { key: 'longitud', header: 'Longitud', width: '90px' },
+      { key: 'nombreTabla', header: 'Tabla destino', width: '160px' },
+      { key: 'sucursalCodigo', header: 'Sucursal', width: '90px' },
+      { key: 'sucursalNombre', header: 'Nombre sucursal', width: '160px' },
+      { key: 'ano', header: 'Año', width: '70px' },
+      { key: 'ultNro', header: 'Próximo N°', width: '100px', format: 'numero' },
       { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
     ],
   },
   'numeracion-otr': {
-    titulo: 'Orden de Traslado',
+    titulo: 'Numeración — OTR',
+    subtitulo: 'Correlativo por sucursal y año (tabla almacen.orden_traslado)',
     columnas: [
-      { key: 'codigo', header: 'Código', width: '120px' },
-      { key: 'nombre', header: 'Nombre', width: '220px' },
-      { key: 'serie', header: 'Serie', width: '90px' },
-      { key: 'ultimoNumero', header: 'Último N°', width: '110px', format: 'numero' },
-      { key: 'longitud', header: 'Longitud', width: '90px' },
+      { key: 'nombreTabla', header: 'Tabla destino', width: '180px' },
+      { key: 'sucursalCodigo', header: 'Sucursal', width: '90px' },
+      { key: 'sucursalNombre', header: 'Nombre sucursal', width: '160px' },
+      { key: 'ano', header: 'Año', width: '70px' },
+      { key: 'ultNro', header: 'Próximo N°', width: '100px', format: 'numero' },
       { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
     ],
   },
@@ -146,13 +148,3 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
 };
-
-export function filtroNumeradorVales(codigo: string, nombre: string): boolean {
-  const t = `${codigo} ${nombre}`.toUpperCase();
-  return t.includes('VALE') || t.includes('VM') || t.includes('MOV');
-}
-
-export function filtroNumeradorOtr(codigo: string, nombre: string): boolean {
-  const t = `${codigo} ${nombre}`.toUpperCase();
-  return t.includes('TRASL') || t.includes('OTR') || t.includes('ORDEN');
-}
