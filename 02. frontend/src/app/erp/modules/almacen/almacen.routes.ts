@@ -12,7 +12,6 @@ export const almacenRoutes: Routes = [
   { path: '', redirectTo: 'tablas/almacenes', pathMatch: 'full' },
   tabla('almacenes', 'tablas/almacenes'),
   tabla('tipos-movimiento', 'tablas/tipos-movimiento'),
-  tabla('tipos-almacen', 'tablas/tipos-almacen'),
   tabla('ubicaciones', 'tablas/ubicaciones'),
   tabla('movimientos-almacen', 'tablas/movimientos-almacen'),
   tabla('posiciones', 'tablas/posiciones'),

@@ -125,6 +125,7 @@ export class ErpMenuService {
 
     for (const item of data.items) {
       const om = item.opcionMenu;
+      if (!om.activo) continue;
       if (om.opcionPadreId === null) {
         const arr = padresPorModulo.get(om.moduloId) ?? [];
         arr.push(om);
@@ -138,6 +139,7 @@ export class ErpMenuService {
 
     for (const item of data.items) {
       const om = item.opcionMenu;
+      if (!om.activo) continue;
       const codModulo = om.codigo.split('_')[0];
       if (!moduloNombres.has(om.moduloId)) {
         moduloNombres.set(om.moduloId, this.nombreModulo(codModulo));
@@ -220,14 +222,6 @@ export class ErpMenuService {
       '/almacen/tablas/tablas-almacenes': '/sigre/almacen/tablas/almacenes',
       '/almacen/tablas/almacenes-movimiento': '/sigre/almacen/tablas/movimientos-almacen',
       '/almacen/tablas/tipos-movimiento': '/sigre/almacen/tablas/tipos-movimiento',
-      '/almacen/tablas/ubicaciones': '/sigre/almacen/tablas/ubicaciones',
-      '/almacen/tablas/posiciones': '/sigre/almacen/tablas/posiciones',
-      '/almacen/tablas/motivos-traslado': '/sigre/almacen/tablas/motivos-traslado',
-      '/almacen/tablas/lotes': '/sigre/almacen/tablas/lotes',
-      '/almacen/tablas/unidades-conversion': '/sigre/almacen/tablas/unidades-conversion',
-      '/almacen/tablas/numeracion-vales': '/sigre/almacen/tablas/numeracion-vales',
-      '/almacen/tablas/numeracion-otr': '/sigre/almacen/tablas/numeracion-otr',
-      '/almacen/tablas/parametros': '/sigre/almacen/tablas/parametros',
     };
     if (alias[trimmed]) return alias[trimmed];
     if (trimmed.startsWith('/almacen/')) return `/sigre${trimmed}`;

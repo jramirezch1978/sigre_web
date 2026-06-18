@@ -32,7 +32,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'tipos-movimiento': {
-    titulo: 'Tipos de movimientos de almacén',
+    titulo: 'Tipos de movimientos de almacenes',
     columnas: [
       { key: 'tipoMov', header: 'Código', width: '90px' },
       { key: 'descTipoMov', header: 'Descripción', width: '280px' },
@@ -50,8 +50,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   ubicaciones: {
-    titulo: 'Ubicación de artículo',
-    subtitulo: 'Ubicaciones físicas por almacén',
+    titulo: 'Ubicacion de Articulo',
     columnas: [
       { key: 'almacenCodigo', header: 'Almacén', width: '90px' },
       { key: 'almacenNombre', header: 'Nombre almacén', width: '180px' },
@@ -63,8 +62,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'movimientos-almacen': {
-    titulo: 'Movimientos por almacén',
-    subtitulo: 'Tipos de movimiento habilitados por almacén',
+    titulo: 'Movimientos por almacen',
     columnas: [
       { key: 'almacenCodigo', header: 'Almacén', width: '90px' },
       { key: 'almacenNombre', header: 'Nombre almacén', width: '180px' },
@@ -74,7 +72,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   posiciones: {
-    titulo: 'Posiciones por almacén',
+    titulo: 'Posiciones por Almacen',
     columnas: [
       { key: 'almacenCodigo', header: 'Almacén', width: '90px' },
       { key: 'codigo', header: 'Código', width: '100px' },
@@ -93,7 +91,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   lotes: {
-    titulo: 'Ingreso de lotes',
+    titulo: 'Ingreso de Lotes',
     columnas: [
       { key: 'nroLote', header: 'N° Lote', width: '120px' },
       { key: 'almacenId', header: 'Almacén ID', width: '100px' },
@@ -105,7 +103,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'unidades-conversion': {
-    titulo: 'Unidades de conversión',
+    titulo: 'Unidades de Conversión',
     columnas: [
       { key: 'articuloId', header: 'Artículo ID', width: '100px' },
       { key: 'umOrigenId', header: 'UM origen', width: '100px' },
@@ -115,8 +113,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'numeracion-vales': {
-    titulo: 'Numeración — Vales',
-    subtitulo: 'Numeradores relacionados con vales de almacén',
+    titulo: 'Vales',
     columnas: [
       { key: 'codigo', header: 'Código', width: '120px' },
       { key: 'nombre', header: 'Nombre', width: '220px' },
@@ -127,7 +124,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'numeracion-otr': {
-    titulo: 'Numeración — Orden de traslado',
+    titulo: 'Orden de Traslado',
     columnas: [
       { key: 'codigo', header: 'Código', width: '120px' },
       { key: 'nombre', header: 'Nombre', width: '220px' },
@@ -138,8 +135,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   parametros: {
-    titulo: 'Parámetros del sistema',
-    subtitulo: 'Configuración del módulo Almacén',
+    titulo: 'Parametros del Sistema',
     columnas: [
       { key: 'clave', header: 'Clave', width: '160px' },
       { key: 'descripcion', header: 'Descripción', width: '260px' },
