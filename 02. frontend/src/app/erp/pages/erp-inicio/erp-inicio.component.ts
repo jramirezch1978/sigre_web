@@ -113,7 +113,9 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     }, 150);
   }
 
-  navegarOpcion(ruta: string | null, codigo?: string): void {
+  navegarOpcion(event: Event, ruta: string | null, codigo?: string): void {
+    event.preventDefault();
+    event.stopPropagation();
     const destino = codigo
       ? this.menuService.resolverRutaFrontend(codigo, ruta)
       : this.menuService.normalizarRutaFrontend(ruta);

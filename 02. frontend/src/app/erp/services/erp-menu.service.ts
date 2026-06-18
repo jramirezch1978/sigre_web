@@ -213,11 +213,11 @@ export class ErpMenuService {
     return nombres[codigo] ?? codigo;
   }
 
-  /** Resuelve ruta web: BD → tabla canónica frontend → normalización legacy. */
+  /** Resuelve ruta web: tabla canónica por código → BD → normalización legacy. */
   resolverRutaFrontend(codigo: string, rutaBd: string | null): string | null {
-    const desdeBd = this.normalizarRutaFrontend(rutaBd);
-    if (desdeBd) return desdeBd;
-    return this.normalizarRutaFrontend(rutaFrontendPorCodigoOpcion(codigo));
+    const desdeCodigo = this.normalizarRutaFrontend(rutaFrontendPorCodigoOpcion(codigo));
+    if (desdeCodigo) return desdeCodigo;
+    return this.normalizarRutaFrontend(rutaBd);
   }
 
   navegarOpcionDesdeMenu(codigo: string, ruta: string | null): string | null {
@@ -228,18 +228,27 @@ export class ErpMenuService {
   normalizarRutaFrontend(ruta: string | null): string | null {
     if (!ruta) return null;
     const trimmed = ruta.trim();
-    if (trimmed.startsWith('/sigre/')) return trimmed;
+    if (!trimmed || trimmed === '/') return null;
+
+    const alias = this.aliasRutasAlmacen();
+    if (alias[trimmed]) return alias[trimmed];
 
     const canon = ALMACEN_TABLAS_POR_CODIGO[trimmed];
     if (canon) return canon.rutaFrontend;
 
-    const alias: Record<string, string> = {
+    if (trimmed.startsWith('/sigre/almacen/')) return trimmed;
+    if (trimmed.startsWith('/almacen/')) return `/sigre${trimmed}`;
+
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  }
+
+  private aliasRutasAlmacen(): Readonly<Record<string, string>> {
+    return {
       '/almacen/tablas/tablas-almacenes': '/sigre/almacen/tablas/almacenes',
       '/almacen/tablas/almacenes-movimiento': '/sigre/almacen/tablas/movimientos-almacen',
       '/almacen/tablas/tipos-movimiento': '/sigre/almacen/tablas/tipos-movimiento',
+      '/sigre/almacen/tablas/tablas-almacenes': '/sigre/almacen/tablas/almacenes',
+      '/sigre/almacen/tablas/almacenes-movimiento': '/sigre/almacen/tablas/movimientos-almacen',
     };
-    if (alias[trimmed]) return alias[trimmed];
-    if (trimmed.startsWith('/almacen/')) return `/sigre${trimmed}`;
-    return trimmed;
   }
 }

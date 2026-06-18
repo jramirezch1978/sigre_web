@@ -80,14 +80,16 @@
                        (mouseenter)="abrirDropdown(seccion.id)"
                        (mouseleave)="cerrarDropdown()">
                     @for (opcion of seccion.opciones; track opcion.id) {
-                      <a class="erp-dropdown__option"
+                      <button type="button"
+                         class="erp-dropdown__option"
                          [class.erp-dropdown__option--disabled]="!opcion.rutaFrontend"
-                         (click)="navegarOpcion(opcion.rutaFrontend, opcion.codigo)">
+                         [disabled]="!opcion.rutaFrontend"
+                         (click)="navegarOpcion($event, opcion.rutaFrontend, opcion.codigo)">
                         {{ opcion.nombre }}
                         @if (!opcion.rutaFrontend) {
                           <span class="erp-dropdown__badge">Próximamente</span>
                         }
-                      </a>
+                      </button>
                     }
                     @if (seccion.opciones.length === 0) {
                       <span class="erp-dropdown__empty">Sin opciones</span>
