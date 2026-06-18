@@ -103,9 +103,12 @@
               } @else {
                 <span class="landing-pricing-card__currency">$</span>
                 <span class="landing-pricing-card__amount">{{ plan.precio }}</span>
-                <span class="landing-pricing-card__period">por usuario al mes</span>
+                <span class="landing-pricing-card__period">por usuario<br>y por empresa / mes</span>
               }
             </div>
+            @if (plan.maxUsuarios && plan.precio > 0) {
+              <p class="landing-pricing-card__limit">Hasta {{ plan.maxUsuarios }} usuarios incluidos</p>
+            }
             <p class="landing-pricing-card__desc">{{ plan.descripcion }}</p>
             <ul class="landing-pricing-card__features">
               @for (feat of plan.caracteristicas; track feat) {
@@ -117,6 +120,77 @@
             </button>
           </div>
         }
+      </div>
+
+      <div class="landing-pricing__notes">
+        <div class="landing-pricing-note">
+          <h3 class="landing-pricing-note__title">¿Cómo se calcula el precio?</h3>
+          <p>
+            Cada tarifa indica un monto <strong>por usuario y por empresa al mes</strong>.
+            Si un mismo usuario accede a más de una empresa, se multiplica el precio de la tarifa
+            por la cantidad de empresas asignadas.
+          </p>
+          <ul class="landing-pricing-note__list">
+            <li>
+              <strong>Ejemplo Mype ($8):</strong> 1 usuario con 1 empresa = $8/mes;
+              con 2 empresas = $16/mes; con 3 empresas = $24/mes.
+            </li>
+            <li>
+              El total mensual de su organización es la suma de todos sus usuarios,
+              considerando las empresas a las que cada uno tiene acceso.
+            </li>
+          </ul>
+        </div>
+
+        <div class="landing-pricing-note">
+          <h3 class="landing-pricing-note__title">Usuarios incluidos y recargo adicional</h3>
+          <p>
+            Cada plan incluye un número máximo de usuarios a tarifa base.
+            Por cada usuario adicional sobre ese límite se cobra la tarifa base
+            <strong>más ${{ recargoUsuarioExtra }} adicionales</strong> (por usuario y por empresa).
+          </p>
+          <div class="landing-pricing-limits">
+            @for (plan of planes; track plan.codigo) {
+              @if (plan.maxUsuarios && plan.precio > 0) {
+                <div class="landing-pricing-limits__item">
+                  <span class="landing-pricing-limits__plan">{{ plan.nombre }}</span>
+                  <span class="landing-pricing-limits__detail">
+                    Hasta {{ plan.maxUsuarios }} usuarios ·
+                    adicional: ${{ precioUsuarioAdicional(plan) }}/usuario/empresa
+                  </span>
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="landing-pricing-note landing-pricing-note--examples">
+          <h3 class="landing-pricing-note__title">Ejemplos de facturación mensual</h3>
+          <div class="landing-pricing-examples">
+            <div class="landing-pricing-example">
+              <h4>Mype — 1 empresa, 6 usuarios</h4>
+              <p>
+                5 usuarios incluidos × $8 = <strong>$40</strong> +
+                1 usuario adicional × $10 = <strong>$10</strong> →
+                <strong>Total: $50/mes</strong>
+              </p>
+            </div>
+            <div class="landing-pricing-example">
+              <h4>Mype — 1 usuario, 3 empresas</h4>
+              <p>
+                1 usuario × 3 empresas × $8 = <strong>Total: $24/mes</strong>
+              </p>
+            </div>
+            <div class="landing-pricing-example">
+              <h4>Enterprise — 1 empresa, 41 usuarios</h4>
+              <p>
+                40 usuarios incluidos × $20 = <strong>$800</strong> +
+                1 usuario adicional × $22 = <strong>$22</strong> →
+                <strong>Total: $822/mes</strong>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>

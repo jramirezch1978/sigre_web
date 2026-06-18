@@ -253,24 +253,31 @@ VALUES
         '1'
     ),
     (
-        'STANDARD', 'Estándar', 8,
+        'STANDARD', 'Mype', 8,
         'Edición SIGRE Mype — SIGRE Online',
-        'MYPE', '#f5a623', FALSE, NULL, NULL, 2,
-        '["Edición SIGRE Mype","SIGRE Online","Módulos incluidos en Mype","Soporte por email","Actualizaciones incluidas"]'::jsonb,
+        'MYPE', '#f5a623', FALSE, NULL, 5, 2,
+        '["Hasta 5 usuarios incluidos","Edición SIGRE Mype","SIGRE Online","Módulos incluidos en Mype","Soporte por email","Actualizaciones incluidas"]'::jsonb,
         '1'
     ),
     (
-        'PERSONALIZADO', 'Personalizado', 12,
+        'SMALL_BUSINESS', 'Small Business', 10,
+        'Edición SIGRE Small Business — SIGRE Online',
+        'SMALL_BUSINESS', '#26a69a', FALSE, NULL, 10, 3,
+        '["Hasta 10 usuarios incluidos","Edición SIGRE Small Business","SIGRE Online","Módulos Mype + Compras, RR.HH. y más","Soporte por email","Actualizaciones incluidas"]'::jsonb,
+        '1'
+    ),
+    (
+        'PERSONALIZADO', 'Professional', 12,
         'Edición SIGRE Professional — SIGRE Online / On-premise',
-        'PROFESSIONAL', '#714b67', TRUE, NULL, NULL, 3,
-        '["Edición SIGRE Professional","SIGRE Online / On-premise","Multi-sucursal","Módulos operativos completos","Soporte prioritario"]'::jsonb,
+        'PROFESSIONAL', '#714b67', TRUE, NULL, 20, 4,
+        '["Hasta 20 usuarios incluidos","Edición SIGRE Professional","SIGRE Online / On-premise","Multi-sucursal","Módulos operativos completos","Soporte prioritario"]'::jsonb,
         '1'
     ),
     (
         'ENTERPRISE', 'Enterprise', 20,
         'Edición SIGRE Enterprise — acceso completo',
-        'ENTERPRISE', '#e11d48', FALSE, NULL, NULL, 4,
-        '["Edición SIGRE Enterprise","Todos los módulos","Multi-empresa ilimitado","API de integración","Personalización avanzada","Soporte 24/7 dedicado"]'::jsonb,
+        'ENTERPRISE', '#e11d48', FALSE, NULL, 40, 5,
+        '["Hasta 40 usuarios incluidos","Edición SIGRE Enterprise","Todos los módulos","Multi-empresa ilimitado","API de integración","Personalización avanzada","Soporte 24/7 dedicado"]'::jsonb,
         '1'
     )
 ON CONFLICT (codigo) DO UPDATE SET

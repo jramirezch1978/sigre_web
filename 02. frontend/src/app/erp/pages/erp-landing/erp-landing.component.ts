@@ -29,6 +29,7 @@ interface PlanSuscripcion {
   caracteristicas: string[];
   color: string;
   destacado: boolean;
+  maxUsuarios: number | null;
 }
 
 interface EdicionERP {
@@ -55,6 +56,9 @@ export class ErpLandingComponent implements OnInit {
 
   planes: PlanSuscripcion[] = [];
   ediciones: EdicionERP[] = [];
+
+  /** Recargo mensual por usuario que excede el límite incluido en la tarifa */
+  readonly recargoUsuarioExtra = 2;
 
   modulos: ModuloInfo[] = [
     {
@@ -243,6 +247,10 @@ export class ErpLandingComponent implements OnInit {
     document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' });
   }
 
+  precioUsuarioAdicional(plan: PlanSuscripcion): number {
+    return plan.precio + this.recargoUsuarioExtra;
+  }
+
   private buildCategorias(): void {
     const map: Record<string, string[]> = {
       'FINANZAS': ['CONTABILIDAD', 'FINANZAS', 'PRESUPUESTO', 'ACTIVOS_FIJOS'],
@@ -278,6 +286,7 @@ export class ErpLandingComponent implements OnInit {
       caracteristicas: plan.caracteristicas ?? [],
       color: plan.color ?? '#714b67',
       destacado: !!plan.destacado,
+      maxUsuarios: plan.maxUsuarios,
     };
   }
 
@@ -300,33 +309,47 @@ export class ErpLandingComponent implements OnInit {
         caracteristicas: ['Todo el SIGRE', 'Máximo 5 usuarios', '15 días de acceso', 'Sin tarjeta de crédito'],
         color: '#00bcd4',
         destacado: false,
+        maxUsuarios: 5,
       },
       {
         codigo: 'STANDARD',
-        nombre: 'Estándar',
+        nombre: 'Mype',
         precio: 8,
         descripcion: 'Edición SIGRE Mype — SIGRE Online',
-        caracteristicas: ['Edición SIGRE Mype', 'SIGRE Online', 'Módulos incluidos en Mype', 'Soporte por email', 'Actualizaciones incluidas'],
+        caracteristicas: ['Hasta 5 usuarios incluidos', 'Edición SIGRE Mype', 'SIGRE Online', 'Módulos incluidos en Mype', 'Soporte por email', 'Actualizaciones incluidas'],
         color: '#f5a623',
         destacado: false,
+        maxUsuarios: 5,
+      },
+      {
+        codigo: 'SMALL_BUSINESS',
+        nombre: 'Small Business',
+        precio: 10,
+        descripcion: 'Edición SIGRE Small Business — SIGRE Online',
+        caracteristicas: ['Hasta 10 usuarios incluidos', 'Edición SIGRE Small Business', 'SIGRE Online', 'Módulos Mype + Compras, RR.HH. y más', 'Soporte por email', 'Actualizaciones incluidas'],
+        color: '#26a69a',
+        destacado: false,
+        maxUsuarios: 10,
       },
       {
         codigo: 'PERSONALIZADO',
-        nombre: 'Personalizado',
+        nombre: 'Professional',
         precio: 12,
         descripcion: 'Edición SIGRE Professional — SIGRE Online / On-premise',
-        caracteristicas: ['Edición SIGRE Professional', 'SIGRE Online / On-premise', 'Multi-sucursal', 'Módulos operativos completos', 'Soporte prioritario'],
+        caracteristicas: ['Hasta 20 usuarios incluidos', 'Edición SIGRE Professional', 'SIGRE Online / On-premise', 'Multi-sucursal', 'Módulos operativos completos', 'Soporte prioritario'],
         color: '#714b67',
         destacado: true,
+        maxUsuarios: 20,
       },
       {
         codigo: 'ENTERPRISE',
         nombre: 'Enterprise',
         precio: 20,
         descripcion: 'Edición SIGRE Enterprise — acceso completo',
-        caracteristicas: ['Edición SIGRE Enterprise', 'Todos los módulos', 'Multi-empresa ilimitado', 'API de integración', 'Personalización avanzada', 'Soporte 24/7 dedicado'],
+        caracteristicas: ['Hasta 40 usuarios incluidos', 'Edición SIGRE Enterprise', 'Todos los módulos', 'Multi-empresa ilimitado', 'API de integración', 'Personalización avanzada', 'Soporte 24/7 dedicado'],
         color: '#e11d48',
         destacado: false,
+        maxUsuarios: 40,
       },
     ];
   }
