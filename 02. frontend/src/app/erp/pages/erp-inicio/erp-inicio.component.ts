@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,7 +15,7 @@ import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
   templateUrl: './erp-inicio.component.html',
   styleUrls: ['./erp-inicio.component.scss'],
 })
-export class ErpInicioComponent implements OnInit {
+export class ErpInicioComponent implements OnInit, OnDestroy {
 
   private readonly router = inject(Router);
   private readonly storage = inject(StorageService);
@@ -25,12 +25,14 @@ export class ErpInicioComponent implements OnInit {
   nombreUsuario = '';
   empresaActual = '';
   sucursalActual = '';
-  currentYear = new Date().getFullYear();
 
   modulos: MenuModulo[] = [];
   moduloActivo: MenuModulo | null = null;
   cargandoMenu = true;
   errorMenu = '';
+
+  dropdownAbiertoId: number | null = null;
+  private dropdownTimeout: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
     const user = this.storage.getUser<{
@@ -54,22 +56,18 @@ export class ErpInicioComponent implements OnInit {
     this.cargarMenu();
   }
 
-  private leerClaimsToken(): Record<string, string> | null {
-    const token = this.storage.getToken();
-    if (!token) return null;
-    try {
-      const parts = token.split('.');
-      if (parts.length !== 3) return null;
-      let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-      while (base64.length % 4 !== 0) base64 += '=';
-      return JSON.parse(atob(base64));
-    } catch {
-      return null;
-    }
+  ngOnDestroy(): void {
+    this.limpiarTimeout();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(): void {
+    this.dropdownAbiertoId = null;
   }
 
   cargarMenu(): void {
     this.cargandoMenu = true;
+    this.errorMenu = '';
     this.menuService.obtenerMiMenu().subscribe({
       next: (modulos) => {
         this.modulos = modulos;
@@ -84,14 +82,49 @@ export class ErpInicioComponent implements OnInit {
 
   seleccionarModulo(modulo: MenuModulo): void {
     this.moduloActivo = this.moduloActivo?.moduloId === modulo.moduloId ? null : modulo;
+    this.dropdownAbiertoId = null;
+  }
+
+  abrirDropdown(seccionId: number): void {
+    this.limpiarTimeout();
+    this.dropdownAbiertoId = seccionId;
+  }
+
+  cerrarDropdown(): void {
+    this.limpiarTimeout();
+    this.dropdownTimeout = setTimeout(() => {
+      this.dropdownAbiertoId = null;
+    }, 150);
   }
 
   navegarOpcion(ruta: string | null): void {
     if (!ruta) return;
+    this.dropdownAbiertoId = null;
     void this.router.navigateByUrl(ruta);
   }
 
   cerrarSesion(): void {
     void this.authService.signOut();
+  }
+
+  private leerClaimsToken(): Record<string, string> | null {
+    const token = this.storage.getToken();
+    if (!token) return null;
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4 !== 0) base64 += '=';
+      return JSON.parse(atob(base64));
+    } catch {
+      return null;
+    }
+  }
+
+  private limpiarTimeout(): void {
+    if (this.dropdownTimeout) {
+      clearTimeout(this.dropdownTimeout);
+      this.dropdownTimeout = null;
+    }
   }
 }
