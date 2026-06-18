@@ -102,43 +102,27 @@
 
       <!-- Contenido principal -->
       <main class="erp-content">
-        @if (moduloActivo === null && !errorMenu) {
-          <div class="erp-dashboard">
-            <div class="erp-dashboard__grid">
-              @for (modulo of modulos; track modulo.moduloId) {
-                <div class="erp-dashboard__card" (click)="seleccionarModulo(modulo)">
-                  <div class="erp-dashboard__card-icon">
-                    @if (modulo.iconoSvg) {
-                      <img [src]="modulo.iconoSvg" [alt]="modulo.nombre" />
-                    } @else {
-                      <mat-icon>{{ modulo.icono }}</mat-icon>
-                    }
-                  </div>
-                  <span class="erp-dashboard__card-name">{{ modulo.nombre }}</span>
-                </div>
-              }
-            </div>
-          </div>
-        }
-
         @if (errorMenu) {
           <div class="erp-error">
             <mat-icon>error_outline</mat-icon>
             <p>{{ errorMenu }}</p>
             <button mat-stroked-button (click)="cargarMenu()">Reintentar</button>
           </div>
-        }
-
-        @if (moduloActivo && !errorMenu) {
-          <div class="erp-module-placeholder">
-            @if (moduloActivo.iconoSvg) {
-              <img [src]="moduloActivo.iconoSvg" [alt]="moduloActivo.nombre" class="erp-module-placeholder__img" />
-            } @else {
-              <mat-icon>{{ moduloActivo.icono }}</mat-icon>
-            }
-            <h2>{{ moduloActivo.nombre }}</h2>
-            <p>Seleccione una opción del menú superior</p>
-          </div>
+        } @else {
+          @if (!mostrarPlaceholderModulo) {
+            <router-outlet></router-outlet>
+          }
+          @if (mostrarPlaceholderModulo) {
+            <div class="erp-module-placeholder">
+              @if (moduloActivo!.iconoSvg) {
+                <img [src]="moduloActivo!.iconoSvg" [alt]="moduloActivo!.nombre" class="erp-module-placeholder__img" />
+              } @else {
+                <mat-icon>{{ moduloActivo!.icono }}</mat-icon>
+              }
+              <h2>{{ moduloActivo!.nombre }}</h2>
+              <p>Seleccione una opción del menú superior</p>
+            </div>
+          }
         }
       </main>
 

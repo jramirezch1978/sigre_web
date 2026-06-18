@@ -1,0 +1,39 @@
+@if (cargando) {
+  <div class="erp-table__loading">
+    <mat-spinner diameter="36"></mat-spinner>
+    <span>Cargando registros…</span>
+  </div>
+} @else if (error) {
+  <div class="erp-table__error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+} @else if (filas.length === 0) {
+  <div class="erp-table__empty">
+    <mat-icon>inbox</mat-icon>
+    <span>No hay registros para mostrar</span>
+  </div>
+} @else {
+  <div class="erp-table__meta">{{ totalRegistros }} registro(s)</div>
+  <div class="erp-table__scroll">
+    <table mat-table [dataSource]="filas" class="erp-table">
+      @for (col of columnas; track col.key) {
+        <ng-container [matColumnDef]="col.key">
+          <th mat-header-cell *matHeaderCellDef [style.min-width]="col.width">{{ col.header }}</th>
+          <td mat-cell *matCellDef="let row">
+            @if (col.format === 'estado') {
+              <span class="erp-table__badge"
+                    [class.erp-table__badge--active]="row[col.key] === '1' || row[col.key] === 1">
+                {{ valorCelda(row, col) }}
+              </span>
+            } @else {
+              {{ valorCelda(row, col) }}
+            }
+          </td>
+        </ng-container>
+      }
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+}

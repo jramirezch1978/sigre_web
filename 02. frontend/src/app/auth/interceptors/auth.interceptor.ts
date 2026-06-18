@@ -115,8 +115,27 @@ export class AuthInterceptor implements HttpInterceptor {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+      const claims = this.decodeJwtPayload(token);
+      if (claims?.['empresaId'] != null) {
+        headers['X-Empresa-Id'] = String(claims['empresaId']);
+      }
+      if (claims?.['sucursalId'] != null) {
+        headers['X-Sucursal-Id'] = String(claims['sucursalId']);
+      }
     }
     return req.clone({ setHeaders: headers });
+  }
+
+  private decodeJwtPayload(token: string): Record<string, unknown> | null {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4 !== 0) base64 += '=';
+      return JSON.parse(atob(base64));
+    } catch {
+      return null;
+    }
   }
 
   private isLocalAsset(url: string): boolean {

@@ -20,6 +20,11 @@ export const routes: Routes = [
     loadChildren: () => import('./erp/erp.routes').then(m => m.erpRoutes)
   },
   {
+    path: 'almacen',
+    redirectTo: 'sigre/almacen',
+    pathMatch: 'prefix'
+  },
+  {
     path: 'auth',
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },

@@ -20,12 +20,19 @@ export const erpRoutes: Routes = [
   {
     path: '',
     canActivate: [erpSessionGuard],
+    loadComponent: () =>
+      import('./pages/erp-inicio/erp-inicio.component').then(m => m.ErpInicioComponent),
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./pages/erp-inicio/erp-inicio.component').then(m => m.ErpInicioComponent),
+          import('./pages/erp-dashboard/erp-dashboard.component').then(m => m.ErpDashboardComponent),
+      },
+      {
+        path: 'almacen',
+        loadChildren: () =>
+          import('./modules/almacen/almacen.routes').then(m => m.almacenRoutes),
       },
     ],
   },

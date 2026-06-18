@@ -1,12 +1,14 @@
 import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StorageService } from '../../../core/services/storage.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
+import { ErpLayoutService } from '../../services/erp-layout.service';
 
 @Component({
   selector: 'app-erp-inicio',
@@ -21,6 +23,7 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   private readonly storage = inject(StorageService);
   private readonly authService = inject(AuthService);
   private readonly menuService = inject(ErpMenuService);
+  private readonly layout = inject(ErpLayoutService);
 
   nombreUsuario = '';
   empresaActual = '';
@@ -54,6 +57,12 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     }
 
     this.cargarMenu();
+    this.layout.moduloActivo$.subscribe(modulo => {
+      this.moduloActivo = modulo;
+    });
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(() => this.sincronizarModuloConRuta());
   }
 
   ngOnDestroy(): void {
@@ -72,6 +81,7 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
       next: (modulos) => {
         this.modulos = modulos;
         this.cargandoMenu = false;
+        this.sincronizarModuloConRuta();
       },
       error: (err) => {
         this.cargandoMenu = false;
@@ -81,13 +91,14 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   }
 
   seleccionarModulo(modulo: MenuModulo): void {
-    this.moduloActivo = modulo;
+    this.layout.seleccionarModulo(modulo);
     this.dropdownAbiertoId = null;
   }
 
   irADashboard(): void {
-    this.moduloActivo = null;
+    this.layout.seleccionarModulo(null);
     this.dropdownAbiertoId = null;
+    void this.router.navigate(['/sigre/dashboard']);
   }
 
   abrirDropdown(seccionId: number): void {
@@ -105,7 +116,32 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   navegarOpcion(ruta: string | null): void {
     if (!ruta) return;
     this.dropdownAbiertoId = null;
-    void this.router.navigateByUrl(ruta);
+    void this.router.navigateByUrl(this.menuService.normalizarRutaFrontend(ruta));
+  }
+
+  get rutaAlmacenActiva(): boolean {
+    return this.router.url.includes('/almacen/');
+  }
+
+  get mostrarPlaceholderModulo(): boolean {
+    return !!this.moduloActivo && !this.rutaAlmacenActiva && !this.enDashboard;
+  }
+
+  get enDashboard(): boolean {
+    return this.router.url.includes('/dashboard') || this.router.url === '/sigre' || this.router.url === '/sigre/';
+  }
+
+  private sincronizarModuloConRuta(): void {
+    if (!this.modulos.length) return;
+    const url = this.router.url;
+    if (url.includes('/almacen')) {
+      const mod = this.modulos.find(m => m.codigo === 'ALMACEN');
+      if (mod) this.layout.seleccionarModulo(mod);
+      return;
+    }
+    if (this.enDashboard) {
+      this.layout.seleccionarModulo(null);
+    }
   }
 
   cerrarSesion(): void {

@@ -164,7 +164,7 @@ export class ErpMenuService {
               id: h.opcionMenu.id,
               codigo: h.opcionMenu.codigo,
               nombre: h.opcionMenu.nombre,
-              rutaFrontend: h.opcionMenu.rutaFrontend,
+              rutaFrontend: this.normalizarRutaFrontend(h.opcionMenu.rutaFrontend),
               acciones: h.acciones,
             })),
           };
@@ -208,5 +208,29 @@ export class ErpMenuService {
       SEGURIDAD: 'Configuración',
     };
     return nombres[codigo] ?? codigo;
+  }
+
+  /** Convierte rutas legacy RestPE (/almacen/...) a rutas SIGRE (/sigre/almacen/...). */
+  normalizarRutaFrontend(ruta: string | null): string | null {
+    if (!ruta) return null;
+    const trimmed = ruta.trim();
+    if (trimmed.startsWith('/sigre/')) return trimmed;
+
+    const alias: Record<string, string> = {
+      '/almacen/tablas/tablas-almacenes': '/sigre/almacen/tablas/almacenes',
+      '/almacen/tablas/almacenes-movimiento': '/sigre/almacen/tablas/movimientos-almacen',
+      '/almacen/tablas/tipos-movimiento': '/sigre/almacen/tablas/tipos-movimiento',
+      '/almacen/tablas/ubicaciones': '/sigre/almacen/tablas/ubicaciones',
+      '/almacen/tablas/posiciones': '/sigre/almacen/tablas/posiciones',
+      '/almacen/tablas/motivos-traslado': '/sigre/almacen/tablas/motivos-traslado',
+      '/almacen/tablas/lotes': '/sigre/almacen/tablas/lotes',
+      '/almacen/tablas/unidades-conversion': '/sigre/almacen/tablas/unidades-conversion',
+      '/almacen/tablas/numeracion-vales': '/sigre/almacen/tablas/numeracion-vales',
+      '/almacen/tablas/numeracion-otr': '/sigre/almacen/tablas/numeracion-otr',
+      '/almacen/tablas/parametros': '/sigre/almacen/tablas/parametros',
+    };
+    if (alias[trimmed]) return alias[trimmed];
+    if (trimmed.startsWith('/almacen/')) return `/sigre${trimmed}`;
+    return trimmed;
   }
 }
