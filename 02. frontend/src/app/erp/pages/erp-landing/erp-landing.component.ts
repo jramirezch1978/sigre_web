@@ -6,6 +6,7 @@ import {
   ErpLandingCatalogService,
   PlanSuscripcionDto,
 } from '../../services/erp-landing-catalog.service';
+import { AuthService } from '../../../auth/services/auth.service';
 import { EDICIONES_CONTENIDO } from './ediciones-contenido';
 import { iconoModulo } from '../../shared/modulos-iconos';
 
@@ -58,6 +59,7 @@ export class ErpLandingComponent implements OnInit {
 
   private readonly router = inject(Router);
   private readonly landingCatalog = inject(ErpLandingCatalogService);
+  private readonly authService = inject(AuthService);
 
   currentYear = new Date().getFullYear();
   showDropdown = '';
@@ -244,7 +246,9 @@ export class ErpLandingComponent implements OnInit {
   }
 
   irALogin(): void {
-    void this.router.navigateByUrl('/auth/signin');
+    void this.authService.invalidateSession().then(() => {
+      void this.router.navigateByUrl('/auth/signin');
+    });
   }
 
   irARegistro(): void {

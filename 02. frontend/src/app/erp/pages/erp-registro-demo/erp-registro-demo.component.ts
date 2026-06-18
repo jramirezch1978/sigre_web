@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../auth/services/auth.service';
 import { ErpConsultaRucService } from '../../services/erp-consulta-ruc.service';
 import { ErpUbigeoService, UbigeoItem } from '../../services/erp-ubigeo.service';
 
@@ -50,6 +51,7 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
 
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
   private readonly consultaRucService = inject(ErpConsultaRucService);
   private readonly ubigeoService = inject(ErpUbigeoService);
 
@@ -340,7 +342,9 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
   }
 
   irALogin(): void {
-    void this.router.navigateByUrl('/auth/signin');
+    void this.authService.invalidateSession().then(() => {
+      void this.router.navigateByUrl('/auth/signin');
+    });
   }
 
   volver(): void {

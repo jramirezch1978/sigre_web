@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 import { ViewWillEnter } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
 import { PostAuthIntentService } from '../../../admin/services/post-auth-intent.service';
+import { ErpLayoutService } from '../../../erp/services/erp-layout.service';
 import { CryptoService } from '@core/services/crypto.service';
 import { ConfigService } from '../../../services/config.service';
 
@@ -43,6 +44,7 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   private readonly configService = inject(ConfigService);
   private readonly router = inject(Router);
   private readonly postAuthIntent = inject(PostAuthIntentService);
+  private readonly erpLayout = inject(ErpLayoutService);
 
   private static readonly REMEMBER_LOGIN_COOKIE = 'sigre_erp_remember_login';
   private static readonly REMEMBER_LOGIN_DAYS = 30;
@@ -53,6 +55,7 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   private ipPrivada = '';
 
   ngOnInit(): void {
+    void this.limpiarSesionAlEntrar();
     this.initializeForm();
     this.cargarCredencialesRecordadas();
     this.suscribirRecargaCredencialesAlVolverALogin();
@@ -79,7 +82,15 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   }
 
   ionViewWillEnter(): void {
+    void this.limpiarSesionAlEntrar();
     this.cargarCredencialesRecordadas();
+  }
+
+  private async limpiarSesionAlEntrar(): Promise<void> {
+    await this.authService.invalidateSession();
+    this.erpLayout.seleccionarModulo(null);
+    this.errorMessage = '';
+    this.isLoading = false;
   }
 
   private suscribirRecargaCredencialesAlVolverALogin(): void {

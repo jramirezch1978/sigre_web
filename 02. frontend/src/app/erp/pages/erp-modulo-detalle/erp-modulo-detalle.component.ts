@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AuthService } from '../../../auth/services/auth.service';
 import { MODULOS_INFO, ModuloCompleto } from './modulos-data';
 import { iconoModulo } from '../../shared/modulos-iconos';
 
@@ -17,6 +18,7 @@ export class ErpModuloDetalleComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly authService = inject(AuthService);
 
   modulo: ModuloCompleto | null = null;
   currentYear = new Date().getFullYear();
@@ -37,7 +39,9 @@ export class ErpModuloDetalleComponent implements OnInit {
   }
 
   irALogin(): void {
-    void this.router.navigateByUrl('/auth/signin');
+    void this.authService.invalidateSession().then(() => {
+      void this.router.navigateByUrl('/auth/signin');
+    });
   }
 
   renderDiagramaHTML(): SafeHtml {

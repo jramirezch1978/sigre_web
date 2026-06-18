@@ -281,11 +281,14 @@ export class AuthService {
     return this.storage.getToken();
   }
 
-  async signOut(options?: { returnUrl?: string; redirectTo?: string }): Promise<void> {
+  /** Cierra sesión local y en servidor sin redirigir (p. ej. antes de mostrar el login). */
+  async invalidateSession(): Promise<void> {
     this.sessionIdle.stop();
     this.loginLoadingSubject.next(false);
     this.loginErrorSubject.next(false);
-    const token = this.storage.getToken();
+    this.postAuthIntent.markDefault();
+
+    const token = this.storage.getToken() ?? this.storage.getAccessTokenRaw();
     if (token) {
       try {
         await firstValueFrom(
@@ -299,9 +302,12 @@ export class AuthService {
         /* ignorar */
       }
     }
-    this.postAuthIntent.markDefault();
     this.utilityService.signOut();
     this.storage.purgeAuthState();
+  }
+
+  async signOut(options?: { returnUrl?: string; redirectTo?: string }): Promise<void> {
+    await this.invalidateSession();
 
     const redirectTo = options?.redirectTo?.trim();
     if (redirectTo) {
