@@ -13,7 +13,7 @@ import java.util.List;
 public interface AlmacenMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "flagEstado", ignore = true)
+    @Mapping(target = "flagEstado", source = "flagEstado", defaultValue = "1")
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "fecCreacion", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
@@ -29,7 +29,7 @@ public interface AlmacenMapper {
     List<AlmacenResponse> toResponseList(List<Almacen> entities);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "flagEstado", ignore = true)
+    @Mapping(target = "flagEstado", source = "flagEstado", defaultValue = "1")
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "fecCreacion", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)

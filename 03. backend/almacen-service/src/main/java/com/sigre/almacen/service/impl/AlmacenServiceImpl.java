@@ -68,6 +68,9 @@ public class AlmacenServiceImpl implements AlmacenService {
         existing.setAlmacenTipoId(entity.getAlmacenTipoId());
         existing.setCodigo(entity.getCodigo());
         existing.setNombre(entity.getNombre());
+        if (entity.getFlagEstado() != null) {
+            existing.setFlagEstado(entity.getFlagEstado());
+        }
         Almacen updated = repository.save(existing);
         log.info("Almacen actualizado exitosamente con id: {}", id);
         return updated;

@@ -1,6 +1,6 @@
 import { AlmacenTablaKey } from './almacen-tablas.config';
 
-export type TablaCampoTipo = 'text' | 'number' | 'select' | 'date';
+export type TablaCampoTipo = 'text' | 'number' | 'select' | 'date' | 'switch';
 
 export type CrudApiSource = 'almacen' | 'core';
 
@@ -23,7 +23,20 @@ export interface TablaCrudCampo {
   maxLength?: number;
   readonlyOnEdit?: boolean;
   optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento';
+  /** Etiqueta cuando el switch está encendido (flag_estado = 1). */
+  switchOnLabel?: string;
+  /** Etiqueta cuando el switch está apagado (flag_estado = 0). */
+  switchOffLabel?: string;
 }
+
+/** Campo reutilizable para flag_estado binario (0/1). */
+export const CAMPO_FLAG_ESTADO: TablaCrudCampo = {
+  key: 'flagEstado',
+  label: 'Estado',
+  type: 'switch',
+  switchOnLabel: 'Activo',
+  switchOffLabel: 'Anulado',
+};
 
 export interface TablaCrudConfig {
   basePath: string;
@@ -41,18 +54,20 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
     basePath: '/almacenes',
     handler: 'standard',
     campos: [
-      { key: 'codigo', label: 'Código', type: 'text', required: true, maxLength: 20 },
+      { key: 'codigo', label: 'Código', type: 'text', required: true, maxLength: 20, readonlyOnEdit: true },
       { key: 'nombre', label: 'Nombre', type: 'text', required: true, maxLength: 150 },
       { key: 'almacenTipoId', label: 'Tipo de almacén', type: 'select', optionsFrom: 'tipos-almacen' },
       { key: 'sucursalId', label: 'Sucursal', type: 'select', optionsFrom: 'sucursales', required: true },
+      CAMPO_FLAG_ESTADO,
     ],
   },
   'tipos-almacen': {
     basePath: '/almacen-tipos',
     handler: 'standard',
     campos: [
-      { key: 'codigo', label: 'Código', type: 'text', required: true, maxLength: 20 },
+      { key: 'codigo', label: 'Código', type: 'text', required: true, maxLength: 20, readonlyOnEdit: true },
       { key: 'nombre', label: 'Nombre', type: 'text', required: true, maxLength: 120 },
+      CAMPO_FLAG_ESTADO,
     ],
   },
   'tipos-movimiento': {
@@ -61,6 +76,7 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
     campos: [
       { key: 'tipoMov', label: 'Código', type: 'text', required: true, maxLength: 10, readonlyOnEdit: true },
       { key: 'descTipoMov', label: 'Descripción', type: 'text', required: true, maxLength: 200 },
+      CAMPO_FLAG_ESTADO,
     ],
   },
   ubicaciones: {
@@ -103,8 +119,9 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
     basePath: '/maestros/motivos-traslado',
     handler: 'standard',
     campos: [
-      { key: 'codigo', label: 'Código', type: 'text', required: true, maxLength: 20 },
+      { key: 'codigo', label: 'Código', type: 'text', required: true, maxLength: 20, readonlyOnEdit: true },
       { key: 'nombre', label: 'Nombre', type: 'text', required: true, maxLength: 120 },
+      CAMPO_FLAG_ESTADO,
     ],
   },
   lotes: {
@@ -117,6 +134,7 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
       { key: 'fechaProduccion', label: 'F. producción', type: 'date' },
       { key: 'fechaVencimiento', label: 'F. vencimiento', type: 'date' },
       { key: 'observacion', label: 'Observación', type: 'text', maxLength: 1000 },
+      CAMPO_FLAG_ESTADO,
     ],
   },
   'unidades-conversion': {

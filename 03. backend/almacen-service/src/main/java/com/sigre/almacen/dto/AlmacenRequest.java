@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AlmacenRequest {
+public class AlmacenRequest extends FlagEstadoRequest {
 
     @NotNull
     private Long sucursalId;

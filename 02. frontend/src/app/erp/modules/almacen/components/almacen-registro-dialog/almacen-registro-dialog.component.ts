@@ -6,6 +6,7 @@ import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { forkJoin, of } from 'rxjs';
 import { TablaCrudCampo, TablaCrudConfig } from '../../config/almacen-tabla-crud.config';
@@ -30,6 +31,7 @@ export interface AlmacenRegistroDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatSlideToggleModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './almacen-registro-dialog.component.html',
@@ -85,7 +87,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       next: () => this.dialogRef.close(true),
       error: err => {
         this.guardando = false;
-        this.error = err?.error?.message ?? err?.message ?? 'No se pudo guardar el registro';
+        this.error = this.extraerMensajeError(err);
       },
     });
   }
@@ -102,14 +104,28 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     return campo.type === 'number';
   }
 
+  esCampoSwitch(campo: TablaCrudCampo): boolean {
+    return campo.type === 'switch';
+  }
+
+  etiquetaSwitch(campo: TablaCrudCampo): string {
+    const valor = this.form.get(campo.key)?.value;
+    return valor ? (campo.switchOnLabel ?? 'Activo') : (campo.switchOffLabel ?? 'Anulado');
+  }
+
   private valorInicial(campo: TablaCrudCampo): unknown {
     const reg = this.data.registro;
     if (!reg) {
+      if (campo.type === 'switch') return true;
       if (campo.key === 'ano') return new Date().getFullYear();
       if (campo.key === 'fechaMov' || campo.key === 'fecha' || campo.key === 'fechaConteo') {
         return new Date().toISOString().slice(0, 10);
       }
       return campo.type === 'number' ? null : '';
+    }
+    if (campo.type === 'switch') {
+      const raw = reg[campo.key];
+      return raw === '1' || raw === 1 || raw === true;
     }
     if (campo.key === 'valor' && reg['valor'] === '—') return '';
     if (campo.key === 'sucursalId' && reg['sucursalId'] == null && reg['nombreTabla']) {
@@ -174,7 +190,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     const body: Record<string, unknown> = {};
     for (const campo of this.data.config.campos) {
       let valor = raw[campo.key];
-      if (campo.type === 'number' || campo.type === 'select') {
+      if (campo.type === 'switch') {
+        valor = valor === true || valor === '1' || valor === 1 ? '1' : '0';
+      } else if (campo.type === 'number' || campo.type === 'select') {
         valor = valor === '' || valor == null ? null : Number(valor);
       } else if (campo.type === 'date') {
         valor = valor === '' ? null : valor;
@@ -184,5 +202,14 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       body[campo.key] = valor;
     }
     return body;
+  }
+
+  private extraerMensajeError(err: unknown): string {
+    const e = err as { error?: { message?: string; data?: Array<{ message?: string }> }; message?: string };
+    const detalle = e?.error?.data?.[0]?.message;
+    if (detalle) return detalle;
+    if (e?.error?.message) return e.error.message;
+    if (e?.message) return e.message;
+    return 'No se pudo guardar el registro';
   }
 }

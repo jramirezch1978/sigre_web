@@ -68,6 +68,9 @@ public class LotePalletServiceImpl implements LotePalletService {
         existing.setFechaProduccion(entity.getFechaProduccion());
         existing.setFechaVencimiento(entity.getFechaVencimiento());
         existing.setObservacion(entity.getObservacion());
+        if (entity.getFlagEstado() != null) {
+            existing.setFlagEstado(entity.getFlagEstado());
+        }
         return repository.save(existing);
     }
 

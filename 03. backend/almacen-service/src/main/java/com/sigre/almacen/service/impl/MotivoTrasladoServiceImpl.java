@@ -62,6 +62,9 @@ public class MotivoTrasladoServiceImpl implements MotivoTrasladoService {
         validateUniqueCodigo(entity.getCodigo(), id);
         existing.setCodigo(entity.getCodigo());
         existing.setNombre(entity.getNombre());
+        if (entity.getFlagEstado() != null) {
+            existing.setFlagEstado(entity.getFlagEstado());
+        }
         MotivoTraslado updated = repository.save(existing);
         log.info("MotivoTraslado actualizado exitosamente con id: {}", id);
         return updated;

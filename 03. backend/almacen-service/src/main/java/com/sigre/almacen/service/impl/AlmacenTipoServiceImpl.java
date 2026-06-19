@@ -54,6 +54,9 @@ public class AlmacenTipoServiceImpl implements AlmacenTipoService {
         validateUnicoCodigo(entity.getCodigo(), id);
         existing.setCodigo(entity.getCodigo());
         existing.setNombre(entity.getNombre());
+        if (entity.getFlagEstado() != null) {
+            existing.setFlagEstado(entity.getFlagEstado());
+        }
         return repository.save(existing);
     }
 

@@ -13,7 +13,7 @@ import java.util.List;
 public interface MotivoTrasladoMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "flagEstado", ignore = true)
+    @Mapping(target = "flagEstado", source = "flagEstado", defaultValue = "1")
     MotivoTraslado toEntity(MotivoTrasladoRequest request);
 
     MotivoTrasladoResponse toResponse(MotivoTraslado entity);
@@ -21,6 +21,6 @@ public interface MotivoTrasladoMapper {
     List<MotivoTrasladoResponse> toResponseList(List<MotivoTraslado> entities);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "flagEstado", ignore = true)
+    @Mapping(target = "flagEstado", source = "flagEstado", defaultValue = "1")
     void updateEntity(MotivoTrasladoRequest request, @MappingTarget MotivoTraslado entity);
 }

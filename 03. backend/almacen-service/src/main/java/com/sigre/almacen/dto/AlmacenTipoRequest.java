@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AlmacenTipoRequest {
+public class AlmacenTipoRequest extends FlagEstadoRequest {
 
     @NotBlank(message = "Código es obligatorio")
     @Size(max = 20)

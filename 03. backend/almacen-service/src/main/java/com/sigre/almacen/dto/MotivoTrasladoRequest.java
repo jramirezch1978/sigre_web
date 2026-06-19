@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MotivoTrasladoRequest {
+public class MotivoTrasladoRequest extends FlagEstadoRequest {
 
     @NotBlank
     @Size(max = 20)

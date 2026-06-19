@@ -13,7 +13,7 @@ import java.util.List;
 public interface LotePalletMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "flagEstado", constant = "1")
+    @Mapping(target = "flagEstado", source = "flagEstado", defaultValue = "1")
     LotePallet toEntity(LotePalletRequest request);
 
     LotePalletResponse toResponse(LotePallet entity);
@@ -23,6 +23,6 @@ public interface LotePalletMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "almacenId", ignore = true)
     @Mapping(target = "articuloId", ignore = true)
-    @Mapping(target = "flagEstado", ignore = true)
+    @Mapping(target = "flagEstado", source = "flagEstado", defaultValue = "1")
     void updateEntity(LotePalletRequest request, @MappingTarget LotePallet entity);
 }
