@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map, switchMap } from 'rxjs';
+import { Observable, map, of, switchMap } from 'rxjs';
 import { ApiBaseService } from '../../../../services/api-base.service';
 import { ApiResponse, PageData } from '../../../shared/models/api-page.model';
 import { StorageService } from '../../../../core/services/storage.service';
@@ -31,6 +31,17 @@ export interface ConfigClaveDto {
   descripcion: string;
   tipoDato: string;
   flagEstado: string;
+}
+
+export interface SelectOptionDto {
+  value: number;
+  label: string;
+}
+
+export interface SucursalDto {
+  id: number;
+  codigo?: string;
+  nombre: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -67,9 +78,16 @@ export class CoreApiService {
       .pipe(map(res => res.data ?? []));
   }
 
+  listarMisSucursales(): Observable<SucursalDto[]> {
+    const empresaId = this.leerEmpresaId();
+    if (!empresaId) return of([]);
+    return this.http
+      .get<ApiResponse<SucursalDto[]>>(`${this.base}/empresas/${empresaId}/sucursales/mias`)
+      .pipe(map(res => res.data ?? []));
+  }
+
   listarParametrosAlmacenConValor(): Observable<Record<string, unknown>[]> {
-    const user = this.storage.getUser<{ empresaId?: number; sucursalId?: number }>();
-    const empresaId = user?.empresaId ?? this.leerClaim<number>('empresaId');
+    const empresaId = this.leerEmpresaId();
     if (!empresaId) {
       return this.listarParametrosAlmacen().pipe(
         map(claves =>
@@ -106,6 +124,11 @@ export class CoreApiService {
           );
       })
     );
+  }
+
+  private leerEmpresaId(): number | undefined {
+    const user = this.storage.getUser<{ empresaId?: number }>();
+    return user?.empresaId ?? this.leerClaim<number>('empresaId');
   }
 
   private leerClaim<T>(key: string): T | undefined {

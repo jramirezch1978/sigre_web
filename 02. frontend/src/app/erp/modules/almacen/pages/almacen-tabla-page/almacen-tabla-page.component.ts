@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable, map, of } from 'rxjs';
 import { ErpDataTableComponent } from '../../../../shared/erp-data-table/erp-data-table.component';
 import {
@@ -14,13 +15,18 @@ import {
   ALMACEN_NUMERADOR_TABLA_VALES,
 } from '../../config/almacen-opciones-menu.config';
 import { tablaKeyPorRutaFrontend } from '../../config/almacen-opciones-menu.config';
+import { crudConfigPorTabla, TablaCrudConfig } from '../../config/almacen-tabla-crud.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { CoreApiService } from '../../services/core-api.service';
+import {
+  AlmacenRegistroDialogComponent,
+  AlmacenRegistroDialogData,
+} from '../../components/almacen-registro-dialog/almacen-registro-dialog.component';
 
 @Component({
   selector: 'app-almacen-tabla-page',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, ErpDataTableComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatDialogModule, ErpDataTableComponent],
   templateUrl: './almacen-tabla-page.component.html',
   styleUrls: ['./almacen-tabla-page.component.scss'],
 })
@@ -29,6 +35,7 @@ export class AlmacenTablaPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly almacenApi = inject(AlmacenApiService);
   private readonly coreApi = inject(CoreApiService);
+  private readonly dialog = inject(MatDialog);
 
   titulo = '';
   subtitulo = '';
@@ -36,9 +43,14 @@ export class AlmacenTablaPageComponent implements OnInit {
   filas: Record<string, unknown>[] = [];
   cargando = true;
   error = '';
+  crudConfig: TablaCrudConfig | null = null;
 
   private tablaKey: AlmacenTablaKey = 'almacenes';
   private nombreTablaDocumento: string | null = null;
+
+  get puedeGestionar(): boolean {
+    return this.crudConfig != null;
+  }
 
   ngOnInit(): void {
     this.route.data.subscribe(data => {
@@ -51,12 +63,72 @@ export class AlmacenTablaPageComponent implements OnInit {
       this.titulo = (data['titulo'] as string) ?? def.titulo;
       this.subtitulo = def.subtitulo ?? '';
       this.columnas = def.columnas;
+      this.crudConfig = crudConfigPorTabla(this.tablaKey);
       this.cargarDatos();
     });
   }
 
   recargar(): void {
     this.cargarDatos();
+  }
+
+  anadir(): void {
+    if (!this.crudConfig) return;
+    this.abrirDialogo('Nuevo registro', null);
+  }
+
+  editarRegistro(fila: Record<string, unknown>): void {
+    if (!this.crudConfig) return;
+    this.abrirDialogo('Editar registro', fila);
+  }
+
+  anularRegistro(fila: Record<string, unknown>): void {
+    if (!this.crudConfig) return;
+    const id = Number(fila['id']);
+    const nombre = String(fila['nombre'] ?? fila['descTipoMov'] ?? fila['codigo'] ?? id);
+    if (!confirm(`¿Anular el registro "${nombre}"?`)) return;
+
+    this.almacenApi.desactivarRegistro(this.crudConfig.basePath, id).subscribe({
+      next: () => this.cargarDatos(),
+      error: err => {
+        this.error = err?.error?.message ?? 'No se pudo anular el registro';
+      },
+    });
+  }
+
+  eliminarRegistro(fila: Record<string, unknown>): void {
+    if (!this.crudConfig) return;
+    const id = Number(fila['id']);
+    const nombre = String(fila['nombre'] ?? fila['descTipoMov'] ?? fila['codigo'] ?? id);
+    if (!confirm(`¿Eliminar permanentemente "${nombre}"? Esta acción no se puede deshacer.`)) return;
+
+    this.almacenApi.eliminarRegistro(this.crudConfig.basePath, id).subscribe({
+      next: () => this.cargarDatos(),
+      error: err => {
+        this.error = err?.error?.message ?? 'No se pudo eliminar el registro';
+      },
+    });
+  }
+
+  private abrirDialogo(titulo: string, registro: Record<string, unknown> | null): void {
+    if (!this.crudConfig) return;
+
+    const data: AlmacenRegistroDialogData = {
+      titulo,
+      config: this.crudConfig,
+      registro,
+    };
+
+    this.dialog
+      .open(AlmacenRegistroDialogComponent, {
+        data,
+        width: '520px',
+        disableClose: true,
+      })
+      .afterClosed()
+      .subscribe(ok => {
+        if (ok) this.cargarDatos();
+      });
   }
 
   private cargarDatos(): void {

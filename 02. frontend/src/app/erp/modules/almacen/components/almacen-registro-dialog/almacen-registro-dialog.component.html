@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>{{ data.titulo }}</h2>
+
+<mat-dialog-content>
+  @if (cargandoOpciones) {
+    <div class="almacen-dialog__loading">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Cargando formulario…</span>
+    </div>
+  } @else {
+    <form [formGroup]="form" class="almacen-dialog__form">
+      @for (campo of data.config.campos; track campo.key) {
+        @if (campo.type === 'select') {
+          <mat-form-field appearance="outline" class="almacen-dialog__field">
+            <mat-label>{{ campo.label }}</mat-label>
+            <mat-select [formControlName]="campo.key">
+              @for (opt of opcionesDe(campo); track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        } @else {
+          <mat-form-field appearance="outline" class="almacen-dialog__field">
+            <mat-label>{{ campo.label }}</mat-label>
+            <input matInput [formControlName]="campo.key" [maxlength]="campo.maxLength ?? null" />
+          </mat-form-field>
+        }
+      }
+    </form>
+    @if (error) {
+      <p class="almacen-dialog__error">{{ error }}</p>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancelar()" [disabled]="guardando">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="guardar()" [disabled]="guardando || cargandoOpciones">
+    @if (guardando) {
+      Guardando…
+    } @else {
+      Guardar
+    }
+  </button>
+</mat-dialog-actions>

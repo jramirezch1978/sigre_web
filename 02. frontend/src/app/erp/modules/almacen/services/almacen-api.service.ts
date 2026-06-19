@@ -226,4 +226,28 @@ export class AlmacenApiService {
       .post<ApiResponse<{ mensaje?: string; detalle?: string }>>(`${this.base}${procesoPath}`, {})
       .pipe(map(res => res.data ?? {}));
   }
+
+  crearRegistro(basePath: string, body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.base}${basePath}`, body)
+      .pipe(map(res => res.data));
+  }
+
+  actualizarRegistro(basePath: string, id: number, body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .put<ApiResponse<unknown>>(`${this.base}${basePath}/${id}`, body)
+      .pipe(map(res => res.data));
+  }
+
+  desactivarRegistro(basePath: string, id: number): Observable<unknown> {
+    return this.http
+      .patch<ApiResponse<unknown>>(`${this.base}${basePath}/${id}/desactivar`, {})
+      .pipe(map(res => res.data));
+  }
+
+  eliminarRegistro(basePath: string, id: number): Observable<unknown> {
+    return this.http
+      .delete<ApiResponse<unknown>>(`${this.base}${basePath}/${id}`)
+      .pipe(map(res => res.data));
+  }
 }

@@ -6,10 +6,18 @@
         <p>{{ subtitulo }}</p>
       }
     </div>
-    <button mat-stroked-button type="button" (click)="recargar()" [disabled]="cargando">
-      <mat-icon>refresh</mat-icon>
-      Actualizar
-    </button>
+    <div class="almacen-tabla__actions">
+      @if (puedeGestionar) {
+        <button mat-flat-button color="primary" type="button" (click)="anadir()" [disabled]="cargando">
+          <mat-icon>add</mat-icon>
+          Añadir
+        </button>
+      }
+      <button mat-stroked-button type="button" (click)="recargar()" [disabled]="cargando">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
   </header>
 
   <app-erp-data-table
@@ -17,6 +25,10 @@
     [filas]="filas"
     [cargando]="cargando"
     [error]="error"
-    [totalRegistros]="filas.length">
+    [totalRegistros]="filas.length"
+    [mostrarAcciones]="puedeGestionar"
+    (editar)="editarRegistro($event)"
+    (anular)="anularRegistro($event)"
+    (eliminar)="eliminarRegistro($event)">
   </app-erp-data-table>
 </div>
