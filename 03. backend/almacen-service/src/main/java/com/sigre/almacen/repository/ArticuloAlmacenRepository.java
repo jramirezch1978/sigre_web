@@ -25,7 +25,9 @@ public interface ArticuloAlmacenRepository extends JpaRepository<ArticuloAlmacen
 
     /**
      * Diagnóstico por almacén: {@code [almacenId, totalArticulos, totalUnidades,
-     * valorInventario]} (valor = Σ cantidadDisponible * costoPromedio).
+     * valorInventario]}.
+     * <p>Equivale a Oracle SIGRE: {@code SUM(aa.sldo_total * aa.costo_prom_sol)}
+     * sobre {@code articulo_almacen} con saldo &gt; 0.</p>
      */
     @Query("""
             SELECT a.almacenId,
@@ -33,9 +35,10 @@ public interface ArticuloAlmacenRepository extends JpaRepository<ArticuloAlmacen
                    COALESCE(SUM(a.cantidadDisponible), 0),
                    COALESCE(SUM(a.cantidadDisponible * a.costoPromedio), 0)
             FROM ArticuloAlmacen a
-            WHERE (:almacenId IS NULL OR a.almacenId = :almacenId)
+            WHERE a.cantidadDisponible > 0
+              AND (:almacenId IS NULL OR a.almacenId = :almacenId)
             GROUP BY a.almacenId
-            ORDER BY a.almacenId
+            ORDER BY 4 DESC, a.almacenId
             """)
     List<Object[]> diagnosticoPorAlmacen(@Param("almacenId") Long almacenId);
 }

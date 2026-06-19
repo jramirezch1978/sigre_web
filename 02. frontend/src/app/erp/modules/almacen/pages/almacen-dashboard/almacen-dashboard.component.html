@@ -48,17 +48,24 @@
       </div>
     </article>
 
-    <article class="almacen-dashboard__chart-card">
+    <article class="almacen-dashboard__chart-card almacen-dashboard__chart-card--full">
       <header class="almacen-dashboard__chart-head">
         <div>
           <h2>Valorización por almacén</h2>
-          <p>Distribución del valor de inventario</p>
+          <p>Stock actual × costo promedio en soles (sldo_total × costo_prom_sol)</p>
         </div>
-        <mat-icon>donut_large</mat-icon>
+        <mat-icon>stacked_bar_chart</mat-icon>
       </header>
-      <div class="almacen-dashboard__chart almacen-dashboard__chart--donut">
-        @if (!cargando) {
-          <canvas baseChart type="doughnut" [data]="valorizacionDonutData" [options]="valorizacionDonutOptions"></canvas>
+      <div class="almacen-dashboard__chart almacen-dashboard__chart--valorizacion"
+           [style.height.px]="valorizacionChartAltura">
+        @if (!cargando && !sinValorizacion) {
+          <canvas baseChart type="bar" [data]="valorizacionBarData" [options]="valorizacionBarOptions"></canvas>
+        } @else if (!cargando && sinValorizacion) {
+          <div class="almacen-dashboard__chart-empty">
+            <mat-icon>inventory</mat-icon>
+            <p>Sin stock valorizado en almacén.</p>
+            <span>La valorización se calcula desde <strong>articulo_almacen</strong> (cantidad × costo promedio).</span>
+          </div>
         } @else {
           <div class="almacen-dashboard__chart-loading">Cargando…</div>
         }

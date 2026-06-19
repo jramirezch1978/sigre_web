@@ -16,7 +16,6 @@ interface AlmacenKpi {
 }
 
 const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-const CHART_COLORS = ['#2E7D32', '#1abb9c', '#1565C0', '#E65100', '#6A1B9A', '#00838F', '#C62828', '#4527A0'];
 
 @Component({
   selector: 'app-almacen-dashboard',
@@ -54,14 +53,36 @@ export class AlmacenDashboardComponent implements OnInit {
     },
   };
 
-  valorizacionDonutData: ChartData<'doughnut'> = { labels: [], datasets: [{ data: [], backgroundColor: [] }] };
-  valorizacionDonutOptions: ChartOptions<'doughnut'> = {
+  valorizacionBarData: ChartData<'bar'> = { labels: [], datasets: [] };
+  valorizacionBarOptions: ChartOptions<'bar'> = {
+    indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, pointStyle: 'circle' } },
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => this.formatearMoneda(Number(ctx.parsed.x ?? 0)),
+        },
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: {
+          callback: value => this.formatearMoneda(Number(value)),
+        },
+        grid: { color: 'rgba(0,0,0,0.06)' },
+      },
+      y: {
+        grid: { display: false },
+        ticks: { autoSkip: false, font: { size: 11 } },
+      },
     },
   };
+
+  valorizacionChartAltura = 280;
+  sinValorizacion = false;
 
   ngOnInit(): void {
     this.menuService.obtenerMiMenu().subscribe({
@@ -164,27 +185,36 @@ export class AlmacenDashboardComponent implements OnInit {
   }
 
   private construirGraficoValorizacion(
-    diagnostico: { almacenNombre: string; valorInventario: number }[]
+    diagnostico: { almacenNombre: string; almacenCodigo?: string; valorInventario: number }[]
   ): void {
     const items = diagnostico
       .filter(d => Number(d.valorInventario) > 0)
-      .sort((a, b) => Number(b.valorInventario) - Number(a.valorInventario))
-      .slice(0, 8);
+      .sort((a, b) => Number(b.valorInventario) - Number(a.valorInventario));
+
+    this.sinValorizacion = items.length === 0;
 
     if (!items.length) {
-      this.valorizacionDonutData = {
-        labels: ['Sin datos'],
-        datasets: [{ data: [1], backgroundColor: ['#E2E8F0'] }],
-      };
+      this.valorizacionBarData = { labels: [], datasets: [] };
+      this.valorizacionChartAltura = 280;
       return;
     }
 
-    this.valorizacionDonutData = {
-      labels: items.map(d => d.almacenNombre),
+    const etiquetas = items.map(d => {
+      const nombre = (d.almacenNombre || d.almacenCodigo || 'Almacén').trim();
+      return nombre.length > 28 ? `${nombre.slice(0, 26)}…` : nombre;
+    });
+
+    this.valorizacionChartAltura = Math.min(Math.max(items.length * 34 + 48, 220), 720);
+
+    this.valorizacionBarData = {
+      labels: etiquetas,
       datasets: [
         {
+          label: 'Valorización (S/)',
           data: items.map(d => Number(d.valorInventario)),
-          backgroundColor: items.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+          backgroundColor: '#2E7D32',
+          borderRadius: 4,
+          maxBarThickness: 22,
         },
       ],
     };

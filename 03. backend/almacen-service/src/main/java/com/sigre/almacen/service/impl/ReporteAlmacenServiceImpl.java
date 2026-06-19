@@ -34,6 +34,8 @@ import org.springframework.data.domain.PageImpl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -184,24 +186,34 @@ public class ReporteAlmacenServiceImpl implements ReporteAlmacenService {
 
     @Override
     public List<DiagnosticoAlmacenResponse> diagnostico(Long almacenId) {
+        List<Almacen> almacenesActivos = almacenId != null
+                ? almacenRepository.findAllById(List.of(almacenId))
+                : almacenRepository.findByFlagEstadoOrderByCodigoAsc("1");
+
         List<Object[]> filas = articuloAlmacenRepository.diagnosticoPorAlmacen(almacenId);
-        List<Long> ids = filas.stream().map(f -> (Long) f[0]).filter(java.util.Objects::nonNull).distinct().toList();
-        Map<Long, Almacen> almacenes = ids.isEmpty()
-                ? Map.of()
-                : almacenRepository.findAllById(ids).stream()
-                        .collect(Collectors.toMap(Almacen::getId, Function.identity()));
-        return filas.stream().map(f -> {
-            Long almId = (Long) f[0];
-            Almacen alm = almacenes.get(almId);
-            return DiagnosticoAlmacenResponse.builder()
-                    .almacenId(almId)
-                    .almacenCodigo(alm != null ? alm.getCodigo() : null)
-                    .almacenNombre(alm != null ? alm.getNombre() : null)
-                    .totalArticulos(f[1] != null ? ((Number) f[1]).longValue() : 0L)
-                    .totalUnidades(toBigDecimal(f[2]))
-                    .valorInventario(toBigDecimal(f[3]))
-                    .build();
-        }).toList();
+        Map<Long, Object[]> valorPorAlmacen = new HashMap<>();
+        for (Object[] fila : filas) {
+            valorPorAlmacen.put((Long) fila[0], fila);
+        }
+
+        return almacenesActivos.stream()
+                .map(alm -> {
+                    Object[] f = valorPorAlmacen.get(alm.getId());
+                    return DiagnosticoAlmacenResponse.builder()
+                            .almacenId(alm.getId())
+                            .almacenCodigo(alm.getCodigo())
+                            .almacenNombre(alm.getNombre())
+                            .totalArticulos(f != null && f[1] != null ? ((Number) f[1]).longValue() : 0L)
+                            .totalUnidades(f != null ? toBigDecimal(f[2]) : BigDecimal.ZERO)
+                            .valorInventario(f != null ? toBigDecimal(f[3]) : BigDecimal.ZERO)
+                            .build();
+                })
+                .sorted(Comparator
+                        .comparing(DiagnosticoAlmacenResponse::getValorInventario,
+                                Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(DiagnosticoAlmacenResponse::getAlmacenCodigo,
+                                Comparator.nullsLast(String::compareToIgnoreCase)))
+                .toList();
     }
 
     // ── Comparación de inventario (físico vs sistema) ──────────────────────
