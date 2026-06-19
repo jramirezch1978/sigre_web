@@ -131,6 +131,88 @@ export class CoreApiService {
     return user?.empresaId ?? this.leerClaim<number>('empresaId');
   }
 
+  crearConversionUnidad(body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.base}/conversiones-unidad`, body)
+      .pipe(map(res => res.data));
+  }
+
+  actualizarConversionUnidad(id: number, body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .put<ApiResponse<unknown>>(`${this.base}/conversiones-unidad/${id}`, body)
+      .pipe(map(res => res.data));
+  }
+
+  eliminarConversionUnidad(id: number): Observable<unknown> {
+    return this.http
+      .delete<ApiResponse<unknown>>(`${this.base}/conversiones-unidad/${id}`)
+      .pipe(map(res => res.data));
+  }
+
+  desactivarConversionUnidad(id: number): Observable<unknown> {
+    return this.http
+      .patch<ApiResponse<unknown>>(`${this.base}/conversiones-unidad/${id}/desactivar`, {})
+      .pipe(map(res => res.data));
+  }
+
+  guardarNumeradorDocumento(body: {
+    nombreTabla: string;
+    sucursalId: number;
+    ano: number;
+    ultNro: number;
+  }): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.base}/numeradores-documento`, body)
+      .pipe(map(res => res.data));
+  }
+
+  desactivarNumeradorDocumento(nombreTabla: string, sucursalId: number, ano: number): Observable<unknown> {
+    const params = new HttpParams()
+      .set('nombreTabla', nombreTabla)
+      .set('sucursalId', String(sucursalId))
+      .set('ano', String(ano));
+    return this.http
+      .patch<ApiResponse<unknown>>(`${this.base}/numeradores-documento/desactivar`, {}, { params })
+      .pipe(map(res => res.data));
+  }
+
+  guardarParametroEmpresa(clave: string, valor: unknown): Observable<unknown> {
+    const empresaId = this.leerEmpresaId();
+    if (!empresaId) {
+      throw new Error('Empresa no identificada en sesión');
+    }
+    return this.http
+      .put<ApiResponse<unknown>>(`${this.base}/config/empresa`, {
+        empresaId,
+        valores: { [clave]: valor },
+      })
+      .pipe(map(res => res.data));
+  }
+
+  crearRegistroCore(basePath: string, body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.base}${basePath}`, body)
+      .pipe(map(res => res.data));
+  }
+
+  actualizarRegistroCore(basePath: string, id: number, body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .put<ApiResponse<unknown>>(`${this.base}${basePath}/${id}`, body)
+      .pipe(map(res => res.data));
+  }
+
+  desactivarRegistroCore(basePath: string, id: number): Observable<unknown> {
+    return this.http
+      .patch<ApiResponse<unknown>>(`${this.base}${basePath}/${id}/desactivar`, {})
+      .pipe(map(res => res.data));
+  }
+
+  eliminarRegistroCore(basePath: string, id: number): Observable<unknown> {
+    return this.http
+      .delete<ApiResponse<unknown>>(`${this.base}${basePath}/${id}`)
+      .pipe(map(res => res.data));
+  }
+
   private leerClaim<T>(key: string): T | undefined {
     const token = this.storage.getToken();
     if (!token) return undefined;

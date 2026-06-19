@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { forkJoin, of } from 'rxjs';
 import { TablaCrudCampo, TablaCrudConfig } from '../../config/almacen-tabla-crud.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
+import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService, SelectOptionDto } from '../../services/core-api.service';
 
 export interface AlmacenRegistroDialogData {
@@ -39,6 +40,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<AlmacenRegistroDialogComponent>);
   private readonly almacenApi = inject(AlmacenApiService);
   private readonly coreApi = inject(CoreApiService);
+  private readonly crudService = inject(AlmacenCrudService);
   readonly data = inject<AlmacenRegistroDialogData>(MAT_DIALOG_DATA);
 
   form!: FormGroup;
@@ -46,19 +48,22 @@ export class AlmacenRegistroDialogComponent implements OnInit {
   guardando = false;
   error = '';
   opciones: Record<string, SelectOptionDto[]> = {};
+  private esEdicion = false;
 
   ngOnInit(): void {
+    this.esEdicion = !!this.data.registro?.['id'] || this.data.config.handler === 'parametro';
     this.form = this.fb.group({});
     for (const campo of this.data.config.campos) {
-      const valor = this.data.registro?.[campo.key];
+      const valor = this.valorInicial(campo);
       const validators = campo.required ? [Validators.required] : [];
       if (campo.maxLength) {
         validators.push(Validators.maxLength(campo.maxLength));
       }
-      this.form.addControl(
-        campo.key,
-        this.fb.control(valor ?? (campo.type === 'number' ? null : ''), validators)
+      const control = this.fb.control(
+        { value: valor, disabled: this.esEdicion && !!campo.readonlyOnEdit },
+        validators
       );
+      this.form.addControl(campo.key, control);
     }
     this.cargarOpciones();
   }
@@ -75,16 +80,12 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     this.guardando = true;
     this.error = '';
     const body = this.normalizarBody(this.form.getRawValue());
-    const id = Number(this.data.registro?.['id'] ?? 0);
-    const peticion = id
-      ? this.almacenApi.actualizarRegistro(this.data.config.basePath, id, body)
-      : this.almacenApi.crearRegistro(this.data.config.basePath, body);
 
-    peticion.subscribe({
+    this.crudService.guardar(this.data.config, this.data.registro ?? null, body).subscribe({
       next: () => this.dialogRef.close(true),
       error: err => {
         this.guardando = false;
-        this.error = err?.error?.message ?? 'No se pudo guardar el registro';
+        this.error = err?.error?.message ?? err?.message ?? 'No se pudo guardar el registro';
       },
     });
   }
@@ -93,11 +94,38 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     return campo.optionsFrom ? (this.opciones[campo.optionsFrom] ?? []) : [];
   }
 
-  private cargarOpciones(): void {
-    const necesitaTipos = this.data.config.campos.some(c => c.optionsFrom === 'tipos-almacen');
-    const necesitaSucursales = this.data.config.campos.some(c => c.optionsFrom === 'sucursales');
+  esCampoDate(campo: TablaCrudCampo): boolean {
+    return campo.type === 'date';
+  }
 
-    if (!necesitaTipos && !necesitaSucursales) {
+  esCampoNumber(campo: TablaCrudCampo): boolean {
+    return campo.type === 'number';
+  }
+
+  private valorInicial(campo: TablaCrudCampo): unknown {
+    const reg = this.data.registro;
+    if (!reg) {
+      if (campo.key === 'ano') return new Date().getFullYear();
+      if (campo.key === 'fechaMov' || campo.key === 'fecha' || campo.key === 'fechaConteo') {
+        return new Date().toISOString().slice(0, 10);
+      }
+      return campo.type === 'number' ? null : '';
+    }
+    if (campo.key === 'valor' && reg['valor'] === '—') return '';
+    if (campo.key === 'sucursalId' && reg['sucursalId'] == null && reg['nombreTabla']) {
+      return reg['sucursalId'];
+    }
+    return reg[campo.key] ?? (campo.type === 'number' ? null : '');
+  }
+
+  private cargarOpciones(): void {
+    const campos = this.data.config.campos;
+    const necesitaTipos = campos.some(c => c.optionsFrom === 'tipos-almacen');
+    const necesitaSucursales = campos.some(c => c.optionsFrom === 'sucursales');
+    const necesitaAlmacenes = campos.some(c => c.optionsFrom === 'almacenes');
+    const necesitaTiposMov = campos.some(c => c.optionsFrom === 'tipos-movimiento');
+
+    if (!necesitaTipos && !necesitaSucursales && !necesitaAlmacenes && !necesitaTiposMov) {
       this.cargandoOpciones = false;
       return;
     }
@@ -105,8 +133,10 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     forkJoin({
       tipos: necesitaTipos ? this.almacenApi.listarTiposAlmacen() : of([]),
       sucursales: necesitaSucursales ? this.coreApi.listarMisSucursales() : of([]),
+      almacenes: necesitaAlmacenes ? this.almacenApi.listarAlmacenes() : of([]),
+      tiposMov: necesitaTiposMov ? this.almacenApi.listarTiposMovimiento() : of([]),
     }).subscribe({
-      next: ({ tipos, sucursales }) => {
+      next: ({ tipos, sucursales, almacenes, tiposMov }) => {
         if (necesitaTipos) {
           this.opciones['tipos-almacen'] = tipos.map(t => ({
             value: t.id,
@@ -117,6 +147,18 @@ export class AlmacenRegistroDialogComponent implements OnInit {
           this.opciones['sucursales'] = sucursales.map(s => ({
             value: s.id,
             label: `${s.codigo ?? s.id} — ${s.nombre}`,
+          }));
+        }
+        if (necesitaAlmacenes) {
+          this.opciones['almacenes'] = almacenes.map(a => ({
+            value: a.id,
+            label: `${a.codigo} — ${a.nombre}`,
+          }));
+        }
+        if (necesitaTiposMov) {
+          this.opciones['tipos-movimiento'] = tiposMov.map(t => ({
+            value: t.id,
+            label: `${t.tipoMov} — ${t.descTipoMov}`,
           }));
         }
         this.cargandoOpciones = false;
@@ -134,6 +176,8 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       let valor = raw[campo.key];
       if (campo.type === 'number' || campo.type === 'select') {
         valor = valor === '' || valor == null ? null : Number(valor);
+      } else if (campo.type === 'date') {
+        valor = valor === '' ? null : valor;
       } else if (typeof valor === 'string') {
         valor = valor.trim();
       }

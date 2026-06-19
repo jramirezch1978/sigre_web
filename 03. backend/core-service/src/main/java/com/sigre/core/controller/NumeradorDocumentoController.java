@@ -1,13 +1,13 @@
 package com.sigre.core.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import com.sigre.common.dto.ApiResponse;
 import com.sigre.core.dto.NumeradorDocumentoResponse;
+import com.sigre.core.dto.NumeradorDocumentoUpsertRequest;
 import com.sigre.core.dto.PageData;
 import com.sigre.core.service.NumeradorDocumentoService;
 
@@ -27,5 +27,25 @@ public class NumeradorDocumentoController {
             @RequestParam(required = false) String nombreTabla,
             Pageable pageable) {
         return ApiResponse.ok(service.listar(nombreTabla, pageable));
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<NumeradorDocumentoResponse> upsert(@Valid @RequestBody NumeradorDocumentoUpsertRequest request) {
+        return ApiResponse.ok(service.upsert(request), "Numerador guardado");
+    }
+
+    @PutMapping
+    public ApiResponse<NumeradorDocumentoResponse> actualizar(@Valid @RequestBody NumeradorDocumentoUpsertRequest request) {
+        return ApiResponse.ok(service.upsert(request), "Numerador actualizado");
+    }
+
+    @PatchMapping("/desactivar")
+    public ApiResponse<Boolean> desactivar(
+            @RequestParam String nombreTabla,
+            @RequestParam Long sucursalId,
+            @RequestParam Integer ano) {
+        service.desactivar(nombreTabla, sucursalId, ano);
+        return ApiResponse.ok(true, "Numerador desactivado");
     }
 }

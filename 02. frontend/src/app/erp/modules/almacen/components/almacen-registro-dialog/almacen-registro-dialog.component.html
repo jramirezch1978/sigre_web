@@ -18,10 +18,19 @@
               }
             </mat-select>
           </mat-form-field>
+        } @else if (esCampoDate(campo)) {
+          <mat-form-field appearance="outline" class="almacen-dialog__field">
+            <mat-label>{{ campo.label }}</mat-label>
+            <input matInput type="date" [formControlName]="campo.key" />
+          </mat-form-field>
         } @else {
           <mat-form-field appearance="outline" class="almacen-dialog__field">
             <mat-label>{{ campo.label }}</mat-label>
-            <input matInput [formControlName]="campo.key" [maxlength]="campo.maxLength ?? null" />
+            <input
+              matInput
+              [type]="esCampoNumber(campo) ? 'number' : 'text'"
+              [formControlName]="campo.key"
+              [maxlength]="campo.maxLength ?? null" />
           </mat-form-field>
         }
       }

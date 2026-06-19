@@ -250,4 +250,80 @@ export class AlmacenApiService {
       .delete<ApiResponse<unknown>>(`${this.base}${basePath}/${id}`)
       .pipe(map(res => res.data));
   }
+
+  crearUbicacion(almacenId: number, body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.base}/almacenes/${almacenId}/ubicaciones`, body)
+      .pipe(map(res => res.data));
+  }
+
+  actualizarUbicacion(id: number, body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .put<ApiResponse<unknown>>(`${this.base}/ubicaciones/${id}`, body)
+      .pipe(map(res => res.data));
+  }
+
+  eliminarUbicacion(id: number): Observable<unknown> {
+    return this.http
+      .delete<ApiResponse<unknown>>(`${this.base}/ubicaciones/${id}`)
+      .pipe(map(res => res.data));
+  }
+
+  asignarTipoMovimiento(almacenId: number, articuloMovTipoId: number): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.base}/almacenes/${almacenId}/tipos-movimiento`, { articuloMovTipoId })
+      .pipe(map(res => res.data));
+  }
+
+  desasignarTipoMovimiento(almacenId: number, articuloMovTipoId: number): Observable<unknown> {
+    return this.http
+      .delete<ApiResponse<unknown>>(`${this.base}/almacenes/${almacenId}/tipos-movimiento/${articuloMovTipoId}`)
+      .pipe(map(res => res.data));
+  }
+
+  crearMovimiento(body: Record<string, unknown>): Observable<unknown> {
+    return this.http.post<ApiResponse<unknown>>(`${this.base}/movimientos`, body).pipe(map(res => res.data));
+  }
+
+  actualizarMovimiento(id: number, body: Record<string, unknown>): Observable<unknown> {
+    return this.http.put<ApiResponse<unknown>>(`${this.base}/movimientos/${id}`, body).pipe(map(res => res.data));
+  }
+
+  anularMovimiento(id: number): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.base}/movimientos/anular`, { id, motivo: 'Anulación desde SIGRE Web' })
+      .pipe(map(res => res.data));
+  }
+
+  crearOrdenTraslado(body: Record<string, unknown>): Observable<unknown> {
+    return this.http.post<ApiResponse<unknown>>(`${this.base}/ordenes-traslado`, body).pipe(map(res => res.data));
+  }
+
+  actualizarOrdenTraslado(id: number, body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .put<ApiResponse<unknown>>(`${this.base}/ordenes-traslado/${id}`, body)
+      .pipe(map(res => res.data));
+  }
+
+  anularOrdenTraslado(id: number): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.base}/ordenes-traslado/${id}/anular`, {})
+      .pipe(map(res => res.data));
+  }
+
+  crearTomaInventario(body: Record<string, unknown>): Observable<unknown> {
+    return this.http.post<ApiResponse<unknown>>(`${this.base}/tomas-inventario`, body).pipe(map(res => res.data));
+  }
+
+  actualizarTomaInventario(id: number, body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .put<ApiResponse<unknown>>(`${this.base}/tomas-inventario/${id}`, body)
+      .pipe(map(res => res.data));
+  }
+
+  anularTomaInventario(id: number): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.base}/tomas-inventario/${id}/anular`, {})
+      .pipe(map(res => res.data));
+  }
 }

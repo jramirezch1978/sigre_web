@@ -17,6 +17,7 @@ import {
 import { tablaKeyPorRutaFrontend } from '../../config/almacen-opciones-menu.config';
 import { crudConfigPorTabla, TablaCrudConfig } from '../../config/almacen-tabla-crud.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
+import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService } from '../../services/core-api.service';
 import {
   AlmacenRegistroDialogComponent,
@@ -35,6 +36,7 @@ export class AlmacenTablaPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly almacenApi = inject(AlmacenApiService);
   private readonly coreApi = inject(CoreApiService);
+  private readonly crudService = inject(AlmacenCrudService);
   private readonly dialog = inject(MatDialog);
 
   titulo = '';
@@ -79,16 +81,16 @@ export class AlmacenTablaPageComponent implements OnInit {
 
   editarRegistro(fila: Record<string, unknown>): void {
     if (!this.crudConfig) return;
+    if (this.crudConfig.handler === 'tipo-mov-asignacion') return;
     this.abrirDialogo('Editar registro', fila);
   }
 
   anularRegistro(fila: Record<string, unknown>): void {
-    if (!this.crudConfig) return;
-    const id = Number(fila['id']);
-    const nombre = String(fila['nombre'] ?? fila['descTipoMov'] ?? fila['codigo'] ?? id);
+    if (!this.crudConfig || !this.crudService.permiteAnular(this.crudConfig)) return;
+    const nombre = this.etiquetaRegistro(fila);
     if (!confirm(`¿Anular el registro "${nombre}"?`)) return;
 
-    this.almacenApi.desactivarRegistro(this.crudConfig.basePath, id).subscribe({
+    this.crudService.anular(this.crudConfig, fila).subscribe({
       next: () => this.cargarDatos(),
       error: err => {
         this.error = err?.error?.message ?? 'No se pudo anular el registro';
@@ -97,12 +99,11 @@ export class AlmacenTablaPageComponent implements OnInit {
   }
 
   eliminarRegistro(fila: Record<string, unknown>): void {
-    if (!this.crudConfig) return;
-    const id = Number(fila['id']);
-    const nombre = String(fila['nombre'] ?? fila['descTipoMov'] ?? fila['codigo'] ?? id);
+    if (!this.crudConfig || !this.crudService.permiteEliminar(this.crudConfig)) return;
+    const nombre = this.etiquetaRegistro(fila);
     if (!confirm(`¿Eliminar permanentemente "${nombre}"? Esta acción no se puede deshacer.`)) return;
 
-    this.almacenApi.eliminarRegistro(this.crudConfig.basePath, id).subscribe({
+    this.crudService.eliminar(this.crudConfig, fila).subscribe({
       next: () => this.cargarDatos(),
       error: err => {
         this.error = err?.error?.message ?? 'No se pudo eliminar el registro';
@@ -122,13 +123,19 @@ export class AlmacenTablaPageComponent implements OnInit {
     this.dialog
       .open(AlmacenRegistroDialogComponent, {
         data,
-        width: '520px',
+        width: '560px',
         disableClose: true,
       })
       .afterClosed()
       .subscribe(ok => {
         if (ok) this.cargarDatos();
       });
+  }
+
+  private etiquetaRegistro(fila: Record<string, unknown>): string {
+    return String(
+      fila['nombre'] ?? fila['descTipoMov'] ?? fila['codigo'] ?? fila['clave'] ?? fila['nroLote'] ?? fila['id'] ?? ''
+    );
   }
 
   private cargarDatos(): void {
