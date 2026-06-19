@@ -9,6 +9,7 @@ import { StorageService } from '../../../core/services/storage.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
 import { ErpLayoutService } from '../../services/erp-layout.service';
+import { iconoModulo } from '../../shared/modulos-iconos';
 
 @Component({
   selector: 'app-erp-inicio',
@@ -143,6 +144,10 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
 
   cerrarSesion(): void {
     void this.authService.signOut();
+  }
+
+  iconoSidebar(modulo: MenuModulo): string {
+    return modulo.iconoSvg || iconoModulo(modulo.codigo);
   }
 
   private leerClaimsToken(): Record<string, string> | null {

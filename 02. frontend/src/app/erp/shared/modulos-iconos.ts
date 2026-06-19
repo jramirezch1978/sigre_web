@@ -4,6 +4,7 @@ export const MODULOS_ICONOS: Readonly<Record<string, string>> = {
   COMPRAS: 'assets/imagenes/modulos/compras.svg',
   APROVISIONAMIENTO: 'assets/imagenes/modulos/aprovisionamiento.svg',
   COMERCIALIZACION: 'assets/imagenes/modulos/comercializacion.svg',
+  VENTAS: 'assets/imagenes/modulos/comercializacion.svg',
   FINANZAS: 'assets/imagenes/modulos/finanzas.svg',
   CONTABILIDAD: 'assets/imagenes/modulos/contabilidad.svg',
   ACTIVOS_FIJOS: 'assets/imagenes/modulos/activos-fijos.svg',

@@ -4,7 +4,7 @@ import { Observable, map } from 'rxjs';
 import { ApiBaseService } from '../../services/api-base.service';
 import { ALMACEN_TABLAS_POR_CODIGO, rutaFrontendPorCodigoOpcion } from '../modules/almacen/config/almacen-opciones-menu.config';
 import { ALMACEN_VISTAS_POR_CODIGO } from '../modules/almacen/config/almacen-vistas.config';
-import { MODULOS_ICONOS } from '../shared/modulos-iconos';
+import { iconoModulo } from '../shared/modulos-iconos';
 import { StorageService } from '../../core/services/storage.service';
 
 export interface OpcionMenuDto {
@@ -162,7 +162,7 @@ export class ErpMenuService {
         codigo: codModulo,
         nombre: moduloNombres.get(moduloId) ?? 'Módulo',
         icono: ICONOS_MODULO[codigoKey] ?? 'apps',
-        iconoSvg: ICONOS_SVG_MODULO[codigoKey] ?? '',
+        iconoSvg: iconoModulo(codigoKey),
         secciones,
       });
     }
