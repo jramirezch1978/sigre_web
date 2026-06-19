@@ -74,9 +74,7 @@ export class ErpDashboardComponent implements OnInit {
   abrirModulo(modulo: ModuloGrid): void {
     if (modulo.moduloReal) {
       this.layout.seleccionarModulo(modulo.moduloReal);
-      void this.router.navigateByUrl(this.menuService.rutaDashboardModulo(modulo.codigo));
-    } else {
-      void this.router.navigateByUrl(`/sigre/m/${modulo.codigo.toLowerCase()}`);
     }
+    void this.router.navigateByUrl(this.menuService.rutaDashboardModulo(modulo.codigo));
   }
 }

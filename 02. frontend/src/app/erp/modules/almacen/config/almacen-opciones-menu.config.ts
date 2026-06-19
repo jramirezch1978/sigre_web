@@ -1,4 +1,5 @@
 import { AlmacenTablaKey } from './almacen-tablas.config';
+import { ALMACEN_VISTAS_POR_CODIGO } from './almacen-vistas.config';
 
 /** Tabla destino en core.numerador_documento (cuando aplica). */
 export interface AlmacenOpcionMenuDef {
@@ -107,6 +108,14 @@ export const ALMACEN_TABLAS_POR_CODIGO: Readonly<Record<string, AlmacenOpcionMen
 export const ALMACEN_TABLAS_POR_RUTA: Readonly<Record<string, AlmacenOpcionMenuDef>> =
   Object.fromEntries(ALMACEN_TABLAS_OPCIONES.map(o => [o.rutaFrontend, o]));
 
+/** Catálogo unificado código → ruta (11 tablas + 23 operaciones/consultas/reportes/procesos). */
+export const ALMACEN_OPCIONES_POR_CODIGO: Readonly<Record<string, string>> = {
+  ...Object.fromEntries(ALMACEN_TABLAS_OPCIONES.map(o => [o.codigo, o.rutaFrontend])),
+  ...Object.fromEntries(
+    Object.values(ALMACEN_VISTAS_POR_CODIGO).map(v => [v.codigo, v.rutaFrontend]),
+  ),
+};
+
 /** Ruta relativa dentro del módulo almacén (sin prefijo /sigre/almacen). */
 export function rutaRelativaAlmacen(rutaFrontend: string): string {
   const prefix = '/sigre/almacen/';
@@ -114,7 +123,7 @@ export function rutaRelativaAlmacen(rutaFrontend: string): string {
 }
 
 export function rutaFrontendPorCodigoOpcion(codigo: string): string | null {
-  return ALMACEN_TABLAS_POR_CODIGO[codigo]?.rutaFrontend ?? null;
+  return ALMACEN_OPCIONES_POR_CODIGO[codigo.toUpperCase()] ?? null;
 }
 
 export function tablaKeyPorRutaFrontend(ruta: string): AlmacenTablaKey | null {

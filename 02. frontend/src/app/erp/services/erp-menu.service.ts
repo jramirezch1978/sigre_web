@@ -2,9 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiBaseService } from '../../services/api-base.service';
-import { ALMACEN_TABLAS_POR_CODIGO, rutaFrontendPorCodigoOpcion } from '../modules/almacen/config/almacen-opciones-menu.config';
-import { ALMACEN_VISTAS_POR_CODIGO } from '../modules/almacen/config/almacen-vistas.config';
+import { ALMACEN_TABLAS_POR_CODIGO, ALMACEN_OPCIONES_POR_CODIGO, ALMACEN_TABLAS_POR_RUTA, rutaFrontendPorCodigoOpcion } from '../modules/almacen/config/almacen-opciones-menu.config';
+import { ALMACEN_VISTAS_POR_CODIGO, ALMACEN_VISTAS_POR_RUTA } from '../modules/almacen/config/almacen-vistas.config';
 import { iconoModulo } from '../shared/modulos-iconos';
+import { moduloDesdeCodigoOpcion, rutaDashboardModulo as buildRutaDashboardModulo } from '../shared/erp-modulos-rutas.config';
 import { StorageService } from '../../core/services/storage.service';
 
 export interface OpcionMenuDto {
@@ -82,8 +83,6 @@ const ICONOS_MODULO: Record<string, string> = {
   HORECA: 'hotel',
   SEGURIDAD: 'admin_panel_settings',
 };
-
-const ICONOS_SVG_MODULO: Record<string, string> = { ...MODULOS_ICONOS };
 
 @Injectable({ providedIn: 'root' })
 export class ErpMenuService {
@@ -197,13 +196,26 @@ export class ErpMenuService {
     return nombres[codigo] ?? codigo;
   }
 
-  /** Resuelve ruta web: tabla canónica por código → BD → normalización legacy. */
+  /** Resuelve ruta web: catálogo FE → BD → normalización legacy → dashboard del módulo. */
   resolverRutaFrontend(codigo: string, rutaBd: string | null): string | null {
-    const vistaAlmacen = ALMACEN_VISTAS_POR_CODIGO[codigo];
+    const codigoUpper = (codigo ?? '').toUpperCase();
+
+    const desdeCatalogo = ALMACEN_OPCIONES_POR_CODIGO[codigoUpper];
+    if (desdeCatalogo) return desdeCatalogo;
+
+    const vistaAlmacen = ALMACEN_VISTAS_POR_CODIGO[codigoUpper];
     if (vistaAlmacen) return vistaAlmacen.rutaFrontend;
-    const desdeCodigo = this.normalizarRutaFrontend(rutaFrontendPorCodigoOpcion(codigo));
+
+    const desdeCodigo = this.normalizarRutaFrontend(rutaFrontendPorCodigoOpcion(codigoUpper));
     if (desdeCodigo) return desdeCodigo;
-    return this.normalizarRutaFrontend(rutaBd);
+
+    const normalizada = this.normalizarRutaFrontend(rutaBd);
+    if (normalizada) return normalizada;
+
+    const modulo = moduloDesdeCodigoOpcion(codigoUpper);
+    if (modulo) return buildRutaDashboardModulo(modulo);
+
+    return null;
   }
 
   navegarOpcionDesdeMenu(codigo: string, ruta: string | null): string | null {
@@ -212,12 +224,7 @@ export class ErpMenuService {
 
   /** Ruta del dashboard interno del módulo (al salir del grid principal). */
   rutaDashboardModulo(codigo: string): string {
-    switch (codigo.toUpperCase()) {
-      case 'ALMACEN':
-        return '/sigre/almacen';
-      default:
-        return `/sigre/m/${codigo.toLowerCase()}`;
-    }
+    return buildRutaDashboardModulo(codigo);
   }
 
   /** Resuelve módulo activo a partir de la URL actual. */
@@ -244,6 +251,15 @@ export class ErpMenuService {
 
     const canon = ALMACEN_TABLAS_POR_CODIGO[trimmed];
     if (canon) return canon.rutaFrontend;
+
+    const vistaCanon = ALMACEN_VISTAS_POR_RUTA[trimmed];
+    if (vistaCanon) return vistaCanon.rutaFrontend;
+
+    const tablaCanon = ALMACEN_TABLAS_POR_RUTA[trimmed];
+    if (tablaCanon) return tablaCanon.rutaFrontend;
+
+    const conSigre = trimmed.startsWith('/sigre/almacen/') ? trimmed : `/sigre/almacen/${trimmed.replace(/^\//, '')}`;
+    if (ALMACEN_VISTAS_POR_RUTA[conSigre]) return conSigre;
 
     if (trimmed.startsWith('/sigre/almacen/')) return trimmed;
     if (trimmed.startsWith('/almacen/')) return `/sigre${trimmed}`;
