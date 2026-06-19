@@ -9,6 +9,7 @@ import { StorageService } from '../../../core/services/storage.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
 import { ErpLayoutService } from '../../services/erp-layout.service';
+import { fusionarModulosConCatalogo } from '../../shared/erp-modulos-catalog.config';
 import { iconoModulo } from '../../shared/modulos-iconos';
 
 @Component({
@@ -79,8 +80,8 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     this.cargandoMenu = true;
     this.errorMenu = '';
     this.menuService.obtenerMiMenu().subscribe({
-      next: (modulos) => {
-        this.modulos = modulos;
+      next: (modulosApi) => {
+        this.modulos = fusionarModulosConCatalogo(modulosApi, true);
         this.cargandoMenu = false;
         this.sincronizarModuloConRuta();
       },
