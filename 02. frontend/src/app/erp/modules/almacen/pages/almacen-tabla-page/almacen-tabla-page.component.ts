@@ -19,6 +19,7 @@ import { crudConfigPorTabla, TablaCrudConfig } from '../../config/almacen-tabla-
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService } from '../../services/core-api.service';
+import { ErpConfirmService } from '../../../../shared/services/erp-confirm.service';
 import {
   AlmacenRegistroDialogComponent,
   AlmacenRegistroDialogData,
@@ -38,6 +39,7 @@ export class AlmacenTablaPageComponent implements OnInit {
   private readonly coreApi = inject(CoreApiService);
   private readonly crudService = inject(AlmacenCrudService);
   private readonly dialog = inject(MatDialog);
+  private readonly confirmService = inject(ErpConfirmService);
 
   titulo = '';
   subtitulo = '';
@@ -88,26 +90,30 @@ export class AlmacenTablaPageComponent implements OnInit {
   anularRegistro(fila: Record<string, unknown>): void {
     if (!this.crudConfig || !this.crudService.permiteAnular(this.crudConfig)) return;
     const nombre = this.etiquetaRegistro(fila);
-    if (!confirm(`¿Anular el registro "${nombre}"?`)) return;
 
-    this.crudService.anular(this.crudConfig, fila).subscribe({
-      next: () => this.cargarDatos(),
-      error: err => {
-        this.error = err?.error?.message ?? 'No se pudo anular el registro';
-      },
+    this.confirmService.confirmAnular(nombre).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.crudService.anular(this.crudConfig!, fila).subscribe({
+        next: () => this.cargarDatos(),
+        error: err => {
+          this.error = err?.error?.message ?? 'No se pudo anular el registro';
+        },
+      });
     });
   }
 
   eliminarRegistro(fila: Record<string, unknown>): void {
     if (!this.crudConfig || !this.crudService.permiteEliminar(this.crudConfig)) return;
     const nombre = this.etiquetaRegistro(fila);
-    if (!confirm(`¿Eliminar permanentemente "${nombre}"? Esta acción no se puede deshacer.`)) return;
 
-    this.crudService.eliminar(this.crudConfig, fila).subscribe({
-      next: () => this.cargarDatos(),
-      error: err => {
-        this.error = err?.error?.message ?? 'No se pudo eliminar el registro';
-      },
+    this.confirmService.confirmEliminar(nombre).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.crudService.eliminar(this.crudConfig!, fila).subscribe({
+        next: () => this.cargarDatos(),
+        error: err => {
+          this.error = err?.error?.message ?? 'No se pudo eliminar el registro';
+        },
+      });
     });
   }
 

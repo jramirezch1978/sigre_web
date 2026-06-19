@@ -10,6 +10,7 @@ import { AlmacenVistaDef, ALMACEN_VISTAS_POR_RUTA } from '../../config/almacen-v
 import { crudConfigPorCodigoVista, VistaCrudConfig } from '../../config/almacen-vista-crud.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
+import { ErpConfirmService } from '../../../../shared/services/erp-confirm.service';
 import {
   AlmacenRegistroDialogComponent,
   AlmacenRegistroDialogData,
@@ -28,6 +29,7 @@ export class AlmacenListadoPageComponent implements OnInit {
   private readonly almacenApi = inject(AlmacenApiService);
   private readonly crudService = inject(AlmacenCrudService);
   private readonly dialog = inject(MatDialog);
+  private readonly confirmService = inject(ErpConfirmService);
 
   titulo = '';
   subtitulo = '';
@@ -71,28 +73,36 @@ export class AlmacenListadoPageComponent implements OnInit {
 
   anularRegistro(fila: Record<string, unknown>): void {
     if (!this.crudConfig || !this.crudService.permiteAnular(this.crudConfig)) return;
-    const nombre = String(fila['numero'] ?? fila['nroVale'] ?? fila['id'] ?? 'registro');
-    if (!confirm(`¿Anular "${nombre}"?`)) return;
+    const nombre = this.etiquetaRegistro(fila);
 
-    this.crudService.anular(this.crudConfig, fila).subscribe({
-      next: () => this.cargarDatos(),
-      error: err => {
-        this.error = err?.error?.message ?? 'No se pudo anular';
-      },
+    this.confirmService.confirmAnular(nombre).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.crudService.anular(this.crudConfig!, fila).subscribe({
+        next: () => this.cargarDatos(),
+        error: err => {
+          this.error = err?.error?.message ?? 'No se pudo anular';
+        },
+      });
     });
   }
 
   eliminarRegistro(fila: Record<string, unknown>): void {
     if (!this.crudConfig || !this.crudService.permiteEliminar(this.crudConfig)) return;
-    const nombre = String(fila['numero'] ?? fila['nroVale'] ?? fila['id'] ?? 'registro');
-    if (!confirm(`¿Eliminar permanentemente "${nombre}"?`)) return;
+    const nombre = this.etiquetaRegistro(fila);
 
-    this.crudService.eliminar(this.crudConfig, fila).subscribe({
-      next: () => this.cargarDatos(),
-      error: err => {
-        this.error = err?.error?.message ?? 'No se pudo eliminar';
-      },
+    this.confirmService.confirmEliminar(nombre).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.crudService.eliminar(this.crudConfig!, fila).subscribe({
+        next: () => this.cargarDatos(),
+        error: err => {
+          this.error = err?.error?.message ?? 'No se pudo eliminar';
+        },
+      });
     });
+  }
+
+  private etiquetaRegistro(fila: Record<string, unknown>): string {
+    return String(fila['numero'] ?? fila['nroVale'] ?? fila['nombre'] ?? fila['codigo'] ?? fila['id'] ?? 'registro');
   }
 
   private abrirDialogo(titulo: string, registro: Record<string, unknown> | null): void {

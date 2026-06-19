@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>{{ data.titulo }}</h2>
+
+<mat-dialog-content>
+  <div class="erp-confirm__body">
+    <mat-icon class="erp-confirm__icon" [class.erp-confirm__icon--danger]="data.tipo === 'danger'">
+      {{ icono }}
+    </mat-icon>
+    <p class="erp-confirm__mensaje">{{ data.mensaje }}</p>
+    @if (data.submensaje) {
+      <p class="erp-confirm__submensaje">{{ data.submensaje }}</p>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancelar()">
+    {{ data.textoCancelar ?? 'Cancelar' }}
+  </button>
+  <button
+    mat-flat-button
+    type="button"
+    [color]="data.tipo === 'danger' ? 'warn' : 'primary'"
+    (click)="confirmar()">
+    {{ data.textoConfirmar ?? 'Confirmar' }}
+  </button>
+</mat-dialog-actions>
