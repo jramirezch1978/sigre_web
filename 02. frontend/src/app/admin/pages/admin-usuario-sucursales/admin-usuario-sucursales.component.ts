@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { forkJoin, of } from 'rxjs';
 import { ModalController } from '@ionic/angular';
-import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
+import { ModalConfirmationComponent } from '@sigre-common';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { AdminCoreMaestrosApiService } from '../../services/admin-core-maestros-api.service';
 import { EmpresaAdminDto, UsuarioAdminDto } from '../../models/admin.models';

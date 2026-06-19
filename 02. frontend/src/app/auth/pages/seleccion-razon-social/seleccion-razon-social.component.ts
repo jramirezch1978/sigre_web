@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
-import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
+import { ModalConfirmationComponent } from '@sigre-common';
 import { AuthService, EmpresaUsuario, LoginData } from '../../services/auth.service';
 import { PostAuthIntentService } from '../../../admin/services/post-auth-intent.service';
 import { StorageService } from '@core/services/storage.service';

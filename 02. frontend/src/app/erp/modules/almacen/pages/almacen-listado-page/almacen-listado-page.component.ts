@@ -10,7 +10,7 @@ import { AlmacenVistaDef, ALMACEN_VISTAS_POR_RUTA } from '../../config/almacen-v
 import { crudConfigPorCodigoVista, VistaCrudConfig } from '../../config/almacen-vista-crud.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
-import { ErpConfirmService } from '../../../../shared/services/erp-confirm.service';
+import { SigreModalService } from '@sigre-common';
 import {
   AlmacenRegistroDialogComponent,
   AlmacenRegistroDialogData,
@@ -29,7 +29,7 @@ export class AlmacenListadoPageComponent implements OnInit {
   private readonly almacenApi = inject(AlmacenApiService);
   private readonly crudService = inject(AlmacenCrudService);
   private readonly dialog = inject(MatDialog);
-  private readonly confirmService = inject(ErpConfirmService);
+  private readonly confirmService = inject(SigreModalService);
 
   titulo = '';
   subtitulo = '';
@@ -75,7 +75,7 @@ export class AlmacenListadoPageComponent implements OnInit {
     if (!this.crudConfig || !this.crudService.permiteAnular(this.crudConfig)) return;
     const nombre = this.etiquetaRegistro(fila);
 
-    this.confirmService.confirmAnular(nombre).subscribe(confirmed => {
+    this.confirmService.confirmAnular$(nombre).subscribe(confirmed => {
       if (!confirmed) return;
       this.crudService.anular(this.crudConfig!, fila).subscribe({
         next: () => this.cargarDatos(),
@@ -90,7 +90,7 @@ export class AlmacenListadoPageComponent implements OnInit {
     if (!this.crudConfig || !this.crudService.permiteEliminar(this.crudConfig)) return;
     const nombre = this.etiquetaRegistro(fila);
 
-    this.confirmService.confirmEliminar(nombre).subscribe(confirmed => {
+    this.confirmService.confirmEliminar$(nombre).subscribe(confirmed => {
       if (!confirmed) return;
       this.crudService.eliminar(this.crudConfig!, fila).subscribe({
         next: () => this.cargarDatos(),

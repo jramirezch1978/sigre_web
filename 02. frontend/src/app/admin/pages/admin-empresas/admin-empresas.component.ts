@@ -1,12 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ModalController, ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { AdminProvisioningApiService } from '../../services/admin-provisioning-api.service';
 import { AdminUbigeoApiService } from '../../services/admin-ubigeo-api.service';
 import { EmpresaAdminDto, UbigeoItem, UsuarioAdminDto } from '../../models/admin.models';
-import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
+import { SigreModalService } from '@sigre-common';
 
 @Component({
   selector: 'app-admin-empresas',
@@ -20,7 +20,7 @@ export class AdminEmpresasComponent implements OnInit {
   private readonly provisioning = inject(AdminProvisioningApiService);
   private readonly ubigeoApi = inject(AdminUbigeoApiService);
   private readonly fb = inject(FormBuilder);
-  private readonly modalCtrl = inject(ModalController);
+  private readonly sigreModal = inject(SigreModalService);
   private readonly toastCtrl = inject(ToastController);
 
   empresas: EmpresaAdminDto[] = [];
@@ -248,23 +248,16 @@ export class AdminEmpresasComponent implements OnInit {
   }
 
   async confirmarCambioEstado(e: EmpresaAdminDto, activar: boolean): Promise<void> {
-    const modal = await this.modalCtrl.create({
-      component: ModalConfirmationComponent,
-      cssClass: 'promo',
-      componentProps: {
-        titlemodal: '',
-        tipemodal: 'confirm',
-        title: activar ? 'Reactivar empresa' : 'Anular empresa',
-        message: activar
-          ? `¿Reactivar «${this.escapeHtmlLite(e.razonSocial)}»?`
-          : `¿Marcar como inactiva «${this.escapeHtmlLite(e.razonSocial)}»?`,
-        btnCancelTxt: 'Cancelar',
-        btnOkTxt: activar ? 'Reactivar' : 'Anular',
-      },
+    const confirmed = await this.sigreModal.confirm({
+      titulo: activar ? 'Reactivar empresa' : 'Anular empresa',
+      mensaje: activar
+        ? `¿Reactivar «${this.escapeHtmlLite(e.razonSocial)}»?`
+        : `¿Marcar como inactiva «${this.escapeHtmlLite(e.razonSocial)}»?`,
+      tipo: 'confirm',
+      textoConfirmar: activar ? 'Reactivar' : 'Anular',
+      conCancelar: true,
     });
-    await modal.present();
-    const { data } = await modal.onDidDismiss<boolean>();
-    if (!data) return;
+    if (!confirmed) return;
     this.api.cambiarEstadoEmpresa(e.id, activar).subscribe({
       next: () => {
         void this.presentToast(activar ? 'Empresa reactivada' : 'Empresa anulada', 'success');
@@ -284,20 +277,14 @@ export class AdminEmpresasComponent implements OnInit {
       return;
     }
 
-    const modal = await this.modalCtrl.create({
-      component: ModalConfirmationComponent,
-      cssClass: 'promo',
-      componentProps: {
-        titlemodal: '',
-        tipemodal: 'info',
-        title: 'Enviar correo de bienvenida',
-        message: `Se enviará el correo de registro a <strong>${this.escapeHtmlLite(e.correoContacto)}</strong> con los datos de «${this.escapeHtmlLite(e.razonSocial)}». ¿Continuar?`,
-        btnCancelTxt: 'CANCELAR',
-        btnOkTxt: 'ENVIAR',
-      },
+    const confirmed = await this.sigreModal.confirm({
+      titulo: 'Enviar correo de bienvenida',
+      mensaje: `Se enviará el correo de registro a <strong>${this.escapeHtmlLite(e.correoContacto)}</strong> con los datos de «${this.escapeHtmlLite(e.razonSocial)}». ¿Continuar?`,
+      tipo: 'info',
+      textoConfirmar: 'ENVIAR',
+      textoCancelar: 'CANCELAR',
+      conCancelar: true,
     });
-    await modal.present();
-    const { data: confirmed } = await modal.onDidDismiss<boolean>();
     if (!confirmed) return;
 
     this.enviandoCorreoBienvenidaId = e.id;
@@ -315,20 +302,14 @@ export class AdminEmpresasComponent implements OnInit {
   }
 
   async confirmarRecrear(e: EmpresaAdminDto): Promise<void> {
-    const modal = await this.modalCtrl.create({
-      component: ModalConfirmationComponent,
-      cssClass: 'promo',
-      componentProps: {
-        titlemodal: '',
-        tipemodal: 'warning',
-        title: 'Recrear base de datos',
-        message: `Se eliminará y recreará la BD <strong>${this.escapeHtmlLite(e.dbName ?? '')}</strong> desde el template. Esta acción borra todos los datos del tenant «${this.escapeHtmlLite(e.razonSocial)}». ¿Continuar?`,
-        btnCancelTxt: 'CANCELAR',
-        btnOkTxt: 'RECREAR',
-      },
+    const confirmed = await this.sigreModal.confirm({
+      titulo: 'Recrear base de datos',
+      mensaje: `Se eliminará y recreará la BD <strong>${this.escapeHtmlLite(e.dbName ?? '')}</strong> desde el template. Esta acción borra todos los datos del tenant «${this.escapeHtmlLite(e.razonSocial)}». ¿Continuar?`,
+      tipo: 'warning',
+      textoConfirmar: 'RECREAR',
+      textoCancelar: 'CANCELAR',
+      conCancelar: true,
     });
-    await modal.present();
-    const { data: confirmed } = await modal.onDidDismiss<boolean>();
     if (!confirmed) return;
 
     this.provisioning.recrearEmpresa({ dbName: e.dbName }).subscribe({
@@ -375,27 +356,11 @@ export class AdminEmpresasComponent implements OnInit {
   }
 
   private async presentError(message: string): Promise<void> {
-    await this.presentModal('Error', message, 'error');
+    await this.sigreModal.error(message);
   }
 
   private async presentSuccess(title: string, message: string): Promise<void> {
-    await this.presentModal(title, message, 'success');
-  }
-
-  private async presentModal(title: string, message: string, tipo: 'error' | 'success'): Promise<void> {
-    const modal = await this.modalCtrl.create({
-      component: ModalConfirmationComponent,
-      cssClass: 'promo',
-      componentProps: {
-        titlemodal: '',
-        tipemodal: tipo,
-        title,
-        message,
-        btnOkTxt: 'Aceptar',
-        mostrarCancelar: false,
-      },
-    });
-    await modal.present();
+    await this.sigreModal.success(title, message);
   }
 
   // ── Ubigeo cascada ──
@@ -617,21 +582,14 @@ export class AdminEmpresasComponent implements OnInit {
     const usuario = this.usuariosAsociados.find(u => u.id === usuarioId);
     if (!usuario) return;
 
-    const modal = await this.modalCtrl.create({
-      component: ModalConfirmationComponent,
-      cssClass: 'promo',
-      componentProps: {
-        titlemodal: '',
-        tipemodal: 'warning',
-        title: 'Confirmar retiro',
-        message: `¿Está seguro de retirar a «${this.escapeHtmlLite(usuario.nombreCompleto ?? '')}» de esta empresa? Esto eliminará sus roles y sucursales asignadas.`,
-        btnOkTxt: 'Continuar',
-        btnCancelTxt: 'Cancelar',
-      },
+    const confirmed = await this.sigreModal.confirm({
+      titulo: 'Confirmar retiro',
+      mensaje: `¿Está seguro de retirar a «${this.escapeHtmlLite(usuario.nombreCompleto ?? '')}» de esta empresa? Esto eliminará sus roles y sucursales asignadas.`,
+      tipo: 'warning',
+      textoConfirmar: 'Continuar',
+      conCancelar: true,
     });
-    await modal.present();
-    const { data } = await modal.onWillDismiss();
-    if (!data) return;
+    if (!confirmed) return;
 
     const eid = this.empresaGestionUsuarios.id;
     try {

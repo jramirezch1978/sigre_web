@@ -4,7 +4,7 @@ import { filter } from 'rxjs/operators';
 import { ModalController } from '@ionic/angular';
 import { AuthService, LoginData } from '../../../auth/services/auth.service';
 import { StorageService } from '../../../core/services/storage.service';
-import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
+import { ModalConfirmationComponent } from '@sigre-common';
 
 export interface AdminMenuItem {
   label: string;

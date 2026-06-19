@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminProvisioningApiService } from '../../services/admin-provisioning-api.service';
 import { ModalController } from '@ionic/angular';
-import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
+import { ModalConfirmationComponent } from '@sigre-common';
 
 @Component({
   selector: 'app-admin-empresa-provision',

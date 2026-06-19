@@ -13,6 +13,7 @@ import { TablaCrudCampo, TablaCrudConfig } from '../../config/almacen-tabla-crud
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService, SelectOptionDto } from '../../services/core-api.service';
+import { extraerMensajeErrorApi } from '@sigre-common';
 
 export interface AlmacenRegistroDialogData {
   titulo: string;
@@ -87,7 +88,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       next: () => this.dialogRef.close(true),
       error: err => {
         this.guardando = false;
-        this.error = this.extraerMensajeError(err);
+        this.error = extraerMensajeErrorApi(err, 'No se pudo guardar el registro');
       },
     });
   }
@@ -202,14 +203,5 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       body[campo.key] = valor;
     }
     return body;
-  }
-
-  private extraerMensajeError(err: unknown): string {
-    const e = err as { error?: { message?: string; data?: Array<{ message?: string }> }; message?: string };
-    const detalle = e?.error?.data?.[0]?.message;
-    if (detalle) return detalle;
-    if (e?.error?.message) return e.error.message;
-    if (e?.message) return e.message;
-    return 'No se pudo guardar el registro';
   }
 }

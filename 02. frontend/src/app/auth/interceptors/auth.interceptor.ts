@@ -4,8 +4,7 @@ import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, filter, take, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { StorageService } from '../../core/services/storage.service';
-import { ModalController } from '@ionic/angular';
-import { ModalConfirmationComponent } from '@ui/modal-confirmation/modal-confirmation.component';
+import { SigreModalService } from '@sigre-common';
 import { AuthService } from '../services/auth.service';
 
 @Injectable()
@@ -21,7 +20,6 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(
     private storage: StorageService,
     private router: Router,
-    private modalController: ModalController,
     private injector: Injector
   ) {}
 
@@ -171,21 +169,8 @@ export class AuthInterceptor implements HttpInterceptor {
     this.sessionModalShown = true;
 
     const message = error?.error?.message ?? 'Su sesión ha expirado. Inicie sesión nuevamente.';
-
-    const modal = await this.modalController.create({
-      component: ModalConfirmationComponent,
-      cssClass: 'promo',
-      componentProps: {
-        titlemodal: '',
-        tipemodal: 'error',
-        title: 'Sesión expirada',
-        message,
-        btnOkTxt: 'Aceptar'
-      }
-    });
-
-    await modal.present();
-    await modal.onDidDismiss();
+    const modalService = this.injector.get(SigreModalService);
+    await modalService.error(message, 'Sesión expirada');
 
     this.storage.clearSession();
     this.sessionModalShown = false;
