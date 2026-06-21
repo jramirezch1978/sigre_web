@@ -10,19 +10,23 @@
     <form [formGroup]="form" class="almacen-dialog__form">
       @for (campo of data.config.campos; track campo.key) {
         @if (campo.type === 'select') {
-          <mat-form-field appearance="outline" class="almacen-dialog__field">
-            <mat-label>{{ campo.label }}</mat-label>
-            <mat-select [formControlName]="campo.key">
-              @for (opt of opcionesDe(campo); track opt.value) {
-                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+          <sigre-validated-field [control]="controlDe(campo)" variant="select">
+            <mat-form-field appearance="outline" class="almacen-dialog__field">
+              <mat-label>{{ campo.label }}</mat-label>
+              <mat-select [formControlName]="campo.key">
+                @for (opt of opcionesDe(campo); track opt.value) {
+                  <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </sigre-validated-field>
         } @else if (esCampoDate(campo)) {
-          <mat-form-field appearance="outline" class="almacen-dialog__field">
-            <mat-label>{{ campo.label }}</mat-label>
-            <input matInput type="date" [formControlName]="campo.key" />
-          </mat-form-field>
+          <sigre-validated-field [control]="controlDe(campo)" variant="date">
+            <mat-form-field appearance="outline" class="almacen-dialog__field">
+              <mat-label>{{ campo.label }}</mat-label>
+              <input matInput type="date" [formControlName]="campo.key" />
+            </mat-form-field>
+          </sigre-validated-field>
         } @else if (esCampoSwitch(campo)) {
           <div class="almacen-dialog__switch">
             <span class="almacen-dialog__switch-label">{{ campo.label }}</span>
@@ -31,14 +35,16 @@
             </mat-slide-toggle>
           </div>
         } @else {
-          <mat-form-field appearance="outline" class="almacen-dialog__field">
-            <mat-label>{{ campo.label }}</mat-label>
-            <input
-              matInput
-              [type]="esCampoNumber(campo) ? 'number' : 'text'"
-              [formControlName]="campo.key"
-              [maxlength]="campo.maxLength ?? null" />
-          </mat-form-field>
+          <sigre-validated-field [control]="controlDe(campo)" variant="text">
+            <mat-form-field appearance="outline" class="almacen-dialog__field">
+              <mat-label>{{ campo.label }}</mat-label>
+              <input
+                matInput
+                [type]="esCampoNumber(campo) ? 'number' : 'text'"
+                [formControlName]="campo.key"
+                [maxlength]="campo.maxLength ?? null" />
+            </mat-form-field>
+          </sigre-validated-field>
         }
       }
     </form>

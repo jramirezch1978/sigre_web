@@ -13,7 +13,7 @@ import { TablaCrudCampo, TablaCrudConfig } from '../../config/almacen-tabla-crud
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService, SelectOptionDto } from '../../services/core-api.service';
-import { extraerMensajeErrorApi } from '@sigre-common';
+import { extraerMensajeErrorApi, SigreValidatedFieldComponent } from '@sigre-common';
 
 export interface AlmacenRegistroDialogData {
   titulo: string;
@@ -34,6 +34,7 @@ export interface AlmacenRegistroDialogData {
     MatSelectModule,
     MatSlideToggleModule,
     MatProgressSpinnerModule,
+    SigreValidatedFieldComponent,
   ],
   templateUrl: './almacen-registro-dialog.component.html',
   styleUrls: ['./almacen-registro-dialog.component.scss'],
@@ -112,6 +113,16 @@ export class AlmacenRegistroDialogComponent implements OnInit {
   etiquetaSwitch(campo: TablaCrudCampo): string {
     const valor = this.form.get(campo.key)?.value;
     return valor ? (campo.switchOnLabel ?? 'Activo') : (campo.switchOffLabel ?? 'Anulado');
+  }
+
+  controlDe(campo: TablaCrudCampo) {
+    return this.form.get(campo.key);
+  }
+
+  varianteCampo(campo: TablaCrudCampo): 'text' | 'select' | 'date' {
+    if (campo.type === 'select') return 'select';
+    if (campo.type === 'date') return 'date';
+    return 'text';
   }
 
   private valorInicial(campo: TablaCrudCampo): unknown {
