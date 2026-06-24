@@ -1,29 +1,53 @@
 package com.sigre.rrhh.mapper;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import com.sigre.rrhh.RrhhTestFixtures;
 import com.sigre.rrhh.dto.request.PermisoLicenciaCreateRequest;
 import com.sigre.rrhh.dto.request.PermisoLicenciaUpdateRequest;
 import com.sigre.rrhh.dto.response.PermisoLicenciaResponse;
 import com.sigre.rrhh.entity.PermisoLicencia;
+import com.sigre.rrhh.repository.PermisoLicenciaDetRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("PermisoLicenciaMapper — Pruebas Unitarias")
 class PermisoLicenciaMapperTest {
 
-    private final PermisoLicenciaMapper mapper = Mappers.getMapper(PermisoLicenciaMapper.class);
+    @Mock
+    private PermisoLicenciaDetRepository detRepository;
+
+    @Mock
+    private PermisoLicenciaDetMapper detMapper;
+
+    @InjectMocks
+    private PermisoLicenciaMapperImpl mapper;
+
+    @BeforeEach
+    void setUp() {
+        when(detRepository.findByPermisoLicenciaIdOrderByItemAsc(anyLong()))
+                .thenAnswer(inv -> List.of(RrhhTestFixtures.permisoLicenciaDet(10L, inv.getArgument(0))));
+        when(detMapper.toResponseList(org.mockito.ArgumentMatchers.anyList()))
+                .thenAnswer(inv -> List.of());
+    }
 
     @Test
-    @DisplayName("toResponse() -> convierte entidad a DTO de respuesta")
+    @DisplayName("toResponse() -> convierte cabecera y enriquece con detalle")
     void toResponse_convierteEntidadADTORespuesta() {
         PermisoLicencia entity = RrhhTestFixtures.permisoLicencia(1L);
 
@@ -31,6 +55,7 @@ class PermisoLicenciaMapperTest {
 
         assertThat(response.getId()).isEqualTo(1L);
         assertThat(response.getTrabajadorId()).isEqualTo(1L);
+        assertThat(response.getConceptoPlanillaId()).isEqualTo(1L);
         assertThat(response.getTipoSuspensionLaboralId()).isEqualTo(1L);
         assertThat(response.getFechaInicio()).isEqualTo(LocalDate.of(2026, 1, 15));
         assertThat(response.getCreatedBy()).isEqualTo("1");
@@ -52,7 +77,7 @@ class PermisoLicenciaMapperTest {
     }
 
     @Test
-    @DisplayName("toEntity() -> convierte DTO request a entidad")
+    @DisplayName("toEntity() -> convierte DTO request a cabecera")
     void toEntity_convierteDTORequestAEntidad() {
         PermisoLicenciaCreateRequest request = RrhhTestFixtures.permisoLicenciaCreateRequest();
 
@@ -60,14 +85,13 @@ class PermisoLicenciaMapperTest {
 
         assertThat(entity.getId()).isNull();
         assertThat(entity.getTrabajadorId()).isEqualTo(1L);
-        assertThat(entity.getTipoSuspensionLaboralId()).isEqualTo(1L);
-        assertThat(entity.getFechaInicio()).isEqualTo(LocalDate.of(2026, 1, 15));
+        assertThat(entity.getConceptoPlanillaId()).isNull();
         assertThat(entity.getCreatedBy()).isNull();
         assertThat(entity.getFecCreacion()).isNull();
     }
 
     @Test
-    @DisplayName("updateEntity() -> actualiza entidad existente sin modificar ID ni auditoría")
+    @DisplayName("updateEntity() -> actualiza cabecera sin modificar ID ni auditoría")
     void updateEntity_actualizaEntidadExistente() {
         PermisoLicenciaUpdateRequest request = RrhhTestFixtures.permisoLicenciaUpdateRequest();
         PermisoLicencia entity = RrhhTestFixtures.permisoLicencia(1L);
@@ -77,8 +101,6 @@ class PermisoLicenciaMapperTest {
         mapper.updateEntity(entity, request);
 
         assertThat(entity.getId()).isEqualTo(1L);
-        assertThat(entity.getFechaFin()).isEqualTo(LocalDate.of(2026, 1, 20));
-        assertThat(entity.getDias()).isEqualTo(5);
         assertThat(entity.getFlagEstado()).isEqualTo("1");
         assertThat(entity.getCreatedBy()).isEqualTo(1L);
         assertThat(entity.getFecCreacion()).isNotNull();

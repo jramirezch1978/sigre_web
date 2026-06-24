@@ -14,8 +14,10 @@ import com.sigre.rrhh.dto.request.ConceptoPlanillaCreateRequest;
 import com.sigre.rrhh.dto.request.ConceptoPlanillaUpdateRequest;
 import com.sigre.rrhh.dto.response.ConceptoPlanillaResponse;
 import com.sigre.rrhh.entity.ConceptoPlanilla;
+import com.sigre.rrhh.entity.GrupoConceptosPlanilla;
 import com.sigre.rrhh.mapper.ConceptoPlanillaMapper;
 import com.sigre.rrhh.repository.ConceptoPlanillaRepository;
+import com.sigre.rrhh.repository.GrupoConceptosPlanillaRepository;
 import com.sigre.rrhh.service.ConceptoPlanillaService;
 import com.sigre.rrhh.specification.ConceptoPlanillaSpecification;
 import com.sigre.rrhh.validation.ConceptoPlanillaValidator;
@@ -29,12 +31,13 @@ import java.util.List;
 public class ConceptoPlanillaServiceImpl implements ConceptoPlanillaService {
 
     private final ConceptoPlanillaRepository repository;
+    private final GrupoConceptosPlanillaRepository grupoConceptosPlanillaRepository;
     private final ConceptoPlanillaMapper mapper;
     private final ConceptoPlanillaValidator validator;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ConceptoPlanillaResponse> listar(String codigo, String nombre, String tipo, String flagEstado, Pageable pageable) {
+    public Page<ConceptoPlanillaResponse> listar(String codigo, String nombre, String grupoCalculo, String flagEstado, Pageable pageable) {
         Specification<ConceptoPlanilla> spec = Specification.where(null);
 
         if (codigo != null && !codigo.isEmpty()) {
@@ -43,8 +46,8 @@ public class ConceptoPlanillaServiceImpl implements ConceptoPlanillaService {
         if (nombre != null && !nombre.isEmpty()) {
             spec = spec.and(ConceptoPlanillaSpecification.conNombre(nombre));
         }
-        if (tipo != null && !tipo.isEmpty()) {
-            spec = spec.and(ConceptoPlanillaSpecification.conTipo(tipo));
+        if (grupoCalculo != null && !grupoCalculo.isEmpty()) {
+            spec = spec.and(ConceptoPlanillaSpecification.conGrupoCalculo(grupoCalculo));
         }
         if (flagEstado != null && !flagEstado.isBlank()) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("flagEstado"), flagEstado));
@@ -72,9 +75,10 @@ public class ConceptoPlanillaServiceImpl implements ConceptoPlanillaService {
     @Timed("rrhh.conceptoPlanilla.crear")
     public ConceptoPlanillaResponse crear(ConceptoPlanillaCreateRequest request) {
         validator.validarCodigoUnico(request.getCodigo());
-        validator.validarTipo(request.getTipo());
+        validator.validarGrupoCalculo(request.getGrupoCalculo());
 
         ConceptoPlanilla entity = mapper.toEntity(request);
+        entity.setGrupoConceptosPlanilla(resolverGrupo(request.getGrupoCalculo()));
         entity.setCreatedBy(TenantContext.getUsuarioId());
         entity.setFecCreacion(Instant.now());
         ConceptoPlanilla saved = repository.save(entity);
@@ -88,9 +92,10 @@ public class ConceptoPlanillaServiceImpl implements ConceptoPlanillaService {
         ConceptoPlanilla entity = repository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Concepto de planilla", id));
 
-        validator.validarTipo(request.getTipo());
+        validator.validarGrupoCalculo(request.getGrupoCalculo());
 
         mapper.updateEntity(entity, request);
+        entity.setGrupoConceptosPlanilla(resolverGrupo(request.getGrupoCalculo()));
         ConceptoPlanilla saved = repository.save(entity);
         return mapper.toResponse(saved);
     }
@@ -120,5 +125,10 @@ public class ConceptoPlanillaServiceImpl implements ConceptoPlanillaService {
         entity.setUpdatedBy(TenantContext.getUsuarioId());
         entity.setFecModificacion(Instant.now());
         return mapper.toResponse(repository.save(entity));
+    }
+
+    private GrupoConceptosPlanilla resolverGrupo(String codigoGrupo) {
+        return grupoConceptosPlanillaRepository.findByCodigo(codigoGrupo)
+            .orElseThrow(() -> new ResourceNotFoundException("Grupo de conceptos de planilla", "codigo", codigoGrupo));
     }
 }

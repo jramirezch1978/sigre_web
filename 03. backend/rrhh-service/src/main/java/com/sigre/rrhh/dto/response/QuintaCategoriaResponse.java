@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * DTO de respuesta para los cálculos de retención de quinta categoría.
+ * DTO de respuesta para quinta categoría (esquema SIGRE).
  */
 @Data
 @Builder
@@ -19,15 +19,19 @@ public class QuintaCategoriaResponse {
     private Long id;
     private Long trabajadorId;
     private String trabajadorNombres;
-    private Integer anio;
-    private Integer mes;
-    private BigDecimal rentaBrutaAcumulada;
-    private BigDecimal rentaBrutaProyectada;
-    private BigDecimal deduccion7uit;
-    private BigDecimal rentaNeta;
-    private BigDecimal impuestoAnualProyectado;
-    private BigDecimal retencionMensual;
-    private BigDecimal retencionAcumulada;
+    private String fecProceso;
+    private Long tipoPlanillaId;
+    private String tipoPlanillaCodigo;
+    private BigDecimal remProyectable;
+    private BigDecimal remImprecisa;
+    private BigDecimal remRetencion;
+    private BigDecimal remGratif;
+    private BigDecimal sueldo;
+    private BigDecimal gratifProyect;
+    private BigDecimal remExterna;
+    private Short nroDias;
+    private String flagAutomatico;
+    private String flagReplicacion;
     private Long createdBy;
     private String fecCreacion;
     private Long updatedBy;

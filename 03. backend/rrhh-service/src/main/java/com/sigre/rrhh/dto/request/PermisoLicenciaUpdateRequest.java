@@ -10,6 +10,7 @@ public class PermisoLicenciaUpdateRequest {
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private Integer dias;
+    private Long conceptoPlanillaId;
     private String sustento;
     private String flagEstado;
 }

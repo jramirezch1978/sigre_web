@@ -12,6 +12,7 @@ public class TipoSuspensionLaboralResponse {
     private String flagTipoSusp;
     private Long tipoSubsidioId;
     private String flagCitt;
+    private String flagDatosLesion;
     private String flagEstado;
     private String createdBy;
     private OffsetDateTime fecCreacion;

@@ -28,6 +28,7 @@ import com.sigre.rrhh.service.TrabajadorService;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Base64;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -103,7 +104,7 @@ public class TrabajadorServiceImpl implements TrabajadorService {
         existing.setSexoId(datos.getSexoId());
         existing.setEstadoCivilId(datos.getEstadoCivilId());
         existing.setDireccion(datos.getDireccion());
-        existing.setTelefono(datos.getTelefono());
+        applyExtendedFields(existing, request);
         existing.setEmail(datos.getEmail());
         existing.setCuentaBancariaSueldo(datos.getCuentaBancariaSueldo());
         existing.setCuentaCts(datos.getCuentaCts());
@@ -442,7 +443,7 @@ public class TrabajadorServiceImpl implements TrabajadorService {
         t.setSexoId(r.getSexoId());
         t.setEstadoCivilId(r.getEstadoCivilId());
         t.setDireccion(r.getDireccion());
-        t.setTelefono(r.getTelefono());
+        applyExtendedFields(t, r);
         t.setEmail(r.getEmail());
         t.setCuentaBancariaSueldo(r.getCuentaBancariaSueldo());
         t.setCuentaCts(r.getCuentaCts());
@@ -456,6 +457,70 @@ public class TrabajadorServiceImpl implements TrabajadorService {
         t.setFechaCese(r.getFechaCese());
         t.setMotivoCese(r.getMotivoCese());
         return t;
+    }
+
+    private void applyExtendedFields(Trabajador t, TrabajadorRequest r) {
+        t.setNombre1(r.getNombre1());
+        t.setNombre2(r.getNombre2());
+        t.setAlergias(r.getAlergias());
+        t.setTipoSangreId(r.getTipoSangreId());
+        t.setNroBrevete(r.getNroBrevete());
+        t.setAutogeneradoEssalud(r.getAutogeneradoEssalud());
+        t.setTelefonoFijo(r.getTelefonoFijo());
+        t.setCelular1(r.getCelular1());
+        t.setCelular2(r.getCelular2());
+        t.setCodigoTelCiudad(r.getCodigoTelCiudad());
+        t.setFlagDiscapacidad(r.getFlagDiscapacidad());
+        t.setFlagDomiciliado(r.getFlagDomiciliado());
+        t.setFlagComisionAfp(r.getFlagComisionAfp());
+        t.setFlagPensionista(r.getFlagPensionista());
+        t.setFlagAfiliadoEps(r.getFlagAfiliadoEps());
+        t.setFlagEssaludVida(r.getFlagEssaludVida());
+        t.setFlagSctrPension(r.getFlagSctrPension());
+        t.setFlagSctrSalud(r.getFlagSctrSalud());
+        t.setFlagQuintaExonerado(r.getFlagQuintaExonerado());
+        t.setDistritoId(r.getDistritoId());
+        t.setTipoViaId(r.getTipoViaId());
+        t.setNombreVia(r.getNombreVia());
+        t.setNumeroVia(r.getNumeroVia());
+        t.setTipoZonaId(r.getTipoZonaId());
+        t.setNombreZona(r.getNombreZona());
+        t.setTipoViviendaId(r.getTipoViviendaId());
+        t.setInterior(r.getInterior());
+        t.setReferencia(r.getReferencia());
+        t.setBancoSueldoId(r.getBancoSueldoId());
+        t.setBancoCtsId(r.getBancoCtsId());
+        t.setMonedaSueldoId(r.getMonedaSueldoId());
+        t.setMonedaCtsId(r.getMonedaCtsId());
+        t.setPensionRtpsId(r.getPensionRtpsId());
+        t.setRegimenPensionarioId(r.getRegimenPensionarioId());
+        t.setFecIniAfilAfp(r.getFecIniAfilAfp());
+        t.setFecFinAfilAfp(r.getFecFinAfilAfp());
+        t.setTipoTrabajadorId(r.getTipoTrabajadorId());
+        t.setTipoTrabajadorRtpsId(r.getTipoTrabajadorRtpsId());
+        t.setOcupacionRtpsId(r.getOcupacionRtpsId());
+        t.setSeccionId(r.getSeccionId());
+        t.setCentroCostoId(r.getCentroCostoId());
+        t.setMotivoCeseId(r.getMotivoCeseId());
+        t.setComentario(r.getComentario());
+        t.setProcedencia(r.getProcedencia());
+        applyBlobFields(t, r);
+    }
+
+    private void applyBlobFields(Trabajador t, TrabajadorRequest r) {
+        if (r.getFotoBlobBase64() != null) {
+            t.setFotoBlob(decodeBase64OrNull(r.getFotoBlobBase64()));
+        }
+        if (r.getDniBlobBase64() != null) {
+            t.setDniBlob(decodeBase64OrNull(r.getDniBlobBase64()));
+        }
+    }
+
+    private byte[] decodeBase64OrNull(String base64) {
+        if (base64 == null || base64.isBlank()) {
+            return null;
+        }
+        return Base64.getDecoder().decode(base64);
     }
 
     private BusinessException badRequest(String msg, String code) {

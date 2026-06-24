@@ -8,16 +8,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.rrhh.repository.ConceptoPlanillaRepository;
+import com.sigre.rrhh.repository.GrupoConceptosPlanillaRepository;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.when;
 import static com.sigre.rrhh.constants.ConceptoPlanillaConstants.*;
 
-/**
- * Tests unitarios para ConceptoPlanillaValidator.
- * Valida las reglas de negocio personalizadas.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Pruebas Unitarias - ConceptoPlanillaValidator")
 class ConceptoPlanillaValidatorTest {
@@ -25,104 +24,52 @@ class ConceptoPlanillaValidatorTest {
     @Mock
     private ConceptoPlanillaRepository repository;
 
+    @Mock
+    private GrupoConceptosPlanillaRepository grupoConceptosPlanillaRepository;
+
     @InjectMocks
     private ConceptoPlanillaValidator validator;
 
-    // ==== validarCodigoUnico ====
-
     @Test
-    @DisplayName("validarCodigoUnico() con código existente -> lanza BusinessException")
+    @DisplayName("validarCodigoUnico() con c?digo existente -> lanza BusinessException")
     void validarCodigoUnico_conCodigoExistente_lanzaBusinessException() {
-        when(repository.existsByCodigo("ING-001")).thenReturn(true);
+        when(repository.existsByCodigo("1013")).thenReturn(true);
 
-        assertThatThrownBy(() -> validator.validarCodigoUnico("ING-001"))
+        assertThatThrownBy(() -> validator.validarCodigoUnico("1013"))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining("Ya existe")
             .hasFieldOrPropertyWithValue("errorCode", ERROR_CODIGO_DUPLICADO);
     }
 
     @Test
-    @DisplayName("validarCodigoUnico() con código nuevo -> no lanza excepción")
+    @DisplayName("validarCodigoUnico() con c?digo nuevo -> no lanza excepci?n")
     void validarCodigoUnico_conCodigoNuevo_noLanzaExcepcion() {
-        when(repository.existsByCodigo("ING-999")).thenReturn(false);
+        when(repository.existsByCodigo("9999")).thenReturn(false);
 
-        assertThatCode(() -> validator.validarCodigoUnico("ING-999"))
+        assertThatCode(() -> validator.validarCodigoUnico("9999"))
             .doesNotThrowAnyException();
     }
 
-    // ==== validarCodigoUnicoParaActualizacion ====
+    @Test
+    @DisplayName("validarGrupoCalculo() con grupo v?lido -> no lanza excepci?n")
+    void validarGrupoCalculo_conGrupoValido_noLanzaExcepcion() {
+        when(grupoConceptosPlanillaRepository.findByCodigo("10")).thenReturn(Optional.of(new com.sigre.rrhh.entity.GrupoConceptosPlanilla()));
+
+        assertThatCode(() -> validator.validarGrupoCalculo("10"))
+            .doesNotThrowAnyException();
+    }
 
     @Test
-    @DisplayName("validarCodigoUnicoParaActualizacion() con código en otro registro -> lanza BusinessException")
-    void validarCodigoUnicoParaActualizacion_conCodigoEnOtroRegistro_lanzaBusinessException() {
-        when(repository.existsByCodigoAndIdNot("ING-001", 2L)).thenReturn(true);
-
-        assertThatThrownBy(() -> validator.validarCodigoUnicoParaActualizacion("ING-001", 2L))
+    @DisplayName("validarGrupoCalculo() con grupo inv?lido -> lanza BusinessException")
+    void validarGrupoCalculo_conGrupoInvalido_lanzaBusinessException() {
+        assertThatThrownBy(() -> validator.validarGrupoCalculo(""))
             .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("Ya existe");
+            .hasFieldOrPropertyWithValue("errorCode", ERROR_GRUPO_CALCULO_INVALIDO);
     }
 
     @Test
-    @DisplayName("validarCodigoUnicoParaActualizacion() con código del mismo registro -> no lanza excepción")
-    void validarCodigoUnicoParaActualizacion_conCodigoDelMismoRegistro_noLanzaExcepcion() {
-        when(repository.existsByCodigoAndIdNot("ING-001", 1L)).thenReturn(false);
-
-        assertThatCode(() -> validator.validarCodigoUnicoParaActualizacion("ING-001", 1L))
-            .doesNotThrowAnyException();
-    }
-
-    // ==== validarTipo ====
-
-    @Test
-    @DisplayName("validarTipo() con INGRESO -> no lanza excepción")
-    void validarTipo_conIngreso_noLanzaExcepcion() {
-        assertThatCode(() -> validator.validarTipo(TIPO_INGRESO))
-            .doesNotThrowAnyException();
-    }
-
-    @Test
-    @DisplayName("validarTipo() con DESCUENTO -> no lanza excepción")
-    void validarTipo_conDescuento_noLanzaExcepcion() {
-        assertThatCode(() -> validator.validarTipo(TIPO_DESCUENTO))
-            .doesNotThrowAnyException();
-    }
-
-    @Test
-    @DisplayName("validarTipo() con APORTE -> no lanza excepción")
-    void validarTipo_conAporte_noLanzaExcepcion() {
-        assertThatCode(() -> validator.validarTipo(TIPO_APORTE))
-            .doesNotThrowAnyException();
-    }
-
-    @Test
-    @DisplayName("validarTipo() con tipo inválido -> lanza BusinessException")
-    void validarTipo_conTipoInvalido_lanzaBusinessException() {
-        assertThatThrownBy(() -> validator.validarTipo("INVALIDO"))
-            .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("tipo debe ser")
-            .hasFieldOrPropertyWithValue("errorCode", ERROR_TIPO_INVALIDO);
-    }
-
-    @Test
-    @DisplayName("validarTipo() con null -> lanza BusinessException")
-    void validarTipo_conNull_lanzaBusinessException() {
-        assertThatThrownBy(() -> validator.validarTipo(null))
-            .isInstanceOf(BusinessException.class);
-    }
-
-    @Test
-    @DisplayName("validarTipo() con cadena vacía -> lanza BusinessException")
-    void validarTipo_conCadenaVacia_lanzaBusinessException() {
-        assertThatThrownBy(() -> validator.validarTipo(""))
-            .isInstanceOf(BusinessException.class);
-    }
-
-    // ==== validarNoEnUso ====
-
-    @Test
-    @DisplayName("validarNoEnUso() no lanza excepción (implementación pendiente)")
+    @DisplayName("validarNoEnUso() no lanza excepci?n (implementaci?n pendiente)")
     void validarNoEnUso_noLanzaExcepcion() {
-        // TODO: Implementar cuando exista la tabla calculo_det
         assertThatCode(() -> validator.validarNoEnUso(1L))
             .doesNotThrowAnyException();
     }

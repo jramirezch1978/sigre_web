@@ -95,7 +95,7 @@ class CalculoControllerTest {
     @DisplayName("POST /api/rrhh/calculos/procesar -> procesa planilla")
     void procesar_datosValidos_procesa() throws Exception {
         CalculoProcesarRequest request = RrhhTestFixtures.calculoProcesarRequest();
-        when(service.procesar(2026, 6, 1L)).thenReturn(RrhhTestFixtures.calculoDetalleResponse(1L));
+        when(service.procesar(2026, 6, "N", "PI")).thenReturn(RrhhTestFixtures.calculoDetalleResponse(1L));
 
         mockMvc.perform(post("/api/rrhh/calculos/procesar")
                         .contentType(MediaType.APPLICATION_JSON)

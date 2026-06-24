@@ -41,10 +41,10 @@ public class CalculoMapper {
                 .mes(c.getMes())
                 .tipoPlanillaId(c.getTipoPlanillaId())
                 .tipoPlanillaNombre(resolveTipoPlanillaNombre(c.getTipoPlanillaId()))
-                .totalIngresos(c.getTotalIngresos())
-                .totalDescuentos(c.getTotalDescuentos())
-                .totalNeto(c.getTotalNeto())
-                .totalAportes(c.getTotalAportes())
+                .totalIngresos(c.getTotalIngresosSoles())
+                .totalDescuentos(c.getTotalDescuentosSoles())
+                .totalNeto(c.getTotalNetoSoles())
+                .totalAportes(c.getTotalAportesSoles())
                 .totalTrabajadores(totalTrabajadores)
                 .createdBy(c.getCreatedBy())
                 .fecCreacion(formatTimestamp(c.getFecCreacion()))
@@ -57,22 +57,17 @@ public class CalculoMapper {
      * Convierte un {@link Calculo} con sus detalles al DTO de detalle completo.
      */
     public CalculoDetalleResponse toDetalleResponse(Calculo c, List<CalculoDet> detalles) {
-        long trabajadoresDistintos = detalles.stream()
-                .map(CalculoDet::getTrabajadorId)
-                .distinct()
-                .count();
-
         return CalculoDetalleResponse.builder()
                 .id(c.getId())
                 .anio(c.getAnio())
                 .mes(c.getMes())
                 .tipoPlanillaId(c.getTipoPlanillaId())
                 .tipoPlanillaNombre(resolveTipoPlanillaNombre(c.getTipoPlanillaId()))
-                .totalIngresos(c.getTotalIngresos())
-                .totalDescuentos(c.getTotalDescuentos())
-                .totalNeto(c.getTotalNeto())
-                .totalAportes(c.getTotalAportes())
-                .totalTrabajadores((int) trabajadoresDistintos)
+                .totalIngresos(c.getTotalIngresosSoles())
+                .totalDescuentos(c.getTotalDescuentosSoles())
+                .totalNeto(c.getTotalNetoSoles())
+                .totalAportes(c.getTotalAportesSoles())
+                .totalTrabajadores(c.getTrabajadorId() != null ? 1 : 0)
                 .createdBy(c.getCreatedBy())
                 .fecCreacion(formatTimestamp(c.getFecCreacion()))
                 .updatedBy(c.getUpdatedBy())
@@ -86,17 +81,20 @@ public class CalculoMapper {
      * resolviendo nombres de trabajador y concepto.
      */
     public CalculoDetResponse toDetResponse(CalculoDet d) {
-        String trabajadorNombres = resolveTrabajadorNombres(d.getTrabajadorId());
+        Long trabajadorId = calculoRepo.findById(d.getCalculoId())
+                .map(Calculo::getTrabajadorId)
+                .orElse(null);
+        String trabajadorNombres = resolveTrabajadorNombres(trabajadorId);
         String conceptoNombre = resolveConceptoNombre(d.getConceptoId());
 
         return CalculoDetResponse.builder()
                 .id(d.getId())
                 .calculoId(d.getCalculoId())
-                .trabajadorId(d.getTrabajadorId())
+                .trabajadorId(trabajadorId)
                 .trabajadorNombres(trabajadorNombres)
                 .conceptoId(d.getConceptoId())
                 .conceptoNombre(conceptoNombre)
-                .monto(d.getMonto())
+                .monto(d.getImpSoles())
                 .tipoConceptoCalculoId(d.getTipoConceptoCalculoId())
                 .tipoConceptoCalculoNombre(resolveTipoConceptoCalculoNombre(d.getTipoConceptoCalculoId()))
                 .build();

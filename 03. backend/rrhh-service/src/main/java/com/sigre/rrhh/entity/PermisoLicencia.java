@@ -8,8 +8,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import com.sigre.common.entity.BaseEntity;
-import java.time.LocalDate;
 
+/**
+ * Cabecera permiso/licencia ({@code rrhh.permiso_licencia}).
+ * Saldo por trabajador, concepto de planilla y periodo laboral.
+ * Los tramos operativos (fechas, tipo RTPS, documento) van en {@link PermisoLicenciaDet}.
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -21,18 +25,18 @@ public class PermisoLicencia extends BaseEntity {
     @Column(name = "trabajador_id", nullable = false)
     private Long trabajadorId;
 
-    @Column(name = "tipo_suspension_laboral_id", nullable = false)
-    private Long tipoSuspensionLaboralId;
+    @Column(name = "concepto_planilla_id")
+    private Long conceptoPlanillaId;
 
-    @Column(name = "fecha_inicio", nullable = false)
-    private LocalDate fechaInicio;
+    @Column(name = "periodo_inicio", nullable = false)
+    private Integer periodoInicio;
 
-    @Column(name = "fecha_fin")
-    private LocalDate fechaFin;
+    @Column(name = "periodo_fin")
+    private Integer periodoFin;
 
-    @Column(name = "dias")
-    private Integer dias;
+    @Column(name = "dias_totales", nullable = false)
+    private Integer diasTotales = 0;
 
-    @Column(name = "sustento", columnDefinition = "TEXT")
-    private String sustento;
+    @Column(name = "dias_gozados", nullable = false)
+    private Integer diasGozados = 0;
 }

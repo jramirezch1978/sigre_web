@@ -31,4 +31,7 @@ public class TipoSuspensionLaboral extends BaseEntity {
 
     @Column(name = "flag_citt", length = 1, nullable = false)
     private String flagCitt = "0";
+
+    @Column(name = "flag_datos_lesion", length = 1, nullable = false)
+    private String flagDatosLesion = "0";
 }

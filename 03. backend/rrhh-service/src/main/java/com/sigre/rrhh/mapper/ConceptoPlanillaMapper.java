@@ -28,6 +28,7 @@ public interface ConceptoPlanillaMapper {
      * @param entity Entidad a convertir
      * @return DTO de respuesta con los datos de la entidad
      */
+    @Mapping(target = "grupoCalculo", source = "grupoConceptosPlanilla.codigo")
     ConceptoPlanillaResponse toResponse(ConceptoPlanilla entity);
 
     List<ConceptoPlanillaResponse> toResponseList(List<ConceptoPlanilla> entities);
@@ -39,6 +40,7 @@ public interface ConceptoPlanillaMapper {
      * @return Entidad ConceptoPlanilla con los datos del request
      */
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "grupoConceptosPlanilla", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "fecCreacion", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
@@ -54,6 +56,7 @@ public interface ConceptoPlanillaMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "codigo", ignore = true)
+    @Mapping(target = "grupoConceptosPlanilla", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "fecCreacion", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)

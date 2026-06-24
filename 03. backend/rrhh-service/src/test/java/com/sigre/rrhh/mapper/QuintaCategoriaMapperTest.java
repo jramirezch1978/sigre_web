@@ -9,7 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sigre.rrhh.RrhhTestFixtures;
 import com.sigre.rrhh.dto.response.QuintaCategoriaResponse;
 import com.sigre.rrhh.entity.QuintaCategoria;
+import com.sigre.rrhh.entity.TipoPlanilla;
 import com.sigre.rrhh.entity.Trabajador;
+import com.sigre.rrhh.repository.TipoPlanillaRepository;
 import com.sigre.rrhh.repository.TrabajadorRepository;
 
 import java.math.BigDecimal;
@@ -25,6 +27,9 @@ class QuintaCategoriaMapperTest {
     @Mock
     private TrabajadorRepository trabajadorRepo;
 
+    @Mock
+    private TipoPlanillaRepository tipoPlanillaRepo;
+
     @InjectMocks
     private QuintaCategoriaMapper mapper;
 
@@ -33,21 +38,20 @@ class QuintaCategoriaMapperTest {
     void toResponse_convierteEntidadADTORespuesta() {
         QuintaCategoria entity = RrhhTestFixtures.quintaCategoria(1L);
         Trabajador trabajador = RrhhTestFixtures.trabajador(1L);
+        TipoPlanilla tipoPlanilla = new TipoPlanilla();
+        tipoPlanilla.setId(1L);
+        tipoPlanilla.setCodigo("N");
         when(trabajadorRepo.findById(1L)).thenReturn(Optional.of(trabajador));
+        when(tipoPlanillaRepo.findById(1L)).thenReturn(Optional.of(tipoPlanilla));
 
         QuintaCategoriaResponse response = mapper.toResponse(entity);
 
         assertThat(response.getId()).isEqualTo(1L);
         assertThat(response.getTrabajadorId()).isEqualTo(1L);
-        assertThat(response.getAnio()).isEqualTo(2026);
-        assertThat(response.getMes()).isEqualTo(6);
-        assertThat(response.getRentaBrutaAcumulada()).isEqualByComparingTo(new BigDecimal("15000.0000"));
-        assertThat(response.getRentaBrutaProyectada()).isEqualByComparingTo(new BigDecimal("42000.0000"));
-        assertThat(response.getDeduccion7uit()).isEqualByComparingTo(new BigDecimal("37450.0000"));
-        assertThat(response.getRentaNeta()).isEqualByComparingTo(new BigDecimal("4550.0000"));
-        assertThat(response.getImpuestoAnualProyectado()).isEqualByComparingTo(new BigDecimal("364.0000"));
-        assertThat(response.getRetencionMensual()).isEqualByComparingTo(new BigDecimal("60.6667"));
-        assertThat(response.getRetencionAcumulada()).isEqualByComparingTo(new BigDecimal("364.0000"));
+        assertThat(response.getFecProceso()).isEqualTo("30/06/2026");
+        assertThat(response.getTipoPlanillaCodigo()).isEqualTo("N");
+        assertThat(response.getRemProyectable()).isEqualByComparingTo(new BigDecimal("42000.00"));
+        assertThat(response.getRemRetencion()).isEqualByComparingTo(new BigDecimal("60.67"));
     }
 
     @Test
@@ -55,6 +59,7 @@ class QuintaCategoriaMapperTest {
     void toResponse_resuelveNombreTrabajador() {
         QuintaCategoria entity = RrhhTestFixtures.quintaCategoria(1L);
         when(trabajadorRepo.findById(1L)).thenReturn(Optional.of(RrhhTestFixtures.trabajador(1L)));
+        when(tipoPlanillaRepo.findById(1L)).thenReturn(Optional.empty());
 
         QuintaCategoriaResponse response = mapper.toResponse(entity);
 
@@ -77,6 +82,7 @@ class QuintaCategoriaMapperTest {
     void toResponse_formateaFecCreacion() {
         QuintaCategoria entity = RrhhTestFixtures.quintaCategoria(1L);
         when(trabajadorRepo.findById(1L)).thenReturn(Optional.of(RrhhTestFixtures.trabajador(1L)));
+        when(tipoPlanillaRepo.findById(1L)).thenReturn(Optional.empty());
 
         QuintaCategoriaResponse response = mapper.toResponse(entity);
 

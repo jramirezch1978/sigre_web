@@ -15,13 +15,16 @@ import com.sigre.common.security.TenantContext;
 import com.sigre.rrhh.RrhhTestFixtures;
 import com.sigre.rrhh.entity.Contrato;
 import com.sigre.rrhh.entity.QuintaCategoria;
+import com.sigre.rrhh.entity.TipoPlanilla;
 import com.sigre.rrhh.entity.Trabajador;
 import com.sigre.rrhh.repository.ContratoRepository;
 import com.sigre.rrhh.repository.QuintaCategoriaRepository;
+import com.sigre.rrhh.repository.TipoPlanillaRepository;
 import com.sigre.rrhh.repository.TrabajadorRepository;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,6 +38,7 @@ class QuintaCategoriaServiceImplTest {
     @Mock private QuintaCategoriaRepository quintaCategoriaRepo;
     @Mock private TrabajadorRepository trabajadorRepo;
     @Mock private ContratoRepository contratoRepo;
+    @Mock private TipoPlanillaRepository tipoPlanillaRepo;
 
     @InjectMocks
     private QuintaCategoriaServiceImpl service;
@@ -49,6 +53,10 @@ class QuintaCategoriaServiceImplTest {
     void procesar_calculaRetencionParaActivosConContrato() {
         Trabajador trabajador = RrhhTestFixtures.trabajador(1L);
         Contrato contrato = RrhhTestFixtures.contrato(1L, 1L);
+        TipoPlanilla tipoPlanilla = new TipoPlanilla();
+        tipoPlanilla.setId(1L);
+        tipoPlanilla.setCodigo("N");
+        when(tipoPlanillaRepo.findByCodigo("N")).thenReturn(Optional.of(tipoPlanilla));
         when(trabajadorRepo.findAll()).thenReturn(List.of(trabajador));
         when(contratoRepo.findByTrabajadorIdAndFlagEstadoOrderByFecCreacionDesc(1L, "1"))
                 .thenReturn(List.of(contrato));
@@ -58,9 +66,9 @@ class QuintaCategoriaServiceImplTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getTrabajadorId()).isEqualTo(1L);
-        assertThat(result.get(0).getAnio()).isEqualTo(2026);
-        assertThat(result.get(0).getMes()).isEqualTo(6);
-        verify(quintaCategoriaRepo).deleteByAnioAndMes(2026, 6);
+        assertThat(result.get(0).getFecProceso()).isEqualTo(LocalDate.of(2026, 6, 30));
+        verify(quintaCategoriaRepo).deleteByFecProcesoBetween(
+                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30));
         verify(quintaCategoriaRepo).saveAll(anyList());
     }
 
@@ -83,6 +91,9 @@ class QuintaCategoriaServiceImplTest {
     @Test
     @DisplayName("procesar() sin trabajadores activos -> lanza BusinessException")
     void procesar_sinTrabajadoresActivos_lanzaBusinessException() {
+        TipoPlanilla tipoPlanilla = new TipoPlanilla();
+        tipoPlanilla.setId(1L);
+        when(tipoPlanillaRepo.findByCodigo("N")).thenReturn(Optional.of(tipoPlanilla));
         when(trabajadorRepo.findAll()).thenReturn(List.of());
 
         assertThatThrownBy(() -> service.procesar(2026, 6))
@@ -94,6 +105,9 @@ class QuintaCategoriaServiceImplTest {
     @DisplayName("procesar() salta trabajadores sin contrato activo")
     void procesar_saltaTrabajadoresSinContrato() {
         Trabajador trabajador = RrhhTestFixtures.trabajador(1L);
+        TipoPlanilla tipoPlanilla = new TipoPlanilla();
+        tipoPlanilla.setId(1L);
+        when(tipoPlanillaRepo.findByCodigo("N")).thenReturn(Optional.of(tipoPlanilla));
         when(trabajadorRepo.findAll()).thenReturn(List.of(trabajador));
         when(contratoRepo.findByTrabajadorIdAndFlagEstadoOrderByFecCreacionDesc(1L, "1"))
                 .thenReturn(List.of());
@@ -108,6 +122,9 @@ class QuintaCategoriaServiceImplTest {
     @DisplayName("procesar() solo trabajador inactivo -> lanza BusinessException")
     void procesar_soloInactivo_lanzaBusinessException() {
         Trabajador inactivo = RrhhTestFixtures.trabajadorInactivo(2L);
+        TipoPlanilla tipoPlanilla = new TipoPlanilla();
+        tipoPlanilla.setId(1L);
+        when(tipoPlanillaRepo.findByCodigo("N")).thenReturn(Optional.of(tipoPlanilla));
         when(trabajadorRepo.findAll()).thenReturn(List.of(inactivo));
 
         assertThatThrownBy(() -> service.procesar(2026, 6))
@@ -142,7 +159,7 @@ class QuintaCategoriaServiceImplTest {
     @Test
     @DisplayName("obtenerPorId() con ID existente -> retorna registro")
     void obtenerPorId_idExistente_retornaRegistro() {
-        when(quintaCategoriaRepo.findById(1L)).thenReturn(java.util.Optional.of(RrhhTestFixtures.quintaCategoria(1L)));
+        when(quintaCategoriaRepo.findById(1L)).thenReturn(Optional.of(RrhhTestFixtures.quintaCategoria(1L)));
 
         QuintaCategoria result = service.obtenerPorId(1L);
 
@@ -153,7 +170,7 @@ class QuintaCategoriaServiceImplTest {
     @Test
     @DisplayName("obtenerPorId() con ID inexistente -> lanza BusinessException")
     void obtenerPorId_idInexistente_lanzaBusinessException() {
-        when(quintaCategoriaRepo.findById(999L)).thenReturn(java.util.Optional.empty());
+        when(quintaCategoriaRepo.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.obtenerPorId(999L))
                 .isInstanceOf(BusinessException.class)

@@ -8,13 +8,11 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 /**
- * Entidad que representa el cálculo de retención de impuesto a la renta de
- * quinta categoría para un trabajador en un período (año/mes) determinado.
- * <p>
- * No extiende {@code BaseEntity} porque la tabla no posee {@code flag_estado};
- * los campos de auditoría se manejan directamente como en {@link Area}.
+ * Proyección y retención de quinta categoría por trabajador y fecha de proceso.
+ * Esquema alineado a SIGRE QUINTA_CATEGORIA (adaptado a FKs PostgreSQL).
  */
 @Entity
 @Table(name = "quinta_categoria", schema = "rrhh")
@@ -31,34 +29,42 @@ public class QuintaCategoria {
     @Column(name = "trabajador_id", nullable = false)
     private Long trabajadorId;
 
-    @Column(name = "anio", nullable = false)
-    private Integer anio;
+    @Column(name = "fec_proceso", nullable = false)
+    private LocalDate fecProceso;
 
-    @Column(name = "mes", nullable = false)
-    private Integer mes;
+    @Column(name = "rem_proyectable", nullable = false, precision = 13, scale = 2)
+    private BigDecimal remProyectable;
 
-    @Column(name = "renta_bruta_acumulada", precision = 18, scale = 4)
-    private BigDecimal rentaBrutaAcumulada;
+    @Column(name = "rem_imprecisa", nullable = false, precision = 13, scale = 2)
+    private BigDecimal remImprecisa;
 
-    @Column(name = "renta_bruta_proyectada", precision = 18, scale = 4)
-    private BigDecimal rentaBrutaProyectada;
+    @Column(name = "rem_retencion", nullable = false, precision = 13, scale = 2)
+    private BigDecimal remRetencion;
 
-    @Column(name = "deduccion_7uit", precision = 18, scale = 4)
-    private BigDecimal deduccion7uit;
+    @Column(name = "rem_gratif", nullable = false, precision = 13, scale = 2)
+    private BigDecimal remGratif;
 
-    @Column(name = "renta_neta", precision = 18, scale = 4)
-    private BigDecimal rentaNeta;
+    @Column(name = "flag_replicacion", nullable = false, length = 1)
+    private String flagReplicacion;
 
-    @Column(name = "impuesto_anual_proyectado", precision = 18, scale = 4)
-    private BigDecimal impuestoAnualProyectado;
+    @Column(name = "nro_dias", nullable = false)
+    private Short nroDias;
 
-    @Column(name = "retencion_mensual", precision = 18, scale = 4)
-    private BigDecimal retencionMensual;
+    @Column(name = "sueldo", nullable = false, precision = 13, scale = 2)
+    private BigDecimal sueldo;
 
-    @Column(name = "retencion_acumulada", precision = 18, scale = 4)
-    private BigDecimal retencionAcumulada;
+    @Column(name = "flag_automatico", nullable = false, length = 1)
+    private String flagAutomatico;
 
-    // Campos de auditoría (manejados directamente)
+    @Column(name = "gratif_proyect", nullable = false, precision = 13, scale = 2)
+    private BigDecimal gratifProyect;
+
+    @Column(name = "rem_externa", nullable = false, precision = 13, scale = 2)
+    private BigDecimal remExterna;
+
+    @Column(name = "tipo_planilla_id", nullable = false)
+    private Long tipoPlanillaId;
+
     @Column(name = "created_by", updatable = false)
     private Long createdBy;
 

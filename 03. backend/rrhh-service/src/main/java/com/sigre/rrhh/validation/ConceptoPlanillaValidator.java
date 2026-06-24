@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.rrhh.repository.ConceptoPlanillaRepository;
+import com.sigre.rrhh.repository.GrupoConceptosPlanillaRepository;
 
 import static com.sigre.rrhh.constants.ConceptoPlanillaConstants.*;
 
@@ -18,6 +19,7 @@ import static com.sigre.rrhh.constants.ConceptoPlanillaConstants.*;
 public class ConceptoPlanillaValidator {
 
     private final ConceptoPlanillaRepository repository;
+    private final GrupoConceptosPlanillaRepository grupoConceptosPlanillaRepository;
 
     /**
      * Valida que el código no exista en la base de datos.
@@ -47,14 +49,17 @@ public class ConceptoPlanillaValidator {
     }
 
     /**
-     * Valida que el tipo sea uno de los valores permitidos: INGRESO, DESCUENTO o APORTE.
-     * 
-     * @param tipo Tipo a validar
-     * @throws BusinessException si el tipo no es válido (RH-CP-003)
+     * Valida que el grupo de cálculo esté informado.
+     *
+     * @param grupoCalculo Grupo SIGRE (GRUPO_CALC)
+     * @throws BusinessException si el grupo es nulo o vacío (RH-CP-003)
      */
-    public void validarTipo(String tipo) {
-        if (!TIPO_INGRESO.equals(tipo) && !TIPO_DESCUENTO.equals(tipo) && !TIPO_APORTE.equals(tipo)) {
-            throw new BusinessException(MSG_TIPO_INVALIDO, ERROR_TIPO_INVALIDO);
+    public void validarGrupoCalculo(String grupoCalculo) {
+        if (grupoCalculo == null || grupoCalculo.isBlank()) {
+            throw new BusinessException(MSG_GRUPO_CALCULO_INVALIDO, ERROR_GRUPO_CALCULO_INVALIDO);
+        }
+        if (grupoConceptosPlanillaRepository.findByCodigo(grupoCalculo).isEmpty()) {
+            throw new BusinessException(MSG_GRUPO_CALCULO_INVALIDO, ERROR_GRUPO_CALCULO_INVALIDO);
         }
     }
 

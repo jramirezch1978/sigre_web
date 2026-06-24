@@ -35,8 +35,11 @@ class TrabajadorMapperTest {
     void setUp() {
         mapper = new TrabajadorMapper(repository);
         lenient().when(repository.findAreaNombreById(anyLong())).thenReturn("Cocina");
+        lenient().when(repository.findSeccionNombreById(anyLong())).thenReturn("Producción");
         lenient().when(repository.findCargoNombreById(anyLong())).thenReturn("Chef");
+        lenient().when(repository.findCentroCostoNombreById(anyLong())).thenReturn("CC Operaciones");
         lenient().when(repository.findSucursalNombreById(anyLong())).thenReturn("Sucursal Miraflores");
+        lenient().when(repository.findTipoTrabajadorNombreById(anyLong())).thenReturn("Empleado");
         lenient().when(repository.findAdminAfpNombreById(anyLong())).thenReturn("AFP Integra");
         lenient().when(repository.findTurnoNombreById(anyLong())).thenReturn("Turno Mañana");
     }
@@ -45,6 +48,11 @@ class TrabajadorMapperTest {
     @DisplayName("toListResponse() mapea campos principales y resuelve FKs")
     void toListResponse_mapeaCampos() {
         Trabajador t = trabajador(1L);
+        t.setTipoTrabajadorId(2L);
+        t.setAdminAfpId(3L);
+        t.setCentroCostoId(4L);
+        t.setSeccionId(5L);
+        t.setFecIniAfilAfp(java.time.LocalDate.of(2020, 1, 15));
 
         TrabajadorListResponse resp = mapper.toListResponse(t);
 
@@ -55,8 +63,13 @@ class TrabajadorMapperTest {
         assertThat(resp.getArea()).isNotNull();
         assertThat(resp.getArea().getId()).isEqualTo(1L);
         assertThat(resp.getArea().getNombre()).isEqualTo("Cocina");
+        assertThat(resp.getSeccion().getNombre()).isEqualTo("Producción");
         assertThat(resp.getCargo().getNombre()).isEqualTo("Chef");
+        assertThat(resp.getCentroCosto().getNombre()).isEqualTo("CC Operaciones");
         assertThat(resp.getSucursal().getNombre()).isEqualTo("Sucursal Miraflores");
+        assertThat(resp.getTipoTrabajador().getNombre()).isEqualTo("Empleado");
+        assertThat(resp.getAdminAfp().getNombre()).isEqualTo("AFP Integra");
+        assertThat(resp.getFecIniAfilAfp()).isEqualTo("2020-01-15");
     }
 
     @Test
@@ -126,13 +139,21 @@ class TrabajadorMapperTest {
     void toListResponse_fksNulas_refsNulas() {
         Trabajador t = trabajador(1L);
         t.setAreaId(null);
+        t.setSeccionId(null);
         t.setCargoId(null);
+        t.setCentroCostoId(null);
         t.setSucursalId(null);
+        t.setTipoTrabajadorId(null);
+        t.setAdminAfpId(null);
 
         TrabajadorListResponse resp = mapper.toListResponse(t);
 
         assertThat(resp.getArea()).isNull();
+        assertThat(resp.getSeccion()).isNull();
         assertThat(resp.getCargo()).isNull();
+        assertThat(resp.getCentroCosto()).isNull();
         assertThat(resp.getSucursal()).isNull();
+        assertThat(resp.getTipoTrabajador()).isNull();
+        assertThat(resp.getAdminAfp()).isNull();
     }
 }

@@ -6,5 +6,6 @@ import com.sigre.rrhh.entity.CntaCrrte;
 
 public interface CntaCrrteRepository extends JpaRepository<CntaCrrte, Long>,
         JpaSpecificationExecutor<CntaCrrte> {
-    boolean existsByTrabajadorIdAndFlagEstado(Long trabajadorId, String flagEstado);
+
+    boolean existsByTrabajadorIdAndDocTipoIdAndNroDoc(Long trabajadorId, Long docTipoId, String nroDoc);
 }

@@ -21,11 +21,11 @@ public interface ConceptoPlanillaService {
      * 
      * @param codigo Filtro por código (LIKE, opcional)
      * @param nombre Filtro por nombre (LIKE, opcional)
-     * @param tipo Filtro por tipo (INGRESO, DESCUENTO, APORTE, opcional)
+     * @param grupoCalculo Filtro por grupo de cálculo SIGRE (opcional)
      * @param pageable Configuración de paginación
      * @return Página de conceptos que cumplen los filtros
      */
-    Page<ConceptoPlanillaResponse> listar(String codigo, String nombre, String tipo, String flagEstado, Pageable pageable);
+    Page<ConceptoPlanillaResponse> listar(String codigo, String nombre, String grupoCalculo, String flagEstado, Pageable pageable);
 
     /**
      * Obtiene un concepto de planilla por su ID.
@@ -38,11 +38,11 @@ public interface ConceptoPlanillaService {
 
     /**
      * Crea un nuevo concepto de planilla.
-     * Valida que el código sea único y que el tipo sea válido.
+     * Valida que el código sea único y que el grupo de cálculo sea válido.
      * 
      * @param request DTO con los datos del concepto a crear
      * @return DTO con los datos del concepto creado
-     * @throws com.sigre.common.exception.BusinessException si el código ya existe o el tipo es inválido
+     * @throws com.sigre.common.exception.BusinessException si el código ya existe o el grupo de cálculo es inválido
      */
     ConceptoPlanillaResponse crear(ConceptoPlanillaCreateRequest request);
 
@@ -54,7 +54,7 @@ public interface ConceptoPlanillaService {
      * @param request DTO con los nuevos datos del concepto
      * @return DTO con los datos del concepto actualizado
      * @throws com.sigre.common.exception.ResourceNotFoundException si no existe el concepto
-     * @throws com.sigre.common.exception.BusinessException si el tipo es inválido
+     * @throws com.sigre.common.exception.BusinessException si el grupo de cálculo es inválido
      */
     ConceptoPlanillaResponse actualizar(Long id, ConceptoPlanillaUpdateRequest request);
 

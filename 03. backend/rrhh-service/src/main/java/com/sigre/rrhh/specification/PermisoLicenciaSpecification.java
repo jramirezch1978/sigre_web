@@ -1,8 +1,10 @@
 package com.sigre.rrhh.specification;
 
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 import com.sigre.rrhh.entity.PermisoLicencia;
+import com.sigre.rrhh.entity.PermisoLicenciaDet;
 import com.sigre.rrhh.util.RrhhFlagEstadoLegacyNormalizer;
 
 import java.time.LocalDate;
@@ -22,11 +24,23 @@ public final class PermisoLicenciaSpecification {
             if (trabajadorId != null) {
                 predicates.add(cb.equal(root.get("trabajadorId"), trabajadorId));
             }
-            if (fechaDesde != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("fechaInicio"), fechaDesde));
-            }
-            if (fechaHasta != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("fechaFin"), fechaHasta));
+            if (fechaDesde != null || fechaHasta != null) {
+                Subquery<Long> sub = query.subquery(Long.class);
+                var detRoot = sub.from(PermisoLicenciaDet.class);
+                sub.select(detRoot.get("permisoLicenciaId"));
+                List<Predicate> subPredicates = new ArrayList<>();
+                subPredicates.add(cb.equal(detRoot.get("permisoLicenciaId"), root.get("id")));
+                if (fechaDesde != null) {
+                    subPredicates.add(cb.greaterThanOrEqualTo(detRoot.get("fechaInicio"), fechaDesde));
+                }
+                if (fechaHasta != null) {
+                    subPredicates.add(cb.or(
+                            cb.isNull(detRoot.get("fechaFin")),
+                            cb.lessThanOrEqualTo(detRoot.get("fechaFin"), fechaHasta)
+                    ));
+                }
+                sub.where(subPredicates.toArray(new Predicate[0]));
+                predicates.add(cb.exists(sub));
             }
             if (flagEstado != null && !flagEstado.isEmpty()) {
                 var valores = RrhhFlagEstadoLegacyNormalizer.permisoFlagEstadosParaFiltro(flagEstado);

@@ -21,7 +21,7 @@ public final class CntaCrrteConstants {
     public static final String ERROR_TRANSICION_INVALIDA = "RH-CC-006";
 
     // ── Mensajes ─────────────────────────────────────────────────
-    public static final String MSG_CUENTA_DUPLICADA = "El trabajador ya tiene una cuenta corriente activa.";
+    public static final String MSG_CUENTA_DUPLICADA = "Ya existe un documento de cuenta corriente con el mismo tipo y número para el trabajador.";
     public static final String MSG_CIERRE_CON_SALDO = "No se puede cerrar una cuenta con saldo distinto de cero.";
     public static final String MSG_MOVIMIENTO_INACTIVA = "No se pueden registrar movimientos en una cuenta cerrada.";
     public static final String MSG_NO_ENCONTRADO = "Cuenta corriente no encontrada.";

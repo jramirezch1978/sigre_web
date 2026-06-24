@@ -8,12 +8,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
-/**
- * DTO para la actualización de un concepto de planilla.
- * El campo 'codigo' no se incluye ya que es inmutable tras la creación.
- * 
- * @author Equipo de Desarrollo RRHH
- */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,22 +18,43 @@ public class ConceptoPlanillaUpdateRequest {
     @Size(max = 150, message = "El nombre no puede exceder 150 caracteres")
     private String nombre;
 
-    @NotBlank(message = "El tipo es obligatorio")
-    @Pattern(regexp = "INGRESO|DESCUENTO|APORTE", message = "El tipo debe ser INGRESO, DESCUENTO o APORTE")
-    private String tipo;
+    @Size(max = 150, message = "La descripción breve no puede exceder 150 caracteres")
+    private String descripcionBreve;
 
-    @Size(max = 5000, message = "La fórmula no puede exceder 5000 caracteres")
-    private String formula;
+    @NotNull(message = "El factor de pago es obligatorio")
+    @DecimalMin(value = "0.0", inclusive = true, message = "El factor de pago debe ser mayor o igual a 0")
+    private BigDecimal factorPago;
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "El valor fijo debe ser mayor a 0")
-    private BigDecimal valorFijo;
+    @NotNull(message = "El importe tope mínimo es obligatorio")
+    @DecimalMin(value = "0.0", inclusive = true, message = "El importe tope mínimo debe ser mayor o igual a 0")
+    private BigDecimal importeTopeMin;
 
-    @NotNull(message = "El campo afectoQuinta es obligatorio")
-    private Boolean afectoQuinta;
+    @NotNull(message = "El importe tope máximo es obligatorio")
+    @DecimalMin(value = "0.0", inclusive = true, message = "El importe tope máximo debe ser mayor o igual a 0")
+    private BigDecimal importeTopeMax;
 
-    @NotNull(message = "El campo afectoEssalud es obligatorio")
-    private Boolean afectoEssalud;
+    @DecimalMin(value = "0.0", inclusive = true, message = "El número de horas debe ser mayor o igual a 0")
+    private BigDecimal numeroHoras;
 
-    @NotNull(message = "El campo aplicaTodos es obligatorio")
-    private Boolean aplicaTodos;
+    @NotBlank(message = "El grupo de cálculo es obligatorio")
+    @Size(max = 10, message = "El grupo de cálculo no puede exceder 10 caracteres")
+    private String grupoCalculo;
+
+    @NotBlank(message = "El flag de replicación es obligatorio")
+    @Pattern(regexp = "[01]", message = "El flag de replicación debe ser 0 o 1")
+    private String flagReplicacion;
+
+    @Size(max = 10, message = "El concepto RTPS no puede exceder 10 caracteres")
+    private String conceptoRtps;
+
+    @NotBlank(message = "El flag de subsidio es obligatorio")
+    @Pattern(regexp = "[01]", message = "El flag de subsidio debe ser 0 o 1")
+    private String flagSubsidio;
+
+    @NotBlank(message = "El flag de reporte quinta es obligatorio")
+    @Pattern(regexp = "[01]", message = "El flag de reporte quinta debe ser 0 o 1")
+    private String flagReporteQuinta;
+
+    @Size(max = 20, message = "El número de orden no puede exceder 20 caracteres")
+    private String numeroOrden;
 }

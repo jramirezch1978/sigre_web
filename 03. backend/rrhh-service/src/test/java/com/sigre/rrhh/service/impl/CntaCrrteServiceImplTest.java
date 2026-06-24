@@ -66,9 +66,11 @@ class CntaCrrteServiceImplTest {
             CntaCrrteResponse r = new CntaCrrteResponse();
             r.setId(entity.getId());
             r.setTrabajadorId(entity.getTrabajadorId());
-            r.setFechaApertura(entity.getFechaApertura());
-            r.setSaldoInicial(entity.getSaldoInicial());
-            r.setSaldoActual(entity.getSaldoActual());
+            r.setDocTipoId(entity.getDocTipoId());
+            r.setNroDoc(entity.getNroDoc());
+            r.setFecPrestamo(entity.getFecPrestamo());
+            r.setMontoOriginal(entity.getMontoOriginal());
+            r.setSaldoPrestamo(entity.getSaldoPrestamo());
             r.setFlagEstado(entity.getFlagEstado());
             return r;
         });
@@ -77,7 +79,7 @@ class CntaCrrteServiceImplTest {
             CntaCrrteDetResponse r = new CntaCrrteDetResponse();
             r.setId(det.getId());
             r.setCntaCrrteId(det.getCntaCrrteId());
-            r.setMonto(det.getMonto());
+            r.setMonto(det.getImpDscto());
             return r;
         });
     }
@@ -134,7 +136,7 @@ class CntaCrrteServiceImplTest {
         CntaCrrteCreateRequest request = RrhhTestFixtures.cntaCrrteCreateRequest();
         CntaCrrte entity = RrhhTestFixtures.cntaCrrte(1L);
         when(mapper.toEntity(request)).thenReturn(entity);
-        when(repository.existsByTrabajadorIdAndFlagEstado(1L, "1")).thenReturn(false);
+        when(repository.existsByTrabajadorIdAndDocTipoIdAndNroDoc(1L, 1L, "CC-001")).thenReturn(false);
         when(repository.save(any())).thenReturn(entity);
 
         CntaCrrteResponse result = service.crear(request);
@@ -143,7 +145,7 @@ class CntaCrrteServiceImplTest {
         verify(mapper).toEntity(request);
         verify(repository).save(captor.capture());
         CntaCrrte saved = captor.getValue();
-        assertThat(saved.getSaldoActual()).isEqualByComparingTo("1000.0000");
+        assertThat(saved.getSaldoPrestamo()).isEqualByComparingTo("1000.00000");
         assertThat(saved.getCreatedBy()).isEqualTo(1L);
         assertThat(saved.getFecCreacion()).isNotNull();
     }
@@ -152,7 +154,7 @@ class CntaCrrteServiceImplTest {
     @DisplayName("crear() con cuenta duplicada -> lanza BusinessException")
     void crear_cuentaDuplicada_lanzaBusinessException() {
         CntaCrrteCreateRequest request = RrhhTestFixtures.cntaCrrteCreateRequest();
-        when(repository.existsByTrabajadorIdAndFlagEstado(1L, "1")).thenReturn(true);
+        when(repository.existsByTrabajadorIdAndDocTipoIdAndNroDoc(1L, 1L, "CC-001")).thenReturn(true);
 
         assertThatThrownBy(() -> service.crear(request))
                 .isInstanceOf(BusinessException.class);
@@ -186,7 +188,7 @@ class CntaCrrteServiceImplTest {
     @DisplayName("cambiarEstado() activo sin saldo -> pasa a inactivo")
     void cambiarEstado_activoSinSaldo_pasaAInactivo() {
         CntaCrrte entity = RrhhTestFixtures.cntaCrrte(1L, "1");
-        entity.setSaldoActual(java.math.BigDecimal.ZERO);
+        entity.setSaldoPrestamo(java.math.BigDecimal.ZERO);
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
         when(repository.save(entity)).thenReturn(entity);
 
@@ -241,6 +243,7 @@ class CntaCrrteServiceImplTest {
         when(repository.findById(1L)).thenReturn(Optional.of(cuenta));
         CntaCrrteMovimientoRequest request = RrhhTestFixtures.cntaCrrteMovimientoRequest();
         CntaCrrteDet det = RrhhTestFixtures.cntaCrrteDet(1L);
+        when(detRepository.findMaxNroDsctoByCntaCrrteId(1L)).thenReturn((short) 0);
         when(mapper.toDetEntity(request)).thenReturn(det);
         when(detRepository.save(any())).thenReturn(det);
 
@@ -268,10 +271,10 @@ class CntaCrrteServiceImplTest {
     @DisplayName("actualizarMovimiento() -> actualiza y ajusta saldo")
     void actualizarMovimiento_actualizaYAjustaSaldo() {
         CntaCrrte cuenta = RrhhTestFixtures.cntaCrrte(1L, "1");
-        cuenta.setSaldoActual(new java.math.BigDecimal("500.0000"));
+        cuenta.setSaldoPrestamo(new java.math.BigDecimal("500.00000"));
         when(repository.findById(1L)).thenReturn(Optional.of(cuenta));
         CntaCrrteDet det = RrhhTestFixtures.cntaCrrteDet(1L);
-        det.setMonto(new java.math.BigDecimal("200.0000"));
+        det.setImpDscto(new java.math.BigDecimal("200.0000"));
         when(detRepository.findById(2L)).thenReturn(Optional.of(det));
         CntaCrrteMovimientoUpdateRequest request = RrhhTestFixtures.cntaCrrteMovimientoUpdateRequest();
         when(detRepository.save(det)).thenReturn(det);
@@ -285,10 +288,10 @@ class CntaCrrteServiceImplTest {
     @DisplayName("eliminarMovimiento() -> elimina y ajusta saldo")
     void eliminarMovimiento_eliminaYAjustaSaldo() {
         CntaCrrte cuenta = RrhhTestFixtures.cntaCrrte(1L, "1");
-        cuenta.setSaldoActual(new java.math.BigDecimal("500.0000"));
+        cuenta.setSaldoPrestamo(new java.math.BigDecimal("500.00000"));
         when(repository.findById(1L)).thenReturn(Optional.of(cuenta));
         CntaCrrteDet det = RrhhTestFixtures.cntaCrrteDet(1L);
-        det.setMonto(new java.math.BigDecimal("200.0000"));
+        det.setImpDscto(new java.math.BigDecimal("200.0000"));
         when(detRepository.findById(2L)).thenReturn(Optional.of(det));
 
         service.eliminarMovimiento(1L, 2L);

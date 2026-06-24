@@ -6,9 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.rrhh.constants.PermisoLicenciaConstants;
-import com.sigre.rrhh.repository.PermisoLicenciaRepository;
+import com.sigre.rrhh.repository.PermisoLicenciaDetRepository;
 import com.sigre.rrhh.repository.TipoSuspensionLaboralRepository;
 import com.sigre.rrhh.repository.TrabajadorRepository;
+
 import java.time.LocalDate;
 
 @Slf4j
@@ -16,7 +17,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class PermisoLicenciaValidator {
 
-    private final PermisoLicenciaRepository repository;
+    private final PermisoLicenciaDetRepository detRepository;
     private final TrabajadorRepository trabajadorRepository;
     private final TipoSuspensionLaboralRepository tipoSuspensionRepository;
 
@@ -44,9 +45,9 @@ public class PermisoLicenciaValidator {
         }
     }
 
-    public void validarSinSolapamiento(Long trabajadorId, LocalDate fechaInicio, LocalDate fechaFin, Long excluirId) {
+    public void validarSinSolapamiento(Long trabajadorId, LocalDate fechaInicio, LocalDate fechaFin, Long excluirPermisoId) {
         LocalDate fin = fechaFin != null ? fechaFin : fechaInicio;
-        if (repository.existsSolapamiento(trabajadorId, fechaInicio, fin, excluirId)) {
+        if (detRepository.existsSolapamiento(trabajadorId, fechaInicio, fin, excluirPermisoId)) {
             log.warn("Solapamiento detectado para trabajador {} entre {} y {}", trabajadorId, fechaInicio, fin);
             throw new BusinessException(PermisoLicenciaConstants.MSG_SOLAPAMIENTO,
                     HttpStatus.CONFLICT, PermisoLicenciaConstants.ERROR_SOLAPAMIENTO);

@@ -11,7 +11,7 @@ public interface CalculoService {
 
     CalculoDetalleResponse obtenerDetalle(Long id);
 
-    CalculoDetalleResponse procesar(Integer anio, Integer mes, Long tipoPlanillaId);
+    CalculoDetalleResponse procesar(Integer anio, Integer mes, String tipoPlanillaCodigo, String origen);
 
     void eliminar(Long id);
 

@@ -69,23 +69,27 @@ class ConceptoPlanillaSpecificationTest {
         assertThat(result).isNull();
     }
 
-    @Test void conTipo_conValor_cbEqual() {
-        Specification<ConceptoPlanilla> spec = ConceptoPlanillaSpecification.conTipo("INGRESO");
-        when(cb.equal(root.get("tipo"), "INGRESO")).thenReturn(mock(Predicate.class));
+    @Test void conGrupoCalculo_conValor_cbEqual() {
+        Specification<ConceptoPlanilla> spec = ConceptoPlanillaSpecification.conGrupoCalculo("10");
+        Join<Object, Object> join = mock(Join.class);
+        Path<Object> codigoPath = mock(Path.class);
+        when(root.join("grupoConceptosPlanilla")).thenReturn(join);
+        when(join.get("codigo")).thenReturn(codigoPath);
+        when(cb.equal(codigoPath, "10")).thenReturn(mock(Predicate.class));
         Predicate result = spec.toPredicate(root, query, cb);
         assertThat(result).isNotNull();
-        verify(cb).equal(root.get("tipo"), "INGRESO");
+        verify(cb).equal(codigoPath, "10");
     }
 
-    @Test void conTipo_null_toPredicateRetornaNull() {
-        Specification<ConceptoPlanilla> spec = ConceptoPlanillaSpecification.conTipo(null);
+    @Test void conGrupoCalculo_null_toPredicateRetornaNull() {
+        Specification<ConceptoPlanilla> spec = ConceptoPlanillaSpecification.conGrupoCalculo(null);
         assertThat(spec).isNotNull();
         Predicate result = spec.toPredicate(root, query, cb);
         assertThat(result).isNull();
     }
 
-    @Test void conTipo_vacio_toPredicateRetornaNull() {
-        Specification<ConceptoPlanilla> spec = ConceptoPlanillaSpecification.conTipo("");
+    @Test void conGrupoCalculo_vacio_toPredicateRetornaNull() {
+        Specification<ConceptoPlanilla> spec = ConceptoPlanillaSpecification.conGrupoCalculo("");
         assertThat(spec).isNotNull();
         Predicate result = spec.toPredicate(root, query, cb);
         assertThat(result).isNull();

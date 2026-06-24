@@ -8,18 +8,48 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import com.sigre.common.entity.BaseEntity;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Data @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor @AllArgsConstructor
-@Entity @Table(name = "cnta_crrte_det", schema = "rrhh")
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "cnta_crrte_det", schema = "rrhh")
 public class CntaCrrteDet extends BaseEntity {
 
-    @Column(name = "cnta_crrte_id", nullable = false) private Long cntaCrrteId;
-    @Column(name = "fecha_movimiento", nullable = false) private LocalDate fechaMovimiento;
-    @Column(name = "tipo_movimiento_cnta_crrte_id", nullable = false) private Long tipoMovimientoCntaCrrteId;
-    @Column(name = "concepto", columnDefinition = "TEXT") private String concepto;
-    @Column(name = "monto", nullable = false, precision = 18, scale = 4) private BigDecimal monto;
-    @Column(name = "referencia", length = 120) private String referencia;
+    @Column(name = "cnta_crrte_id", nullable = false)
+    private Long cntaCrrteId;
+
+    @Column(name = "nro_dscto", nullable = false)
+    private Short nroDscto = 1;
+
+    @Column(name = "fecha_movimiento", nullable = false)
+    private LocalDate fechaMovimiento;
+
+    @Column(name = "tipo_movimiento_cnta_crrte_id", nullable = false)
+    private Long tipoMovimientoCntaCrrteId;
+
+    @Column(name = "imp_dscto", nullable = false, precision = 18, scale = 4)
+    private BigDecimal impDscto;
+
+    @Column(name = "flag_digitado", nullable = false, length = 1)
+    private String flagDigitado = "0";
+
+    @Column(name = "liquidacion_benef_id")
+    private Long liquidacionBenefId;
+
+    @Column(name = "calculo_det_id")
+    private Long calculoDetId;
+
+    @Column(name = "referencia", length = 120)
+    private String referencia;
+
+    @Column(name = "observaciones", length = 120)
+    private String observaciones;
+
+    @Column(name = "flag_proceso", length = 1)
+    private String flagProceso;
 }

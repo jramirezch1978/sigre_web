@@ -8,5 +8,6 @@ import com.sigre.rrhh.entity.TipoPlanilla;
 @Repository
 public interface TipoPlanillaRepository extends JpaRepository<TipoPlanilla, Long>, JpaSpecificationExecutor<TipoPlanilla> {
     boolean existsByCodigo(String codigo);
+    java.util.Optional<TipoPlanilla> findByCodigo(String codigo);
     java.util.List<TipoPlanilla> findByFlagEstadoOrderByNombreAsc(String flagEstado);
 }

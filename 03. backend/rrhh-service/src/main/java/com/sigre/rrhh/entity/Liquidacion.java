@@ -11,14 +11,14 @@ import java.time.LocalDate;
  * Entidad que representa la liquidación de beneficios sociales (cese)
  * de un trabajador.
  * <p>
- * Extiende {@link BaseEntity} porque la tabla {@code rrhh.liquidacion}
+ * Extiende {@link BaseEntity} porque la tabla {@code rrhh.liquidacion_benef}
  * posee {@code flag_estado}, igual que {@link Contrato} y {@link Trabajador}.
  * <p>
  * Semántica de {@code flagEstado}: {@code "1"}=Pendiente, {@code "2"}=Aprobada,
  * {@code "0"}=Anulada.
  */
 @Entity
-@Table(name = "liquidacion", schema = "rrhh")
+@Table(name = "liquidacion_benef", schema = "rrhh")
 @Getter
 @Setter
 @Builder

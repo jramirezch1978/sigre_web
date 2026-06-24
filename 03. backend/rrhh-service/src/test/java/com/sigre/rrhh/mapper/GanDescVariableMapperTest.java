@@ -42,8 +42,9 @@ class GanDescVariableMapperTest {
         GanDescVariable entity = RrhhTestFixtures.ganDescVariable(1L);
         when(trabajadorRepository.findById(1L)).thenReturn(Optional.of(Trabajador.builder()
                 .nombres("Nombre 1").apellidoPaterno("Paterno").apellidoMaterno("Materno").build()));
-        when(conceptoPlanillaRepository.findById(1L)).thenReturn(Optional.of(
-                new ConceptoPlanilla(null, "Sueldo Básico Test", null, null, null, null, null, null)));
+        ConceptoPlanilla concepto = new ConceptoPlanilla();
+        concepto.setNombre("Sueldo Básico Test");
+        when(conceptoPlanillaRepository.findById(1L)).thenReturn(Optional.of(concepto));
         when(ganDescVariableRepository.findTipoPlanillaNombreById(1L)).thenReturn("Planilla Test");
 
         GanDescVariableResponse response = mapper.toResponse(entity);

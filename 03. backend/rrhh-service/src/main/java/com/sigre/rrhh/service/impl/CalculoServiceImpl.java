@@ -5,23 +5,30 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.sigre.common.exception.BusinessException;
 import com.sigre.common.exception.ResourceNotFoundException;
 import com.sigre.rrhh.dto.response.CalculoDetalleResponse;
 import com.sigre.rrhh.dto.response.CalculoResponse;
-import com.sigre.rrhh.entity.*;
+import com.sigre.rrhh.entity.Calculo;
+import com.sigre.rrhh.entity.CalculoDet;
+import com.sigre.rrhh.entity.TipoPlanilla;
 import com.sigre.rrhh.mapper.CalculoMapper;
-import com.sigre.rrhh.repository.*;
+import com.sigre.rrhh.repository.CalculoDetRepository;
+import com.sigre.rrhh.repository.CalculoRepository;
+import com.sigre.rrhh.repository.TipoPlanillaRepository;
 import com.sigre.rrhh.service.CalculoService;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Thin wrapper: delega el cálculo al stored procedure {@code rrhh.sp_calcular_planilla}
+ * en PostgreSQL. La lógica de negocio vive en la BD (§6.1 PLANIFICACION_DESARROLLO_JUNIO_2026.md).
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -30,16 +37,9 @@ public class CalculoServiceImpl implements CalculoService {
 
     private final CalculoRepository calculoRepo;
     private final CalculoDetRepository calculoDetRepo;
-    private final TrabajadorRepository trabajadorRepo;
-    private final ContratoRepository contratoRepo;
-    private final ConceptoPlanillaRepository conceptoRepo;
-    private final AdminAfpRepository adminAfpRepo;
+    private final TipoPlanillaRepository tipoPlanillaRepo;
     private final CalculoMapper mapper;
-
-    private static final String CONCEPTO_REMUNERACION_CODIGO = "C001";
-    private static final String CONCEPTO_AFP_CODIGO = "D001";
-    private static final String TIPO_CONCEPTO_INGRESO = "INGRESO";
-    private static final String TIPO_CONCEPTO_DESCUENTO = "DESCUENTO";
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     @Transactional(readOnly = true)
@@ -52,101 +52,59 @@ public class CalculoServiceImpl implements CalculoService {
     @Transactional(readOnly = true)
     public CalculoDetalleResponse obtenerDetalle(Long id) {
         Calculo calculo = buscarOrThrow(id);
-        List<CalculoDet> detalles = calculoDetRepo.findByCalculoIdOrderByTrabajadorId(id);
+        List<CalculoDet> detalles = calculoDetRepo.findByCalculoIdOrderByConceptoIdAscItemAsc(id);
         return mapper.toDetalleResponse(calculo, detalles);
     }
 
+    /**
+     * Invoca {@code CALL rrhh.sp_calcular_planilla(origen, fec_proceso, tipo_planilla_codigo)}.
+     * El SP resuelve internamente el id de {@code rrhh.tipo_planilla} o falla si no existe.
+     */
     @Override
     @Timed("rrhh.calculo.procesar")
-    public CalculoDetalleResponse procesar(Integer anio, Integer mes, Long tipoPlanillaId) {
-        log.info("Iniciando cálculo de planilla: anio={}, mes={}, tipoPlanillaId={}", anio, mes, tipoPlanillaId);
+    public CalculoDetalleResponse procesar(Integer anio, Integer mes, String tipoPlanillaCodigo, String origen) {
+        LocalDate fecProceso = LocalDate.of(anio, mes, 1);
+        String codigo = tipoPlanillaCodigo.trim();
 
-        validarTipoPlanilla(tipoPlanillaId);
+        log.info("Iniciando sp_calcular_planilla: origen={}, fec_proceso={}, tipoPlanillaCodigo={}",
+                origen, fecProceso, codigo);
 
-        calculoRepo.findByAnioAndMesAndTipoPlanillaId(anio, mes, tipoPlanillaId).ifPresent(existing -> {
-            calculoDetRepo.deleteByCalculoId(existing.getId());
-            calculoRepo.delete(existing);
-        });
+        jdbcTemplate.update(
+                "CALL rrhh.sp_calcular_planilla(?, ?, ?)",
+                origen,
+                Date.valueOf(fecProceso),
+                codigo);
 
-        List<Trabajador> activos = trabajadorRepo.findAll().stream()
-                .filter(t -> "1".equals(t.getFlagEstado()))
-                .toList();
+        log.info("sp_calcular_planilla finalizado: origen={}, fec_proceso={}", origen, fecProceso);
 
-        if (activos.isEmpty()) {
-            throw new BusinessException(
-                    "No existen trabajadores activos para procesar la planilla",
-                    HttpStatus.UNPROCESSABLE_ENTITY, "RH-CA-004");
-        }
+        TipoPlanilla tipoPlanilla = tipoPlanillaRepo.findByCodigo(codigo)
+                .orElseThrow(() -> new ResourceNotFoundException("TipoPlanilla", "codigo", codigo));
 
-        Long tipoConceptoIngresoId = resolveTipoConceptoCalculoId(TIPO_CONCEPTO_INGRESO);
-        Long tipoConceptoDescuentoId = resolveTipoConceptoCalculoId(TIPO_CONCEPTO_DESCUENTO);
+        List<Calculo> calculos = calculoRepo.findWithFilters(anio, mes, tipoPlanilla.getId(), Pageable.unpaged())
+                .getContent();
 
-        ConceptoPlanilla conceptoIngreso = resolveConcepto(CONCEPTO_REMUNERACION_CODIGO, "INGRESO");
-        ConceptoPlanilla conceptoAfp = resolveConcepto(CONCEPTO_AFP_CODIGO, "DESCUENTO");
+        BigDecimal totalIngresos   = calculos.stream()
+                .map(c -> c.getTotalIngresosSoles()   != null ? c.getTotalIngresosSoles()   : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalDescuentos = calculos.stream()
+                .map(c -> c.getTotalDescuentosSoles() != null ? c.getTotalDescuentosSoles() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalAportes    = calculos.stream()
+                .map(c -> c.getTotalAportesSoles()    != null ? c.getTotalAportesSoles()    : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        Calculo calculo = Calculo.builder()
+        return CalculoDetalleResponse.builder()
                 .anio(anio)
                 .mes(mes)
-                .tipoPlanillaId(tipoPlanillaId)
-                .totalIngresos(BigDecimal.ZERO)
-                .totalDescuentos(BigDecimal.ZERO)
-                .totalNeto(BigDecimal.ZERO)
-                .totalAportes(BigDecimal.ZERO)
+                .tipoPlanillaId(tipoPlanilla.getId())
+                .tipoPlanillaNombre(tipoPlanilla.getNombre())
+                .totalIngresos(totalIngresos)
+                .totalDescuentos(totalDescuentos)
+                .totalNeto(totalIngresos.subtract(totalDescuentos))
+                .totalAportes(totalAportes)
+                .totalTrabajadores(calculos.size())
+                .detalles(List.of())
                 .build();
-
-        calculo = calculoRepo.save(calculo);
-
-        BigDecimal totalIngresos = BigDecimal.ZERO;
-        BigDecimal totalDescuentos = BigDecimal.ZERO;
-        BigDecimal totalAportes = BigDecimal.ZERO;
-        List<CalculoDet> detalles = new ArrayList<>();
-
-        for (Trabajador trabajador : activos) {
-            Contrato contrato = findContratoActivo(trabajador.getId());
-            if (contrato == null) continue;
-
-            BigDecimal remuneracion = contrato.getRemuneracion() != null
-                    ? contrato.getRemuneracion()
-                    : BigDecimal.ZERO;
-
-            CalculoDet detIngreso = CalculoDet.builder()
-                    .calculoId(calculo.getId())
-                    .trabajadorId(trabajador.getId())
-                    .conceptoId(conceptoIngreso.getId())
-                    .monto(remuneracion)
-                    .tipoConceptoCalculoId(tipoConceptoIngresoId)
-                    .build();
-            detalles.add(detIngreso);
-            totalIngresos = totalIngresos.add(remuneracion);
-
-            if (trabajador.getAdminAfpId() != null) {
-                BigDecimal descuentoAfp = calcularDescuentoAfp(trabajador.getAdminAfpId(), remuneracion);
-                if (descuentoAfp.compareTo(BigDecimal.ZERO) > 0) {
-                    CalculoDet detDescuento = CalculoDet.builder()
-                            .calculoId(calculo.getId())
-                            .trabajadorId(trabajador.getId())
-                            .conceptoId(conceptoAfp.getId())
-                            .monto(descuentoAfp)
-                            .tipoConceptoCalculoId(tipoConceptoDescuentoId)
-                            .build();
-                    detalles.add(detDescuento);
-                    totalDescuentos = totalDescuentos.add(descuentoAfp);
-                    totalAportes = totalAportes.add(descuentoAfp);
-                }
-            }
-        }
-
-        calculoDetRepo.saveAll(detalles);
-
-        BigDecimal totalNeto = totalIngresos.subtract(totalDescuentos);
-        calculo.setTotalIngresos(totalIngresos);
-        calculo.setTotalDescuentos(totalDescuentos);
-        calculo.setTotalNeto(totalNeto);
-        calculo.setTotalAportes(totalAportes);
-        calculo = calculoRepo.save(calculo);
-
-        log.info("Cálculo completado: ID={}, neto={}", calculo.getId(), totalNeto);
-        return mapper.toDetalleResponse(calculo, detalles);
     }
 
     @Override
@@ -160,55 +118,5 @@ public class CalculoServiceImpl implements CalculoService {
     private Calculo buscarOrThrow(Long id) {
         return calculoRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Calculo", id));
-    }
-
-    private void validarTipoPlanilla(Long tipoPlanillaId) {
-        if (tipoPlanillaId == null || !calculoRepo.existsTipoPlanillaById(tipoPlanillaId)) {
-            throw new BusinessException(
-                    "Tipo de planilla no encontrado con ID: " + tipoPlanillaId,
-                    HttpStatus.BAD_REQUEST, "RH-CA-001");
-        }
-    }
-
-    private Long resolveTipoConceptoCalculoId(String codigo) {
-        Long id = calculoRepo.findTipoConceptoCalculoIdByCodigo(codigo);
-        if (id == null) {
-            throw new BusinessException(
-                    "Tipo de concepto de cálculo no configurado para el código: " + codigo,
-                    HttpStatus.UNPROCESSABLE_ENTITY, "RH-CA-005");
-        }
-        return id;
-    }
-
-    private Contrato findContratoActivo(Long trabajadorId) {
-        List<Contrato> contratos = contratoRepo.findByTrabajadorIdAndFlagEstadoOrderByFecCreacionDesc(trabajadorId, "1");
-        return contratos.isEmpty() ? null : contratos.get(0);
-    }
-
-    private ConceptoPlanilla resolveConcepto(String codigo, String tipo) {
-        return conceptoRepo.findAll().stream()
-                .filter(cp -> codigo.equals(cp.getCodigo()))
-                .findFirst()
-                .orElseGet(() -> {
-                    String nombre = "INGRESO".equals(tipo) ? "Remuneración básica" : "Aporte AFP";
-                    ConceptoPlanilla nuevo = new ConceptoPlanilla();
-                    nuevo.setCodigo(codigo);
-                    nuevo.setNombre(nombre);
-                    nuevo.setTipo(tipo);
-                    return conceptoRepo.save(nuevo);
-                });
-    }
-
-    private BigDecimal calcularDescuentoAfp(Long adminAfpId, BigDecimal remuneracion) {
-        return adminAfpRepo.findById(adminAfpId)
-                .map(afp -> {
-                    BigDecimal comision = afp.getComisionPorcentaje() != null ? afp.getComisionPorcentaje() : BigDecimal.ZERO;
-                    BigDecimal prima = afp.getPrimaSeguro() != null ? afp.getPrimaSeguro() : BigDecimal.ZERO;
-                    BigDecimal aporte = afp.getAporteObligatorio() != null ? afp.getAporteObligatorio() : BigDecimal.ZERO;
-                    BigDecimal totalPorcentaje = comision.add(prima).add(aporte);
-                    return remuneracion.multiply(totalPorcentaje)
-                            .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
-                })
-                .orElse(BigDecimal.ZERO);
     }
 }

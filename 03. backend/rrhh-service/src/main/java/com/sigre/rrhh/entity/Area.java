@@ -21,6 +21,10 @@ import com.sigre.common.entity.BaseEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Area extends BaseEntity {
+
+    /** Código SIGRE (negocio); la PK es {@code id}. */
+    @Column(name = "codigo", length = 10)
+    private String codigo;
     
     @Column(name = "nombre", nullable = false, length = 120)
     private String nombre;

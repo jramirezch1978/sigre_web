@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import com.sigre.common.exception.BusinessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import com.sigre.common.exception.ResourceNotFoundException;
 import com.sigre.common.security.TenantContext;
 import com.sigre.rrhh.RrhhTestFixtures;
@@ -22,7 +22,6 @@ import com.sigre.rrhh.entity.*;
 import com.sigre.rrhh.mapper.CalculoMapper;
 import com.sigre.rrhh.repository.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,11 +36,9 @@ class CalculoServiceImplTest {
 
     @Mock private CalculoRepository calculoRepo;
     @Mock private CalculoDetRepository calculoDetRepo;
-    @Mock private TrabajadorRepository trabajadorRepo;
-    @Mock private ContratoRepository contratoRepo;
-    @Mock private ConceptoPlanillaRepository conceptoRepo;
-    @Mock private AdminAfpRepository adminAfpRepo;
+    @Mock private TipoPlanillaRepository tipoPlanillaRepo;
     @Mock private CalculoMapper mapper;
+    @Mock private JdbcTemplate jdbcTemplate;
 
     @InjectMocks
     private CalculoServiceImpl service;
@@ -94,7 +91,7 @@ class CalculoServiceImplTest {
         Calculo entity = RrhhTestFixtures.calculo(1L);
         List<CalculoDet> detalles = List.of(RrhhTestFixtures.calculoDet(1L, 1L));
         when(calculoRepo.findById(1L)).thenReturn(Optional.of(entity));
-        when(calculoDetRepo.findByCalculoIdOrderByTrabajadorId(1L)).thenReturn(detalles);
+        when(calculoDetRepo.findByCalculoIdOrderByConceptoIdAscItemAsc(1L)).thenReturn(detalles);
         when(mapper.toDetalleResponse(entity, detalles)).thenReturn(RrhhTestFixtures.calculoDetalleResponse(1L));
 
         CalculoDetalleResponse result = service.obtenerDetalle(1L);
@@ -117,106 +114,20 @@ class CalculoServiceImplTest {
     // ═══════════════════════════════════════════════════
 
     @Test
-    @DisplayName("procesar() -> crea cálculo con trabajadores activos")
-    void procesar_creaCalculo() {
-        when(calculoRepo.existsTipoPlanillaById(1L)).thenReturn(true);
-        when(calculoRepo.findByAnioAndMesAndTipoPlanillaId(2026, 6, 1L)).thenReturn(Optional.empty());
-        Trabajador t = RrhhTestFixtures.trabajador(1L);
-        when(trabajadorRepo.findAll()).thenReturn(List.of(t));
-        when(calculoRepo.findTipoConceptoCalculoIdByCodigo("INGRESO")).thenReturn(1L);
-        when(calculoRepo.findTipoConceptoCalculoIdByCodigo("DESCUENTO")).thenReturn(2L);
-        when(calculoRepo.save(any(Calculo.class))).thenAnswer(i -> {
-            Calculo c = i.getArgument(0);
-            if (c.getId() == null) c.setId(1L);
-            return c;
-        });
-        Contrato contrato = RrhhTestFixtures.contrato(1L, 1L);
-        when(contratoRepo.findByTrabajadorIdAndFlagEstadoOrderByFecCreacionDesc(1L, "1")).thenReturn(List.of(contrato));
+    @DisplayName("procesar() -> invoca sp_calcular_planilla y devuelve resumen")
+    void procesar_invocaStoredProcedure() {
+        TipoPlanilla tipoPlanilla = RrhhTestFixtures.tipoPlanilla(1L, "N");
+        when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(0);
+        when(tipoPlanillaRepo.findByCodigo("N")).thenReturn(Optional.of(tipoPlanilla));
+        when(calculoRepo.findWithFilters(eq(2026), eq(6), eq(1L), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
 
-        ConceptoPlanilla cpIngreso = new ConceptoPlanilla();
-        cpIngreso.setId(1L);
-        cpIngreso.setCodigo("C001");
-        cpIngreso.setNombre("Remuneración básica");
-        cpIngreso.setTipo("INGRESO");
-        when(conceptoRepo.findAll()).thenReturn(List.of(cpIngreso));
+        CalculoDetalleResponse resp = service.procesar(2026, 6, "N", "PI");
 
-        when(calculoDetRepo.saveAll(anyList())).thenReturn(null);
-        when(mapper.toDetalleResponse(any(), anyList())).thenReturn(RrhhTestFixtures.calculoDetalleResponse(1L));
-
-        CalculoDetalleResponse result = service.procesar(2026, 6, 1L);
-
-        assertThat(result).isNotNull();
-        verify(calculoRepo, atLeastOnce()).save(any(Calculo.class));
-        verify(calculoDetRepo).saveAll(anyList());
-    }
-
-    @Test
-    @DisplayName("procesar() con tipo planilla inexistente -> lanza RH-CA-001")
-    void procesar_tipoPlanillaInexistente_lanzaError() {
-        when(calculoRepo.existsTipoPlanillaById(999L)).thenReturn(false);
-
-        assertThatThrownBy(() -> service.procesar(2026, 6, 999L))
-            .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("Tipo de planilla no encontrado");
-        verify(calculoRepo, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("procesar() sin trabajadores activos -> lanza RH-CA-004")
-    void procesar_sinTrabajadoresActivos_lanzaError() {
-        when(calculoRepo.existsTipoPlanillaById(1L)).thenReturn(true);
-        when(calculoRepo.findByAnioAndMesAndTipoPlanillaId(2026, 6, 1L)).thenReturn(Optional.empty());
-        when(trabajadorRepo.findAll()).thenReturn(List.of());
-
-        assertThatThrownBy(() -> service.procesar(2026, 6, 1L))
-            .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("No existen trabajadores activos");
-    }
-
-    @Test
-    @DisplayName("procesar() con trabajador con AFP -> calcula descuento AFP")
-    void procesar_conTrabajadorConAfp_calculaDescuentoAfp() {
-        when(calculoRepo.existsTipoPlanillaById(1L)).thenReturn(true);
-        when(calculoRepo.findByAnioAndMesAndTipoPlanillaId(2026, 6, 1L)).thenReturn(Optional.empty());
-        Trabajador t = RrhhTestFixtures.trabajador(1L);
-        t.setAdminAfpId(1L);
-        when(trabajadorRepo.findAll()).thenReturn(List.of(t));
-        when(calculoRepo.findTipoConceptoCalculoIdByCodigo("INGRESO")).thenReturn(1L);
-        when(calculoRepo.findTipoConceptoCalculoIdByCodigo("DESCUENTO")).thenReturn(2L);
-        when(calculoRepo.save(any(Calculo.class))).thenAnswer(i -> {
-            Calculo c = i.getArgument(0);
-            if (c.getId() == null) c.setId(1L);
-            return c;
-        });
-        Contrato contrato = RrhhTestFixtures.contrato(1L, 1L);
-        when(contratoRepo.findByTrabajadorIdAndFlagEstadoOrderByFecCreacionDesc(1L, "1")).thenReturn(List.of(contrato));
-
-        ConceptoPlanilla cpIngreso = new ConceptoPlanilla();
-        cpIngreso.setId(1L);
-        cpIngreso.setCodigo("C001");
-        cpIngreso.setNombre("Remuneración básica");
-        cpIngreso.setTipo("INGRESO");
-        ConceptoPlanilla cpAfp = new ConceptoPlanilla();
-        cpAfp.setId(2L);
-        cpAfp.setCodigo("D001");
-        cpAfp.setNombre("Aporte AFP");
-        cpAfp.setTipo("DESCUENTO");
-        when(conceptoRepo.findAll()).thenReturn(List.of(cpIngreso, cpAfp));
-
-        AdminAfp afp = new AdminAfp();
-        afp.setId(1L);
-        afp.setComisionPorcentaje(new BigDecimal("1.8000"));
-        afp.setPrimaSeguro(new BigDecimal("0.9800"));
-        afp.setAporteObligatorio(new BigDecimal("10.0000"));
-        when(adminAfpRepo.findById(1L)).thenReturn(Optional.of(afp));
-
-        when(calculoDetRepo.saveAll(anyList())).thenReturn(null);
-        when(mapper.toDetalleResponse(any(), anyList())).thenReturn(RrhhTestFixtures.calculoDetalleResponse(1L));
-
-        CalculoDetalleResponse result = service.procesar(2026, 6, 1L);
-
-        assertThat(result).isNotNull();
-        verify(adminAfpRepo).findById(1L);
+        assertThat(resp.getAnio()).isEqualTo(2026);
+        assertThat(resp.getMes()).isEqualTo(6);
+        assertThat(resp.getTotalTrabajadores()).isZero();
+        verify(jdbcTemplate).update(contains("sp_calcular_planilla"), any(Object[].class));
     }
 
     // ═══════════════════════════════════════════════════

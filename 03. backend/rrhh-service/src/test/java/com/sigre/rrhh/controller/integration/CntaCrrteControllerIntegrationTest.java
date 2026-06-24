@@ -49,6 +49,8 @@ class CntaCrrteControllerIntegrationTest {
     private ObjectMapper objectMapper;
     private String authToken;
     private Long trabajadorId;
+    private Long docTipoId;
+    private Long conceptoPlanillaId;
 
     @MockBean
     private JwtTokenProvider jwtTokenProvider;
@@ -60,6 +62,8 @@ class CntaCrrteControllerIntegrationTest {
         objectMapper.registerModule(new JavaTimeModule());
 
         trabajadorId = ensureTrabajador();
+        docTipoId = ensureDocTipo();
+        conceptoPlanillaId = ensureConceptoPlanilla();
 
         when(jwtTokenProvider.validateToken("mock-token")).thenReturn(true);
         when(jwtTokenProvider.getEmpresaId("mock-token")).thenReturn(2L);
@@ -88,13 +92,17 @@ class CntaCrrteControllerIntegrationTest {
     @Test
     @DisplayName("POST -> GET -> PUT -> PATCH estado flujo completo CRUD")
     void flujoCRUD_completo() throws Exception {
+        String nroDoc = "CC-IT-" + (System.currentTimeMillis() % 100000);
         String crearJson = """
                 {
                     "trabajadorId": %d,
-                    "fechaApertura": "2026-01-01",
-                    "saldoInicial": 0
+                    "docTipoId": %d,
+                    "nroDoc": "%s",
+                    "conceptoPlanillaId": %d,
+                    "fecPrestamo": "2026-01-01",
+                    "montoOriginal": 0
                 }
-                """.formatted(trabajadorId);
+                """.formatted(trabajadorId, docTipoId, nroDoc, conceptoPlanillaId);
 
         String response = mockMvc.perform(post("/api/rrhh/cuentas-corrientes")
                         .header("Authorization", authToken)
@@ -104,8 +112,8 @@ class CntaCrrteControllerIntegrationTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.id").exists())
                 .andExpect(jsonPath("$.data.trabajadorId").value(trabajadorId))
-                .andExpect(jsonPath("$.data.saldoInicial").value(0))
-                .andExpect(jsonPath("$.data.saldoActual").value(0))
+                .andExpect(jsonPath("$.data.montoOriginal").value(0))
+                .andExpect(jsonPath("$.data.saldoPrestamo").value(0))
                 .andReturn().getResponse().getContentAsString();
 
         Long id = objectMapper.readTree(response).get("data").get("id").asLong();
@@ -118,8 +126,8 @@ class CntaCrrteControllerIntegrationTest {
 
         String actualizarJson = """
                 {
-                    "fechaApertura": "2026-02-01",
-                    "saldoInicial": 2000.0000,
+                    "fecPrestamo": "2026-02-01",
+                    "montoOriginal": 2000.00000,
                     "flagEstado": "1"
                 }
                 """;
@@ -151,7 +159,7 @@ class CntaCrrteControllerIntegrationTest {
     void crear_datosInvalidos_retorna400() throws Exception {
         String json = """
                 {
-                    "fechaApertura": "2026-01-01"
+                    "fecPrestamo": "2026-01-01"
                 }
                 """;
 
@@ -182,5 +190,36 @@ class CntaCrrteControllerIntegrationTest {
             VALUES (?, 'Trabajador CC', 1, 1, NOW())
             """, codigo);
         return jdbc.queryForObject("SELECT id FROM rrhh.trabajador WHERE codigo_trabajador = ?", Long.class, codigo);
+    }
+
+    private Long ensureDocTipo() {
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        Long existing = jdbc.query(
+                "SELECT id FROM core.doc_tipo ORDER BY id LIMIT 1",
+                rs -> rs.next() ? rs.getLong("id") : null);
+        if (existing != null) {
+            return existing;
+        }
+        return jdbc.queryForObject("""
+            INSERT INTO core.doc_tipo (codigo, nombre, sunat_codigo, flag_signo, flag_estado)
+            VALUES ('CC', 'Cuenta Corriente Test', '00', '+', '1')
+            RETURNING id
+            """, Long.class);
+    }
+
+    private Long ensureConceptoPlanilla() {
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        Long existing = jdbc.query(
+                "SELECT id FROM rrhh.concepto_planilla ORDER BY id LIMIT 1",
+                rs -> rs.next() ? rs.getLong("id") : null);
+        if (existing != null) {
+            return existing;
+        }
+        return jdbc.queryForObject("""
+            INSERT INTO rrhh.concepto_planilla
+            (codigo, nombre, tipo, flag_estado, created_by, fec_creacion)
+            VALUES ('CC-TEST', 'Concepto CC Test', 'DESCUENTO', '1', 1, NOW())
+            RETURNING id
+            """, Long.class);
     }
 }

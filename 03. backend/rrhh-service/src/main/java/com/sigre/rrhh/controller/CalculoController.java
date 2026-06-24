@@ -44,7 +44,8 @@ public class CalculoController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Procesar planilla")
     public ApiResponse<CalculoDetalleResponse> procesar(@Valid @RequestBody CalculoProcesarRequest request) {
-        return ApiResponse.ok(service.procesar(request.getAnio(), request.getMes(), request.getTipoPlanillaId()));
+        return ApiResponse.ok(service.procesar(
+            request.getAnio(), request.getMes(), request.getTipoPlanillaCodigo(), request.getOrigen()));
     }
 
     @DeleteMapping("/{id}")

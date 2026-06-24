@@ -60,11 +60,11 @@ class CalculoMapperTest {
     void toDetalleResponse_convierteEntidadYDetalles() {
         Calculo entity = RrhhTestFixtures.calculo(1L);
         CalculoDet det = RrhhTestFixtures.calculoDet(1L, 1L);
-        det.setTrabajadorId(1L);
         det.setConceptoId(1L);
 
         when(calculoRepo.findTipoPlanillaNombreById(1L)).thenReturn("Planilla Mensual");
         when(calculoRepo.findTipoConceptoCalculoNombreById(1L)).thenReturn("INGRESO");
+        when(calculoRepo.findById(1L)).thenReturn(Optional.of(entity));
         Trabajador t = RrhhTestFixtures.trabajador(1L);
         when(trabajadorRepo.findById(1L)).thenReturn(Optional.of(t));
         ConceptoPlanilla cp = new ConceptoPlanilla();
@@ -85,9 +85,9 @@ class CalculoMapperTest {
     @DisplayName("toDetResponse() -> convierte detalle a DTO")
     void toDetResponse_convierteDetalle() {
         CalculoDet det = RrhhTestFixtures.calculoDet(1L, 1L);
-        det.setTrabajadorId(1L);
         det.setConceptoId(1L);
 
+        when(calculoRepo.findById(1L)).thenReturn(Optional.of(RrhhTestFixtures.calculo(1L)));
         when(calculoRepo.findTipoConceptoCalculoNombreById(1L)).thenReturn("INGRESO");
         Trabajador t = RrhhTestFixtures.trabajador(1L);
         when(trabajadorRepo.findById(1L)).thenReturn(Optional.of(t));
@@ -122,7 +122,7 @@ class CalculoMapperTest {
     @DisplayName("toDetResponse() con trabajadorId null -> trabajadorNombres null")
     void toDetResponse_trabajadorNull_retornaNombresNull() {
         CalculoDet det = RrhhTestFixtures.calculoDet(1L, 1L);
-        det.setTrabajadorId(null);
+        when(calculoRepo.findById(1L)).thenReturn(Optional.empty());
 
         CalculoDetResponse response = mapper.toDetResponse(det);
 

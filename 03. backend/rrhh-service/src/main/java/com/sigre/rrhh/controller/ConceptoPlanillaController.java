@@ -31,10 +31,10 @@ public class ConceptoPlanillaController {
     public ApiResponse<PageData<ConceptoPlanillaResponse>> listar(
             @RequestParam(required = false) String codigo,
             @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String grupoCalculo,
             @RequestParam(required = false) String flagEstado,
             Pageable pageable) {
-        Page<ConceptoPlanillaResponse> page = service.listar(codigo, nombre, tipo, flagEstado, pageable);
+        Page<ConceptoPlanillaResponse> page = service.listar(codigo, nombre, grupoCalculo, flagEstado, pageable);
         return ApiResponse.ok(PageData.of(page, page.getContent()));
     }
 

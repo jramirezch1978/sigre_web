@@ -19,8 +19,10 @@ import com.sigre.rrhh.dto.request.ConceptoPlanillaCreateRequest;
 import com.sigre.rrhh.dto.request.ConceptoPlanillaUpdateRequest;
 import com.sigre.rrhh.dto.response.ConceptoPlanillaResponse;
 import com.sigre.rrhh.entity.ConceptoPlanilla;
+import com.sigre.rrhh.entity.GrupoConceptosPlanilla;
 import com.sigre.rrhh.mapper.ConceptoPlanillaMapper;
 import com.sigre.rrhh.repository.ConceptoPlanillaRepository;
+import com.sigre.rrhh.repository.GrupoConceptosPlanillaRepository;
 import com.sigre.rrhh.service.impl.ConceptoPlanillaServiceImpl;
 import com.sigre.rrhh.validation.ConceptoPlanillaValidator;
 
@@ -45,6 +47,9 @@ class ConceptoPlanillaServiceTest {
 
     @Mock
     private ConceptoPlanillaRepository repository;
+
+    @Mock
+    private GrupoConceptosPlanillaRepository grupoConceptosPlanillaRepository;
 
     @Mock
     private ConceptoPlanillaMapper mapper;
@@ -98,8 +103,8 @@ class ConceptoPlanillaServiceTest {
     }
 
     @Test
-    @DisplayName("listar() con filtro tipo -> retorna página filtrada")
-    void listar_conFiltroTipo_retornaPaginaFiltrada() {
+    @DisplayName("listar() con filtro grupoCalculo -> retorna página filtrada")
+    void listar_conFiltroGrupoCalculo_retornaPaginaFiltrada() {
         ConceptoPlanilla entity = crearEntityMinimo();
         Page<ConceptoPlanilla> page = new PageImpl<>(List.of(entity));
         ConceptoPlanillaResponse response = new ConceptoPlanillaResponse();
@@ -107,7 +112,7 @@ class ConceptoPlanillaServiceTest {
         when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
         when(mapper.toResponse(any())).thenReturn(response);
 
-        Page<ConceptoPlanillaResponse> result = service.listar(null, null, TIPO_INGRESO, null, PageRequest.of(0, 10));
+        Page<ConceptoPlanillaResponse> result = service.listar(null, null, "10", null, PageRequest.of(0, 10));
 
         assertThat(result).isNotNull();
         assertThat(result.getTotalElements()).isEqualTo(1);
@@ -185,7 +190,8 @@ class ConceptoPlanillaServiceTest {
         ConceptoPlanillaResponse response = new ConceptoPlanillaResponse();
 
         doNothing().when(validator).validarCodigoUnico(anyString());
-        doNothing().when(validator).validarTipo(anyString());
+        doNothing().when(validator).validarGrupoCalculo(anyString());
+        when(grupoConceptosPlanillaRepository.findByCodigo("10")).thenReturn(Optional.of(crearGrupo("10")));
         when(mapper.toEntity(request)).thenReturn(entity);
         when(repository.save(any())).thenReturn(entity);
         when(mapper.toResponse(entity)).thenReturn(response);
@@ -194,7 +200,7 @@ class ConceptoPlanillaServiceTest {
 
         assertThat(result).isNotNull();
         verify(validator).validarCodigoUnico(request.getCodigo());
-        verify(validator).validarTipo(request.getTipo());
+        verify(validator).validarGrupoCalculo(request.getGrupoCalculo());
         verify(repository).save(any());
     }
 
@@ -212,18 +218,18 @@ class ConceptoPlanillaServiceTest {
     }
 
     @Test
-    @DisplayName("crear() con tipo inválido -> lanza BusinessException")
-    void crear_conTipoInvalido_lanzaBusinessException() {
+    @DisplayName("crear() con grupo de cálculo inválido -> lanza BusinessException")
+    void crear_conGrupoCalculoInvalido_lanzaBusinessException() {
         ConceptoPlanillaCreateRequest request = crearRequestMinimo();
-        request.setTipo("INVALIDO");
+        request.setGrupoCalculo("");
 
         doNothing().when(validator).validarCodigoUnico(anyString());
-        doThrow(new BusinessException(MSG_TIPO_INVALIDO, ERROR_TIPO_INVALIDO))
-            .when(validator).validarTipo(anyString());
+        doThrow(new BusinessException(MSG_GRUPO_CALCULO_INVALIDO, ERROR_GRUPO_CALCULO_INVALIDO))
+            .when(validator).validarGrupoCalculo(anyString());
 
         assertThatThrownBy(() -> service.crear(request))
             .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("tipo debe ser");
+            .hasMessageContaining("grupo de cálculo");
     }
 
     // ==== actualizar ====
@@ -236,7 +242,8 @@ class ConceptoPlanillaServiceTest {
         ConceptoPlanillaResponse response = new ConceptoPlanillaResponse();
 
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
-        doNothing().when(validator).validarTipo(anyString());
+        doNothing().when(validator).validarGrupoCalculo(anyString());
+        when(grupoConceptosPlanillaRepository.findByCodigo("10")).thenReturn(Optional.of(crearGrupo("10")));
         doNothing().when(mapper).updateEntity(any(), any());
         when(repository.save(any())).thenReturn(entity);
         when(mapper.toResponse(entity)).thenReturn(response);
@@ -260,15 +267,15 @@ class ConceptoPlanillaServiceTest {
     }
 
     @Test
-    @DisplayName("actualizar() con tipo inválido -> lanza BusinessException")
-    void actualizar_conTipoInvalido_lanzaBusinessException() {
+    @DisplayName("actualizar() con grupo de cálculo inválido -> lanza BusinessException")
+    void actualizar_conGrupoCalculoInvalido_lanzaBusinessException() {
         ConceptoPlanilla entity = crearEntityMinimo();
         ConceptoPlanillaUpdateRequest request = crearUpdateRequestMinimo();
-        request.setTipo("INVALIDO");
+        request.setGrupoCalculo("");
 
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
-        doThrow(new BusinessException(MSG_TIPO_INVALIDO, ERROR_TIPO_INVALIDO))
-            .when(validator).validarTipo(anyString());
+        doThrow(new BusinessException(MSG_GRUPO_CALCULO_INVALIDO, ERROR_GRUPO_CALCULO_INVALIDO))
+            .when(validator).validarGrupoCalculo(anyString());
 
         assertThatThrownBy(() -> service.actualizar(1L, request))
             .isInstanceOf(BusinessException.class);
@@ -348,33 +355,50 @@ class ConceptoPlanillaServiceTest {
     private ConceptoPlanilla crearEntityMinimo() {
         ConceptoPlanilla entity = new ConceptoPlanilla();
         entity.setId(1L);
-        entity.setCodigo("ING-001");
-        entity.setNombre("Sueldo Básico");
-        entity.setTipo(TIPO_INGRESO);
-        entity.setAfectoQuinta(true);
-        entity.setAfectoEssalud(true);
-        entity.setAplicaTodos(true);
+        entity.setCodigo("1013");
+        entity.setNombre("PRIMA DE FRIO");
+        entity.setGrupoConceptosPlanilla(crearGrupo("10"));
+        entity.setFactorPago(new BigDecimal("1"));
+        entity.setImporteTopeMin(BigDecimal.ZERO);
+        entity.setImporteTopeMax(BigDecimal.ZERO);
+        entity.setFlagReplicacion("1");
+        entity.setFlagSubsidio("0");
+        entity.setFlagReporteQuinta("0");
         return entity;
     }
 
     private ConceptoPlanillaCreateRequest crearRequestMinimo() {
         ConceptoPlanillaCreateRequest request = new ConceptoPlanillaCreateRequest();
-        request.setCodigo("ING-001");
-        request.setNombre("Sueldo Básico");
-        request.setTipo(TIPO_INGRESO);
-        request.setAfectoQuinta(true);
-        request.setAfectoEssalud(true);
-        request.setAplicaTodos(true);
+        request.setCodigo("1013");
+        request.setNombre("PRIMA DE FRIO");
+        request.setGrupoCalculo("10");
+        request.setFactorPago(new BigDecimal("1"));
+        request.setImporteTopeMin(BigDecimal.ZERO);
+        request.setImporteTopeMax(BigDecimal.ZERO);
+        request.setFlagReplicacion("1");
+        request.setFlagSubsidio("0");
+        request.setFlagReporteQuinta("0");
         return request;
     }
 
     private ConceptoPlanillaUpdateRequest crearUpdateRequestMinimo() {
         ConceptoPlanillaUpdateRequest request = new ConceptoPlanillaUpdateRequest();
-        request.setNombre("Sueldo Básico Mensual");
-        request.setTipo(TIPO_INGRESO);
-        request.setAfectoQuinta(true);
-        request.setAfectoEssalud(true);
-        request.setAplicaTodos(true);
+        request.setNombre("PRIMA DE FRIO ACTUALIZADA");
+        request.setGrupoCalculo("10");
+        request.setFactorPago(new BigDecimal("1"));
+        request.setImporteTopeMin(BigDecimal.ZERO);
+        request.setImporteTopeMax(BigDecimal.ZERO);
+        request.setFlagReplicacion("1");
+        request.setFlagSubsidio("0");
+        request.setFlagReporteQuinta("0");
         return request;
+    }
+
+    private GrupoConceptosPlanilla crearGrupo(String codigo) {
+        GrupoConceptosPlanilla grupo = new GrupoConceptosPlanilla();
+        grupo.setId(1L);
+        grupo.setCodigo(codigo);
+        grupo.setNombre("Grupo " + codigo);
+        return grupo;
     }
 }

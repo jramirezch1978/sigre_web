@@ -175,12 +175,23 @@ class GanDescVariableControllerIntegrationTest {
 
     private void ensureConceptoPlanilla() {
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        jdbc.update("""
+            INSERT INTO rrhh.grupo_conceptos_planilla (codigo, nombre, flag_replicacion, flag_estado, created_by, fec_creacion)
+            VALUES ('10', 'GANANCIAS FIJAS', '1', '1', 1, NOW())
+            ON CONFLICT (codigo) DO NOTHING
+            """);
         Integer count = jdbc.queryForObject(
                 "SELECT COUNT(*) FROM rrhh.concepto_planilla WHERE id = 1", Integer.class);
         if (count == null || count == 0) {
             jdbc.update("""
-                INSERT INTO rrhh.concepto_planilla (id, codigo, nombre, tipo, flag_estado, created_by, fec_creacion)
-                VALUES (1, 'SUELDO', 'Sueldo Básico Test', 'INGRESO', '1', 1, NOW())
+                INSERT INTO rrhh.concepto_planilla (
+                    id, codigo, nombre, descripcion_breve, factor_pago, importe_tope_min, importe_tope_max,
+                    grupo_conceptos_planilla_id, flag_replicacion, flag_subsidio, flag_reporte_quinta,
+                    flag_estado, created_by, fec_creacion
+                )
+                SELECT 1, 'SUELDO', 'Sueldo Básico Test', 'Sueldo Básico Test', 1, 0, 0, g.id, '1', '0', '0', '1', 1, NOW()
+                FROM rrhh.grupo_conceptos_planilla g
+                WHERE g.codigo = '10'
                 """);
         }
     }

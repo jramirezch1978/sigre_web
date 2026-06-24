@@ -14,7 +14,7 @@ import java.util.List;
 public interface CalculoDetRepository extends JpaRepository<CalculoDet, Long> {
 
     /** Lista todos los detalles de un cálculo ordenados por trabajador. */
-    List<CalculoDet> findByCalculoIdOrderByTrabajadorId(Long calculoId);
+    List<CalculoDet> findByCalculoIdOrderByConceptoIdAscItemAsc(Long calculoId);
 
     /** Elimina todos los detalles asociados a un cálculo. */
     void deleteByCalculoId(Long calculoId);

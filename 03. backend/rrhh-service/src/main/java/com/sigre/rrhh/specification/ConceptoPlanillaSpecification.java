@@ -48,15 +48,12 @@ public class ConceptoPlanillaSpecification {
     }
 
     /**
-     * Filtra conceptos por tipo exacto.
-     * 
-     * @param tipo Tipo de concepto (INGRESO, DESCUENTO, APORTE)
-     * @return Specification para filtrar por tipo
+     * Filtra conceptos por grupo de cálculo exacto (SIGRE GRUPO_CALC).
      */
-    public static Specification<ConceptoPlanilla> conTipo(String tipo) {
+    public static Specification<ConceptoPlanilla> conGrupoCalculo(String grupoCalculo) {
         return (root, query, criteriaBuilder) ->
-            tipo != null && !tipo.isEmpty()
-                ? criteriaBuilder.equal(root.get("tipo"), tipo)
+            grupoCalculo != null && !grupoCalculo.isEmpty()
+                ? criteriaBuilder.equal(root.join("grupoConceptosPlanilla").get("codigo"), grupoCalculo)
                 : null;
     }
 }

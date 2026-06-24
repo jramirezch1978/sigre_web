@@ -31,9 +31,11 @@ class CntaCrrteMapperTest {
 
         assertThat(response.getId()).isEqualTo(1L);
         assertThat(response.getTrabajadorId()).isEqualTo(1L);
-        assertThat(response.getFechaApertura()).isEqualTo("2026-01-01");
-        assertThat(response.getSaldoInicial()).isEqualByComparingTo("1000.0000");
-        assertThat(response.getSaldoActual()).isEqualByComparingTo("500.0000");
+        assertThat(response.getDocTipoId()).isEqualTo(1L);
+        assertThat(response.getNroDoc()).isEqualTo("CC-001");
+        assertThat(response.getFecPrestamo()).isEqualTo("2026-01-01");
+        assertThat(response.getMontoOriginal()).isEqualByComparingTo("1000.00000");
+        assertThat(response.getSaldoPrestamo()).isEqualByComparingTo("500.00000");
     }
 
     @Test
@@ -58,7 +60,8 @@ class CntaCrrteMapperTest {
 
         assertThat(entity.getId()).isNull();
         assertThat(entity.getTrabajadorId()).isEqualTo(1L);
-        assertThat(entity.getSaldoActual()).isNull();
+        assertThat(entity.getDocTipoId()).isEqualTo(1L);
+        assertThat(entity.getSaldoPrestamo()).isNull();
         assertThat(entity.getCreatedBy()).isNull();
         assertThat(entity.getFecCreacion()).isNull();
     }
@@ -73,7 +76,7 @@ class CntaCrrteMapperTest {
 
         assertThat(entity.getId()).isEqualTo(1L);
         assertThat(entity.getTrabajadorId()).isEqualTo(1L);
-        assertThat(entity.getFechaApertura()).isEqualTo("2026-02-01");
+        assertThat(entity.getFecPrestamo()).isEqualTo("2026-02-01");
     }
 
     @Test
@@ -110,7 +113,7 @@ class CntaCrrteMapperTest {
 
         assertThat(det.getId()).isNull();
         assertThat(det.getCntaCrrteId()).isNull();
-        assertThat(det.getMonto()).isEqualByComparingTo("200.0000");
+        assertThat(det.getImpDscto()).isEqualByComparingTo("200.0000");
         assertThat(det.getCreatedBy()).isNull();
     }
 
@@ -122,8 +125,8 @@ class CntaCrrteMapperTest {
 
         mapper.updateDetEntity(det, request);
 
-        assertThat(det.getMonto()).isEqualByComparingTo("300.0000");
-        assertThat(det.getConcepto()).isEqualTo("Abono actualizado");
+        assertThat(det.getImpDscto()).isEqualByComparingTo("300.0000");
+        assertThat(det.getObservaciones()).isEqualTo("Abono actualizado");
     }
 
     @Test

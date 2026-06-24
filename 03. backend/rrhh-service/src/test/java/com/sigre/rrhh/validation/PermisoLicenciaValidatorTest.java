@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.sigre.common.exception.BusinessException;
-import com.sigre.rrhh.repository.PermisoLicenciaRepository;
+import com.sigre.rrhh.repository.PermisoLicenciaDetRepository;
 import com.sigre.rrhh.repository.TipoSuspensionLaboralRepository;
 import com.sigre.rrhh.repository.TrabajadorRepository;
 
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 class PermisoLicenciaValidatorTest {
 
     @Mock
-    private PermisoLicenciaRepository repository;
+    private PermisoLicenciaDetRepository detRepository;
 
     @Mock
     private TrabajadorRepository trabajadorRepository;
@@ -35,7 +35,7 @@ class PermisoLicenciaValidatorTest {
 
     @BeforeEach
     void setUp() {
-        validator = new PermisoLicenciaValidator(repository, trabajadorRepository, tipoSuspensionRepository);
+        validator = new PermisoLicenciaValidator(detRepository, trabajadorRepository, tipoSuspensionRepository);
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -127,7 +127,7 @@ class PermisoLicenciaValidatorTest {
     @Test
     @DisplayName("validarSinSolapamiento() sin solapamiento -> no lanza excepción")
     void validarSinSolapamiento_sinSolapamiento_noLanzaExcepcion() {
-        when(repository.existsSolapamiento(1L,
+        when(detRepository.existsSolapamiento(1L,
                 LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 20), null))
             .thenReturn(false);
 
@@ -139,7 +139,7 @@ class PermisoLicenciaValidatorTest {
     @Test
     @DisplayName("validarSinSolapamiento() con solapamiento -> lanza BusinessException")
     void validarSinSolapamiento_conSolapamiento_lanzaBusinessException() {
-        when(repository.existsSolapamiento(1L,
+        when(detRepository.existsSolapamiento(1L,
                 LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 20), null))
             .thenReturn(true);
 
@@ -152,14 +152,14 @@ class PermisoLicenciaValidatorTest {
     @Test
     @DisplayName("validarSinSolapamiento() excluyendo ID -> pasa excluirId al repository")
     void validarSinSolapamiento_excluyendoId_pasaExcluirId() {
-        when(repository.existsSolapamiento(1L,
+        when(detRepository.existsSolapamiento(1L,
                 LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 15), 5L))
             .thenReturn(false);
 
         validator.validarSinSolapamiento(1L,
                 LocalDate.of(2026, 1, 15), null, 5L);
 
-        verify(repository).existsSolapamiento(1L,
+        verify(detRepository).existsSolapamiento(1L,
                 LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 15), 5L);
     }
 }

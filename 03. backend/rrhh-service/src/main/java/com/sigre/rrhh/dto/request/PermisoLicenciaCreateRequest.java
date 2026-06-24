@@ -18,5 +18,6 @@ public class PermisoLicenciaCreateRequest {
 
     private LocalDate fechaFin;
     private Integer dias;
+    private Long conceptoPlanillaId;
     private String sustento;
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import com.sigre.rrhh.dto.response.QuintaCategoriaResponse;
 import com.sigre.rrhh.entity.QuintaCategoria;
+import com.sigre.rrhh.repository.TipoPlanillaRepository;
 import com.sigre.rrhh.repository.TrabajadorRepository;
 
 import java.time.Instant;
@@ -11,39 +12,37 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Mapper manual para convertir entidades {@link QuintaCategoria} a DTOs de respuesta.
- * Resuelve el nombre del trabajador consultando el repositorio.
+ * Mapper manual para {@link QuintaCategoria}.
  */
 @Component
 @RequiredArgsConstructor
 public class QuintaCategoriaMapper {
 
     private static final ZoneId ZONA_LIMA = ZoneId.of("America/Lima");
+    private static final DateTimeFormatter FMT_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter FMT_TIMESTAMP = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     private final TrabajadorRepository trabajadorRepo;
+    private final TipoPlanillaRepository tipoPlanillaRepo;
 
-    /**
-     * Convierte una {@link QuintaCategoria} a su DTO de respuesta,
-     * resolviendo el nombre completo del trabajador.
-     *
-     * @param q entidad a convertir
-     * @return DTO de respuesta
-     */
     public QuintaCategoriaResponse toResponse(QuintaCategoria q) {
         return QuintaCategoriaResponse.builder()
                 .id(q.getId())
                 .trabajadorId(q.getTrabajadorId())
                 .trabajadorNombres(resolveTrabajadorNombres(q.getTrabajadorId()))
-                .anio(q.getAnio())
-                .mes(q.getMes())
-                .rentaBrutaAcumulada(q.getRentaBrutaAcumulada())
-                .rentaBrutaProyectada(q.getRentaBrutaProyectada())
-                .deduccion7uit(q.getDeduccion7uit())
-                .rentaNeta(q.getRentaNeta())
-                .impuestoAnualProyectado(q.getImpuestoAnualProyectado())
-                .retencionMensual(q.getRetencionMensual())
-                .retencionAcumulada(q.getRetencionAcumulada())
+                .fecProceso(q.getFecProceso() != null ? q.getFecProceso().format(FMT_DATE) : null)
+                .tipoPlanillaId(q.getTipoPlanillaId())
+                .tipoPlanillaCodigo(resolveTipoPlanillaCodigo(q.getTipoPlanillaId()))
+                .remProyectable(q.getRemProyectable())
+                .remImprecisa(q.getRemImprecisa())
+                .remRetencion(q.getRemRetencion())
+                .remGratif(q.getRemGratif())
+                .sueldo(q.getSueldo())
+                .gratifProyect(q.getGratifProyect())
+                .remExterna(q.getRemExterna())
+                .nroDias(q.getNroDias())
+                .flagAutomatico(q.getFlagAutomatico())
+                .flagReplicacion(q.getFlagReplicacion())
                 .createdBy(q.getCreatedBy())
                 .fecCreacion(formatTimestamp(q.getFecCreacion()))
                 .updatedBy(q.getUpdatedBy())
@@ -52,14 +51,29 @@ public class QuintaCategoriaMapper {
     }
 
     private String resolveTrabajadorNombres(Long trabajadorId) {
-        if (trabajadorId == null) return null;
+        if (trabajadorId == null) {
+            return null;
+        }
         return trabajadorRepo.findById(trabajadorId)
                 .map(t -> {
                     String full = t.getNombres();
-                    if (t.getApellidoPaterno() != null) full = t.getApellidoPaterno() + " " + full;
-                    if (t.getApellidoMaterno() != null) full = full + " " + t.getApellidoMaterno();
+                    if (t.getApellidoPaterno() != null) {
+                        full = t.getApellidoPaterno() + " " + full;
+                    }
+                    if (t.getApellidoMaterno() != null) {
+                        full = full + " " + t.getApellidoMaterno();
+                    }
                     return full.trim();
                 })
+                .orElse(null);
+    }
+
+    private String resolveTipoPlanillaCodigo(Long tipoPlanillaId) {
+        if (tipoPlanillaId == null) {
+            return null;
+        }
+        return tipoPlanillaRepo.findById(tipoPlanillaId)
+                .map(tp -> tp.getCodigo())
                 .orElse(null);
     }
 

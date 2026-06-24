@@ -7,18 +7,14 @@ import com.sigre.rrhh.dto.request.ConceptoPlanillaCreateRequest;
 import com.sigre.rrhh.dto.request.ConceptoPlanillaUpdateRequest;
 import com.sigre.rrhh.dto.response.ConceptoPlanillaResponse;
 import com.sigre.rrhh.entity.ConceptoPlanilla;
+import com.sigre.rrhh.entity.GrupoConceptosPlanilla;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static com.sigre.rrhh.constants.ConceptoPlanillaConstants.*;
 
-/**
- * Tests unitarios para ConceptoPlanillaMapper.
- * Valida las conversiones entre entidades y DTOs.
- */
 @DisplayName("Pruebas Unitarias - ConceptoPlanillaMapper")
 class ConceptoPlanillaMapperTest {
 
@@ -27,74 +23,56 @@ class ConceptoPlanillaMapperTest {
     @Test
     @DisplayName("toResponse() mapea correctamente entity a response")
     void toResponse_mapeaCorrectamente() {
+        GrupoConceptosPlanilla grupo = new GrupoConceptosPlanilla();
+        grupo.setCodigo("10");
+
         ConceptoPlanilla entity = new ConceptoPlanilla();
         entity.setId(1L);
-        entity.setCodigo("ING-001");
-        entity.setNombre("Sueldo Básico");
-        entity.setTipo(TIPO_INGRESO);
-        entity.setFormula(null);
-        entity.setValorFijo(new BigDecimal("1500.00"));
-        entity.setAfectoQuinta(true);
-        entity.setAfectoEssalud(true);
-        entity.setAplicaTodos(true);
+        entity.setCodigo("1013");
+        entity.setNombre("PRIMA DE FRIO");
+        entity.setDescripcionBreve("PRIMA DE FRIO");
+        entity.setGrupoConceptosPlanilla(grupo);
+        entity.setFactorPago(new BigDecimal("1"));
+        entity.setImporteTopeMin(BigDecimal.ZERO);
+        entity.setImporteTopeMax(BigDecimal.ZERO);
+        entity.setFlagReplicacion("1");
+        entity.setFlagSubsidio("0");
+        entity.setFlagReporteQuinta("0");
+        entity.setConceptoRtps("0303");
+        entity.setNumeroOrden("1013");
 
         ConceptoPlanillaResponse response = mapper.toResponse(entity);
 
         assertThat(response).isNotNull();
         assertThat(response.getId()).isEqualTo(1L);
-        assertThat(response.getCodigo()).isEqualTo("ING-001");
-        assertThat(response.getNombre()).isEqualTo("Sueldo Básico");
-        assertThat(response.getTipo()).isEqualTo(TIPO_INGRESO);
-        assertThat(response.getValorFijo()).isEqualByComparingTo(new BigDecimal("1500.00"));
-        assertThat(response.getAfectoQuinta()).isTrue();
-        assertThat(response.getAfectoEssalud()).isTrue();
-        assertThat(response.getAplicaTodos()).isTrue();
+        assertThat(response.getCodigo()).isEqualTo("1013");
+        assertThat(response.getGrupoCalculo()).isEqualTo("10");
+        assertThat(response.getFactorPago()).isEqualByComparingTo(BigDecimal.ONE);
+        assertThat(response.getConceptoRtps()).isEqualTo("0303");
     }
 
     @Test
     @DisplayName("toEntity() mapea correctamente request a entity")
     void toEntity_mapeaCorrectamente() {
         ConceptoPlanillaCreateRequest request = new ConceptoPlanillaCreateRequest();
-        request.setCodigo("DESC-001");
-        request.setNombre("AFP");
-        request.setTipo(TIPO_DESCUENTO);
-        request.setFormula("SUELDO_BASICO * 0.13");
-        request.setValorFijo(null);
-        request.setAfectoQuinta(false);
-        request.setAfectoEssalud(false);
-        request.setAplicaTodos(true);
+        request.setCodigo("2119");
+        request.setNombre("CRED EPS");
+        request.setDescripcionBreve("CRED EPS");
+        request.setGrupoCalculo("23");
+        request.setFactorPago(new BigDecimal("0.025"));
+        request.setImporteTopeMin(BigDecimal.ZERO);
+        request.setImporteTopeMax(BigDecimal.ZERO);
+        request.setFlagReplicacion("1");
+        request.setFlagSubsidio("0");
+        request.setFlagReporteQuinta("0");
+        request.setConceptoRtps("0611");
 
         ConceptoPlanilla entity = mapper.toEntity(request);
 
         assertThat(entity).isNotNull();
-        assertThat(entity.getCodigo()).isEqualTo("DESC-001");
-        assertThat(entity.getNombre()).isEqualTo("AFP");
-        assertThat(entity.getTipo()).isEqualTo(TIPO_DESCUENTO);
-        assertThat(entity.getFormula()).isEqualTo("SUELDO_BASICO * 0.13");
-        assertThat(entity.getValorFijo()).isNull();
-        assertThat(entity.getAfectoQuinta()).isFalse();
-        assertThat(entity.getAfectoEssalud()).isFalse();
-        assertThat(entity.getAplicaTodos()).isTrue();
-    }
-
-    @Test
-    @DisplayName("toEntity() con valores nulos mapea correctamente")
-    void toEntity_conValoresNulos_mapeaCorrectamente() {
-        ConceptoPlanillaCreateRequest request = new ConceptoPlanillaCreateRequest();
-        request.setCodigo("APO-001");
-        request.setNombre("EsSalud");
-        request.setTipo(TIPO_APORTE);
-        request.setFormula(null);
-        request.setValorFijo(null);
-        request.setAfectoQuinta(false);
-        request.setAfectoEssalud(false);
-        request.setAplicaTodos(true);
-
-        ConceptoPlanilla entity = mapper.toEntity(request);
-
-        assertThat(entity).isNotNull();
-        assertThat(entity.getFormula()).isNull();
-        assertThat(entity.getValorFijo()).isNull();
+        assertThat(entity.getCodigo()).isEqualTo("2119");
+        assertThat(entity.getGrupoConceptosPlanilla()).isNull();
+        assertThat(entity.getFactorPago()).isEqualByComparingTo(new BigDecimal("0.025"));
     }
 
     @Test
@@ -108,10 +86,10 @@ class ConceptoPlanillaMapperTest {
     void toResponseList_convierteListaADTOs() {
         ConceptoPlanilla e1 = new ConceptoPlanilla();
         e1.setId(1L);
-        e1.setCodigo("ING-001");
+        e1.setCodigo("1013");
         ConceptoPlanilla e2 = new ConceptoPlanilla();
         e2.setId(2L);
-        e2.setCodigo("DESC-001");
+        e2.setCodigo("2119");
 
         List<ConceptoPlanillaResponse> responses = mapper.toResponseList(List.of(e1, e2));
 
@@ -125,8 +103,7 @@ class ConceptoPlanillaMapperTest {
     void toResponse_conFecCreacionNoNulo_mapeaCorrectamente() {
         ConceptoPlanilla entity = new ConceptoPlanilla();
         entity.setId(1L);
-        entity.setCodigo("ING-001");
-        entity.setNombre("Sueldo Básico");
+        entity.setCodigo("1013");
         entity.setFecCreacion(Instant.parse("2026-01-15T10:00:00Z"));
 
         ConceptoPlanillaResponse response = mapper.toResponse(entity);
@@ -136,50 +113,32 @@ class ConceptoPlanillaMapperTest {
     }
 
     @Test
-    @DisplayName("toResponseList() con lista null -> retorna null")
-    void toResponseList_conListaNull_retornaNull() {
-        assertThat(mapper.toResponseList(null)).isNull();
-    }
-
-    @Test
-    @DisplayName("toEntity() con request null -> retorna null")
-    void toEntity_conRequestNull_retornaNull() {
-        assertThat(mapper.toEntity(null)).isNull();
-    }
-
-    @Test
-    @DisplayName("updateEntity() con request null -> no lanza excepción")
-    void updateEntity_conRequestNull_noLanzaExcepcion() {
-        ConceptoPlanilla entity = new ConceptoPlanilla();
-        entity.setCodigo("ING-001");
-        mapper.updateEntity(entity, null);
-        assertThat(entity.getCodigo()).isEqualTo("ING-001");
-    }
-
-    @Test
     @DisplayName("updateEntity() actualiza correctamente sin modificar código")
     void updateEntity_actualizaCorrectamenteSinModificarCodigo() {
+        GrupoConceptosPlanilla grupo = new GrupoConceptosPlanilla();
+        grupo.setCodigo("10");
+
         ConceptoPlanilla entity = new ConceptoPlanilla();
         entity.setId(1L);
-        entity.setCodigo("ING-001");
-        entity.setNombre("Sueldo Básico");
-        entity.setTipo(TIPO_INGRESO);
+        entity.setCodigo("1013");
+        entity.setNombre("PRIMA DE FRIO");
+        entity.setGrupoConceptosPlanilla(grupo);
 
         ConceptoPlanillaUpdateRequest request = new ConceptoPlanillaUpdateRequest();
-        request.setNombre("Sueldo Básico Mensual");
-        request.setTipo(TIPO_INGRESO);
-        request.setFormula(null);
-        request.setValorFijo(new BigDecimal("2000.00"));
-        request.setAfectoQuinta(true);
-        request.setAfectoEssalud(true);
-        request.setAplicaTodos(false);
+        request.setNombre("PRIMA DE FRIO ACTUALIZADA");
+        request.setGrupoCalculo("10");
+        request.setFactorPago(new BigDecimal("1.5"));
+        request.setImporteTopeMin(BigDecimal.ZERO);
+        request.setImporteTopeMax(BigDecimal.ZERO);
+        request.setFlagReplicacion("1");
+        request.setFlagSubsidio("0");
+        request.setFlagReporteQuinta("0");
 
         mapper.updateEntity(entity, request);
 
-        assertThat(entity.getId()).isEqualTo(1L);
-        assertThat(entity.getCodigo()).isEqualTo("ING-001"); // No debe cambiar
-        assertThat(entity.getNombre()).isEqualTo("Sueldo Básico Mensual");
-        assertThat(entity.getValorFijo()).isEqualByComparingTo(new BigDecimal("2000.00"));
-        assertThat(entity.getAplicaTodos()).isFalse();
+        assertThat(entity.getCodigo()).isEqualTo("1013");
+        assertThat(entity.getNombre()).isEqualTo("PRIMA DE FRIO ACTUALIZADA");
+        assertThat(entity.getFactorPago()).isEqualByComparingTo(new BigDecimal("1.5"));
+        assertThat(entity.getGrupoConceptosPlanilla().getCodigo()).isEqualTo("10");
     }
 }

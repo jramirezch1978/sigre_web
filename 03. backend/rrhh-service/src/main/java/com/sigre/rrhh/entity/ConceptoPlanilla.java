@@ -11,12 +11,7 @@ import com.sigre.common.entity.BaseEntity;
 import java.math.BigDecimal;
 
 /**
- * Entidad que representa un concepto de planilla.
- * Los conceptos pueden ser de tipo INGRESO, DESCUENTO o APORTE y se utilizan
- * para el cálculo automático de la planilla de remuneraciones.
- * Extiende de BaseEntity para heredar campos de auditoría y flag_estado.
- * 
- * @author Equipo de Desarrollo RRHH
+ * Entidad alineada con catálogo SIGRE CONCEPTO (CONCEPTO.json).
  */
 @Getter
 @Setter
@@ -37,21 +32,37 @@ public class ConceptoPlanilla extends BaseEntity {
     @Column(name = "nombre", nullable = false, length = 150)
     private String nombre;
 
-    @Column(name = "tipo", nullable = false, length = 30)
-    private String tipo;
+    @Column(name = "descripcion_breve", length = 150)
+    private String descripcionBreve;
 
-    @Column(name = "formula", columnDefinition = "TEXT")
-    private String formula;
+    @Column(name = "factor_pago", nullable = false, precision = 18, scale = 6)
+    private BigDecimal factorPago = BigDecimal.ONE;
 
-    @Column(name = "valor_fijo", precision = 18, scale = 4)
-    private BigDecimal valorFijo;
+    @Column(name = "importe_tope_min", nullable = false, precision = 18, scale = 4)
+    private BigDecimal importeTopeMin = BigDecimal.ZERO;
 
-    @Column(name = "afecto_quinta", nullable = false)
-    private Boolean afectoQuinta = false;
+    @Column(name = "importe_tope_max", nullable = false, precision = 18, scale = 4)
+    private BigDecimal importeTopeMax = BigDecimal.ZERO;
 
-    @Column(name = "afecto_essalud", nullable = false)
-    private Boolean afectoEssalud = false;
+    @Column(name = "numero_horas", precision = 6, scale = 2)
+    private BigDecimal numeroHoras;
 
-    @Column(name = "aplica_todos", nullable = false)
-    private Boolean aplicaTodos = true;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "grupo_conceptos_planilla_id", nullable = false)
+    private GrupoConceptosPlanilla grupoConceptosPlanilla;
+
+    @Column(name = "flag_replicacion", nullable = false, length = 1)
+    private String flagReplicacion = "1";
+
+    @Column(name = "concepto_rtps", length = 10)
+    private String conceptoRtps;
+
+    @Column(name = "flag_subsidio", nullable = false, length = 1)
+    private String flagSubsidio = "0";
+
+    @Column(name = "flag_reporte_quinta", nullable = false, length = 1)
+    private String flagReporteQuinta = "0";
+
+    @Column(name = "numero_orden", length = 20)
+    private String numeroOrden;
 }

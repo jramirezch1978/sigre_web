@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * TestDataSeeder específico para rrhh-service.
+ * TestDataSeeder específico para ms-rrhh.
  * Las áreas no se insertan aquí - se crean dinámicamente en los tests de integración.
  * Esto permite probar el flujo completo de CRUD sin datos preexistentes.
  *

@@ -8,12 +8,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-/**
- * DTO de respuesta para un concepto de planilla.
- * Incluye todos los campos de la entidad más los campos de auditoría.
- * 
- * @author Equipo de Desarrollo RRHH
- */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,12 +17,17 @@ public class ConceptoPlanillaResponse {
     private Long id;
     private String codigo;
     private String nombre;
-    private String tipo;
-    private String formula;
-    private BigDecimal valorFijo;
-    private Boolean afectoQuinta;
-    private Boolean afectoEssalud;
-    private Boolean aplicaTodos;
+    private String descripcionBreve;
+    private BigDecimal factorPago;
+    private BigDecimal importeTopeMin;
+    private BigDecimal importeTopeMax;
+    private BigDecimal numeroHoras;
+    private String grupoCalculo;
+    private String flagReplicacion;
+    private String conceptoRtps;
+    private String flagSubsidio;
+    private String flagReporteQuinta;
+    private String numeroOrden;
     private String flagEstado;
     private Long createdBy;
     private OffsetDateTime fecCreacion;

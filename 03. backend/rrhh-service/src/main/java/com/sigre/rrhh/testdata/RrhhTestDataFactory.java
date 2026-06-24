@@ -491,6 +491,7 @@ public class RrhhTestDataFactory {
      */
     public void ensureConceptoPlanillaTestData() {
         log.info("Creando datos de prueba para conceptos de planilla...");
+        ensureGrupoConceptosPlanillaTestData();
         
         // Ingresos
         ensureConceptoPlanilla("ING-TEST-001", "Sueldo Básico Test", "INGRESO", null, "1500.0000", true, true, true);
@@ -507,6 +508,44 @@ public class RrhhTestDataFactory {
         ensureConceptoPlanilla("APO-TEST-002", "SCTR Test", "APORTE", null, "50.0000", false, false, true);
         
         log.info("Datos de prueba para conceptos de planilla creados exitosamente");
+    }
+
+    /**
+     * Asegura catálogos mínimos de grupo de cálculo SIGRE para pruebas.
+     */
+    public void ensureGrupoConceptosPlanillaTestData() {
+        ensureGrupoConceptosPlanilla("10", "GANANCIAS FIJAS");
+        ensureGrupoConceptosPlanilla("14", "GANANCIAS VARIABLES");
+        ensureGrupoConceptosPlanilla("20", "DESCUENTOS DE LEY");
+        ensureGrupoConceptosPlanilla("30", "APORTACIONES DE LA EMPRESA");
+    }
+
+    private void ensureGrupoConceptosPlanilla(String codigo, String nombre) {
+        String sql = """
+            INSERT INTO rrhh.grupo_conceptos_planilla
+            (codigo, nombre, flag_replicacion, flag_estado, created_by, fec_creacion)
+            VALUES (?, ?, '1', '1', 1, NOW())
+            ON CONFLICT (codigo) DO NOTHING
+            """;
+        jdbc.update(sql, codigo, nombre);
+    }
+
+    private Long findGrupoConceptosPlanillaIdByCodigo(String codigo) {
+        String sql = "SELECT id FROM rrhh.grupo_conceptos_planilla WHERE codigo = ? ORDER BY id LIMIT 1";
+        try {
+            return jdbc.queryForObject(sql, Long.class, codigo);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String mapTipoToGrupoCalculo(String tipo) {
+        return switch (tipo) {
+            case "DESCUENTO" -> "20";
+            case "APORTE" -> "30";
+            case "INGRESO" -> "10";
+            default -> "10";
+        };
     }
     
     /**
@@ -530,18 +569,28 @@ public class RrhhTestDataFactory {
             log.debug("Concepto de planilla '{}' ya existe con ID: {}", codigo, existingId);
             return existingId;
         }
+
+        ensureGrupoConceptosPlanillaTestData();
+        String grupoCodigo = mapTipoToGrupoCalculo(tipo);
+        Long grupoId = findGrupoConceptosPlanillaIdByCodigo(grupoCodigo);
+        if (grupoId == null) {
+            log.error("Grupo de conceptos '{}' no encontrado para concepto '{}'", grupoCodigo, codigo);
+            return null;
+        }
         
         String sql = """
-            INSERT INTO rrhh.concepto_planilla 
-            (codigo, nombre, tipo, formula, valor_fijo, afecto_quinta, afecto_essalud, aplica_todos, created_by, fec_creacion)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())
+            INSERT INTO rrhh.concepto_planilla
+            (codigo, nombre, descripcion_breve, factor_pago, importe_tope_min, importe_tope_max,
+             grupo_conceptos_planilla_id, flag_replicacion, flag_subsidio, flag_reporte_quinta,
+             flag_estado, created_by, fec_creacion)
+            VALUES (?, ?, ?, ?, 0, 0, ?, '1', '0', ?, '1', 1, NOW())
             RETURNING id
             """;
         
         try {
-            BigDecimal valor = valorFijo != null ? new BigDecimal(valorFijo) : null;
-            Long newId = jdbc.queryForObject(sql, Long.class, codigo, nombre, tipo, formula, 
-                                            valor, afectoQuinta, afectoEssalud, aplicaTodos);
+            BigDecimal factor = valorFijo != null ? new BigDecimal(valorFijo) : BigDecimal.ONE;
+            String flagQuinta = afectoQuinta ? "1" : "0";
+            Long newId = jdbc.queryForObject(sql, Long.class, codigo, nombre, nombre, factor, grupoId, flagQuinta);
             log.info("Concepto de planilla '{}' creado con ID: {}", codigo, newId);
             return newId;
         } catch (Exception e) {
@@ -883,8 +932,9 @@ public class RrhhTestDataFactory {
 
         jdbc.update("""
             INSERT INTO rrhh.cnta_crrte
-            (trabajador_id, fecha_apertura, saldo_inicial, saldo_actual, flag_estado, created_by, fec_creacion)
-            VALUES (?, '2026-01-01', 1000.0000, 800.0000, '1', 1, NOW())
+            (trabajador_id, doc_tipo_id, nro_doc, concepto_planilla_id, fec_prestamo,
+             nro_cuotas, monto_original, monto_cuota, saldo_prestamo, flag_estado, created_by, fec_creacion)
+            VALUES (?, 1, 'CC-TEST-001', 1, '2026-01-01', 1, 1000.00000, 1000.00000, 800.00000, '1', 1, NOW())
             """, trabajadorId);
 
         log.info("Datos de prueba para cuentas corrientes creados exitosamente");

@@ -9,6 +9,7 @@ import com.sigre.rrhh.dto.response.CntaCrrteDetResponse;
 import com.sigre.rrhh.dto.response.CntaCrrteResponse;
 import com.sigre.rrhh.entity.CntaCrrte;
 import com.sigre.rrhh.entity.CntaCrrteDet;
+
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -21,33 +22,63 @@ public interface CntaCrrteMapper {
     @Mapping(target = "fecModificacion", source = "fecModificacion", qualifiedByName = "instantToOffsetDateTime")
     @Mapping(target = "trabajadorNombres", ignore = true)
     CntaCrrteResponse toResponse(CntaCrrte entity);
+
     List<CntaCrrteResponse> toResponseList(List<CntaCrrte> entities);
 
-    @Mapping(target = "id", ignore = true) @Mapping(target = "saldoActual", ignore = true)
-    @Mapping(target = "createdBy", ignore = true) @Mapping(target = "fecCreacion", ignore = true)
-    @Mapping(target = "updatedBy", ignore = true) @Mapping(target = "fecModificacion", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "saldoPrestamo", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "fecCreacion", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "fecModificacion", ignore = true)
+    @Mapping(target = "flagEstado", ignore = true)
     CntaCrrte toEntity(CntaCrrteCreateRequest request);
 
-    @Mapping(target = "id", ignore = true) @Mapping(target = "trabajadorId", ignore = true)
-    @Mapping(target = "saldoActual", ignore = true) @Mapping(target = "saldoInicial", ignore = true)
-    @Mapping(target = "createdBy", ignore = true) @Mapping(target = "fecCreacion", ignore = true)
-    @Mapping(target = "updatedBy", ignore = true) @Mapping(target = "fecModificacion", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "trabajadorId", ignore = true)
+    @Mapping(target = "docTipoId", ignore = true)
+    @Mapping(target = "nroDoc", ignore = true)
+    @Mapping(target = "cntasPagarId", ignore = true)
+    @Mapping(target = "cntasCobrarId", ignore = true)
+    @Mapping(target = "conceptoPlanillaId", ignore = true)
+    @Mapping(target = "saldoPrestamo", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "fecCreacion", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "fecModificacion", ignore = true)
     void updateEntity(@MappingTarget CntaCrrte entity, CntaCrrteUpdateRequest request);
 
     @Mapping(target = "fecCreacion", source = "fecCreacion", qualifiedByName = "instantToOffsetDateTime")
+    @Mapping(target = "fecModificacion", source = "fecModificacion", qualifiedByName = "instantToOffsetDateTime")
+    @Mapping(target = "monto", source = "impDscto")
     CntaCrrteDetResponse toDetResponse(CntaCrrteDet entity);
+
     List<CntaCrrteDetResponse> toDetResponseList(List<CntaCrrteDet> entities);
 
-    @Mapping(target = "id", ignore = true) @Mapping(target = "cntaCrrteId", ignore = true)
-    @Mapping(target = "createdBy", ignore = true) @Mapping(target = "fecCreacion", ignore = true)
-    @Mapping(target = "updatedBy", ignore = true) @Mapping(target = "fecModificacion", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "cntaCrrteId", ignore = true)
+    @Mapping(target = "nroDscto", ignore = true)
+    @Mapping(target = "impDscto", source = "monto")
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "fecCreacion", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "fecModificacion", ignore = true)
+    @Mapping(target = "flagEstado", ignore = true)
     CntaCrrteDet toDetEntity(CntaCrrteMovimientoRequest request);
 
-    @Mapping(target = "id", ignore = true) @Mapping(target = "cntaCrrteId", ignore = true)
-    @Mapping(target = "createdBy", ignore = true) @Mapping(target = "fecCreacion", ignore = true)
-    @Mapping(target = "updatedBy", ignore = true) @Mapping(target = "fecModificacion", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "cntaCrrteId", ignore = true)
+    @Mapping(target = "nroDscto", ignore = true)
+    @Mapping(target = "impDscto", source = "monto")
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "fecCreacion", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "fecModificacion", ignore = true)
+    @Mapping(target = "flagEstado", ignore = true)
     void updateDetEntity(@MappingTarget CntaCrrteDet entity, CntaCrrteMovimientoUpdateRequest request);
 
     @Named("instantToOffsetDateTime")
-    default OffsetDateTime instantToOffsetDateTime(Instant instant) { return instant != null ? instant.atOffset(ZoneOffset.UTC) : null; }
+    default OffsetDateTime instantToOffsetDateTime(Instant instant) {
+        return instant != null ? instant.atOffset(ZoneOffset.UTC) : null;
+    }
 }

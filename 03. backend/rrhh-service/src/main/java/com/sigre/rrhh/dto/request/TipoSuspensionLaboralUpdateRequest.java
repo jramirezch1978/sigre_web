@@ -12,5 +12,6 @@ public class TipoSuspensionLaboralUpdateRequest {
     private String flagTipoSusp;
     private Long tipoSubsidioId;
     private String flagCitt;
+    private String flagDatosLesion;
     private String flagEstado;
 }

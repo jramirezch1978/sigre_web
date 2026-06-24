@@ -18,6 +18,7 @@ import com.sigre.rrhh.dto.request.GanDescFijoRequest;
 import com.sigre.rrhh.dto.request.GanDescFijoEstadoRequest;
 import com.sigre.rrhh.dto.response.GanDescFijoResponse;
 import com.sigre.rrhh.entity.PermisoLicencia;
+import com.sigre.rrhh.entity.PermisoLicenciaDet;
 import com.sigre.rrhh.entity.TipoSuspensionLaboral;
 import com.sigre.rrhh.entity.SancionAmonestacion;
 import com.sigre.rrhh.entity.TipoSancion;
@@ -149,7 +150,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 /**
- * Fixtures estáticas en RAM (tipo C) para tests unitarios de rrhh-service.
+ * Fixtures estáticas en RAM (tipo C) para tests unitarios de ms-rrhh.
  * No accede a BD; construye entidades con datos mínimos coherentes.
  */
 public final class RrhhTestFixtures {
@@ -180,7 +181,7 @@ public final class RrhhTestFixtures {
                 .sexoId(null)
                 .estadoCivilId(null)
                 .direccion("Av. Test 123")
-                .telefono("987654321")
+                .telefonoFijo("987654321")
                 .email("test" + id + "@empresa.com")
                 .regimenLaboralId(null)
                 .areaId(1L)
@@ -540,15 +541,27 @@ public final class RrhhTestFixtures {
         PermisoLicencia e = new PermisoLicencia();
         e.setId(id);
         e.setTrabajadorId(1L);
-        e.setTipoSuspensionLaboralId(1L);
-        e.setFechaInicio(LocalDate.of(2026, 1, 15));
-        e.setFechaFin(null);
-        e.setDias(null);
-        e.setSustento(null);
+        e.setConceptoPlanillaId(1L);
+        e.setPeriodoInicio(2026);
+        e.setDiasTotales(1);
+        e.setDiasGozados(0);
         e.setFlagEstado(flagEstado);
         e.setCreatedBy(DEFAULT_USUARIO_ID);
         e.setFecCreacion(Instant.now());
         return e;
+    }
+
+    public static PermisoLicenciaDet permisoLicenciaDet(Long id, Long permisoLicenciaId) {
+        PermisoLicenciaDet d = new PermisoLicenciaDet();
+        d.setId(id);
+        d.setPermisoLicenciaId(permisoLicenciaId);
+        d.setItem(1);
+        d.setTipoSuspensionLaboralId(1L);
+        d.setFechaSolicitud(LocalDate.of(2026, 1, 15));
+        d.setFechaInicio(LocalDate.of(2026, 1, 15));
+        d.setFechaFin(null);
+        d.setDias(java.math.BigDecimal.ONE);
+        return d;
     }
 
     public static PermisoLicenciaCreateRequest permisoLicenciaCreateRequest() {
@@ -579,7 +592,9 @@ public final class RrhhTestFixtures {
         PermisoLicenciaResponse r = new PermisoLicenciaResponse();
         r.setId(id);
         r.setTrabajadorId(1L);
+        r.setConceptoPlanillaId(1L);
         r.setTipoSuspensionLaboralId(1L);
+        r.setPeriodoInicio(2026);
         r.setFechaInicio(LocalDate.of(2026, 1, 15));
         r.setFlagEstado("1");
         r.setCreatedBy(DEFAULT_USUARIO_ID.toString());
@@ -1023,9 +1038,14 @@ public final class RrhhTestFixtures {
         CntaCrrte e = new CntaCrrte();
         e.setId(id);
         e.setTrabajadorId(1L);
-        e.setFechaApertura(LocalDate.of(2026, 1, 1));
-        e.setSaldoInicial(new BigDecimal("1000.0000"));
-        e.setSaldoActual(new BigDecimal("500.0000"));
+        e.setDocTipoId(1L);
+        e.setNroDoc("CC-001");
+        e.setConceptoPlanillaId(1L);
+        e.setFecPrestamo(LocalDate.of(2026, 1, 1));
+        e.setNroCuotas((short) 1);
+        e.setMontoOriginal(new BigDecimal("1000.00000"));
+        e.setMontoCuota(new BigDecimal("1000.00000"));
+        e.setSaldoPrestamo(new BigDecimal("500.00000"));
         e.setFlagEstado(flagEstado);
         e.setCreatedBy(DEFAULT_USUARIO_ID);
         e.setFecCreacion(Instant.now());
@@ -1036,9 +1056,14 @@ public final class RrhhTestFixtures {
         CntaCrrteResponse r = new CntaCrrteResponse();
         r.setId(id);
         r.setTrabajadorId(1L);
-        r.setFechaApertura(LocalDate.of(2026, 1, 1));
-        r.setSaldoInicial(new BigDecimal("1000.0000"));
-        r.setSaldoActual(new BigDecimal("500.0000"));
+        r.setDocTipoId(1L);
+        r.setNroDoc("CC-001");
+        r.setConceptoPlanillaId(1L);
+        r.setFecPrestamo(LocalDate.of(2026, 1, 1));
+        r.setNroCuotas((short) 1);
+        r.setMontoOriginal(new BigDecimal("1000.00000"));
+        r.setMontoCuota(new BigDecimal("1000.00000"));
+        r.setSaldoPrestamo(new BigDecimal("500.00000"));
         r.setFlagEstado("1");
         r.setCreatedBy(DEFAULT_USUARIO_ID);
         r.setFecCreacion(null);
@@ -1053,10 +1078,10 @@ public final class RrhhTestFixtures {
         CntaCrrteDet e = new CntaCrrteDet();
         e.setId(id);
         e.setCntaCrrteId(1L);
+        e.setNroDscto((short) 1);
         e.setFechaMovimiento(LocalDate.of(2026, 1, 15));
         e.setTipoMovimientoCntaCrrteId(1L);
-        e.setConcepto("Abono de prueba");
-        e.setMonto(new BigDecimal("200.0000"));
+        e.setImpDscto(new BigDecimal("200.0000"));
         e.setReferencia("ABO-001");
         e.setCreatedBy(DEFAULT_USUARIO_ID);
         e.setFecCreacion(Instant.now());
@@ -1067,9 +1092,9 @@ public final class RrhhTestFixtures {
         CntaCrrteDetResponse r = new CntaCrrteDetResponse();
         r.setId(id);
         r.setCntaCrrteId(1L);
+        r.setNroDscto((short) 1);
         r.setFechaMovimiento(LocalDate.of(2026, 1, 15));
         r.setTipoMovimientoCntaCrrteId(1L);
-        r.setConcepto("Abono de prueba");
         r.setMonto(new BigDecimal("200.0000"));
         r.setReferencia("ABO-001");
         r.setCreatedBy(DEFAULT_USUARIO_ID);
@@ -1546,15 +1571,18 @@ public final class RrhhTestFixtures {
     public static CntaCrrteCreateRequest cntaCrrteCreateRequest() {
         CntaCrrteCreateRequest r = new CntaCrrteCreateRequest();
         r.setTrabajadorId(1L);
-        r.setFechaApertura(LocalDate.of(2026, 1, 1));
-        r.setSaldoInicial(new BigDecimal("1000.0000"));
+        r.setDocTipoId(1L);
+        r.setNroDoc("CC-001");
+        r.setConceptoPlanillaId(1L);
+        r.setFecPrestamo(LocalDate.of(2026, 1, 1));
+        r.setMontoOriginal(new BigDecimal("1000.00000"));
         return r;
     }
 
     public static CntaCrrteUpdateRequest cntaCrrteUpdateRequest() {
         CntaCrrteUpdateRequest r = new CntaCrrteUpdateRequest();
-        r.setFechaApertura(LocalDate.of(2026, 2, 1));
-        r.setSaldoInicial(new BigDecimal("2000.0000"));
+        r.setFecPrestamo(LocalDate.of(2026, 2, 1));
+        r.setMontoOriginal(new BigDecimal("2000.00000"));
         r.setFlagEstado("1");
         return r;
     }
@@ -1563,7 +1591,6 @@ public final class RrhhTestFixtures {
         CntaCrrteMovimientoRequest r = new CntaCrrteMovimientoRequest();
         r.setFechaMovimiento(LocalDate.of(2026, 1, 15));
         r.setTipoMovimientoCntaCrrteId(1L);
-        r.setConcepto("Abono de prueba");
         r.setMonto(new BigDecimal("200.0000"));
         r.setReferencia("ABO-001");
         return r;
@@ -1573,9 +1600,9 @@ public final class RrhhTestFixtures {
         CntaCrrteMovimientoUpdateRequest r = new CntaCrrteMovimientoUpdateRequest();
         r.setFechaMovimiento(LocalDate.of(2026, 1, 20));
         r.setTipoMovimientoCntaCrrteId(2L);
-        r.setConcepto("Abono actualizado");
         r.setMonto(new BigDecimal("300.0000"));
         r.setReferencia("ABO-002");
+        r.setObservaciones("Abono actualizado");
         return r;
     }
 
@@ -1863,28 +1890,31 @@ public final class RrhhTestFixtures {
     // ── Calculo ───────────────────────────────────────────────────
 
     public static Calculo calculo(Long id) {
-        Calculo e = Calculo.builder()
+        return Calculo.builder()
                 .id(id)
+                .trabajadorId(1L)
+                .fecProceso(java.time.LocalDate.of(2026, 6, 17))
                 .anio(2026)
                 .mes(6)
                 .tipoPlanillaId(1L)
-                .totalIngresos(new BigDecimal("5000.0000"))
-                .totalDescuentos(new BigDecimal("500.0000"))
-                .totalNeto(new BigDecimal("4500.0000"))
-                .totalAportes(new BigDecimal("500.0000"))
+                .sucursalId(1L)
+                .totalIngresosSoles(new BigDecimal("5000.0000"))
+                .totalDescuentosSoles(new BigDecimal("500.0000"))
+                .totalNetoSoles(new BigDecimal("4500.0000"))
+                .totalAportesSoles(new BigDecimal("500.0000"))
                 .createdBy(DEFAULT_USUARIO_ID)
                 .fecCreacion(Instant.now())
                 .build();
-        return e;
     }
 
     public static CalculoDet calculoDet(Long id, Long calculoId) {
         return CalculoDet.builder()
                 .id(id)
                 .calculoId(calculoId)
-                .trabajadorId(1L)
                 .conceptoId(1L)
-                .monto(new BigDecimal("2500.0000"))
+                .item((short) 1)
+                .impSoles(new BigDecimal("2500.0000"))
+                .impDolar(new BigDecimal("740.0000"))
                 .tipoConceptoCalculoId(1L)
                 .build();
     }
@@ -1946,7 +1976,8 @@ public final class RrhhTestFixtures {
         return CalculoProcesarRequest.builder()
                 .anio(2026)
                 .mes(6)
-                .tipoPlanillaId(1L)
+                .tipoPlanillaCodigo("N")
+                .origen("PI")
                 .build();
     }
 
@@ -1997,15 +2028,18 @@ public final class RrhhTestFixtures {
         QuintaCategoria e = new QuintaCategoria();
         e.setId(id);
         e.setTrabajadorId(1L);
-        e.setAnio(2026);
-        e.setMes(6);
-        e.setRentaBrutaAcumulada(new BigDecimal("15000.0000"));
-        e.setRentaBrutaProyectada(new BigDecimal("42000.0000"));
-        e.setDeduccion7uit(new BigDecimal("37450.0000"));
-        e.setRentaNeta(new BigDecimal("4550.0000"));
-        e.setImpuestoAnualProyectado(new BigDecimal("364.0000"));
-        e.setRetencionMensual(new BigDecimal("60.6667"));
-        e.setRetencionAcumulada(new BigDecimal("364.0000"));
+        e.setFecProceso(LocalDate.of(2026, 6, 30));
+        e.setRemProyectable(new BigDecimal("42000.00"));
+        e.setRemImprecisa(BigDecimal.ZERO.setScale(2));
+        e.setRemRetencion(new BigDecimal("60.67"));
+        e.setRemGratif(BigDecimal.ZERO.setScale(2));
+        e.setFlagReplicacion("1");
+        e.setNroDias((short) 30);
+        e.setSueldo(new BigDecimal("3000.00"));
+        e.setFlagAutomatico("1");
+        e.setGratifProyect(BigDecimal.ZERO.setScale(2));
+        e.setRemExterna(BigDecimal.ZERO.setScale(2));
+        e.setTipoPlanillaId(1L);
         e.setCreatedBy(DEFAULT_USUARIO_ID);
         e.setFecCreacion(Instant.now());
         return e;
@@ -2016,15 +2050,19 @@ public final class RrhhTestFixtures {
                 .id(id)
                 .trabajadorId(1L)
                 .trabajadorNombres("Paterno Materno, Nombre 1")
-                .anio(2026)
-                .mes(6)
-                .rentaBrutaAcumulada(new BigDecimal("15000.0000"))
-                .rentaBrutaProyectada(new BigDecimal("42000.0000"))
-                .deduccion7uit(new BigDecimal("37450.0000"))
-                .rentaNeta(new BigDecimal("4550.0000"))
-                .impuestoAnualProyectado(new BigDecimal("364.0000"))
-                .retencionMensual(new BigDecimal("60.6667"))
-                .retencionAcumulada(new BigDecimal("364.0000"))
+                .fecProceso("30/06/2026")
+                .tipoPlanillaId(1L)
+                .tipoPlanillaCodigo("N")
+                .remProyectable(new BigDecimal("42000.00"))
+                .remImprecisa(BigDecimal.ZERO.setScale(2))
+                .remRetencion(new BigDecimal("60.67"))
+                .remGratif(BigDecimal.ZERO.setScale(2))
+                .sueldo(new BigDecimal("3000.00"))
+                .gratifProyect(BigDecimal.ZERO.setScale(2))
+                .remExterna(BigDecimal.ZERO.setScale(2))
+                .nroDias((short) 30)
+                .flagAutomatico("1")
+                .flagReplicacion("1")
                 .createdBy(DEFAULT_USUARIO_ID)
                 .fecCreacion(null)
                 .updatedBy(null)

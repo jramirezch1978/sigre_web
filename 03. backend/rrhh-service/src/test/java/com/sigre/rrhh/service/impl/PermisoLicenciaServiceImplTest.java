@@ -19,8 +19,10 @@ import com.sigre.rrhh.dto.request.PermisoLicenciaCreateRequest;
 import com.sigre.rrhh.dto.request.PermisoLicenciaUpdateRequest;
 import com.sigre.rrhh.dto.response.PermisoLicenciaResponse;
 import com.sigre.rrhh.entity.PermisoLicencia;
+import com.sigre.rrhh.entity.PermisoLicenciaDet;
 import com.sigre.rrhh.mapper.PermisoLicenciaMapper;
 import java.time.LocalDate;
+import com.sigre.rrhh.repository.PermisoLicenciaDetRepository;
 import com.sigre.rrhh.repository.PermisoLicenciaRepository;
 import com.sigre.rrhh.validation.PermisoLicenciaValidator;
 
@@ -38,6 +40,9 @@ class PermisoLicenciaServiceImplTest {
 
     @Mock
     private PermisoLicenciaRepository repository;
+
+    @Mock
+    private PermisoLicenciaDetRepository detRepository;
 
     @Mock
     private PermisoLicenciaValidator validator;
@@ -130,8 +135,14 @@ class PermisoLicenciaServiceImplTest {
         PermisoLicencia saved = RrhhTestFixtures.permisoLicencia(1L);
 
         when(mapper.toEntity(request)).thenReturn(entity);
-        when(repository.save(entity)).thenReturn(saved);
-        when(mapper.toResponse(saved)).thenReturn(RrhhTestFixtures.permisoLicenciaResponse(1L));
+        when(repository.save(any(PermisoLicencia.class))).thenAnswer(invocation -> {
+            PermisoLicencia p = invocation.getArgument(0);
+            if (p.getId() == null) {
+                p.setId(1L);
+            }
+            return p;
+        });
+        when(mapper.toResponse(any(PermisoLicencia.class))).thenReturn(RrhhTestFixtures.permisoLicenciaResponse(1L));
 
         PermisoLicenciaResponse result = service.crear(request);
 
@@ -142,7 +153,8 @@ class PermisoLicenciaServiceImplTest {
         verify(validator).validarFechas(request.getFechaInicio(), request.getFechaFin());
         verify(validator).validarSinSolapamiento(request.getTrabajadorId(), request.getFechaInicio(), request.getFechaFin(), null);
         verify(mapper).toEntity(request);
-        verify(repository).save(entity);
+        verify(repository, times(1)).save(any(PermisoLicencia.class));
+        verify(detRepository).save(any(PermisoLicenciaDet.class));
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -154,11 +166,12 @@ class PermisoLicenciaServiceImplTest {
     void actualizar_actualizaYRetornaDTO() {
         PermisoLicenciaUpdateRequest request = RrhhTestFixtures.permisoLicenciaUpdateRequest();
         PermisoLicencia existing = RrhhTestFixtures.permisoLicencia(1L);
+        PermisoLicenciaDet det = RrhhTestFixtures.permisoLicenciaDet(10L, 1L);
         PermisoLicencia updated = RrhhTestFixtures.permisoLicencia(1L);
-        updated.setDias(5);
-        updated.setFechaFin(LocalDate.of(2026, 1, 20));
+        updated.setDiasTotales(5);
 
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
+        when(detRepository.findFirstByPermisoLicenciaIdOrderByItemAsc(1L)).thenReturn(Optional.of(det));
         when(repository.save(existing)).thenReturn(updated);
         when(mapper.toResponse(updated)).thenReturn(RrhhTestFixtures.permisoLicenciaResponse(1L));
 
@@ -188,6 +201,7 @@ class PermisoLicenciaServiceImplTest {
         PermisoLicencia existing = RrhhTestFixtures.permisoLicencia(1L);
 
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
+        when(detRepository.findFirstByPermisoLicenciaIdOrderByItemAsc(1L)).thenReturn(Optional.empty());
 
         service.actualizar(1L, request);
 
@@ -202,6 +216,7 @@ class PermisoLicenciaServiceImplTest {
         PermisoLicencia existing = RrhhTestFixtures.permisoLicencia(1L);
 
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
+        when(detRepository.findFirstByPermisoLicenciaIdOrderByItemAsc(1L)).thenReturn(Optional.empty());
         when(repository.save(existing)).thenReturn(existing);
         when(mapper.toResponse(existing)).thenReturn(RrhhTestFixtures.permisoLicenciaResponse(1L));
 
@@ -221,6 +236,8 @@ class PermisoLicenciaServiceImplTest {
         PermisoLicencia existing = RrhhTestFixtures.permisoLicencia(1L);
 
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
+        when(detRepository.findFirstByPermisoLicenciaIdOrderByItemAsc(1L))
+                .thenReturn(Optional.of(RrhhTestFixtures.permisoLicenciaDet(10L, 1L)));
         when(repository.save(existing)).thenReturn(existing);
         when(mapper.toResponse(existing)).thenReturn(RrhhTestFixtures.permisoLicenciaResponse(1L));
 
@@ -228,6 +245,7 @@ class PermisoLicenciaServiceImplTest {
 
         assertThat(result).isNotNull();
         verify(validator).validarSinSolapamiento(1L, LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 5), 1L);
+        verify(detRepository).save(any(PermisoLicenciaDet.class));
     }
 
     // ══════════════════════════════════════════════════════════════

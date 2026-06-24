@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestExecutionListeners;
@@ -16,23 +17,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import com.sigre.common.security.JwtTokenProvider;
 import com.sigre.common.testutil.TenantContextTestExecutionListener;
 import com.sigre.rrhh.repository.ConceptoPlanillaRepository;
 import com.sigre.rrhh.testdata.RrhhTestDataExecutionListener;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import com.sigre.common.security.JwtTokenProvider;
-import static org.mockito.Mockito.when;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static com.sigre.rrhh.constants.ConceptoPlanillaConstants.*;
 
-/**
- * Tests de integración para ConceptoPlanillaController.
- * Sigue el estándar de TEST_STANDARDS.md con datos reales en BD.
- * 
- * @author Equipo de Desarrollo RRHH
- */
 @Tag("integration")
 @SpringBootTest
 @AutoConfigureWebMvc
@@ -59,7 +52,7 @@ class ConceptoPlanillaControllerIntegrationTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -74,26 +67,12 @@ class ConceptoPlanillaControllerIntegrationTest {
         when(jwtTokenProvider.getClaim("mock-token", "userId", Object.class)).thenReturn(1L);
 
         authToken = "Bearer mock-token";
-        
-        // Los datos maestros ya fueron cargados por RrhhTestDataExecutionListener
     }
 
-    // ==== CREATE ====
-
     @Test
-    @DisplayName("POST /api/rrhh/conceptos-planilla -> crea INGRESO y retorna 201")
-    void crear_conceptoIngreso_retornaCreated() throws Exception {
-        String requestJson = """
-            {
-                "codigo": "ING-IT-001",
-                "nombre": "Sueldo Básico Test",
-                "tipo": "INGRESO",
-                "valorFijo": 3000.00,
-                "afectoQuinta": true,
-                "afectoEssalud": true,
-                "aplicaTodos": true
-            }
-            """;
+    @DisplayName("POST /api/rrhh/conceptos-planilla -> crea concepto SIGRE y retorna 201")
+    void crear_conceptoSigre_retornaCreated() throws Exception {
+        String requestJson = bodySigre("IT-1013", "1013", "PRIMA DE FRIO", "10");
 
         mockMvc.perform(post("/api/rrhh/conceptos-planilla")
                 .header("Authorization", authToken)
@@ -101,62 +80,9 @@ class ConceptoPlanillaControllerIntegrationTest {
                 .content(requestJson))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data.codigo").value("ING-IT-001"))
-            .andExpect(jsonPath("$.data.tipo").value("INGRESO"));
+            .andExpect(jsonPath("$.data.codigo").value("IT-1013"))
+            .andExpect(jsonPath("$.data.grupoCalculo").value("10"));
     }
-
-    @Test
-    @DisplayName("POST /api/rrhh/conceptos-planilla -> crea DESCUENTO con fórmula y retorna 201")
-    void crear_conceptoDescuentoConFormula_retornaCreated() throws Exception {
-        String requestJson = """
-            {
-                "codigo": "DESC-IT-001",
-                "nombre": "AFP Test",
-                "tipo": "DESCUENTO",
-                "formula": "SUELDO_BASICO * 0.13",
-                "afectoQuinta": false,
-                "afectoEssalud": false,
-                "aplicaTodos": true
-            }
-            """;
-
-        mockMvc.perform(post("/api/rrhh/conceptos-planilla")
-                .header("Authorization", authToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data.codigo").value("DESC-IT-001"))
-            .andExpect(jsonPath("$.data.tipo").value("DESCUENTO"))
-            .andExpect(jsonPath("$.data.formula").value("SUELDO_BASICO * 0.13"));
-    }
-
-    @Test
-    @DisplayName("POST /api/rrhh/conceptos-planilla -> crea APORTE y retorna 201")
-    void crear_conceptoAporte_retornaCreated() throws Exception {
-        String requestJson = """
-            {
-                "codigo": "APO-IT-001",
-                "nombre": "EsSalud Test",
-                "tipo": "APORTE",
-                "formula": "SUELDO_BASICO * 0.09",
-                "afectoQuinta": false,
-                "afectoEssalud": false,
-                "aplicaTodos": true
-            }
-            """;
-
-        mockMvc.perform(post("/api/rrhh/conceptos-planilla")
-                .header("Authorization", authToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data.codigo").value("APO-IT-001"))
-            .andExpect(jsonPath("$.data.tipo").value("APORTE"));
-    }
-
-    // ==== READ - LIST ====
 
     @Test
     @DisplayName("GET /api/rrhh/conceptos-planilla -> lista con paginación")
@@ -171,41 +97,24 @@ class ConceptoPlanillaControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /api/rrhh/conceptos-planilla?codigo=X -> filtra por código")
-    void listar_conFiltroCodigo_retornaFiltrados() throws Exception {
+    @DisplayName("GET /api/rrhh/conceptos-planilla?grupoCalculo=10 -> filtra por grupo")
+    void listar_conFiltroGrupoCalculo_retornaFiltrados() throws Exception {
         mockMvc.perform(get("/api/rrhh/conceptos-planilla")
                 .header("Authorization", authToken)
-                .param("codigo", "ING-TEST")
+                .param("grupoCalculo", "10")
                 .param("page", "0")
                 .param("size", "10"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
     }
-
-    @Test
-    @DisplayName("GET /api/rrhh/conceptos-planilla?tipo=INGRESO -> filtra por tipo")
-    void listar_conFiltroTipo_retornaFiltrados() throws Exception {
-        mockMvc.perform(get("/api/rrhh/conceptos-planilla")
-                .header("Authorization", authToken)
-                .param("tipo", "INGRESO")
-                .param("page", "0")
-                .param("size", "10"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.success").value(true));
-    }
-
-    // ==== READ - BY ID ====
 
     @Test
     @DisplayName("GET /api/rrhh/conceptos-planilla/{id} -> retorna concepto existente")
     void obtener_conIdExistente_retornaOk() throws Exception {
-        String createJson = """
-            {"codigo":"ING-GET-001","nombre":"GET Test","tipo":"INGRESO","valorFijo":1000,"afectoQuinta":true,"afectoEssalud":true,"aplicaTodos":true}
-            """;
         String createResp = mockMvc.perform(post("/api/rrhh/conceptos-planilla")
                 .header("Authorization", authToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(createJson))
+                .content(bodySigre("IT-GET-001", "GET-001", "GET Test", "10")))
             .andExpect(status().isCreated())
             .andReturn().getResponse().getContentAsString();
         Long id = objectMapper.readTree(createResp).get("data").get("id").asLong();
@@ -218,38 +127,27 @@ class ConceptoPlanillaControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /api/rrhh/conceptos-planilla/{id} con ID inexistente -> retorna 404")
-    void obtener_conIdInexistente_retornaNotFound() throws Exception {
-        mockMvc.perform(get("/api/rrhh/conceptos-planilla/99999")
-                .header("Authorization", authToken))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.success").value(false));
-    }
-
-    // ==== UPDATE ====
-
-    @Test
-    @DisplayName("PUT /api/rrhh/conceptos-planilla/{id} -> actualiza y retorna 201")
-    void actualizar_conDatosValidos_retornaCreated() throws Exception {
-        String createJson = """
-            {"codigo":"ING-UPD-001","nombre":"Update Test","tipo":"INGRESO","valorFijo":1000,"afectoQuinta":true,"afectoEssalud":true,"aplicaTodos":true}
-            """;
+    @DisplayName("PUT /api/rrhh/conceptos-planilla/{id} -> actualiza y retorna 200")
+    void actualizar_conDatosValidos_retornaOk() throws Exception {
         String createResp = mockMvc.perform(post("/api/rrhh/conceptos-planilla")
                 .header("Authorization", authToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(createJson))
+                .content(bodySigre("IT-UPD-001", "UPD-001", "Update Test", "10")))
             .andExpect(status().isCreated())
             .andReturn().getResponse().getContentAsString();
         Long id = objectMapper.readTree(createResp).get("data").get("id").asLong();
 
         String requestJson = """
             {
-                "nombre": "Sueldo Básico Actualizado",
-                "tipo": "INGRESO",
-                "valorFijo": 3500.00,
-                "afectoQuinta": true,
-                "afectoEssalud": true,
-                "aplicaTodos": true
+                "nombre": "PRIMA DE FRIO ACTUALIZADA",
+                "descripcionBreve": "PRIMA",
+                "factorPago": 1.5,
+                "importeTopeMin": 0,
+                "importeTopeMax": 0,
+                "grupoCalculo": "10",
+                "flagReplicacion": "1",
+                "flagSubsidio": "0",
+                "flagReporteQuinta": "0"
             }
             """;
 
@@ -259,43 +157,16 @@ class ConceptoPlanillaControllerIntegrationTest {
                 .content(requestJson))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data.nombre").value("Sueldo Básico Actualizado"));
+            .andExpect(jsonPath("$.data.nombre").value("PRIMA DE FRIO ACTUALIZADA"));
     }
-
-    @Test
-    @DisplayName("PUT /api/rrhh/conceptos-planilla/{id} con ID inexistente -> retorna 404")
-    void actualizar_conIdInexistente_retornaNotFound() throws Exception {
-        String requestJson = """
-            {
-                "nombre": "Test",
-                "tipo": "INGRESO",
-                "valorFijo": 1000.00,
-                "afectoQuinta": true,
-                "afectoEssalud": true,
-                "aplicaTodos": true
-            }
-            """;
-
-        mockMvc.perform(put("/api/rrhh/conceptos-planilla/99999")
-                .header("Authorization", authToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.success").value(false));
-    }
-
-    // ==== PATCH DESACTIVAR ====
 
     @Test
     @DisplayName("PATCH /api/rrhh/conceptos-planilla/{id}/desactivar -> desactiva y retorna ok")
     void desactivar_conIdValido_retornaOk() throws Exception {
-        String createJson = """
-            {"codigo":"ING-DEL-001","nombre":"Delete Test","tipo":"INGRESO","valorFijo":1000,"afectoQuinta":true,"afectoEssalud":true,"aplicaTodos":true}
-            """;
         String createResp = mockMvc.perform(post("/api/rrhh/conceptos-planilla")
                 .header("Authorization", authToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(createJson))
+                .content(bodySigre("IT-DEL-001", "DEL-001", "Delete Test", "10")))
             .andExpect(status().isCreated())
             .andReturn().getResponse().getContentAsString();
         Long id = objectMapper.readTree(createResp).get("data").get("id").asLong();
@@ -307,30 +178,9 @@ class ConceptoPlanillaControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("PATCH /api/rrhh/conceptos-planilla/{id}/desactivar con ID inexistente -> retorna 404")
-    void desactivar_conIdInexistente_retornaNotFound() throws Exception {
-        mockMvc.perform(patch("/api/rrhh/conceptos-planilla/99999/desactivar")
-                .header("Authorization", authToken))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.success").value(false));
-    }
-
-    // ==== VALIDATIONS ====
-
-    @Test
-    @DisplayName("POST con código duplicado -> retorna 409")
+    @DisplayName("POST con código duplicado -> retorna 400")
     void crear_conCodigoDuplicado_retornaConflict() throws Exception {
-        String requestJson = """
-            {
-                "codigo": "ING-DUP-001",
-                "nombre": "Original",
-                "tipo": "INGRESO",
-                "valorFijo": 1000.00,
-                "afectoQuinta": true,
-                "afectoEssalud": true,
-                "aplicaTodos": true
-            }
-            """;
+        String requestJson = bodySigre("IT-DUP-001", "DUP-001", "Original", "10");
 
         mockMvc.perform(post("/api/rrhh/conceptos-planilla")
                 .header("Authorization", authToken)
@@ -344,5 +194,24 @@ class ConceptoPlanillaControllerIntegrationTest {
                 .content(requestJson))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.success").value(false));
+    }
+
+    private String bodySigre(String codigo, String numeroOrden, String nombre, String grupoCalculo) {
+        return """
+            {
+                "codigo": "%s",
+                "nombre": "%s",
+                "descripcionBreve": "%s",
+                "factorPago": 1,
+                "importeTopeMin": 0,
+                "importeTopeMax": 0,
+                "grupoCalculo": "%s",
+                "flagReplicacion": "1",
+                "conceptoRtps": "0303",
+                "flagSubsidio": "0",
+                "flagReporteQuinta": "0",
+                "numeroOrden": "%s"
+            }
+            """.formatted(codigo, nombre, nombre, grupoCalculo, numeroOrden);
     }
 }

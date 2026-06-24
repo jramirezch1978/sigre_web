@@ -2,6 +2,7 @@ package com.sigre.rrhh.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,10 @@ public class CalculoProcesarRequest {
     @Max(value = 12, message = "El mes debe estar entre 1 y 12")
     private Integer mes;
 
-    @NotNull(message = "El tipo de planilla es obligatorio")
-    private Long tipoPlanillaId;
+    @NotBlank(message = "El código de tipo de planilla es obligatorio")
+    private String tipoPlanillaCodigo;
+
+    /** Código de sucursal/origen (PI=Piura, LM=Lima). Requerido para invocar sp_calcular_planilla. */
+    @NotNull(message = "El origen (sucursal) es obligatorio")
+    private String origen;
 }

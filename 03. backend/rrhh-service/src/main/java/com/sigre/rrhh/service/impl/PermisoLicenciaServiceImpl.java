@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.http.HttpStatus;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.exception.ResourceNotFoundException;
 import com.sigre.common.security.TenantContext;
@@ -15,15 +15,19 @@ import com.sigre.rrhh.dto.request.PermisoLicenciaCreateRequest;
 import com.sigre.rrhh.dto.request.PermisoLicenciaUpdateRequest;
 import com.sigre.rrhh.dto.response.PermisoLicenciaResponse;
 import com.sigre.rrhh.entity.PermisoLicencia;
+import com.sigre.rrhh.entity.PermisoLicenciaDet;
 import com.sigre.rrhh.mapper.PermisoLicenciaMapper;
+import com.sigre.rrhh.repository.PermisoLicenciaDetRepository;
 import com.sigre.rrhh.repository.PermisoLicenciaRepository;
 import com.sigre.rrhh.service.PermisoLicenciaService;
 import com.sigre.rrhh.specification.PermisoLicenciaSpecification;
 import com.sigre.rrhh.util.RrhhFlagEstadoLegacyNormalizer;
 import com.sigre.rrhh.validation.PermisoLicenciaValidator;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static com.sigre.rrhh.constants.PermisoLicenciaConstants.*;
@@ -35,6 +39,7 @@ import static com.sigre.rrhh.constants.PermisoLicenciaConstants.*;
 public class PermisoLicenciaServiceImpl implements PermisoLicenciaService {
 
     private final PermisoLicenciaRepository repository;
+    private final PermisoLicenciaDetRepository detRepository;
     private final PermisoLicenciaMapper mapper;
     private final PermisoLicenciaValidator validator;
 
@@ -66,11 +71,19 @@ public class PermisoLicenciaServiceImpl implements PermisoLicenciaService {
         validator.validarFechas(request.getFechaInicio(), request.getFechaFin());
         validator.validarSinSolapamiento(request.getTrabajadorId(), request.getFechaInicio(),
                 request.getFechaFin(), null);
+
         var entity = mapper.toEntity(request);
+        entity.setConceptoPlanillaId(request.getConceptoPlanillaId());
+        entity.setPeriodoInicio(request.getFechaInicio().getYear());
+        entity.setDiasTotales(calcularDiasEnteros(request.getDias(), request.getFechaInicio(), request.getFechaFin()));
+        entity.setDiasGozados(0);
         entity.setFlagEstado(ESTADO_SOLICITADO);
         entity.setCreatedBy(TenantContext.getUsuarioId());
         entity.setFecCreacion(Instant.now());
-        return mapper.toResponse(repository.save(entity));
+        entity = repository.save(entity);
+
+        crearDetalleInicial(entity.getId(), request);
+        return mapper.toResponse(entity);
     }
 
     @Override
@@ -83,17 +96,48 @@ public class PermisoLicenciaServiceImpl implements PermisoLicenciaService {
         if (request.getTipoSuspensionLaboralId() != null) {
             validator.validarTipoSuspension(request.getTipoSuspensionLaboralId());
         }
-        LocalDate fechaInicio = request.getFechaInicio() != null ? request.getFechaInicio() : existing.getFechaInicio();
-        LocalDate fechaFin = request.getFechaFin() != null ? request.getFechaFin() : existing.getFechaFin();
-        validator.validarFechas(fechaInicio, fechaFin);
+
+        var det = detRepository.findFirstByPermisoLicenciaIdOrderByItemAsc(id).orElse(null);
+        LocalDate fechaInicio = request.getFechaInicio() != null
+                ? request.getFechaInicio()
+                : (det != null ? det.getFechaInicio() : null);
+        LocalDate fechaFin = request.getFechaFin() != null
+                ? request.getFechaFin()
+                : (det != null ? det.getFechaFin() : null);
+
+        if (fechaInicio != null) {
+            validator.validarFechas(fechaInicio, fechaFin);
+        }
         if (request.getFechaInicio() != null || request.getFechaFin() != null) {
             validator.validarSinSolapamiento(existing.getTrabajadorId(), fechaInicio, fechaFin, id);
         }
+
         mapper.updateEntity(existing, request);
         if (request.getFlagEstado() != null) {
             existing.setFlagEstado(RrhhFlagEstadoLegacyNormalizer.normalizePermisoFlag(request.getFlagEstado()));
         }
         RrhhFlagEstadoLegacyNormalizer.normalizePermiso(existing);
+
+        if (det != null && (request.getFechaInicio() != null || request.getFechaFin() != null
+                || request.getDias() != null || request.getTipoSuspensionLaboralId() != null)) {
+            if (request.getFechaInicio() != null) {
+                det.setFechaInicio(request.getFechaInicio());
+            }
+            if (request.getFechaFin() != null) {
+                det.setFechaFin(request.getFechaFin());
+            }
+            if (request.getTipoSuspensionLaboralId() != null) {
+                det.setTipoSuspensionLaboralId(request.getTipoSuspensionLaboralId());
+            }
+            det.setDias(calcularDiasDecimal(request.getDias(), det.getFechaInicio(), det.getFechaFin()));
+            det.setPeriodoInicio(det.getFechaInicio().getYear());
+            det.setMesPeriodo(det.getFechaInicio().getMonthValue());
+            det.setUpdatedBy(TenantContext.getUsuarioId());
+            det.setFecModificacion(Instant.now());
+            detRepository.save(det);
+            existing.setDiasTotales(calcularDiasEnteros(request.getDias(), det.getFechaInicio(), det.getFechaFin()));
+        }
+
         return mapper.toResponse(repository.save(existing));
     }
 
@@ -105,7 +149,7 @@ public class PermisoLicenciaServiceImpl implements PermisoLicenciaService {
         validarEstadoModificable(entity);
         entity.setFlagEstado(ESTADO_APROBADO);
         entity.setUpdatedBy(TenantContext.getUsuarioId());
-        entity.setFecModificacion(java.time.Instant.now());
+        entity.setFecModificacion(Instant.now());
         return mapper.toResponse(repository.save(entity));
     }
 
@@ -117,7 +161,7 @@ public class PermisoLicenciaServiceImpl implements PermisoLicenciaService {
         validarEstadoModificable(entity);
         entity.setFlagEstado(ESTADO_RECHAZADO);
         entity.setUpdatedBy(TenantContext.getUsuarioId());
-        entity.setFecModificacion(java.time.Instant.now());
+        entity.setFecModificacion(Instant.now());
         return mapper.toResponse(repository.save(entity));
     }
 
@@ -234,6 +278,35 @@ public class PermisoLicenciaServiceImpl implements PermisoLicenciaService {
         entity.setFlagEstado(ESTADO_REF_BOLETA);
         log.info("Permiso {} reflejado en boleta", id);
         return mapper.toResponse(repository.save(entity));
+    }
+
+    private void crearDetalleInicial(Long permisoLicenciaId, PermisoLicenciaCreateRequest request) {
+        var det = new PermisoLicenciaDet();
+        det.setPermisoLicenciaId(permisoLicenciaId);
+        det.setItem(1);
+        det.setTipoSuspensionLaboralId(request.getTipoSuspensionLaboralId());
+        det.setFechaSolicitud(LocalDate.now());
+        det.setPeriodoInicio(request.getFechaInicio().getYear());
+        det.setMesPeriodo(request.getFechaInicio().getMonthValue());
+        det.setFechaInicio(request.getFechaInicio());
+        det.setFechaFin(request.getFechaFin());
+        det.setDias(calcularDiasDecimal(request.getDias(), request.getFechaInicio(), request.getFechaFin()));
+        det.setCreatedBy(TenantContext.getUsuarioId());
+        det.setFecCreacion(Instant.now());
+        detRepository.save(det);
+    }
+
+    private int calcularDiasEnteros(Integer dias, LocalDate inicio, LocalDate fin) {
+        return calcularDiasDecimal(dias, inicio, fin).intValue();
+    }
+
+    private BigDecimal calcularDiasDecimal(Integer dias, LocalDate inicio, LocalDate fin) {
+        if (dias != null) {
+            return BigDecimal.valueOf(dias);
+        }
+        LocalDate hasta = fin != null ? fin : inicio;
+        long diff = ChronoUnit.DAYS.between(inicio, hasta) + 1;
+        return BigDecimal.valueOf(Math.max(diff, 1));
     }
 
     private PermisoLicencia buscarOrThrow(Long id) {

@@ -150,4 +150,49 @@ public interface TrabajadorRepository extends JpaRepository<Trabajador, Long> {
     /** Lista IDs de trabajadores activos para procesos batch. */
     @Query(value = "SELECT id FROM rrhh.trabajador WHERE flag_estado = '1'", nativeQuery = true)
     List<Long> findActivosIds();
+
+    @Query(value = "SELECT nombre FROM rrhh.tipo_sangre WHERE id = :id", nativeQuery = true)
+    String findTipoSangreNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM core.distrito WHERE id = :id", nativeQuery = true)
+    String findDistritoNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM rrhh.tipo_via WHERE id = :id", nativeQuery = true)
+    String findTipoViaNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM rrhh.tipo_zona WHERE id = :id", nativeQuery = true)
+    String findTipoZonaNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM rrhh.tipo_vivienda WHERE id = :id", nativeQuery = true)
+    String findTipoViviendaNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM rrhh.pension_rtps WHERE id = :id", nativeQuery = true)
+    String findPensionRtpsNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM rrhh.regimen_pensionario WHERE id = :id", nativeQuery = true)
+    String findRegimenPensionarioNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM rrhh.tipo_trabajador WHERE id = :id", nativeQuery = true)
+    String findTipoTrabajadorNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM rrhh.tipo_trabajador_rtps WHERE id = :id", nativeQuery = true)
+    String findTipoTrabajadorRtpsNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM rrhh.ocupacion_rtps WHERE id = :id", nativeQuery = true)
+    String findOcupacionRtpsNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM rrhh.seccion WHERE id = :id", nativeQuery = true)
+    String findSeccionNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT desc_cencos FROM contabilidad.centros_costo WHERE id = :id", nativeQuery = true)
+    String findCentroCostoNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM finanzas.banco WHERE id = :id", nativeQuery = true)
+    String findBancoNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM core.moneda WHERE id = :id", nativeQuery = true)
+    String findMonedaNombreById(@Param("id") Long id);
+
+    @Query(value = "SELECT nombre FROM rrhh.motivo_cese WHERE id = :id", nativeQuery = true)
+    String findMotivoCeseNombreById(@Param("id") Long id);
 }

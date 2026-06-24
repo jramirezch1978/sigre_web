@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -37,13 +38,20 @@ public class TrabajadorMapper {
                 .id(t.getId())
                 .codigoTrabajador(t.getCodigoTrabajador())
                 .nombres(t.getNombres())
+                .nombre1(t.getNombre1())
+                .nombre2(t.getNombre2())
                 .apellidoPaterno(t.getApellidoPaterno())
                 .apellidoMaterno(t.getApellidoMaterno())
                 .tipoDocIdentidad(buildRef(t.getTipoDocIdentidadId(), repository::findTipoDocIdentidadNombreById))
                 .numeroDocumento(t.getNumeroDocumento())
                 .area(buildRef(t.getAreaId(), repository::findAreaNombreById))
+                .seccion(buildRef(t.getSeccionId(), repository::findSeccionNombreById))
                 .cargo(buildRef(t.getCargoId(), repository::findCargoNombreById))
+                .centroCosto(buildRef(t.getCentroCostoId(), repository::findCentroCostoNombreById))
                 .sucursal(buildRef(t.getSucursalId(), repository::findSucursalNombreById))
+                .tipoTrabajador(buildRef(t.getTipoTrabajadorId(), repository::findTipoTrabajadorNombreById))
+                .adminAfp(buildRef(t.getAdminAfpId(), repository::findAdminAfpNombreById))
+                .fecIniAfilAfp(formatDate(t.getFecIniAfilAfp()))
                 .fechaIngreso(formatDate(t.getFechaIngreso()))
                 .flagEstado(t.getFlagEstado())
                 .fecCreacion(formatTimestamp(t.getFecCreacion()))
@@ -62,6 +70,8 @@ public class TrabajadorMapper {
                 .entidadContribuyente(buildRef(t.getEntidadContribuyenteId(), id -> null))
                 .codigoTrabajador(t.getCodigoTrabajador())
                 .nombres(t.getNombres())
+                .nombre1(t.getNombre1())
+                .nombre2(t.getNombre2())
                 .apellidoPaterno(t.getApellidoPaterno())
                 .apellidoMaterno(t.getApellidoMaterno())
                 .tipoDocIdentidad(buildRef(t.getTipoDocIdentidadId(), repository::findTipoDocIdentidadNombreById))
@@ -70,19 +80,60 @@ public class TrabajadorMapper {
                 .sexo(buildRef(t.getSexoId(), repository::findSexoNombreById))
                 .estadoCivil(buildRef(t.getEstadoCivilId(), repository::findEstadoCivilNombreById))
                 .direccion(t.getDireccion())
-                .telefono(t.getTelefono())
+                .telefonoFijo(t.getTelefonoFijo())
+                .celular1(t.getCelular1())
+                .celular2(t.getCelular2())
+                .codigoTelCiudad(t.getCodigoTelCiudad())
+                .alergias(t.getAlergias())
+                .tipoSangre(buildRef(t.getTipoSangreId(), repository::findTipoSangreNombreById))
+                .nroBrevete(t.getNroBrevete())
+                .autogeneradoEssalud(t.getAutogeneradoEssalud())
+                .flagDiscapacidad(t.getFlagDiscapacidad())
+                .flagDomiciliado(t.getFlagDomiciliado())
+                .flagComisionAfp(t.getFlagComisionAfp())
+                .flagPensionista(t.getFlagPensionista())
+                .flagAfiliadoEps(t.getFlagAfiliadoEps())
+                .flagEssaludVida(t.getFlagEssaludVida())
+                .flagSctrPension(t.getFlagSctrPension())
+                .flagSctrSalud(t.getFlagSctrSalud())
+                .flagQuintaExonerado(t.getFlagQuintaExonerado())
+                .distrito(buildRef(t.getDistritoId(), repository::findDistritoNombreById))
+                .tipoVia(buildRef(t.getTipoViaId(), repository::findTipoViaNombreById))
+                .nombreVia(t.getNombreVia())
+                .numeroVia(t.getNumeroVia())
+                .tipoZona(buildRef(t.getTipoZonaId(), repository::findTipoZonaNombreById))
+                .nombreZona(t.getNombreZona())
+                .tipoVivienda(buildRef(t.getTipoViviendaId(), repository::findTipoViviendaNombreById))
+                .interior(t.getInterior())
+                .referencia(t.getReferencia())
                 .email(t.getEmail())
                 .cuentaBancariaSueldo(t.getCuentaBancariaSueldo())
                 .cuentaCts(t.getCuentaCts())
                 .adminAfp(buildRef(t.getAdminAfpId(), repository::findAdminAfpNombreById))
                 .cuspp(t.getCuspp())
+                .pensionRtps(buildRef(t.getPensionRtpsId(), repository::findPensionRtpsNombreById))
+                .regimenPensionario(buildRef(t.getRegimenPensionarioId(), repository::findRegimenPensionarioNombreById))
+                .fecIniAfilAfp(formatDate(t.getFecIniAfilAfp()))
+                .fecFinAfilAfp(formatDate(t.getFecFinAfilAfp()))
                 .regimenLaboral(buildRef(t.getRegimenLaboralId(), repository::findRegimenLaboralNombreById))
+                .tipoTrabajador(buildRef(t.getTipoTrabajadorId(), repository::findTipoTrabajadorNombreById))
+                .tipoTrabajadorRtps(buildRef(t.getTipoTrabajadorRtpsId(), repository::findTipoTrabajadorRtpsNombreById))
+                .ocupacionRtps(buildRef(t.getOcupacionRtpsId(), repository::findOcupacionRtpsNombreById))
                 .area(buildRef(t.getAreaId(), repository::findAreaNombreById))
+                .seccion(buildRef(t.getSeccionId(), repository::findSeccionNombreById))
                 .cargo(buildRef(t.getCargoId(), repository::findCargoNombreById))
+                .centroCosto(buildRef(t.getCentroCostoId(), repository::findCentroCostoNombreById))
                 .sucursal(buildRef(t.getSucursalId(), repository::findSucursalNombreById))
+                .bancoSueldo(buildRef(t.getBancoSueldoId(), repository::findBancoNombreById))
+                .bancoCts(buildRef(t.getBancoCtsId(), repository::findBancoNombreById))
+                .monedaSueldo(buildRef(t.getMonedaSueldoId(), repository::findMonedaNombreById))
+                .monedaCts(buildRef(t.getMonedaCtsId(), repository::findMonedaNombreById))
                 .fechaIngreso(formatDate(t.getFechaIngreso()))
                 .fechaCese(formatDate(t.getFechaCese()))
+                .motivoCeseRef(buildRef(t.getMotivoCeseId(), repository::findMotivoCeseNombreById))
                 .motivoCese(t.getMotivoCese())
+                .comentario(t.getComentario())
+                .procedencia(t.getProcedencia())
                 .flagEstado(t.getFlagEstado())
                 .createdBy(t.getCreatedBy())
                 .fecCreacion(formatTimestamp(t.getFecCreacion()))
@@ -90,6 +141,8 @@ public class TrabajadorMapper {
                 .fecModificacion(formatTimestamp(t.getFecModificacion()))
                 .contratos(contratos.stream().map(this::toContratoResponse).toList())
                 .horarios(horarios.stream().map(this::toHorarioResponse).toList())
+                .fotoBlobBase64(encodeBase64(t.getFotoBlob()))
+                .dniBlobBase64(encodeBase64(t.getDniBlob()))
                 .build();
     }
 
@@ -152,5 +205,12 @@ public class TrabajadorMapper {
     /** Formatea {@link Instant} a {@code dd/MM/yyyy HH:mm:ss} en zona Lima; retorna {@code null} si es nulo. */
     private String formatTimestamp(Instant ts) {
         return ts != null ? ts.atZone(ZONA_LIMA).format(FMT_TIMESTAMP) : null;
+    }
+
+    private String encodeBase64(byte[] data) {
+        if (data == null || data.length == 0) {
+            return null;
+        }
+        return Base64.getEncoder().encodeToString(data);
     }
 }
