@@ -580,40 +580,34 @@ if "!SUMMARY_DB!"=="" exit /b 0
 
 echo.
 echo ==============================================================================
-echo  RESUMEN DEPLOY - !SUMMARY_DB! @ !PGHOST!:!PGPORT!
+echo  RESUMEN FINAL - !SUMMARY_DB! @ !PGHOST!:!PGPORT!
 echo ==============================================================================
 (
 echo.
 echo ==============================================================================
-echo  RESUMEN DEPLOY - !SUMMARY_DB! @ !PGHOST!:!PGPORT!
+echo  RESUMEN FINAL - !SUMMARY_DB! @ !PGHOST!:!PGPORT!
 echo ==============================================================================
 )>> "!DBDEPLOY_LOG!"
 
 set "SAVED_PGDATABASE=!PGDATABASE!"
 set "PGDATABASE=!SUMMARY_DB!"
+
+echo.
+echo --- Totales por schema (tablas y filas estimadas) ---
+(
+echo.
+echo --- Totales por schema (tablas y filas estimadas) ---
+)>> "!DBDEPLOY_LOG!"
+
 call :run_sql "99-deploy-resumen.sql"
 set "SUMMARY_RC=!errorlevel!"
 set "PGDATABASE=!SAVED_PGDATABASE!"
 if !SUMMARY_RC! geq 1 exit /b 1
 
-call :print_seed_summary_from_log
-
+echo.
 echo ==============================================================================
+>> "!DBDEPLOY_LOG!" echo.
 >> "!DBDEPLOY_LOG!" echo ==============================================================================
-exit /b 0
-
-:print_seed_summary_from_log
-echo.
-echo --- Seed ejecutado (filas reportadas por psql) ---
-echo.
-set "SEED_FOUND=0"
-for /f "usebackq delims=" %%L in (`findstr /R /C:"^>> --- seed/" /C:"^INSERT 0 " /C:"^COPY " "!DBDEPLOY_LOG!" 2^>nul`) do (
-    set "SEED_FOUND=1"
-    echo   %%L
-)
-if "!SEED_FOUND!"=="0" (
-    echo   (sin archivos seed en este deploy)
-)
 exit /b 0
 
 :done
