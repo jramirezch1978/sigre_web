@@ -1,56 +1,49 @@
-<div class="sigre-metoxi-modal">
-  <div class="modal-header border-bottom">
-    <h5 class="modal-title fw-bold">{{ data.titulo }}</h5>
-    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cancelar()" [disabled]="guardando"></button>
-  </div>
-
-  <div class="modal-body">
-    @if (cargandoOpciones) {
-      <div class="sigre-metoxi-modal__loading">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Cargando…</span>
-        </div>
-        <span>Cargando formulario…</span>
-      </div>
-    } @else {
-      <form [formGroup]="form" class="row g-3 sigre-metoxi-form">
-        @for (campo of data.config.campos; track campo.key) {
-          <erp-metoxi-form-field
-            [control]="controlDe(campo)"
-            [fieldId]="'campo-' + campo.key"
-            [fieldKey]="campo.key"
-            [label]="campo.label"
-            [required]="!!campo.required"
-            [type]="campo.type"
-            [colClass]="colClassDe(campo)"
-            [placeholder]="placeholderDe(campo)"
-            [maxLength]="campo.maxLength ?? null"
-            [options]="opcionesDe(campo)"
-            [switchOnLabel]="campo.switchOnLabel ?? 'Activo'"
-            [switchOffLabel]="campo.switchOffLabel ?? 'Anulado'"
-            [layout]="layoutDe(campo)" />
-        }
-      </form>
-      @if (error) {
-        <div class="alert alert-danger d-flex align-items-center gap-2 mb-0 mt-3" role="alert">
-          <i class="material-icons-outlined">error_outline</i>
-          <span>{{ error }}</span>
-        </div>
-      }
-    }
-  </div>
-
-  <div class="modal-footer border-top bg-light">
-    <div class="d-md-flex d-grid gap-3 w-100 justify-content-end">
-      <button type="button" class="btn btn-filter px-4" (click)="cancelar()" [disabled]="guardando">Cancelar</button>
-      <button type="button" class="btn btn-primary px-4" (click)="guardar()" [disabled]="guardando || cargandoOpciones">
-        @if (guardando) {
-          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-          Guardando…
-        } @else {
-          Guardar
-        }
-      </button>
-    </div>
-  </div>
-</div>
+<sigre-metoxi-modal-shell
+  [titulo]="data.titulo"
+  size="xl"
+  [cerrarDeshabilitado]="guardando"
+  (cerrar)="cancelar()">
+  @if (cargandoOpciones) {
+    <div class="sigre-metoxi-modal__loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando…</span>
+      </div>
+      <span>Cargando formulario…</span>
+    </div>
+  } @else {
+    <form [formGroup]="form" class="row g-3 sigre-metoxi-form">
+      @for (campo of data.config.campos; track campo.key) {
+        <erp-metoxi-form-field
+          [control]="controlDe(campo)"
+          [fieldId]="'campo-' + campo.key"
+          [fieldKey]="campo.key"
+          [label]="campo.label"
+          [required]="!!campo.required"
+          [type]="campo.type"
+          [colClass]="colClassDe(campo)"
+          [placeholder]="placeholderDe(campo)"
+          [maxLength]="campo.maxLength ?? null"
+          [options]="opcionesDe(campo)"
+          [switchOnLabel]="campo.switchOnLabel ?? 'Activo'"
+          [switchOffLabel]="campo.switchOffLabel ?? 'Anulado'"
+          [layout]="layoutDe(campo)" />
+      }
+    </form>
+    @if (error) {
+      <div class="alert alert-danger d-flex align-items-center gap-2 mb-0 mt-3" role="alert">
+        <i class="material-icons-outlined">error_outline</i>
+        <span>{{ error }}</span>
+      </div>
+    }
+  }
+
+  <div sigreMetoxiModalFooter>
+    <sigre-metoxi-modal-actions
+      [mostrarCancelar]="true"
+      [mostrarGuardar]="true"
+      [guardando]="guardando"
+      [deshabilitado]="guardando || cargandoOpciones"
+      (cancelar)="cancelar()"
+      (guardar)="guardar()" />
+  </div>
+</sigre-metoxi-modal-shell>

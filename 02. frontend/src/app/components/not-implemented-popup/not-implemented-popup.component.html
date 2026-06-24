@@ -1,63 +1,40 @@
-<!-- Modal Professional Style (Gentelella inspired) -->
-<div class="modal-content gentelella-modal">
-  
-  <!-- Modal Header -->
-  <div class="modal-header">
-    <h5 class="modal-title">
-      <mat-icon class="title-icon">construction</mat-icon>
-      Funcionalidad en Desarrollo
-    </h5>
-    <button type="button" 
-            mat-icon-button 
-            class="close-btn" 
-            (click)="cerrar()"
-            aria-label="Cerrar">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-
-  <!-- Modal Body -->
-  <div class="modal-body">
-    <div class="notification-content">
-      <!-- Icon Section -->
-      <div class="notification-icon">
-        <mat-icon class="main-icon">build_circle</mat-icon>
-      </div>
-      
-      <!-- Message Section -->
-      <div class="notification-message">
-        <h4 class="feature-name">{{ data.featureName }}</h4>
-        <p class="feature-description">
-          {{ data.description || 'Esta funcionalidad aún no está implementada.' }}
-        </p>
-        <div class="feature-details">
-          <div class="detail-item">
-            <mat-icon class="detail-icon">info</mat-icon>
-            <span>Nuestro equipo está trabajando en esta característica.</span>
-          </div>
-          <div class="detail-item" *ngIf="data.expectedDate">
-            <mat-icon class="detail-icon">schedule</mat-icon>
+<sigre-metoxi-modal-shell
+  titulo="Funcionalidad en desarrollo"
+  size="md"
+  (cerrar)="cerrar()">
+  <div class="sigre-metoxi-modal-info">
+    <div class="sigre-metoxi-modal-info__icon">
+      <i class="material-icons-outlined">construction</i>
+    </div>
+    <div>
+      <h6 class="sigre-metoxi-modal-info__title">{{ data.featureName }}</h6>
+      <p class="sigre-metoxi-modal-info__text mb-3">
+        {{ data.description || 'Esta funcionalidad aún no está implementada.' }}
+      </p>
+      <ul class="sigre-metoxi-modal-info__list list-unstyled mb-0">
+        <li>
+          <i class="material-icons-outlined">info</i>
+          <span>Nuestro equipo está trabajando en esta característica.</span>
+        </li>
+        @if (data.expectedDate) {
+          <li>
+            <i class="material-icons-outlined">schedule</i>
             <span>Fecha estimada: {{ data.expectedDate }}</span>
-          </div>
-          <div class="detail-item">
-            <mat-icon class="detail-icon">contact_support</mat-icon>
-            <span>Para consultas, contacta al administrador del sistema.</span>
-          </div>
-        </div>
-      </div>
+          </li>
+        }
+        <li>
+          <i class="material-icons-outlined">contact_support</i>
+          <span>Para consultas, contacta al administrador del sistema.</span>
+        </li>
+      </ul>
     </div>
   </div>
 
-  <!-- Modal Footer -->
-  <div class="modal-footer">
-    <button type="button" 
-            mat-raised-button 
-            color="primary"
-            class="action-btn"
-            (click)="cerrar()">
-      <mat-icon>check</mat-icon>
-      Entendido
-    </button>
+  <div sigreMetoxiModalFooter>
+    <sigre-metoxi-modal-actions
+      [mostrarCancelar]="false"
+      [mostrarPrimario]="true"
+      textoPrimario="Entendido"
+      (primario)="cerrar()" />
   </div>
-
-</div>
+</sigre-metoxi-modal-shell>

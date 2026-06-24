@@ -1,13 +1,17 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { forkJoin, of } from 'rxjs';
 import { TablaCrudCampo, TablaCrudConfig } from '../../config/almacen-tabla-crud.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService, SelectOptionDto } from '../../services/core-api.service';
-import { extraerMensajeErrorApi } from '@sigre-common';
+import {
+  extraerMensajeErrorApi,
+  SigreMetoxiModalActionsComponent,
+  SigreMetoxiModalShellComponent,
+} from '@sigre-common';
 import { ErpMetoxiFormFieldComponent } from '../../../../shared/erp-metoxi-form-field/erp-metoxi-form-field.component';
 import { colClassMetoxiCampo } from '../../../../shared/utils/erp-metoxi-form-icons.util';
 
@@ -20,7 +24,13 @@ export interface AlmacenRegistroDialogData {
 @Component({
   selector: 'app-almacen-registro-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, ErpMetoxiFormFieldComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    SigreMetoxiModalShellComponent,
+    SigreMetoxiModalActionsComponent,
+    ErpMetoxiFormFieldComponent,
+  ],
   templateUrl: './almacen-registro-dialog.component.html',
   styleUrls: ['./almacen-registro-dialog.component.scss'],
 })

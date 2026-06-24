@@ -10,7 +10,7 @@ import { AlmacenVistaDef, ALMACEN_VISTAS_POR_RUTA } from '../../config/almacen-v
 import { crudConfigPorCodigoVista, VistaCrudConfig } from '../../config/almacen-vista-crud.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
-import { SigreModalService } from '@sigre-common';
+import { abrirDialogoMetoxi, SigreModalService } from '@sigre-common';
 import {
   AlmacenRegistroDialogComponent,
   AlmacenRegistroDialogData,
@@ -126,14 +126,10 @@ export class AlmacenListadoPageComponent implements OnInit {
       config: this.crudConfig,
       registro,
     };
-    this.dialog
-      .open(AlmacenRegistroDialogComponent, {
-        data,
-        width: '720px',
-        maxWidth: '95vw',
-        disableClose: true,
-        panelClass: 'sigre-metoxi-dialog-panel',
-      })
+    abrirDialogoMetoxi(this.dialog, AlmacenRegistroDialogComponent, {
+      data,
+      width: '960px',
+    })
       .afterClosed()
       .subscribe(ok => {
         if (ok) this.cargarDatos();

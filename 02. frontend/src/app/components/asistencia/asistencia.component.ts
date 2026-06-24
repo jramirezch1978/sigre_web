@@ -14,6 +14,7 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { ClockComponent } from '../clock/clock.component';
 import { PopupMovimientosComponent, TipoMovimiento } from '../popup-movimientos/popup-movimientos.component';
 import { PopupRacionesComponent, RacionDisponible } from '../popup-raciones/popup-raciones.component';
+import { abrirDialogoMetoxi } from '@sigre-common';
 import { ErrorPopupComponent, ErrorData } from '../error-popup/error-popup.component';
 import { ConfigService } from '../../services/config.service';
 import { ClockService } from '../../services/clock.service';
@@ -190,10 +191,9 @@ export class AsistenciaComponent implements OnInit {
     };
     
     // Abrir popup modal de error
-    const dialogRef = this.dialog.open(ErrorPopupComponent, {
-      width: '400px',
-      disableClose: true, // No permitir cerrar con ESC o click fuera
-      data: errorData
+    const dialogRef = abrirDialogoMetoxi(this.dialog, ErrorPopupComponent, {
+      width: '480px',
+      data: errorData,
     });
     
     // Al cerrar el popup, regresar a ventana original (limpiar campos)
@@ -246,10 +246,9 @@ export class AsistenciaComponent implements OnInit {
         console.log('⏰ Mostrando error de tiempo mínimo:', errorData);
         
         // Abrir popup modal específico para tiempo mínimo
-        const dialogRef = this.dialog.open(ErrorPopupComponent, {
-          width: '500px',
-          disableClose: true,
-          data: errorData
+        const dialogRef = abrirDialogoMetoxi(this.dialog, ErrorPopupComponent, {
+          width: '520px',
+          data: errorData,
         });
         
         dialogRef.afterClosed().subscribe(() => {
@@ -281,10 +280,9 @@ export class AsistenciaComponent implements OnInit {
     };
     
     // Abrir popup modal de error crítico
-    const dialogRef = this.dialog.open(ErrorPopupComponent, {
-      width: '450px',
-      disableClose: true,
-      data: errorData
+    const dialogRef = abrirDialogoMetoxi(this.dialog, ErrorPopupComponent, {
+      width: '480px',
+      data: errorData,
     });
     
     // Al cerrar, regresar a ventana original para permitir reintento

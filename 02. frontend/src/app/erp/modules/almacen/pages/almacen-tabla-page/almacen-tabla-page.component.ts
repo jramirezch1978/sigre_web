@@ -19,7 +19,7 @@ import { crudConfigPorTabla, TablaCrudConfig } from '../../config/almacen-tabla-
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService } from '../../services/core-api.service';
-import { SigreModalService } from '@sigre-common';
+import { abrirDialogoMetoxi, SigreModalService } from '@sigre-common';
 import {
   AlmacenRegistroDialogComponent,
   AlmacenRegistroDialogData,
@@ -140,14 +140,10 @@ export class AlmacenTablaPageComponent implements OnInit {
       registro,
     };
 
-    this.dialog
-      .open(AlmacenRegistroDialogComponent, {
-        data,
-        width: '960px',
-        maxWidth: '98vw',
-        disableClose: true,
-        panelClass: 'sigre-metoxi-dialog-panel',
-      })
+    abrirDialogoMetoxi(this.dialog, AlmacenRegistroDialogComponent, {
+      data,
+      width: '960px',
+    })
       .afterClosed()
       .subscribe(ok => {
         if (ok) this.cargarDatos();

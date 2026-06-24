@@ -1,11 +1,13 @@
 import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController } from '@ionic/angular';
+import { SigreMetoxiModalActionsComponent } from './metoxi-modal-actions.component';
+import { SigreMetoxiModalShellComponent } from './metoxi-modal-shell.component';
 
 @Component({
   selector: 'app-modal-confirmation',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, SigreMetoxiModalShellComponent, SigreMetoxiModalActionsComponent],
   templateUrl: './modal-confirmation.component.html',
   styleUrls: ['./modal-confirmation.component.scss'],
 })

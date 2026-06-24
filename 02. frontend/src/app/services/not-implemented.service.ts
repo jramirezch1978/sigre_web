@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { abrirDialogoMetoxi } from '@sigre-common';
 import { NotImplementedPopupComponent, NotImplementedData } from '../components/not-implemented-popup/not-implemented-popup.component';
 
 @Injectable({
@@ -27,14 +28,11 @@ export class NotImplementedService {
       expectedDate
     };
 
-    this.dialog.open(NotImplementedPopupComponent, {
-      width: '550px',
-      maxWidth: '90vw',
-      data: data,
+    abrirDialogoMetoxi(this.dialog, NotImplementedPopupComponent, {
+      width: '560px',
+      data,
       disableClose: false,
       autoFocus: true,
-      restoreFocus: true,
-      panelClass: 'gentelella-dialog'
     });
   }
 
