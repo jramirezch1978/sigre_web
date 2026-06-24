@@ -1,100 +1,125 @@
-<div class="section-authentication-cover sigre-auth-metoxi">
-  <div class="row g-0 min-vh-100">
+<div class="auth-basic-wrapper sigre-auth-basic bg-login d-flex align-items-center justify-content-center">
+  <div class="container-fluid my-5 my-lg-0">
+    <div class="row">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5 col-xxl-4 mx-auto">
+        <div class="card rounded-4 mb-0 border-0 shadow sigre-auth-card">
+          <div class="card-body p-4 p-sm-5">
 
-    <div class="col-12 col-xl-7 col-xxl-8 auth-cover-left align-items-center justify-content-center d-none d-xl-flex border-end">
-      <div class="card rounded-0 mb-0 border-0 shadow-none bg-transparent">
-        <div class="card-body text-center">
-          <img src="assets/imagenes/auth/logo-sigre-hero.png" class="img-fluid sigre-auth-hero" alt="SIGRE — Solución integral de gestión de recursos empresariales" />
-        </div>
-      </div>
-    </div>
+            <div class="sigre-auth-brand mb-4">
+              <img
+                src="assets/imagenes/auth/logo-sigre.png"
+                class="sigre-auth-brand__logo"
+                alt="SIGRE" />
+              <div class="sigre-auth-brand__copy">
+                <h1 class="sigre-auth-brand__title mb-1">SIGRE</h1>
+                <p class="sigre-auth-brand__tagline mb-0">
+                  Solución Integral de REcursos Empresariales
+                </p>
+              </div>
+            </div>
 
-    <div class="col-12 col-xl-5 col-xxl-4 auth-cover-right align-items-center justify-content-center d-flex">
-      <div class="card rounded-0 m-3 mb-0 border-0 shadow-none w-100">
-        <div class="card-body p-sm-5">
-          <img src="assets/imagenes/auth/logo-sigre-horizontal.png" class="mb-4 sigre-auth-logo" alt="SIGRE" />
-          <p class="text-muted small mb-0">Solución integral de gestión de recursos empresariales</p>
-          <h4 class="fw-bold">Acceso al ERP</h4>
-          <p class="mb-0">Ingrese sus credenciales para continuar al módulo operativo.</p>
+            <h4 class="fw-bold mb-1">Comience ahora</h4>
+            <p class="text-muted mb-0">Ingrese sus credenciales para acceder a su cuenta.</p>
 
-          @if (!vistaVerif) {
-            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-body mt-4">
-              @if (errorMessage) {
-                <div class="alert alert-danger py-2" role="alert">{{ errorMessage }}</div>
-              }
-
-              <div class="row g-3">
-                <div class="col-12">
-                  <label for="sigre-usuario" class="form-label">Usuario o correo</label>
-                  <input id="sigre-usuario" type="text" class="form-control" formControlName="usuario" autocomplete="username"
-                         [class.is-invalid]="campoInvalido('usuario')" />
-                  @if (campoInvalido('usuario')) {
-                    <div class="invalid-feedback d-block">El usuario es requerido</div>
-                  }
-                </div>
-
-                <div class="col-12">
-                  <label for="sigre-clave" class="form-label">Contraseña</label>
-                  <div class="input-group">
-                    <input id="sigre-clave" [type]="mostrarClave ? 'text' : 'password'" class="form-control"
-                           formControlName="clave" autocomplete="current-password"
-                           [class.is-invalid]="campoInvalido('clave')" />
-                    <button type="button" class="input-group-text bg-transparent" (click)="toggleClave()">
-                      <i class="material-icons-outlined fs-6">{{ mostrarClave ? 'visibility_off' : 'visibility' }}</i>
-                    </button>
-                  </div>
-                  @if (campoInvalido('clave')) {
-                    <div class="invalid-feedback d-block">La contraseña es requerida</div>
-                  }
-                </div>
-
-                <div class="col-md-6">
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="sigre-recordar" formControlName="recordar" />
-                    <label class="form-check-label" for="sigre-recordar">Recordar usuario</label>
-                  </div>
-                </div>
-                <div class="col-md-6 text-end">
-                  <button type="button" class="btn btn-link p-0" (click)="cambioVistaVerif()">¿Olvidaste tu contraseña?</button>
-                </div>
-
-                @if (turnstileEnabled) {
-                  <div class="col-12">
-                    <div id="cf-turnstile-container"></div>
-                    @if (turnstileError) {
-                      <span class="text-danger small">Debe completar la verificación de seguridad</span>
-                    }
-                  </div>
+            @if (!vistaVerif) {
+              <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-body my-4">
+                @if (errorMessage) {
+                  <div class="alert alert-danger py-2" role="alert">{{ errorMessage }}</div>
                 }
 
-                <div class="col-12">
-                  <div class="d-grid">
-                    <button type="submit" class="btn btn-primary" [disabled]="isLoading || (turnstileEnabled && !turnstileToken)">
-                      @if (isLoading) {
-                        <span class="d-inline-flex align-items-center justify-content-center gap-2">
-                          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                          Ingresando…
-                        </span>
-                      } @else {
-                        Iniciar sesión
-                      }
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label for="sigre-usuario" class="form-label">Usuario o correo</label>
+                    <input
+                      id="sigre-usuario"
+                      type="text"
+                      class="form-control"
+                      formControlName="usuario"
+                      autocomplete="username"
+                      placeholder="usuario&#64;empresa.com"
+                      [class.is-invalid]="campoInvalido('usuario')" />
+                    @if (campoInvalido('usuario')) {
+                      <div class="invalid-feedback d-block">El usuario es requerido</div>
+                    }
+                  </div>
+
+                  <div class="col-12">
+                    <label for="sigre-clave" class="form-label">Contraseña</label>
+                    <div class="input-group" id="show_hide_password">
+                      <input
+                        id="sigre-clave"
+                        [type]="mostrarClave ? 'text' : 'password'"
+                        class="form-control border-end-0"
+                        formControlName="clave"
+                        autocomplete="current-password"
+                        placeholder="Ingrese su contraseña"
+                        [class.is-invalid]="campoInvalido('clave')" />
+                      <button
+                        type="button"
+                        class="input-group-text bg-transparent border-start-0"
+                        (click)="toggleClave()"
+                        aria-label="Mostrar u ocultar contraseña">
+                        <i class="material-icons-outlined fs-6">{{ mostrarClave ? 'visibility_off' : 'visibility' }}</i>
+                      </button>
+                    </div>
+                    @if (campoInvalido('clave')) {
+                      <div class="invalid-feedback d-block">La contraseña es requerida</div>
+                    }
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="sigre-recordar" formControlName="recordar" />
+                      <label class="form-check-label" for="sigre-recordar">Recordar usuario</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6 text-md-end">
+                    <button type="button" class="btn btn-link p-0 sigre-auth-link" (click)="cambioVistaVerif()">
+                      ¿Olvidó su contraseña?
                     </button>
                   </div>
-                </div>
-              </div>
-            </form>
-          } @else {
-            <div class="mt-4">
-              <app-verificacion-contrasenia (volverLogin)="cambioVistaVerif()"></app-verificacion-contrasenia>
-            </div>
-          }
 
-          <div class="text-start mt-4">
-            <a routerLink="/admin/login" class="small">Consola de administración →</a>
+                  @if (turnstileEnabled) {
+                    <div class="col-12">
+                      <div id="cf-turnstile-container"></div>
+                      @if (turnstileError) {
+                        <span class="text-danger small">Debe completar la verificación de seguridad</span>
+                      }
+                    </div>
+                  }
+
+                  <div class="col-12">
+                    <div class="d-grid">
+                      <button
+                        type="submit"
+                        class="btn btn-primary sigre-auth-submit"
+                        [disabled]="isLoading || (turnstileEnabled && !turnstileToken)">
+                        @if (isLoading) {
+                          <span class="d-inline-flex align-items-center justify-content-center gap-2">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Ingresando…
+                          </span>
+                        } @else {
+                          Iniciar sesión
+                        }
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            } @else {
+              <div class="my-4">
+                <app-verificacion-contrasenia (volverLogin)="cambioVistaVerif()"></app-verificacion-contrasenia>
+              </div>
+            }
+
+            <div class="text-center text-md-start">
+              <a routerLink="/admin/login" class="small sigre-auth-link">Consola de administración →</a>
+            </div>
+
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </div>

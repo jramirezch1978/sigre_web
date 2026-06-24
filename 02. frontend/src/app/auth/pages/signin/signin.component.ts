@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, NgZone, inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, NgZone, inject, HostBinding } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -26,6 +26,8 @@ declare global {
   standalone: false
 })
 export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWillEnter {
+
+  @HostBinding('class.sigre-auth-page') readonly authPageClass = true;
 
   vistaVerif = false;
   mostrarClave = false;
@@ -55,6 +57,7 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   private ipPrivada = '';
 
   ngOnInit(): void {
+    document.body.classList.add('sigre-auth-body');
     this.authService.purgeSessionLocal();
     this.erpLayout.seleccionarModulo(null);
     this.initializeForm();
@@ -79,6 +82,7 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   }
 
   ngOnDestroy(): void {
+    document.body.classList.remove('sigre-auth-body');
     this.removeTurnstile();
   }
 
