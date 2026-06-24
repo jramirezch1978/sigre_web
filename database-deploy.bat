@@ -361,11 +361,26 @@ call :run_sql "tenant/08-activos.sql" || exit /b 1
 call :run_sql "tenant/09-produccion.sql" || exit /b 1
 call :run_sql "tenant/10-auditoria.sql" || exit /b 1
 call :run_sql "tenant/11-auditoria-campos-obligatorios.sql" || exit /b 1
+call :run_sql "tenant/12-funciones-procedimientos.sql" || exit /b 1
 call :run_sql "99-auditoria-global.sql" || exit /b 1
 call :run_sql "99-auditoria-triggers-fechas.sql" || exit /b 1
 call :run_sql "seed/01-carga-inicial-maestros.sql" || exit /b 1
 call :run_sql "seed/02-carga-sunat.sql" || exit /b 1
 call :run_sql "seed/02-carga-concepto-matriz-financiera.sql" || exit /b 1
+call :run_sql "seed/01-seed-grupo-conceptos-planilla-sigre.sql" || exit /b 1
+call :run_sql "seed/02-concepto-planilla-sigre.sql" || exit /b 1
+call :run_sql "seed/03-seed-tipo-doc-identidad-sigre.sql" || exit /b 1
+call :run_sql "seed/04-seed-trabajador-maestro-sigre.sql" || exit /b 1
+call :run_sql "seed/05-seed-catalogos-trabajador-sigre.sql" || exit /b 1
+call :run_sql "seed/06-seed-fechas-proceso-sigre.sql" || exit /b 1
+call :run_sql "seed/07-seed-grupo-calculo-sigre.sql" || exit /b 1
+call :run_sql "seed/08-seed-grupo-calculo-det-sigre.sql" || exit /b 1
+call :run_sql "seed/09-seed-rmv-tipo-trabaj-sigre.sql" || exit /b 1
+call :run_sql "seed/10-seed-impuesto-renta-tramos-sigre.sql" || exit /b 1
+call :run_sql "seed/11-seed-configuracion-rrhh-sigre.sql" || exit /b 1
+call :run_sql "seed/12-seed-admin-afp-sigre.sql" || exit /b 1
+call :run_sql "seed/13-seed-motor-planilla-emp-sigre.sql" || exit /b 1
+call :run_sql "seed/14-seed-calculo-referencia-sigre.sql" || exit /b 1
 set "PGDATABASE=!PGTEMPLATE!"
 echo.
 echo ^>^> create-template: DDL de plantilla ejecutado en !PGTEMPLATE!

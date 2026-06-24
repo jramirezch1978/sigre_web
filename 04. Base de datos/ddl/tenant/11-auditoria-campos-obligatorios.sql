@@ -82,7 +82,7 @@ DECLARE
         'contabilidad.cntbl_cierre',
         'produccion.orden_trabajo',
         'produccion.programacion_produccion',
-        'rrhh.liquidacion',
+        'rrhh.liquidacion_benef',
         -- RRHH: flag_estado = máquina de estados (no solo activo/anulado 0/1)
         'rrhh.permiso_licencia',
         'rrhh.vacacion',

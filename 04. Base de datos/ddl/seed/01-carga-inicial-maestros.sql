@@ -4493,17 +4493,29 @@ ON CONFLICT (codigo) DO UPDATE SET
     nro_dias = EXCLUDED.nro_dias,
     flag_estado = EXCLUDED.flag_estado;
 
-INSERT INTO rrhh.tipo_suspension_laboral (codigo, nombre, flag_tipo_susp, flag_citt, flag_estado)
+INSERT INTO rrhh.tipo_suspension_laboral (codigo, nombre, flag_tipo_susp, flag_citt, flag_datos_lesion, flag_estado)
 VALUES
-    ('PER_PERSON', 'Permiso personal', 'P', '0', '1'),
-    ('LIC_MEDICA', 'Licencia médica', 'L', '1', '1'),
-    ('LIC_MATERN', 'Licencia por maternidad', 'L', '1', '1'),
-    ('LIC_PATERN', 'Licencia por paternidad', 'L', '0', '1'),
-    ('LIC_FALLEC', 'Licencia por fallecimiento de familiar', 'L', '0', '1')
+    ('01', 'S.P. SANCIÓN DISCIPLINARIA', '1', '0', '0', '1'),
+    ('02', 'S.P. EJERCICIO DEL DERECHO DE HUELGA', '1', '0', '0', '1'),
+    ('03', 'S.P. DETENCIÓN DEL TRABAJADOR, SALVO EL CASO DE CONDENA PRIVATIVA DE LA LIBERTAD', '1', '0', '0', '1'),
+    ('04', 'S.P. INHABILITACIÓN ADMINISTRATIVA O JUDICIAL POR PERÍODO NO SUPERIOR A TRES MESES', '1', '0', '0', '1'),
+    ('05', 'S.P. PERMISO O LICENCIA CONCEDIDOS POR EL EMPLEADOR SIN GOCE DE HABER', '1', '0', '0', '1'),
+    ('06', 'S.P. CASO FORTUITO O FUERZA MAYOR', '1', '0', '0', '1'),
+    ('07', 'S.P. FALTA NO JUSTIFICADA', '1', '0', '0', '1'),
+    ('08', 'S.P. POR TEMPORADA O INTERMITENTE', '1', '0', '0', '1'),
+    ('20', 'S.I. ENFERMEDAD O ACCIDENTE (PRIMEROS VEINTE DÍAS)', '2', '0', '0', '1'),
+    ('21', 'S.I. INCAPACIDAD TEMPORAL (INVALIDEZ, ENFERMEDAD Y ACCIDENTES)', '2', '0', '0', '1'),
+    ('22', 'S.I. MATERNIDAD DURANTE EL DESCANSO PRE Y POST NATAL', '2', '0', '0', '1'),
+    ('23', 'S.I. DESCANSO VACACIONAL', '2', '0', '0', '1'),
+    ('24', 'S.I. LICENCIA PARA DESEMPEÑAR CARGO CÍVICO Y PARA CUMPLIR CON EL SERVICIO MILITAR OBLIGATORIO', '2', '0', '0', '1'),
+    ('25', 'S.I. PERMISO Y LICENCIA PARA EL DESEMPEÑO DE CARGOS SINDICALES', '2', '0', '0', '1'),
+    ('26', 'S.I. LICENCIA CON GOCE DE HABER', '2', '0', '0', '1'),
+    ('27', 'S.I. DÍAS COMPENSADOS POR HORAS TRABAJADAS EN SOBRETIEMPO', '2', '0', '0', '1')
 ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,
     flag_tipo_susp = EXCLUDED.flag_tipo_susp,
     flag_citt = EXCLUDED.flag_citt,
+    flag_datos_lesion = EXCLUDED.flag_datos_lesion,
     flag_estado = EXCLUDED.flag_estado;
 
 INSERT INTO rrhh.tipo_sancion (codigo, nombre, flag_estado)
@@ -4519,7 +4531,8 @@ VALUES
     ('N', 'Planilla normal', '1'),
     ('G', 'Gratificación', '1'),
     ('C', 'CTS', '1'),
-    ('V', 'Vacaciones', '1')
+    ('V', 'Vacaciones', '1'),
+    ('B', 'Bonificación', '1')
 ON CONFLICT (codigo) DO UPDATE SET nombre = EXCLUDED.nombre, flag_estado = EXCLUDED.flag_estado;
 
 INSERT INTO rrhh.tipo_concepto_calculo (codigo, nombre, flag_estado)
