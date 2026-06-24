@@ -257,8 +257,15 @@ if not exist "!DDL_ROOT!\!REL_WIN!" (
 )
 echo ^>^> --- !REL_UNIX! ---
 (echo ^>^> --- !REL_UNIX! ---)>> "!DBDEPLOY_LOG!"
-docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -f "/ddl/!REL_UNIX!"
-if errorlevel 1 exit /b 1
+set "RUNSQL_OUT=%TEMP%\dbdeploy_run_!RANDOM!_!RANDOM!.log"
+docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -f "/ddl/!REL_UNIX!" > "!RUNSQL_OUT!" 2>&1
+set "RUNSQL_RC=!ERRORLEVEL!"
+if exist "!RUNSQL_OUT!" (
+    type "!RUNSQL_OUT!"
+    type "!RUNSQL_OUT!" >> "!DBDEPLOY_LOG!"
+    del "!RUNSQL_OUT!" >nul 2>&1
+)
+if !RUNSQL_RC! geq 1 exit /b 1
 echo    OK
 exit /b 0
 
@@ -267,8 +274,15 @@ set "TGRANT_ROLE=%~1"
 set "REL_UNIX=tenant/99-grants-tenant-role.sql"
 echo ^>^> --- tenant/99-grants-tenant-role.sql ^(rol=!TGRANT_ROLE!^) ---
 (echo ^>^> --- tenant/99-grants-tenant-role.sql ^(rol=!TGRANT_ROLE!^) ---)>> "!DBDEPLOY_LOG!"
-docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -v tenant_role=!TGRANT_ROLE! -f "/ddl/!REL_UNIX!"
-if errorlevel 1 exit /b 1
+set "RUNSQL_OUT=%TEMP%\dbdeploy_run_!RANDOM!_!RANDOM!.log"
+docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! --mount "type=bind,source=!DDL_MOUNT!,target=/ddl" !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGDATABASE!" -v ON_ERROR_STOP=1 -v tenant_role=!TGRANT_ROLE! -f "/ddl/!REL_UNIX!" > "!RUNSQL_OUT!" 2>&1
+set "RUNSQL_RC=!ERRORLEVEL!"
+if exist "!RUNSQL_OUT!" (
+    type "!RUNSQL_OUT!"
+    type "!RUNSQL_OUT!" >> "!DBDEPLOY_LOG!"
+    del "!RUNSQL_OUT!" >nul 2>&1
+)
+if !RUNSQL_RC! geq 1 exit /b 1
 echo    OK
 exit /b 0
 
@@ -332,6 +346,7 @@ call :run_sql "patches/20260619-opciones-menu-completas.sql" || exit /b 1
 set "PGDATABASE=!SAVED_PGDATABASE!"
 echo.
 echo ^>^> create-security: DDL de seguridad ejecutado en !PGSECURITY!
+call :print_deploy_summary "!PGSECURITY!" || exit /b 1
 exit /b 0
 
 :do_create_template
@@ -383,6 +398,7 @@ call :run_sql "seed/13-seed-motor-planilla-emp-sigre.sql" || exit /b 1
 set "PGDATABASE=!PGTEMPLATE!"
 echo.
 echo ^>^> create-template: DDL de plantilla ejecutado en !PGTEMPLATE!
+call :print_deploy_summary "!PGTEMPLATE!" || exit /b 1
 exit /b 0
 
 :do_create_asistencia
@@ -421,6 +437,7 @@ call :precheck_ddl_applied || exit /b 1
 call :run_sql "seed/01-carga-inicial-maestros.sql" || exit /b 1
 echo.
 echo ^>^> insert: OK
+call :print_deploy_summary "!PGDATABASE!" || exit /b 1
 exit /b 0
 
 :precheck_ddl_applied
@@ -482,6 +499,7 @@ if not defined CLONE_ROLE (
 )
 echo ^>^> Aplicando privilegios tenant ^(!CLONE_NEWDB! / !CLONE_ROLE!^)...
 call :do_tenant_grants "!CLONE_NEWDB!" "!CLONE_ROLE!" || exit /b 1
+call :print_deploy_summary "!CLONE_NEWDB!" || exit /b 1
 exit /b 0
 
 :do_patch_bluecoast
@@ -555,6 +573,12 @@ call :run_sql_tenant_grants "!TGROLE!"
 set "RC=!errorlevel!"
 set "PGDATABASE=!SAVED_PGDATABASE!"
 exit /b !RC!
+
+:print_deploy_summary
+set "SUMMARY_DB=%~1"
+if "!SUMMARY_DB!"=="" exit /b 0
+powershell -NoProfile -ExecutionPolicy Bypass -File "!REPO_ROOT!\scripts\print-db-deploy-summary.ps1" -Database "!SUMMARY_DB!" -DeployLog "!DBDEPLOY_LOG!" -PgHost "!PGHOST!" -PgPort !PGPORT! -PgUser "!PGUSER!" -PgPassword "!PGPASSWORD!" -PgSqlImage "!PGSQLIMG!" -PgSslMode "!PGSSLMODE!"
+exit /b %ERRORLEVEL%
 
 :done
 echo.
