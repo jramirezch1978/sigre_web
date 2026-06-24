@@ -380,7 +380,6 @@ call :run_sql "seed/10-seed-impuesto-renta-tramos-sigre.sql" || exit /b 1
 call :run_sql "seed/11-seed-configuracion-rrhh-sigre.sql" || exit /b 1
 call :run_sql "seed/12-seed-admin-afp-sigre.sql" || exit /b 1
 call :run_sql "seed/13-seed-motor-planilla-emp-sigre.sql" || exit /b 1
-call :run_sql "seed/14-seed-calculo-referencia-sigre.sql" || exit /b 1
 set "PGDATABASE=!PGTEMPLATE!"
 echo.
 echo ^>^> create-template: DDL de plantilla ejecutado en !PGTEMPLATE!

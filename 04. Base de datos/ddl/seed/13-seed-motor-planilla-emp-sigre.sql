@@ -1,6 +1,5 @@
 -- Datos transaccionales del motor EMP (planilla normal)
 -- gan_desct_fijo, grupo_conceptos_seccion (SENATI), fechas_proceso referencia CALCULO.json
--- Tablas calculo_referencia / calculo_det_referencia: definidas en tenant/07-rrhh.sql
 BEGIN;
 
 -- Sentinel ONP para cabecera calculo.admin_afp_id NOT NULL cuando trabajador no tiene AFP

@@ -3384,45 +3384,4 @@ BEGIN
     END IF;
 END;
 $$;
-
--- ============================================================
--- fn_validar_calculo_referencia â€” compara motor vs seed 14 (CALCULO.json)
--- Retorna filas con diferencia de importe mayor a p_tolerancia.
--- ============================================================
-CREATE OR REPLACE FUNCTION rrhh.fn_validar_calculo_referencia(
-    p_origen            VARCHAR,
-    p_fec_proceso       DATE,
-    p_tipo_planilla_id  BIGINT,
-    p_tolerancia        NUMERIC DEFAULT 0.02
-)
-RETURNS TABLE (
-    codigo_trabajador   VARCHAR,
-    concepto_codigo     VARCHAR,
-    imp_referencia      NUMERIC,
-    imp_calculado       NUMERIC,
-    diferencia          NUMERIC
-)
-LANGUAGE sql STABLE AS $$
-    SELECT t.codigo_trabajador,
-           cp.codigo AS concepto_codigo,
-           ref.imp_soles AS imp_referencia,
-           calc.imp_soles AS imp_calculado,
-           ABS(COALESCE(ref.imp_soles, 0) - COALESCE(calc.imp_soles, 0)) AS diferencia
-      FROM rrhh.calculo_referencia ref_c
-      JOIN rrhh.trabajador t ON t.id = ref_c.trabajador_id
-      JOIN auth.sucursal s ON s.id = ref_c.sucursal_id AND s.codigo = p_origen
-      JOIN rrhh.calculo_det_referencia ref ON ref.calculo_id = ref_c.id
-      JOIN rrhh.concepto_planilla cp ON cp.id = ref.concepto_id
-      JOIN rrhh.calculo calc_c
-        ON calc_c.trabajador_id = ref_c.trabajador_id
-       AND calc_c.fec_proceso = p_fec_proceso
-       AND calc_c.tipo_planilla_id = p_tipo_planilla_id
-       AND calc_c.sucursal_id = ref_c.sucursal_id
-      JOIN rrhh.calculo_det calc
-        ON calc.calculo_id = calc_c.id
-       AND calc.concepto_id = ref.concepto_id
-       AND calc.item = ref.item
-     WHERE ref_c.fec_proceso = p_fec_proceso
-       AND ref_c.tipo_planilla_id = p_tipo_planilla_id
-       AND ABS(COALESCE(ref.imp_soles, 0) - COALESCE(calc.imp_soles, 0)) > p_tolerancia;
-$$;
+ â€” 

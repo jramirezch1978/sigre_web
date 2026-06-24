@@ -1626,50 +1626,10 @@ DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='fk_calculo
 DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='uq_calculo_det_linea')
     THEN ALTER TABLE rrhh.calculo_det ADD CONSTRAINT uq_calculo_det_linea UNIQUE (calculo_id, concepto_id, item); END IF; END $$;
 
--- Golden master CALCULO.json (validación rrhh.fn_validar_calculo_referencia; antes de 12-funciones)
-CREATE TABLE IF NOT EXISTS rrhh.calculo_referencia (
-    LIKE rrhh.calculo INCLUDING DEFAULTS
-);
-CREATE TABLE IF NOT EXISTS rrhh.calculo_det_referencia (
-    LIKE rrhh.calculo_det INCLUDING DEFAULTS
-);
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'pk_calculo_referencia') THEN
-        ALTER TABLE rrhh.calculo_referencia ADD CONSTRAINT pk_calculo_referencia PRIMARY KEY (id);
-    END IF;
-END $$;
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'pk_calculo_det_referencia') THEN
-        ALTER TABLE rrhh.calculo_det_referencia ADD CONSTRAINT pk_calculo_det_referencia PRIMARY KEY (id);
-    END IF;
-END $$;
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_calculo_det_referencia_calculo') THEN
-        ALTER TABLE rrhh.calculo_det_referencia
-            ADD CONSTRAINT fk_calculo_det_referencia_calculo
-            FOREIGN KEY (calculo_id) REFERENCES rrhh.calculo_referencia(id);
-    END IF;
-END $$;
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_calculo_det_referencia_concepto') THEN
-        ALTER TABLE rrhh.calculo_det_referencia
-            ADD CONSTRAINT fk_calculo_det_referencia_concepto
-            FOREIGN KEY (concepto_id) REFERENCES rrhh.concepto_planilla(id);
-    END IF;
-END $$;
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_calculo_det_referencia_tipo_concepto') THEN
-        ALTER TABLE rrhh.calculo_det_referencia
-            ADD CONSTRAINT fk_calculo_det_referencia_tipo_concepto
-            FOREIGN KEY (tipo_concepto_calculo_id) REFERENCES rrhh.tipo_concepto_calculo(id);
-    END IF;
-END $$;
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_calculo_det_referencia_linea') THEN
-        ALTER TABLE rrhh.calculo_det_referencia
-            ADD CONSTRAINT uq_calculo_det_referencia_linea UNIQUE (calculo_id, concepto_id, item);
-    END IF;
-END $$;
+-- Legacy QA: tablas calculo_referencia / calculo_det_referencia eliminadas
+DROP TABLE IF EXISTS rrhh.calculo_det_referencia CASCADE;
+DROP TABLE IF EXISTS rrhh.calculo_referencia CASCADE;
+DROP FUNCTION IF EXISTS rrhh.fn_validar_calculo_referencia(VARCHAR, DATE, BIGINT, NUMERIC);
 
 ALTER TABLE rrhh.cnta_crrte ADD COLUMN IF NOT EXISTS doc_tipo_id BIGINT;
 ALTER TABLE rrhh.cnta_crrte ADD COLUMN IF NOT EXISTS nro_doc VARCHAR(20);
