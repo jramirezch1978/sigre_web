@@ -6,8 +6,6 @@ import com.sigre.almacen.dto.AlmacenResponse;
 import com.sigre.almacen.entity.Almacen;
 import com.sigre.almacen.entity.AlmacenTipo;
 import com.sigre.almacen.entity.CentrosCostoRef;
-import com.sigre.almacen.entity.EntidadContribuyenteRef;
-import com.sigre.almacen.entity.SucursalRef;
 import com.sigre.almacen.repository.AlmacenTipoRepository;
 import com.sigre.almacen.repository.CentrosCostoRefRepository;
 import com.sigre.almacen.repository.EntidadContribuyenteRefRepository;
@@ -38,46 +36,57 @@ public class AlmacenResponseEnricher {
         dto.setUpdatedByUsuario(UsuarioResumenLoader.fromMap(users, dto.getUpdatedBy()));
 
         if (dto.getSucursalId() != null) {
-            dto.setSucursalNombre(queryNombreSucursal(dto.getSucursalId()));
-        }
-        if (dto.getAlmacenTipoId() != null) {
-            dto.setAlmacenTipoNombre(queryNombreAlmacenTipo(dto.getAlmacenTipoId()));
+            sucursalRefRepository.findById(dto.getSucursalId()).ifPresentOrElse(sucursal -> {
+                dto.setSucursalCodigo(sucursal.getCodigo());
+                dto.setSucursalNombre(FkDisplayFormatter.codigoDescripcion(sucursal.getCodigo(), sucursal.getNombre()));
+            }, () -> {
+                dto.setSucursalCodigo(null);
+                dto.setSucursalNombre(null);
+            });
         } else {
+            dto.setSucursalCodigo(null);
+            dto.setSucursalNombre(null);
+        }
+
+        if (dto.getAlmacenTipoId() != null) {
+            almacenTipoRepository.findById(dto.getAlmacenTipoId()).ifPresentOrElse(tipo -> {
+                dto.setAlmacenTipoCodigo(tipo.getCodigo());
+                dto.setAlmacenTipoNombre(FkDisplayFormatter.codigoDescripcion(tipo.getCodigo(), tipo.getNombre()));
+            }, () -> {
+                dto.setAlmacenTipoCodigo(null);
+                dto.setAlmacenTipoNombre(null);
+            });
+        } else {
+            dto.setAlmacenTipoCodigo(null);
             dto.setAlmacenTipoNombre(null);
         }
+
         if (dto.getCentrosCostoId() != null) {
-            dto.setCentrosCostoNombre(queryNombreCentrosCosto(dto.getCentrosCostoId()));
+            centrosCostoRefRepository.findById(dto.getCentrosCostoId()).ifPresentOrElse(cc -> {
+                dto.setCentrosCostoCodigo(cc.getCencos());
+                dto.setCentrosCostoNombre(FkDisplayFormatter.codigoDescripcion(cc.getCencos(), cc.getDescCencos()));
+            }, () -> {
+                dto.setCentrosCostoCodigo(null);
+                dto.setCentrosCostoNombre(null);
+            });
         } else {
+            dto.setCentrosCostoCodigo(null);
             dto.setCentrosCostoNombre(null);
         }
+
         if (dto.getProveedorEntidadId() != null) {
-            dto.setProveedorNombre(queryNombreProveedor(dto.getProveedorEntidadId()));
+            entidadContribuyenteRefRepository.findById(dto.getProveedorEntidadId()).ifPresentOrElse(proveedor -> {
+                dto.setProveedorDocumento(proveedor.getNroDocumento());
+                dto.setProveedorNombre(FkDisplayFormatter.codigoDescripcion(
+                        proveedor.getNroDocumento(),
+                        proveedor.getNombreCompleto()));
+            }, () -> {
+                dto.setProveedorDocumento(null);
+                dto.setProveedorNombre(null);
+            });
         } else {
+            dto.setProveedorDocumento(null);
             dto.setProveedorNombre(null);
         }
-    }
-
-    private String queryNombreSucursal(Long sucursalId) {
-        return sucursalRefRepository.findById(sucursalId)
-                .map(SucursalRef::getNombre)
-                .orElse(null);
-    }
-
-    private String queryNombreAlmacenTipo(Long tipoId) {
-        return almacenTipoRepository.findById(tipoId)
-                .map(AlmacenTipo::getNombre)
-                .orElse(null);
-    }
-
-    private String queryNombreCentrosCosto(Long centrosCostoId) {
-        return centrosCostoRefRepository.findById(centrosCostoId)
-                .map(cc -> cc.getCencos() + " — " + cc.getDescCencos())
-                .orElse(null);
-    }
-
-    private String queryNombreProveedor(Long entidadId) {
-        return entidadContribuyenteRefRepository.findById(entidadId)
-                .map(EntidadContribuyenteRef::getNombreCompleto)
-                .orElse(null);
     }
 }

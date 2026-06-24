@@ -16,12 +16,16 @@ public class AlmacenResponse {
 
     private Long id;
     private Long sucursalId;
+    private String sucursalCodigo;
     private String sucursalNombre;
     private Long almacenTipoId;
+    private String almacenTipoCodigo;
     private String almacenTipoNombre;
     private Long centrosCostoId;
+    private String centrosCostoCodigo;
     private String centrosCostoNombre;
     private Long proveedorEntidadId;
+    private String proveedorDocumento;
     private String proveedorNombre;
     private Long responsableUsuarioId;
     private String codigo;

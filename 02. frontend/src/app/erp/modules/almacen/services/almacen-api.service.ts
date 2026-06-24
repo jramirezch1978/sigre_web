@@ -7,12 +7,16 @@ import { ApiResponse, PageData } from '../../../shared/models/api-page.model';
 export interface AlmacenDto {
   id: number;
   sucursalId: number;
+  sucursalCodigo?: string;
   sucursalNombre?: string;
   almacenTipoId?: number;
+  almacenTipoCodigo?: string;
   almacenTipoNombre?: string;
   centrosCostoId?: number;
+  centrosCostoCodigo?: string;
   centrosCostoNombre?: string;
   proveedorEntidadId?: number;
+  proveedorDocumento?: string;
   proveedorNombre?: string;
   responsableUsuarioId?: number;
   codigo: string;

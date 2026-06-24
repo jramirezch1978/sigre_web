@@ -58,17 +58,20 @@ class AlmacenResponseEnricherTest {
         dto.setUpdatedBy(101L);
 
         SucursalRef sucursal = org.mockito.Mockito.mock(SucursalRef.class);
-        when(sucursal.getNombre()).thenReturn("Sucursal Lima");
+        when(sucursal.getCodigo()).thenReturn("LM");
+        when(sucursal.getNombre()).thenReturn("LIMA");
 
         AlmacenTipo tipo = new AlmacenTipo();
         tipo.setId(5L);
-        tipo.setNombre("Tipo Principal");
+        tipo.setCodigo("MP");
+        tipo.setNombre("MATERIA PRIMA");
 
         CentrosCostoRef cencos = org.mockito.Mockito.mock(CentrosCostoRef.class);
         when(cencos.getCencos()).thenReturn("CC001");
         when(cencos.getDescCencos()).thenReturn("Centro operaciones");
 
         EntidadContribuyenteRef proveedor = org.mockito.Mockito.mock(EntidadContribuyenteRef.class);
+        when(proveedor.getNroDocumento()).thenReturn("20123456789");
         when(proveedor.getNombreCompleto()).thenReturn("Proveedor SAC");
 
         UsuarioResumenDto u1 = UsuarioResumenDto.builder().id(100L).nombreCompleto("Creador").build();
@@ -81,10 +84,14 @@ class AlmacenResponseEnricherTest {
 
         enricher.enrich(entity, dto);
 
-        assertThat(dto.getSucursalNombre()).isEqualTo("Sucursal Lima");
-        assertThat(dto.getAlmacenTipoNombre()).isEqualTo("Tipo Principal");
+        assertThat(dto.getSucursalCodigo()).isEqualTo("LM");
+        assertThat(dto.getSucursalNombre()).isEqualTo("LM — LIMA");
+        assertThat(dto.getAlmacenTipoCodigo()).isEqualTo("MP");
+        assertThat(dto.getAlmacenTipoNombre()).isEqualTo("MP — MATERIA PRIMA");
+        assertThat(dto.getCentrosCostoCodigo()).isEqualTo("CC001");
         assertThat(dto.getCentrosCostoNombre()).isEqualTo("CC001 — Centro operaciones");
-        assertThat(dto.getProveedorNombre()).isEqualTo("Proveedor SAC");
+        assertThat(dto.getProveedorDocumento()).isEqualTo("20123456789");
+        assertThat(dto.getProveedorNombre()).isEqualTo("20123456789 — Proveedor SAC");
         assertThat(dto.getCreatedByUsuario().getNombreCompleto()).isEqualTo("Creador");
         assertThat(dto.getUpdatedByUsuario().getNombreCompleto()).isEqualTo("Editor");
     }
