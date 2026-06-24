@@ -579,25 +579,16 @@ set "SUMMARY_DB=%~1"
 if "!SUMMARY_DB!"=="" exit /b 0
 
 echo.
-echo ==============================================================================
+echo ===========================================================================
 echo  RESUMEN FINAL - !SUMMARY_DB! @ !PGHOST!:!PGPORT!
-echo ==============================================================================
-(
-echo.
-echo ==============================================================================
-echo  RESUMEN FINAL - !SUMMARY_DB! @ !PGHOST!:!PGPORT!
-echo ==============================================================================
-)>> "!DBDEPLOY_LOG!"
+echo ===========================================================================
+>> "!DBDEPLOY_LOG!" echo.
+>> "!DBDEPLOY_LOG!" echo ===========================================================================
+>> "!DBDEPLOY_LOG!" echo  RESUMEN FINAL - !SUMMARY_DB! @ !PGHOST!:!PGPORT!
+>> "!DBDEPLOY_LOG!" echo ===========================================================================
 
 set "SAVED_PGDATABASE=!PGDATABASE!"
 set "PGDATABASE=!SUMMARY_DB!"
-
-echo.
-echo --- Totales por schema (tablas y filas estimadas) ---
-(
-echo.
-echo --- Totales por schema (tablas y filas estimadas) ---
-)>> "!DBDEPLOY_LOG!"
 
 call :run_sql "99-deploy-resumen.sql"
 set "SUMMARY_RC=!errorlevel!"
@@ -605,9 +596,9 @@ set "PGDATABASE=!SAVED_PGDATABASE!"
 if !SUMMARY_RC! geq 1 exit /b 1
 
 echo.
-echo ==============================================================================
+echo ===========================================================================
 >> "!DBDEPLOY_LOG!" echo.
->> "!DBDEPLOY_LOG!" echo ==============================================================================
+>> "!DBDEPLOY_LOG!" echo ===========================================================================
 exit /b 0
 
 :done
