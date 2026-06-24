@@ -39,6 +39,7 @@ CREATE TABLE config.configuracion (
     valor_entero INTEGER,
     valor_decimal NUMERIC(18, 6),
     valor_fecha DATE,
+    valor_bool BOOLEAN,
     editable BOOLEAN NOT NULL DEFAULT TRUE,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     modificado_en TIMESTAMPTZ,
@@ -181,3 +182,6 @@ COMMENT ON FUNCTION config.fn_get_parametro_dec(VARCHAR, VARCHAR, NUMERIC)
     IS 'Parámetro DECIMAL de config.configuracion (security); si no existe lo crea con el default.';
 COMMENT ON FUNCTION config.fn_get_parametro_bool(VARCHAR, VARCHAR, BOOLEAN)
     IS 'Parámetro BOOLEAN de config.configuracion (security); si no existe lo crea con el default.';
+
+-- Migración idempotente: valor_bool para parámetros RRHH SIGRE
+ALTER TABLE config.configuracion ADD COLUMN IF NOT EXISTS valor_bool BOOLEAN;
