@@ -64,16 +64,17 @@ body.toggled .sigre-sidebar-header .logo-icon {
 
 /* Dropdowns del header: posicionamiento manual (sin Popper de Bootstrap JS) */
 .top-header .sigre-nav-dropdown {
-  position: relative;
+  position: relative !important;
 
   > .dropdown-menu {
     position: absolute;
-    top: calc(100% + 0.35rem);
+    top: calc(100% + 0.35rem) !important;
+    bottom: auto !important;
     right: 0;
     left: auto;
     margin: 0;
     transform: none;
-    inset: auto 0 auto auto;
+    z-index: 1100;
   }
 
   > .dropdown-menu:not(.show) {
@@ -87,12 +88,18 @@ body.toggled .sigre-sidebar-header .logo-icon {
 
 .top-header .dropdown-apps {
   width: min(420px, calc(100vw - 1.5rem));
-  max-height: min(72vh, 560px);
-  overflow: hidden;
+  max-height: min(calc(100vh - 84px), 620px);
+  padding: 0.75rem !important;
+  overflow: visible;
 
   &.show {
     display: flex;
     flex-direction: column;
+  }
+
+  &::after {
+    top: -6px;
+    right: 1.25rem;
   }
 }
 
@@ -100,9 +107,10 @@ body.toggled .sigre-sidebar-header .logo-icon {
   width: 100%;
   min-width: 0;
   max-width: none;
-  max-height: min(68vh, 520px);
+  max-height: min(calc(100vh - 100px), 580px);
   overflow-x: hidden;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 
   .app-wrapper {
     padding: 0.85rem 0.45rem;
