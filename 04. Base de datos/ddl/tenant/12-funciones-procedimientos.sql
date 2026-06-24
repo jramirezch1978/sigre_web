@@ -3372,7 +3372,7 @@ BEGIN
     EXCEPTION
         WHEN OTHERS THEN
             v_errores := v_errores + 1;
-            RAISE WARNING 'Error trabajador %: % â€” %',
+            RAISE WARNING 'Error trabajador %: % - %',
                 v_trab.codigo_trabajador, SQLERRM, SQLSTATE;
     END;
     END LOOP;
@@ -3384,4 +3384,3 @@ BEGIN
     END IF;
 END;
 $$;
- â€” 
