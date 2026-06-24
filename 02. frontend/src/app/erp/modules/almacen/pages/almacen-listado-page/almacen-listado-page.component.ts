@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ErpDataTableComponent } from '../../../../shared/erp-data-table/erp-data-table.component';
+import { ErpMetoxiListPageComponent, ErpMetoxiFiltroTab } from '../../../../shared/erp-metoxi-list-page/erp-metoxi-list-page.component';
+import { contarRegistrosPorEstado, filtrarFilasListado } from '../../../../shared/utils/erp-list-filter.util';
 import { TablaColumna } from '../../../../shared/models/api-page.model';
 import { AlmacenVistaDef, ALMACEN_VISTAS_POR_RUTA } from '../../config/almacen-vistas.config';
 import { crudConfigPorCodigoVista, VistaCrudConfig } from '../../config/almacen-vista-crud.config';
@@ -17,7 +19,7 @@ import {
 @Component({
   selector: 'app-almacen-listado-page',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, ErpDataTableComponent],
+  imports: [CommonModule, MatDialogModule, ErpDataTableComponent, ErpMetoxiListPageComponent],
   templateUrl: './almacen-listado-page.component.html',
   styleUrls: ['./almacen-listado-page.component.scss'],
 })
@@ -33,6 +35,8 @@ export class AlmacenListadoPageComponent implements OnInit {
   subtitulo = '';
   columnas: TablaColumna[] = [];
   filas: Record<string, unknown>[] = [];
+  busqueda = '';
+  filtroTab: ErpMetoxiFiltroTab = 'todos';
   cargando = true;
   error = '';
   crudConfig: VistaCrudConfig | null = null;
@@ -41,6 +45,18 @@ export class AlmacenListadoPageComponent implements OnInit {
 
   get puedeGestionar(): boolean {
     return this.crudConfig != null;
+  }
+
+  get tieneColumnaEstado(): boolean {
+    return this.columnas.some(c => c.format === 'estado');
+  }
+
+  get conteo() {
+    return contarRegistrosPorEstado(this.filas);
+  }
+
+  get filasVisibles(): Record<string, unknown>[] {
+    return filtrarFilasListado(this.filas, this.columnas, this.busqueda, this.filtroTab);
   }
 
   ngOnInit(): void {
@@ -111,7 +127,13 @@ export class AlmacenListadoPageComponent implements OnInit {
       registro,
     };
     this.dialog
-      .open(AlmacenRegistroDialogComponent, { data, width: '560px', disableClose: true })
+      .open(AlmacenRegistroDialogComponent, {
+        data,
+        width: '720px',
+        maxWidth: '95vw',
+        disableClose: true,
+        panelClass: 'sigre-metoxi-dialog-panel',
+      })
       .afterClosed()
       .subscribe(ok => {
         if (ok) this.cargarDatos();

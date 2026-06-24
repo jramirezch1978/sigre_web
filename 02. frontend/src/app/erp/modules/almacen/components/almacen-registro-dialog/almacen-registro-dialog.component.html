@@ -1,66 +1,80 @@
-<h2 mat-dialog-title>{{ data.titulo }}</h2>
+<div class="sigre-metoxi-modal">
+  <div class="modal-header border-bottom">
+    <h5 class="modal-title fw-bold">{{ data.titulo }}</h5>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cancelar()" [disabled]="guardando"></button>
+  </div>
 
-<mat-dialog-content>
-  @if (cargandoOpciones) {
-    <div class="almacen-dialog__loading">
-      <mat-spinner diameter="32"></mat-spinner>
-      <span>Cargando formulario…</span>
-    </div>
-  } @else {
-    <form [formGroup]="form" class="almacen-dialog__form">
-      @for (campo of data.config.campos; track campo.key) {
-        @if (campo.type === 'select') {
-          <sigre-validated-field [control]="controlDe(campo)" variant="select">
-            <mat-form-field appearance="outline" class="almacen-dialog__field">
-              <mat-label>{{ campo.label }}</mat-label>
-              <mat-select [formControlName]="campo.key">
-                @for (opt of opcionesDe(campo); track opt.value) {
-                  <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </sigre-validated-field>
-        } @else if (esCampoDate(campo)) {
-          <sigre-validated-field [control]="controlDe(campo)" variant="date">
-            <mat-form-field appearance="outline" class="almacen-dialog__field">
-              <mat-label>{{ campo.label }}</mat-label>
-              <input matInput type="date" [formControlName]="campo.key" />
-            </mat-form-field>
-          </sigre-validated-field>
-        } @else if (esCampoSwitch(campo)) {
-          <div class="almacen-dialog__switch">
-            <span class="almacen-dialog__switch-label">{{ campo.label }}</span>
-            <mat-slide-toggle [formControlName]="campo.key" color="primary">
-              {{ etiquetaSwitch(campo) }}
-            </mat-slide-toggle>
-          </div>
-        } @else {
-          <sigre-validated-field [control]="controlDe(campo)" variant="text">
-            <mat-form-field appearance="outline" class="almacen-dialog__field">
-              <mat-label>{{ campo.label }}</mat-label>
-              <input
-                matInput
-                [type]="esCampoNumber(campo) ? 'number' : 'text'"
-                [formControlName]="campo.key"
-                [maxlength]="campo.maxLength ?? null" />
-            </mat-form-field>
-          </sigre-validated-field>
-        }
-      }
-    </form>
-    @if (error) {
-      <p class="almacen-dialog__error">{{ error }}</p>
-    }
-  }
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="cancelar()" [disabled]="guardando">Cancelar</button>
-  <button mat-flat-button color="primary" type="button" (click)="guardar()" [disabled]="guardando || cargandoOpciones">
-    @if (guardando) {
-      Guardando…
+  <div class="modal-body">
+    @if (cargandoOpciones) {
+      <div class="sigre-metoxi-modal__loading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando…</span>
+        </div>
+        <span>Cargando formulario…</span>
+      </div>
     } @else {
-      Guardar
+      <form [formGroup]="form" class="sigre-metoxi-modal__form">
+        @for (campo of data.config.campos; track campo.key) {
+          @if (campo.type === 'select') {
+            <div class="mb-4">
+              <h5 class="mb-3">{{ etiquetaCampo(campo) }}</h5>
+              <sigre-validated-field [control]="controlDe(campo)" variant="bootstrap">
+                <select class="form-select" [formControlName]="campo.key">
+                  <option value="" disabled>Seleccione…</option>
+                  @for (opt of opcionesDe(campo); track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                  }
+                </select>
+              </sigre-validated-field>
+            </div>
+          } @else if (esCampoDate(campo)) {
+            <div class="mb-4">
+              <h5 class="mb-3">{{ etiquetaCampo(campo) }}</h5>
+              <sigre-validated-field [control]="controlDe(campo)" variant="bootstrap">
+                <input class="form-control" type="date" [formControlName]="campo.key" />
+              </sigre-validated-field>
+            </div>
+          } @else if (esCampoSwitch(campo)) {
+            <div class="mb-4">
+              <h5 class="mb-3">{{ etiquetaCampo(campo) }}</h5>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" [formControlName]="campo.key" [id]="'sw-' + campo.key" />
+                <label class="form-check-label" [for]="'sw-' + campo.key">{{ etiquetaSwitch(campo) }}</label>
+              </div>
+            </div>
+          } @else {
+            <div class="mb-4">
+              <h5 class="mb-3">{{ etiquetaCampo(campo) }}</h5>
+              <sigre-validated-field [control]="controlDe(campo)" variant="bootstrap">
+                <input
+                  class="form-control"
+                  [type]="esCampoNumber(campo) ? 'number' : 'text'"
+                  [formControlName]="campo.key"
+                  [maxlength]="campo.maxLength ?? null"
+                  [placeholder]="'Ingrese ' + campo.label.toLowerCase() + '…'" />
+              </sigre-validated-field>
+            </div>
+          }
+        }
+      </form>
+      @if (error) {
+        <div class="alert alert-danger d-flex align-items-center gap-2 mb-0 mt-2" role="alert">
+          <i class="material-icons-outlined">error_outline</i>
+          <span>{{ error }}</span>
+        </div>
+      }
     }
-  </button>
-</mat-dialog-actions>
+  </div>
+
+  <div class="modal-footer border-top bg-light">
+    <button type="button" class="btn btn-filter px-4" (click)="cancelar()" [disabled]="guardando">Cancelar</button>
+    <button type="button" class="btn btn-primary px-4" (click)="guardar()" [disabled]="guardando || cargandoOpciones">
+      @if (guardando) {
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Guardando…
+      } @else {
+        Guardar
+      }
+    </button>
+  </div>
+</div>

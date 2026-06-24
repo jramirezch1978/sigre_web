@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable, map, of } from 'rxjs';
 import { ErpDataTableComponent } from '../../../../shared/erp-data-table/erp-data-table.component';
+import { ErpMetoxiListPageComponent, ErpMetoxiFiltroTab } from '../../../../shared/erp-metoxi-list-page/erp-metoxi-list-page.component';
+import { contarRegistrosPorEstado, filtrarFilasListado } from '../../../../shared/utils/erp-list-filter.util';
 import {
   ALMACEN_TABLAS,
   AlmacenTablaKey,
@@ -26,7 +28,7 @@ import {
 @Component({
   selector: 'app-almacen-tabla-page',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, ErpDataTableComponent],
+  imports: [CommonModule, MatDialogModule, ErpDataTableComponent, ErpMetoxiListPageComponent],
   templateUrl: './almacen-tabla-page.component.html',
   styleUrls: ['./almacen-tabla-page.component.scss'],
 })
@@ -43,6 +45,8 @@ export class AlmacenTablaPageComponent implements OnInit {
   subtitulo = '';
   columnas = ALMACEN_TABLAS.almacenes.columnas;
   filas: Record<string, unknown>[] = [];
+  busqueda = '';
+  filtroTab: ErpMetoxiFiltroTab = 'todos';
   cargando = true;
   error = '';
   crudConfig: TablaCrudConfig | null = null;
@@ -52,6 +56,18 @@ export class AlmacenTablaPageComponent implements OnInit {
 
   get puedeGestionar(): boolean {
     return this.crudConfig != null;
+  }
+
+  get tieneColumnaEstado(): boolean {
+    return this.columnas.some(c => c.format === 'estado');
+  }
+
+  get conteo() {
+    return contarRegistrosPorEstado(this.filas);
+  }
+
+  get filasVisibles(): Record<string, unknown>[] {
+    return filtrarFilasListado(this.filas, this.columnas, this.busqueda, this.filtroTab);
   }
 
   ngOnInit(): void {
@@ -127,8 +143,10 @@ export class AlmacenTablaPageComponent implements OnInit {
     this.dialog
       .open(AlmacenRegistroDialogComponent, {
         data,
-        width: '560px',
+        width: '720px',
+        maxWidth: '95vw',
         disableClose: true,
+        panelClass: 'sigre-metoxi-dialog-panel',
       })
       .afterClosed()
       .subscribe(ok => {

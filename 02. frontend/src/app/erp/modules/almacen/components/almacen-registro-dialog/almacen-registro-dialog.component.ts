@@ -1,13 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { forkJoin, of } from 'rxjs';
 import { TablaCrudCampo, TablaCrudConfig } from '../../config/almacen-tabla-crud.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
@@ -24,18 +18,7 @@ export interface AlmacenRegistroDialogData {
 @Component({
   selector: 'app-almacen-registro-dialog',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatSlideToggleModule,
-    MatProgressSpinnerModule,
-    SigreValidatedFieldComponent,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, SigreValidatedFieldComponent],
   templateUrl: './almacen-registro-dialog.component.html',
   styleUrls: ['./almacen-registro-dialog.component.scss'],
 })
@@ -119,10 +102,8 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     return this.form.get(campo.key);
   }
 
-  varianteCampo(campo: TablaCrudCampo): 'text' | 'select' | 'date' {
-    if (campo.type === 'select') return 'select';
-    if (campo.type === 'date') return 'date';
-    return 'text';
+  etiquetaCampo(campo: TablaCrudCampo): string {
+    return campo.required ? `${campo.label} *` : campo.label;
   }
 
   private valorInicial(campo: TablaCrudCampo): unknown {

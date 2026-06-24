@@ -1,85 +1,96 @@
-@if (cargando) {
-  <div class="sigre-metoxi-table__state">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando…</span>
-    </div>
-    <span>Cargando registros…</span>
-  </div>
-} @else if (error) {
-  <div class="alert alert-danger d-flex align-items-center gap-2 mb-0" role="alert">
-    <i class="material-icons-outlined">error_outline</i>
-    <span>{{ error }}</span>
-  </div>
-} @else if (filas.length === 0) {
-  <div class="sigre-metoxi-table__state">
-    <i class="material-icons-outlined sigre-metoxi-table__state-icon">inbox</i>
-    <span>No hay registros para mostrar</span>
-  </div>
-} @else {
-  <div class="sigre-metoxi-table__toolbar">
-    <span class="text-muted small">{{ totalRegistros }} registro(s)</span>
-  </div>
-  <div class="table-responsive sigre-metoxi-table__wrap">
-    <table class="table table-striped table-hover align-middle mb-0 sigre-metoxi-table w-100">
-      <thead class="table-light">
-        <tr>
-          @for (col of columnas; track col.key) {
-            <th scope="col" [style.min-width]="col.width">{{ col.header }}</th>
-          }
-          @if (mostrarAcciones) {
-            <th scope="col" class="text-center sigre-metoxi-table__actions-head">Acciones</th>
-          }
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of filas; track trackFila(row, $index)) {
-          <tr>
-            @for (col of columnas; track col.key) {
-              <td>
-                @if (col.format === 'estado') {
-                  <span
-                    class="badge rounded-pill fw-semibold"
-                    [class.text-bg-success]="estaActivoValor(row[col.key])"
-                    [class.text-bg-secondary]="!estaActivoValor(row[col.key])">
-                    {{ valorCelda(row, col) }}
-                  </span>
-                } @else {
-                  {{ valorCelda(row, col) }}
-                }
-              </td>
-            }
-            @if (mostrarAcciones) {
-              <td class="text-center text-nowrap sigre-metoxi-table__actions-cell">
-                <div class="d-inline-flex align-items-center gap-1">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-primary"
-                    title="Editar"
-                    (click)="editar.emit(row)">
-                    <i class="material-icons-outlined fs-6">edit</i>
-                  </button>
-                  @if (estaActivo(row)) {
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-warning"
-                      title="Anular"
-                      (click)="anular.emit(row)">
-                      <i class="material-icons-outlined fs-6">block</i>
-                    </button>
-                  }
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    title="Eliminar"
-                    (click)="eliminar.emit(row)">
-                    <i class="material-icons-outlined fs-6">delete</i>
-                  </button>
-                </div>
-              </td>
-            }
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-}
+@if (cargando) {
+  <div class="sigre-metoxi-table__state">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando…</span>
+    </div>
+    <span>Cargando registros…</span>
+  </div>
+} @else if (error) {
+  <div class="alert alert-danger d-flex align-items-center gap-2 mb-0" role="alert">
+    <i class="material-icons-outlined">error_outline</i>
+    <span>{{ error }}</span>
+  </div>
+} @else if (filas.length === 0) {
+  <div class="sigre-metoxi-table__state">
+    <i class="material-icons-outlined sigre-metoxi-table__state-icon">inbox</i>
+    <span>No hay registros para mostrar</span>
+  </div>
+} @else {
+  <div class="customer-table">
+    <div class="table-responsive white-space-nowrap">
+      <table class="table align-middle mb-0 sigre-metoxi-table w-100">
+        <thead class="table-light">
+          <tr>
+            @for (col of columnas; track col.key) {
+              <th scope="col" [style.min-width]="col.width">{{ col.header }}</th>
+            }
+            @if (mostrarAcciones) {
+              <th scope="col" class="text-end sigre-metoxi-table__actions-head">Acción</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of filas; track trackFila(row, $index)) {
+            <tr>
+              @for (col of columnas; track col.key) {
+                <td>
+                  @if (col.format === 'estado') {
+                    @if (estaActivoValor(row[col.key])) {
+                      <span class="lable-table bg-success-subtle text-success rounded border border-success-subtle font-text2 fw-bold">
+                        Activo
+                        <i class="material-icons-outlined sigre-metoxi-table__badge-icon">check</i>
+                      </span>
+                    } @else {
+                      <span class="lable-table bg-danger-subtle text-danger rounded border border-danger-subtle font-text2 fw-bold">
+                        Inactivo
+                        <i class="material-icons-outlined sigre-metoxi-table__badge-icon">close</i>
+                      </span>
+                    }
+                  } @else {
+                    {{ valorCelda(row, col) }}
+                  }
+                </td>
+              }
+              @if (mostrarAcciones) {
+                <td class="text-end">
+                  <div class="dropdown">
+                    <button
+                      class="btn btn-sm btn-filter dropdown-toggle dropdown-toggle-nocaret"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false">
+                      <i class="material-icons-outlined fs-6">more_horiz</i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:;" (click)="editar.emit(row)">
+                          <i class="material-icons-outlined fs-6">edit</i>
+                          Editar
+                        </a>
+                      </li>
+                      @if (estaActivo(row)) {
+                        <li>
+                          <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:;" (click)="anular.emit(row)">
+                            <i class="material-icons-outlined fs-6">block</i>
+                            Anular
+                          </a>
+                        </li>
+                      }
+                      <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="javascript:;" (click)="eliminar.emit(row)">
+                          <i class="material-icons-outlined fs-6">delete</i>
+                          Eliminar
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+

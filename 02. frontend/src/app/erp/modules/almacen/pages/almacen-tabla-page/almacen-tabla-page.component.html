@@ -1,49 +1,28 @@
-<div class="almacen-tabla">
-  <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Almacén</div>
-    <div class="ps-3">
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-0 p-0">
-          <li class="breadcrumb-item active" aria-current="page">{{ titulo }}</li>
-        </ol>
-      </nav>
-    </div>
-  </div>
+<app-erp-metoxi-list-page
+  modulo="Almacén"
+  [titulo]="titulo"
+  [subtitulo]="subtitulo"
+  [totalRegistros]="conteo.total"
+  [totalActivos]="conteo.activos"
+  [totalInactivos]="conteo.inactivos"
+  [mostrarTabsEstado]="tieneColumnaEstado"
+  [puedeGestionar]="puedeGestionar"
+  [cargando]="cargando"
+  textoBotonAnadir="Añadir registro"
+  [placeholderBusqueda]="'Buscar en ' + titulo + '…'"
+  [(busqueda)]="busqueda"
+  [(filtroTab)]="filtroTab"
+  (anadir)="anadir()"
+  (recargar)="recargar()">
 
-  <div class="card rounded-4 mb-0 w-100">
-    <div class="card-body">
-      <header class="almacen-tabla__header">
-        <div>
-          <h4 class="mb-1">{{ titulo }}</h4>
-          @if (subtitulo) {
-            <p class="text-muted mb-0">{{ subtitulo }}</p>
-          }
-        </div>
-        <div class="almacen-tabla__actions">
-          @if (puedeGestionar) {
-            <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1" (click)="anadir()" [disabled]="cargando">
-              <i class="material-icons-outlined fs-6">add</i>
-              Añadir
-            </button>
-          }
-          <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1" (click)="recargar()" [disabled]="cargando">
-            <i class="material-icons-outlined fs-6">refresh</i>
-            Actualizar
-          </button>
-        </div>
-      </header>
-
-      <app-erp-data-table
-        [columnas]="columnas"
-        [filas]="filas"
-        [cargando]="cargando"
-        [error]="error"
-        [totalRegistros]="filas.length"
-        [mostrarAcciones]="puedeGestionar"
-        (editar)="editarRegistro($event)"
-        (anular)="anularRegistro($event)"
-        (eliminar)="eliminarRegistro($event)">
-      </app-erp-data-table>
-    </div>
-  </div>
-</div>
+  <app-erp-data-table
+    [columnas]="columnas"
+    [filas]="filasVisibles"
+    [cargando]="cargando"
+    [error]="error"
+    [totalRegistros]="filasVisibles.length"
+    [mostrarAcciones]="puedeGestionar"
+    (editar)="editarRegistro($event)"
+    (anular)="anularRegistro($event)"
+    (eliminar)="eliminarRegistro($event)" />
+</app-erp-metoxi-list-page>
