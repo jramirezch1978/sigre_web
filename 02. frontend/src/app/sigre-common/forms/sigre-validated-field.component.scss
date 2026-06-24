@@ -3,29 +3,50 @@
   display: block;
   width: 100%;
 
-  .sigre-validation-badge {
+  /* El badge vive en un componente hijo: hay que posicionar su host con ::ng-deep */
+  ::ng-deep > sigre-validation-badge {
     position: absolute;
-    top: 6px;
-    right: 10px;
-    z-index: 3;
+    z-index: 4;
     pointer-events: none;
+    display: inline-flex;
+    line-height: 0;
   }
 
-  &--select .sigre-validation-badge {
-    right: 36px;
+  /* mat-form-field (texto, select, fecha): superior izquierda dentro del outline */
+  &:not(.sigre-validated-field--bootstrap):not(.sigre-validated-field--password) {
+    ::ng-deep > sigre-validation-badge {
+      top: 12px;
+      left: 12px;
+      right: auto;
+    }
+
+    ::ng-deep .mat-mdc-form-field-infix {
+      padding-left: 1.75rem;
+    }
   }
 
-  &--date .sigre-validation-badge {
-    right: 14px;
+  &--select ::ng-deep > sigre-validation-badge {
+    top: 12px;
+    left: 12px;
   }
 
-  &--bootstrap .sigre-validation-badge,
-  &--password .sigre-validation-badge {
+  &--date ::ng-deep > sigre-validation-badge {
+    top: 12px;
+    left: 12px;
+  }
+
+  /* Bootstrap (login): derecha, centrado vertical */
+  &--bootstrap ::ng-deep > sigre-validation-badge {
     top: 50%;
+    left: auto;
+    right: 10px;
     transform: translateY(-50%);
   }
 
-  &--password .sigre-validation-badge {
+  &--password ::ng-deep > sigre-validation-badge {
+    top: 50%;
+    left: auto;
     right: 48px;
+    transform: translateY(-50%);
   }
 }

@@ -17,11 +17,15 @@ import { estadoValidacionCampo, SigreFieldValidationState } from './sigre-field-
   `,
   styles: [
     `
+      :host {
+        display: inline-flex;
+        line-height: 0;
+      }
       .sigre-validation-badge {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        line-height: 18px;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
       }
       .sigre-validation-badge--valid {
         color: #1abb9c;
