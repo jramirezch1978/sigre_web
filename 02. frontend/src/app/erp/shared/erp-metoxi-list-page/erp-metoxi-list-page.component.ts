@@ -32,7 +32,6 @@ export class ErpMetoxiListPageComponent {
 
   @Output() anadir = new EventEmitter<void>();
   @Output() recargar = new EventEmitter<void>();
-  @Output() exportar = new EventEmitter<void>();
 
   onBusquedaInput(valor: string): void {
     this.busqueda = valor;
