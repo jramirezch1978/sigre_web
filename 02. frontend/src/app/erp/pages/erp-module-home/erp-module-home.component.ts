@@ -1,7 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
@@ -17,7 +16,7 @@ interface ModuloKpi {
 @Component({
   selector: 'app-erp-module-home',
   standalone: true,
-  imports: [CommonModule, MatIconModule, BaseChartDirective],
+  imports: [CommonModule, BaseChartDirective],
   templateUrl: './erp-module-home.component.html',
   styleUrls: ['./erp-module-home.component.scss'],
 })

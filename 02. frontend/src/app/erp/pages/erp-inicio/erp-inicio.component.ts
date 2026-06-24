@@ -2,13 +2,11 @@ import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StorageService } from '../../../core/services/storage.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
 import { ErpLayoutService } from '../../services/erp-layout.service';
+import { MetoxiInitService } from '../../services/metoxi-init.service';
 import { fusionarModulosConCatalogo } from '../../shared/erp-modulos-catalog.config';
 import { iconoModulo } from '../../shared/modulos-iconos';
 
@@ -28,7 +26,7 @@ interface NotificacionDemo {
 @Component({
   selector: 'app-erp-inicio',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule, MatButtonModule, MatProgressSpinnerModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './erp-inicio.component.html',
   styleUrls: ['./erp-inicio.component.scss'],
 })
@@ -39,6 +37,7 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly menuService = inject(ErpMenuService);
   private readonly layout = inject(ErpLayoutService);
+  private readonly metoxiInit = inject(MetoxiInitService);
 
   nombreUsuario = '';
   empresaActual = '';
@@ -77,7 +76,7 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
-    document.body.classList.add('sigre-metoxi-body');
+    this.metoxiInit.activarShellErp();
 
     const user = this.storage.getUser<{
       nombreCompleto?: string;
@@ -107,12 +106,19 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    document.body.classList.remove('sigre-metoxi-body', 'toggled');
+    this.metoxiInit.desactivarShellErp();
   }
 
   @HostListener('document:click')
   onDocumentClick(): void {
     this.dropdownActivo = null;
+  }
+
+  get inicialesUsuario(): string {
+    const partes = this.nombreUsuario.trim().split(/\s+/).filter(Boolean);
+    if (!partes.length) return 'U';
+    if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
   }
 
   get filasAppsLauncher(): CeldaAppsLauncher[][] {

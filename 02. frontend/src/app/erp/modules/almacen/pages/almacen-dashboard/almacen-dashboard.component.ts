@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { forkJoin } from 'rxjs';
@@ -20,7 +19,7 @@ const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'O
 @Component({
   selector: 'app-almacen-dashboard',
   standalone: true,
-  imports: [CommonModule, MatIconModule, BaseChartDirective],
+  imports: [CommonModule, BaseChartDirective],
   templateUrl: './almacen-dashboard.component.html',
   styleUrls: ['./almacen-dashboard.component.scss'],
 })

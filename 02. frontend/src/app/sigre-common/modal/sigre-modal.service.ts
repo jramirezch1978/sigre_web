@@ -86,7 +86,7 @@ export class SigreModalService {
   private async presentConfirmacion(options: SigreModalOptions): Promise<boolean> {
     const modal = await this.modalCtrl.create({
       component: ModalConfirmationComponent,
-      cssClass: 'promo',
+      cssClass: 'sigre-metoxi-ion-modal',
       componentProps: this.toComponentProps(options, true),
     });
     await modal.present();
@@ -97,7 +97,7 @@ export class SigreModalService {
   private async presentAlerta(options: SigreModalOptions): Promise<void> {
     const modal = await this.modalCtrl.create({
       component: ModalConfirmationComponent,
-      cssClass: 'promo',
+      cssClass: 'sigre-metoxi-ion-modal',
       componentProps: this.toComponentProps({ ...options, conCancelar: false }),
     });
     await modal.present();

@@ -1,33 +1,43 @@
-<div class="modal-confirmation">
-  <div class="modal-confirmation__header">
-    <span class="modal-confirmation__title">{{ titlemodal }}</span>
-    <button type="button" class="modal-confirmation__close" (click)="cerrarModal(false)" aria-label="Cerrar">
-      <ion-icon name="close-outline"></ion-icon>
-    </button>
-  </div>
-  <div class="modal-confirmation__body">
-    @if (tipemodal === 'confirm' || tipemodal === 'success') {
-      <ion-icon name="checkmark-circle-outline" class="modal-confirmation__icon modal-confirmation__icon--success"></ion-icon>
-    }
-    @if (tipemodal === 'error') {
-      <ion-icon name="close-circle-outline" class="modal-confirmation__icon modal-confirmation__icon--error"></ion-icon>
-    }
-    @if (tipemodal === 'warning' || tipemodal === 'info') {
-      <ion-icon name="warning-outline" class="modal-confirmation__icon modal-confirmation__icon--warning"></ion-icon>
-    }
-    <span class="modal-confirmation__heading">{{ title }}</span>
-    <span class="modal-confirmation__message" [innerHTML]="message"></span>
-    @if (submessage) {
-      <span class="modal-confirmation__message" [innerHTML]="submessage"></span>
-    }
-    <div class="modal-confirmation__actions">
+<div class="modal-dialog modal-dialog-centered m-0 sigre-metoxi-confirm">
+  <div class="modal-content border-0 shadow-lg rounded-4">
+    <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
+      <h5 class="modal-title fw-bold mb-0">{{ title || 'Confirmación' }}</h5>
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal(false)"></button>
+    </div>
+
+    <div class="modal-body text-center px-4 py-3">
+      @if (tipemodal === 'confirm' || tipemodal === 'success') {
+        <div class="sigre-metoxi-confirm__icon sigre-metoxi-confirm__icon--success">
+          <i class="material-icons-outlined">check_circle</i>
+        </div>
+      }
+      @if (tipemodal === 'error') {
+        <div class="sigre-metoxi-confirm__icon sigre-metoxi-confirm__icon--error">
+          <i class="material-icons-outlined">cancel</i>
+        </div>
+      }
+      @if (tipemodal === 'warning' || tipemodal === 'info') {
+        <div class="sigre-metoxi-confirm__icon sigre-metoxi-confirm__icon--warning">
+          <i class="material-icons-outlined">warning_amber</i>
+        </div>
+      }
+
+      @if (message) {
+        <p class="mb-2 sigre-metoxi-confirm__message" [innerHTML]="message"></p>
+      }
+      @if (submessage) {
+        <p class="mb-0 text-muted small sigre-metoxi-confirm__submessage" [innerHTML]="submessage"></p>
+      }
+    </div>
+
+    <div class="modal-footer border-top-0 justify-content-center gap-2 px-4 pb-4 pt-0">
       @if (btnCancelTxt) {
-        <button type="button" class="btn btn-default" (click)="cerrarModal(false)">{{ btnCancelTxt }}</button>
+        <button type="button" class="btn btn-filter px-4" (click)="cerrarModal(false)">{{ btnCancelTxt }}</button>
       }
       @if (tipemodal === 'error' || tipemodal === 'warning') {
-        <button type="button" class="btn btn-danger" (click)="cerrarModal(true)">{{ btnOkTxt }}</button>
+        <button type="button" class="btn btn-danger px-4" (click)="cerrarModal(true)">{{ btnOkTxt }}</button>
       } @else {
-        <button type="button" class="btn btn-success" (click)="cerrarModal(true)">{{ btnOkTxt }}</button>
+        <button type="button" class="btn btn-primary px-4" (click)="cerrarModal(true)">{{ btnOkTxt }}</button>
       }
     </div>
   </div>
