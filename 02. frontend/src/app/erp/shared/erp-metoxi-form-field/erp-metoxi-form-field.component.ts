@@ -35,7 +35,17 @@ export class ErpMetoxiFormFieldComponent {
   @Input() layout: 'icon-inside' | 'input-group' = 'icon-inside';
 
   get labelText(): string {
-    return this.required ? `${this.label} *` : this.label;
+    if (this.required) {
+      return `${this.label} *`;
+    }
+    if (this.type === 'select') {
+      return `${this.label} (opcional)`;
+    }
+    return this.label;
+  }
+
+  get placeholderSelect(): string {
+    return this.required ? 'Seleccione…' : '— Sin asignar —';
   }
 
   get iconName(): string {

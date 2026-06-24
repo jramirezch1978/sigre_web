@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class AlmacenRequest extends FlagEstadoRequest {
 
-    @NotNull
+    @NotNull(message = "La sucursal es obligatoria")
     private Long sucursalId;
 
     private Long almacenTipoId;
@@ -27,11 +27,11 @@ public class AlmacenRequest extends FlagEstadoRequest {
 
     private Long responsableUsuarioId;
 
-    @NotBlank
+    @NotBlank(message = "El código de almacén es obligatorio")
     @Size(max = 20)
     private String codigo;
 
-    @NotBlank
+    @NotBlank(message = "El nombre de almacén es obligatorio")
     @Size(max = 150)
     private String nombre;
 

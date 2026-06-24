@@ -54,10 +54,12 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
     basePath: '/almacenes',
     handler: 'standard',
     campos: [
+      // Obligatorios (BD NOT NULL + @NotBlank/@NotNull + required en formulario)
       { key: 'codigo', label: 'Código', type: 'text', required: true, maxLength: 20, readonlyOnEdit: true },
       { key: 'nombre', label: 'Nombre', type: 'text', required: true, maxLength: 150 },
-      { key: 'almacenTipoId', label: 'Tipo de almacén', type: 'select', optionsFrom: 'tipos-almacen' },
       { key: 'sucursalId', label: 'Sucursal', type: 'select', optionsFrom: 'sucursales', required: true },
+      // Opcionales (nullable en BD, sin @NotNull en DTO)
+      { key: 'almacenTipoId', label: 'Tipo de almacén', type: 'select', optionsFrom: 'tipos-almacen' },
       { key: 'centrosCostoId', label: 'Centro de costo', type: 'select', optionsFrom: 'centros-costo' },
       { key: 'proveedorEntidadId', label: 'Proveedor', type: 'select', optionsFrom: 'proveedores' },
       { key: 'responsableUsuarioId', label: 'Responsable (usuario ID)', type: 'number' },

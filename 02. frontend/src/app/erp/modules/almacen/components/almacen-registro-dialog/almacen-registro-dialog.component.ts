@@ -14,6 +14,7 @@ import {
 } from '@sigre-common';
 import { ErpMetoxiFormFieldComponent } from '../../../../shared/erp-metoxi-form-field/erp-metoxi-form-field.component';
 import { colClassMetoxiCampo } from '../../../../shared/utils/erp-metoxi-form-icons.util';
+import { noSoloEspaciosValidator } from '../../../../shared/utils/erp-form-validators.util';
 
 export interface AlmacenRegistroDialogData {
   titulo: string;
@@ -55,6 +56,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     for (const campo of this.data.config.campos) {
       const valor = this.valorInicial(campo);
       const validators = campo.required ? [Validators.required] : [];
+      if (campo.required && campo.type === 'text') {
+        validators.push(noSoloEspaciosValidator());
+      }
       if (campo.maxLength) {
         validators.push(Validators.maxLength(campo.maxLength));
       }

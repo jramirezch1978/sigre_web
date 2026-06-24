@@ -53,6 +53,7 @@ public class AlmacenServiceImpl implements AlmacenService {
     @Transactional
     public Almacen create(Almacen entity) {
         log.info("Creando almacen con codigo: {} para sucursal: {}", entity.getCodigo(), entity.getSucursalId());
+        normalizarTextosObligatorios(entity);
         validateForeignKeys(entity);
         validateUniqueSucursalCodigo(entity.getSucursalId(), entity.getCodigo(), null);
         Almacen saved = repository.save(entity);
@@ -66,6 +67,7 @@ public class AlmacenServiceImpl implements AlmacenService {
     public Almacen update(Long id, Almacen entity) {
         log.info("Actualizando almacen con id: {}", id);
         Almacen existing = findById(id);
+        normalizarTextosObligatorios(entity);
         validateForeignKeys(entity);
         validateUniqueSucursalCodigo(entity.getSucursalId(), entity.getCodigo(), id);
         copiarDatosNegocio(entity, existing);
@@ -157,6 +159,15 @@ public class AlmacenServiceImpl implements AlmacenService {
         destino.setCodSunat(origen.getCodSunat());
         destino.setFlagVirtual(origen.getFlagVirtual());
         destino.setUbigeo(origen.getUbigeo());
+    }
+
+    private void normalizarTextosObligatorios(Almacen entity) {
+        if (entity.getCodigo() != null) {
+            entity.setCodigo(entity.getCodigo().trim());
+        }
+        if (entity.getNombre() != null) {
+            entity.setNombre(entity.getNombre().trim());
+        }
     }
 
     private void validateUniqueSucursalCodigo(Long sucursalId, String codigo, Long excludeId) {
