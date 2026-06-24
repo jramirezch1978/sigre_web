@@ -1065,6 +1065,9 @@ CREATE TABLE core.tipo_doc_identidad (
     id BIGSERIAL NOT NULL,
     codigo VARCHAR(10) NOT NULL,
     nombre VARCHAR(120) NOT NULL,
+    tipo_doc VARCHAR(10),
+    tipo_doc_afpnet VARCHAR(10) NOT NULL DEFAULT '0',
+    flag_doc_bbva VARCHAR(1),
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1',
     created_by          BIGINT,
     fec_creacion        TIMESTAMPTZ     DEFAULT NOW(),
@@ -1528,6 +1531,11 @@ ALTER TABLE core.detr_bien_serv ALTER COLUMN tasa_pdbe SET DEFAULT 0;
 ALTER TABLE core.detr_bien_serv ALTER COLUMN tasa_pdbe SET NOT NULL;
 COMMENT ON COLUMN core.detr_bien_serv.tasa_pdbe IS
     'Tasa de detracción PDBE (%). NOT NULL; 0 cuando no aplica detracción.';
+
+-- Migración idempotente: tipo_doc_identidad alineado SIGRE (RRHH_TIPO_DOC_RTPS.json)
+ALTER TABLE core.tipo_doc_identidad ADD COLUMN IF NOT EXISTS tipo_doc VARCHAR(10);
+ALTER TABLE core.tipo_doc_identidad ADD COLUMN IF NOT EXISTS tipo_doc_afpnet VARCHAR(10) NOT NULL DEFAULT '0';
+ALTER TABLE core.tipo_doc_identidad ADD COLUMN IF NOT EXISTS flag_doc_bbva VARCHAR(1);
 
 -- ============================================================
 -- SECCIÓN 4: DATOS INICIALES

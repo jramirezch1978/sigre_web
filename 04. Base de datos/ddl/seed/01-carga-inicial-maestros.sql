@@ -4397,18 +4397,21 @@ ON CONFLICT (moneda_id, fecha) DO UPDATE SET compra = EXCLUDED.compra, venta = E
 -- ============================================================
 -- TX 8k: core.tipo_doc_identidad (RRHH_TIPO_DOC_RTPS.json — 7 registros)
 -- ============================================================
-INSERT INTO core.tipo_doc_identidad (codigo, nombre, flag_estado)
+INSERT INTO core.tipo_doc_identidad (codigo, nombre, flag_estado, tipo_doc, tipo_doc_afpnet, flag_doc_bbva)
 VALUES
-    ('0', 'OTROS TIPOS DE DOCUMENTOS', '1'),
-    ('1', 'DNI', '1'),
-    ('2', 'CARNET DE LAS FUERZAS POLICIALES', '1'),
-    ('3', 'CARNET DE LAS FUERZAS ARMADAS', '1'),
-    ('4', 'CARNE DE EXTRANJERIA', '1'),
-    ('6', 'RUC', '1'),
-    ('7', 'PASAPORTE', '1')
+    ('0', 'OTROS TIPOS DE DOCUMENTOS', '1', NULL, '0', NULL),
+    ('1', 'DNI', '1', NULL, '0', NULL),
+    ('2', 'CARNET DE LAS FUERZAS POLICIALES', '1', NULL, '2', NULL),
+    ('3', 'CARNET DE LAS FUERZAS ARMADAS', '1', NULL, '2', NULL),
+    ('4', 'CARNE DE EXTRANJERIA', '1', NULL, '1', NULL),
+    ('6', 'RUC', '1', NULL, '9', NULL),
+    ('7', 'PASAPORTE', '1', NULL, '4', NULL)
 ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,
-    flag_estado = EXCLUDED.flag_estado;
+    flag_estado = EXCLUDED.flag_estado,
+    tipo_doc = EXCLUDED.tipo_doc,
+    tipo_doc_afpnet = EXCLUDED.tipo_doc_afpnet,
+    flag_doc_bbva = EXCLUDED.flag_doc_bbva;
 
 -- ============================================================
 -- TX 8k2: core.configuracion — parámetros del numerador de documentos
