@@ -1,10 +1,13 @@
 package com.sigre.almacen.support;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import com.sigre.almacen.dto.AlmacenResponse;
 import com.sigre.almacen.entity.Almacen;
+import com.sigre.almacen.entity.AlmacenTipo;
+import com.sigre.almacen.entity.SucursalRef;
+import com.sigre.almacen.repository.AlmacenTipoRepository;
+import com.sigre.almacen.repository.SucursalRefRepository;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +16,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AlmacenResponseEnricher {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final AlmacenTipoRepository almacenTipoRepository;
+    private final SucursalRefRepository sucursalRefRepository;
     private final UsuarioResumenLoader usuarioResumenLoader;
 
     public void enrich(Almacen entity, AlmacenResponse dto) {
@@ -38,24 +42,14 @@ public class AlmacenResponseEnricher {
     }
 
     private String queryNombreSucursal(Long sucursalId) {
-        try {
-            return jdbcTemplate.queryForObject(
-                    "SELECT nombre FROM auth.sucursal WHERE id = ?",
-                    String.class,
-                    sucursalId);
-        } catch (Exception ignored) {
-            return null;
-        }
+        return sucursalRefRepository.findById(sucursalId)
+                .map(SucursalRef::getNombre)
+                .orElse(null);
     }
 
     private String queryNombreAlmacenTipo(Long tipoId) {
-        try {
-            return jdbcTemplate.queryForObject(
-                    "SELECT nombre FROM almacen.almacen_tipo WHERE id = ?",
-                    String.class,
-                    tipoId);
-        } catch (Exception ignored) {
-            return null;
-        }
+        return almacenTipoRepository.findById(tipoId)
+                .map(AlmacenTipo::getNombre)
+                .orElse(null);
     }
 }

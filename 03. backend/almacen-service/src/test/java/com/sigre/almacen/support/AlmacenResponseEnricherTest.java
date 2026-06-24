@@ -5,23 +5,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.jdbc.core.JdbcTemplate;
 import com.sigre.almacen.dto.AlmacenResponse;
 import com.sigre.almacen.dto.UsuarioResumenDto;
 import com.sigre.almacen.entity.Almacen;
+import com.sigre.almacen.entity.AlmacenTipo;
+import com.sigre.almacen.entity.SucursalRef;
+import com.sigre.almacen.repository.AlmacenTipoRepository;
+import com.sigre.almacen.repository.SucursalRefRepository;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static com.sigre.almacen.TestDataFactory.almacen;
 
 @ExtendWith(MockitoExtension.class)
 class AlmacenResponseEnricherTest {
 
-    @Mock private JdbcTemplate jdbcTemplate;
+    @Mock private AlmacenTipoRepository almacenTipoRepository;
+    @Mock private SucursalRefRepository sucursalRefRepository;
     @Mock private UsuarioResumenLoader usuarioResumenLoader;
     @InjectMocks private AlmacenResponseEnricher enricher;
 
@@ -42,13 +47,18 @@ class AlmacenResponseEnricherTest {
         dto.setCreatedBy(100L);
         dto.setUpdatedBy(101L);
 
+        SucursalRef sucursal = org.mockito.Mockito.mock(SucursalRef.class);
+        when(sucursal.getNombre()).thenReturn("Sucursal Lima");
+
+        AlmacenTipo tipo = new AlmacenTipo();
+        tipo.setId(5L);
+        tipo.setNombre("Tipo Principal");
+
         UsuarioResumenDto u1 = UsuarioResumenDto.builder().id(100L).nombreCompleto("Creador").build();
         UsuarioResumenDto u2 = UsuarioResumenDto.builder().id(101L).nombreCompleto("Editor").build();
         when(usuarioResumenLoader.loadByIds(any(Set.class))).thenReturn(Map.of(100L, u1, 101L, u2));
-        when(jdbcTemplate.queryForObject(contains("auth.sucursal"), eq(String.class), eq(10L)))
-                .thenReturn("Sucursal Lima");
-        when(jdbcTemplate.queryForObject(contains("almacen_tipo"), eq(String.class), eq(5L)))
-                .thenReturn("Tipo Principal");
+        when(sucursalRefRepository.findById(10L)).thenReturn(Optional.of(sucursal));
+        when(almacenTipoRepository.findById(5L)).thenReturn(Optional.of(tipo));
 
         enricher.enrich(entity, dto);
 

@@ -128,11 +128,18 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       if (campo.key === 'fechaMov' || campo.key === 'fecha' || campo.key === 'fechaConteo') {
         return new Date().toISOString().slice(0, 10);
       }
-      return campo.type === 'number' ? null : '';
+      if (campo.type === 'select' || campo.type === 'number') return null;
+      return '';
     }
     if (campo.type === 'switch') {
       const raw = reg[campo.key];
       return raw === '1' || raw === 1 || raw === true;
+    }
+    if (campo.type === 'select') {
+      const raw = reg[campo.key];
+      if (raw == null || raw === '') return null;
+      const num = Number(raw);
+      return Number.isNaN(num) ? raw : num;
     }
     if (campo.key === 'valor' && reg['valor'] === '—') return '';
     if (campo.key === 'sucursalId' && reg['sucursalId'] == null && reg['nombreTabla']) {
